@@ -1,23 +1,28 @@
 ﻿using System;
-using libtcodWrapper;
-using Console = libtcodWrapper.Console;
+using System.Windows.Forms;
 
-public class Program
+namespace RogueBasin
 {
-    public static void Main(String[] args)
+    static class Program
     {
-        CustomFontRequest fontReq = new CustomFontRequest("terminal.png", 8, 16, CustomFontRequestFontTypes.Grayscale);
-        RootConsole.Width = 80;
-        RootConsole.Height = 50;
-        RootConsole.WindowTitle = "Hello World!";
-        RootConsole.Fullscreen = false;
-        RootConsole.Font = fontReq;
-
-        RootConsole rootConsole = RootConsole.GetInstance();
-
-        rootConsole.PrintLine("Hello world!", 30, 30, LineAlignment.Left);
-        rootConsole.Flush();
-
-        Keyboard.WaitForKeyPress(true);
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static int Main(string [] args)
+        {
+            try
+            {
+                using (RogueBase d = new RogueBase())
+                {
+                    return d.Run(args);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error occurred: " + e.Message);
+                return 1;
+            }
+        }
     }
 }
