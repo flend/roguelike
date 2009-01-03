@@ -4,7 +4,7 @@ using System.Text;
 namespace RogueBasin
 {
     //Represents a level map
-    class Point {
+    public class Point {
         public int x;
         public int y;
 
@@ -14,7 +14,7 @@ namespace RogueBasin
         }
     }
     
-    class Map
+    public class Map
     {
         public MapTerrain [,] mapSquares;
         public Point PCStartLocation;

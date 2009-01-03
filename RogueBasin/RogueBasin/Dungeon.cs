@@ -6,7 +6,7 @@ using System.Text;
 namespace RogueBasin
 {
     //This class keeps track of all the spaces in the dungeon and where everything is
-    class Dungeon
+    public class Dungeon
     {
         List<Map> levels;
 

@@ -6,8 +6,8 @@ using Console = System.Console;
 
 namespace RogueBasin {
 
-    //Represents our screen
-    class Screen
+    //Represents our screen - could be a singleton
+    public class Screen
     {
         //Console/screen size
         int width;
@@ -96,5 +96,10 @@ namespace RogueBasin {
             rootConsole.Flush();
         }
 
+
+        internal void ConsoleLine(string datedEntry)
+        {
+            Console.WriteLine(datedEntry);
+        }
     }
 }
