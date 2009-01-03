@@ -11,7 +11,7 @@ namespace RogueBasin
         Dungeon dungeon;
 
         //Master object for the console & screen
-        Screen screen;
+        public static Screen screen;
 
         //Are we running or have we exited?
         bool runMapLoop = true;
@@ -81,9 +81,10 @@ namespace RogueBasin
 
             if (userKey.KeyCode == KeyCode.TCODK_CHAR)
             {
-                switch (userKey.Character)
+                char keyCode = (char)userKey.Character;
+                switch (keyCode)
                 {
-                    case (byte)'x':
+                    case 'x':
                         runMapLoop = false;
                         break;
                 }
@@ -130,6 +131,21 @@ namespace RogueBasin
         {
             //Initial setup
 
+            //Setup screen
+            screen = new Screen();
+            screen.InitialSetup();
+
+            //Setup logfile
+            try
+            {
+                LogFile.Log.LogEntry("Starting log file");
+            }
+            catch (Exception e)
+            {
+                screen.ConsoleLine("Error creating log file: " + e.Message);
+            }
+                
+
             //Create dungeon
             dungeon = new Dungeon();
 
@@ -151,9 +167,7 @@ namespace RogueBasin
             //Set PC start position
 
 
-            //Setup screen
-            screen = new Screen();
-            screen.InitialSetup();
+            //Tell screen about dungeon
             screen.Dungeon = dungeon; //don't really like this
         }
 
