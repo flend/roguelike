@@ -1,0 +1,16 @@
+<Combine name="libtcodWrapper" fileversion="2.0">
+  <Configurations active="Debug|Any CPU">
+    <Configuration name="Debug|Any CPU" ctype="CombineConfiguration">
+      <Entry build="True" name="libtcodWrapper" configuration="Debug|Any CPU" />
+    </Configuration>
+    <Configuration name="Release|Any CPU" ctype="CombineConfiguration">
+      <Entry build="True" name="libtcodWrapper" configuration="Release|Any CPU" />
+    </Configuration>
+  </Configurations>
+  <StartMode startupentry="libtcodWrapper" single="True">
+    <Execute type="None" entry="libtcodWrapper" />
+  </StartMode>
+  <Entries>
+    <Entry filename="libtcodWrapper.csproj" />
+  </Entries>
+</Combine>
