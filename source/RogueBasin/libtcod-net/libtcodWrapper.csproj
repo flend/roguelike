@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>libtcodWrapper</RootNamespace>
+    <AssemblyName>libtcodWrapper</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
+    <AssemblyName>libtcodWrapper</AssemblyName>
+    <RootNamespace>libtcodWrapper</RootNamespace>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DocumentationFile>xmlDocs.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
+    <AssemblyName>libtcodWrapper</AssemblyName>
+    <DebugSymbols>true</DebugSymbols>
+    <RootNamespace>libtcodWrapper</RootNamespace>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DocumentationFile>xmlDocs.xml</DocumentationFile>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <Compile Include="libtcodWrapper\Enumerations.cs" />
+    <Compile Include="libtcodWrapper\TCODBSP.cs" />
+    <Compile Include="libtcodWrapper\TCODColor.cs" />
+    <Compile Include="libtcodWrapper\TCODConsole.cs" />
+    <Compile Include="libtcodWrapper\TCODException.cs" />
+    <Compile Include="libtcodWrapper\TCODFileParser.cs" />
+    <Compile Include="libtcodWrapper\TCODFov.cs" />
+    <Compile Include="libtcodWrapper\TCODImage.cs" />
+    <Compile Include="libtcodWrapper\TCODKeyboard.cs" />
+    <Compile Include="libtcodWrapper\TCODLineDrawing.cs" />
+    <Compile Include="libtcodWrapper\TCODNoise.cs" />
+    <Compile Include="libtcodWrapper\TCODPathFinding.cs" />
+    <Compile Include="libtcodWrapper\TCODRandom.cs" />
+    <Compile Include="libtcodWrapper\TCODSystem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="libtcodWrapper\TCODMouse.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+</Project>
