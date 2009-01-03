@@ -13,6 +13,9 @@ namespace RogueBasin
         //Master object for the console & screen
         Screen screen;
 
+        //Are we running or have we exited?
+        bool runMapLoop = true;
+
         public RogueBase()
         {
 
@@ -44,7 +47,7 @@ namespace RogueBasin
 
             Console.WriteLine("debug test message.");
             */
-            Keyboard.WaitForKeyPress(true);
+            //Keyboard.WaitForKeyPress(true);
 
             return 1;
         }
@@ -53,6 +56,7 @@ namespace RogueBasin
         {
             //Time
 
+            while(runMapLoop) {
             //Spool through list of creatures, giving them turns as appropriate
 
             //After each turn update screen - may not be required
@@ -60,11 +64,50 @@ namespace RogueBasin
 
             //Deal with PCs turn as appropriate
 
-            //UserInput()
+            UserInput();
 
             //ProcessCommand()
-            
+            }
 
+        }
+
+        //Deal with user input
+        //Return code is if the command was successful. If not, don't increment time - not sure yet
+        private bool UserInput()
+        {
+            bool commandSuccess = false;
+
+            KeyPress userKey = Keyboard.CheckForKeypress(KeyPressType.Pressed);
+
+            if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+            {
+                switch (userKey.Character)
+                {
+                    case (byte)'x':
+                        runMapLoop = false;
+                        break;
+                }
+            }
+            else
+            {
+                switch (userKey.KeyCode)
+                {
+                    case KeyCode.TCODK_LEFT:
+                        commandSuccess = dungeon.PCMove(-1, 0);
+                        break;
+                    case KeyCode.TCODK_RIGHT:
+                        commandSuccess = dungeon.PCMove(1, 0);
+                        break;
+                    case KeyCode.TCODK_UP:
+                        commandSuccess = dungeon.PCMove(0, -1);
+                        break;
+                    case KeyCode.TCODK_DOWN:
+                        commandSuccess = dungeon.PCMove(0, 1);
+                        break;
+                }
+            }
+
+            return commandSuccess;
         }
 
         private void UpdateScreen()

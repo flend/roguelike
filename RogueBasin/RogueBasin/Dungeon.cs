@@ -53,5 +53,22 @@ namespace RogueBasin
             }
         }
 
+
+        internal bool PCMove(int x, int y)
+        {
+            Point newPCLocation = new Point(pcLocation.x + x, pcLocation.y + y);
+            
+            //OK to move into this space
+            if (levels[PCLevel].mapSquares[newPCLocation.x, newPCLocation.y] == Map.MapTerrain.Empty)
+            {
+                PCLocation = newPCLocation;
+                return true;
+            }
+            else
+            {
+                //Don't move PC and return false;
+                return false;
+            }
+        }
     }
 }
