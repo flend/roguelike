@@ -59,7 +59,7 @@ namespace RogueBasin
             Point newPCLocation = new Point(pcLocation.x + x, pcLocation.y + y);
             
             //OK to move into this space
-            if (levels[PCLevel].mapSquares[newPCLocation.x, newPCLocation.y] != Map.MapTerrain.Wall)
+            if (levels[PCLevel].mapSquares[newPCLocation.x, newPCLocation.y].terrain != MapTerrain.Wall)
             {
                 PCLocation = newPCLocation;
                 return true;
