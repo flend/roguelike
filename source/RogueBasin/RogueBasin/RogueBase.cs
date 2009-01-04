@@ -154,7 +154,14 @@ namespace RogueBasin
             mapGen.Width = 180;
             mapGen.Height = 50;
              
+
             Map level1 = mapGen.GenerateMap();
+
+            //Test
+            //for (int i = 0; i < 1000; i++)
+            //{
+            //    mapGen.GenerateMap();
+            //}
 
             //Give map to dungeon
             dungeon.AddMap(level1);
