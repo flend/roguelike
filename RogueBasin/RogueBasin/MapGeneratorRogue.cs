@@ -51,6 +51,8 @@ namespace RogueBasin
 
         public Map GenerateMap()
         {
+            LogFile.Log.LogEntry(String.Format("Generating Rogue-like dungeon {0}x{0}", subSquareDim));
+
             rand = new Random();
 
             baseMap = new Map(width, height);
@@ -131,10 +133,14 @@ namespace RogueBasin
 
             startRoom = 0;
 
+            int fixingIterations = 0; //profiling
+
             while (connectedRooms < totalRooms)
             {
+                fixingIterations++;
 
                 //Find next unconnected room
+             
                 while (mapRooms[startRoom].connected == true)
                 {
                     startRoom++;
@@ -163,7 +169,10 @@ namespace RogueBasin
                     connectedRooms++;
                 }
                 //If we don't find a connected neighbour this time, we'll return here on the cycle
+                startRoom++;
             }
+
+            LogFile.Log.LogEntry(String.Format("Generation complete, fixing iterations {0}", fixingIterations));
 
             //Draw rooms on map
 
@@ -268,7 +277,7 @@ namespace RogueBasin
 
             do {
                 //Find the terrain in this square
-                Map.MapTerrain terrainType;
+                MapTerrain terrainType;
                 int squareX, squareY;
 
                 if (lineHoriz)
@@ -282,9 +291,9 @@ namespace RogueBasin
                     squareY = i;
                 }
 
-                terrainType = baseMap.mapSquares[squareX, squareY];
+                terrainType = baseMap.mapSquares[squareX, squareY].terrain;
 
-                if (terrainType == Map.MapTerrain.Wall)
+                if (terrainType == MapTerrain.Wall)
                 {
                     //Drawing corridor already - this is the last iteration
                     if (drawingCorridor == true)
@@ -297,7 +306,7 @@ namespace RogueBasin
                 //Place this square with corridor
                 if (drawingCorridor)
                 {
-                    baseMap.mapSquares[squareX, squareY] = Map.MapTerrain.Corridor;
+                    baseMap.mapSquares[squareX, squareY].terrain = MapTerrain.Corridor;
                 }
 
                 i++;
@@ -317,17 +326,17 @@ namespace RogueBasin
             for (int i = lx; i <= rx; i++)
             {
                 //Top row
-                baseMap.mapSquares[i, ty] = Map.MapTerrain.Wall;
+                baseMap.mapSquares[i, ty].terrain = MapTerrain.Wall;
                 //Bottom row
-                baseMap.mapSquares[i, by] = Map.MapTerrain.Wall;
+                baseMap.mapSquares[i, by].terrain = MapTerrain.Wall;
             }
 
             for (int i = ty; i <= by; i++)
             {
                 //Left row
-                baseMap.mapSquares[lx, i] = Map.MapTerrain.Wall;
+                baseMap.mapSquares[lx, i].terrain = MapTerrain.Wall;
                 //Right row
-                baseMap.mapSquares[rx, i] = Map.MapTerrain.Wall;
+                baseMap.mapSquares[rx, i].terrain = MapTerrain.Wall;
             }
         }
 

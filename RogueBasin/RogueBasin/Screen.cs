@@ -18,7 +18,7 @@ namespace RogueBasin {
         //Top left coord to start drawing the map at
         Point mapTopLeft;
 
-        Dictionary<Map.MapTerrain, char> terrainChars;
+        Dictionary<MapTerrain, char> terrainChars;
         char PCChar;
         
         public Screen()
@@ -28,10 +28,10 @@ namespace RogueBasin {
 
             mapTopLeft = new Point(5, 5);
 
-            terrainChars = new Dictionary<Map.MapTerrain, char>();
-            terrainChars.Add(Map.MapTerrain.Empty, '.');
-            terrainChars.Add(Map.MapTerrain.Wall, '#');
-            terrainChars.Add(Map.MapTerrain.Corridor, '|');
+            terrainChars = new Dictionary<MapTerrain, char>();
+            terrainChars.Add(MapTerrain.Empty, '.');
+            terrainChars.Add(MapTerrain.Wall, '#');
+            terrainChars.Add(MapTerrain.Corridor, '|');
 
             PCChar = '@';
         }
@@ -82,7 +82,7 @@ namespace RogueBasin {
                     int screenX = mapTopLeft.x + i;
                     int screenY = mapTopLeft.y + j;
 
-                    rootConsole.PutChar(screenX, screenY, terrainChars[map.mapSquares[i, j]]);
+                    rootConsole.PutChar(screenX, screenY, terrainChars[map.mapSquares[i, j].terrain]);
 
                 }
             }
