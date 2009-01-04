@@ -36,12 +36,17 @@ namespace RogueBasin
 
         RogueRoom[] mapRooms;
 
-        Random rand;
+        static Random rand;
         Map baseMap;
 
         public MapGeneratorRogue()
         {
 
+        }
+
+        static MapGeneratorRogue()
+        {
+            rand = new Random();
         }
 
         RogueRoom MapRoom(int x, int y)
@@ -53,7 +58,7 @@ namespace RogueBasin
         {
             LogFile.Log.LogEntry(String.Format("Generating Rogue-like dungeon {0}x{0}", subSquareDim));
 
-            rand = new Random();
+            
 
             baseMap = new Map(width, height);
 
@@ -91,6 +96,9 @@ namespace RogueBasin
             }
 
             //Connect rooms
+            //First stage is to snake through the rooms until we reach a 'snake' corner
+
+            //(we could snake more than once for big maps but unnecessary for small maps)
 
             int connectedRooms = 0;
 
@@ -178,6 +186,35 @@ namespace RogueBasin
                 }
 
             }
+
+            //Add some more random connections
+
+            int totalRandomConnections = rand.Next(subSquareDim);
+            int noRandomConnections = 0;
+
+            while (noRandomConnections < totalRandomConnections)
+            {
+                //Pick a room at random
+                int randomRoom = rand.Next(totalRooms);
+
+                //Pick a random neighbour to connect to
+                List<int> allNeighbours = FindAllNeighbours(randomRoom);
+
+                if (allNeighbours.Count > 0)
+                {
+                    int neighbourRand = rand.Next(allNeighbours.Count);
+                    int neighbourToConnectTo = allNeighbours[neighbourRand];
+
+                    //If we are not already connected, add a connection
+                    if (!mapRooms[randomRoom].connectedTo.Contains(neighbourToConnectTo) && !mapRooms[neighbourToConnectTo].connectedTo.Contains(randomRoom))
+                    {
+                        mapRooms[randomRoom].connectedTo.Add(neighbourToConnectTo);
+                        noRandomConnections++;
+                    }
+                }
+
+            }
+
 
             LogFile.Log.LogEntry(String.Format("Generation complete, fixing iterations {0}", fixingIterations));
 
@@ -413,6 +450,42 @@ namespace RogueBasin
             return unconnectedN;
         }
 
+        private List<int> FindAllNeighbours(int startRoom)
+        {
+            List<int> neighbourRooms = new List<int>();
+
+            int roomX, roomY;
+
+            RoomCoords(startRoom, out roomX, out roomY);
+
+            //Neighbours are in compass directions only
+
+            //E neighbour
+            if (roomX != subSquareDim - 1)
+            {
+                neighbourRooms.Add(MapRoomNum(roomX + 1, roomY));
+            }
+
+            //W neighbour
+            if (roomX != 0)
+            {
+                    neighbourRooms.Add(MapRoomNum(roomX - 1, roomY));
+            }
+
+            //N neighbour
+            if (roomY != 0)
+            {
+                    neighbourRooms.Add(MapRoomNum(roomX, roomY - 1));
+            }
+
+            //S neighbour
+            if (roomY != subSquareDim - 1)
+            {
+                    neighbourRooms.Add(MapRoomNum(roomX, roomY + 1));
+            }
+
+            return neighbourRooms;
+        }
 
         void RandomRoom(out int roomX, out int roomY)
         {
