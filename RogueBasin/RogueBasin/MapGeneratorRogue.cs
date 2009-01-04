@@ -32,11 +32,12 @@ namespace RogueBasin
         //Make n x n rooms
         int subSquareDim = 3;
 
-        int minimumRoomSize = 1;
+        int minimumRoomSize = 4;
 
         RogueRoom[] mapRooms;
 
         Random rand;
+        Map baseMap;
 
         public MapGeneratorRogue()
         {
@@ -52,7 +53,7 @@ namespace RogueBasin
         {
             rand = new Random();
 
-            Map baseMap = new Map(width, height);
+            baseMap = new Map(width, height);
 
             //Divide the grid up into subsquares
             int subsquareWidth = width / subSquareDim;
@@ -90,7 +91,6 @@ namespace RogueBasin
             //Connect rooms
 
             int connectedRooms = 0;
-            
 
             //Current processing room
 
@@ -165,9 +165,19 @@ namespace RogueBasin
                 //If we don't find a connected neighbour this time, we'll return here on the cycle
             }
 
+            //Draw rooms on map
+
+            foreach (RogueRoom room in mapRooms)
+            {
+                DrawRoomOnMap(room);
+            }
+
+            //Place the PC in room 1
+            baseMap.PCStartLocation = new Point(mapRooms[0].roomX, mapRooms[0].roomY);
+
 
             //Make a square
-           
+           /*
             for (int i = 10; i < 20; i++)
             {
                 for (int j = 10; j < 20; j++)
@@ -183,16 +193,42 @@ namespace RogueBasin
                     baseMap.mapSquares[i,j] = Map.MapTerrain.Empty;
                 }
             }
-            
+            */
             //Stick the PC in the middle
 
-            baseMap.PCStartLocation = new Point(15, 15);
+            //baseMap.PCStartLocation = new Point(15, 15);
 
             return baseMap;
         }
 
+        //Draw squares for map
+        private void DrawRoomOnMap(RogueRoom room)
+        {
+            int lx = room.roomX - room.roomWidth / 2;
+            int rx = lx + room.roomWidth - 1;
+            int ty = room.roomY - room.roomHeight / 2;
+            int by = ty + room.roomHeight - 1;
+
+            for (int i = lx; i <= rx; i++)
+            {
+                //Top row
+                baseMap.mapSquares[i, ty] = Map.MapTerrain.Wall;
+                //Bottom row
+                baseMap.mapSquares[i, by] = Map.MapTerrain.Wall;
+            }
+
+            for (int i = ty; i <= by; i++)
+            {
+                //Left row
+                baseMap.mapSquares[lx, i] = Map.MapTerrain.Wall;
+                //Right row
+                baseMap.mapSquares[rx, i] = Map.MapTerrain.Wall;
+            }
+        }
+
         //Get X Y coords from roomNo
-        private void RoomCoords(int roomNo, out int roomX, out int roomY) {
+        private void RoomCoords(int roomNo, out int roomX, out int roomY)
+        {
 
             roomX = roomNo / subSquareDim;
             roomY = roomNo - (roomX * subSquareDim);
