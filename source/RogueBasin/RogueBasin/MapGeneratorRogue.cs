@@ -170,6 +170,13 @@ namespace RogueBasin
                 }
                 //If we don't find a connected neighbour this time, we'll return here on the cycle
                 startRoom++;
+                
+                //Allow cycle to reset back to 0
+                if (startRoom == totalRooms)
+                {
+                    startRoom = 0;
+                }
+
             }
 
             LogFile.Log.LogEntry(String.Format("Generation complete, fixing iterations {0}", fixingIterations));
