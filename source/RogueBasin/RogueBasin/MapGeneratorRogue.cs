@@ -26,11 +26,11 @@ namespace RogueBasin
     class MapGeneratorRogue
     {
 
-        int width = 80;
-        int height = 25;
+        int width = 180;
+        int height = 50;
 
         //Make n x n rooms
-        int subSquareDim = 3;
+        int subSquareDim = 5;
 
         int minimumRoomSize = 4;
 
@@ -172,6 +172,16 @@ namespace RogueBasin
                 DrawRoomOnMap(room);
             }
 
+            //Draw corridors
+
+            foreach (RogueRoom room in mapRooms)
+            {
+                foreach (int dest in room.connectedTo)
+                {
+                    DrawMapCorridor(room, mapRooms[dest]);
+                }
+            }
+
             //Place the PC in room 1
             baseMap.PCStartLocation = new Point(mapRooms[0].roomX, mapRooms[0].roomY);
 
@@ -199,6 +209,101 @@ namespace RogueBasin
             //baseMap.PCStartLocation = new Point(15, 15);
 
             return baseMap;
+        }
+
+        private void DrawMapCorridor(RogueRoom startRoom, RogueRoom destRoom)
+        {
+            //Run a straight ray from the centre of start room to dest room
+            //When we hit the first wall we start drawing corridor
+            //When we hit the second wall we stop drawing corridor
+
+            int startX, startY;
+            int endX, endY;
+
+            bool lineHoriz; //false == vertical
+
+            if (startRoom.roomX > destRoom.roomX)
+            {
+                startX = destRoom.roomX;
+                endX = startRoom.roomX;
+            }
+            else
+            {
+                startX = startRoom.roomX;
+                endX = destRoom.roomX;
+            }
+
+            if (startRoom.roomY > destRoom.roomY)
+            {
+                startY = destRoom.roomY;
+                endY = startRoom.roomY;
+            }
+            else
+            {
+                startY = startRoom.roomY;
+                endY = destRoom.roomY;
+            }
+
+            int startCoord, endCoord;
+
+            //Either the Xs or Ys ought to be the same
+            if (startX == endX)
+            {
+                //Draw a vertical line
+                lineHoriz = false;
+                startCoord = startY;
+                endCoord = endY;
+            }
+            else
+            {
+                lineHoriz = true;
+                startCoord = startX;
+                endCoord = endX;
+            }
+
+            bool drawingCorridor = false;
+            bool endDrawing = false;
+
+            int i = startCoord;
+
+            do {
+                //Find the terrain in this square
+                Map.MapTerrain terrainType;
+                int squareX, squareY;
+
+                if (lineHoriz)
+                {
+                    squareX = i;
+                    squareY = startY;
+                }
+                else
+                {
+                    squareX = startX;
+                    squareY = i;
+                }
+
+                terrainType = baseMap.mapSquares[squareX, squareY];
+
+                if (terrainType == Map.MapTerrain.Wall)
+                {
+                    //Drawing corridor already - this is the last iteration
+                    if (drawingCorridor == true)
+                        endDrawing = true;
+
+                    //Not drawing corridor - start
+                    drawingCorridor = true;
+                }
+
+                //Place this square with corridor
+                if (drawingCorridor)
+                {
+                    baseMap.mapSquares[squareX, squareY] = Map.MapTerrain.Corridor;
+                }
+
+                i++;
+
+            } while(!endDrawing);
+
         }
 
         //Draw squares for map

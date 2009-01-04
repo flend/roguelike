@@ -24,7 +24,8 @@ namespace RogueBasin
 
         public enum MapTerrain {
             Empty = 0,
-            Wall = 1
+            Wall = 1,
+            Corridor = 2
         }
 
         public Map(int width, int height)

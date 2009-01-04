@@ -23,14 +23,15 @@ namespace RogueBasin {
         
         public Screen()
         {
-            width = 100;
-            height = 40;
+            width = 200;
+            height = 80;
 
             mapTopLeft = new Point(5, 5);
 
             terrainChars = new Dictionary<Map.MapTerrain, char>();
             terrainChars.Add(Map.MapTerrain.Empty, '.');
             terrainChars.Add(Map.MapTerrain.Wall, '#');
+            terrainChars.Add(Map.MapTerrain.Corridor, '|');
 
             PCChar = '@';
         }
