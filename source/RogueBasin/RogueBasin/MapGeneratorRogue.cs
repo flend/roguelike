@@ -74,26 +74,48 @@ namespace RogueBasin
                 mapRooms[i] = new RogueRoom();
             }
 
-            //Calculate room centres
-            for (int i = 0; i < subSquareDim; i++)
-            {
-                for (int j = 0; j < subSquareDim; j++)
-                {
-                    MapRoom(i, j).roomX = subsquareWidth / 2 + subsquareWidth * i;
-                    MapRoom(i, j).roomY = subsquareHeight / 2 + subsquareHeight * j;
-                }
-            }
-
             //Give rooms random sizes
+            //-2 is to ensure there are same columns at the extremes of the squares
+            //The maxroom size possible is 1 below filling the allowed area completely.
 
-            int roomSizeWidthVariation = subsquareWidth - minimumRoomSize;
-            int roomSizeHeightVariation = subsquareHeight - minimumRoomSize;
+            int roomSizeWidthVariation = subsquareWidth - minimumRoomSize - 2;
+            int roomSizeHeightVariation = subsquareHeight - minimumRoomSize - 2;
 
             foreach (RogueRoom room in mapRooms)
             {
                 room.roomWidth = minimumRoomSize + rand.Next(roomSizeWidthVariation);
                 room.roomHeight = minimumRoomSize + rand.Next(roomSizeHeightVariation);
             }
+
+            //Calculate room centres
+            for (int i = 0; i < subSquareDim; i++)
+            {
+                for (int j = 0; j < subSquareDim; j++)
+                {
+                    //Available space
+                    //x: SubsquareWidth - 2 (safe columns) - roomSizeWidth
+                    //+1 used in Rand so we can generate the maximum
+                    int squareCentreX = subsquareWidth / 2 + subsquareWidth * i;
+                    int squareCentreY = subsquareHeight / 2 + subsquareHeight * j;
+
+                    int roomWidth = MapRoom(i, j).roomWidth;
+                    int roomHeight = MapRoom(i, j).roomHeight;
+
+                    int availableX = subsquareWidth - 2 - roomWidth;
+                    int availableY = subsquareHeight - 2 - roomHeight;
+
+                    int offsetX = rand.Next(availableX + 1);
+                    int offsetY = rand.Next(availableY + 1);
+
+                    offsetX -= availableX / 2;
+                    offsetY -= availableY / 2;
+
+                    MapRoom(i, j).roomX = squareCentreX + offsetX;
+                    MapRoom(i, j).roomY = squareCentreY + offsetY;
+                }
+            }
+
+            
 
             //Connect rooms
             //First stage is to snake through the rooms until we reach a 'snake' corner
@@ -110,6 +132,7 @@ namespace RogueBasin
 
             bool unconnectedNeighbourFound = false;
 
+            
             do
             {
                 //Say this room is connected (it is at least connected to the room we came from)
@@ -135,7 +158,14 @@ namespace RogueBasin
                 }
             }
             while (unconnectedNeighbourFound);
+            
 
+            /*
+            //The snake above can be commented out if you like and replaced with these two lines
+            mapRooms[startRoom].connected = true;
+            connectedRooms++;
+            */
+             
             //Cycle through all unconnected rooms
             //Connect each to a connected neighbour
 
@@ -226,15 +256,15 @@ namespace RogueBasin
             }
 
             //Draw corridors
+            
+            for(int i=0;i<totalRooms;i++) {
 
-            foreach (RogueRoom room in mapRooms)
-            {
-                foreach (int dest in room.connectedTo)
+                foreach (int dest in mapRooms[i].connectedTo)
                 {
-                    DrawMapCorridor(room, mapRooms[dest]);
+                    DrawMapCorridor(i, dest);
                 }
             }
-
+            
             //Place the PC in room 1
             baseMap.PCStartLocation = new Point(mapRooms[0].roomX, mapRooms[0].roomY);
 
@@ -264,99 +294,295 @@ namespace RogueBasin
             return baseMap;
         }
 
-        private void DrawMapCorridor(RogueRoom startRoom, RogueRoom destRoom)
+        enum Direction { North, East, South, West };
+
+        private void DrawMapCorridor(int startRoomCoord, int destRoomCoord)
         {
-            //Run a straight ray from the centre of start room to dest room
-            //When we hit the first wall we start drawing corridor
-            //When we hit the second wall we stop drawing corridor
+            //Draw an L-shaped corridor from centre to centre
 
-            int startX, startY;
-            int endX, endY;
+            //Providing we don't have room centres on the extreme top or left of squares then there will always be a route
 
-            bool lineHoriz; //false == vertical
+            //Establish what sort of connection this is, horizontal or vertical
+            //We have the room numbers (this logic won't work on 1 row / column maps where some types of connection are not possible
+            int startRoomX, startRoomY;
+            RoomCoords(startRoomCoord, out startRoomX, out startRoomY);
 
-            if (startRoom.roomX > destRoom.roomX)
+            int destRoomX, destRoomY;
+            RoomCoords(destRoomCoord, out destRoomX, out destRoomY);
+
+            Direction corridorDir;
+
+            if (startRoomY == destRoomY)
             {
-                startX = destRoom.roomX;
-                endX = startRoom.roomX;
-            }
-            else
-            {
-                startX = startRoom.roomX;
-                endX = destRoom.roomX;
-            }
-
-            if (startRoom.roomY > destRoom.roomY)
-            {
-                startY = destRoom.roomY;
-                endY = startRoom.roomY;
-            }
-            else
-            {
-                startY = startRoom.roomY;
-                endY = destRoom.roomY;
-            }
-
-            int startCoord, endCoord;
-
-            //Either the Xs or Ys ought to be the same
-            if (startX == endX)
-            {
-                //Draw a vertical line
-                lineHoriz = false;
-                startCoord = startY;
-                endCoord = endY;
-            }
-            else
-            {
-                lineHoriz = true;
-                startCoord = startX;
-                endCoord = endX;
-            }
-
-            bool drawingCorridor = false;
-            bool endDrawing = false;
-
-            int i = startCoord;
-
-            do {
-                //Find the terrain in this square
-                MapTerrain terrainType;
-                int squareX, squareY;
-
-                if (lineHoriz)
+                if (startRoomX < destRoomX)
                 {
-                    squareX = i;
-                    squareY = startY;
+                    //East
+                    corridorDir = Direction.East;
                 }
                 else
                 {
-                    squareX = startX;
-                    squareY = i;
+                    //West
+                    corridorDir = Direction.West;
                 }
-
-                terrainType = baseMap.mapSquares[squareX, squareY].terrain;
-
-                if (terrainType == MapTerrain.Wall)
+            }
+            else
+            {
+                if (startRoomY < destRoomY)
                 {
-                    //Drawing corridor already - this is the last iteration
-                    if (drawingCorridor == true)
-                        endDrawing = true;
-
-                    //Not drawing corridor - start
-                    drawingCorridor = true;
+                    //North
+                    corridorDir = Direction.South;
                 }
-
-                //Place this square with corridor
-                if (drawingCorridor)
+                else
                 {
-                    baseMap.mapSquares[squareX, squareY].terrain = MapTerrain.Corridor;
+                    //South
+                    corridorDir = Direction.North;
+                }
+            }
+
+            //Get room objects
+            RogueRoom startRoom = mapRooms[startRoomCoord];
+            RogueRoom destRoom = mapRooms[destRoomCoord];
+            
+            int startX, startY;
+            int endX, endY;
+
+            //Rooms are drawn from
+            //centre - roomWidth / 2
+            //to
+            //(centre - roomWidth / 2) + roomWidth - 1 (inclusive)
+            //right wall: centre + ceil(roomWidth / 2) (inclusive)
+            //left wall: centre - floor(roomWidth / 2)
+
+            //start/end X/Y are the wall spaces which will become doors
+
+            if (corridorDir == Direction.East)
+            {
+                startX = startRoom.roomX - startRoom.roomWidth / 2 + startRoom.roomWidth - 1;
+                startY = startRoom.roomY;
+                endX = destRoom.roomX - destRoom.roomWidth / 2;
+                endY = destRoom.roomY;
+            }
+            
+            else if (corridorDir == Direction.West)
+            {
+                //Draw the corridor the other way round (east)
+                startX = destRoom.roomX - destRoom.roomWidth / 2 + destRoom.roomWidth - 1;
+                startY = destRoom.roomY;
+                endX = startRoom.roomX - startRoom.roomWidth / 2;
+                endY = startRoom.roomY;
+
+                corridorDir = Direction.East;
+            }
+
+            else if (corridorDir == Direction.South)
+            {
+                startY = startRoom.roomY - startRoom.roomHeight / 2 + startRoom.roomHeight - 1;
+                startX = startRoom.roomX;
+                endY = destRoom.roomY - destRoom.roomHeight / 2;
+                endX = destRoom.roomX;
+            }
+
+            else
+            {
+                //Direction.North
+                //Turn this into a south corridor
+                startY = destRoom.roomY - destRoom.roomHeight / 2 + destRoom.roomHeight - 1;
+                startX = destRoom.roomX;
+                endY = startRoom.roomY - startRoom.roomHeight / 2;
+                endX = startRoom.roomX;
+
+                corridorDir = Direction.South;
+            }
+
+            //Corridor spaces (not including doors)
+            int corridorLengthX = endX - startX - 2;
+            int corridorLengthY = endY - startY - 2;
+
+            //Try to draw a random corridor. It may intersect with a pre-existing corridor in which case we need to start again
+            bool corridorFailed = false;
+
+            //Where to put the bend is the random variable
+            int lBendCoord;
+
+            do
+            {
+                
+                //Pick a random point for the L bend
+                //+1 so we can get the largest value
+                if (corridorDir == Direction.East)
+                {
+                    lBendCoord = rand.Next(corridorLengthX + 1);
+                }
+                else
+                {
+                    //Direction.South
+                    lBendCoord = rand.Next(corridorLengthY + 1);
                 }
 
-                i++;
+                //Trace out the corridor - except the doors
+                //Look for non-empty squares - a collision
+                //In that case restart
 
-            } while(!endDrawing);
+                //East
+                //Go right: (startX + 1) to (startX + 1 + lBendCoord)
+                //Go up/down: (startY + 1) to (endY)
+                //Go left: (startX + 1 + lBendCoord) to (endX - 1)
 
+                if (corridorDir == Direction.East)
+                {
+                    //right
+                    for (int i = startX + 1; i <= startX + 1 + lBendCoord; i++)
+                    {
+                        if (baseMap.mapSquares[i, startY].terrain != MapTerrain.Empty)
+                            continue;
+                    }
+
+                    //up / down
+                    int xCoord = startX + 1 + lBendCoord;
+
+                    int yStart;
+                    int yEnd;
+
+                    if (endY > startY)
+                    {
+                        yStart = startY;
+                        yEnd = endY;
+                    }
+                    else
+                    {
+                        yStart = endY;
+                        yEnd = startY;
+                    }
+
+                    for (int j = yStart; j <= yEnd; j++)
+                    {
+                        if (baseMap.mapSquares[xCoord, j].terrain != MapTerrain.Empty)
+                            continue;
+                    }
+
+                    //right
+                    for (int i = xCoord + 1; i <= endX - 1; i++)
+                    {
+                        if (baseMap.mapSquares[i, endY].terrain != MapTerrain.Empty)
+                            continue;
+                    }
+                }
+                else
+                {
+                    //Direction.South
+                    //down
+                    for (int i = startY + 1; i <= startY + 1 + lBendCoord; i++)
+                    {
+                        if (baseMap.mapSquares[startX, i].terrain != MapTerrain.Empty)
+                            continue;
+                    }
+
+                    //left / right
+                    int yCoord = startY + 1 + lBendCoord;
+
+                    int xEnd;
+                    int xStart;
+
+                    if (endX > startX)
+                    {
+                        xStart = startX;
+                        xEnd = endX;
+                    }
+                    else
+                    {
+                        xStart = endX;
+                        xEnd = startX;
+                    }
+
+                    for (int j = xStart; j <= xEnd; j++)
+                    {
+                        if (baseMap.mapSquares[j, yCoord].terrain != MapTerrain.Empty)
+                            continue;
+                    }
+
+                    //down
+                    for (int i = yCoord + 1; i <= endY - 1; i++)
+                    {
+                        if (baseMap.mapSquares[endX, i].terrain != MapTerrain.Empty)
+                            continue;
+                    }
+                }
+            } while (corridorFailed);
+
+            //We now have a successful corridor so draw it
+            if (corridorDir == Direction.East)
+            {
+                //right
+                for (int i = startX + 1; i <= startX + 1 + lBendCoord; i++)
+                {
+                    baseMap.mapSquares[i, startY].terrain = MapTerrain.Corridor;
+                }
+
+                //up / down
+                int xCoord = startX + 1 + lBendCoord;
+
+                int yStart;
+                int yEnd;
+
+                if (endY > startY)
+                {
+                    yStart = startY;
+                    yEnd = endY;
+                }
+                else
+                {
+                    yStart = endY;
+                    yEnd = startY;
+                }
+
+                for (int j = yStart; j <= yEnd; j++)
+                {
+                    baseMap.mapSquares[xCoord, j].terrain = MapTerrain.Corridor;
+                }
+
+                //right
+                for (int i = xCoord + 1; i <= endX - 1; i++)
+                {
+                    baseMap.mapSquares[i, endY].terrain = MapTerrain.Corridor;
+                }
+            }
+            else
+            {
+                //Direction.South
+                //down
+                for (int i = startY + 1; i <= startY + 1 + lBendCoord; i++)
+                {
+                    baseMap.mapSquares[startX, i].terrain = MapTerrain.Corridor;
+                }
+
+                //left / right
+                int yCoord = startY + 1 + lBendCoord;
+
+                int xEnd;
+                int xStart;
+
+                if (endX > startX)
+                {
+                    xStart = startX;
+                    xEnd = endX;
+                }
+                else
+                {
+                    xStart = endX;
+                    xEnd = startX;
+                }
+
+                for (int j = xStart; j <= xEnd; j++)
+                {
+                    baseMap.mapSquares[j, yCoord].terrain = MapTerrain.Corridor;
+                }
+
+                //down
+                for (int i = yCoord + 1; i <= endY - 1; i++)
+                {
+                    baseMap.mapSquares[endX, i].terrain = MapTerrain.Corridor;
+                }
+            }
         }
 
         //Draw squares for map
