@@ -26,13 +26,15 @@ namespace RogueBasin
     class MapGeneratorRogue
     {
 
-        int width = 180;
-        int height = 50;
+        int width = 60;
+        int height = 60;
 
         //Make n x n rooms
-        int subSquareDim = 5;
+        int subSquareDim = 10;
 
-        int minimumRoomSize = 4;
+        int minimumRoomSize = 3;
+
+        int corridorRedos;
 
         RogueRoom[] mapRooms;
 
@@ -57,7 +59,7 @@ namespace RogueBasin
         public Map GenerateMap()
         {
             LogFile.Log.LogEntry(String.Format("Generating Rogue-like dungeon {0}x{0}", subSquareDim));
-
+            corridorRedos = 0;
             
 
             baseMap = new Map(width, height);
@@ -76,10 +78,11 @@ namespace RogueBasin
 
             //Give rooms random sizes
             //-2 is to ensure there are same columns at the extremes of the squares
+            //-1 would probably be OK too
             //The maxroom size possible is 1 below filling the allowed area completely.
 
-            int roomSizeWidthVariation = subsquareWidth - minimumRoomSize - 2;
-            int roomSizeHeightVariation = subsquareHeight - minimumRoomSize - 2;
+            int roomSizeWidthVariation = subsquareWidth - minimumRoomSize - 1;
+            int roomSizeHeightVariation = subsquareHeight - minimumRoomSize - 1;
 
             foreach (RogueRoom room in mapRooms)
             {
@@ -246,7 +249,7 @@ namespace RogueBasin
             }
 
 
-            LogFile.Log.LogEntry(String.Format("Generation complete, fixing iterations {0}", fixingIterations));
+            LogFile.Log.LogEntry(String.Format("Generation complete, fixing iterations {0}, corridor redos {1}", fixingIterations, corridorRedos));
 
             //Draw rooms on map
 
@@ -434,7 +437,10 @@ namespace RogueBasin
                     for (int i = startX + 1; i <= startX + 1 + lBendCoord; i++)
                     {
                         if (baseMap.mapSquares[i, startY].terrain != MapTerrain.Empty)
+                        {
                             continue;
+                            corridorRedos++;
+                        }
                     }
 
                     //up / down
@@ -456,15 +462,21 @@ namespace RogueBasin
 
                     for (int j = corridorYStart; j <= corridorYEnd; j++)
                     {
-                        if (baseMap.mapSquares[xCoord, j].terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[xCoord, j].terrain != MapTerrain.Empty) {
                             continue;
+                            corridorRedos++;
+                        }
+
                     }
 
                     //right
                     for (int i = xCoord + 1; i <= endX - 1; i++)
                     {
-                        if (baseMap.mapSquares[i, endY].terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[i, endY].terrain != MapTerrain.Empty) {
                             continue;
+                            corridorRedos++;
+                        }
+
                     }
                 }
                 else
@@ -473,8 +485,11 @@ namespace RogueBasin
                     //down
                     for (int i = startY + 1; i <= startY + 1 + lBendCoord; i++)
                     {
-                        if (baseMap.mapSquares[startX, i].terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[startX, i].terrain != MapTerrain.Empty) {
                             continue;
+                            corridorRedos++;
+                        }
+
                     }
 
                     //left / right
@@ -496,15 +511,21 @@ namespace RogueBasin
 
                     for (int j = corridorXStart; j <= corridorXEnd; j++)
                     {
-                        if (baseMap.mapSquares[j, yCoord].terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[j, yCoord].terrain != MapTerrain.Empty) {
                             continue;
+                            corridorRedos++;
+                        }
+
                     }
 
                     //down
                     for (int i = yCoord + 1; i <= endY - 1; i++)
                     {
-                        if (baseMap.mapSquares[endX, i].terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[endX, i].terrain != MapTerrain.Empty) {
                             continue;
+                            corridorRedos++;
+                        }
+
                     }
                 }
             } while (corridorFailed);
