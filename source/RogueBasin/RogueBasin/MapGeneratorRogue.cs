@@ -440,21 +440,21 @@ namespace RogueBasin
                     //up / down
                     int xCoord = startX + 1 + lBendCoord;
 
-                    int yStart;
-                    int yEnd;
+                    int corridorYStart;
+                    int corridorYEnd;
 
                     if (endY > startY)
                     {
-                        yStart = startY;
-                        yEnd = endY;
+                        corridorYStart = startY;
+                        corridorYEnd = endY;
                     }
                     else
                     {
-                        yStart = endY;
-                        yEnd = startY;
+                        corridorYStart = endY;
+                        corridorYEnd = startY;
                     }
 
-                    for (int j = yStart; j <= yEnd; j++)
+                    for (int j = corridorYStart; j <= corridorYEnd; j++)
                     {
                         if (baseMap.mapSquares[xCoord, j].terrain != MapTerrain.Empty)
                             continue;
@@ -480,21 +480,21 @@ namespace RogueBasin
                     //left / right
                     int yCoord = startY + 1 + lBendCoord;
 
-                    int xEnd;
-                    int xStart;
+                    int corridorXEnd;
+                    int corridorXStart;
 
                     if (endX > startX)
                     {
-                        xStart = startX;
-                        xEnd = endX;
+                        corridorXStart = startX;
+                        corridorXEnd = endX;
                     }
                     else
                     {
-                        xStart = endX;
-                        xEnd = startX;
+                        corridorXStart = endX;
+                        corridorXEnd = startX;
                     }
 
-                    for (int j = xStart; j <= xEnd; j++)
+                    for (int j = corridorXStart; j <= corridorXEnd; j++)
                     {
                         if (baseMap.mapSquares[j, yCoord].terrain != MapTerrain.Empty)
                             continue;
@@ -513,7 +513,7 @@ namespace RogueBasin
             if (corridorDir == Direction.East)
             {
                 //right
-                for (int i = startX + 1; i <= startX + 1 + lBendCoord; i++)
+                for (int i = startX; i <= startX + 1 + lBendCoord; i++)
                 {
                     baseMap.mapSquares[i, startY].terrain = MapTerrain.Corridor;
                 }
@@ -521,27 +521,27 @@ namespace RogueBasin
                 //up / down
                 int xCoord = startX + 1 + lBendCoord;
 
-                int yStart;
-                int yEnd;
+                int corridorYStart;
+                int corridorYEnd;
 
                 if (endY > startY)
                 {
-                    yStart = startY;
-                    yEnd = endY;
+                    corridorYStart = startY;
+                    corridorYEnd = endY;
                 }
                 else
                 {
-                    yStart = endY;
-                    yEnd = startY;
+                    corridorYStart = endY;
+                    corridorYEnd = startY;
                 }
 
-                for (int j = yStart; j <= yEnd; j++)
+                for (int j = corridorYStart; j <= corridorYEnd; j++)
                 {
                     baseMap.mapSquares[xCoord, j].terrain = MapTerrain.Corridor;
                 }
 
                 //right
-                for (int i = xCoord + 1; i <= endX - 1; i++)
+                for (int i = xCoord + 1; i <= endX; i++)
                 {
                     baseMap.mapSquares[i, endY].terrain = MapTerrain.Corridor;
                 }
@@ -550,7 +550,7 @@ namespace RogueBasin
             {
                 //Direction.South
                 //down
-                for (int i = startY + 1; i <= startY + 1 + lBendCoord; i++)
+                for (int i = startY; i <= startY + 1 + lBendCoord; i++)
                 {
                     baseMap.mapSquares[startX, i].terrain = MapTerrain.Corridor;
                 }
@@ -558,27 +558,27 @@ namespace RogueBasin
                 //left / right
                 int yCoord = startY + 1 + lBendCoord;
 
-                int xEnd;
-                int xStart;
+                int corridorXEnd;
+                int corridorXStart;
 
                 if (endX > startX)
                 {
-                    xStart = startX;
-                    xEnd = endX;
+                    corridorXStart = startX;
+                    corridorXEnd = endX;
                 }
                 else
                 {
-                    xStart = endX;
-                    xEnd = startX;
+                    corridorXStart = endX;
+                    corridorXEnd = startX;
                 }
 
-                for (int j = xStart; j <= xEnd; j++)
+                for (int j = corridorXStart; j <= corridorXEnd; j++)
                 {
                     baseMap.mapSquares[j, yCoord].terrain = MapTerrain.Corridor;
                 }
 
                 //down
-                for (int i = yCoord + 1; i <= endY - 1; i++)
+                for (int i = yCoord + 1; i <= endY; i++)
                 {
                     baseMap.mapSquares[endX, i].terrain = MapTerrain.Corridor;
                 }
