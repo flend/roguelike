@@ -30,7 +30,7 @@ namespace RogueBasin
         int height = 60;
 
         //Make n x n rooms
-        int subSquareDim = 3;
+        int subSquareDim = 6;
 
         int minimumRoomSize = 3;
 
@@ -364,18 +364,18 @@ namespace RogueBasin
             if (corridorDir == Direction.East)
             {
                 startX = startRoom.roomX - startRoom.roomWidth / 2 + startRoom.roomWidth - 1;
-                startY = startRoom.roomY;
+                startY = startRoom.roomY - startRoom.roomHeight / 2 + 1 + rand.Next(startRoom.roomHeight - 2);
                 endX = destRoom.roomX - destRoom.roomWidth / 2;
-                endY = destRoom.roomY;
+                endY = destRoom.roomY - destRoom.roomHeight / 2 + 1 + rand.Next(destRoom.roomHeight - 2);
             }
             
             else if (corridorDir == Direction.West)
             {
                 //Draw the corridor the other way round (east)
                 startX = destRoom.roomX - destRoom.roomWidth / 2 + destRoom.roomWidth - 1;
-                startY = destRoom.roomY;
+                startY = destRoom.roomY - destRoom.roomHeight / 2 + 1 + rand.Next(destRoom.roomHeight - 2);
                 endX = startRoom.roomX - startRoom.roomWidth / 2;
-                endY = startRoom.roomY;
+                endY = startRoom.roomY - startRoom.roomHeight / 2 + 1 + rand.Next(startRoom.roomHeight - 2);
 
                 corridorDir = Direction.East;
             }
@@ -383,9 +383,9 @@ namespace RogueBasin
             else if (corridorDir == Direction.South)
             {
                 startY = startRoom.roomY - startRoom.roomHeight / 2 + startRoom.roomHeight - 1;
-                startX = startRoom.roomX;
+                startX = startRoom.roomX - startRoom.roomWidth / 2 + 1 + rand.Next(startRoom.roomWidth - 2);
                 endY = destRoom.roomY - destRoom.roomHeight / 2;
-                endX = destRoom.roomX;
+                endX = destRoom.roomX - destRoom.roomWidth / 2 + 1 + rand.Next(destRoom.roomWidth - 2);
             }
 
             else
@@ -393,9 +393,9 @@ namespace RogueBasin
                 //Direction.North
                 //Turn this into a south corridor
                 startY = destRoom.roomY - destRoom.roomHeight / 2 + destRoom.roomHeight - 1;
-                startX = destRoom.roomX;
+                startX = destRoom.roomX - destRoom.roomWidth / 2 + 1 + rand.Next(destRoom.roomWidth - 2);
                 endY = startRoom.roomY - startRoom.roomHeight / 2;
-                endX = startRoom.roomX;
+                endX = startRoom.roomX - startRoom.roomWidth / 2 + 1 + rand.Next(startRoom.roomWidth - 2);
 
                 corridorDir = Direction.South;
             }
@@ -410,21 +410,24 @@ namespace RogueBasin
             //Where to put the bend is the random variable
             int lBendCoord;
 
+            //Pick a random point for the L bend
+            //+1 so we can get the largest value
+            if (corridorDir == Direction.East)
+            {
+                lBendCoord = rand.Next(corridorLengthX + 1);
+            }
+            else
+            {
+                //Direction.South
+                lBendCoord = rand.Next(corridorLengthY + 1);
+            }
+
+
+            /*
             do
             {
                 
-                //Pick a random point for the L bend
-                //+1 so we can get the largest value
-                if (corridorDir == Direction.East)
-                {
-                    lBendCoord = rand.Next(corridorLengthX + 1);
-                }
-                else
-                {
-                    //Direction.South
-                    lBendCoord = rand.Next(corridorLengthY + 1);
-                }
-
+                
                 //Trace out the corridor - except the doors
                 //Look for non-empty squares - a collision
                 //In that case restart
@@ -537,7 +540,7 @@ namespace RogueBasin
                     }
                 }
             } while (corridorFailed);
-
+            */
             //We now have a successful corridor so draw it
             if (corridorDir == Direction.East)
             {
