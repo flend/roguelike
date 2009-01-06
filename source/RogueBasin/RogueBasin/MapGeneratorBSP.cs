@@ -19,6 +19,9 @@ namespace RogueBasin
         const double minimumSplit = 0.2;
         const double maximumSplit = 0.8;
 
+        const double minFill = 0.6;
+        const double maxFill = 1.0;
+
         public MapNode(int x, int y, int width, int height)
         {
             this.x = x;
@@ -118,10 +121,20 @@ namespace RogueBasin
         public void DrawRoom(Map baseMap) {
             //For now just draw a room filling the BSP
 
-            int lx = x;
-            int rx = x + width - 1;
-            int ty = y;
-            int by = ty + height - 1;
+            Random rand = MapGeneratorBSP.rand;
+            int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill) + 1 ) ));
+            int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) + 1 ) ));
+
+            /*if (roomWidth < MapGeneratorBSP.minimumRoomSize)
+                roomWidth = MapGeneratorBSP.minimumRoomSize;
+
+            if (roomHeight < MapGeneratorBSP.minimumRoomSize)
+                roomHeight = MapGeneratorBSP.minimumRoomSize;*/
+
+            int lx = x + rand.Next(width - roomWidth + 1);
+            int rx = lx + roomWidth - 1;
+            int ty = y + rand.Next(height - roomHeight + 1);
+            int by = ty + roomHeight - 1;
 
             for (int i = lx; i <= rx; i++)
             {
@@ -147,7 +160,7 @@ namespace RogueBasin
         int height = 40;
 
         public static Random rand;
-        public const int minimumRoomSize = 8;
+        public const int minimumRoomSize = 6;
 
         Map baseMap;
 
