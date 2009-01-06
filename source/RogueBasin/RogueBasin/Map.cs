@@ -23,7 +23,32 @@ namespace RogueBasin
 
     public class MapSquare
     {
-        public MapTerrain terrain;
+        MapTerrain terrain;
+        bool walkable;
+
+        public MapTerrain Terrain
+        {
+            set
+            {
+                terrain = value;
+                if (terrain == MapTerrain.Wall)
+                    walkable = false;
+                else
+                    walkable = true;
+            }
+            get
+            {
+                return terrain;
+            }
+        }
+
+        public bool Walkable
+        {
+            get
+            {
+                return walkable;
+            }
+        }
     }
 
     public class Map
@@ -45,7 +70,7 @@ namespace RogueBasin
                 for (int j = 0; j < height; j++)
                 {
                     mapSquares[i, j] = new MapSquare();
-                    mapSquares[i, j].terrain = MapTerrain.Empty;
+                    mapSquares[i, j].Terrain = MapTerrain.Empty;
                 }
             }
         }
@@ -56,7 +81,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < height; j++)
                 {
-                    mapSquares[i, j].terrain = MapTerrain.Empty;
+                    mapSquares[i, j].Terrain = MapTerrain.Empty;
                 }
             }
         }

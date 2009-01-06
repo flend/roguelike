@@ -57,9 +57,19 @@ namespace RogueBasin
         internal bool PCMove(int x, int y)
         {
             Point newPCLocation = new Point(pcLocation.x + x, pcLocation.y + y);
-            
+
+            if (newPCLocation.x < 0 || newPCLocation.x >= levels[PCLevel].width)
+            {
+                return false;
+            }
+
+            if (newPCLocation.y < 0 || newPCLocation.y >= levels[PCLevel].height)
+            {
+                return false;
+            }
+
             //OK to move into this space
-            if (levels[PCLevel].mapSquares[newPCLocation.x, newPCLocation.y].terrain != MapTerrain.Wall)
+            if (levels[PCLevel].mapSquares[newPCLocation.x, newPCLocation.y].Walkable == true)
             {
                 PCLocation = newPCLocation;
                 return true;
