@@ -42,6 +42,7 @@
     <Compile Include="Dungeon.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="MapGeneratorBSP.cs" />
     <Compile Include="MapGeneratorRogue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />

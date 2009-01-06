@@ -150,7 +150,7 @@ namespace RogueBasin
             dungeon = new Dungeon();
 
             //Create dungeon map (at least level 1)
-            MapGeneratorRogue mapGen = new MapGeneratorRogue();
+            MapGeneratorBSP mapGen = new MapGeneratorBSP();
             mapGen.Width = 120;
             mapGen.Height = 60;
              
