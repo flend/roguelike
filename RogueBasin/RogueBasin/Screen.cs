@@ -82,7 +82,7 @@ namespace RogueBasin {
                     int screenX = mapTopLeft.x + i;
                     int screenY = mapTopLeft.y + j;
 
-                    rootConsole.PutChar(screenX, screenY, terrainChars[map.mapSquares[i, j].terrain]);
+                    rootConsole.PutChar(screenX, screenY, terrainChars[map.mapSquares[i, j].Terrain]);
 
                 }
             }

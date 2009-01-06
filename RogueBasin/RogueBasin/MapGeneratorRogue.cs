@@ -442,7 +442,7 @@ namespace RogueBasin
                     //right
                     for (int i = startX + 1; i <= startX + 1 + lBendCoord; i++)
                     {
-                        if (baseMap.mapSquares[i, startY].terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[i, startY].Terrain != MapTerrain.Empty)
                         {
                             corridorRedos++;
                             continue;
@@ -469,7 +469,7 @@ namespace RogueBasin
 
                     for (int j = corridorYStart; j <= corridorYEnd; j++)
                     {
-                        if (baseMap.mapSquares[xCoord, j].terrain != MapTerrain.Empty) {
+                        if (baseMap.mapSquares[xCoord, j].Terrain != MapTerrain.Empty) {
                             corridorRedos++; 
                             continue;
 
@@ -480,7 +480,7 @@ namespace RogueBasin
                     //right
                     for (int i = xCoord + 1; i <= endX - 1; i++)
                     {
-                        if (baseMap.mapSquares[i, endY].terrain != MapTerrain.Empty) {
+                        if (baseMap.mapSquares[i, endY].Terrain != MapTerrain.Empty) {
                             corridorRedos++;
                             continue;
 
@@ -494,7 +494,7 @@ namespace RogueBasin
                     //down
                     for (int i = startY + 1; i <= startY + 1 + lBendCoord; i++)
                     {
-                        if (baseMap.mapSquares[startX, i].terrain != MapTerrain.Empty) {
+                        if (baseMap.mapSquares[startX, i].Terrain != MapTerrain.Empty) {
                             corridorRedos++; 
                             continue;
 
@@ -521,7 +521,7 @@ namespace RogueBasin
 
                     for (int j = corridorXStart; j <= corridorXEnd; j++)
                     {
-                        if (baseMap.mapSquares[j, yCoord].terrain != MapTerrain.Empty) {
+                        if (baseMap.mapSquares[j, yCoord].Terrain != MapTerrain.Empty) {
                             corridorRedos++; 
                             continue;
 
@@ -532,7 +532,7 @@ namespace RogueBasin
                     //down
                     for (int i = yCoord + 1; i <= endY - 1; i++)
                     {
-                        if (baseMap.mapSquares[endX, i].terrain != MapTerrain.Empty) {
+                        if (baseMap.mapSquares[endX, i].Terrain != MapTerrain.Empty) {
                             corridorRedos++;
                             continue;
                         }
@@ -547,7 +547,7 @@ namespace RogueBasin
                 //right
                 for (int i = startX; i <= startX + 1 + lBendCoord; i++)
                 {
-                    baseMap.mapSquares[i, startY].terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[i, startY].Terrain = MapTerrain.Corridor;
                 }
 
                 //up / down
@@ -569,13 +569,13 @@ namespace RogueBasin
 
                 for (int j = corridorYStart; j <= corridorYEnd; j++)
                 {
-                    baseMap.mapSquares[xCoord, j].terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[xCoord, j].Terrain = MapTerrain.Corridor;
                 }
 
                 //right
                 for (int i = xCoord + 1; i <= endX; i++)
                 {
-                    baseMap.mapSquares[i, endY].terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[i, endY].Terrain = MapTerrain.Corridor;
                 }
             }
             else
@@ -584,7 +584,7 @@ namespace RogueBasin
                 //down
                 for (int i = startY; i <= startY + 1 + lBendCoord; i++)
                 {
-                    baseMap.mapSquares[startX, i].terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[startX, i].Terrain = MapTerrain.Corridor;
                 }
 
                 //left / right
@@ -606,13 +606,13 @@ namespace RogueBasin
 
                 for (int j = corridorXStart; j <= corridorXEnd; j++)
                 {
-                    baseMap.mapSquares[j, yCoord].terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[j, yCoord].Terrain = MapTerrain.Corridor;
                 }
 
                 //down
                 for (int i = yCoord + 1; i <= endY; i++)
                 {
-                    baseMap.mapSquares[endX, i].terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[endX, i].Terrain = MapTerrain.Corridor;
                 }
             }
         }
@@ -628,17 +628,17 @@ namespace RogueBasin
             for (int i = lx; i <= rx; i++)
             {
                 //Top row
-                baseMap.mapSquares[i, ty].terrain = MapTerrain.Wall;
+                baseMap.mapSquares[i, ty].Terrain = MapTerrain.Wall;
                 //Bottom row
-                baseMap.mapSquares[i, by].terrain = MapTerrain.Wall;
+                baseMap.mapSquares[i, by].Terrain = MapTerrain.Wall;
             }
 
             for (int i = ty; i <= by; i++)
             {
                 //Left row
-                baseMap.mapSquares[lx, i].terrain = MapTerrain.Wall;
+                baseMap.mapSquares[lx, i].Terrain = MapTerrain.Wall;
                 //Right row
-                baseMap.mapSquares[rx, i].terrain = MapTerrain.Wall;
+                baseMap.mapSquares[rx, i].Terrain = MapTerrain.Wall;
             }
         }
 
