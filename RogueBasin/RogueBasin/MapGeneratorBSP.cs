@@ -200,23 +200,25 @@ namespace RogueBasin
                         MapTerrain terrainNext = baseMap.mapSquares[i, leftY].Terrain;
                         MapTerrain terrainNext2 = baseMap.mapSquares[i - 1, leftY].Terrain;
 
-                        //Any corridor is OK
+                        //A corridor is OK
                         if (terrainNext == MapTerrain.Corridor)
                         {
                             leftX = i;
                             break;
                         }
+                        //A wall with empty or corridor behind it is OK
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 != MapTerrain.Wall)
+                        {
+                            leftX = i;
+                            break;
+                        }
+                        //A corridor 'seen coming' we can short cut too
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
                             leftX = i - 1;
                             break;
                         }
                         //A 1-thick wall is OK
-                        else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Empty)
-                        {
-                            leftX = i;
-                            break;
-                        }
                         else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Wall)
                         {
                             //No good
@@ -247,17 +249,19 @@ namespace RogueBasin
                             rightX = i;
                             break;
                         }
-                        else if (terrainNext2 == MapTerrain.Corridor)
-                        {
-                            rightX = i + 1;
-                            break;
-                        }
-                        //A 1-thick wall is OK
-                        else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Empty)
+                        //A wall with empty or corridor behind it is OK
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 != MapTerrain.Wall)
                         {
                             rightX = i;
                             break;
                         }
+                        //A corridor 'seen coming' we can short cut too
+                        else if (terrainNext2 == MapTerrain.Corridor)
+                        {
+                            rightX = i - 1;
+                            break;
+                        }
+                        //A 1-thick wall is OK
                         else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Wall)
                         {
                             //No good
@@ -330,9 +334,171 @@ namespace RogueBasin
                 {
                     baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
                 }
+                }
+            else
+            {
+                //Vertical
+
+                //We are guaranteed that rays from the split into the left and right child will not hit an obstruction
+                //(from any y)
+                //However, routing a L shaped corridor between the rays is only guaranteed to be possible down the edge of the BSP tile
+
+                //So after finding start and end Y from projected ray we just guess an L and check that it works before doing
+
+                //Cast rays from the split into the left child
+                //Look for a corridor or accessable room
+
+                int leftX;
+                int leftY = -1;
+                do
+                {
+                    //Random x coord
+                    leftX = x + rand.Next(width);
+
+                    //Don't go quite to the left extent (y) - the 2 look ahead will fix this
+                    for (int i = y + actualSplit - 1; i > y; i--)
+                    {
+                        //Look ahead 2
+                        MapTerrain terrainNext = baseMap.mapSquares[leftX, i].Terrain;
+                        MapTerrain terrainNext2 = baseMap.mapSquares[leftX, i - 1].Terrain;
+
+                        //Any corridor is OK
+                        if (terrainNext == MapTerrain.Corridor)
+                        {
+                            leftY = i;
+                            break;
+                        }
+                        //A wall with empty or corridor behind it is OK
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 != MapTerrain.Wall)
+                        {
+                            leftY = i;
+                            break;
+                        }
+                        //A corridor 'seen coming' we can short cut too
+                        else if (terrainNext2 == MapTerrain.Corridor)
+                        {
+                            leftY = i - 1;
+                            break;
+                        }
+                        //A 1-thick wall is OK
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Wall)
+                        {
+                            //No good
+                            break;
+                        }
+                    }
+                } while (leftY == -1);
+
+                //Cast ray into right child
+                int rightX;
+                int rightY = -1;
+
+                do
+                {
+                    //Random y coord
+                    rightX = x + rand.Next(width);
+
+                    //Don't go quite to the right extent (x) - the 2 look ahead will fix this
+                    for (int i = y + actualSplit; i < y + height - 1; i++)
+                    {
+                        //Look ahead 2
+                        MapTerrain terrainNext = baseMap.mapSquares[rightX, i].Terrain;
+                        MapTerrain terrainNext2 = baseMap.mapSquares[rightX, i + 1].Terrain;
+
+                        //Any corridor is OK
+                        if (terrainNext == MapTerrain.Corridor)
+                        {
+                            rightY = i;
+                            break;
+                        }
+                        //A wall with empty or corridor behind it is OK
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 != MapTerrain.Wall)
+                        {
+                            rightY = i;
+                            break;
+                        }
+                        //A corridor 'seen coming' we can short cut too
+                        else if (terrainNext2 == MapTerrain.Corridor)
+                        {
+                            rightY = i - 1;
+                            break;
+                        }
+                        //A 1-thick wall is OK
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Wall)
+                        {
+                            //No good
+                            break;
+                        }
+                    }
+                } while (rightY == -1);
+
+
+                //Now route a L corridor from (leftX, leftY) to (rightX, rightY)
+                //The L bend can occur within X: leftSafeX -> rightSafeX
+
+                List<Point> corridorRoute = new List<Point>(Math.Abs(rightX - leftX) + rightY - leftY);
+                bool notValidPath = false;
+
+                //Keep trying until we get a valid path (at least one is guaranteed)
+
+                do
+                {
+                    corridorRoute.Clear();
+                    notValidPath = false;
+
+                    //L bend set randonly
+                    int lBendY = leftY + 1 + rand.Next(rightY - leftY - 2);
+
+                    for (int i = leftY; i <= lBendY; i++)
+                    {
+                        corridorRoute.Add(new Point(leftX, i));
+                    }
+
+                    int startX;
+                    int endX;
+
+                    if (leftX > rightX)
+                    {
+                        //down
+                        startX = rightX;
+                        endX = leftX;
+                    }
+                    else
+                    {
+                        startX = leftX;
+                        endX = rightX;
+                    }
+
+                    for (int j = startX + 1; j < endX; j++)
+                    {
+                        corridorRoute.Add(new Point(j, lBendY));
+                    }
+
+                    for (int i = lBendY; i <= rightY; i++)
+                    {
+                        corridorRoute.Add(new Point(rightX, i));
+                    }
+
+                    //Check this path for validity
+                    //Look for walls but ignore the first and last squares
+                    for (int i = 1; i < corridorRoute.Count - 1; i++)
+                    {
+                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Empty)
+                        {
+                            notValidPath = true;
+                            break;
+                        }
+                    }
+                } while (notValidPath);
+
+                //We now have a valid path so draw it
+                foreach (Point sq in corridorRoute)
+                {
+                    baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
+                }
+
 
             }
-            
         }
     }
 
