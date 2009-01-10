@@ -124,8 +124,9 @@ namespace RogueBasin
         public void DrawRoom(Map baseMap) {
             
             Random rand = MapGeneratorBSP.rand;
-            int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill) + 1 ) ));
-            int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) + 1 ) ));
+            //Width and height ensures a 1 square border in the BSP square
+            int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill) - 1 ) ));
+            int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) - 1 ) ));
 
             /*if (roomWidth < MapGeneratorBSP.minimumRoomSize)
                 roomWidth = MapGeneratorBSP.minimumRoomSize;
@@ -133,9 +134,9 @@ namespace RogueBasin
             if (roomHeight < MapGeneratorBSP.minimumRoomSize)
                 roomHeight = MapGeneratorBSP.minimumRoomSize;*/
 
-            int lx = x + rand.Next(width - roomWidth + 1);
+            int lx = x + 1 + rand.Next(width - roomWidth);
             int rx = lx + roomWidth - 1;
-            int ty = y + rand.Next(height - roomHeight + 1);
+            int ty = y + 1 + rand.Next(height - roomHeight);
             int by = ty + roomHeight - 1;
 
             for (int i = lx; i <= rx; i++)
@@ -168,6 +169,10 @@ namespace RogueBasin
                 return;
             childRight.DrawCorridorConnectingChildren(baseMap);
 
+            //If we only have 1 child we can't connect them, but our parent will connect to them
+            if (childLeft == null || childRight == null)
+                return;
+
             Random rand = MapGeneratorBSP.rand;
 
             if (split == SplitType.Horizontal)
@@ -192,13 +197,21 @@ namespace RogueBasin
                         //Any corridor is OK
                         if(terrainNext == MapTerrain.Corridor) {
                            leftX = i;
+                           break;
                         }
                         else if(terrainNext2 == MapTerrain.Corridor) {
                             leftX = i - 1;
+                            break;
                         }
                         //A 1-thick wall is OK
                         else if(terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Empty) {
                             leftX = i;
+                            break;
+                        }
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Wall)
+                        {
+                            //No good
+                            break;
                         }
                     }
                 } while (leftX == -1);
@@ -223,15 +236,23 @@ namespace RogueBasin
                         if (terrainNext == MapTerrain.Corridor)
                         {
                             rightX = i;
+                            break;
                         }
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
                             rightX = i + 1;
+                            break;
                         }
                         //A 1-thick wall is OK
                         else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Empty)
                         {
                             rightX = i;
+                            break;
+                        }
+                        else if (terrainNext == MapTerrain.Wall && terrainNext2 == MapTerrain.Wall)
+                        {
+                            //No good
+                            break;
                         }
                     }
                 } while (rightX == -1);
@@ -294,7 +315,7 @@ namespace RogueBasin
                     baseMap.mapSquares[lBendX, j].Terrain = MapTerrain.Corridor;
                 }
 
-                for (int i = lBendX; i < rightX; i++)
+                for (int i = lBendX; i <= rightX; i++)
                 {
                     baseMap.mapSquares[i, rightY].Terrain = MapTerrain.Corridor;
                 }
