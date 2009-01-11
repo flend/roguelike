@@ -161,13 +161,11 @@ namespace RogueBasin
             //Children should do their own drawing first
             //However, if we don't have children, return to our parent
 
-            if (childLeft == null)
-                return;
-            childLeft.DrawCorridorConnectingChildren(baseMap);
+            if (childLeft != null)
+                childLeft.DrawCorridorConnectingChildren(baseMap);
 
-            if (childRight == null)
-                return;
-            childRight.DrawCorridorConnectingChildren(baseMap);
+            if (childRight != null) 
+                childRight.DrawCorridorConnectingChildren(baseMap);
 
             //If we only have 1 child we can't connect them, but our parent will connect to them
             if (childLeft == null || childRight == null)
@@ -258,7 +256,7 @@ namespace RogueBasin
                         //A corridor 'seen coming' we can short cut too
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
-                            rightX = i - 1;
+                            rightX = i + 1;
                             break;
                         }
                         //A 1-thick wall is OK
@@ -420,7 +418,7 @@ namespace RogueBasin
                         //A corridor 'seen coming' we can short cut too
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
-                            rightY = i - 1;
+                            rightY = i + 1;
                             break;
                         }
                         //A 1-thick wall is OK
