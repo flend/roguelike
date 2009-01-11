@@ -149,6 +149,9 @@ namespace RogueBasin
             //Create dungeon
             dungeon = new Dungeon();
 
+            //Tell screen about dungeon
+            screen.Dungeon = dungeon; //don't really like this
+
             //Create dungeon map (at least level 1)
             MapGeneratorBSP mapGen = new MapGeneratorBSP();
             //MapGeneratorRogue mapGen = new MapGeneratorRogue();
@@ -175,8 +178,7 @@ namespace RogueBasin
             //Set PC start position
 
 
-            //Tell screen about dungeon
-            screen.Dungeon = dungeon; //don't really like this
+            
         }
 
     }

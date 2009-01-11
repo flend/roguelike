@@ -63,7 +63,7 @@ namespace RogueBasin {
 
         }
 
-        //Draw the current dungeon map
+        //Draw the current dungeon map and objects
         public void Draw()
         {
             //Get screen handle
@@ -72,8 +72,38 @@ namespace RogueBasin {
             //Clear screen
             rootConsole.Clear();
 
-            //Draw map
-            Map map = dungeon.PCMap;
+            DrawMapPart(dungeon.PCMap);
+
+            //Draw PC
+
+            Point PClocation = dungeon.PCLocation;
+
+            rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, PCChar);
+
+            //Flush the console
+            rootConsole.Flush();
+            
+        }
+
+        //Draw a map only (useful for debugging)
+        public void DrawMap(Map map)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Clear screen
+            rootConsole.Clear();
+
+            DrawMapPart(map);
+            
+            //Flush the console
+            rootConsole.Flush();
+        }
+
+        private void DrawMapPart(Map map)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
 
             for (int i = 0; i < map.width; i++)
             {
@@ -86,18 +116,7 @@ namespace RogueBasin {
 
                 }
             }
-            
-            //Draw PC
-
-            Point PClocation = dungeon.PCLocation;
-
-            rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, PCChar);
-
-            //Flush the console
-            rootConsole.Flush();
         }
-
-
         internal void ConsoleLine(string datedEntry)
         {
             Console.WriteLine(datedEntry);

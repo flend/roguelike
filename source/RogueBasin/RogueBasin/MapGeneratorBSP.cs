@@ -28,17 +28,21 @@ namespace RogueBasin
         const int minBSPSquareWidth = 8;
         const int minBSPSquareHeight = 5;
 
+        //Minimum room sizes. Below 3 will break the algorithm (and make unwalkable rooms)
+        const int minRoomWidth = 4;
+        const int minRoomHeight = 4;
+
         //Smaller numbers make larger areas more likely
+        //Numbers 5 or below make a significant difference
         const int noSplitChance = 5;
 
-
         //How the BSP squares are split as a ratio
-        const double minimumSplit = 0.3;
-        const double maximumSplit = 0.7;
+        const double minimumSplit = 0.4;
+        const double maximumSplit = 0.6;
 
         //How much of the BSP square is filled by a room
-        const double minFill = 0.4;
-        const double maxFill = 0.6;
+        const double minFill = 0.7;
+        const double maxFill = 1.0;
 
         public MapNode(int x, int y, int width, int height)
         {
@@ -70,6 +74,7 @@ namespace RogueBasin
                 {
                     childLeft = null;
                     childRight = null;
+                    return;
                 }
 
                 int minSplit = (int)(width * minimumSplit);
@@ -160,6 +165,19 @@ namespace RogueBasin
             //Width and height are reduced by 1 from max filling to ensure there is always a free column / row for an L-shaped corridor
             int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill)) ));
             int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) ) ));
+
+            if(width <= minRoomWidth) {
+                throw new ApplicationException("BSP too small for room");
+            }
+            if(height <= minRoomHeight) {
+                throw new ApplicationException("BSP too small for room");
+            }
+
+            if(roomWidth < minRoomWidth)
+                roomWidth = minRoomWidth;
+
+            if (roomHeight < minRoomHeight)
+                roomHeight = minRoomHeight;
 
             /*if (roomWidth < MapGeneratorBSP.minimumRoomSize)
                 roomWidth = MapGeneratorBSP.minimumRoomSize;
@@ -539,7 +557,6 @@ namespace RogueBasin
         int height = 40;
 
         public static Random rand;
-        public const int minimumRoomSize = 6;
 
         Map baseMap;
 
@@ -566,6 +583,8 @@ namespace RogueBasin
             
             //Draw a room in each BSP leaf
             rootNode.DrawRoomAtLeaf(baseMap);
+
+            RogueBase.screen.DrawMap(baseMap);
 
             rootNode.DrawCorridorConnectingChildren(baseMap);
 
