@@ -283,7 +283,7 @@ namespace RogueBasin
                     notValidPath = false;
 
                     //L bend set randonly
-                    int lBendX = leftX + 1 + rand.Next(rightX - leftX - 2);
+                    int lBendX = leftX + 1 + rand.Next(rightX - leftX - 1);
 
                     for (int i = leftX; i <= lBendX; i++)
                     {
@@ -445,7 +445,7 @@ namespace RogueBasin
                     notValidPath = false;
 
                     //L bend set randonly
-                    int lBendY = leftY + 1 + rand.Next(rightY - leftY - 2);
+                    int lBendY = leftY + 1 + rand.Next(rightY - leftY - 1);
 
                     for (int i = leftY; i <= lBendY; i++)
                     {

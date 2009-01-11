@@ -49,16 +49,16 @@
     <Compile Include="Screen.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\resources\libtcod-net\libtcodWrapper.csproj">
-      <Project>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</Project>
-      <Name>libtcodWrapper</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libtcod-net\libtcodWrapper.csproj">
+      <Project>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</Project>
+      <Name>libtcodWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
