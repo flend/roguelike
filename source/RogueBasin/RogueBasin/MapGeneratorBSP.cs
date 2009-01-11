@@ -14,6 +14,13 @@ namespace RogueBasin
         int width;
         int height;
 
+        //Room coords
+        int roomX;
+        int roomY;
+
+        int roomWidth;
+        int roomHeight;
+
         //Square split parameters
         SplitType split;
         int actualSplit;
@@ -35,6 +42,8 @@ namespace RogueBasin
         //Smaller numbers make larger areas more likely
         //Numbers 5 or below make a significant difference
         const int noSplitChance = 5;
+        //Multiple of BSPwidth above which we must split
+        const int mustSplitSize = 3;
 
         //How the BSP squares are split as a ratio
         const double minimumSplit = 0.4;
@@ -43,7 +52,7 @@ namespace RogueBasin
         //How much of the BSP square is filled by a room
         const double minFill = 0.7;
         const double maxFill = 1.0;
-
+        
         public MapNode(int x, int y, int width, int height)
         {
             this.x = x;
@@ -54,6 +63,69 @@ namespace RogueBasin
 
         enum SplitType {
             Horizontal, Vertical
+        }
+
+        //Find a random point within a room
+        public Point RandomRoomPoint()
+        {
+            return FindRandomRoomPoint();
+        }
+
+        private Point FindRandomRoomPoint()
+        {
+            //Go down the tree to a random left. When there find a random point in the room and return it
+            Random rand = MapGeneratorBSP.rand;
+            
+            Point retPoint = new Point(-1, -1);
+
+            //If we have both children choose one
+            if (childLeft != null & childRight != null)
+            {
+
+                if (rand.Next(2) < 1)
+                {
+                    if (childLeft != null)
+                    {
+                        retPoint = childLeft.RandomRoomPoint();
+                    }
+                }
+                else
+                {
+                    if (childRight != null)
+                    {
+                        retPoint = childRight.RandomRoomPoint();
+                    }
+                }
+            }
+            //Otherwise do the one we have
+            else
+            {
+                if (childLeft != null)
+                {
+                    retPoint = childLeft.RandomRoomPoint();
+                }
+
+                else
+                {
+                    if (childRight != null)
+                    {
+                        retPoint = childRight.RandomRoomPoint();
+                    }
+                }
+            }
+
+            //If it's the first leaf we've come to 
+            //Find point in the room
+            if (retPoint.x == -1)
+            {
+
+                int x = roomX + 1 + rand.Next(roomWidth - 2);
+                int y = roomY + 1 + rand.Next(roomHeight - 2);
+
+                return new Point(x, y);
+            }
+
+            return retPoint;
         }
 
         public void Split() {
@@ -69,7 +141,7 @@ namespace RogueBasin
             if (split == SplitType.Horizontal)
             {
                 //Small chance that we don't recurse any further
-                int chanceNoSplitHoriz = 3 - (width / minBSPSquareWidth);
+                int chanceNoSplitHoriz = mustSplitSize - (width / minBSPSquareWidth);
                 if (rand.Next(noSplitChance) < chanceNoSplitHoriz)
                 {
                     childLeft = null;
@@ -108,7 +180,7 @@ namespace RogueBasin
                 //SplitType.Vertical
 
                 //Small chance that we don't recurse any further
-                int chanceNoSplitVert = 3 - (height / minBSPSquareHeight);
+                int chanceNoSplitVert = mustSplitSize - (height / minBSPSquareHeight);
                 if (rand.Next(noSplitChance) < chanceNoSplitVert)
                 {
                     childLeft = null;
@@ -163,8 +235,8 @@ namespace RogueBasin
             
             Random rand = MapGeneratorBSP.rand;
             //Width and height are reduced by 1 from max filling to ensure there is always a free column / row for an L-shaped corridor
-            int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill)) ));
-            int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) ) ));
+            roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill)) ));
+            roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) ) ));
 
             if(width <= minRoomWidth) {
                 throw new ApplicationException("BSP too small for room");
@@ -185,23 +257,23 @@ namespace RogueBasin
             if (roomHeight < MapGeneratorBSP.minimumRoomSize)
                 roomHeight = MapGeneratorBSP.minimumRoomSize;*/
 
-            int lx = x + 1 + rand.Next(width - roomWidth);
-            int rx = lx + roomWidth - 1;
-            int ty = y + 1 + rand.Next(height - roomHeight);
-            int by = ty + roomHeight - 1;
+            roomX = x + 1 + rand.Next(width - roomWidth);
+            int rx = roomX + roomWidth - 1;
+            roomY = y + 1 + rand.Next(height - roomHeight);
+            int by = roomY + roomHeight - 1;
 
-            for (int i = lx; i <= rx; i++)
+            for (int i = roomX; i <= rx; i++)
             {
                 //Top row
-                baseMap.mapSquares[i, ty].Terrain = MapTerrain.Wall;
+                baseMap.mapSquares[i, roomY].Terrain = MapTerrain.Wall;
                 //Bottom row
                 baseMap.mapSquares[i, by].Terrain = MapTerrain.Wall;
             }
 
-            for (int i = ty; i <= by; i++)
+            for (int i = roomY; i <= by; i++)
             {
                 //Left row
-                baseMap.mapSquares[lx, i].Terrain = MapTerrain.Wall;
+                baseMap.mapSquares[roomX, i].Terrain = MapTerrain.Wall;
                 //Right row
                 baseMap.mapSquares[rx, i].Terrain = MapTerrain.Wall;
             }
@@ -584,11 +656,14 @@ namespace RogueBasin
             //Draw a room in each BSP leaf
             rootNode.DrawRoomAtLeaf(baseMap);
 
-            RogueBase.screen.DrawMap(baseMap);
+            //debug
+            //RogueBase.screen.DrawMap(baseMap);
 
+            //Draw connecting corridors
             rootNode.DrawCorridorConnectingChildren(baseMap);
 
-            baseMap.PCStartLocation = new Point(0, 0);
+            //Set the PC start location in a random room
+            baseMap.PCStartLocation = rootNode.RandomRoomPoint();
 
             return baseMap;
         }
