@@ -6,24 +6,39 @@ namespace RogueBasin
 {
     class MapNode
     {
-        int width;
-        int height;
-
-        //tl corner in map coords
+        //BSP tl corner in map coords
         int x;
         int y;
 
-        MapNode childLeft;
-        MapNode childRight;
+        //BSP square dimensions
+        int width;
+        int height;
 
+        //Square split parameters
         SplitType split;
         int actualSplit;
 
-        const double minimumSplit = 0.2;
-        const double maximumSplit = 0.8;
+        //Children references
+        MapNode childLeft;
+        MapNode childRight;
 
-        const double minFill = 0.6;
-        const double maxFill = 1.0;
+        //TUNING PARAMETERS
+
+        //Minimum BSP square sizes
+        const int minBSPSquareWidth = 8;
+        const int minBSPSquareHeight = 5;
+
+        //Smaller numbers make larger areas more likely
+        const int noSplitChance = 5;
+
+
+        //How the BSP squares are split as a ratio
+        const double minimumSplit = 0.3;
+        const double maximumSplit = 0.7;
+
+        //How much of the BSP square is filled by a room
+        const double minFill = 0.4;
+        const double maxFill = 0.6;
 
         public MapNode(int x, int y, int width, int height)
         {
@@ -42,12 +57,21 @@ namespace RogueBasin
             Random rand = MapGeneratorBSP.rand;
             split = SplitType.Vertical;
 
-            if(rand.Next(2) == 1) {
+            //Long thin areas are more likely to be split widthways and vice versa
+            if(rand.Next(width + height) < width) {
                 split = SplitType.Horizontal;
             }
 
             if (split == SplitType.Horizontal)
             {
+                //Small chance that we don't recurse any further
+                int chanceNoSplitHoriz = 3 - (width / minBSPSquareWidth);
+                if (rand.Next(noSplitChance) < chanceNoSplitHoriz)
+                {
+                    childLeft = null;
+                    childRight = null;
+                }
+
                 int minSplit = (int)(width * minimumSplit);
                 int maxSplit = (int)(width * maximumSplit);
 
@@ -55,7 +79,7 @@ namespace RogueBasin
 
                 //Define the two child areas, make objects and then recursively split them
 
-                if (actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (actualSplit < minBSPSquareWidth)
                 {
                     childLeft = null;
                 }
@@ -65,7 +89,7 @@ namespace RogueBasin
                     childLeft.Split();
                 }
 
-                if (width - actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (width - actualSplit < minBSPSquareWidth)
                 {
                     childRight = null;
                 }
@@ -77,6 +101,15 @@ namespace RogueBasin
             }
             else {
                 //SplitType.Vertical
+
+                //Small chance that we don't recurse any further
+                int chanceNoSplitVert = 3 - (height / minBSPSquareHeight);
+                if (rand.Next(noSplitChance) < chanceNoSplitVert)
+                {
+                    childLeft = null;
+                    childRight = null;
+                }
+
                 int minSplit = (int)(height * minimumSplit);
                 int maxSplit = (int)(height * maximumSplit);
 
@@ -84,7 +117,7 @@ namespace RogueBasin
 
                 //Define the two child areas, make objects and then recursively split them
 
-                if (actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (actualSplit < minBSPSquareHeight)
                 {
                     childLeft = null;
                 }
@@ -94,7 +127,7 @@ namespace RogueBasin
                     childLeft.Split();
                 }
 
-                if (height - actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (height - actualSplit < minBSPSquareHeight)
                 {
                     childRight = null;
                 }
@@ -124,9 +157,9 @@ namespace RogueBasin
         public void DrawRoom(Map baseMap) {
             
             Random rand = MapGeneratorBSP.rand;
-            //Width and height ensures a 1 square border in the BSP square
-            int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill) - 1 ) ));
-            int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) - 1 ) ));
+            //Width and height are reduced by 1 from max filling to ensure there is always a free column / row for an L-shaped corridor
+            int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill)) ));
+            int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) ) ));
 
             /*if (roomWidth < MapGeneratorBSP.minimumRoomSize)
                 roomWidth = MapGeneratorBSP.minimumRoomSize;
