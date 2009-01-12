@@ -23,18 +23,19 @@ namespace RogueBasin
 
     public class MapSquare
     {
-        MapTerrain terrain;
-        bool walkable;
+        MapTerrain terrain = MapTerrain.Empty;
+        bool walkable = false;
+        bool blocksLight = true;
 
         public MapTerrain Terrain
         {
             set
             {
                 terrain = value;
-                if (terrain == MapTerrain.Wall)
+                /*if (terrain == MapTerrain.Wall)
                     walkable = false;
                 else
-                    walkable = true;
+                    walkable = true;*/
             }
             get
             {
@@ -48,6 +49,28 @@ namespace RogueBasin
             {
                 return walkable;
             }
+            set
+            {
+                walkable = value;
+            }
+        }
+
+        public bool BlocksLight
+        {
+            get
+            {
+                return blocksLight;
+            }
+            set
+            {
+                blocksLight = value;
+            }
+        }
+
+        //Sets walkable and non-light blocking
+        public void SetOpen() {
+            BlocksLight = false;
+            Walkable = true;
         }
     }
 
@@ -70,7 +93,6 @@ namespace RogueBasin
                 for (int j = 0; j < height; j++)
                 {
                     mapSquares[i, j] = new MapSquare();
-                    mapSquares[i, j].Terrain = MapTerrain.Empty;
                 }
             }
         }

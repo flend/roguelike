@@ -262,6 +262,8 @@ namespace RogueBasin
             roomY = y + 1 + rand.Next(height - roomHeight);
             int by = roomY + roomHeight - 1;
 
+            //Walls
+
             for (int i = roomX; i <= rx; i++)
             {
                 //Top row
@@ -276,6 +278,16 @@ namespace RogueBasin
                 baseMap.mapSquares[roomX, i].Terrain = MapTerrain.Wall;
                 //Right row
                 baseMap.mapSquares[rx, i].Terrain = MapTerrain.Wall;
+            }
+
+            //Inside
+            //Need to set as walkable and non-light blocking
+            for (int i = roomX + 1; i < rx; i++)
+            {
+                for (int j = roomY + 1; j < by; j++)
+                {
+                    baseMap.mapSquares[i, j].SetOpen();
+                }
             }
         }
 
@@ -454,8 +466,9 @@ namespace RogueBasin
                 foreach (Point sq in corridorRoute)
                 {
                     baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[sq.x, sq.y].SetOpen();
                 }
-                }
+            }
             else
             {
                 //Vertical
@@ -616,6 +629,7 @@ namespace RogueBasin
                 foreach (Point sq in corridorRoute)
                 {
                     baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[sq.x, sq.y].SetOpen();
                 }
 
 
