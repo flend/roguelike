@@ -39,6 +39,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="Creature.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />

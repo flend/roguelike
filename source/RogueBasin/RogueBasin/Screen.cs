@@ -72,7 +72,11 @@ namespace RogueBasin {
             //Clear screen
             rootConsole.Clear();
 
-            DrawMapPart(dungeon.PCMap);
+            DrawMap(dungeon.PCMap);
+
+            //Draw creatures
+
+            DrawCreatures(dungeon.Creatures);
 
             //Draw PC
 
@@ -85,8 +89,23 @@ namespace RogueBasin {
             
         }
 
+        private void DrawCreatures(List<Creature> creatureList)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            foreach (Creature creature in creatureList)
+            {
+                //Not on this level
+                if (creature.LocationLevel != dungeon.PCLevel)
+                    continue;
+
+                rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
+            }
+        }
+
         //Draw a map only (useful for debugging)
-        public void DrawMap(Map map)
+        public void DrawMapDebug(Map map)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
@@ -94,13 +113,13 @@ namespace RogueBasin {
             //Clear screen
             rootConsole.Clear();
 
-            DrawMapPart(map);
+            DrawMap(map);
             
             //Flush the console
             rootConsole.Flush();
         }
 
-        private void DrawMapPart(Map map)
+        private void DrawMap(Map map)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();

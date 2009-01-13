@@ -169,9 +169,33 @@ namespace RogueBasin
 
             //Give map to dungeon
             dungeon.AddMap(level1);
+
+            //Set PC start location
             dungeon.PCLocation = level1.PCStartLocation;
 
             //Create creatures and start positions
+            
+            //Add some random creatures
+
+            Random rand = new Random();
+            int noCreatures = rand.Next(10);
+
+            for (int i = 0; i < noCreatures; i++)
+            {
+                Creature creature = new Creature();
+                creature.Representation = Convert.ToChar(65 + rand.Next(26));
+
+                int level = 0;
+                Point location;
+                
+                //Loop until we find an acceptable location and the add works
+                do
+                {
+                    location = mapGen.RandomPointInRoom();
+                }
+                while (!dungeon.AddCreature(creature, level, location));
+            }
+
 
             //Create objects and start positions
 

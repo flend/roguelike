@@ -646,6 +646,8 @@ namespace RogueBasin
 
         Map baseMap;
 
+        MapNode rootNode;
+
         public MapGeneratorBSP()
         {
 
@@ -664,7 +666,7 @@ namespace RogueBasin
 
             //Make a BSP tree for the rooms
 
-            MapNode rootNode = new MapNode(0, 0, width, height);
+            rootNode = new MapNode(0, 0, width, height);
             rootNode.Split();
             
             //Draw a room in each BSP leaf
@@ -680,6 +682,11 @@ namespace RogueBasin
             baseMap.PCStartLocation = rootNode.RandomRoomPoint();
 
             return baseMap;
+        }
+
+        public Point RandomPointInRoom()
+        {
+            return rootNode.RandomRoomPoint();
         }
 
         public int Width
