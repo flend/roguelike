@@ -56,8 +56,25 @@ namespace RogueBasin
         {
             //Time
 
+            //Increment world clock
+
+            //Check PC
+            //Take a turn if signalled by the internal clock
+
+            //Loop through creatures
+            //If their internal clocks signal another turn then take one
+
+
+
             while(runMapLoop) {
-            //Spool through list of creatures, giving them turns as appropriate
+
+                //Add a time slice for the creature and process turn if applicable
+                foreach (Creature creature in dungeon.Creatures)
+                {
+                    
+                    creature.IncrementTurnTime();
+                }
+                
 
             //After each turn update screen - may not be required
             UpdateScreen();

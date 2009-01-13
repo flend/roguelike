@@ -34,14 +34,8 @@ namespace RogueBasin
             {
                 Map creatureLevel = levels[level];
                 
-                //Check walkable
-                if (!creatureLevel.mapSquares[location.x, location.y].Walkable)
-                {
-                    return false;
-                }
-
                 //Check nothing else is there
-                if (!MapSquareIsEmpty(level, location))
+                if (!MapSquareCanBeEntered(level, location))
                 {
                     return false;
                 }
@@ -61,15 +55,19 @@ namespace RogueBasin
 
         }
 
-        private bool MapSquareIsEmpty(int level, Point location)
+        private bool MapSquareCanBeEntered(int level, Point location)
         {
-            //Check the terrain
+            //Not a wall
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Wall)
             {
                 return false;
             }
 
             //Walkable?
+            if (!levels[level].mapSquares[location.x, location.y].Walkable)
+            {
+                return false;
+            }
 
             //Check creatures that be blocking
             foreach (Creature creature in creatures)
@@ -146,7 +144,7 @@ namespace RogueBasin
            }
 
             //OK to move into this space
-            if (levels[PCLevel].mapSquares[newPCLocation.x, newPCLocation.y].Walkable == true)
+            if (MapSquareCanBeEntered(PCLevel, newPCLocation))
             {
                 PCLocation = newPCLocation;
                 return true;
