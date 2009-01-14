@@ -234,11 +234,14 @@ namespace RogueBasin
             //Give map to dungeon
             dungeon.AddMap(level1);
 
-            //Set PC start location
-            dungeon.Player.LocationMap = level1.PCStartLocation;
-
             //Setup PC
-            dungeon.Player.Representation = '@';
+            Player player = dungeon.Player;
+
+            player.Representation = '@';
+            player.LocationMap = level1.PCStartLocation;
+
+            player.Hitpoints = 100;
+            player.MaxHitpoints = 100;
 
             //Create creatures and start positions
             

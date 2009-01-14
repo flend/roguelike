@@ -19,6 +19,9 @@ namespace RogueBasin
         /// </summary>
         Point locationMap;
 
+        /// <summary>
+        /// ASCII character
+        /// </summary>
         char representation;
 
         /// <summary>
@@ -35,8 +38,34 @@ namespace RogueBasin
         /// How much the turn clock has to reach to process
         /// </summary>
         protected const int turnClockLimit = 1000;
-        
 
+        int hitpoints;
+
+        int maxHitpoints;
+
+        public int Hitpoints
+        {
+            get
+            {
+                return hitpoints;
+            }
+            set
+            {
+                hitpoints = value;
+            }
+        }
+
+        public int MaxHitpoints
+        {
+            get
+            {
+                return maxHitpoints;
+            }
+            set
+            {
+                maxHitpoints = value;
+            }
+        }
 
         public int LocationLevel
         {

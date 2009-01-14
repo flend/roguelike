@@ -24,6 +24,14 @@ namespace RogueBasin {
         Point msgDisplayTopLeft;
         int msgDisplayNumLines;
 
+        Point statsDisplayTopLeft;
+
+        Point hitpointsOffset;
+        Point maxHitpointsOffset;
+
+        /// <summary>
+        /// Mapping of terrain to ASCII characters
+        /// </summary>
         Dictionary<MapTerrain, char> terrainChars;
 
         //Keep enough state so that we can draw each screen
@@ -51,6 +59,11 @@ namespace RogueBasin {
 
             msgDisplayTopLeft = new Point(0, 1);
             msgDisplayNumLines = 1;
+
+            statsDisplayTopLeft = new Point(0, 31);
+
+            hitpointsOffset = new Point(6, 0);
+            maxHitpointsOffset = new Point(13, 0);
 
             terrainChars = new Dictionary<MapTerrain, char>();
             terrainChars.Add(MapTerrain.Empty, '.');
@@ -113,6 +126,21 @@ namespace RogueBasin {
             Point PClocation = player.LocationMap;
 
             rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, player.Representation);        
+
+            //Draw Stats
+            DrawStats(dungeon.Player);
+        }
+
+        private void DrawStats(Player player)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            string hitpointsString = "HP: " + player.Hitpoints.ToString();
+            string maxHitpointsString = "/" + player.MaxHitpoints.ToString();
+
+            rootConsole.PrintLine(hitpointsString, statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
+            rootConsole.PrintLine(maxHitpointsString, statsDisplayTopLeft.x + maxHitpointsOffset.x, statsDisplayTopLeft.y + maxHitpointsOffset.y, LineAlignment.Left);
         }
 
         private void DrawCreatures(List<Monster> creatureList)
