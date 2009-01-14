@@ -85,24 +85,24 @@ namespace RogueBasin
                     UpdateScreen();
 
                     //Deal with PCs turn as appropriate
-                    bool commandSuccess = false;
+                    bool timeAdvances = false;
                     do
                     {
-                        commandSuccess = UserInput();
-                    } while (!commandSuccess);
+                        timeAdvances = UserInput();
+                    } while (!timeAdvances);
 
                     UpdateScreen();
 
-                    Game.MessageQueue.AddMessage("Finished PC move");
+                    //Game.MessageQueue.AddMessage("Finished PC move");
                 }
             }
         }
 
         //Deal with user input
-        //Return code is if the command was successful. If not, don't increment time - not sure yet
+        //Return code is if the command was successful and time increments (i.e. the player has done a time-using command like moving)
         private bool UserInput()
         {
-            bool commandSuccess = false;
+            bool timeAdvances = false;
 
             KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
@@ -113,7 +113,7 @@ namespace RogueBasin
                 {
                     case 'x':
                         runMapLoop = false;
-                        commandSuccess = true;
+                        timeAdvances = true;
                         break;
                 }
             }
@@ -122,28 +122,27 @@ namespace RogueBasin
                 switch (userKey.KeyCode)
                 {
                     case KeyCode.TCODK_LEFT:
-                        commandSuccess = dungeon.PCMove(-1, 0);
+                        timeAdvances = dungeon.PCMove(-1, 0);
                         break;
                     case KeyCode.TCODK_RIGHT:
-                        commandSuccess = dungeon.PCMove(1, 0);
+                        timeAdvances = dungeon.PCMove(1, 0);
                         break;
                     case KeyCode.TCODK_UP:
-                        commandSuccess = dungeon.PCMove(0, -1);
+                        timeAdvances = dungeon.PCMove(0, -1);
                         break;
                     case KeyCode.TCODK_DOWN:
-                        commandSuccess = dungeon.PCMove(0, 1);
+                        timeAdvances = dungeon.PCMove(0, 1);
                         break;
                 }
             }
 
-            return commandSuccess;
+            return timeAdvances;
         }
 
         private void UpdateScreen()
         {
             //Draw screen 
             Screen.Instance.Draw();
-            
 
             //Message queue - requires keyboard to advance messages - not sure about this yet
             RunMessageQueue();
@@ -165,6 +164,8 @@ namespace RogueBasin
                 Screen.Instance.PrintMessage(messages[0]);
 
                 Game.MessageQueue.ClearList();
+
+                Screen.Instance.FlushConsole();
                 return;
             }
 
@@ -175,6 +176,7 @@ namespace RogueBasin
                 if (i != messages.Count - 1)
                 {
                     Screen.Instance.PrintMessage(messages[i] + " <more>");
+                    Screen.Instance.FlushConsole();
 
                     //Block for this keypress - may want to listen for exit too
                     KeyPress userKey;
@@ -234,6 +236,9 @@ namespace RogueBasin
 
             //Set PC start location
             dungeon.Player.LocationMap = level1.PCStartLocation;
+
+            //Setup PC
+            dungeon.Player.Representation = '@';
 
             //Create creatures and start positions
             

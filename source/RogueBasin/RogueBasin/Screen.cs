@@ -25,10 +25,11 @@ namespace RogueBasin {
         int msgDisplayNumLines;
 
         Dictionary<MapTerrain, char> terrainChars;
-        char PCChar;
 
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
+
+
 
         public static Screen Instance
         {
@@ -55,8 +56,6 @@ namespace RogueBasin {
             terrainChars.Add(MapTerrain.Empty, '.');
             terrainChars.Add(MapTerrain.Wall, '#');
             terrainChars.Add(MapTerrain.Corridor, '|');
-
-            PCChar = '@';
         }
 
         //Setup the screen
@@ -80,30 +79,40 @@ namespace RogueBasin {
 
         }
 
+        /// <summary>
+        /// Call after all drawing is complete to output onto screen
+        /// </summary>
+        public void FlushConsole()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.Flush();
+        }
+
         //Draw the current dungeon map and objects
         public void Draw()
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
             //Clear screen
             rootConsole.Clear();
 
-            DrawMap(Game.Dungeon.PCMap);
+            DrawMap(dungeon.PCMap);
 
             //Draw creatures
 
-            DrawCreatures(Game.Dungeon.Monsters);
+            DrawCreatures(dungeon.Monsters);
 
             //Draw PC
 
-            Point PClocation = Game.Dungeon.Player.LocationMap;
+            Point PClocation = player.LocationMap;
 
-            rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, PCChar);
-
-            //Flush the console
-            rootConsole.Flush();
-            
+            rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, player.Representation);        
         }
 
         private void DrawCreatures(List<Monster> creatureList)
@@ -166,8 +175,6 @@ namespace RogueBasin {
             lastMessage = null;
 
             ClearMessageBar();
-
-            rootConsole.Flush();
         }
 
         internal void PrintMessage(string message)
@@ -183,8 +190,6 @@ namespace RogueBasin {
 
             //Display new message
             rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, width - msgDisplayTopLeft.x, msgDisplayNumLines, LineAlignment.Left);
-
-            rootConsole.Flush();
         }
 
         void ClearMessageBar()
