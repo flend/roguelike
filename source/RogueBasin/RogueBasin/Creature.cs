@@ -23,19 +23,19 @@ namespace RogueBasin
         char representation;
 
         /// <summary>
-        /// Increment each game turn for the creature's internal clock. Turn at 1000
+        /// Increment each game turn for the creature's internal clock. Turn at turnClockLimit
         /// </summary>
-        int speed;
+        protected int speed = 10;
 
         /// <summary>
-        /// Speed added each game turn. When 1000 the creature takes a turn
+        /// Current turn clock value for the creature. When 1000 the creature takes a turn
         /// </summary>
-        int turnClock = 0;
+        protected int turnClock = 0;
 
         /// <summary>
         /// How much the turn clock has to reach to process
         /// </summary>
-        const int turnClockLimit = 1000;
+        protected const int turnClockLimit = 1000;
         
 
 
@@ -89,8 +89,9 @@ namespace RogueBasin
 
         /// <summary>
         /// Increment the internal turn timer. If sufficient, carry out a turn. Perhaps also deal with time-based effects?
+        /// Returns true if a turn was had
         /// </summary>
-        internal void IncrementTurnTime()
+        internal virtual bool IncrementTurnTime()
         {
             turnClock += speed;
 
@@ -99,10 +100,13 @@ namespace RogueBasin
                 turnClock -= turnClockLimit;
 
                 ProcessTurn();
+
+                return true;
             }
+            else return false;
         }
 
-        private void ProcessTurn()
+        public virtual void ProcessTurn()
         {
             //Right now we don't do anything
         }

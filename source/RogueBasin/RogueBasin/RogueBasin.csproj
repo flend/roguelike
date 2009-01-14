@@ -45,6 +45,7 @@
     <Compile Include="Map.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
     <Compile Include="MapGeneratorRogue.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />
     <Compile Include="Screen.cs" />

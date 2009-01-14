@@ -11,14 +11,16 @@ namespace RogueBasin
         List<Map> levels;
         List<Creature> creatures;
 
-        Point pcLocation;
+        Player player;
 
-        int pcLevel = 0;
+        long worldClock = 0;
 
         public Dungeon()
         {
             levels = new List<Map>();
             creatures = new List<Creature>();
+
+            player = new Player();
         }
 
         public void AddMap(Map mapToAdd)
@@ -82,11 +84,19 @@ namespace RogueBasin
             return true;
         }
 
+        /// <summary>
+        /// Increments the world clock. May in future check events
+        /// </summary>
+        public void IncrementWorldClock()
+        {
+            worldClock++;
+        }
+
         public int CurrentLevel
         {
             set
             {
-                pcLevel = value;
+                player.LocationLevel = value;
             }
         }
 
@@ -95,15 +105,7 @@ namespace RogueBasin
         {
             get
             {
-                return levels[pcLevel];
-            }
-        }
-
-        public int PCLevel
-        {
-            get
-            {
-                return pcLevel;
+                return levels[player.LocationLevel];
             }
         }
 
@@ -116,37 +118,31 @@ namespace RogueBasin
             }
         }
 
-        public Point PCLocation
-        {
+        public Player Player {
             get
             {
-                return pcLocation;
-            }
-            set
-            {
-                pcLocation = value;
+                return player;
             }
         }
 
-
         internal bool PCMove(int x, int y)
         {
-            Point newPCLocation = new Point(pcLocation.x + x, pcLocation.y + y);
+            Point newPCLocation = new Point(Player.LocationMap.x + x, Player.LocationMap.y + y);
 
-            if (newPCLocation.x < 0 || newPCLocation.x >= levels[PCLevel].width)
+            if (newPCLocation.x < 0 || newPCLocation.x >= levels[player.LocationLevel].width)
             {
                 return false;
             }
 
-            if (newPCLocation.y < 0 || newPCLocation.y >= levels[PCLevel].height)
+            if (newPCLocation.y < 0 || newPCLocation.y >= levels[player.LocationLevel].height)
             {
                 return false;
            }
 
             //OK to move into this space
-            if (MapSquareCanBeEntered(PCLevel, newPCLocation))
+            if (MapSquareCanBeEntered(player.LocationLevel, newPCLocation))
             {
-                PCLocation = newPCLocation;
+                player.LocationMap = newPCLocation;
                 return true;
             }
             else

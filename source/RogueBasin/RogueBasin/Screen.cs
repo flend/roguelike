@@ -80,7 +80,7 @@ namespace RogueBasin {
 
             //Draw PC
 
-            Point PClocation = dungeon.PCLocation;
+            Point PClocation = dungeon.Player.LocationMap;
 
             rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, PCChar);
 
@@ -97,7 +97,7 @@ namespace RogueBasin {
             foreach (Creature creature in creatureList)
             {
                 //Not on this level
-                if (creature.LocationLevel != dungeon.PCLevel)
+                if (creature.LocationLevel != dungeon.Player.LocationLevel)
                     continue;
 
                 rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);

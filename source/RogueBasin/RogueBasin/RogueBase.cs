@@ -57,6 +57,7 @@ namespace RogueBasin
             //Time
 
             //Increment world clock
+            dungeon.IncrementWorldClock();
 
             //Check PC
             //Take a turn if signalled by the internal clock
@@ -66,26 +67,28 @@ namespace RogueBasin
 
 
 
-            while(runMapLoop) {
+            while (runMapLoop)
+            {
 
                 //Add a time slice for the creature and process turn if applicable
                 foreach (Creature creature in dungeon.Creatures)
                 {
-                    
                     creature.IncrementTurnTime();
                 }
-                
 
-            //After each turn update screen - may not be required
-            UpdateScreen();
+                //Check if the PC gets a turn
+                if (dungeon.Player.IncrementTurnTime())
+                {
 
-            //Deal with PCs turn as appropriate
+                    //Update screen before and after PC's turn
+                    UpdateScreen();
 
-            UserInput();
+                    //Deal with PCs turn as appropriate
+                    UserInput();
 
-            //ProcessCommand()
+                    UpdateScreen();
+                }
             }
-
         }
 
         //Deal with user input
@@ -188,7 +191,7 @@ namespace RogueBasin
             dungeon.AddMap(level1);
 
             //Set PC start location
-            dungeon.PCLocation = level1.PCStartLocation;
+            dungeon.Player.LocationMap = level1.PCStartLocation;
 
             //Create creatures and start positions
             
