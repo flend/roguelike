@@ -57,7 +57,7 @@ namespace RogueBasin
             }
 
             //To debug console
-            RogueBase.screen.ConsoleLine(datedEntry);
+            Screen.Instance.ConsoleLine(datedEntry);
         }
 
         //Produce save dateTime string for filenames

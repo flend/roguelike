@@ -5,11 +5,10 @@ using System.Text;
 namespace RogueBasin
 {
     /// <summary>
-    /// Base class for Creatures. Types will be inherited off this.
+    /// Base class for Creatures.
     /// </summary>
     public class Creature
     {
-        
         /// <summary>
         /// Level the creature is on
         /// </summary>

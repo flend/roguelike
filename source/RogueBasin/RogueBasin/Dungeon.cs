@@ -9,7 +9,7 @@ namespace RogueBasin
     public class Dungeon
     {
         List<Map> levels;
-        List<Creature> creatures;
+        List<Monster> monsters;
 
         Player player;
 
@@ -18,7 +18,7 @@ namespace RogueBasin
         public Dungeon()
         {
             levels = new List<Map>();
-            creatures = new List<Creature>();
+            monsters = new List<Monster>();
 
             player = new Player();
         }
@@ -28,7 +28,7 @@ namespace RogueBasin
             levels.Add(mapToAdd);
         }
 
-        public bool AddCreature(Creature creature, int level, Point location)
+        public bool AddMonster(Monster creature, int level, Point location)
         {
             //Try to add a creature at the requested location
             //This may fail due to something else being there or being non-walkable
@@ -46,7 +46,7 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
-                creatures.Add(creature);
+                monsters.Add(creature);
                 return true;
             }
             catch (Exception ex)
@@ -72,7 +72,7 @@ namespace RogueBasin
             }
 
             //Check creatures that be blocking
-            foreach (Creature creature in creatures)
+            foreach (Creature creature in monsters)
             {
                 if (creature.LocationMap.x == location.x && creature.LocationMap.y == location.y)
                 {
@@ -110,11 +110,11 @@ namespace RogueBasin
         }
 
         //Get the list of creatures
-        public List<Creature> Creatures
+        public List<Monster> Monsters
         {
             get
             {
-                return creatures;
+                return monsters;
             }
         }
 

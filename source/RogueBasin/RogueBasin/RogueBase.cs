@@ -2,6 +2,7 @@
 
 using libtcodWrapper;
 using Console = System.Console;
+using System.Collections.Generic;
 
 namespace RogueBasin
 {
@@ -9,9 +10,6 @@ namespace RogueBasin
     {
         //Master object representing the game
         Dungeon dungeon;
-
-        //Master object for the console & screen
-        public static Screen screen;
 
         //Are we running or have we exited?
         bool runMapLoop = true;
@@ -71,22 +69,31 @@ namespace RogueBasin
             {
 
                 //Add a time slice for the creature and process turn if applicable
-                foreach (Creature creature in dungeon.Creatures)
+                foreach (Creature creature in dungeon.Monsters)
                 {
                     creature.IncrementTurnTime();
                 }
 
+                
+
                 //Check if the PC gets a turn
                 if (dungeon.Player.IncrementTurnTime())
                 {
+                    Game.MessageQueue.AddMessage("Finished creature move");
 
                     //Update screen before and after PC's turn
                     UpdateScreen();
 
                     //Deal with PCs turn as appropriate
-                    UserInput();
+                    bool commandSuccess = false;
+                    do
+                    {
+                        commandSuccess = UserInput();
+                    } while (!commandSuccess);
 
                     UpdateScreen();
+
+                    Game.MessageQueue.AddMessage("Finished PC move");
                 }
             }
         }
@@ -97,7 +104,7 @@ namespace RogueBasin
         {
             bool commandSuccess = false;
 
-            KeyPress userKey = Keyboard.CheckForKeypress(KeyPressType.Pressed);
+            KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
             if (userKey.KeyCode == KeyCode.TCODK_CHAR)
             {
@@ -106,6 +113,7 @@ namespace RogueBasin
                 {
                     case 'x':
                         runMapLoop = false;
+                        commandSuccess = true;
                         break;
                 }
             }
@@ -134,7 +142,7 @@ namespace RogueBasin
         private void UpdateScreen()
         {
             //Draw screen 
-            screen.Draw();
+            Screen.Instance.Draw();
             
 
             //Message queue - requires keyboard to advance messages - not sure about this yet
@@ -142,8 +150,43 @@ namespace RogueBasin
 
         }
 
+        /// <summary>
+        /// Run through the messages for the user and require a key press after each one
+        /// </summary>
         private void RunMessageQueue()
         {
+            List<string> messages = Game.MessageQueue.GetMessages();
+
+            Screen.Instance.ClearMessageLine();
+
+            if (messages.Count == 1)
+            {
+                //Single message just print it
+                Screen.Instance.PrintMessage(messages[0]);
+
+                Game.MessageQueue.ClearList();
+                return;
+            }
+
+            //Otherwise require a space bar press between each
+            //TODO: Wrap messages
+            for (int i = 0; i < messages.Count; i++)
+            {
+                if (i != messages.Count - 1)
+                {
+                    Screen.Instance.PrintMessage(messages[i] + " <more>");
+
+                    //Block for this keypress - may want to listen for exit too
+                    KeyPress userKey;
+                    userKey = Keyboard.WaitForKeyPress(true);
+                }
+                else
+                {
+                    Screen.Instance.PrintMessage(messages[i]);
+                }
+            }
+            
+            Game.MessageQueue.ClearList();
 
         }
 
@@ -152,8 +195,7 @@ namespace RogueBasin
             //Initial setup
 
             //Setup screen
-            screen = new Screen();
-            screen.InitialSetup();
+            Screen.Instance.InitialSetup();
 
             //Setup logfile
             try
@@ -162,15 +204,15 @@ namespace RogueBasin
             }
             catch (Exception e)
             {
-                screen.ConsoleLine("Error creating log file: " + e.Message);
+                Screen.Instance.ConsoleLine("Error creating log file: " + e.Message);
             }
                 
+            //Setup message queue
+            Game.MessageQueue = new MessageQueue();
 
-            //Create dungeon
+            //Create dungeon and set it as current in Game
             dungeon = new Dungeon();
-
-            //Tell screen about dungeon
-            screen.Dungeon = dungeon; //don't really like this
+            Game.Dungeon = dungeon;
 
             //Create dungeon map (at least level 1)
             MapGeneratorBSP mapGen = new MapGeneratorBSP();
@@ -202,7 +244,7 @@ namespace RogueBasin
 
             for (int i = 0; i < noCreatures; i++)
             {
-                Creature creature = new Creature();
+                Monster creature = new Monster();
                 creature.Representation = Convert.ToChar(65 + rand.Next(26));
 
                 int level = 0;
@@ -213,7 +255,7 @@ namespace RogueBasin
                 {
                     location = mapGen.RandomPointInRoom();
                 }
-                while (!dungeon.AddCreature(creature, level, location));
+                while (!dungeon.AddMonster(creature, level, location));
             }
 
 

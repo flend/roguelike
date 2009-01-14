@@ -6,27 +6,50 @@ using Console = System.Console;
 
 namespace RogueBasin {
 
-    //Represents our screen - could be a singleton
+    //Represents our screen
     public class Screen
     {
+        static Screen instance = null;
+
         //Console/screen size
         int width;
         int height;
 
-        Dungeon dungeon;
-
         //Top left coord to start drawing the map at
         Point mapTopLeft;
 
+        /// <summary>
+        /// Dimensions of message display area
+        /// </summary>
+        Point msgDisplayTopLeft;
+        int msgDisplayNumLines;
+
         Dictionary<MapTerrain, char> terrainChars;
         char PCChar;
-        
-        public Screen()
+
+        //Keep enough state so that we can draw each screen
+        string lastMessage = "";
+
+        public static Screen Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new Screen();
+                return instance;
+            }
+        }
+
+
+        Screen()
         {
             width = 200;
             height = 80;
 
             mapTopLeft = new Point(5, 5);
+
+            msgDisplayTopLeft = new Point(0, 1);
+            msgDisplayNumLines = 1;
 
             terrainChars = new Dictionary<MapTerrain, char>();
             terrainChars.Add(MapTerrain.Empty, '.');
@@ -36,17 +59,11 @@ namespace RogueBasin {
             PCChar = '@';
         }
 
-        public Dungeon Dungeon
-        {
-            set
-            {
-                dungeon = value;
-            }
-        }
-
         //Setup the screen
         public void InitialSetup()
         {
+            //Note that 
+
             //CustomFontRequest fontReq = new CustomFontRequest("terminal.png", 8, 8, CustomFontRequestFontTypes.Grayscale);
             RootConsole.Width = width;
             RootConsole.Height = height;
@@ -72,15 +89,15 @@ namespace RogueBasin {
             //Clear screen
             rootConsole.Clear();
 
-            DrawMap(dungeon.PCMap);
+            DrawMap(Game.Dungeon.PCMap);
 
             //Draw creatures
 
-            DrawCreatures(dungeon.Creatures);
+            DrawCreatures(Game.Dungeon.Monsters);
 
             //Draw PC
 
-            Point PClocation = dungeon.Player.LocationMap;
+            Point PClocation = Game.Dungeon.Player.LocationMap;
 
             rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, PCChar);
 
@@ -89,7 +106,7 @@ namespace RogueBasin {
             
         }
 
-        private void DrawCreatures(List<Creature> creatureList)
+        private void DrawCreatures(List<Monster> creatureList)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
@@ -97,7 +114,7 @@ namespace RogueBasin {
             foreach (Creature creature in creatureList)
             {
                 //Not on this level
-                if (creature.LocationLevel != dungeon.Player.LocationLevel)
+                if (creature.LocationLevel != Game.Dungeon.Player.LocationLevel)
                     continue;
 
                 rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
@@ -140,5 +157,43 @@ namespace RogueBasin {
         {
             Console.WriteLine(datedEntry);
         }
+
+        internal void ClearMessageLine()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            lastMessage = null;
+
+            ClearMessageBar();
+
+            rootConsole.Flush();
+        }
+
+        internal void PrintMessage(string message)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Update state
+            lastMessage = message;
+
+            //Clear message bar
+            ClearMessageBar();
+
+            //Display new message
+            rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, width - msgDisplayTopLeft.x, msgDisplayNumLines, LineAlignment.Left);
+
+            rootConsole.Flush();
+        }
+
+        void ClearMessageBar()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, width - msgDisplayTopLeft.x, msgDisplayNumLines, true);
+        }
+
     }
 }
