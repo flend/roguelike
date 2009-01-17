@@ -314,7 +314,7 @@ namespace RogueBasin
 
             for (int i = 0; i < noFeatures; i++)
             {
-                Feature feature = new Feature();
+                Features.StaircaseUp feature = new Features.StaircaseUp();
 
                 feature.Representation = Convert.ToChar(58 + rand.Next(6));
 
@@ -337,7 +337,7 @@ namespace RogueBasin
 
             for (int i = 0; i < noItems; i++)
             {
-                Item item = new Item();
+                Items.Potion item = new Items.Potion();
 
                 item.Representation = Convert.ToChar(33 + rand.Next(12));
 

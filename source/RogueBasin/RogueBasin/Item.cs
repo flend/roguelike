@@ -7,7 +7,7 @@ namespace RogueBasin
     /// <summary>
     /// Base class for all types of pickup-able items
     /// </summary>
-    public class Item
+    public abstract class Item
     {
         public Item() {
             inInventory = false;
@@ -81,7 +81,6 @@ namespace RogueBasin
             {
                 return inInventory;
             }
-
         }
     }
 }
