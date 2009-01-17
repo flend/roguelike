@@ -678,10 +678,28 @@ namespace RogueBasin
             //Draw connecting corridors
             rootNode.DrawCorridorConnectingChildren(baseMap);
 
+            //Set which squares are light blocking
+            SetLightBlocking(baseMap);
+
             //Set the PC start location in a random room
             baseMap.PCStartLocation = rootNode.RandomRoomPoint();
 
             return baseMap;
+        }
+
+        private void SetLightBlocking(Map baseMap)
+        {
+            foreach (MapSquare square in baseMap.mapSquares)
+            {
+                if (square.Terrain == MapTerrain.Empty)
+                {
+                    square.BlocksLight = false;
+                }
+                else
+                {
+                    square.BlocksLight = true;
+                }
+            }
         }
 
         public Point RandomPointInRoom()

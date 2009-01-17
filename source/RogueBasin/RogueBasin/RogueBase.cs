@@ -77,6 +77,7 @@ namespace RogueBasin
                         if (creature.Alive)
                         {
                             creature.ProcessTurn();
+                            RecalculateMapAfterMove();
                         }
                     }
                 }
@@ -97,11 +98,22 @@ namespace RogueBasin
                         timeAdvances = UserInput();
                     } while (!timeAdvances);
 
+                    RecalculateMapAfterMove();
+
                     //UpdateScreen();
 
                     //Game.MessageQueue.AddMessage("Finished PC move");
                 }
             }
+        }
+
+        /// <summary>
+        /// After each move, recalculate the walkable parameter on each map square.
+        /// This could be optimised a lot (far better to set creature's previous location as empty and new location as full)
+        /// </summary>
+        private void RecalculateMapAfterMove()
+        {
+            Game.Dungeon.RecalculateWalkable();
         }
 
         //Deal with user input

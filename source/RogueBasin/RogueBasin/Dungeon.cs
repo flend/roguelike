@@ -377,5 +377,52 @@ namespace RogueBasin
                 monsters.Remove(monster);
             }
         }
+
+        /// <summary>
+        /// Check and set the walkable parameter on each map square
+        /// At the moment done for all levels
+        /// </summary>
+        internal void RecalculateWalkable()
+        {
+            //Terrain
+
+            for (int i = 0; i < levels.Count; i++)
+            {
+                {
+                    Map level = levels[i];
+
+                    for (int j = 0; j < level.width; j++)
+                    {
+                        for (int k = 0; k < level.height; k++)
+                        {
+
+                            //Terrain
+
+                            bool walkable = true;
+
+                            //Walls
+                            if (level.mapSquares[j, k].Terrain == MapTerrain.Wall)
+                            {
+                                walkable = false;
+                            }
+
+                            //Void
+                            if (level.mapSquares[j, k].Terrain == MapTerrain.Void)
+                            {
+                                walkable = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Creatures
+            
+            //Set each monster's square to non-walkable
+            foreach (Monster monster in monsters)
+            {
+                levels[monster.LocationLevel].mapSquares[monster.LocationMap.x, monster.LocationMap.y].Walkable = false;
+            }
+        }
     }
 }
