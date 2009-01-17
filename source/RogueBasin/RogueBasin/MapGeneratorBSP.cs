@@ -281,12 +281,12 @@ namespace RogueBasin
             }
 
             //Inside
-            //Need to set as walkable and non-light blocking
+            //Set as empty
             for (int i = roomX + 1; i < rx; i++)
             {
                 for (int j = roomY + 1; j < by; j++)
                 {
-                    baseMap.mapSquares[i, j].SetOpen();
+                    baseMap.mapSquares[i, j].Terrain = MapTerrain.Empty;
                 }
             }
         }
@@ -454,7 +454,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
-                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Void)
                         {
                             notValidPath = true;
                             break;
@@ -617,7 +617,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
-                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Void)
                         {
                             notValidPath = true;
                             break;

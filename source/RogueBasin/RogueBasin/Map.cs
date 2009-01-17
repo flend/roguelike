@@ -16,15 +16,24 @@ namespace RogueBasin
     
     public enum MapTerrain
     {
-        Empty = 0,
-        Wall = 1,
-        Corridor = 2
+        Void,    //non-walkable
+        Empty,   //walkable
+        Wall,    //non-walkable
+        Corridor //walkable
     }
 
     public class MapSquare
     {
         MapTerrain terrain = MapTerrain.Empty;
+        
+        /// <summary>
+        /// Is the square walkable. This is recalculated based on creature positions etc. each turn
+        /// </summary>
         bool walkable = false;
+
+        /// <summary>
+        /// Does the square block light. Shouldn't change after the map is made
+        /// </summary>
         bool blocksLight = true;
 
         public MapTerrain Terrain
@@ -43,6 +52,9 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Is the square walkable. This is recalculated based on creature positions etc. each turn
+        /// </summary>
         public bool Walkable
         {
             get
@@ -55,6 +67,9 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Does the square block light. Shouldn't change after the map is made
+        /// </summary>
         public bool BlocksLight
         {
             get
@@ -95,6 +110,8 @@ namespace RogueBasin
                     mapSquares[i, j] = new MapSquare();
                 }
             }
+
+            Clear();
         }
 
         public void Clear()
@@ -103,7 +120,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < height; j++)
                 {
-                    mapSquares[i, j].Terrain = MapTerrain.Empty;
+                    mapSquares[i, j].Terrain = MapTerrain.Void;
                 }
             }
         }

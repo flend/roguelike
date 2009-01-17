@@ -226,8 +226,8 @@ namespace RogueBasin
                 return false;
             }
 
-            //Not Walkable
-            if (!levels[level].mapSquares[location.x, location.y].Walkable)
+            //Void (outside of map)
+            if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Void)
             {
                 return false;
             }

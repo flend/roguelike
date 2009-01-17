@@ -69,6 +69,7 @@ namespace RogueBasin {
             terrainChars.Add(MapTerrain.Empty, '.');
             terrainChars.Add(MapTerrain.Wall, '#');
             terrainChars.Add(MapTerrain.Corridor, '|');
+            terrainChars.Add(MapTerrain.Void, ' ');
         }
 
         //Setup the screen
