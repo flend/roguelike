@@ -117,6 +117,10 @@ namespace RogueBasin {
 
             DrawMap(dungeon.PCMap);
 
+            //Draw items
+
+            DrawItems(dungeon.Items);
+
             //Draw creatures
 
             DrawCreatures(dungeon.Monsters);
@@ -143,12 +147,34 @@ namespace RogueBasin {
             rootConsole.PrintLine(maxHitpointsString, statsDisplayTopLeft.x + maxHitpointsOffset.x, statsDisplayTopLeft.y + maxHitpointsOffset.y, LineAlignment.Left);
         }
 
+        private void DrawItems(List<Item> itemList)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Could consider storing here and sorting to give an accurate representation of multiple objects
+
+            foreach (Item item in itemList)
+            {
+                //Don't draw items on creatures
+                if (item.InInventory)
+                    continue;
+
+                //Don't draw items on other levels
+                if (item.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                    continue;
+
+                rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
+            }
+
+        }
+
         private void DrawCreatures(List<Monster> creatureList)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
-            foreach (Creature creature in creatureList)
+            foreach (Monster creature in creatureList)
             {
                 //Not on this level
                 if (creature.LocationLevel != Game.Dungeon.Player.LocationLevel)

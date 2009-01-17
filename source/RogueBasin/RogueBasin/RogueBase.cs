@@ -304,8 +304,29 @@ namespace RogueBasin
 
             //Create objects and start positions
 
-            //Set PC start position
+            //Add some random objects
 
+            int noItems = rand.Next(10) + 5;
+
+            for (int i = 0; i < noItems; i++)
+            {
+                Item item = new Item();
+
+                item.Representation = Convert.ToChar(58 + rand.Next(6));
+
+                int level = 0;
+                Point location;
+
+                //Loop until we find an acceptable location and the add works
+                do
+                {
+                    location = mapGen.RandomPointInRoom();
+                }
+                while (!dungeon.AddItem(item, level, location));
+
+                //Set PC start position
+
+            }
 
             
         }

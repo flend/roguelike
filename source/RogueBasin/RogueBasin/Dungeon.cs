@@ -88,6 +88,42 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Add an item to the dungeon. May fail if location is invalid or unwalkable
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool AddItem(Item item, int level, Point location)
+        {
+            //Try to add a creature at the requested location
+            //This may fail due to something else being there or being non-walkable
+            try
+            {
+                Map creatureLevel = levels[level];
+
+                //Check square is accessable
+                if (!MapSquareCanBeEntered(level, location))
+                {
+                    return false;
+                }
+
+                //Otherwise OK
+                item.LocationLevel = level;
+                item.LocationMap = location;
+
+                items.Add(item);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry(String.Format("AddItem: ") + ex.Message);
+                return false;
+            }
+
+        }
+
+        /// <summary>
         /// Does the square contain a player or creature?
         /// </summary>
         /// <param name="level"></param>
@@ -185,6 +221,17 @@ namespace RogueBasin
             get
             {
                 return monsters;
+            }
+        }
+
+        /// <summary>
+        /// List of all the items in the game
+        /// </summary>
+        public List<Item> Items
+        {
+            get
+            {
+                return items;
             }
         }
 
