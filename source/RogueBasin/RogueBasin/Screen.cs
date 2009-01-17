@@ -52,8 +52,8 @@ namespace RogueBasin {
 
         Screen()
         {
-            width = 200;
-            height = 80;
+            width = 90;
+            height = 35;
 
             mapTopLeft = new Point(5, 5);
 

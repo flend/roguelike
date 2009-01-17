@@ -207,17 +207,41 @@ namespace RogueBasin
                 return false;
            }
 
-            //OK to move into this space
-            if (MapSquareCanBeEntered(player.LocationLevel, newPCLocation))
+            //If this is not a valid square, return false
+           
+            if (!MapSquareCanBeEntered(player.LocationLevel, newPCLocation))
             {
-                player.LocationMap = newPCLocation;
-                return true;
-            }
-            else
-            {
-                //Don't move PC and return false;
                 return false;
             }
+
+            //Check for monsters in the square
+            SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
+            bool okToMoveIntoSquare = false;
+
+            //If it's empty, it's OK
+            if (contents.empty)
+            {
+                okToMoveIntoSquare = true;
+            }
+            
+            //Monster - attack it
+            if (contents.monster != null)
+            {
+                CombatResults results = player.AttackMonster(contents.monster);
+                if (results == CombatResults.DefenderDied)
+                {
+                    okToMoveIntoSquare = true;
+                }
+            }
+            
+            player.LocationMap = newPCLocation;
+            return true;
+        }
+
+        //Remove the monster from the list of creatures. It won't get processed or drawn next turn
+        internal void KillMonster(Monster monster)
+        {
+            monsters.Remove(monster);
         }
     }
 }

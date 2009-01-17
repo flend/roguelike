@@ -57,5 +57,18 @@ namespace RogueBasin
             }
             return false;
         }
+
+        public CombatResults AttackMonster(Monster monster)
+        {
+            //The monster always dies
+            Game.Dungeon.KillMonster(monster);
+
+            string msg = monster.Representation + " was killed!";
+            Game.MessageQueue.AddMessage(msg);
+            LogFile.Log.LogEntry(msg);
+
+            return CombatResults.DefenderDied;
+
+        }
     }
 }

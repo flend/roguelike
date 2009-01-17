@@ -82,8 +82,6 @@ namespace RogueBasin
                 //Check if the PC gets a turn
                 if (dungeon.Player.IncrementTurnTime())
                 {
-                    Game.MessageQueue.AddMessage("Finished creature move");
-
                     //Update screen before and after PC's turn
                     UpdateScreen();
 
@@ -94,7 +92,7 @@ namespace RogueBasin
                         timeAdvances = UserInput();
                     } while (!timeAdvances);
 
-                    UpdateScreen();
+                    //UpdateScreen();
 
                     //Game.MessageQueue.AddMessage("Finished PC move");
                 }
@@ -118,21 +116,49 @@ namespace RogueBasin
                         runMapLoop = false;
                         timeAdvances = true;
                         break;
+                    case '.':
+                        // Do nothing
+                        timeAdvances = true;
+                        break;
                 }
             }
             else
             {
                 switch (userKey.KeyCode)
                 {
+                    case KeyCode.TCODK_KP1:
+                        timeAdvances = dungeon.PCMove(-1, 1);
+                        break;
+
+                    case KeyCode.TCODK_KP3:
+                        timeAdvances = dungeon.PCMove(1, 1);
+                        break;
+
+                    case KeyCode.TCODK_KP5:
+                        //Don't move
+                        timeAdvances = true;
+                        break;
+
+                    case KeyCode.TCODK_KP7:
+                        timeAdvances = dungeon.PCMove(-1, -1);
+                        break;
+                    case KeyCode.TCODK_KP9:
+                        timeAdvances = dungeon.PCMove(1, -1);
+                        break;
+
                     case KeyCode.TCODK_LEFT:
+                    case KeyCode.TCODK_KP4:
                         timeAdvances = dungeon.PCMove(-1, 0);
                         break;
                     case KeyCode.TCODK_RIGHT:
+                    case KeyCode.TCODK_KP6:
                         timeAdvances = dungeon.PCMove(1, 0);
                         break;
                     case KeyCode.TCODK_UP:
+                    case KeyCode.TCODK_KP8:
                         timeAdvances = dungeon.PCMove(0, -1);
                         break;
+                    case KeyCode.TCODK_KP2:
                     case KeyCode.TCODK_DOWN:
                         timeAdvances = dungeon.PCMove(0, 1);
                         break;
@@ -160,6 +186,12 @@ namespace RogueBasin
             List<string> messages = Game.MessageQueue.GetMessages();
 
             Screen.Instance.ClearMessageLine();
+
+            if (messages.Count == 0)
+            {
+                Screen.Instance.FlushConsole();
+                return;
+            }
 
             if (messages.Count == 1)
             {
