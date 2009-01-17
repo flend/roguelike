@@ -85,9 +85,17 @@ namespace RogueBasin
 
         public override CombatResults AttackMonster(Monster monster)
         {
-            LogFile.Log.LogEntry(this.Representation + " attacked " + monster.Representation);
+            string msg = this.Representation + " attacked " + monster.Representation;
+            LogFile.Log.LogEntry(msg);
 
-            return CombatResults.NeitherDied;
+            //Defender always dies
+            Game.Dungeon.KillMonster(monster);
+
+            msg = this.Representation + " killed " + monster.Representation + " !";
+            LogFile.Log.LogEntry(msg);
+            Game.MessageQueue.AddMessage(msg);
+
+            return CombatResults.DefenderDied;
         }
     }
 }

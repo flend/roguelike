@@ -69,15 +69,20 @@ namespace RogueBasin
             {
 
                 //Add a time slice for the creature and process turn if applicable
+                //Creatures may be killed by other creatures so check they are alive before processing
                 foreach (Monster creature in dungeon.Monsters)
                 {
                     if (creature.IncrementTurnTime())
                     {
-                        creature.ProcessTurn();
+                        if (creature.Alive)
+                        {
+                            creature.ProcessTurn();
+                        }
                     }
                 }
 
-                
+                //Remove dead monsters
+                dungeon.RemoveDeadMonsters();
 
                 //Check if the PC gets a turn
                 if (dungeon.Player.IncrementTurnTime())
@@ -301,6 +306,28 @@ namespace RogueBasin
                 while (!dungeon.AddMonster(creature, level, location));
             }
 
+            //Create features
+
+            //Add some random features
+
+            int noFeatures = rand.Next(5) + 2;
+
+            for (int i = 0; i < noFeatures; i++)
+            {
+                Feature feature = new Feature();
+
+                feature.Representation = Convert.ToChar(58 + rand.Next(6));
+
+                int level = 0;
+                Point location;
+
+                //Loop until we find an acceptable location and the add works
+                do
+                {
+                    location = mapGen.RandomPointInRoom();
+                }
+                while (!dungeon.AddFeature(feature, level, location));
+            }
 
             //Create objects and start positions
 
@@ -312,7 +339,7 @@ namespace RogueBasin
             {
                 Item item = new Item();
 
-                item.Representation = Convert.ToChar(58 + rand.Next(6));
+                item.Representation = Convert.ToChar(33 + rand.Next(12));
 
                 int level = 0;
                 Point location;
@@ -323,9 +350,6 @@ namespace RogueBasin
                     location = mapGen.RandomPointInRoom();
                 }
                 while (!dungeon.AddItem(item, level, location));
-
-                //Set PC start position
-
             }
 
             

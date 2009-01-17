@@ -39,6 +39,7 @@ namespace RogueBasin
         List<Map> levels;
         List<Monster> monsters;
         List<Item> items;
+        List<Feature> features;
 
         Player player;
 
@@ -49,6 +50,7 @@ namespace RogueBasin
             levels = new List<Map>();
             monsters = new List<Monster>();
             items = new List<Item>();
+            features = new List<Feature>();
 
             player = new Player();
         }
@@ -66,11 +68,20 @@ namespace RogueBasin
             {
                 Map creatureLevel = levels[level];
                 
-                //Check nothing else is there
+                //Check square is accessable
                 if (!MapSquareCanBeEntered(level, location))
                 {
                     return false;
                 }
+
+                //Check square has nothing else on it
+                SquareContents contents = MapSquareContents(level, location);
+
+                if (contents.monster != null)
+                    return false;
+
+                if (contents.player != null)
+                    return false;
 
                 //Otherwise OK
                 creature.LocationLevel = level;
@@ -96,8 +107,8 @@ namespace RogueBasin
         /// <returns></returns>
         public bool AddItem(Item item, int level, Point location)
         {
-            //Try to add a creature at the requested location
-            //This may fail due to something else being there or being non-walkable
+            //Try to add a item at the requested location
+            //This may fail due to the square being inaccessable
             try
             {
                 Map creatureLevel = levels[level];
@@ -113,6 +124,41 @@ namespace RogueBasin
                 item.LocationMap = location;
 
                 items.Add(item);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry(String.Format("AddItem: ") + ex.Message);
+                return false;
+            }
+
+        }
+        /// <summary>
+        /// Add feature to the dungeon
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool AddFeature(Feature feature, int level, Point location)
+        {
+            //Try to add a creature at the requested location
+            //This may fail due to something else being there or being non-walkable
+            try
+            {
+                Map creatureLevel = levels[level];
+
+                //Check square is accessable
+                if (!MapSquareCanBeEntered(level, location))
+                {
+                    return false;
+                }
+
+                //Otherwise OK
+                feature.LocationLevel = level;
+                feature.LocationMap = location;
+
+                features.Add(feature);
                 return true;
             }
             catch (Exception ex)
@@ -235,6 +281,18 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// List of all the features in the game
+        /// </summary>
+        public List<Feature> Features
+        {
+            get
+            {
+                return features;
+            }
+        }
+
+
         public Player Player {
             get
             {
@@ -288,10 +346,36 @@ namespace RogueBasin
             return true;
         }
 
-        //Remove the monster from the list of creatures. It won't get processed or drawn next turn
-        internal void KillMonster(Monster monster)
+        /// <summary>
+        /// Kill a monster. This monster won't get any further turns.
+        /// </summary>
+        /// <param name="monster"></param>
+        public void KillMonster(Monster monster)
         {
-            monsters.Remove(monster);
+            //We can't take the monster out of the collection directly since we might still be iterating through them
+            //Instead set a flag on the monster and remove it after all turns are complete
+            monster.Alive = false;
+        }
+
+        /// <summary>
+        /// Remove all dead creatures from the list so they are not processed again
+        /// </summary>
+        public void RemoveDeadMonsters()
+        {
+            List<Monster> deadMonsters = new List<Monster>();
+
+            foreach (Monster monster in monsters)
+            {
+                if (monster.Alive == false)
+                {
+                    deadMonsters.Add(monster);
+                }
+            }
+
+            foreach (Monster monster in deadMonsters)
+            {
+                monsters.Remove(monster);
+            }
         }
     }
 }

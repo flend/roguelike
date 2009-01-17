@@ -42,6 +42,7 @@
     <Compile Include="Creature.cs" />
     <Compile Include="Creatures\Rat.cs" />
     <Compile Include="Dungeon.cs" />
+    <Compile Include="Feature.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="ITurnAI.cs" />
@@ -69,5 +70,9 @@
       <Project>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</Project>
       <Name>libtcodWrapper</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Features\" />
+    <Folder Include="Items\" />
   </ItemGroup>
 </Project>

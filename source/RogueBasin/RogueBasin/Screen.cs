@@ -117,6 +117,9 @@ namespace RogueBasin {
 
             DrawMap(dungeon.PCMap);
 
+            //Draw fixed features
+            DrawFeatures(dungeon.Features);
+
             //Draw items
 
             DrawItems(dungeon.Items);
@@ -165,6 +168,24 @@ namespace RogueBasin {
                     continue;
 
                 rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
+            }
+
+        }
+
+        private void DrawFeatures(List<Feature> featureList)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Could consider storing here and sorting to give an accurate representation of multiple objects
+
+            foreach (Feature feature in featureList)
+            {
+                //Don't draw features on other levels
+                if (feature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                    continue;
+
+                rootConsole.PutChar(mapTopLeft.x + feature.LocationMap.x, mapTopLeft.y + feature.LocationMap.y, feature.Representation);
             }
 
         }

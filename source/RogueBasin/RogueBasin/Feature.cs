@@ -5,13 +5,10 @@ using System.Text;
 namespace RogueBasin
 {
     /// <summary>
-    /// Base class for all types of pickup-able items
+    /// Non-pickupable objects in the dungeon
     /// </summary>
-    public class Item
+    public class Feature
     {
-        public Item() {
-            inInventory = false;
-        }
 
         /// <summary>
         /// ASCII character
@@ -19,31 +16,14 @@ namespace RogueBasin
         char representation;
 
         /// <summary>
-        /// Level the creature is on
+        /// Level the item is on
         /// </summary>
         int locationLevel;
 
         /// <summary>
-        /// Point on the map on this level that the creature is on
+        /// Point on the map on this level that the item is on
         /// </summary>
         Point locationMap;
-
-        /// <summary>
-        /// Is this in a creature's inventory
-        /// </summary>
-        bool inInventory;
-
-        public char Representation
-        {
-            get
-            {
-                return representation;
-            }
-            set
-            {
-                representation = value;
-            }
-        }
 
         /// <summary>
         /// Level the item is on
@@ -75,12 +55,20 @@ namespace RogueBasin
             }
         }
 
-        public bool InInventory
+        public char Representation
         {
             get
             {
-                return inInventory;
+                return representation;
             }
+            set
+            {
+                representation = value;
+            }
+        }
+
+        public Feature()
+        {
 
         }
     }

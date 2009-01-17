@@ -25,6 +25,11 @@ namespace RogueBasin
         char representation;
 
         /// <summary>
+        /// Is the creature still alive?
+        /// </summary>
+        bool alive;
+
+        /// <summary>
         /// Increment each game turn for the creature's internal clock. Turn at turnClockLimit
         /// </summary>
         protected int speed = 10;
@@ -85,6 +90,26 @@ namespace RogueBasin
             {
                 speed = value;
             }
+        }
+
+        /// <summary>
+        /// Set to false to kill the creature
+        /// </summary>
+        public bool Alive
+        {
+            get
+            {
+                return alive;
+            }
+            set
+            {
+                alive = value;
+            }
+        }
+
+        public Creature()
+        {
+            alive = true;
         }
 
         /// <summary>
