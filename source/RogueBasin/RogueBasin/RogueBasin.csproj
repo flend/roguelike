@@ -43,6 +43,7 @@
     <Compile Include="Creatures\Rat.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="Item.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />

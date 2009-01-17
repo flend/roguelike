@@ -38,6 +38,7 @@ namespace RogueBasin
     {
         List<Map> levels;
         List<Monster> monsters;
+        List<Item> items;
 
         Player player;
 
@@ -47,6 +48,7 @@ namespace RogueBasin
         {
             levels = new List<Map>();
             monsters = new List<Monster>();
+            items = new List<Item>();
 
             player = new Player();
         }
@@ -234,7 +236,8 @@ namespace RogueBasin
                 }
             }
             
-            player.LocationMap = newPCLocation;
+            if(okToMoveIntoSquare)
+                player.LocationMap = newPCLocation;
             return true;
         }
 
