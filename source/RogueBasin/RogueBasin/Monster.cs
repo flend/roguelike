@@ -5,6 +5,14 @@ using System.Text;
 namespace RogueBasin
 {
     /// <summary>
+    /// What happened during a combat
+    /// </summary>
+    public enum CombatResults
+    {
+        AttackerDied, DefenderDied, BothDied, NeitherDied
+    }
+
+    /// <summary>
     /// Simplest class for a Monster.
     /// Subclasses will have things like better AI.
     /// Real monsters will inherit off whichever subclass they like
@@ -65,6 +73,10 @@ namespace RogueBasin
         {
             //Base monster classes just sit still
         }
+
+        public abstract CombatResults AttackPlayer(Player player);
+
+        public abstract CombatResults AttackMonster(Monster monster);
 
     }
 }
