@@ -7,7 +7,7 @@ namespace RogueBasin
     /// <summary>
     /// Base class for Creatures.
     /// </summary>
-    public class Creature
+    public abstract class Creature
     {
         /// <summary>
         /// Level the creature is on
@@ -38,34 +38,6 @@ namespace RogueBasin
         /// How much the turn clock has to reach to process
         /// </summary>
         protected const int turnClockLimit = 1000;
-
-        int hitpoints;
-
-        int maxHitpoints;
-
-        public int Hitpoints
-        {
-            get
-            {
-                return hitpoints;
-            }
-            set
-            {
-                hitpoints = value;
-            }
-        }
-
-        public int MaxHitpoints
-        {
-            get
-            {
-                return maxHitpoints;
-            }
-            set
-            {
-                maxHitpoints = value;
-            }
-        }
 
         public int LocationLevel
         {
@@ -116,8 +88,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Increment the internal turn timer. If sufficient, carry out a turn. Perhaps also deal with time-based effects?
-        /// Returns true if a turn was had
+        /// Increment the internal turn timer and resets if over boundary. Return true if a turn should be had.
         /// </summary>
         internal virtual bool IncrementTurnTime()
         {
@@ -127,16 +98,9 @@ namespace RogueBasin
             {
                 turnClock -= turnClockLimit;
 
-                ProcessTurn();
-
                 return true;
             }
             else return false;
-        }
-
-        public virtual void ProcessTurn()
-        {
-            //Right now we don't do anything
         }
     }
 }

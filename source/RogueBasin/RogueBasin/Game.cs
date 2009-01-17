@@ -8,10 +8,11 @@ namespace RogueBasin
     {
         static Dungeon dungeon = null;
         static MessageQueue messages = null;
+        static Random rand;
 
         static Game()
         {
-
+            rand = new Random();
         }
         /// <summary>
         /// Access to the current dungeon
@@ -47,5 +48,12 @@ namespace RogueBasin
             }
         }
 
+        public static Random Random
+        {
+            get
+            {
+                return rand;
+            }
+        }
     }
 }

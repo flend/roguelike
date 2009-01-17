@@ -10,6 +10,41 @@ namespace RogueBasin
         {
 
         }
+
+        /// <summary>
+        /// Current hitpoints
+        /// </summary>
+        int hitpoints;
+
+        /// <summary>
+        /// Maximum hitpoints
+        /// </summary>
+        int maxHitpoints;
+
+        public int Hitpoints
+        {
+            get
+            {
+                return hitpoints;
+            }
+            set
+            {
+                hitpoints = value;
+            }
+        }
+
+        public int MaxHitpoints
+        {
+            get
+            {
+                return maxHitpoints;
+            }
+            set
+            {
+                maxHitpoints = value;
+            }
+        }
+
         /// <summary>
         /// Will we have a turn if we IncrementTurnTime()
         /// </summary>

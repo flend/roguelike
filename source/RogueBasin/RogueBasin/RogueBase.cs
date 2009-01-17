@@ -69,9 +69,12 @@ namespace RogueBasin
             {
 
                 //Add a time slice for the creature and process turn if applicable
-                foreach (Creature creature in dungeon.Monsters)
+                foreach (Monster creature in dungeon.Monsters)
                 {
-                    creature.IncrementTurnTime();
+                    if (creature.IncrementTurnTime())
+                    {
+                        creature.ProcessTurn();
+                    }
                 }
 
                 
@@ -248,11 +251,11 @@ namespace RogueBasin
             //Add some random creatures
 
             Random rand = new Random();
-            int noCreatures = rand.Next(10);
+            int noCreatures = rand.Next(10) + 5;
 
             for (int i = 0; i < noCreatures; i++)
             {
-                Monster creature = new Monster();
+                Monster creature = new Creatures.Rat();
                 creature.Representation = Convert.ToChar(65 + rand.Next(26));
 
                 int level = 0;

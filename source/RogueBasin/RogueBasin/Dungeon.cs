@@ -57,15 +57,32 @@ namespace RogueBasin
 
         }
 
-        private bool MapSquareCanBeEntered(int level, Point location)
+        /// <summary>
+        /// Is the requested square moveable into?
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool MapSquareCanBeEntered(int level, Point location)
         {
-            //Not a wall
+            //Off the map
+            if (location.x < 0 || location.x >= levels[level].width)
+            {
+                return false;
+            }
+
+            if (location.y < 0 || location.y >= levels[level].height)
+            {
+                return false;
+            }
+
+            //A wall
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Wall)
             {
                 return false;
             }
 
-            //Walkable?
+            //Not Walkable
             if (!levels[level].mapSquares[location.x, location.y].Walkable)
             {
                 return false;
@@ -78,6 +95,12 @@ namespace RogueBasin
                 {
                     return false;
                 }
+            }
+
+            //Check for PC blocking
+            if (player.LocationMap.x == location.x && player.LocationMap.y == location.y)
+            {
+                return false;
             }
 
             //Otherwise OK
