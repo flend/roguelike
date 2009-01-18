@@ -598,5 +598,64 @@ namespace RogueBasin
                 }
             }
         }
+
+        /// <summary>
+        /// Returns the direction to go in (+-xy) for the next step towards the target
+        /// </summary>
+        /// <param name="originCreature"></param>
+        /// <param name="destCreature"></param>
+        /// <returns></returns>
+        internal Point GetPathTo(Creature originCreature, Creature destCreature)
+        {
+            //If on different levels it's an error
+            if (originCreature.LocationLevel != destCreature.LocationLevel)
+            {
+                string msg = originCreature.Representation + " not on the same level as " + destCreature.Representation;
+                LogFile.Log.LogEntry(msg);
+                throw new ApplicationException(msg);
+            }
+
+           /* originCreature.LocationMap.x = 10;
+            originCreature.LocationMap.y = 10;
+
+            destCreature.LocationMap.x = 12;
+            destCreature.LocationMap.y = 10;
+
+            levels[0].mapSquares[10, 10].Walkable = false;
+            levels[0].mapSquares[11, 10].Walkable = true;
+            levels[0].mapSquares[12, 10].Walkable = false;
+
+            RefreshTCODMaps();*/
+
+            //Destination square needs to be walkable for the path finding algorithm. However it isn't walkable at the moment since there is the target creature on it
+            //Temporarily make it walkable, keeping transparency the same
+            levelTCODMaps[destCreature.LocationLevel].SetCell(destCreature.LocationMap.x, destCreature.LocationMap.y,
+                !levels[destCreature.LocationLevel].mapSquares[destCreature.LocationMap.x, destCreature.LocationMap.y].BlocksLight, true);
+
+            //Generate path object
+            TCODPathFinding path = new TCODPathFinding(levelTCODMaps[originCreature.LocationLevel], 1.0);
+            path.ComputePath(originCreature.LocationMap.x, originCreature.LocationMap.y, destCreature.LocationMap.x, destCreature.LocationMap.y);
+
+            //Find the first step. We need to load x and y with the origin of the path
+            int x, y;
+            path.GetPathOrigin(out x, out y);
+            //xo = x; yo = y;
+
+            path.WalkPath(ref x, ref y, false);
+            //path.WalkPath(ref x, ref y, false);
+
+            //path.GetPointOnPath(0, out x, out y); //crashes for some reason
+
+            //Dispose of path (bit wasteful seeming!)
+            path.Dispose();
+
+            //Set the destination square as unwalkable again
+            levelTCODMaps[destCreature.LocationLevel].SetCell(destCreature.LocationMap.x, destCreature.LocationMap.y,
+                !levels[destCreature.LocationLevel].mapSquares[destCreature.LocationMap.x, destCreature.LocationMap.y].BlocksLight, false);
+
+            Point nextStep = new Point(x, y);
+
+            return nextStep;
+        }
     }
 }

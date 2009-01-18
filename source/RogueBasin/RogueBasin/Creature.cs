@@ -32,7 +32,7 @@ namespace RogueBasin
         /// <summary>
         /// Sight radius
         /// </summary>
-        int sightRadius = 2;
+        int sightRadius = 5;
 
         /// <summary>
         /// Increment each game turn for the creature's internal clock. Turn at turnClockLimit

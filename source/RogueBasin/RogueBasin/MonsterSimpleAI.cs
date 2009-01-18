@@ -36,11 +36,23 @@ namespace RogueBasin
             if (AIState == SimpleAIStates.Pursuit)
             {
                 //Pursuit state, continue chasing and attacking target
-                ChaseCreature(currentTarget);
+
+                //Is target yet living?
+                if (currentTarget.Alive == false)
+                {
+                    //If not, go to non-chase state
+                    AIState = SimpleAIStates.RandomWalk;
+                }
+                else
+                {
+                    //Otherwise continue to chase
+
+                    ChaseCreature(currentTarget);
+                }
             }
-            else
-            {
-                //Random state
+            
+            if(AIState == SimpleAIStates.RandomWalk) {
+                //RandomWalk state
 
                 //Search an area of sightRadius on either side for creatures and check they are in the FOV
 
@@ -132,8 +144,9 @@ namespace RogueBasin
                         }
                     }
 
-                    //ChaseCreature
+                    //Start chasing this creature
                     LogFile.Log.LogEntry(this.Representation + " chases " + closestCreature.Representation);
+                    ChaseCreature(closestCreature);
                 }
                 else
                 {
@@ -204,9 +217,49 @@ namespace RogueBasin
             }
         }
 
-        private void ChaseCreature(Creature currentTarget)
+        private void ChaseCreature(Creature newTarget)
         {
-            //For now do nothing
+            //Confirm this as current target
+            currentTarget = newTarget;
+
+            //Go into pursuit mode
+            AIState = SimpleAIStates.Pursuit;
+
+            //Find location of next step on the path towards them
+            Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+
+            bool moveIntoSquare = true;
+
+            //If this is the same as the target creature's location, we are adjacent and can attack
+            if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+            {
+                //Attack the monster
+                //Ugly select here
+                CombatResults result;
+
+                if (newTarget == Game.Dungeon.Player)
+                {
+                    result = AttackPlayer(newTarget as Player);
+                }
+                else
+                {
+                    //It's a normal creature
+                    result = AttackMonster(newTarget as Monster);
+                }
+                 
+
+                //If we killed it, move into its square
+                if (result != CombatResults.DefenderDied)
+                {
+                    moveIntoSquare = false;
+                }
+            }
+
+            //Otherwise (or if the creature died), move towards it (or its corpse)
+            if (moveIntoSquare)
+            {
+                LocationMap = nextStep;
+            }
         }
 
         public override CombatResults AttackPlayer(Player player)
