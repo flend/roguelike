@@ -103,6 +103,9 @@ namespace RogueBasin
 
                     RecalculateMapAfterMove();
 
+                    //Reset the creature FOV display
+                    Game.Dungeon.ResetCreatureFOVOnMap();
+
                     //UpdateScreen();
 
                     //Game.MessageQueue.AddMessage("Finished PC move");

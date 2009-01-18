@@ -46,6 +46,11 @@ namespace RogueBasin
         /// </summary>
         bool inPlayerFOV = false;
 
+        /// <summary>
+        /// In a creature's FOV (may be debug only)
+        /// </summary>
+        bool inMonsterFOV = false;
+
         public MapTerrain Terrain
         {
             set
@@ -119,6 +124,21 @@ namespace RogueBasin
             set
             {
                 inPlayerFOV = value;
+            }
+        }
+
+        /// <summary>
+        /// In a creature's FOV (may be debug only)
+        /// </summary>
+        public bool InMonsterFOV
+        {
+            get
+            {
+                return inMonsterFOV;
+            }
+            set
+            {
+                inMonsterFOV = value;
             }
         }
 

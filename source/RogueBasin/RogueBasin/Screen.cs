@@ -37,6 +37,7 @@ namespace RogueBasin {
         Color inFOVTerrainColor = ColorPresets.White;
         Color seenNotInFOVTerrainColor = ColorPresets.Gray;
         Color neverSeenFOVTerrainColor;
+        Color inMonsterFOVTerrainColor = ColorPresets.Blue;
 
         Color pcColor = ColorPresets.White;
 
@@ -344,6 +345,11 @@ namespace RogueBasin {
                     {
                         //In FOV
                         rootConsole.ForegroundColor = inFOVTerrainColor;
+                    }
+                    else if (map.mapSquares[i, j].InMonsterFOV)
+                    {
+                        //Monster can see it
+                        rootConsole.ForegroundColor = inMonsterFOVTerrainColor;
                     }
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {

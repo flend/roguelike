@@ -267,7 +267,9 @@ namespace RogueBasin
             }
         }
 
-        //Get the list of maps
+        /// <summary>
+        /// Get the list of maps
+        /// </summary>
         public List<Map> Levels
         {
             get
@@ -275,6 +277,15 @@ namespace RogueBasin
                 return levels;
             }
         }
+
+        public List<TCODFov> LevelFOVs
+        {
+            get
+            {
+                return LevelFOVs;
+            }
+        }
+
 
         //Get the list of creatures
         public List<Monster> Monsters
@@ -474,6 +485,77 @@ namespace RogueBasin
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ResetCreatureFOVOnMap()
+        {
+            Map level = levels[Player.LocationLevel];
+
+            foreach (MapSquare sq in level.mapSquares)
+            {
+                sq.InMonsterFOV = false;
+            }
+        }
+
+        /// <summary>
+        /// Calculates the FOV for a creature
+        /// Maybe for debug purposes only.
+        /// </summary>
+        /// <param name="creature"></param>
+        public TCODFov CalculateCreatureFOV(Creature creature)
+        {
+            Map currentMap = levels[creature.LocationLevel];
+            TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
+
+            //Update FOV
+            tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
+
+            //Copy this information to the map object for use in drawing
+
+            //Only do this if the creature is on a visible level
+            if(creature.LocationLevel != Player.LocationLevel)
+                return tcodFOV;
+
+            //Only check sightRadius around the creature
+
+            int xl = creature.LocationMap.x - creature.SightRadius;
+            int xr = creature.LocationMap.x + creature.SightRadius;
+
+            int yt = creature.LocationMap.y - creature.SightRadius;
+            int yb = creature.LocationMap.y + creature.SightRadius;
+
+            //If sight is infinite, check all the map
+            if (creature.SightRadius == 0)
+            {
+                xl = 0;
+                xr = currentMap.width;
+                yt = 0;
+                yb = currentMap.height;
+            }
+
+            if (xl < 0)
+                xl = 0;
+            if (xr >= currentMap.width)
+                xr = currentMap.width - 1;
+            if (yt < 0)
+                yt = 0;
+            if (yb >= currentMap.height)
+                yb = currentMap.height - 1;
+
+            for (int i = xl; i <= xr; i++)
+            {
+                for (int j = yt; j <= yb; j++)
+                {
+                    MapSquare thisSquare = currentMap.mapSquares[i, j];
+                    bool yesOrNo = tcodFOV.CheckTileFOV(i, j);
+                    thisSquare.InMonsterFOV = tcodFOV.CheckTileFOV(i, j);
+                }
+            }
+
+            return tcodFOV;
         }
 
         /// <summary>
