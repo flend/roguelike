@@ -88,7 +88,10 @@ namespace RogueBasin
                 //Check if the PC gets a turn
                 if (dungeon.Player.IncrementTurnTime())
                 {
-                    //Update screen before and after PC's turn
+                    //Calculate the player's FOV
+                    RecalculatePlayerFOV();
+
+                    //Update screen just before PC's turn
                     UpdateScreen();
 
                     //Deal with PCs turn as appropriate
@@ -107,13 +110,24 @@ namespace RogueBasin
             }
         }
 
+        private void RecalculatePlayerFOV()
+        {
+            Game.Dungeon.CalculatePlayerFOV();
+        }
+
         /// <summary>
         /// After each move, recalculate the walkable parameter on each map square.
         /// This could be optimised a lot (far better to set creature's previous location as empty and new location as full)
         /// </summary>
         private void RecalculateMapAfterMove()
         {
+            //Recalculate walkable
             Game.Dungeon.RecalculateWalkable();
+
+            //Light blocking doesn't change
+
+            //Refresh the TCOD maps
+            Game.Dungeon.RefreshTCODMaps();
         }
 
         //Deal with user input
@@ -261,6 +275,7 @@ namespace RogueBasin
                 Screen.Instance.ConsoleLine("Error creating log file: " + e.Message);
             }
                 
+
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
 

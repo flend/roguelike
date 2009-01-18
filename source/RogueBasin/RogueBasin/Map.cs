@@ -36,6 +36,16 @@ namespace RogueBasin
         /// </summary>
         bool blocksLight = true;
 
+        /// <summary>
+        /// Has this square ever been in the FOV?
+        /// </summary>
+        bool seenByPlayer = false;
+
+        /// <summary>
+        /// In player's FOV - recalculated each turn
+        /// </summary>
+        bool inPlayerFOV = false;
+
         public MapTerrain Terrain
         {
             set
@@ -79,6 +89,36 @@ namespace RogueBasin
             set
             {
                 blocksLight = value;
+            }
+        }
+
+        /// <summary>
+        /// Has this square ever been in the FOV?
+        /// </summary>
+        public bool SeenByPlayer
+        {
+            get
+            {
+                return seenByPlayer;
+            }
+            set
+            {
+                seenByPlayer = value;
+            }
+        }
+
+        /// <summary>
+        /// In player's FOV - recalculated each turn
+        /// </summary>
+        public bool InPlayerFOV
+        {
+            get
+            {
+                return inPlayerFOV;
+            }
+            set
+            {
+                inPlayerFOV = value;
             }
         }
 

@@ -287,6 +287,7 @@ namespace RogueBasin
                 for (int j = roomY + 1; j < by; j++)
                 {
                     baseMap.mapSquares[i, j].Terrain = MapTerrain.Empty;
+                    baseMap.mapSquares[i, j].SetOpen();
                 }
             }
         }
@@ -679,7 +680,8 @@ namespace RogueBasin
             rootNode.DrawCorridorConnectingChildren(baseMap);
 
             //Set which squares are light blocking
-            SetLightBlocking(baseMap);
+            //Now done during creation
+            //SetLightBlocking(baseMap);
 
             //Set the PC start location in a random room
             baseMap.PCStartLocation = rootNode.RandomRoomPoint();

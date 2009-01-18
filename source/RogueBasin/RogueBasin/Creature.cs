@@ -30,6 +30,11 @@ namespace RogueBasin
         bool alive;
 
         /// <summary>
+        /// Sight radius
+        /// </summary>
+        int sightRadius = 0;
+
+        /// <summary>
         /// Increment each game turn for the creature's internal clock. Turn at turnClockLimit
         /// </summary>
         protected int speed = 10;
@@ -110,6 +115,16 @@ namespace RogueBasin
         public Creature()
         {
             alive = true;
+        }
+
+        public int SightRadius
+        {
+            get {
+                return sightRadius;
+            }
+            set {
+                sightRadius = value;
+            }
         }
 
         /// <summary>

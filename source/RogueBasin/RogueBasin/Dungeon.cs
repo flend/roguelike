@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 
 namespace RogueBasin
@@ -37,6 +38,7 @@ namespace RogueBasin
     public class Dungeon
     {
         List<Map> levels;
+        List<TCODFov> levelTCODMaps;
         List<Monster> monsters;
         List<Item> items;
         List<Feature> features;
@@ -51,6 +53,7 @@ namespace RogueBasin
             monsters = new List<Monster>();
             items = new List<Item>();
             features = new List<Feature>();
+            levelTCODMaps = new List<TCODFov>();
 
             player = new Player();
         }
@@ -58,6 +61,9 @@ namespace RogueBasin
         public void AddMap(Map mapToAdd)
         {
             levels.Add(mapToAdd);
+
+            //Add TCOD version
+            levelTCODMaps.Add(new TCODFov(mapToAdd.width, mapToAdd.height));
         }
 
         public bool AddMonster(Monster creature, int level, Point location)
@@ -261,6 +267,15 @@ namespace RogueBasin
             }
         }
 
+        //Get the list of maps
+        public List<Map> Levels
+        {
+            get
+            {
+                return levels;
+            }
+        }
+
         //Get the list of creatures
         public List<Monster> Monsters
         {
@@ -411,6 +426,8 @@ namespace RogueBasin
                             {
                                 walkable = false;
                             }
+
+                            level.mapSquares[j, k].Walkable = walkable;
                         }
                     }
                 }
@@ -422,6 +439,77 @@ namespace RogueBasin
             foreach (Monster monster in monsters)
             {
                 levels[monster.LocationLevel].mapSquares[monster.LocationMap.x, monster.LocationMap.y].Walkable = false;
+            }
+        }
+
+        /// <summary>
+        /// Find best path between 2 points. No reason really to restrict this to one level only but that would require extending TCOD
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="startPoint"></param>
+        /// <param name="endPoint"></param>
+        /// <returns></returns>
+        public bool CalculatePath(int level, Point startPoint, Point endPoint)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Refresh the TCOD maps used for FOV and pathfinding
+        /// Unoptimised at present
+        /// </summary>
+        internal void RefreshTCODMaps()
+        {
+            //Set the properties on the TCODMaps from our Maps
+            for(int i=0;i<levels.Count;i++) {
+                Map level = levels[i];
+                TCODFov tcodLevel = levelTCODMaps[i];
+
+                for (int j = 0; j < level.width; j++)
+                {
+                    for (int k = 0; k < level.height; k++)
+                    {
+                        tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Recalculate the players FOV. Subsequent accesses to the TCODMap of the player's level will have his FOV
+        /// Note that the maps may get hijacked by other creatures
+        /// </summary>
+        internal void CalculatePlayerFOV()
+        {
+            //Get TCOD to calculate the player's FOV
+
+            levelTCODMaps[Player.LocationLevel].CalculateFOV(Player.LocationMap.x, Player.LocationMap.y, Player.SightRadius);
+
+            //TCODFov tcodFOV = new TCODFov(levels[Player.LocationLevel].width, levels[Player.LocationLevel].height);
+            //tcodFOV.ClearMap();
+
+            //tcodFOV.CalculateFOV(Player.LocationMap.x, Player.LocationMap.y, 5);
+
+            //bool yesorno = tcodFOV.CheckTileFOV(1, 1);
+
+            //Copy this information to the map object for use in drawing
+            Map level = levels[Player.LocationLevel];
+            TCODFov tcodFOV = levelTCODMaps[Player.LocationLevel];
+
+            for (int i = 0; i < level.width; i++)
+            {
+                for (int j = 0; j < level.height; j++)
+                {
+                    MapSquare thisSquare = level.mapSquares[i, j];
+                    bool yesOrNo = tcodFOV.CheckTileFOV(i, j);
+                    thisSquare.InPlayerFOV = tcodFOV.CheckTileFOV(i, j);
+                    //Set 'has ever been seen flag' if appropriate
+                    if (thisSquare.InPlayerFOV == true)
+                    {
+                        thisSquare.SeenByPlayer = true;
+                    }
+                }
             }
         }
     }
