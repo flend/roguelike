@@ -63,7 +63,9 @@ namespace RogueBasin
             //Loop through creatures
             //If their internal clocks signal another turn then take one
 
-
+            //Refresh the map with walkable etc. information
+            //Now that creatures don't cause non-walkable squares, we only need to do this if the terrain changes
+            RecalculateMapAfterMove();
 
             while (runMapLoop)
             {
@@ -74,10 +76,11 @@ namespace RogueBasin
                 {
                     if (creature.IncrementTurnTime())
                     {
+                        //dungeon.ShowCreatureFOVOnMap(creature);
                         if (creature.Alive)
                         {
                             creature.ProcessTurn();
-                            RecalculateMapAfterMove();
+                            //RecalculateMapAfterMove();
                             dungeon.ShowCreatureFOVOnMap(creature);
                         }
                     }
@@ -95,6 +98,11 @@ namespace RogueBasin
                     //Update screen just before PC's turn
                     UpdateScreen();
 
+                    //KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                    //Screen.Instance.DrawFOVDebug(0);
+
+
                     //Deal with PCs turn as appropriate
                     bool timeAdvances = false;
                     do
@@ -102,10 +110,14 @@ namespace RogueBasin
                         timeAdvances = UserInput();
                     } while (!timeAdvances);
 
-                    RecalculateMapAfterMove();
+                    //RecalculateMapAfterMove();
 
                     //Reset the creature FOV display
                     Game.Dungeon.ResetCreatureFOVOnMap();
+
+                    //these 2 go together to generate a new dungeon on every keypress
+                    //SetupDungeon();
+                    //RecalculateMapAfterMove();
 
                     //UpdateScreen();
 
@@ -250,7 +262,7 @@ namespace RogueBasin
 
                     //Block for this keypress - may want to listen for exit too
                     KeyPress userKey;
-                    userKey = Keyboard.WaitForKeyPress(true);
+                    //userKey = Keyboard.WaitForKeyPress(true);
                 }
                 else
                 {
@@ -283,6 +295,11 @@ namespace RogueBasin
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
 
+            SetupDungeon();
+        }
+
+        private void SetupDungeon()
+        {
             //Create dungeon and set it as current in Game
             dungeon = new Dungeon();
             Game.Dungeon = dungeon;
@@ -292,7 +309,7 @@ namespace RogueBasin
             //MapGeneratorRogue mapGen = new MapGeneratorRogue();
             mapGen.Width = 80;
             mapGen.Height = 25;
-             
+
 
             Map level1 = mapGen.GenerateMap();
 
@@ -315,11 +332,11 @@ namespace RogueBasin
             player.MaxHitpoints = 100;
 
             //Create creatures and start positions
-            
+
             //Add some random creatures
 
             Random rand = new Random();
-            int noCreatures = rand.Next(10) + 5;
+            int noCreatures = rand.Next(10) + 115;
 
             for (int i = 0; i < noCreatures; i++)
             {
@@ -328,7 +345,7 @@ namespace RogueBasin
 
                 int level = 0;
                 Point location;
-                
+
                 //Loop until we find an acceptable location and the add works
                 do
                 {
@@ -382,8 +399,6 @@ namespace RogueBasin
                 }
                 while (!dungeon.AddItem(item, level, location));
             }
-
-            
         }
 
     }

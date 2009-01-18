@@ -287,6 +287,51 @@ namespace RogueBasin {
             }
         }
 
+        public void DrawFOVDebug(int levelNo)
+        {
+            Map map = Game.Dungeon.Levels[levelNo];
+            TCODFov fov = Game.Dungeon.FOVs[levelNo];
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Clear screen
+            rootConsole.Clear();
+
+            for (int i = 0; i < map.width; i++)
+            {
+                for (int j = 0; j < map.height; j++)
+                {
+                    int screenX = mapTopLeft.x + i;
+                    int screenY = mapTopLeft.y + j;
+
+                    bool trans;
+                    bool walkable;
+
+                    fov.GetCell(i, j, out trans, out walkable);
+
+                    Color drawColor = inFOVTerrainColor;
+
+                    if (walkable)
+                    {
+                        drawColor = inFOVTerrainColor;
+                    }
+                    else
+                    {
+                        drawColor = inMonsterFOVTerrainColor;
+                    }
+
+                    rootConsole.ForegroundColor = drawColor;
+                    char screenChar = terrainChars[map.mapSquares[i, j].Terrain];
+                    screenChar = '#';
+                    rootConsole.PutChar(screenX, screenY, screenChar);
+
+                    rootConsole.Flush();
+                }
+            }
+
+        }
+
         //Draw a map only (useful for debugging)
         public void DrawMapDebug(Map map)
         {

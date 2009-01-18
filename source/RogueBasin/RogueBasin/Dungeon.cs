@@ -278,14 +278,14 @@ namespace RogueBasin
             }
         }
 
-        public List<TCODFov> LevelFOVs
+        public List<TCODFov> FOVs
         {
             get
             {
-                return LevelFOVs;
+                return levelTCODMaps;
             }
         }
-
+     
 
         //Get the list of creatures
         public List<Monster> Monsters
@@ -529,7 +529,7 @@ namespace RogueBasin
 
             Map currentMap = levels[creature.LocationLevel];
             TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
-
+           
             //Calculate FOV
             tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
@@ -564,7 +564,9 @@ namespace RogueBasin
                 for (int j = yt; j <= yb; j++)
                 {
                     MapSquare thisSquare = currentMap.mapSquares[i, j];
-                    thisSquare.InMonsterFOV = tcodFOV.CheckTileFOV(i, j);
+                    bool inFOV = tcodFOV.CheckTileFOV(i, j);
+                    if(inFOV)
+                        thisSquare.InMonsterFOV = true;
                 }
             }
         }
@@ -602,7 +604,7 @@ namespace RogueBasin
 
         /// <summary>
         /// Returns the direction to go in (+-xy) for the next step towards the target
-        /// If there's no route at all, return -1, -1
+        /// If there's no route at all, return -1, -1. Right now we throw an exception for this, since it shouldn't happen in a connected dungeon
         /// If there's a route but its blocked by a creature return the originCreature's coords
         /// </summary>
         /// <param name="originCreature"></param>
@@ -657,9 +659,21 @@ namespace RogueBasin
                     //If there was no blocking creature then there is no possible route (hopefully impossible in a fully connected dungeon)
                     if (!pathBlockedByCreature)
                     {
-                        nextStep = new Point(-1, -1);
-                        goodPath = true;
-                        continue;
+                        throw new ApplicationException("Path blocked in connected dungeon!");
+                        
+                        /*
+                        nextStep = new Point(x, y);
+                        bool trans;
+                        bool walkable;
+                        levelTCODMaps[0].GetCell(originCreature.LocationMap.x, originCreature.LocationMap.y, out trans, out walkable);
+                        levelTCODMaps[0].GetCell(destCreature.LocationMap.x, destCreature.LocationMap.y, out trans, out walkable);
+                        */
+
+                        //Uncomment this if you want to return -1, -1
+                        
+                        //nextStep = new Point(-1, -1);
+                        //goodPath = true;
+                        //continue;
                     }
                     else
                     {
