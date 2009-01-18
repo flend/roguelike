@@ -502,7 +502,6 @@ namespace RogueBasin
 
         /// <summary>
         /// Calculates the FOV for a creature
-        /// Maybe for debug purposes only.
         /// </summary>
         /// <param name="creature"></param>
         public TCODFov CalculateCreatureFOV(Creature creature)
@@ -513,11 +512,25 @@ namespace RogueBasin
             //Update FOV
             tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
-            //Copy this information to the map object for use in drawing
+            return tcodFOV;
+
+        }
+
+        /// <summary>
+        /// Displays the creature FOV on the map. Note that this clobbers the FOV map
+        /// </summary>
+        /// <param name="creature"></param>
+        public void ShowCreatureFOVOnMap(Creature creature) {
 
             //Only do this if the creature is on a visible level
             if(creature.LocationLevel != Player.LocationLevel)
-                return tcodFOV;
+                return;
+
+            Map currentMap = levels[creature.LocationLevel];
+            TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
+
+            //Calculate FOV
+            tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
             //Only check sightRadius around the creature
 
@@ -550,12 +563,9 @@ namespace RogueBasin
                 for (int j = yt; j <= yb; j++)
                 {
                     MapSquare thisSquare = currentMap.mapSquares[i, j];
-                    bool yesOrNo = tcodFOV.CheckTileFOV(i, j);
                     thisSquare.InMonsterFOV = tcodFOV.CheckTileFOV(i, j);
                 }
             }
-
-            return tcodFOV;
         }
 
         /// <summary>
@@ -565,26 +575,20 @@ namespace RogueBasin
         internal void CalculatePlayerFOV()
         {
             //Get TCOD to calculate the player's FOV
+            Map currentMap = levels[Player.LocationLevel];
 
-            levelTCODMaps[Player.LocationLevel].CalculateFOV(Player.LocationMap.x, Player.LocationMap.y, Player.SightRadius);
-
-            //TCODFov tcodFOV = new TCODFov(levels[Player.LocationLevel].width, levels[Player.LocationLevel].height);
-            //tcodFOV.ClearMap();
-
-            //tcodFOV.CalculateFOV(Player.LocationMap.x, Player.LocationMap.y, 5);
-
-            //bool yesorno = tcodFOV.CheckTileFOV(1, 1);
-
-            //Copy this information to the map object for use in drawing
-            Map level = levels[Player.LocationLevel];
             TCODFov tcodFOV = levelTCODMaps[Player.LocationLevel];
+            
+            tcodFOV.CalculateFOV(Player.LocationMap.x, Player.LocationMap.y, Player.SightRadius);
 
-            for (int i = 0; i < level.width; i++)
+            //Set the FOV flags on the map
+            //Process the whole level, which effectively resets out-of-FOV areas
+
+            for (int i = 0; i < currentMap.width; i++)
             {
-                for (int j = 0; j < level.height; j++)
+                for (int j = 0; j < currentMap.height; j++)
                 {
-                    MapSquare thisSquare = level.mapSquares[i, j];
-                    bool yesOrNo = tcodFOV.CheckTileFOV(i, j);
+                    MapSquare thisSquare = currentMap.mapSquares[i, j];
                     thisSquare.InPlayerFOV = tcodFOV.CheckTileFOV(i, j);
                     //Set 'has ever been seen flag' if appropriate
                     if (thisSquare.InPlayerFOV == true)

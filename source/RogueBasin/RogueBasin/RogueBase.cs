@@ -78,6 +78,7 @@ namespace RogueBasin
                         {
                             creature.ProcessTurn();
                             RecalculateMapAfterMove();
+                            dungeon.ShowCreatureFOVOnMap(creature);
                         }
                     }
                 }
