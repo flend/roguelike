@@ -296,7 +296,7 @@ namespace RogueBasin
                     Screen.Instance.FlushConsole();
 
                     //Block for this keypress - may want to listen for exit too
-                    KeyPress userKey;
+                    //KeyPress userKey;
                     //userKey = Keyboard.WaitForKeyPress(true);
                 }
                 else

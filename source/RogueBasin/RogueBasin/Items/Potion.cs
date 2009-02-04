@@ -10,5 +10,10 @@ namespace RogueBasin.Items
         {
 
         }
+
+        public override int GetWeight()
+        {
+            return 10;
+        }
     }
 }

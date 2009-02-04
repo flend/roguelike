@@ -75,12 +75,27 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Is this item in an inventory and therefore should not be rendered on the map?
+        /// Policy is that LocationMap and LocationLevel may contain out-of-date data when InInventory is set
+        /// </summary>
         public bool InInventory
         {
             get
             {
                 return inInventory;
             }
+
+            set
+            {
+                inInventory = value;
+            }
         }
+
+        /// <summary>
+        /// Return the weight of the object. Set in derived classes
+        /// </summary>
+        /// <returns></returns>
+        public abstract int GetWeight();
     }
 }

@@ -405,7 +405,7 @@ namespace RogueBasin
             int corridorLengthY = endY - startY - 2;
 
             //Try to draw a random corridor. It may intersect with a pre-existing corridor in which case we need to start again
-            bool corridorFailed = false;
+            //bool corridorFailed = false;
 
             //Where to put the bend is the random variable
             int lBendCoord;

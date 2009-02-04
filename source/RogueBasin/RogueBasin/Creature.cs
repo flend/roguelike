@@ -10,6 +10,11 @@ namespace RogueBasin
     public abstract class Creature
     {
         /// <summary>
+        /// The creature's inventory
+        /// </summary>
+        Inventory inventory;
+
+        /// <summary>
         /// Level the creature is on
         /// </summary>
         int locationLevel;
@@ -115,6 +120,8 @@ namespace RogueBasin
         public Creature()
         {
             alive = true;
+
+            inventory = new Inventory();
         }
 
         public int SightRadius
@@ -141,6 +148,43 @@ namespace RogueBasin
                 return true;
             }
             else return false;
+        }
+
+        /// <summary>
+        /// Pick up an item and put it in the inventory if possible
+        /// </summary>
+        /// <param name="itemToPickUp"></param>
+        /// <returns>False if the item won't fit in the inventory for some reason</returns>
+        public virtual bool PickUpItem(Item itemToPickUp)
+        {
+            inventory.AddItem(itemToPickUp);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Drop an item. Sets the item position to the position of this character
+        /// </summary>
+        /// <param name="itemToDrop"></param>
+        /// <returns></returns>
+        public virtual bool DropItem(Item itemToDrop)
+        {
+            inventory.RemoveItem(itemToDrop);
+
+            itemToDrop.LocationLevel = this.LocationLevel;
+            itemToDrop.LocationMap = this.LocationMap;
+            itemToDrop.InInventory = false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// List of inventory items
+        /// </summary>
+        /// <returns></returns>
+        public List<Item> GetInventoryItems()
+        {
+            return inventory.Items;
         }
     }
 }
