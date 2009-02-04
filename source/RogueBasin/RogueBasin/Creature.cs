@@ -37,7 +37,7 @@ namespace RogueBasin
         /// <summary>
         /// Increment each game turn for the creature's internal clock. Turn at turnClockLimit
         /// </summary>
-        protected int speed = 10;
+        protected int speed = 100;
 
         /// <summary>
         /// Current turn clock value for the creature. When 1000 the creature takes a turn
@@ -47,7 +47,7 @@ namespace RogueBasin
         /// <summary>
         /// How much the turn clock has to reach to process
         /// </summary>
-        protected const int turnClockLimit = 1000;
+        protected const int turnClockLimit = 10000;
 
         public int LocationLevel
         {

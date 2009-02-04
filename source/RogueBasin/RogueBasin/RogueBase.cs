@@ -54,8 +54,10 @@ namespace RogueBasin
         {
             //Time
 
-            //Increment world clock
-            dungeon.IncrementWorldClock();
+
+            //Game time
+            //Normal creatures have a speed of 100
+            //This means it takes 100 ticks for them to take a turn (10,000 is the cut off)
 
             //Check PC
             //Take a turn if signalled by the internal clock
@@ -69,9 +71,11 @@ namespace RogueBasin
 
             while (runMapLoop)
             {
+                //Increment world clock
+                dungeon.IncrementWorldClock();
+
                 //Increment time on all global (dungeon) events
                 dungeon.IncrementEventTime();
-
 
                 //All creatures get IncrementTurnTime() called on them each worldClock tick
                 //They internally keep track of when they should take another turn
@@ -89,7 +93,6 @@ namespace RogueBasin
                         {
                             creature.ProcessTurn();
                             //RecalculateMapAfterMove();
-                            dungeon.ShowCreatureFOVOnMap(creature);
                         }
                     }
                 }
@@ -97,11 +100,17 @@ namespace RogueBasin
                 //Remove dead monsters
                 dungeon.RemoveDeadMonsters();
 
-                //Check if the PC gets a turn
+                //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
                 if (dungeon.Player.IncrementTurnTime())
                 {
                     //Calculate the player's FOV
                     RecalculatePlayerFOV();
+
+                    //Debug: show the FOV of all monsters
+                    foreach (Monster monster in dungeon.Monsters)
+                    {
+                        dungeon.ShowCreatureFOVOnMap(monster);
+                    }
 
                     //Update screen just before PC's turn
                     UpdateScreen();
@@ -174,6 +183,24 @@ namespace RogueBasin
                     case '.':
                         // Do nothing
                         timeAdvances = true;
+                        break;
+                    case 's':
+                        //Add a speed up event on the player
+                        PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
+                        Game.Dungeon.Player.AddEffect(speedUp);
+                        UpdateScreen();
+                        break;
+                    case 'h':
+                        //Add a healing event on the player
+                        PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                        Game.Dungeon.Player.AddEffect(healing);
+                        UpdateScreen();
+                        break;
+                    case 'z':
+                        //Add an anti-healing event on the player
+                        PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
+                        Game.Dungeon.Player.AddEffect(zhealing);
+                        UpdateScreen();
                         break;
                 }
             }
@@ -275,6 +302,7 @@ namespace RogueBasin
                 else
                 {
                     Screen.Instance.PrintMessage(messages[i]);
+                    Screen.Instance.FlushConsole();
                 }
             }
             

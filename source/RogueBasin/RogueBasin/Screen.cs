@@ -28,6 +28,8 @@ namespace RogueBasin {
 
         Point hitpointsOffset;
         Point maxHitpointsOffset;
+        Point speedOffset;
+        Point worldTickOffset;
 
         /// <summary>
         /// Mapping of terrain to ASCII characters
@@ -75,6 +77,8 @@ namespace RogueBasin {
 
             hitpointsOffset = new Point(6, 0);
             maxHitpointsOffset = new Point(13, 0);
+            speedOffset = new Point(20, 0);
+            worldTickOffset = new Point(30, 0);
 
             terrainChars = new Dictionary<MapTerrain, char>();
             terrainChars.Add(MapTerrain.Empty, '.');
@@ -164,6 +168,14 @@ namespace RogueBasin {
 
             rootConsole.PrintLine(hitpointsString, statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
             rootConsole.PrintLine(maxHitpointsString, statsDisplayTopLeft.x + maxHitpointsOffset.x, statsDisplayTopLeft.y + maxHitpointsOffset.y, LineAlignment.Left);
+
+            string speedString = "Sp: " + player.Speed.ToString();
+
+            rootConsole.PrintLine(speedString, statsDisplayTopLeft.x + speedOffset.x, statsDisplayTopLeft.y + speedOffset.y, LineAlignment.Left);
+
+            string ticksString = "Tk: " + Game.Dungeon.WorldClock.ToString();
+
+            rootConsole.PrintLine(ticksString, statsDisplayTopLeft.x + worldTickOffset.x, statsDisplayTopLeft.y + worldTickOffset.y, LineAlignment.Left);
         }
 
         private void DrawItems(List<Item> itemList)

@@ -62,6 +62,7 @@
     <Compile Include="PlayerEffect.cs" />
     <Compile Include="PlayerEffectInstant.cs" />
     <Compile Include="PlayerEffectSimpleDuration.cs" />
+    <Compile Include="PlayerEffects\Healing.cs" />
     <Compile Include="PlayerEffects\SpeedUp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />

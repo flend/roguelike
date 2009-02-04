@@ -6,10 +6,10 @@ namespace RogueBasin
 {
     public class Player : Creature
     {
-        public Player()
-        {
-
-        }
+        /// <summary>
+        /// Effects that are active on the player
+        /// </summary>
+        List<PlayerEffect> effects;
 
         /// <summary>
         /// Current hitpoints
@@ -20,6 +20,11 @@ namespace RogueBasin
         /// Maximum hitpoints
         /// </summary>
         int maxHitpoints;
+
+        public Player()
+        {
+            effects = new List<PlayerEffect>();
+        }
 
         public int Hitpoints
         {
@@ -69,6 +74,53 @@ namespace RogueBasin
 
             return CombatResults.DefenderDied;
 
+        }
+
+        /// <summary>
+        /// Increment time on all player events. Events that expire will run their onExit() routines and then delete themselves from the list
+        /// </summary>
+        internal void IncrementEventTime()
+        {
+            //Increment time on events and remove finished ones
+            List<PlayerEffect> finishedEffects = new List<PlayerEffect>();
+
+            foreach (PlayerEffect effect in effects)
+            {
+                effect.IncrementTime();
+
+                if (effect.HasEnded())
+                {
+                    finishedEffects.Add(effect);
+                }
+            }
+
+            //Remove finished effects
+            foreach (PlayerEffect effect in finishedEffects)
+            {
+                effects.Remove(effect);
+            }
+        }
+
+        /// <summary>
+        /// Increment time on all player events then use the base class to increment time on the player's turn counter
+        /// </summary>
+        /// <returns></returns>
+        internal override bool IncrementTurnTime()
+        {
+            IncrementEventTime();
+
+            return base.IncrementTurnTime();
+        }
+
+        /// <summary>
+        /// Run an effect on the player. Calls the effect's onStart and adds it to the current effects queue
+        /// </summary>
+        /// <param name="effect"></param>
+        internal void AddEffect(PlayerEffect effect)
+        {
+            effect.OnStart();
+
+            effects.Add(effect);
         }
     }
 }

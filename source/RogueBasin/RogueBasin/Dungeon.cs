@@ -773,6 +773,14 @@ namespace RogueBasin
             return nextStep;
         }
 
+        public long WorldClock
+        {
+            get
+            {
+                return worldClock;
+            }
+        }
+
         /// <summary>
         /// Increment time on all dungeon (global) events. Events that expire will run their onExit() routines and then delete themselves from the list
         /// </summary>

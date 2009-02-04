@@ -31,5 +31,13 @@ namespace RogueBasin
         {
             return true;
         }
+
+        /// <summary>
+        /// Do nothing here, HasEnded() is always set
+        /// </summary>
+        public override void IncrementTime()
+        {
+            
+        }
     }
 }

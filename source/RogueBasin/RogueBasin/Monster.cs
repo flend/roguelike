@@ -19,9 +19,15 @@ namespace RogueBasin
     /// </summary>
     public abstract class Monster : Creature, ITurnAI
     {
+        /// <summary>
+        /// Effects current active on this monster
+        /// </summary>
+        List<MonsterEffect> effects;
 
         public Monster()
         {
+            effects = new List<MonsterEffect>();
+            
             //Set up attributes from class start values
             maxHitpoints = ClassMaxHitpoints();
         }
@@ -74,9 +80,45 @@ namespace RogueBasin
             //Base monster classes just sit still
         }
 
+        /// <summary>
+        /// Increment time on all monster events. Events that expire will run their onExit() routines and then delete themselves from the list
+        /// </summary>
+        internal void IncrementEventTime()
+        {
+            //Increment time on events and remove finished ones
+            List<MonsterEffect> finishedEffects = new List<MonsterEffect>();
+
+            foreach (MonsterEffect effect in effects)
+            {
+                effect.IncrementTime();
+
+                if (effect.HasEnded())
+                {
+                    finishedEffects.Add(effect);
+                }
+            }
+
+            //Remove finished effects
+            foreach (MonsterEffect effect in finishedEffects)
+            {
+                effects.Remove(effect);
+            }
+        }
+
         public abstract CombatResults AttackPlayer(Player player);
 
         public abstract CombatResults AttackMonster(Monster monster);
+
+        /// <summary>
+        /// Increment time on our events then use the base class to increment time on the monster's turn counter
+        /// </summary>
+        /// <returns></returns>
+        internal override bool IncrementTurnTime()
+        {
+            IncrementEventTime();
+
+            return base.IncrementTurnTime();
+        }
 
     }
 }
