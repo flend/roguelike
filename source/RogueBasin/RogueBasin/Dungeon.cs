@@ -47,6 +47,11 @@ namespace RogueBasin
 
         long worldClock = 0;
 
+        /// <summary>
+        /// List of global events
+        /// </summary>
+        List<DungeonEffect> effects;
+
         public Dungeon()
         {
             levels = new List<Map>();
@@ -54,6 +59,7 @@ namespace RogueBasin
             items = new List<Item>();
             features = new List<Feature>();
             levelTCODMaps = new List<TCODFov>();
+            effects = new List<DungeonEffect>();
 
             player = new Player();
         }
@@ -765,6 +771,31 @@ namespace RogueBasin
             //Point nextStep = new Point(x, y);
 
             return nextStep;
+        }
+
+        /// <summary>
+        /// Increment time on all dungeon (global) events. Events that expire will run their onExit() routines and then delete themselves from the list
+        /// </summary>
+        internal void IncrementEventTime()
+        {
+            //Increment time on events and remove finished ones
+            List<DungeonEffect> finishedEffects = new List<DungeonEffect>();
+
+            foreach (DungeonEffect effect in effects)
+            {
+                effect.IncrementTime();
+
+                if (effect.HasEnded())
+                {
+                    finishedEffects.Add(effect);
+                }
+            }
+
+            //Remove finished effects
+            foreach (DungeonEffect effect in finishedEffects)
+            {
+                effects.Remove(effect);
+            }
         }
     }
 }

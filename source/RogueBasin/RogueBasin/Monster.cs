@@ -67,7 +67,7 @@ namespace RogueBasin
         abstract protected int ClassMaxHitpoints();
 
         /// <summary>
-        /// Process Turn
+        /// Run the creature's action AI
         /// </summary>
         public virtual void ProcessTurn()
         {

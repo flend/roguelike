@@ -42,6 +42,8 @@
     <Compile Include="Creature.cs" />
     <Compile Include="Creatures\Rat.cs" />
     <Compile Include="Dungeon.cs" />
+    <Compile Include="DungeonEffect.cs" />
+    <Compile Include="Effect.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\StaircaseUp.cs" />
     <Compile Include="Game.cs" />
@@ -54,8 +56,13 @@
     <Compile Include="MapGeneratorRogue.cs" />
     <Compile Include="MessageQueue.cs" />
     <Compile Include="Monster.cs" />
+    <Compile Include="MonsterEffect.cs" />
     <Compile Include="MonsterSimpleAI.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="PlayerEffect.cs" />
+    <Compile Include="PlayerEffectInstant.cs" />
+    <Compile Include="PlayerEffectSimpleDuration.cs" />
+    <Compile Include="PlayerEffects\SpeedUp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />
     <Compile Include="Screen.cs" />

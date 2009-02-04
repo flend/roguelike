@@ -20,7 +20,9 @@ namespace RogueBasin
         {
             AIState = SimpleAIStates.RandomWalk;
         }
-
+        /// <summary>
+        /// Run the Simple AI actions
+        /// </summary>
         public override void ProcessTurn()
         {
             //If in pursuit state, continue to pursue enemy until it is dead (or creature itself is killed)

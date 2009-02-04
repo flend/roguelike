@@ -69,14 +69,22 @@ namespace RogueBasin
 
             while (runMapLoop)
             {
+                //Increment time on all global (dungeon) events
+                dungeon.IncrementEventTime();
 
-                //Add a time slice for the creature and process turn if applicable
-                //Creatures may be killed by other creatures so check they are alive before processing
+
+                //All creatures get IncrementTurnTime() called on them each worldClock tick
+                //They internally keep track of when they should take another turn
+
+                //IncrementTurnTime() also increments time for all events on that creature
+                
                 foreach (Monster creature in dungeon.Monsters)
                 {
                     if (creature.IncrementTurnTime())
                     {
                         //dungeon.ShowCreatureFOVOnMap(creature);
+
+                        //Creatures may be killed by other creatures so check they are alive before processing
                         if (creature.Alive)
                         {
                             creature.ProcessTurn();
