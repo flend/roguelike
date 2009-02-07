@@ -158,7 +158,7 @@ namespace RogueBasin
             //This may fail due to something else being there or being non-walkable
             try
             {
-                Map creatureLevel = levels[level];
+                Map featureLevel = levels[level];
 
                 //Check square is accessable
                 if (!MapSquareCanBeEntered(level, location))

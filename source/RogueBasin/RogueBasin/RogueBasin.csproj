@@ -55,6 +55,7 @@
     <Compile Include="Map.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
     <Compile Include="MapGeneratorRogue.cs" />
+    <Compile Include="MapObject.cs" />
     <Compile Include="MessageQueue.cs" />
     <Compile Include="Monster.cs" />
     <Compile Include="MonsterEffect.cs" />

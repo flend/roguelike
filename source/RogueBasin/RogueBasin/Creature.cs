@@ -7,27 +7,12 @@ namespace RogueBasin
     /// <summary>
     /// Base class for Creatures.
     /// </summary>
-    public abstract class Creature
+    public abstract class Creature : MapObject
     {
         /// <summary>
         /// The creature's inventory
         /// </summary>
         Inventory inventory;
-
-        /// <summary>
-        /// Level the creature is on
-        /// </summary>
-        int locationLevel;
-
-        /// <summary>
-        /// Point on the map on this level that the creature is on
-        /// </summary>
-        Point locationMap;
-
-        /// <summary>
-        /// ASCII character
-        /// </summary>
-        char representation;
 
         /// <summary>
         /// Is the creature still alive?
@@ -53,42 +38,6 @@ namespace RogueBasin
         /// How much the turn clock has to reach to process
         /// </summary>
         protected const int turnClockLimit = 10000;
-
-        public int LocationLevel
-        {
-            get
-            {
-                return locationLevel;
-            }
-            set
-            {
-                locationLevel = value;
-            }
-        }
-
-        public Point LocationMap
-        {
-            get
-            {
-                return locationMap;
-            }
-            set
-            {
-                locationMap = value;
-            }
-        }
-
-        public char Representation
-        {
-            get
-            {
-                return representation;
-            }
-            set
-            {
-                representation = value;
-            }
-        }
 
         public int Speed
         {
