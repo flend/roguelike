@@ -25,7 +25,7 @@ namespace RogueBasin
         /// </summary>
         public override void ProcessTurn()
         {
-            //If in pursuit state, continue to pursue enemy until it is dead (or creature itself is killed)
+            //If in pursuit state, continue to pursue enemy until it is dead (or creature itself is killed) [no FOV used after initial target selected]
             
             //If in randomWalk state, look for new enemies in FOV.
             //Closest enemy becomes new target

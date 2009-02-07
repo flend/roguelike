@@ -12,6 +12,42 @@ namespace RogueBasin
             this.x = x;
             this.y = y;
         }
+
+        public static bool operator ==(Point i, Point j)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(i, j))
+            {
+                return true;
+            }
+
+            // If one is null, but not both, return false.
+            if (((object)i == null) || ((object)j == null))
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            if (i.x == j.x && i.y == j.y)
+                return true;
+            return false;
+        }
+
+        public static bool operator !=(Point i, Point j)
+        {
+            return !(i == j);
+        }
+
+        public override bool Equals(object obj)
+        {
+            //Value-wise comparison ensured by the cast
+            return this == (Point)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return x ^ y;
+        }
     }
     
     public enum MapTerrain

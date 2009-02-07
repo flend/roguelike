@@ -150,7 +150,8 @@ namespace RogueBasin
 
         /// <summary>
         /// After each move, recalculate the walkable parameter on each map square.
-        /// This could be optimised a lot (far better to set creature's previous location as empty and new location as full)
+        /// Now only required on a change of terrain features
+        /// May need to keep with/without doors version
         /// </summary>
         private void RecalculateMapAfterMove()
         {
@@ -177,6 +178,7 @@ namespace RogueBasin
                 switch (keyCode)
                 {
                     case 'x':
+                        //Exit from game
                         runMapLoop = false;
                         timeAdvances = true;
                         break;
@@ -184,6 +186,13 @@ namespace RogueBasin
                         // Do nothing
                         timeAdvances = true;
                         break;
+                    case 'i':
+                        //Interact with feature
+                        InteractWithFeature();
+                        break;
+
+                        //Debug events
+
                     case 's':
                         //Add a speed up event on the player
                         PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
@@ -206,6 +215,7 @@ namespace RogueBasin
             }
             else
             {
+                //Arrow keys for directions
                 switch (userKey.KeyCode)
                 {
                     case KeyCode.TCODK_KP1:
@@ -248,6 +258,11 @@ namespace RogueBasin
             }
 
             return timeAdvances;
+        }
+
+        private void InteractWithFeature()
+        {
+            Game.Dungeon.PCInteractWithFeature();
         }
 
         private void UpdateScreen()
@@ -341,13 +356,17 @@ namespace RogueBasin
             Game.Dungeon = dungeon;
 
             //Create dungeon map (at least level 1)
-            MapGeneratorBSP mapGen = new MapGeneratorBSP();
+            MapGeneratorBSP mapGen1 = new MapGeneratorBSP();
             //MapGeneratorRogue mapGen = new MapGeneratorRogue();
-            mapGen.Width = 80;
-            mapGen.Height = 25;
+            mapGen1.Width = 80;
+            mapGen1.Height = 25;
+            
+            Map level1 = mapGen1.GenerateMap();
 
-
-            Map level1 = mapGen.GenerateMap();
+            MapGeneratorBSP mapGen2 = new MapGeneratorBSP();
+            mapGen2.Width = 80;
+            mapGen2.Height = 25;
+            Map level2 = mapGen2.GenerateMap();
 
             //Test
             //for (int i = 0; i < 10000; i++)
@@ -356,7 +375,8 @@ namespace RogueBasin
             //}
 
             //Give map to dungeon
-            dungeon.AddMap(level1);
+            dungeon.AddMap(level1); //level 1
+            dungeon.AddMap(level2); //level 2
 
             //Setup PC
             Player player = dungeon.Player;
@@ -379,13 +399,13 @@ namespace RogueBasin
                 Monster creature = new Creatures.Rat();
                 creature.Representation = Convert.ToChar(65 + rand.Next(26));
 
-                int level = 0;
+                int level = rand.Next(2);
                 Point location;
 
                 //Loop until we find an acceptable location and the add works
                 do
                 {
-                    location = mapGen.RandomPointInRoom();
+                    location = mapGen1.RandomPointInRoom();
                 }
                 while (!dungeon.AddMonster(creature, level, location));
             }
@@ -393,7 +413,7 @@ namespace RogueBasin
             //Create features
 
             //Add some random features
-
+            /*
             int noFeatures = rand.Next(5) + 2;
 
             for (int i = 0; i < noFeatures; i++)
@@ -401,17 +421,13 @@ namespace RogueBasin
                 Features.StaircaseUp feature = new Features.StaircaseUp();
 
                 feature.Representation = Convert.ToChar(58 + rand.Next(6));
+                AddFeatureToDungeon(feature, mapGen1, 0);
+            }*/
 
-                int level = 0;
-                Point location;
-
-                //Loop until we find an acceptable location and the add works
-                do
-                {
-                    location = mapGen.RandomPointInRoom();
-                }
-                while (!dungeon.AddFeature(feature, level, location));
-            }
+            //Add staircases to dungeons level 1 and 2
+            AddFeatureToDungeon(new Features.StaircaseDown(), mapGen1, 0);
+            AddFeatureToDungeon(new Features.StaircaseUp(), mapGen2, 1);
+            
 
             //Create objects and start positions
 
@@ -431,11 +447,29 @@ namespace RogueBasin
                 //Loop until we find an acceptable location and the add works
                 do
                 {
-                    location = mapGen.RandomPointInRoom();
+                    location = mapGen1.RandomPointInRoom();
                 }
                 while (!dungeon.AddItem(item, level, location));
             }
         }
 
+        /// <summary>
+        /// Add a feature to the dungeon. Guarantees an acceptable placement.
+        /// Might loop forever if all squares in the dungeon are already taken up
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        void AddFeatureToDungeon(Feature feature, MapGeneratorBSP mapGen, int level)
+        {
+            Point location;
+            //Loop until we find an acceptable location and the add works
+            do
+            {
+                location = mapGen.RandomPointInRoom();
+
+            }
+            while (!dungeon.AddFeature(feature, level, location));
+        }
     }
 }

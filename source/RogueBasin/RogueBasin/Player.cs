@@ -122,5 +122,10 @@ namespace RogueBasin
 
             effects.Add(effect);
         }
+
+        protected override char GetRepresentation()
+        {
+            return '@';
+        }
     }
 }

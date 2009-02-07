@@ -12,7 +12,7 @@ namespace RogueBasin
         /// <summary>
         /// ASCII character
         /// </summary>
-        char representation;
+        char representation = '\0';
 
         /// <summary>
         /// Level the object is on
@@ -54,16 +54,35 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Map char. Stored in derived classes but can also be overridden by setting with this
+        /// </summary>
         public char Representation
         {
             get
             {
-                return representation;
+                if (representation == '\0')
+                {
+                    return GetRepresentation();
+                }
+                else
+                {
+                    return representation;
+                }
             }
             set
             {
                 representation = value;
             }
+        }
+
+        /// <summary>
+        /// Get the representation from the derived class
+        /// </summary>
+        /// <returns></returns>
+        protected virtual char GetRepresentation()
+        {
+            return 'X';
         }
     }
 }

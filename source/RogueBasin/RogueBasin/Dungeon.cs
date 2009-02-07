@@ -166,6 +166,16 @@ namespace RogueBasin
                     return false;
                 }
 
+                //Check another feature isn't there
+                foreach (Feature otherFeature in features)
+                {
+                    if (otherFeature.LocationLevel == feature.LocationLevel &&
+                        otherFeature.LocationMap == feature.LocationMap)
+                    {
+                        return false;
+                    }
+                }
+
                 //Otherwise OK
                 feature.LocationLevel = level;
                 feature.LocationMap = location;
@@ -281,6 +291,17 @@ namespace RogueBasin
             get
             {
                 return levels;
+            }
+        }
+
+        /// <summary>
+        /// Get the number of levels
+        /// </summary>
+        public int NoLevels
+        {
+            get
+            {
+                return levels.Count;
             }
         }
 
@@ -804,6 +825,46 @@ namespace RogueBasin
             {
                 effects.Remove(effect);
             }
+        }
+
+        /// <summary>
+        /// Player requests at interaction with feature
+        /// </summary>
+        internal void PCInteractWithFeature()
+        {
+            //Is there a feature here? Supports > 1 feature / square only by triggering all of them
+            //If there is, pass interaction to feature-specific code
+            foreach (Feature feature in features)
+            {
+                if (feature.LocationLevel == player.LocationLevel &&
+                    feature.LocationMap == player.LocationMap)
+                {
+                    feature.PlayerInteraction(player);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Move the PC down a level
+        /// </summary>
+        /// <returns></returns>
+        internal bool PCDownLevel()
+        {
+            //If we are trying to go deeper than the dungeon exists
+            if (player.LocationLevel + 1 == Game.Dungeon.NoLevels)
+            {
+                LogFile.Log.LogEntry("Tried to go down stairs to level " + (player.LocationLevel + 1).ToString() + " which doesn't exist");
+                Game.MessageQueue.AddMessage("Bizarrely, the stairs don't work.");
+                return false;
+            }
+
+            //Otherwise move down
+
+            //Increment player level
+            //Set player's location to up staircase on lower level
+
+            return true;
         }
     }
 }
