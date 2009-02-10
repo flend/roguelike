@@ -84,5 +84,39 @@ namespace RogueBasin
         {
             return 'X';
         }
+
+        /// <summary>
+        /// Return true if this object and other are in the same place (level and square)
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool InSameSpace(MapObject other)
+        {
+            if (this.LocationLevel == other.LocationLevel &&
+                this.LocationMap == other.LocationMap)
+            {
+                return true;
+            }
+            else 
+                return false;
+        }
+        
+        /// <summary>
+        /// Return true if the object is at the position specified
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="locationMap"></param>
+        /// <returns></returns>
+        public bool IsLocatedAt(int level, Point locationMap)
+        {
+            if (this.LocationLevel == level && this.LocationMap == locationMap)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

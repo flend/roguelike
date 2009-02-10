@@ -79,7 +79,7 @@ namespace RogueBasin
             Point retPoint = new Point(-1, -1);
 
             //If we have both children choose one
-            if (childLeft != null & childRight != null)
+            if (childLeft != null && childRight != null)
             {
 
                 if (rand.Next(2) < 1)

@@ -189,6 +189,7 @@ namespace RogueBasin
                     case 'i':
                         //Interact with feature
                         InteractWithFeature();
+                        timeAdvances = true;
                         break;
 
                         //Debug events
@@ -387,12 +388,16 @@ namespace RogueBasin
             player.Hitpoints = 100;
             player.MaxHitpoints = 100;
 
+            AddFeatureToDungeon(new Features.StaircaseDown(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
+
             //Create creatures and start positions
 
             //Add some random creatures
 
             Random rand = new Random();
-            int noCreatures = rand.Next(10) + 115;
+
+            //THIS SEEMS TO INFINITE LOOP FAR FAR EARLIER THAT IT NEEDS TO
+            int noCreatures = rand.Next(10) + 515;
 
             for (int i = 0; i < noCreatures; i++)
             {
@@ -406,6 +411,7 @@ namespace RogueBasin
                 do
                 {
                     location = mapGen1.RandomPointInRoom();
+                    LogFile.Log.LogEntry("Creature " + i.ToString() + " pos x: " + location.x + " y: " + location.y);
                 }
                 while (!dungeon.AddMonster(creature, level, location));
             }
@@ -425,8 +431,8 @@ namespace RogueBasin
             }*/
 
             //Add staircases to dungeons level 1 and 2
-            AddFeatureToDungeon(new Features.StaircaseDown(), mapGen1, 0);
-            AddFeatureToDungeon(new Features.StaircaseUp(), mapGen2, 1);
+            AddFeatureToDungeonRandomPoint(new Features.StaircaseDown(), mapGen1, 0);
+            AddFeatureToDungeonRandomPoint(new Features.StaircaseUp(), mapGen2, 1);
             
 
             //Create objects and start positions
@@ -460,7 +466,7 @@ namespace RogueBasin
         /// <param name="feature"></param>
         /// <param name="level"></param>
         /// <param name="location"></param>
-        void AddFeatureToDungeon(Feature feature, MapGeneratorBSP mapGen, int level)
+        void AddFeatureToDungeonRandomPoint(Feature feature, MapGeneratorBSP mapGen, int level)
         {
             Point location;
             //Loop until we find an acceptable location and the add works
@@ -470,6 +476,17 @@ namespace RogueBasin
 
             }
             while (!dungeon.AddFeature(feature, level, location));
+        }
+
+        /// <summary>
+        /// Add a feature to the dungeon at a certain place. May fail if something is already there.
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        bool AddFeatureToDungeon(Feature feature, int level, Point location)
+        {
+            return dungeon.AddFeature(feature, level, location);
         }
     }
 }

@@ -83,6 +83,7 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareCanBeEntered(level, location))
                 {
+                    LogFile.Log.LogEntry("AddMonster failure: Square not enterable");
                     return false;
                 }
 
@@ -90,10 +91,16 @@ namespace RogueBasin
                 SquareContents contents = MapSquareContents(level, location);
 
                 if (contents.monster != null)
+                {
+                    LogFile.Log.LogEntry("AddMonster failure: Monster at this square");
                     return false;
+                }
 
                 if (contents.player != null)
+                {
+                    LogFile.Log.LogEntry("AddMonster failure: Player at this square");
                     return false;
+                }
 
                 //Otherwise OK
                 creature.LocationLevel = level;
@@ -201,13 +208,14 @@ namespace RogueBasin
         {
             SquareContents contents = new SquareContents();
 
-            //Check creatures that be blocking
+            //Check creature that be blocking
             foreach (Monster creature in monsters)
             {
                 if (creature.LocationLevel == level &&
                     creature.LocationMap.x == location.x && creature.LocationMap.y == location.y)
                 {
                     contents.monster = creature;
+                    break;
                 }
             }
 
@@ -738,7 +746,8 @@ namespace RogueBasin
 
                 if (destCreature != Player)
                 {
-                    if (Player.LocationMap.x == x && Player.LocationMap.y == y)
+                    if (Player.LocationLevel == originCreature.LocationLevel &&
+                        Player.LocationMap.x == x && Player.LocationMap.y == y)
                     {
                         blockingCreature = Player;
                     }
@@ -846,10 +855,11 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Move the PC down a level
+        /// PC down a down staircase. Is placed at the up staircase on the lower level
+        /// Could be placed in StaircaseDown, if we don't mind making Features publicly accessible
         /// </summary>
         /// <returns></returns>
-        internal bool PCDownLevel()
+        internal bool PCDownStaircase()
         {
             //If we are trying to go deeper than the dungeon exists
             if (player.LocationLevel + 1 == Game.Dungeon.NoLevels)
@@ -862,7 +872,88 @@ namespace RogueBasin
             //Otherwise move down
 
             //Increment player level
+            player.LocationLevel++;
+
+            Feature foundStaircase = null;
             //Set player's location to up staircase on lower level
+            foreach (Feature feature in Features)
+            {
+                if (feature.LocationLevel == player.LocationLevel
+                    && feature as Features.StaircaseUp != null)
+                {
+                    player.LocationMap = feature.LocationMap;
+                    foundStaircase = feature as Features.StaircaseUp;
+                    break;
+                }
+            }
+
+            if (foundStaircase == null)
+            {
+                LogFile.Log.LogEntry("Couldn't find up staircase on level " + (player.LocationLevel).ToString());
+                return true;
+            }
+
+            //Check there is no monster on the stairs
+            //If there is, kill it (for now)
+            foreach (Monster monster in monsters)
+            {
+                if (monster.InSameSpace(foundStaircase))
+                {
+                    KillMonster(monster);
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// PC down an up staircase. Is placed at the down staircase on the higher level
+        /// </summary>
+        /// <returns></returns>
+        internal bool PCUpStaircase()
+        {
+            //If we are trying to up from the highest level
+            if (player.LocationLevel - 1 < 0)
+            {
+                LogFile.Log.LogEntry("Player tried to escape");
+                Game.MessageQueue.AddMessage("You can't escape that easily!");
+                return false;
+            }
+
+            //Otherwise move up
+
+            //Increment player level
+            player.LocationLevel--;
+
+            Feature foundStaircase = null;
+
+            //Set player's location to up staircase on lower level
+            foreach (Feature feature in Features)
+            {
+                if (feature.LocationLevel == player.LocationLevel
+                    && feature as Features.StaircaseDown != null)
+                {
+                    player.LocationMap = feature.LocationMap;
+                    foundStaircase = feature as Features.StaircaseDown;
+                    break;
+                }
+            }
+
+            if (foundStaircase == null)
+            {
+                LogFile.Log.LogEntry("Couldn't find down staircase on level " + (player.LocationLevel).ToString());
+                return true;
+            }
+
+            //Check there is no monster on the stairs
+            //If there is, kill it (for now)
+            foreach (Monster monster in monsters)
+            {
+                if (monster.InSameSpace(foundStaircase))
+                {
+                    KillMonster(monster);
+                }
+            }
 
             return true;
         }

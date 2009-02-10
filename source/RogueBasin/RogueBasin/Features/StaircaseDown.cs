@@ -17,7 +17,7 @@ namespace RogueBasin.Features
         /// <returns></returns>
         public override bool PlayerInteraction(Player player)
         {
-            return Game.Dungeon.PCDownLevel();
+            return Game.Dungeon.PCDownStaircase();
         }
 
         protected override char GetRepresentation()

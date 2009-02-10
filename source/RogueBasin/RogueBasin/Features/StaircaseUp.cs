@@ -18,18 +18,7 @@ namespace RogueBasin.Features
         /// <returns></returns>
         public override bool PlayerInteraction(Player player)
         {
-            //Is this the top level?
-            //If so, tell the player they can't escape yet
-            if (player.LocationLevel == 1)
-            {
-                Game.MessageQueue.AddMessage("You can't escape that easily!");
-                return false;
-            }
-            else
-            {
-                player.LocationLevel--;
-                return true;
-            }
+            return Game.Dungeon.PCDownStaircase();
         }
 
         protected override char GetRepresentation()

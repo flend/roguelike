@@ -45,6 +45,11 @@ namespace RogueBasin
                     //If not, go to non-chase state
                     AIState = SimpleAIStates.RandomWalk;
                 }
+                //Is target on another level (i.e. has escaped down the stairs)
+                else if (currentTarget.LocationLevel != this.LocationLevel)
+                {
+                    AIState = SimpleAIStates.RandomWalk;
+                }
                 else
                 {
                     //Otherwise continue to chase
