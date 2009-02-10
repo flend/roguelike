@@ -83,7 +83,7 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareCanBeEntered(level, location))
                 {
-                    LogFile.Log.LogEntry("AddMonster failure: Square not enterable");
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
                     return false;
                 }
 
@@ -92,13 +92,13 @@ namespace RogueBasin
 
                 if (contents.monster != null)
                 {
-                    LogFile.Log.LogEntry("AddMonster failure: Monster at this square");
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
                     return false;
                 }
 
                 if (contents.player != null)
                 {
-                    LogFile.Log.LogEntry("AddMonster failure: Player at this square");
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
                     return false;
                 }
 
@@ -253,12 +253,14 @@ namespace RogueBasin
             //A wall
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Wall)
             {
+                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Wall", LogDebugLevel.Low);
                 return false;
             }
 
             //Void (outside of map)
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Void)
             {
+                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Void", LogDebugLevel.Low);
                 return false;
             }
 

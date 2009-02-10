@@ -342,7 +342,9 @@ namespace RogueBasin
             {
                 Screen.Instance.ConsoleLine("Error creating log file: " + e.Message);
             }
-                
+
+            //See all debug messages
+            LogFile.Log.DebugLevel = 3;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
@@ -411,7 +413,7 @@ namespace RogueBasin
                 do
                 {
                     location = mapGen1.RandomPointInRoom();
-                    LogFile.Log.LogEntry("Creature " + i.ToString() + " pos x: " + location.x + " y: " + location.y);
+                    LogFile.Log.LogEntryDebug("Creature " + i.ToString() + " pos x: " + location.x + " y: " + location.y, LogDebugLevel.Low);
                 }
                 while (!dungeon.AddMonster(creature, level, location));
             }

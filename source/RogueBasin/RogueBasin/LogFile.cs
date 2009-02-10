@@ -5,6 +5,11 @@ using System.IO;
 
 namespace RogueBasin
 {
+    public enum LogDebugLevel
+    {
+        High = 1, Medium = 2, Low = 3
+    }
+
     public sealed class LogFile
     {
         static LogFile instance = null;
@@ -13,6 +18,8 @@ namespace RogueBasin
         StreamWriter logFile;
 
         bool logFileWorking = false;
+
+        int debugLevel = 0;
 
         LogFile()
         {
@@ -34,6 +41,20 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Debug entry for the log. Will only be displayed if the log verbosity is at least level debugLevel
+        /// </summary>
+        /// <param name="entry"></param>
+        public void LogEntryDebug(string entry, LogDebugLevel entryLevel)
+        {
+            if (debugLevel >= (int)entryLevel)
+                LogEntry(entry);
+        }
+
+        /// <summary>
+        /// Entry for the log
+        /// </summary>
+        /// <param name="entry"></param>
         public void LogEntry(string entry)
         {
             if (!logFileWorking)
@@ -82,6 +103,17 @@ namespace RogueBasin
                     instance = new LogFile();
                 }
                 return instance;
+            }
+        }
+
+        /// <summary>
+        /// Set the level of debugging info to include
+        /// </summary>
+        public int DebugLevel
+        {
+            set
+            {
+                debugLevel = value;
             }
         }
     }
