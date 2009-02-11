@@ -49,6 +49,7 @@
     <Compile Include="Features\StaircaseUp.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Inventory.cs" />
+    <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Items\Potion.cs" />
     <Compile Include="ITurnAI.cs" />
