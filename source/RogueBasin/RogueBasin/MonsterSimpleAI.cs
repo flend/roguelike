@@ -115,7 +115,7 @@ namespace RogueBasin
                     //Otherwise add to list of possible targets
                     creaturesInFOV.Add(monster);
 
-                    LogFile.Log.LogEntry(this.Representation + " spots " + monster.Representation);
+                    LogFile.Log.LogEntryDebug(this.Representation + " spots " + monster.Representation, LogDebugLevel.Medium);
                 }
 
                 //Check PC
@@ -124,7 +124,7 @@ namespace RogueBasin
                     if (currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
                     {
                         creaturesInFOV.Add(Game.Dungeon.Player);
-                        LogFile.Log.LogEntry(this.Representation + " spots " + Game.Dungeon.Player.Representation);
+                        LogFile.Log.LogEntryDebug(this.Representation + " spots " + Game.Dungeon.Player.Representation, LogDebugLevel.Medium);
                     }
                 }
 
@@ -152,7 +152,7 @@ namespace RogueBasin
                     }
 
                     //Start chasing this creature
-                    LogFile.Log.LogEntry(this.Representation + " chases " + closestCreature.Representation);
+                    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
                     ChaseCreature(closestCreature);
                 }
                 else
@@ -271,7 +271,7 @@ namespace RogueBasin
 
         public override CombatResults AttackPlayer(Player player)
         {
-            LogFile.Log.LogEntry(this.Representation + " attacks player.");
+            LogFile.Log.LogEntryDebug(this.Representation + " attacks player.", LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
         }
@@ -279,13 +279,13 @@ namespace RogueBasin
         public override CombatResults AttackMonster(Monster monster)
         {
             string msg = this.Representation + " attacked " + monster.Representation;
-            LogFile.Log.LogEntry(msg);
+            LogFile.Log.LogEntryDebug(msg, LogDebugLevel.Medium);
 
             //Defender always dies
             Game.Dungeon.KillMonster(monster);
 
             msg = this.Representation + " killed " + monster.Representation + " !";
-            LogFile.Log.LogEntry(msg);
+            LogFile.Log.LogEntryDebug(msg, LogDebugLevel.Medium);
             Game.MessageQueue.AddMessage(msg);
 
             return CombatResults.DefenderDied;

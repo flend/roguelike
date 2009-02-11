@@ -84,17 +84,11 @@ namespace RogueBasin
 
                 if (rand.Next(2) < 1)
                 {
-                    if (childLeft != null)
-                    {
-                        retPoint = childLeft.RandomRoomPoint();
-                    }
+                    retPoint = childLeft.RandomRoomPoint();
                 }
                 else
                 {
-                    if (childRight != null)
-                    {
-                        retPoint = childRight.RandomRoomPoint();
-                    }
+                    retPoint = childRight.RandomRoomPoint();
                 }
             }
             //Otherwise do the one we have

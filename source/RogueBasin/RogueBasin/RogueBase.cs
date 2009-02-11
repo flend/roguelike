@@ -344,7 +344,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 3;
+            LogFile.Log.DebugLevel = 2;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
@@ -398,8 +398,8 @@ namespace RogueBasin
 
             Random rand = new Random();
 
-            //THIS SEEMS TO INFINITE LOOP FAR FAR EARLIER THAT IT NEEDS TO
-            int noCreatures = rand.Next(10) + 515;
+            //May infinite loop too early - not sure
+            int noCreatures = rand.Next(10) + 215;
 
             for (int i = 0; i < noCreatures; i++)
             {
@@ -407,12 +407,15 @@ namespace RogueBasin
                 creature.Representation = Convert.ToChar(65 + rand.Next(26));
 
                 int level = rand.Next(2);
-                Point location;
+                Point location = new Point(0, 0);
 
                 //Loop until we find an acceptable location and the add works
                 do
                 {
-                    location = mapGen1.RandomPointInRoom();
+                    if (level == 0)
+                        location = mapGen1.RandomPointInRoom();
+                    else if (level == 1)
+                        location = mapGen2.RandomPointInRoom();
                     LogFile.Log.LogEntryDebug("Creature " + i.ToString() + " pos x: " + location.x + " y: " + location.y, LogDebugLevel.Low);
                 }
                 while (!dungeon.AddMonster(creature, level, location));

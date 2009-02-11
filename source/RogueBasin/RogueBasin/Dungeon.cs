@@ -843,7 +843,8 @@ namespace RogueBasin
         /// </summary>
         internal void PCInteractWithFeature()
         {
-            //Is there a feature here? Supports > 1 feature / square only by triggering all of them
+            //Is there a feature here?
+            //If the interaction causes the player to jump location, the break stops us interacting with a feature in the new location
             //If there is, pass interaction to feature-specific code
             foreach (Feature feature in features)
             {
@@ -851,6 +852,7 @@ namespace RogueBasin
                     feature.LocationMap == player.LocationMap)
                 {
                     feature.PlayerInteraction(player);
+                    break;
                 }
 
             }

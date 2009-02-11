@@ -71,6 +71,14 @@ namespace RogueBasin
             alive = true;
 
             inventory = new Inventory();
+
+            RandomStartTurnClock();
+        }
+
+        //Creatures start with a random amount in their turn clock. This stops them all moving simultaneously (looks strange if the player is fast)
+        private void RandomStartTurnClock()
+        {
+            turnClock = Game.Random.Next(turnClockLimit);
         }
 
         public int SightRadius
