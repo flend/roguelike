@@ -14,6 +14,16 @@ namespace RogueBasin
         //Are we running or have we exited?
         bool runMapLoop = true;
 
+        enum InputState
+        {
+            MapMovement, Inventory
+        }
+
+        /// <summary>
+        /// State determining what functions keys have
+        /// </summary>
+        InputState inputState = InputState.MapMovement;
+
         public RogueBase()
         {
 
@@ -172,92 +182,131 @@ namespace RogueBasin
 
             KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
-            if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+            //Each state has different keys
+
+            switch (inputState)
             {
-                char keyCode = (char)userKey.Character;
-                switch (keyCode)
-                {
-                    case 'x':
-                        //Exit from game
-                        runMapLoop = false;
-                        timeAdvances = true;
-                        break;
-                    case '.':
-                        // Do nothing
-                        timeAdvances = true;
-                        break;
-                    case 'i':
-                        //Interact with feature
-                        InteractWithFeature();
-                        timeAdvances = true;
-                        break;
 
-                        //Debug events
+                //Normal movement on the map
+                case InputState.MapMovement:
 
-                    case 's':
-                        //Add a speed up event on the player
-                        PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
-                        Game.Dungeon.Player.AddEffect(speedUp);
-                        UpdateScreen();
-                        break;
-                    case 'h':
-                        //Add a healing event on the player
-                        PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
-                        Game.Dungeon.Player.AddEffect(healing);
-                        UpdateScreen();
-                        break;
-                    case 'z':
-                        //Add an anti-healing event on the player
-                        PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
-                        Game.Dungeon.Player.AddEffect(zhealing);
-                        UpdateScreen();
-                        break;
-                }
+                    if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                    {
+                        char keyCode = (char)userKey.Character;
+                        switch (keyCode)
+                        {
+                            case 'x':
+                                //Exit from game
+                                runMapLoop = false;
+                                timeAdvances = true;
+                                break;
+                            case '.':
+                                // Do nothing
+                                timeAdvances = true;
+                                break;
+                            case 'i':
+                                //Interact with feature
+                                InteractWithFeature();
+                                timeAdvances = true;
+                                break;
+                            case 'j':
+                                //Set up the inventory
+                                inputState = InputState.Inventory;
+                                Screen.Instance.DisplayInventory = true;
+                                Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
+                                UpdateScreen();
+                                timeAdvances = false;
+                                break;
+
+                            //Debug events
+
+                            case 's':
+                                //Add a speed up event on the player
+                                PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
+                                Game.Dungeon.Player.AddEffect(speedUp);
+                                UpdateScreen();
+                                break;
+                            case 'h':
+                                //Add a healing event on the player
+                                PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                                Game.Dungeon.Player.AddEffect(healing);
+                                UpdateScreen();
+                                break;
+                            case 'z':
+                                //Add an anti-healing event on the player
+                                PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
+                                Game.Dungeon.Player.AddEffect(zhealing);
+                                UpdateScreen();
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        //Arrow keys for directions
+                        switch (userKey.KeyCode)
+                        {
+                            case KeyCode.TCODK_KP1:
+                                timeAdvances = dungeon.PCMove(-1, 1);
+                                break;
+
+                            case KeyCode.TCODK_KP3:
+                                timeAdvances = dungeon.PCMove(1, 1);
+                                break;
+
+                            case KeyCode.TCODK_KP5:
+                                //Don't move
+                                timeAdvances = true;
+                                break;
+
+                            case KeyCode.TCODK_KP7:
+                                timeAdvances = dungeon.PCMove(-1, -1);
+                                break;
+                            case KeyCode.TCODK_KP9:
+                                timeAdvances = dungeon.PCMove(1, -1);
+                                break;
+
+                            case KeyCode.TCODK_LEFT:
+                            case KeyCode.TCODK_KP4:
+                                timeAdvances = dungeon.PCMove(-1, 0);
+                                break;
+                            case KeyCode.TCODK_RIGHT:
+                            case KeyCode.TCODK_KP6:
+                                timeAdvances = dungeon.PCMove(1, 0);
+                                break;
+                            case KeyCode.TCODK_UP:
+                            case KeyCode.TCODK_KP8:
+                                timeAdvances = dungeon.PCMove(0, -1);
+                                break;
+                            case KeyCode.TCODK_KP2:
+                            case KeyCode.TCODK_DOWN:
+                                timeAdvances = dungeon.PCMove(0, 1);
+                                break;
+                        }
+                    }
+                    break;
+
+                //Inventory is displayed
+                case InputState.Inventory:
+
+                    if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                    {
+                        char keyCode = (char)userKey.Character;
+                        switch (keyCode)
+                        {
+                            case 'x':
+                                //Exit out of inventory
+                                inputState = InputState.MapMovement;
+                                Screen.Instance.DisplayInventory = false;
+                                Screen.Instance.CurrentInventory = null;
+                                UpdateScreen();
+                                timeAdvances = false;
+                                break;
+                        }
+                    }
+
+                    break;
             }
-            else
-            {
-                //Arrow keys for directions
-                switch (userKey.KeyCode)
-                {
-                    case KeyCode.TCODK_KP1:
-                        timeAdvances = dungeon.PCMove(-1, 1);
-                        break;
-
-                    case KeyCode.TCODK_KP3:
-                        timeAdvances = dungeon.PCMove(1, 1);
-                        break;
-
-                    case KeyCode.TCODK_KP5:
-                        //Don't move
-                        timeAdvances = true;
-                        break;
-
-                    case KeyCode.TCODK_KP7:
-                        timeAdvances = dungeon.PCMove(-1, -1);
-                        break;
-                    case KeyCode.TCODK_KP9:
-                        timeAdvances = dungeon.PCMove(1, -1);
-                        break;
-
-                    case KeyCode.TCODK_LEFT:
-                    case KeyCode.TCODK_KP4:
-                        timeAdvances = dungeon.PCMove(-1, 0);
-                        break;
-                    case KeyCode.TCODK_RIGHT:
-                    case KeyCode.TCODK_KP6:
-                        timeAdvances = dungeon.PCMove(1, 0);
-                        break;
-                    case KeyCode.TCODK_UP:
-                    case KeyCode.TCODK_KP8:
-                        timeAdvances = dungeon.PCMove(0, -1);
-                        break;
-                    case KeyCode.TCODK_KP2:
-                    case KeyCode.TCODK_DOWN:
-                        timeAdvances = dungeon.PCMove(0, 1);
-                        break;
-                }
-            }
-
+            
             return timeAdvances;
         }
 
@@ -390,6 +439,10 @@ namespace RogueBasin
             player.Hitpoints = 100;
             player.MaxHitpoints = 100;
 
+            //Give the player some items
+            player.PickUpItem(new Items.Potion());
+
+            //Add a down staircase where the player is standing
             AddFeatureToDungeon(new Features.StaircaseDown(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
 
             //Create creatures and start positions

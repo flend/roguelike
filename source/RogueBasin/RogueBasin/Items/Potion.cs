@@ -15,5 +15,15 @@ namespace RogueBasin.Items
         {
             return 10;
         }
+
+        public override string SingleItemDescription
+        {
+            get { return "potion"; }
+        }
+
+        public override string GroupItemDescription
+        {
+            get { return "potions"; }
+        }
     }
 }

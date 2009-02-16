@@ -143,5 +143,16 @@ namespace RogueBasin
         {
             return inventory.Items;
         }
+
+        /// <summary>
+        /// Inventory
+        /// </summary>
+        public Inventory Inventory
+        {
+            get
+            {
+                return inventory;
+            }
+        }
     }
 }

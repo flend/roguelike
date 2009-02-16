@@ -10,14 +10,19 @@ namespace RogueBasin
     /// </summary>
     public class InventoryListing
     {
-        string description;
+        /// <summary>
+        /// Parent inventory
+        /// </summary>
+        Inventory inventory;
+
         int weight;
 
         List<int> itemIndex;
 
-        public InventoryListing()
+        public InventoryListing(Inventory myInventory)
         {
             itemIndex = new List<int>();
+            inventory = myInventory;
         }
 
         /// <summary>
@@ -36,17 +41,26 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Description suitable for user display (e.g. uncursed short swords)
+        /// Description suitable for user display (e.g. 2 uncursed short swords)
         /// </summary>
         public string Description
         {
-            set
-            {
-                description = value;
-            }
             get
             {
-                return description;
+                //Build the description from the number of objects
+                //and the single or group item description (taken from the Item reference)
+
+                string descString = Number.ToString() + " ";
+
+                if (Number == 1)
+                {
+                    descString += inventory.Items[itemIndex[0]].SingleItemDescription;
+                }
+                else
+                {
+                    descString += inventory.Items[itemIndex[0]].GroupItemDescription;
+                }
+                return descString;
             }
         }
 

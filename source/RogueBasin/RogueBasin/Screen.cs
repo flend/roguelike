@@ -51,8 +51,17 @@ namespace RogueBasin {
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
 
+        //Inventory
+        Point inventoryTL;
+        Point inventoryTR;
+        Point inventoryBL;
 
+        bool displayInventory;
+        int selectedInventoryIndex;
+        int topInventoryIndex;
 
+        Inventory currentInventory;
+        
         public static Screen Instance
         {
             get
@@ -82,6 +91,10 @@ namespace RogueBasin {
             worldTickOffset = new Point(30, 0);
 
             levelOffset = new Point(40, 0);
+
+            inventoryTL = new Point(5, 5);
+            inventoryTR = new Point(75, 5);
+            inventoryBL = new Point(5, 30);
 
             terrainChars = new Dictionary<MapTerrain, char>();
             terrainChars.Add(MapTerrain.Empty, '.');
@@ -137,17 +150,18 @@ namespace RogueBasin {
             //Clear screen
             rootConsole.Clear();
 
+            //Draw the map screen
+
+            //Draw terrain
             DrawMap(dungeon.PCMap);
 
             //Draw fixed features
             DrawFeatures(dungeon.Features);
 
             //Draw items
-
             DrawItems(dungeon.Items);
 
             //Draw creatures
-
             DrawCreatures(dungeon.Monsters);
 
             //Draw PC
@@ -159,6 +173,49 @@ namespace RogueBasin {
 
             //Draw Stats
             DrawStats(dungeon.Player);
+
+            //Draw any overlay screens
+            if (displayInventory)
+                DrawInventory();
+
+        }
+
+        /// <summary>
+        /// Display inventory overlay
+        /// </summary>
+        private void DrawInventory()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame
+            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //List the inventory
+            
+            //Inventory area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            List<InventoryListing> inventoryList = currentInventory.InventoryListing;
+
+            for (int i = 0; i < inventoryListH; i++)
+            {
+                int inventoryIndex = topInventoryIndex + i;
+
+                //End of inventory
+                if (inventoryIndex == inventoryList.Count)
+                    break;
+
+                //Create entry string
+                char selectionChar = (char)((int)'a' + i);
+                string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description;
+
+                //Print entry
+                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+            }
         }
 
         private void DrawStats(Player player)
@@ -467,5 +524,36 @@ namespace RogueBasin {
             rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, width - msgDisplayTopLeft.x, msgDisplayNumLines, true);
         }
 
+        public bool DisplayInventory
+        {
+            set
+            {
+                displayInventory = value;
+            }
+        }
+
+        public int SelectedInventoryIndex
+        {
+            set
+            {
+                selectedInventoryIndex = value;
+            }
+        }
+
+        public int TopInventoryIndex
+        {
+            set
+            {
+                topInventoryIndex = value;
+            }
+        }
+
+        public Inventory CurrentInventory
+        {
+            set
+            {
+                currentInventory = value;
+            }
+        }
     }
 }

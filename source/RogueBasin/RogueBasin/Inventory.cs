@@ -4,23 +4,12 @@ using System.Text;
 
 namespace RogueBasin
 {
-    /// <summary>
-    /// Internal class
-    /// </summary>
-    class InventoryGroup
-    {
-        public List<int> indices;
 
-        public InventoryGroup()
-        {
-            indices = new List<int>();
-        }
-    }
 
     /// <summary>
     /// An object store. Can be on a container, creature or player
     /// </summary>
-    class Inventory
+    public class Inventory
     {
         List<Item> items;
 
@@ -73,8 +62,8 @@ namespace RogueBasin
             //List of groups of similar items
             inventoryListing.Clear();
 
-            //Group similar items into categories
-            for(int i=0;i<items.Count;i++)
+            //Group similar items (based on type) into categories (InventoryListing)
+            for (int i = 0; i < items.Count; i++)
             {
                 Item item = items[i];
 
@@ -87,7 +76,8 @@ namespace RogueBasin
                     Type itemType = item.GetType();
 
                     //Look only at the first item in the group (stored by index). All the items in this group must have the same type
-                    if(items[group.ItemIndex[0]].GetType() == item.GetType()) {
+                    if (items[group.ItemIndex[0]].GetType() == item.GetType())
+                    {
                         group.ItemIndex.Add(i);
                         foundGroup = true;
                         break;
@@ -97,8 +87,9 @@ namespace RogueBasin
                 //If there is no group, create a new one
                 if (!foundGroup)
                 {
-                    InventoryListing newGroup = new InventoryListing();
+                    InventoryListing newGroup = new InventoryListing(this);
                     newGroup.ItemIndex.Add(i);
+                    inventoryListing.Add(newGroup);
                 }
             }
         }

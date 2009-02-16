@@ -9,7 +9,8 @@ namespace RogueBasin
     /// </summary>
     public abstract class Item : MapObject
     {
-        public Item() {
+        public Item()
+        {
             inInventory = false;
         }
 
@@ -40,5 +41,21 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         public abstract int GetWeight();
+
+        /// <summary>
+        /// Single item description, e.g. 'sword'
+        /// </summary>
+        public abstract string SingleItemDescription
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Group item description, e.g. 'swords'
+        /// </summary>
+        public abstract string GroupItemDescription
+        {
+            get;
+        }
     }
 }
