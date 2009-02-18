@@ -16,7 +16,7 @@ namespace RogueBasin
 
         enum InputState
         {
-            MapMovement, Inventory
+            MapMovement, InventoryShow, InventorySelect
         }
 
         /// <summary>
@@ -211,9 +211,8 @@ namespace RogueBasin
                                 break;
                             case 'j':
                                 //Set up the inventory
-                                inputState = InputState.Inventory;
-                                Screen.Instance.DisplayInventory = true;
-                                Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
+                                inputState = InputState.InventoryShow;
+                                SetPlayerInventoryScreen();
                                 UpdateScreen();
                                 timeAdvances = false;
                                 break;
@@ -286,28 +285,44 @@ namespace RogueBasin
                     break;
 
                 //Inventory is displayed
-                case InputState.Inventory:
+                case InputState.InventoryShow:
 
                     if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                     {
                         char keyCode = (char)userKey.Character;
-                        switch (keyCode)
+
+                        //Exit out of inventory
+                        if (keyCode == 'x')
                         {
-                            case 'x':
-                                //Exit out of inventory
-                                inputState = InputState.MapMovement;
-                                Screen.Instance.DisplayInventory = false;
-                                Screen.Instance.CurrentInventory = null;
-                                UpdateScreen();
-                                timeAdvances = false;
-                                break;
+                            inputState = InputState.MapMovement;
+                            DisablePlayerInventoryScreen();
+                            UpdateScreen();
+                            timeAdvances = false;
                         }
                     }
 
                     break;
+                
+                //Select an item in the inventory
+                //case InputState.InventoryShow:
+                //    break;
             }
             
             return timeAdvances;
+        }
+
+        private static void DisablePlayerInventoryScreen()
+        {
+            Screen.Instance.DisplayInventory = false;
+            Screen.Instance.CurrentInventory = null;
+        }
+
+        private static void SetPlayerInventoryScreen()
+        {
+            Screen.Instance.DisplayInventory = true;
+            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
+            Screen.Instance.InventoryTitle = "Inventory";
+            Screen.Instance.InventoryInstructions = "Press (x) to exit";
         }
 
         private void InteractWithFeature()

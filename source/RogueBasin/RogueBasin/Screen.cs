@@ -61,6 +61,8 @@ namespace RogueBasin {
         int topInventoryIndex;
 
         Inventory currentInventory;
+        string inventoryTitle;
+        string inventoryInstructions;
         
         public static Screen Instance
         {
@@ -190,6 +192,12 @@ namespace RogueBasin {
 
             //Draw frame
             rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
 
             //List the inventory
             
@@ -553,6 +561,28 @@ namespace RogueBasin {
             set
             {
                 currentInventory = value;
+            }
+        }
+
+        /// <summary>
+        /// String displayed at the top of the inventory
+        /// </summary>
+        public string InventoryTitle
+        {
+            set
+            {
+                inventoryTitle = value;
+            }
+        }
+
+        /// <summary>
+        /// String displayed at the bottom of the inventory
+        /// </summary>
+        public string InventoryInstructions
+        {
+            set
+            {
+                inventoryInstructions = value;
             }
         }
     }
