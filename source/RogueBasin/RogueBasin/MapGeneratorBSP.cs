@@ -53,6 +53,10 @@ namespace RogueBasin
         const double minFill = 0.7;
         const double maxFill = 1.0;
         
+        //Tree depth counter
+        int treeDepth;
+        bool newConnectionMade;
+
         public MapNode(int x, int y, int width, int height)
         {
             this.x = x;
@@ -286,6 +290,56 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Add an extra connecting corridor somewhere on the map. Returns whether a new connection was drawn (may fail due to randomness, in which case retry)
+        /// </summary>
+        /// <param name="baseMap"></param>
+        public bool AddRandomConnection(Map baseMap)
+        {
+            treeDepth = 0;
+            newConnectionMade = false;
+            AddExtraConnectionBetweenChildren(baseMap);
+
+            return newConnectionMade;
+        }
+
+        public void AddExtraConnectionBetweenChildren(Map baseMap) {
+
+            //Wander down the tree to a leaf, keeping track of the number of nodes with 2 children (that could be possible connections)
+            //When we come back down the tree, try to get one of the 2 children nodes to draw a connection
+
+            if (childLeft != null && childRight != null)
+            {
+                treeDepth++;
+
+                //Pick one node at random
+                if(MapGeneratorBSP.rand.Next(2) < 1) {
+                    childLeft.AddExtraConnectionBetweenChildren(baseMap);
+                }
+                else {
+                    childRight.AddExtraConnectionBetweenChildren(baseMap);
+                }
+
+                //We reach here after we have hit the leaf
+                //If we haven't made a connection yet there's a chance we will connect our children
+
+                if (newConnectionMade == false &&
+                MapGeneratorBSP.rand.Next(treeDepth) < 1)
+                {
+                    newConnectionMade = true;
+
+                    //Draw a connecting corridor between our two children
+                    DrawConnectingCorriderBetweenChildren(baseMap);
+                }
+            }
+            else if(childLeft != null) {
+                childLeft.AddExtraConnectionBetweenChildren(baseMap);
+            }
+            else if(childRight != null) {
+                childRight.AddExtraConnectionBetweenChildren(baseMap);
+            }
+        }
+
         public void DrawCorridorConnectingChildren(Map baseMap)
         {
             //Children should do their own drawing first
@@ -301,6 +355,12 @@ namespace RogueBasin
             if (childLeft == null || childRight == null)
                 return;
 
+            //Draw a connecting corridor between our two children
+            DrawConnectingCorriderBetweenChildren(baseMap);
+        }
+
+        private void DrawConnectingCorriderBetweenChildren(Map baseMap)
+        {
             Random rand = MapGeneratorBSP.rand;
 
             if (split == SplitType.Horizontal)
@@ -340,7 +400,7 @@ namespace RogueBasin
                             leftX = i;
                             break;
                         }
-                        //A corridor 'seen coming' we can short cut too
+                        //A corridor 'seen coming' we can short cut to
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
                             leftX = i - 1;
@@ -398,6 +458,7 @@ namespace RogueBasin
                     }
                 } while (rightX == -1);
 
+                //Screen.Instance.DrawMapDebugHighlight(baseMap, leftX, leftY, rightX, rightY);
 
                 //Now route a L corridor from (leftX, leftY) to (rightX, rightY)
                 //The L bend can occur within X: leftSafeX -> rightSafeX
@@ -413,7 +474,7 @@ namespace RogueBasin
                     notValidPath = false;
 
                     //L bend set randonly
-                    int lBendX = leftX + 1 + rand.Next(rightX - leftX - 1);
+                    int lBendX = leftX + 1 + rand.Next(rightX - leftX);
 
                     for (int i = leftX; i <= lBendX; i++)
                     {
@@ -449,7 +510,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
-                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Void)
+                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain == MapTerrain.Wall)
                         {
                             notValidPath = true;
                             break;
@@ -576,7 +637,7 @@ namespace RogueBasin
                     notValidPath = false;
 
                     //L bend set randonly
-                    int lBendY = leftY + 1 + rand.Next(rightY - leftY - 1);
+                    int lBendY = leftY + 1 + rand.Next(rightY - leftY);
 
                     for (int i = leftY; i <= lBendY; i++)
                     {
@@ -612,7 +673,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
-                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Void)
+                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain == MapTerrain.Wall)
                         {
                             notValidPath = true;
                             break;
@@ -653,7 +714,7 @@ namespace RogueBasin
             rand = new Random();
         }
 
-        public Map GenerateMap()
+        public Map GenerateMap(int extraConnections)
         {
             LogFile.Log.LogEntry(String.Format("Generating BSP dungeon"));
 
@@ -668,10 +729,17 @@ namespace RogueBasin
             rootNode.DrawRoomAtLeaf(baseMap);
 
             //debug
-            //RogueBase.screen.DrawMap(baseMap);
+            //Screen.Instance.DrawMapDebug(baseMap);
 
             //Draw connecting corridors
             rootNode.DrawCorridorConnectingChildren(baseMap);
+
+            //Add any extra connecting corridors as specified
+
+            for (int i = 0; i < extraConnections; i++)
+            {
+                rootNode.AddRandomConnection(baseMap);
+            }
 
             //Set which squares are light blocking
             //Now done during creation

@@ -454,6 +454,55 @@ namespace RogueBasin {
             rootConsole.Flush();
         }
 
+        //Draw a map only (useful for debugging)
+        public void DrawMapDebugHighlight(Map map, int x1, int y1, int x2, int y2)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Clear screen
+            rootConsole.Clear();
+
+            for (int i = 0; i < map.width; i++)
+            {
+                for (int j = 0; j < map.height; j++)
+                {
+                    int screenX = mapTopLeft.x + i;
+                    int screenY = mapTopLeft.y + j;
+
+                    char screenChar = terrainChars[map.mapSquares[i, j].Terrain];
+
+                    Color drawColor = inFOVTerrainColor;
+
+                    if (i == x1 && j == y1)
+                    {
+                        drawColor = ColorPresets.Red;
+                    }
+
+                    if (i == x2 && j == y2)
+                    {
+                        drawColor = ColorPresets.Red;
+                    }
+                    rootConsole.ForegroundColor = drawColor;
+                    /*
+                    if (!map.mapSquares[i, j].BlocksLight)
+                    {
+                        //In FOV
+                        rootConsole.ForegroundColor = inFOVTerrainColor;
+                    }
+                    else
+                    {
+                        //Not in FOV but seen
+                        rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
+                    }*/
+                    rootConsole.PutChar(screenX, screenY, screenChar);
+                }
+            }
+
+            //Flush the console
+            rootConsole.Flush();
+        }
+
         private void DrawMap(Map map)
         {
             //Get screen handle

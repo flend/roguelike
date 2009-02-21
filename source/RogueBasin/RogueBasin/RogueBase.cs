@@ -422,18 +422,22 @@ namespace RogueBasin
             dungeon = new Dungeon();
             Game.Dungeon = dungeon;
 
+            //Randomer
+            Random rand = new Random();
+
             //Create dungeon map (at least level 1)
             MapGeneratorBSP mapGen1 = new MapGeneratorBSP();
             //MapGeneratorRogue mapGen = new MapGeneratorRogue();
             mapGen1.Width = 80;
             mapGen1.Height = 25;
-            
-            Map level1 = mapGen1.GenerateMap();
+            int extraCorridors = rand.Next(10);
+
+            Map level1 = mapGen1.GenerateMap(extraCorridors);
 
             MapGeneratorBSP mapGen2 = new MapGeneratorBSP();
             mapGen2.Width = 80;
             mapGen2.Height = 25;
-            Map level2 = mapGen2.GenerateMap();
+            Map level2 = mapGen2.GenerateMap(extraCorridors);
 
             //Test
             //for (int i = 0; i < 10000; i++)
@@ -464,7 +468,6 @@ namespace RogueBasin
 
             //Add some random creatures
 
-            Random rand = new Random();
 
             //May infinite loop too early - not sure
             int noCreatures = rand.Next(10) + 215;
