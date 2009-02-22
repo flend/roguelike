@@ -741,6 +741,9 @@ namespace RogueBasin
                 rootNode.AddRandomConnection(baseMap);
             }
 
+            //Turn corridors into normal squares and surround with walls
+            CorridorsIntoRooms();
+
             //Set which squares are light blocking
             //Now done during creation
             //SetLightBlocking(baseMap);
@@ -749,6 +752,81 @@ namespace RogueBasin
             baseMap.PCStartLocation = rootNode.RandomRoomPoint();
 
             return baseMap;
+        }
+
+        /// <summary>
+        /// Turn corridors into little rooms
+        /// </summary>
+        private void CorridorsIntoRooms()
+        {
+            //Surround each corridor edge with walls
+            //i.e. fill any adjacent (inc diagonals) void with walls
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Corridor)
+                    {
+                        int tx = i - 1;
+                        int ty = j - 1;
+                        int bx = i + 1;
+                        int by = j + 1;
+
+                        if (tx >= 0 && ty >= 0 &&
+                            baseMap.mapSquares[tx, ty].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[tx, ty].Terrain = MapTerrain.Wall;
+                        }
+                        if (ty >= 0 &&
+                            baseMap.mapSquares[i, ty].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[i, ty].Terrain = MapTerrain.Wall;
+                        }
+                        if (ty >= 0 && bx < width &&
+                            baseMap.mapSquares[bx, ty].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[bx, ty].Terrain = MapTerrain.Wall;
+                        }
+                        if (tx >= 0 &&
+                            baseMap.mapSquares[tx, j].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[tx, j].Terrain = MapTerrain.Wall;
+                        }
+                        if (bx < width &&
+                            baseMap.mapSquares[bx, j].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[bx, j].Terrain = MapTerrain.Wall;
+                        }
+                        if (by < height && tx >= 0 &&
+                            baseMap.mapSquares[tx, by].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[tx, by].Terrain = MapTerrain.Wall;
+                        }
+                        if (by < height &&
+                            baseMap.mapSquares[i, by].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[i, by].Terrain = MapTerrain.Wall;
+                        }
+                        if (by < height && bx < width &&
+                            baseMap.mapSquares[bx, by].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[bx, by].Terrain = MapTerrain.Wall;
+                        }
+                    }
+                }
+            }
+
+            //Now turn all corridors into normal floor
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Corridor)
+                    {
+                        baseMap.mapSquares[i, j].Terrain = MapTerrain.Empty;
+                    }
+                }
+            }
         }
 
         private void SetLightBlocking(Map baseMap)
