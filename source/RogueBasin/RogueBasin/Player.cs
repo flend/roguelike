@@ -138,12 +138,13 @@ namespace RogueBasin
             int itemIndex = selectedGroup.ItemIndex[0];
             Item itemToUse = Inventory.Items[itemIndex];
 
-            bool usedSuccessfully = itemToUse.Use(Game.Dungeon.Player);
+            bool usedSuccessfully = itemToUse.Use(this);
 
             if (itemToUse.UsedUp)
             {
                 //Remove item from inventory and don't drop on floor
                 Inventory.RemoveItem(itemToUse);
+                Game.Dungeon.RemoveItem(itemToUse);
             }
 
             return usedSuccessfully;

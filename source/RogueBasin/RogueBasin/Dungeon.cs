@@ -859,6 +859,27 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Return an item if there is one at the requested square, or return null if not
+        /// </summary>
+        /// <param name="locationLevel"></param>
+        /// <param name="locationMap"></param>
+        /// <returns></returns>
+        internal Item ItemAtSpace(int locationLevel, Point locationMap)
+        {
+            foreach (Item item in items)
+            {
+                if (item.LocationLevel == locationLevel &&
+                    item.LocationMap == locationMap &&
+                    !item.InInventory)
+                {
+                    return item;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// PC down a down staircase. Is placed at the up staircase on the lower level
         /// Could be placed in StaircaseDown, if we don't mind making Features publicly accessible
         /// </summary>
@@ -960,6 +981,11 @@ namespace RogueBasin
             }
 
             return true;
+        }
+
+        internal void RemoveItem(Item itemToUse)
+        {
+            items.Remove(itemToUse);
         }
     }
 }

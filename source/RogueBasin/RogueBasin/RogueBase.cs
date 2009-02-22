@@ -228,7 +228,22 @@ namespace RogueBasin
                                 if(!timeAdvances)
                                     UpdateScreen();
                                 break;
-
+                            case ',':
+                                //Pick up item
+                                timeAdvances = PickUpItem();
+                                //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
+                                if (!timeAdvances)
+                                    UpdateScreen();
+                                break;
+                            case 'd':
+                                //Drop item
+                                SetPlayerInventorySelectScreen();
+                                UpdateScreen();
+                                timeAdvances = DropItem();
+                                DisablePlayerInventoryScreen();
+                                if (!timeAdvances)
+                                    UpdateScreen();
+                                break;
 
                             //Debug events
 
@@ -369,6 +384,69 @@ namespace RogueBasin
             bool usedSuccessfully = Game.Dungeon.Player.UseItem(selectedGroup);
 
             return usedSuccessfully;
+        }
+
+        /// <summary>
+        /// Pick up an item if there is one in this square
+        /// </summary>
+        /// <returns></returns>
+        private bool PickUpItem()
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
+            Item itemToPickUp = dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap);
+
+            if (itemToPickUp == null)
+                return false;
+
+            //Add item to PC inventory
+            player.Inventory.AddItem(itemToPickUp);
+
+            //Message
+            Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up.");
+
+            return true;
+        }
+
+        /// <summary>
+        /// Drop an item from inventory
+        /// </summary>
+        /// <returns></returns>
+        private bool DropItem()
+        {
+            //User selects which item to use
+            int chosenIndex = PlayerChooseFromInventory();
+
+            //Player exited
+            if (chosenIndex == -1)
+                return false;
+
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
+            Inventory playerInventory = player.Inventory;
+
+            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
+            Item selectedItem = playerInventory.Items[selectedGroup.ItemIndex[0]];
+
+            //Check there is no item here already
+            if(dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null) {
+                Game.MessageQueue.AddMessage("Can't drop - already an item here!");
+                return false;
+            }
+
+            //Remove from player inventory
+            playerInventory.RemoveItem(selectedItem);
+
+            //Drop the item here
+            selectedItem.InInventory = false;
+            selectedItem.LocationLevel = player.LocationLevel;
+            selectedItem.LocationMap = player.LocationMap;
+
+            Game.MessageQueue.AddMessage(selectedItem.SingleItemDescription + " dropped.");
+
+            return true;
         }
 
         /// <summary>
@@ -536,7 +614,7 @@ namespace RogueBasin
             player.MaxHitpoints = 100;
 
             //Give the player some items
-            player.PickUpItem(new Items.Potion());
+            //player.PickUpItem(new Items.Potion());
 
             //Add a down staircase where the player is standing
             AddFeatureToDungeon(new Features.StaircaseDown(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
@@ -598,7 +676,7 @@ namespace RogueBasin
             {
                 Items.Potion item = new Items.Potion();
 
-                item.Representation = Convert.ToChar(33 + rand.Next(12));
+                //item.Representation = Convert.ToChar(33 + rand.Next(12));
 
                 int level = 0;
                 Point location;

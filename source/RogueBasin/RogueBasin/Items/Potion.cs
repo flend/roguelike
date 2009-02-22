@@ -55,5 +55,10 @@ namespace RogueBasin.Items
         {
             get { return usedUp; }
         }
+
+        protected override char GetRepresentation()
+        {
+            return '!';
+        }
     }
 }
