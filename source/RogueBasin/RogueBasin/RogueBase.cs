@@ -216,6 +216,19 @@ namespace RogueBasin
                                 UpdateScreen();
                                 timeAdvances = false;
                                 break;
+                            case 'u':
+                                //Use an inventory item
+                                SetPlayerInventorySelectScreen();
+                                UpdateScreen();
+                                //This uses the generic 'select from inventory' input loop
+                                //Time advances if the item was used successfully
+                                timeAdvances = UseItem();
+                                DisablePlayerInventoryScreen();
+                                //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
+                                if(!timeAdvances)
+                                    UpdateScreen();
+                                break;
+
 
                             //Debug events
 
@@ -325,10 +338,74 @@ namespace RogueBasin
             Screen.Instance.InventoryInstructions = "Press (x) to exit";
         }
 
+        private void SetPlayerInventorySelectScreen()
+        {
+            Screen.Instance.DisplayInventory = true;
+            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
+            Screen.Instance.InventoryTitle = "Inventory";
+            Screen.Instance.InventoryInstructions = "Press the letter of an item to select or (x) to exit";
+        }
+
         private void InteractWithFeature()
         {
             Game.Dungeon.PCInteractWithFeature();
         }
+
+        /// <summary>
+        /// Player uses item. Returns true if item was used and time should advance
+        /// </summary>
+        private bool UseItem()
+        {
+            //User selects which item to use
+            int chosenIndex = PlayerChooseFromInventory();
+
+            //Player exited
+            if (chosenIndex == -1)
+                return false;
+
+            Inventory playerInventory = Game.Dungeon.Player.Inventory;
+            
+            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
+            bool usedSuccessfully = Game.Dungeon.Player.UseItem(selectedGroup);
+
+            return usedSuccessfully;
+        }
+
+        /// <summary>
+        /// Returns the index of the inventory group selected or -1 to exit
+        /// </summary>
+        /// <returns></returns>
+        private int PlayerChooseFromInventory()
+        {
+            //Player presses a key from a-w to select an inventory listing or x to exit
+
+            //Check how many items are available
+            Inventory playerInventory = Game.Dungeon.Player.Inventory;
+            int numInventoryListing = playerInventory.InventoryListing.Count;
+
+            do {
+
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+            
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR) {
+                    
+                    char keyCode = (char)userKey.Character;
+
+                    if (keyCode == 'x')
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        int charIndex = (int)keyCode - (int)'a';
+                        if (charIndex < numInventoryListing && charIndex < 24)
+                            return charIndex;
+
+                    }
+                }
+            } while (true);
+        }
+
 
         private void UpdateScreen()
         {

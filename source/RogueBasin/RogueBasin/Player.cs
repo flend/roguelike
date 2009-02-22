@@ -127,5 +127,26 @@ namespace RogueBasin
         {
             return '@';
         }
+
+        /// <summary>
+        /// Use the item group. Function is responsible for deleting the item if used up etc. Return true if item was used successfully and time should be advanced.
+        /// </summary>
+        /// <param name="selectedGroup"></param>
+        internal bool UseItem(InventoryListing selectedGroup)
+        {
+            //For now, we use the first item in any stack only
+            int itemIndex = selectedGroup.ItemIndex[0];
+            Item itemToUse = Inventory.Items[itemIndex];
+
+            bool usedSuccessfully = itemToUse.Use(Game.Dungeon.Player);
+
+            if (itemToUse.UsedUp)
+            {
+                //Remove item from inventory and don't drop on floor
+                Inventory.RemoveItem(itemToUse);
+            }
+
+            return usedSuccessfully;
+        }
     }
 }

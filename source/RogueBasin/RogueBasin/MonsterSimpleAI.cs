@@ -286,7 +286,7 @@ namespace RogueBasin
 
             msg = this.Representation + " killed " + monster.Representation + " !";
             LogFile.Log.LogEntryDebug(msg, LogDebugLevel.Medium);
-            Game.MessageQueue.AddMessage(msg);
+            //Game.MessageQueue.AddMessage(msg);
 
             return CombatResults.DefenderDied;
         }
