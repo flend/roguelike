@@ -265,6 +265,12 @@ namespace RogueBasin
                                 Game.Dungeon.Player.AddEffect(zhealing);
                                 UpdateScreen();
                                 break;
+                            case 'o':
+                                //Open door
+                                timeAdvances = PlayerOpenDoor();
+                                if (!timeAdvances)
+                                    UpdateScreen();
+                                break;
                         }
                     }
                     else
@@ -337,6 +343,59 @@ namespace RogueBasin
             }
             
             return timeAdvances;
+        }
+
+        private bool PlayerOpenDoor()
+        {
+            //Ask user for a direction
+            Game.MessageQueue.AddMessage("Select a direction:");
+            UpdateScreen();
+
+            //Get direction
+            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+            Point direction = new Point(0, 0);
+
+            switch (userKey.KeyCode)
+            {
+
+                case KeyCode.TCODK_LEFT:
+                case KeyCode.TCODK_KP4:
+                    direction = new Point(-1, 0);
+                    break;
+                case KeyCode.TCODK_RIGHT:
+                case KeyCode.TCODK_KP6:
+                    direction = new Point(1, 0);
+                    break;
+                case KeyCode.TCODK_UP:
+                case KeyCode.TCODK_KP8:
+                    direction = new Point(0, -1);
+                    break;
+                case KeyCode.TCODK_KP2:
+                case KeyCode.TCODK_DOWN:
+                    direction = new Point(0, 1);
+                    break;
+            }
+
+            //No direction, fail
+            if (direction == new Point(0, 0))
+            {
+                Game.MessageQueue.AddMessage("No direction");
+                return false;
+            }
+
+            //Check there is a door here
+
+            Player player = Game.Dungeon.Player;
+            Point doorLocation = new Point(direction.x + player.LocationMap.x, direction.y + player.LocationMap.y);
+            bool success = Game.Dungeon.OpenDoor(player.LocationLevel, doorLocation);
+
+            if (!success)
+            {
+                Game.MessageQueue.AddMessage("Not a closed door!");
+                return false;
+            }
+            return true;
         }
 
         private static void DisablePlayerInventoryScreen()

@@ -103,6 +103,8 @@ namespace RogueBasin {
             terrainChars.Add(MapTerrain.Wall, '#');
             terrainChars.Add(MapTerrain.Corridor, '|');
             terrainChars.Add(MapTerrain.Void, ' ');
+            terrainChars.Add(MapTerrain.ClosedDoor, '+');
+            terrainChars.Add(MapTerrain.OpenDoor, '/');
 
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);

@@ -741,6 +741,9 @@ namespace RogueBasin
                 rootNode.AddRandomConnection(baseMap);
             }
 
+            //Add doors where single corridors terminate into rooms
+            AddDoors();
+
             //Turn corridors into normal squares and surround with walls
             CorridorsIntoRooms();
 
@@ -752,6 +755,71 @@ namespace RogueBasin
             baseMap.PCStartLocation = rootNode.RandomRoomPoint();
 
             return baseMap;
+        }
+
+        /// <summary>
+        /// Add doors at the end of single corridors into rooms (don't do so with double or triple corridors,
+        /// so we have to do this in a final pass)
+        /// </summary>
+        private void AddDoors()
+        {
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Corridor)
+                    {
+                        //North door
+                        //Check there is room first
+                        if (j - 1 >= 0 && i - 1 >= 0 && i + 1 < width)
+                        {
+                            //We need to check for the surrounding walls as well as the gap to avoid multi-corridors having multi-doors
+                            if (baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Empty &&
+                                baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+                        //South door
+                        if (j + 1 < height && i - 1 >= 0 && i + 1 < width)
+                        {
+                            if (baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Empty  &&
+                                baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+
+                        //West door
+                        if (i - 1 >= 0 && j - 1 >= 0 && j + 1 < height)
+                        {
+                            if (baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Empty &&
+                                baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+
+                        //East door
+                        if (i + 1 < width && j - 1 >= 0 && j + 1 < height)
+                        {
+                            if (baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Empty &&
+                                baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>

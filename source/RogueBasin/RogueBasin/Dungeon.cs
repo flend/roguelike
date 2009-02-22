@@ -231,6 +231,29 @@ namespace RogueBasin
             return contents;
         }
 
+        public MapTerrain GetTerrainAtPoint(int level, Point location)
+        {
+            //Not a level
+            if (level < 0 || level > levels.Count)
+            {
+                string error = "Level " + level + "does not exist";
+                LogFile.Log.LogEntry(error);
+                throw new ApplicationException(error);
+            }
+
+            //Off the map
+            if (location.x < 0 || location.x >= levels[level].width ||
+                location.y < 0 || location.y >= levels[level].height)
+            {
+                string error = "Location " + location.x + ":" + location.y + " does not exist on level " + level;
+                LogFile.Log.LogEntry(error);
+                throw new ApplicationException(error);
+            }
+
+            //Otherwise return terrain
+            return levels[level].mapSquares[location.x, location.y].Terrain;
+        }
+
         /// <summary>
         /// Is the requested square moveable into? Only deals with terrain, not creatures or items
         /// </summary>
@@ -250,14 +273,21 @@ namespace RogueBasin
                 return false;
             }
 
-            //A wall
+            //Not walkable
+            if (!levels[level].mapSquares[location.x, location.y].Walkable)
+            {
+                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Not Walkable", LogDebugLevel.Low);
+                return false;
+            }
+
+            //A wall - should be caught above
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Wall)
             {
                 LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Wall", LogDebugLevel.Low);
                 return false;
             }
 
-            //Void (outside of map)
+            //Void (outside of map) - should be caught above
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Void)
             {
                 LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Void", LogDebugLevel.Low);
@@ -475,6 +505,12 @@ namespace RogueBasin
                                 walkable = false;
                             }
 
+                            //Closed door
+                            if (level.mapSquares[j, k].Terrain == MapTerrain.ClosedDoor)
+                            {
+                                walkable = false;
+                            }
+
                             level.mapSquares[j, k].Walkable = walkable;
                         }
                     }
@@ -510,19 +546,35 @@ namespace RogueBasin
         internal void RefreshTCODMaps()
         {
             //Set the properties on the TCODMaps from our Maps
-            for(int i=0;i<levels.Count;i++) {
-                Map level = levels[i];
-                TCODFov tcodLevel = levelTCODMaps[i];
+            for (int i = 0; i < levels.Count; i++)
+            {
+                RefreshTCODMap(i);
+            }
+        }
 
-                for (int j = 0; j < level.width; j++)
-                {
-                    for (int k = 0; k < level.height; k++)
-                    {
-                        tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
-                    }
-                }
+        /// <summary>
+        /// Refresh the TCOD maps used for FOV and pathfinding
+        /// Unoptimised at present
+        /// </summary>
+        internal void RefreshTCODMap(int levelToRefresh)
+        {
+            //Fail if we have been asked for an invalid level
+            if (levelToRefresh < 0 || levelToRefresh > levels.Count)
+            {
+                LogFile.Log.LogEntry("RefreshTCODMap: Level " + levelToRefresh + " does not exist");
+                return;
             }
 
+            Map level = levels[levelToRefresh];
+            TCODFov tcodLevel = levelTCODMaps[levelToRefresh];
+
+            for (int j = 0; j < level.width; j++)
+            {
+                for (int k = 0; k < level.height; k++)
+                {
+                    tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
+                }
+            }
         }
 
         /// <summary>
@@ -986,6 +1038,45 @@ namespace RogueBasin
         internal void RemoveItem(Item itemToUse)
         {
             items.Remove(itemToUse);
+        }
+
+        /// <summary>
+        /// Open the door at the requested location. Returns true if the door was successfully opened
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="doorLocation"></param>
+        /// <returns></returns>
+        internal bool OpenDoor(int level, Point doorLocation)
+        {
+            try
+            {
+                //Check there is a door here                
+                MapTerrain doorTerrain = GetTerrainAtPoint(player.LocationLevel, doorLocation);
+
+                if (doorTerrain != MapTerrain.ClosedDoor)
+                {
+                    return false;
+                }
+
+                //Open the door
+                levels[level].mapSquares[doorLocation.x, doorLocation.y].Terrain = MapTerrain.OpenDoor;
+                levels[level].mapSquares[doorLocation.x, doorLocation.y].SetOpen();
+
+                //This is very inefficient since it resets the whole level. Could just do the door
+                //RefreshTCODMap(level);
+
+                //More efficient version
+                levelTCODMaps[level].SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
+
+
+                return true;
+            }
+            catch (ApplicationException)
+            {
+                //Not a valid location - should not occur
+                LogFile.Log.LogEntry("Non-valid location for door requested");
+                return false;
+            }
         }
     }
 }

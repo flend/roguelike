@@ -55,7 +55,9 @@ namespace RogueBasin
         Void,    //non-walkable
         Empty,   //walkable
         Wall,    //non-walkable
-        Corridor //walkable
+        Corridor, //walkable
+        ClosedDoor, //non-walkable
+        OpenDoor //walkable
     }
 
     public class MapSquare
@@ -178,10 +180,21 @@ namespace RogueBasin
             }
         }
 
-        //Sets walkable and non-light blocking
+        /// <summary>
+        /// Sets walkable and non-light blocking
+        /// </summary>
         public void SetOpen() {
             BlocksLight = false;
             Walkable = true;
+        }
+
+        /// <summary>
+        /// Sets non-walkable and light blocking
+        /// </summary>
+        public void SetBlocking()
+        {
+            BlocksLight = true;
+            Walkable = false;
         }
     }
 
