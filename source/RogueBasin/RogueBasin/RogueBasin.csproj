@@ -40,6 +40,7 @@
   -->
   <ItemGroup>
     <Compile Include="Creature.cs" />
+    <Compile Include="CreatureEffect.cs" />
     <Compile Include="Creatures\Rat.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="DungeonEffect.cs" />

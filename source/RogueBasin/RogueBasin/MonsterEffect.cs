@@ -7,11 +7,11 @@ namespace RogueBasin
     /// <summary>
     /// Represents a creature event that has a duration in the game.
     /// </summary>
-    public abstract class MonsterEffect : Effect
+    public abstract class MonsterEffect : CreatureEffect
     {
         Monster monster;
 
-        public MonsterEffect(Monster eventReceiver)
+        public MonsterEffect(Monster eventReceiver) : base(eventReceiver)
         {
             this.monster = eventReceiver;
         }
