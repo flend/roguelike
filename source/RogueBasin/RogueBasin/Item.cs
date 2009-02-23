@@ -43,21 +43,6 @@ namespace RogueBasin
         public abstract int GetWeight();
 
         /// <summary>
-        /// Applies the effect of the object
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns>True if the object could be used</returns>
-        public abstract bool Use(Creature user);
-
-        /// <summary>
-        /// If the object has been used up by a Use()
-        /// </summary>
-        public abstract bool UsedUp
-        {
-            get;
-        }
-
-        /// <summary>
         /// Single item description, e.g. 'sword'
         /// </summary>
         public abstract string SingleItemDescription

@@ -138,9 +138,19 @@ namespace RogueBasin
             int itemIndex = selectedGroup.ItemIndex[0];
             Item itemToUse = Inventory.Items[itemIndex];
 
-            bool usedSuccessfully = itemToUse.Use(this);
+            //Check if this is a useable item
+            IUseableItem useableItem = itemToUse as IUseableItem;
 
-            if (itemToUse.UsedUp)
+            if (useableItem == null)
+            {
+                Game.MessageQueue.AddMessage("Cannot use this type of item!");
+                LogFile.Log.LogEntry("Tried to use non-useable item: " + itemToUse.SingleItemDescription);
+                return false;
+            }
+
+            bool usedSuccessfully = useableItem.Use(this);
+
+            if (useableItem.UsedUp)
             {
                 //Remove item from inventory and don't drop on floor
                 Inventory.RemoveItem(itemToUse);

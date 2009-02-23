@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    class Potion : Item
+    class Potion : Item, IUseableItem
     {
         bool usedUp;
 
@@ -13,7 +13,7 @@ namespace RogueBasin.Items
             usedUp = false;
         }
 
-        public override bool Use(Creature user)
+        public bool Use(Creature user)
         {
             //Currently healing is implemented as a player effect so we need to check the user is a player
             Player player = user as Player;
@@ -51,7 +51,7 @@ namespace RogueBasin.Items
             get { return "potions"; }
         }
 
-        public override bool UsedUp
+        public bool UsedUp
         {
             get { return usedUp; }
         }
