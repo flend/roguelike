@@ -156,14 +156,8 @@ namespace RogueBasin
 
             foreach (EquipmentSlot slotType in itemPossibleSlots)
             {
-                List<EquipmentSlotInfo> suitableSlots = this.EquipmentSlots.FindAll(
-                     delegate(EquipmentSlotInfo creatureEquipSlot) { return (creatureEquipSlot.slotType == slotType); }
-                 );
-
-                //Find a free slot
-                slotToEquipIn = suitableSlots.Find(
-                    delegate(EquipmentSlotInfo creatureEquipSlot) { return (creatureEquipSlot.equippedItem == null); }
-                    );
+                List<EquipmentSlotInfo> suitableSlots = this.EquipmentSlots.FindAll(x => x.slotType == slotType);
+                slotToEquipIn = suitableSlots.Find(x => x.equippedItem == null);
             }
 
             if (slotToEquipIn == null)
