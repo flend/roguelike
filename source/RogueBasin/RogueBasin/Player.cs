@@ -24,6 +24,10 @@ namespace RogueBasin
         public Player()
         {
             effects = new List<PlayerEffect>();
+
+            //Add default equipment slots
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
         }
 
         public int Hitpoints
@@ -126,6 +130,62 @@ namespace RogueBasin
         protected override char GetRepresentation()
         {
             return '@';
+        }
+
+        /// <summary>
+        /// Equip an item. Item is removed from the main inventory.
+        /// Returns true if item was used successfully.
+        /// </summary>
+        /// <param name="selectedGroup"></param>
+        /// <returns></returns>
+        public bool EquipItem(InventoryListing selectedGroup)
+        {
+            //Select the first item in the stack
+            int itemIndex = selectedGroup.ItemIndex[0];
+            Item itemToUse = Inventory.Items[itemIndex];
+
+            //Check if this item is equippable
+            IEquippableItem equippableItem = itemToUse as IEquippableItem;
+
+            if (itemToUse == null)
+                return false;
+
+            //Check if the item can be equipped in a free slot
+            List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
+            EquipmentSlotInfo slotToEquipIn = null;
+
+            foreach (EquipmentSlot slotType in itemPossibleSlots)
+            {
+                List<EquipmentSlotInfo> suitableSlots = this.EquipmentSlots.FindAll(
+                     delegate(EquipmentSlotInfo creatureEquipSlot) { return (creatureEquipSlot.slotType == slotType); }
+                 );
+
+                //Find a free slot
+                slotToEquipIn = suitableSlots.Find(
+                    delegate(EquipmentSlotInfo creatureEquipSlot) { return (creatureEquipSlot.equippedItem == null); }
+                    );
+            }
+
+            if (slotToEquipIn == null)
+            {
+                //Have to unequip something
+                return false;
+            }
+
+            
+            //Or swap items
+
+
+
+            return false;
+        }
+
+        /// <summary>
+        /// Predicate for matching equipment slot of EquipmentSlot type
+        /// </summary>
+        private static bool EquipmentSlotMatchesType(EquipmentSlotInfo equipSlot, EquipmentSlot type)
+        {
+            return (equipSlot.slotType == type);
         }
 
         /// <summary>

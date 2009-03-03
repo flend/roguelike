@@ -19,6 +19,17 @@ namespace RogueBasin.Items
             return false;
         }
 
+        public List<EquipmentSlot> EquipmentSlots
+        {
+            get
+            {
+                List<EquipmentSlot> retList = new List<EquipmentSlot>();
+                retList.Add(EquipmentSlot.RightHand);
+
+                return retList;
+            }
+        }
+
         public bool Equip(Creature user)
         {
             return true;

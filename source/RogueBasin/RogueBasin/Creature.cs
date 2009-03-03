@@ -15,6 +15,11 @@ namespace RogueBasin
         Inventory inventory;
 
         /// <summary>
+        /// The equipment slots the creature has
+        /// </summary>
+        List<EquipmentSlotInfo> equipmentSlots;
+
+        /// <summary>
         /// Is the creature still alive?
         /// </summary>
         bool alive;
@@ -38,6 +43,17 @@ namespace RogueBasin
         /// How much the turn clock has to reach to process
         /// </summary>
         protected const int turnClockLimit = 10000;
+
+        /// <summary>
+        /// A list of all the equipment slots the creature has
+        /// </summary>
+        public List<EquipmentSlotInfo> EquipmentSlots
+        {
+            get
+            {
+                return equipmentSlots;
+            }
+        }
 
         public int Speed
         {
@@ -71,6 +87,8 @@ namespace RogueBasin
             alive = true;
 
             inventory = new Inventory();
+
+            equipmentSlots = new List<EquipmentSlotInfo>();
 
             RandomStartTurnClock();
         }
@@ -145,7 +163,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Inventory
+        /// Inventory - possibly make this protected at some point?
         /// </summary>
         public Inventory Inventory
         {

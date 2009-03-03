@@ -17,6 +17,15 @@ namespace RogueBasin
         bool CanBeEquippedInSlot(EquipmentSlot slot);
 
         /// <summary>
+        /// Returns a list of possible equipment slots that the item can be equipped in
+        /// </summary>
+        /// <returns></returns>
+        List<EquipmentSlot> EquipmentSlots
+        {
+            get;
+        }
+
+        /// <summary>
         /// Apply the equipped effect to the user. Returns true on successfully equipped. May want to consider a hooking interface as well (events).
         /// </summary>
         /// <param name="user"></param>
