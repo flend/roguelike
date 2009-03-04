@@ -192,9 +192,8 @@ namespace RogueBasin
 
                 //Run unequip routine
                 oldItemEquippable.UnEquip(this);
-
-                //Add old item back to inventory
-                //oldItem.InInventory = true;
+                oldItem.IsEquipped = false;
+                
                 //Can't do this right now, since not in inventory items appear on the floor
 
                 //This slot is now free
@@ -206,6 +205,10 @@ namespace RogueBasin
             //Put new item in first relevant slot and run equipping routine
             matchingEquipSlots[0].equippedItem = itemToUse;
             equippableItem.Equip(this);
+            itemToUse.IsEquipped = true;
+
+            //Update the inventory listing since equipping an item changes its stackability
+            Inventory.RefreshInventoryListing();
 
             //Message the user
             LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);

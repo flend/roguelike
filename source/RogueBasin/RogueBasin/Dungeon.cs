@@ -893,7 +893,7 @@ namespace RogueBasin
         /// <summary>
         /// Player requests at interaction with feature
         /// </summary>
-        internal void PCInteractWithFeature()
+        internal bool PCInteractWithFeature()
         {
             //Is there a feature here?
             //If the interaction causes the player to jump location, the break stops us interacting with a feature in the new location
@@ -903,11 +903,31 @@ namespace RogueBasin
                 if (feature.LocationLevel == player.LocationLevel &&
                     feature.LocationMap == player.LocationMap)
                 {
-                    feature.PlayerInteraction(player);
-                    break;
+                    return feature.PlayerInteraction(player);
                 }
-
             }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Return a (the first) feature at this location or null
+        /// </summary>
+        /// <param name="locationLevel"></param>
+        /// <param name="locationMap"></param>
+        /// <returns></returns>
+        internal Feature FeatureAtSpace(int locationLevel, Point locationMap)
+        {
+            foreach (Feature feature in features)
+            {
+                if (feature.LocationLevel == locationLevel &&
+                    feature.LocationMap == locationMap)
+                {
+                    return feature;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

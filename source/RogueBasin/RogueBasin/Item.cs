@@ -12,12 +12,19 @@ namespace RogueBasin
         public Item()
         {
             inInventory = false;
+            IsEquipped = false;
         }
 
         /// <summary>
         /// Is this in a creature's inventory
         /// </summary>
         bool inInventory;
+
+        /// <summary>
+        /// Is equipped by a creature. This properly is tracked on item so the inventory doesn't have to search through a player or creature's equipped slots when deciding whether to stack items.
+        /// Could possibly be placed by a call in Inventory to owner.IsThisItemEquipped()?
+        /// </summary>
+        public bool IsEquipped { get; set; }
 
         /// <summary>
         /// Is this item in an inventory and therefore should not be rendered on the map?

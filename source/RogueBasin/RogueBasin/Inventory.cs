@@ -57,7 +57,7 @@ namespace RogueBasin
         /// <summary>
         /// Update the listing groups
         /// </summary>
-        private void RefreshInventoryListing()
+        public void RefreshInventoryListing()
         {
             //List of groups of similar items
             inventoryListing.Clear();
@@ -68,19 +68,24 @@ namespace RogueBasin
                 Item item = items[i];
 
                 //Check if we have a similar item group already. If so, add the index of this item to that group
+                //Equipped items are not stacked
 
                 bool foundGroup = false;
-                foreach (InventoryListing group in inventoryListing)
+                
+                if (!item.IsEquipped)
                 {
-                    //Check that we are the same type (and therefore sort of item)
-                    Type itemType = item.GetType();
-
-                    //Look only at the first item in the group (stored by index). All the items in this group must have the same type
-                    if (items[group.ItemIndex[0]].GetType() == item.GetType())
+                    foreach (InventoryListing group in inventoryListing)
                     {
-                        group.ItemIndex.Add(i);
-                        foundGroup = true;
-                        break;
+                        //Check that we are the same type (and therefore sort of item)
+                        Type itemType = item.GetType();
+
+                        //Look only at the first item in the group (stored by index). All the items in this group must have the same type
+                        if (items[group.ItemIndex[0]].GetType() == item.GetType() && !items[group.ItemIndex[0]].IsEquipped)
+                        {
+                            group.ItemIndex.Add(i);
+                            foundGroup = true;
+                            break;
+                        }
                     }
                 }
 

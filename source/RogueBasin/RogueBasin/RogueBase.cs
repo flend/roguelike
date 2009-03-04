@@ -206,8 +206,9 @@ namespace RogueBasin
                                 break;
                             case 'i':
                                 //Interact with feature
-                                InteractWithFeature();
-                                timeAdvances = true;
+                                timeAdvances = InteractWithFeature();
+                                if (!timeAdvances)
+                                    UpdateScreen();
                                 break;
                             case 'j':
                                 //Display the inventory
@@ -478,9 +479,22 @@ namespace RogueBasin
             Screen.Instance.CurrentInventory = null;
         }
 
-        private void InteractWithFeature()
+        private bool InteractWithFeature()
         {
-            Game.Dungeon.PCInteractWithFeature();
+            //Preferably just ask the dungeon if there is a feature here, rather than having all the logic in dungeon
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
+            Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
+
+            if (featureAtSpace == null)
+            {
+                Game.MessageQueue.AddMessage("Nothing to interact with here");
+                return false;
+            }
+
+            //Interact with feature - these will normally put success / failure messages in queue
+            return featureAtSpace.PlayerInteraction(player);
         }
 
         /// <summary>
@@ -838,7 +852,16 @@ namespace RogueBasin
 
             for (int i = 0; i < noItems; i++)
             {
-                Items.Potion item = new Items.Potion();
+                Item item;
+
+                if (rand.Next(2) < 1)
+                {
+                    item = new Items.Potion();
+                }
+                else
+                {
+                    item = new Items.ShortSword();
+                }
 
                 //item.Representation = Convert.ToChar(33 + rand.Next(12));
 

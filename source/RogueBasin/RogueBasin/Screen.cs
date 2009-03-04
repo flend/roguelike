@@ -271,7 +271,7 @@ namespace RogueBasin {
                 string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description;
 
                 //Add equipped status
-                //Only consider the first item in a stack, since equipped items can't stack <-- this is only assumed at the moment
+                //Only consider the first item in a stack, since equipped items can't stack
                 Item firstItemInStack = currentInventory.Items[inventoryList[inventoryIndex].ItemIndex[0]];
 
                 EquipmentSlotInfo equippedInSlot = currentEquipment.Find(x => x.equippedItem == firstItemInStack);

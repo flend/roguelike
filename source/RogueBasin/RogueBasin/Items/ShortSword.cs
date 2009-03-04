@@ -59,7 +59,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return '/';
+            return '\\';
         }
     }
 }

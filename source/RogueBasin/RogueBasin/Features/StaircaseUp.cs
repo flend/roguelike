@@ -18,6 +18,8 @@ namespace RogueBasin.Features
         /// <returns></returns>
         public override bool PlayerInteraction(Player player)
         {
+            //Really this logic should be here, not in dungeon.
+            //Otherwise dungeon gets really crowded and these functions are kind of pointless.
             return Game.Dungeon.PCUpStaircase();
         }
 
