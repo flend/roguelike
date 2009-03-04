@@ -32,11 +32,13 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
+            LogFile.Log.LogEntryDebug("Short sword equipped", LogDebugLevel.Low);
             return true;
         }
 
         public bool UnEquip(Creature user)
         {
+            LogFile.Log.LogEntryDebug("Short sword unequipped", LogDebugLevel.Low);
             return true;
         }
 

@@ -32,11 +32,6 @@ namespace RogueBasin {
         Point worldTickOffset;
         Point levelOffset;
 
-        /// <summary>
-        /// Mapping of terrain to ASCII characters
-        /// </summary>
-        Dictionary<MapTerrain, char> terrainChars;
-
         Color inFOVTerrainColor = ColorPresets.White;
         Color seenNotInFOVTerrainColor = ColorPresets.Gray;
         Color neverSeenFOVTerrainColor;
@@ -57,10 +52,17 @@ namespace RogueBasin {
         Point inventoryBL;
 
         bool displayInventory;
+        
+        /// <summary>
+        /// Equipment screen is displayed
+        /// </summary>
+        bool displayEquipment;
+        
         int selectedInventoryIndex;
         int topInventoryIndex;
 
         Inventory currentInventory;
+        List<EquipmentSlotInfo> currentEquipment;
         string inventoryTitle;
         string inventoryInstructions;
         
@@ -97,14 +99,6 @@ namespace RogueBasin {
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(75, 5);
             inventoryBL = new Point(5, 30);
-
-            terrainChars = new Dictionary<MapTerrain, char>();
-            terrainChars.Add(MapTerrain.Empty, '.');
-            terrainChars.Add(MapTerrain.Wall, '#');
-            terrainChars.Add(MapTerrain.Corridor, '|');
-            terrainChars.Add(MapTerrain.Void, ' ');
-            terrainChars.Add(MapTerrain.ClosedDoor, '+');
-            terrainChars.Add(MapTerrain.OpenDoor, '/');
 
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
@@ -181,6 +175,8 @@ namespace RogueBasin {
             //Draw any overlay screens
             if (displayInventory)
                 DrawInventory();
+            else if (displayEquipment)
+                DrawEquipment();
 
         }
 
@@ -222,6 +218,56 @@ namespace RogueBasin {
                 //Create entry string
                 char selectionChar = (char)((int)'a' + i);
                 string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description;
+
+                //Print entry
+                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+            }
+        }
+
+        /// <summary>
+        /// Display equipment overlay
+        /// </summary>
+        private void DrawEquipment()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Use frame and strings from inventory for now
+
+            //Draw frame
+            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //List current slots & items if filled
+
+            //Equipment area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            for (int i = 0; i < inventoryListH; i++)
+            {
+                int inventoryIndex = topInventoryIndex + i;
+
+                //End of inventory
+                if (inventoryIndex == currentEquipment.Count)
+                    break;
+
+                //Create entry string
+                EquipmentSlotInfo currentSlot = currentEquipment[inventoryIndex];
+
+                char selectionChar = (char)((int)'a' + i);
+                string entryString = "(" + selectionChar.ToString() + ") " + StringEquivalent.EquipmentSlots[currentSlot.slotType] + ": ";
+                if (currentSlot.equippedItem == null)
+                    entryString += "Empty";
+                else
+                    entryString += currentSlot.equippedItem.SingleItemDescription;
 
                 //Print entry
                 rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
@@ -408,7 +454,7 @@ namespace RogueBasin {
                     }
 
                     rootConsole.ForegroundColor = drawColor;
-                    char screenChar = terrainChars[map.mapSquares[i, j].Terrain];
+                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
                     screenChar = '#';
                     rootConsole.PutChar(screenX, screenY, screenChar);
 
@@ -434,7 +480,7 @@ namespace RogueBasin {
                     int screenX = mapTopLeft.x + i;
                     int screenY = mapTopLeft.y + j;
 
-                    char screenChar = terrainChars[map.mapSquares[i, j].Terrain];
+                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
 
                     Color drawColor = inFOVTerrainColor;
 
@@ -472,7 +518,7 @@ namespace RogueBasin {
                     int screenX = mapTopLeft.x + i;
                     int screenY = mapTopLeft.y + j;
 
-                    char screenChar = terrainChars[map.mapSquares[i, j].Terrain];
+                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
 
                     Color drawColor = inFOVTerrainColor;
 
@@ -517,7 +563,7 @@ namespace RogueBasin {
                     int screenX = mapTopLeft.x + i;
                     int screenY = mapTopLeft.y + j;
 
-                    char screenChar = terrainChars[map.mapSquares[i, j].Terrain];
+                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
 
                     Color drawColor = inFOVTerrainColor;
 
@@ -587,7 +633,25 @@ namespace RogueBasin {
         {
             set
             {
+                if (value == true)
+                {
+                    displayEquipment = false;
+                }
+                
                 displayInventory = value;
+            }
+        }
+
+        public bool DisplayEquipment
+        {
+            set
+            {
+                if (value == true)
+                {
+                    displayInventory = false;
+                }
+
+                displayEquipment = value;
             }
         }
 
@@ -612,6 +676,14 @@ namespace RogueBasin {
             set
             {
                 currentInventory = value;
+            }
+        }
+
+        public List<EquipmentSlotInfo> CurrentEquipment
+        {
+            set
+            {
+                currentEquipment = value;
             }
         }
 

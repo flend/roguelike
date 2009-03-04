@@ -210,7 +210,7 @@ namespace RogueBasin
                                 timeAdvances = true;
                                 break;
                             case 'j':
-                                //Set up the inventory
+                                //Display the inventory
                                 inputState = InputState.InventoryShow;
                                 SetPlayerInventoryScreen();
                                 UpdateScreen();
@@ -228,6 +228,16 @@ namespace RogueBasin
                                 if(!timeAdvances)
                                     UpdateScreen();
                                 break;
+                            case 'e':
+                                //Display currently equipped items
+                                SetPlayerEquippedItemsScreen();
+                                UpdateScreen();
+                                DisplayEquipment();
+                                DisablePlayerEquippedItemsScreen();
+                                UpdateScreen();
+                                timeAdvances = false;
+                                break;
+
                             case ',':
                                 //Pick up item
                                 timeAdvances = PickUpItem();
@@ -420,6 +430,26 @@ namespace RogueBasin
             Screen.Instance.InventoryInstructions = "Press the letter of an item to select or (x) to exit";
         }
 
+        /// <summary>
+        /// Set state to display equipped items
+        /// </summary>
+        private void SetPlayerEquippedItemsScreen()
+        {
+            Screen.Instance.DisplayEquipment = true;
+            Screen.Instance.CurrentEquipment = Game.Dungeon.Player.EquipmentSlots;
+            Screen.Instance.InventoryTitle = "Equipped Items";
+            Screen.Instance.InventoryInstructions = "Press (x) to exit";
+        }
+
+        /// <summary>
+        /// Disable equipped items overlay
+        /// </summary>
+        private void DisablePlayerEquippedItemsScreen()
+        {
+            Screen.Instance.DisplayEquipment = false;
+            Screen.Instance.CurrentEquipment = null;
+        }
+
         private void InteractWithFeature()
         {
             Game.Dungeon.PCInteractWithFeature();
@@ -506,6 +536,30 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage(selectedItem.SingleItemDescription + " dropped.");
 
             return true;
+        }
+
+        /// <summary>
+        /// Display equipment overlay
+        /// </summary>
+        private void DisplayEquipment()
+        {
+            //Wait until the player presses exit
+            do
+            {
+
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+
+                    char keyCode = (char)userKey.Character;
+
+                    if (keyCode == 'x')
+                    {
+                        return;
+                    }
+                }
+            } while (true);
         }
 
         /// <summary>
@@ -622,7 +676,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 2;
+            LogFile.Log.DebugLevel = 3;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
@@ -677,6 +731,9 @@ namespace RogueBasin
 
             //Add a down staircase where the player is standing
             AddFeatureToDungeon(new Features.StaircaseDown(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
+
+            //Add a test short sword
+            dungeon.AddItem(new Items.ShortSword(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
 
             //Create creatures and start positions
 

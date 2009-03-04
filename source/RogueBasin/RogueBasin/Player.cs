@@ -27,7 +27,7 @@ namespace RogueBasin
 
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
         }
 
         public int Hitpoints
@@ -150,28 +150,62 @@ namespace RogueBasin
             if (itemToUse == null)
                 return false;
 
-            //Check if the item can be equipped in a free slot
+            //Find all matching slots available on the player
+
             List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
+            List<EquipmentSlotInfo> matchingEquipSlots = new List<EquipmentSlotInfo>();
+
             EquipmentSlotInfo slotToEquipIn = null;
 
             foreach (EquipmentSlot slotType in itemPossibleSlots)
             {
-                List<EquipmentSlotInfo> suitableSlots = this.EquipmentSlots.FindAll(x => x.slotType == slotType);
-                slotToEquipIn = suitableSlots.Find(x => x.equippedItem == null);
+                matchingEquipSlots.AddRange(this.EquipmentSlots.FindAll(x => x.slotType == slotType));
             }
 
-            if (slotToEquipIn == null)
+            //No suitable slots
+            if (matchingEquipSlots.Count == 0)
             {
-                //Have to unequip something
+                LogFile.Log.LogEntryDebug("Can't equip item, no valid slots: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
+
                 return false;
             }
 
-            
-            //Or swap items
+            //Look for first empty slot
 
+            EquipmentSlotInfo freeSlot = matchingEquipSlots.Find(x => x.equippedItem == null);
 
+            if (slotToEquipIn == null)
+            {
+                //Not slots free, unequip first slot
+                Item oldItem = matchingEquipSlots[0].equippedItem;
+                IEquippableItem oldItemEquippable = oldItem as IEquippableItem;
 
-            return false;
+                //Sanity check
+                if (oldItemEquippable == null)
+                {
+                    LogFile.Log.LogEntry("Currently equipped item is not equippable!: " + oldItem.SingleItemDescription);
+                    return false;
+                }
+
+                //Run unequip routine
+                oldItemEquippable.UnEquip(this);
+
+                //Add old item back to inventory
+                //oldItem.InInventory = true;
+                //Can't do this right now, since not in inventory items appear on the floor
+
+                //This slot is now free
+                freeSlot = matchingEquipSlots[0];
+            }
+
+            //We now have a free slot to equip in
+
+            //Put new item in first relevant slot and run equipping routine
+            matchingEquipSlots[0].equippedItem = itemToUse;
+            equippableItem.Equip(this);
+
+            return true;
         }
 
         /// <summary>
