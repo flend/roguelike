@@ -891,26 +891,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Player requests at interaction with feature
-        /// </summary>
-        internal bool PCInteractWithFeature()
-        {
-            //Is there a feature here?
-            //If the interaction causes the player to jump location, the break stops us interacting with a feature in the new location
-            //If there is, pass interaction to feature-specific code
-            foreach (Feature feature in features)
-            {
-                if (feature.LocationLevel == player.LocationLevel &&
-                    feature.LocationMap == player.LocationMap)
-                {
-                    return feature.PlayerInteraction(player);
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Return a (the first) feature at this location or null
         /// </summary>
         /// <param name="locationLevel"></param>
@@ -920,9 +900,7 @@ namespace RogueBasin
         {
             foreach (Feature feature in features)
             {
-                if (feature.LocationLevel == locationLevel &&
-                    feature.LocationMap == locationMap)
-                {
+                if(feature.IsLocatedAt(locationLevel, locationMap)) {
                     return feature;
                 }
             }
@@ -940,8 +918,7 @@ namespace RogueBasin
         {
             foreach (Item item in items)
             {
-                if (item.LocationLevel == locationLevel &&
-                    item.LocationMap == locationMap &&
+                if (item.IsLocatedAt(locationLevel, locationMap) &&
                     !item.InInventory)
                 {
                     return item;
@@ -949,110 +926,6 @@ namespace RogueBasin
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// PC down a down staircase. Is placed at the up staircase on the lower level
-        /// Could be placed in StaircaseDown, if we don't mind making Features publicly accessible
-        /// </summary>
-        /// <returns></returns>
-        internal bool PCDownStaircase()
-        {
-            //If we are trying to go deeper than the dungeon exists
-            if (player.LocationLevel + 1 == Game.Dungeon.NoLevels)
-            {
-                LogFile.Log.LogEntry("Tried to go down stairs to level " + (player.LocationLevel + 1).ToString() + " which doesn't exist");
-                Game.MessageQueue.AddMessage("Bizarrely, the stairs don't work.");
-                return false;
-            }
-
-            //Otherwise move down
-
-            //Increment player level
-            player.LocationLevel++;
-
-            Feature foundStaircase = null;
-            //Set player's location to up staircase on lower level
-            foreach (Feature feature in Features)
-            {
-                if (feature.LocationLevel == player.LocationLevel
-                    && feature as Features.StaircaseUp != null)
-                {
-                    player.LocationMap = feature.LocationMap;
-                    foundStaircase = feature as Features.StaircaseUp;
-                    break;
-                }
-            }
-
-            if (foundStaircase == null)
-            {
-                LogFile.Log.LogEntry("Couldn't find up staircase on level " + (player.LocationLevel).ToString());
-                return true;
-            }
-
-            //Check there is no monster on the stairs
-            //If there is, kill it (for now)
-            foreach (Monster monster in monsters)
-            {
-                if (monster.InSameSpace(foundStaircase))
-                {
-                    KillMonster(monster);
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// PC down an up staircase. Is placed at the down staircase on the higher level
-        /// </summary>
-        /// <returns></returns>
-        internal bool PCUpStaircase()
-        {
-            //If we are trying to up from the highest level
-            if (player.LocationLevel - 1 < 0)
-            {
-                LogFile.Log.LogEntry("Player tried to escape");
-                Game.MessageQueue.AddMessage("You can't escape that easily!");
-                return false;
-            }
-
-            //Otherwise move up
-
-            //Increment player level
-            player.LocationLevel--;
-
-            Feature foundStaircase = null;
-
-            //Set player's location to up staircase on lower level
-            foreach (Feature feature in Features)
-            {
-                if (feature.LocationLevel == player.LocationLevel
-                    && feature as Features.StaircaseDown != null)
-                {
-                    player.LocationMap = feature.LocationMap;
-                    foundStaircase = feature as Features.StaircaseDown;
-                    break;
-                }
-            }
-
-            if (foundStaircase == null)
-            {
-                LogFile.Log.LogEntry("Couldn't find down staircase on level " + (player.LocationLevel).ToString());
-                return true;
-            }
-
-            //Check there is no monster on the stairs
-            //If there is, kill it (for now)
-            foreach (Monster monster in monsters)
-            {
-                if (monster.InSameSpace(foundStaircase))
-                {
-                    KillMonster(monster);
-                }
-            }
-
-            return true;
         }
 
         internal void RemoveItem(Item itemToUse)
