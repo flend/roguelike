@@ -57,6 +57,11 @@ namespace RogueBasin {
         /// Equipment screen is displayed
         /// </summary>
         bool displayEquipment;
+
+        /// <summary>
+        /// Select new equipment screen is displayed
+        /// </summary>
+        bool displayEquipmentSelect;
         
         int selectedInventoryIndex;
         int topInventoryIndex;
@@ -177,6 +182,8 @@ namespace RogueBasin {
                 DrawInventory();
             else if (displayEquipment)
                 DrawEquipment();
+            else if (displayEquipmentSelect)
+                DrawEquipmentSelect();
 
         }
 
@@ -223,6 +230,62 @@ namespace RogueBasin {
                 rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
             }
         }
+
+        /// <summary>
+        /// Display equipment select overview
+        /// </summary>
+        private void DrawEquipmentSelect()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame
+            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //List the inventory
+
+            //Inventory area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            List<InventoryListing> inventoryList = currentInventory.InventoryListing;
+
+            for (int i = 0; i < inventoryListH; i++)
+            {
+                int inventoryIndex = topInventoryIndex + i;
+
+                //End of inventory
+                if (inventoryIndex == inventoryList.Count)
+                    break;
+
+                //Create entry string
+                char selectionChar = (char)((int)'a' + i);
+                string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description;
+
+                //Add equipped status
+                //Only consider the first item in a stack, since equipped items can't stack <-- this is only assumed at the moment
+                Item firstItemInStack = currentInventory.Items[inventoryList[inventoryIndex].ItemIndex[0]];
+
+                EquipmentSlotInfo equippedInSlot = currentEquipment.Find(x => x.equippedItem == firstItemInStack);
+
+                if (equippedInSlot != null)
+                {
+                    entryString += " (equipped: " + StringEquivalent.EquipmentSlots[equippedInSlot.slotType] + ")";
+                }
+
+                //Print entry
+                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+            }
+        }
+
 
         /// <summary>
         /// Display equipment overlay
@@ -636,6 +699,7 @@ namespace RogueBasin {
                 if (value == true)
                 {
                     displayEquipment = false;
+                    displayEquipmentSelect = false;
                 }
                 
                 displayInventory = value;
@@ -649,9 +713,24 @@ namespace RogueBasin {
                 if (value == true)
                 {
                     displayInventory = false;
+                    displayEquipmentSelect = false;
                 }
 
                 displayEquipment = value;
+            }
+        }
+
+        public bool DisplayEquipmentSelect
+        {
+            set
+            {
+                if (value == true)
+                {
+                    displayInventory = false;
+                    displayEquipment = false;
+                }
+
+                displayEquipmentSelect = value;
             }
         }
 

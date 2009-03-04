@@ -229,6 +229,15 @@ namespace RogueBasin
                                     UpdateScreen();
                                 break;
                             case 'e':
+                                //Select an item to equip
+                                SetPlayerEquippedItemsSelectScreen();
+                                UpdateScreen();
+                                timeAdvances = EquipItem();
+                                DisablePlayerEquippedItemsSelectScreen();
+                                if (!timeAdvances)
+                                UpdateScreen();
+                                break;
+                            case 'w':
                                 //Display currently equipped items
                                 SetPlayerEquippedItemsScreen();
                                 UpdateScreen();
@@ -430,6 +439,15 @@ namespace RogueBasin
             Screen.Instance.InventoryInstructions = "Press the letter of an item to select or (x) to exit";
         }
 
+        private void SetPlayerEquippedItemsSelectScreen()
+        {
+            Screen.Instance.DisplayEquipmentSelect = true;
+            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
+            Screen.Instance.CurrentEquipment = Game.Dungeon.Player.EquipmentSlots;
+            Screen.Instance.InventoryTitle = "Equip Item";
+            Screen.Instance.InventoryInstructions = "Press the letter of an item to equip or (x) to exit";
+        }
+
         /// <summary>
         /// Set state to display equipped items
         /// </summary>
@@ -448,6 +466,16 @@ namespace RogueBasin
         {
             Screen.Instance.DisplayEquipment = false;
             Screen.Instance.CurrentEquipment = null;
+        }
+
+        /// <summary>
+        /// Disable equipment select overlay. Really want to make these setup functions methods in Screen
+        /// </summary>
+        private void DisablePlayerEquippedItemsSelectScreen()
+        {
+            Screen.Instance.DisplayEquipmentSelect = false;
+            Screen.Instance.CurrentEquipment = null;
+            Screen.Instance.CurrentInventory = null;
         }
 
         private void InteractWithFeature()
@@ -471,6 +499,26 @@ namespace RogueBasin
             
             InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
             bool usedSuccessfully = Game.Dungeon.Player.UseItem(selectedGroup);
+
+            return usedSuccessfully;
+        }
+
+        /// <summary>
+        /// Player equips item. Returns true if item was equipped and time should advance
+        /// </summary>
+        private bool EquipItem()
+        {
+            //User selects which item to use
+            int chosenIndex = PlayerChooseFromInventory();
+
+            //Player exited
+            if (chosenIndex == -1)
+                return false;
+
+            Inventory playerInventory = Game.Dungeon.Player.Inventory;
+
+            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
+            bool usedSuccessfully = Game.Dungeon.Player.EquipItem(selectedGroup);
 
             return usedSuccessfully;
         }

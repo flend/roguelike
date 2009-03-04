@@ -147,15 +147,17 @@ namespace RogueBasin
             //Check if this item is equippable
             IEquippableItem equippableItem = itemToUse as IEquippableItem;
 
-            if (itemToUse == null)
+            if (equippableItem == null)
+            {
+                LogFile.Log.LogEntryDebug("Can't equip item, not equippable: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
                 return false;
+            }
 
             //Find all matching slots available on the player
 
             List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
             List<EquipmentSlotInfo> matchingEquipSlots = new List<EquipmentSlotInfo>();
-
-            EquipmentSlotInfo slotToEquipIn = null;
 
             foreach (EquipmentSlot slotType in itemPossibleSlots)
             {
@@ -175,7 +177,7 @@ namespace RogueBasin
 
             EquipmentSlotInfo freeSlot = matchingEquipSlots.Find(x => x.equippedItem == null);
 
-            if (slotToEquipIn == null)
+            if (freeSlot == null)
             {
                 //Not slots free, unequip first slot
                 Item oldItem = matchingEquipSlots[0].equippedItem;
@@ -204,6 +206,10 @@ namespace RogueBasin
             //Put new item in first relevant slot and run equipping routine
             matchingEquipSlots[0].equippedItem = itemToUse;
             equippableItem.Equip(this);
+
+            //Message the user
+            LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
+            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped in " + StringEquivalent.EquipmentSlots[matchingEquipSlots[0].slotType]);
 
             return true;
         }
