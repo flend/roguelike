@@ -912,9 +912,32 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Returns only points in rooms (not corridors)
+        /// </summary>
+        /// <returns></returns>
         public Point RandomPointInRoom()
         {
             return rootNode.RandomRoomPoint();
+        }
+
+        /// <summary>
+        /// Returns a point anywhere the terrain is empty
+        /// </summary>
+        /// <returns></returns>
+        public Point RandomWalkablePoint()
+        {
+            do
+            {
+                int x = Game.Random.Next(width);
+                int y = Game.Random.Next(height);
+
+                if (baseMap.mapSquares[x, y].Terrain == MapTerrain.Empty)
+                {
+                    return new Point(x, y);
+                }
+            }
+            while (true);
         }
 
         public int Width

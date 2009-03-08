@@ -814,7 +814,7 @@ namespace RogueBasin
             //Add some random creatures
 
 
-            //May infinite loop too early - not sure
+            
             int noCreatures = rand.Next(10) + 215;
 
             for (int i = 0; i < noCreatures; i++)
@@ -830,9 +830,9 @@ namespace RogueBasin
                 do
                 {
                     if (level == 0)
-                        location = mapGen1.RandomPointInRoom();
+                        location = mapGen1.RandomWalkablePoint();
                     else if (level == 1)
-                        location = mapGen2.RandomPointInRoom();
+                        location = mapGen2.RandomWalkablePoint();
                     LogFile.Log.LogEntryDebug("Creature " + i.ToString() + " pos x: " + location.x + " y: " + location.y, LogDebugLevel.Low);
                 }
                 while (!dungeon.AddMonster(creature, level, location));
@@ -884,7 +884,7 @@ namespace RogueBasin
                 //Loop until we find an acceptable location and the add works
                 do
                 {
-                    location = mapGen1.RandomPointInRoom();
+                    location = mapGen1.RandomWalkablePoint();
                 }
                 while (!dungeon.AddItem(item, level, location));
             }
@@ -903,7 +903,7 @@ namespace RogueBasin
             //Loop until we find an acceptable location and the add works
             do
             {
-                location = mapGen.RandomPointInRoom();
+                location = mapGen.RandomWalkablePoint();
 
             }
             while (!dungeon.AddFeature(feature, level, location));
