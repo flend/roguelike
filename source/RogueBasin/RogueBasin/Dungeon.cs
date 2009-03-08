@@ -64,12 +64,19 @@ namespace RogueBasin
             player = new Player();
         }
 
-        public void AddMap(Map mapToAdd)
+        /// <summary>
+        /// Add map and return its level index
+        /// </summary>
+        /// <param name="mapToAdd"></param>
+        /// <returns></returns>
+        public int AddMap(Map mapToAdd)
         {
             levels.Add(mapToAdd);
 
             //Add TCOD version
             levelTCODMaps.Add(new TCODFov(mapToAdd.width, mapToAdd.height));
+
+            return levels.Count - 1;
         }
 
         public bool AddMonster(Monster creature, int level, Point location)
@@ -170,6 +177,7 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareCanBeEntered(level, location))
                 {
+                    LogFile.Log.LogEntry("AddFeature: map square can't be entered");
                     return false;
                 }
 
@@ -179,6 +187,7 @@ namespace RogueBasin
                     if (otherFeature.LocationLevel == feature.LocationLevel &&
                         otherFeature.LocationMap == feature.LocationMap)
                     {
+                        LogFile.Log.LogEntry("AddFeature: other feature already there");
                         return false;
                     }
                 }

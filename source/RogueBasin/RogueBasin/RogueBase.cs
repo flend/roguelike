@@ -3,6 +3,7 @@
 using libtcodWrapper;
 using Console = System.Console;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace RogueBasin
 {
@@ -777,8 +778,19 @@ namespace RogueBasin
 
             //Give map to dungeon
             dungeon.AddMap(level1); //level 1
-            dungeon.AddMap(level2); //level 2
+            //dungeon.AddMap(level2); //level 2
 
+            //Load level 3 from file
+            try
+            {
+                MapGeneratorFromASCIIFile mapGen3 = new MapGeneratorFromASCIIFile();
+                mapGen3.LoadASCIIFile("test1.txt");
+                mapGen3.AddMapToDungeon();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("failed to add level 3: " + ex.Message);
+            }
             //Setup PC
             Player player = dungeon.Player;
 
@@ -810,7 +822,8 @@ namespace RogueBasin
                 Monster creature = new Creatures.Rat();
                 creature.Representation = Convert.ToChar(65 + rand.Next(26));
 
-                int level = rand.Next(2);
+                //int level = rand.Next(2);
+                int level = 0;
                 Point location = new Point(0, 0);
 
                 //Loop until we find an acceptable location and the add works
@@ -841,7 +854,7 @@ namespace RogueBasin
 
             //Add staircases to dungeons level 1 and 2
             AddFeatureToDungeonRandomPoint(new Features.StaircaseDown(), mapGen1, 0);
-            AddFeatureToDungeonRandomPoint(new Features.StaircaseUp(), mapGen2, 1);
+            //AddFeatureToDungeonRandomPoint(new Features.StaircaseUp(), mapGen2, 1);
             
 
             //Create objects and start positions
