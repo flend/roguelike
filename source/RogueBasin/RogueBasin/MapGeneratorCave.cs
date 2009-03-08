@@ -9,9 +9,22 @@ namespace RogueBasin
     {
         Map baseMap;
 
+        /// <summary>
+        /// Chance of digging surrounding squares
+        /// </summary>
         public int DiggingChance { get; set; }
+        /// <summary>
+        /// When connecting stairs, the chance to expand the corridor
+        /// </summary>
         public int MineChance { get; set; }
+        /// <summary>
+        /// How much of the level must be open (not necessarily connected)
+        /// </summary>
         public double PercOpenRequired { get; set; }
+        /// <summary>
+        /// How far away the stairs are guaranteed to be
+        /// </summary>
+        public double RequiredStairDistance { get; set; }
 
         public int Width {get; set;}
         public int Height {get; set;}
@@ -33,8 +46,9 @@ namespace RogueBasin
             }
 
             DiggingChance = 20;
-            MineChance = 35;
+            MineChance = 15;
             PercOpenRequired = 0.4;
+            RequiredStairDistance = 40;
 
             baseMap = new Map(Width, Height);
 
@@ -89,9 +103,16 @@ namespace RogueBasin
 
             //Find places for the stairs
 
-            upStaircase = RandomPoint();
-            downStaircase = RandomPoint();
+            double stairDistance;
 
+            do
+            {
+                upStaircase = RandomPoint();
+                downStaircase = RandomPoint();
+
+                stairDistance = Math.Sqrt(Math.Pow(upStaircase.x - downStaircase.x, 2) + Math.Pow(upStaircase.y - downStaircase.y, 2));
+
+            } while (stairDistance < RequiredStairDistance);
             //Ensure the stairs are connected
             ConnectPoints(upStaircase, downStaircase);
 
@@ -134,6 +155,44 @@ namespace RogueBasin
 
         private void ConnectPoints(Point upStairsPoint, Point downStairsPoint)
         {
+            //First check if the stairs are connected... 
+
+            //Build tcodmap
+            TCODFov tcodMap = new TCODFov(Width, Height);
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    tcodMap.SetCell(i, j, !baseMap.mapSquares[i, j].BlocksLight, baseMap.mapSquares[i, j].Walkable);
+                }
+            }
+
+            //Try to walk the path between the 2 staircases
+            TCODPathFinding path = new TCODPathFinding(tcodMap, 1.0);
+            path.ComputePath(upStairsPoint.x, upStairsPoint.y, downStairsPoint.x, downStairsPoint.y);
+
+            //Find the first step. We need to load x and y with the origin of the path
+            int x = upStaircase.x;
+            int y = upStaircase.y;
+
+            bool obstacleHit = false;
+
+            //If there's no routeable path
+            if (path.IsPathEmpty())
+            {
+                obstacleHit = true;
+            }
+
+            //We are done with tcod
+            path.Dispose();
+            tcodMap.Dispose();
+
+            //If we managed to get there OK, return
+            if (obstacleHit == false)
+                return;
+
+            //If not, open a path between the staircases
+
             TCODLineDrawing.InitLine(upStairsPoint.x, upStairsPoint.y, downStairsPoint.x, downStairsPoint.y);
 
             int nextX = upStairsPoint.x;
@@ -214,7 +273,7 @@ namespace RogueBasin
             } while (!TCODLineDrawing.StepLine(ref nextX, ref nextY));
 
         }
-
+    
         private Point RandomPoint()
         {
             do
