@@ -773,6 +773,7 @@ namespace RogueBasin
             MapGeneratorCave cave1 = new MapGeneratorCave();
             cave1.Width = 80;
             cave1.Height = 25;
+
             Map cave = cave1.GenerateMap();
 
  

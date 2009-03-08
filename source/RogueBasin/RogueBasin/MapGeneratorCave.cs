@@ -39,6 +39,8 @@ namespace RogueBasin
 
         public Map GenerateMap() {
 
+            LogFile.Log.LogEntry("Making cave map");
+
             if (Width < 1 || Height < 1)
             {
                 LogFile.Log.LogEntry("Can't make 0 dimension map");
@@ -50,73 +52,100 @@ namespace RogueBasin
             PercOpenRequired = 0.4;
             RequiredStairDistance = 40;
 
-            baseMap = new Map(Width, Height);
+            int maxStairConnectAttempts = 10;
 
-            //Fill map with walls
-            for (int i = 0; i < Width; i++)
-            {
-                for (int j = 0; j < Height; j++)
-                {
-                    SetSquareClosed(i, j);
-                }
-            }
+            //Since we can't gaurantee connectivity, we will run the map gen many times until we get a map that meets our criteria
 
-            //Start digging from a random point
-            int noDiggingPoints = 4 + Game.Random.Next(4);
-
-            for (int i = 0; i < noDiggingPoints; i++)
-            {
-                int x = Game.Random.Next(Width);
-                int y = Game.Random.Next(Height);
-
-                //Don't dig right to the edge
-                if (x == 0)
-                    x = 1;
-                if (x == Width - 1)
-                    x = Width - 2;
-                if (y == 0)
-                    y = 1;
-                if (y == Height - 1)
-                    y = Height - 2;
-
-                Dig(x, y);
-            }
-
-            //Check if we are too small, and add more digs
-            while (CalculatePercentageOpen() < PercOpenRequired)
-            {
-                int x = Game.Random.Next(Width);
-                int y = Game.Random.Next(Height);
-
-                //Don't dig right to the edge
-                if (x == 0)
-                    x = 1;
-                if (x == Width - 1)
-                    x = Width - 2;
-                if (y == 0)
-                    y = 1;
-                if (y == Height - 1)
-                    y = Height - 2;
-
-                Dig(x, y);
-            }
-
-            //Find places for the stairs
-
-            double stairDistance;
+            bool badMap = true;
+            int mapsMade = 0;
 
             do
             {
-                upStaircase = RandomPoint();
-                downStaircase = RandomPoint();
 
-                stairDistance = Math.Sqrt(Math.Pow(upStaircase.x - downStaircase.x, 2) + Math.Pow(upStaircase.y - downStaircase.y, 2));
+                baseMap = new Map(Width, Height);
+                mapsMade++;
 
-            } while (stairDistance < RequiredStairDistance);
-            //Ensure the stairs are connected
-            ConnectPoints(upStaircase, downStaircase);
+                //Fill map with walls
+                for (int i = 0; i < Width; i++)
+                {
+                    for (int j = 0; j < Height; j++)
+                    {
+                        SetSquareClosed(i, j);
+                    }
+                }
 
-            //Screen.Instance.DrawMapDebug(baseMap);
+                //Start digging from a random point
+                int noDiggingPoints = 4 + Game.Random.Next(4);
+
+                for (int i = 0; i < noDiggingPoints; i++)
+                {
+                    int x = Game.Random.Next(Width);
+                    int y = Game.Random.Next(Height);
+
+                    //Don't dig right to the edge
+                    if (x == 0)
+                        x = 1;
+                    if (x == Width - 1)
+                        x = Width - 2;
+                    if (y == 0)
+                        y = 1;
+                    if (y == Height - 1)
+                        y = Height - 2;
+
+                    Dig(x, y);
+                }
+
+                //Check if we are too small, and add more digs
+                while (CalculatePercentageOpen() < PercOpenRequired)
+                {
+                    int x = Game.Random.Next(Width);
+                    int y = Game.Random.Next(Height);
+
+                    //Don't dig right to the edge
+                    if (x == 0)
+                        x = 1;
+                    if (x == Width - 1)
+                        x = Width - 2;
+                    if (y == 0)
+                        y = 1;
+                    if (y == Height - 1)
+                        y = Height - 2;
+
+                    Dig(x, y);
+                }
+
+                //Find places for the stairs
+
+                //We will attempt this several times before we give up and redo the whole map
+                int attempts = 0;
+
+                do
+                {
+                    double stairDistance;
+                    
+                    do
+                    {
+                        upStaircase = RandomPoint();
+                        downStaircase = RandomPoint();
+
+                        stairDistance = Math.Sqrt(Math.Pow(upStaircase.x - downStaircase.x, 2) + Math.Pow(upStaircase.y - downStaircase.y, 2));
+
+                    } while (stairDistance < RequiredStairDistance);
+
+                    //If the stairs aren't connected, try placing them in different random spots, by relooping
+                                       
+                    if (ArePointsConnected(upStaircase, downStaircase))
+                    {
+                        badMap = false;
+                        break;
+                    }
+
+                    attempts++;
+                } while (attempts < maxStairConnectAttempts);
+
+            } while (badMap);
+
+            LogFile.Log.LogEntry("Total maps made: " + mapsMade.ToString());
 
             return baseMap;
         }
@@ -153,10 +182,8 @@ namespace RogueBasin
             return percOpen;
         }
 
-        private void ConnectPoints(Point upStairsPoint, Point downStairsPoint)
+        private bool ArePointsConnected(Point firstPoint, Point secondPoint)
         {
-            //First check if the stairs are connected... 
-
             //Build tcodmap
             TCODFov tcodMap = new TCODFov(Width, Height);
             for (int i = 0; i < Width; i++)
@@ -169,7 +196,7 @@ namespace RogueBasin
 
             //Try to walk the path between the 2 staircases
             TCODPathFinding path = new TCODPathFinding(tcodMap, 1.0);
-            path.ComputePath(upStairsPoint.x, upStairsPoint.y, downStairsPoint.x, downStairsPoint.y);
+            path.ComputePath(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y);
 
             //Find the first step. We need to load x and y with the origin of the path
             int x = upStaircase.x;
@@ -183,12 +210,16 @@ namespace RogueBasin
                 obstacleHit = true;
             }
 
-            //We are done with tcod
             path.Dispose();
             tcodMap.Dispose();
 
-            //If we managed to get there OK, return
-            if (obstacleHit == false)
+            return (!obstacleHit);
+        }
+
+        private void ConnectPoints(Point upStairsPoint, Point downStairsPoint)
+        {
+            //First check if the stairs are connected... 
+            if (ArePointsConnected(upStaircase, downStaircase))
                 return;
 
             //If not, open a path between the staircases
