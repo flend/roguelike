@@ -274,8 +274,7 @@ namespace RogueBasin
                             case 'x':
                                 baseMap.PCStartLocation = new Point(i, row);
                                 break;
-                        }
-                    }
+                        }                    }
                 }
 
                 row++;

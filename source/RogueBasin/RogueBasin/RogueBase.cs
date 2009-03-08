@@ -770,6 +770,15 @@ namespace RogueBasin
             mapGen2.Height = 25;
             Map level2 = mapGen2.GenerateMap(extraCorridors);
 
+            MapGeneratorCave cave1 = new MapGeneratorCave();
+            cave1.Width = 80;
+            cave1.Height = 25;
+            Map cave = cave1.GenerateMap();
+
+ 
+            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+
             //Test
             //for (int i = 0; i < 10000; i++)
             //{
@@ -779,6 +788,10 @@ namespace RogueBasin
             //Give map to dungeon
             dungeon.AddMap(level1); //level 1
             //dungeon.AddMap(level2); //level 2
+
+            int caveLevel = dungeon.AddMap(cave);
+            cave1.AddStaircases(caveLevel);
+
 
             //Load level 3 from file
             try
