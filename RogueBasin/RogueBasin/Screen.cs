@@ -73,9 +73,9 @@ namespace RogueBasin {
         string inventoryTitle;
         string inventoryInstructions;
 
-        Point movieTL = new Point(5, 5);
-        int movieWidth = 60;
-        int movieHeight = 30;
+        Point movieTL = new Point(25, 7);
+        int movieWidth = 40;
+        int movieHeight = 20;
         uint movieMSBetweenFrames = 500;
 
         //Current movie
@@ -205,7 +205,7 @@ namespace RogueBasin {
                 }
 
                 //Print press any key
-                rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.x + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
 
                 Screen.Instance.FlushConsole();
 

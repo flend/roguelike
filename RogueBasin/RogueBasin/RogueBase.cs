@@ -204,6 +204,7 @@ namespace RogueBasin
                             case 'm':
                                 //Play movie
                                 Screen.Instance.PlayMovie("wallpush");
+                                Screen.Instance.PlayMovie("stunbox");
                                 timeAdvances = false;
                                 break;
                             case '.':
