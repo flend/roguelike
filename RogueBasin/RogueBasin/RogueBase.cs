@@ -201,6 +201,11 @@ namespace RogueBasin
                                 runMapLoop = false;
                                 timeAdvances = true;
                                 break;
+                            case 'm':
+                                //Play movie
+                                Screen.Instance.PlayMovie("wallpush");
+                                timeAdvances = false;
+                                break;
                             case '.':
                                 // Do nothing
                                 timeAdvances = true;

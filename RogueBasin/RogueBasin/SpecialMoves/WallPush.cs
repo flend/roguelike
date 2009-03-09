@@ -217,5 +217,10 @@ namespace RogueBasin.SpecialMoves
         {
             moveCounter = 0;
         }
+
+        public override string MovieRoot()
+        {
+            return "wallpush";
+        }
     }
 }

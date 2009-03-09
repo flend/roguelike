@@ -150,5 +150,10 @@ namespace RogueBasin.SpecialMoves
             LogFile.Log.LogEntry("StunBox!");
             Game.MessageQueue.AddMessage("Stun Box!");
         }
+
+        public override string MovieRoot()
+        {
+            return "stunbox";
+        }
     }
 }

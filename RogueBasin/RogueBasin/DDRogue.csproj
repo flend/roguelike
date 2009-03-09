@@ -70,6 +70,7 @@
     <Compile Include="Monster.cs" />
     <Compile Include="MonsterEffect.cs" />
     <Compile Include="MonsterSimpleAI.cs" />
+    <Compile Include="MovieFrame.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerEffect.cs" />
     <Compile Include="PlayerEffectInstant.cs" />

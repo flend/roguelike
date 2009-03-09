@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
 using Console = System.Console;
+using System.IO;
+using System.Windows.Forms;
 
 namespace RogueBasin {
 
@@ -70,7 +72,15 @@ namespace RogueBasin {
         List<EquipmentSlotInfo> currentEquipment;
         string inventoryTitle;
         string inventoryInstructions;
-        
+
+        Point movieTL = new Point(5, 5);
+        int movieWidth = 60;
+        int movieHeight = 30;
+        uint movieMSBetweenFrames = 500;
+
+        //Current movie
+        List <MovieFrame> movieFrames;
+
         public static Screen Instance
         {
             get
@@ -139,6 +149,148 @@ namespace RogueBasin {
             RootConsole rootConsole = RootConsole.GetInstance();
 
             rootConsole.Flush();
+        }
+
+        /// <summary>
+        /// Play the movie indicated by the filename root.
+        /// </summary>
+        /// <param name="root"></param>
+        public void PlayMovie(string filenameRoot)
+        {
+            try
+            {
+
+                //Draw the basis of the screen
+                Draw();
+
+                //Get screen handle
+                RootConsole rootConsole = RootConsole.GetInstance();
+
+                //Load whole movie
+                LoadMovie(filenameRoot);
+
+                //Use the width and height of the first frame to centre the movie
+                int width = movieFrames[0].width;
+                int height = movieFrames[0].height;
+
+                int xOffset = (movieWidth - width) / 2;
+                int yOffset = (movieHeight - height) / 2;
+
+                Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
+
+                //Draw each frame of the movie
+                foreach (MovieFrame frame in movieFrames)
+                {
+
+                    //Draw frame
+                    rootConsole.DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
+
+                    //Draw content
+
+                    List<string> scanLines = frame.scanLines;
+
+                    int offset = 0;
+
+                    foreach (string line in scanLines)
+                    {
+                        rootConsole.PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left);
+                        offset++;
+                    }
+
+                    Screen.Instance.FlushConsole();
+
+                    //Wait for the specified time
+                    TCODSystem.Sleep(movieMSBetweenFrames);
+
+                }
+
+                //Print press any key
+                rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.x + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+
+                Screen.Instance.FlushConsole();
+
+                //Await keypress then redraw normal screen
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                Draw();
+                Screen.Instance.FlushConsole();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to play movie: " + filenameRoot + " : " + ex.Message);
+            }
+        }
+
+        private void LoadMovie(string filenameRoot)
+        {
+            try
+            {
+                LogFile.Log.LogEntry("Loading movie: " + filenameRoot);
+
+                int frameNo = 0;
+
+                movieFrames = new List<MovieFrame>();
+
+                do
+                {
+                    string currentFilename = "movies/" + filenameRoot + frameNo.ToString() + ".amf";
+
+                    //If this is the first frame check if there is at least one frame
+                    if (frameNo == 0)
+                    {
+                        if (!File.Exists(currentFilename))
+                        {
+                            throw new ApplicationException("Can't find file: " + currentFilename);
+                        }
+                    }
+
+                    //Otherwise, not finding a file just means the end of a movie
+
+                    if (!File.Exists(currentFilename))
+                    {
+                        break;
+                    }
+
+                    //File exists, load the frame
+                    MovieFrame frame = new MovieFrame();
+
+                    using (StreamReader reader = new StreamReader(currentFilename))
+                    {
+                        string thisLine;
+
+                        frame.scanLines = new List<string>();
+
+                        while ((thisLine = reader.ReadLine()) != null)
+                        {
+                            frame.scanLines.Add(thisLine);
+                        }
+
+                        //Set width and height
+
+                        //Calculate dimensions
+                        frame.width = 0;
+
+                        foreach (string row in frame.scanLines)
+                        {
+                            if (row.Length > frame.width)
+                                frame.width = row.Length;
+                        }
+
+                        frame.height = frame.scanLines.Count;
+
+                        //Add the frame
+                        movieFrames.Add(frame);
+
+                        //Increment the frame no
+                        frameNo++;
+                    }
+                } while (true);
+
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException("Failed to load movie: " + e.Message);
+            }
         }
 
         //Draw the current dungeon map and objects
