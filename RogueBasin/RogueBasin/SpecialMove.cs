@@ -4,8 +4,20 @@ using System.Text;
 
 namespace RogueBasin
 {
-    public abstract class SpecialMove
+    /// <summary>
+    /// Base class for SpecialMoves. Shouldn't be instantiated. Instantiate a child.
+    /// Contains checks for whether we know a move or not.
+    /// </summary>
+    public class SpecialMove
     {
+        /// <summary>
+        /// Has the player learnt this move yet?
+        /// </summary>
+        public bool Known { get; set; }
+
+        public SpecialMove() {
+           Known = false;
+        }
 
         /// <summary>
         /// Check the player's last action, does it fit with the move?
@@ -13,27 +25,29 @@ namespace RogueBasin
         /// <param name="isMove"></param>
         /// <param name="isAttack"></param>
         /// <param name="locationAfterMove"></param>
-        public abstract void CheckAction(bool isMove, Point locationAfterMove);
+        public virtual void CheckAction(bool isMove, Point locationAfterMove) { 
+        
+        }
 
         /// <summary>
         /// Is the move complete and will fire?
         /// </summary>
         /// <returns></returns>
-        public abstract bool MoveComplete();
+        public virtual bool MoveComplete() { return false; }
 
         /// <summary>
         /// Carry out the move (instead of normal move / attack)
         /// </summary>
-        public abstract void DoMove(Point locationAfterMove);
+        public virtual void DoMove(Point locationAfterMove) { }
 
         /// <summary>
         /// Clear the counter - used when another move has triggered
         /// </summary>
-        public abstract void ClearMove();
+        public virtual void ClearMove() { }
 
         /// <summary>
         /// Return the root of the movie for this special move
         /// </summary>
-        public abstract string MovieRoot();
+        public virtual string MovieRoot() { return ""; }
     }
 }

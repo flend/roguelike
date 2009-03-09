@@ -203,8 +203,7 @@ namespace RogueBasin
                                 break;
                             case 'm':
                                 //Play movie
-                                Screen.Instance.PlayMovie("wallpush");
-                                Screen.Instance.PlayMovie("stunbox");
+                                Game.Dungeon.PlayerLearnsRandomMove();
                                 timeAdvances = false;
                                 break;
                             case '.':

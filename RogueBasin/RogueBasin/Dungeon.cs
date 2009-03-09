@@ -78,6 +78,11 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.WallVault());
             specialMoves.Add(new SpecialMoves.StunBox());
             specialMoves.Add(new SpecialMoves.WallPush());
+
+            foreach (SpecialMove move in specialMoves)
+            {
+                move.Known = true;
+            }
         }
 
         /// <summary>
@@ -93,6 +98,21 @@ namespace RogueBasin
             levelTCODMaps.Add(new TCODFov(mapToAdd.width, mapToAdd.height));
 
             return levels.Count - 1;
+        }
+
+        /// <summary>
+        /// Player learns a random move. Play movie.
+        /// </summary>
+        public void PlayerLearnsRandomMove()
+        {
+            //OK, this needs to be fixed so you don't keep learning the same moves, but I'm leaving it like this for now for debug
+
+            int moveToLearn = Game.Random.Next(specialMoves.Count);
+
+            specialMoves[moveToLearn].Known = true;
+
+            //Play movie
+            Screen.Instance.PlayMovie(specialMoves[moveToLearn].MovieRoot());
         }
 
         public bool AddMonster(Monster creature, int level, Point location)
@@ -501,7 +521,10 @@ namespace RogueBasin
 
             foreach (SpecialMove move in specialMoves)
             {
-                move.CheckAction(true, newPCLocation);
+                if (move.Known)
+                {
+                    move.CheckAction(true, newPCLocation);
+                }
             }
             
             //Are any moves ready, if so carry the first one out. All other are deleted (otherwise move interactions have to be worried about)
@@ -509,7 +532,7 @@ namespace RogueBasin
             SpecialMove moveToDo = null;
 
             foreach(SpecialMove move in specialMoves) {
-                if (move.MoveComplete())
+                if (move.Known && move.MoveComplete())
                 {
                     moveToDo = move;
                     break;
@@ -1112,7 +1135,8 @@ namespace RogueBasin
 
             foreach (SpecialMove move in specialMoves)
             {
-                move.CheckAction(false, new Point(0, 0));
+                if(move.Known)
+                    move.CheckAction(false, new Point(0, 0));
             }
 
             //Are any moves ready, if so carry the first one out. All other are deleted (otherwise move interactions have to be worried about)
@@ -1121,7 +1145,7 @@ namespace RogueBasin
 
             foreach (SpecialMove move in specialMoves)
             {
-                if (move.MoveComplete())
+                if (move.Known && move.MoveComplete())
                 {
                     moveToDo = move;
                     break;
