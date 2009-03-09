@@ -6,24 +6,56 @@ namespace RogueBasin
 {
     class MapNode
     {
-        int width;
-        int height;
-
-        //tl corner in map coords
+        //BSP tl corner in map coords
         int x;
         int y;
 
-        MapNode childLeft;
-        MapNode childRight;
+        //BSP square dimensions
+        int width;
+        int height;
 
+        //Room coords
+        int roomX;
+        int roomY;
+
+        int roomWidth;
+        int roomHeight;
+
+        //Square split parameters
         SplitType split;
         int actualSplit;
 
-        const double minimumSplit = 0.2;
-        const double maximumSplit = 0.8;
+        //Children references
+        MapNode childLeft;
+        MapNode childRight;
 
-        const double minFill = 0.6;
+        //TUNING PARAMETERS
+
+        //Minimum BSP square sizes
+        const int minBSPSquareWidth = 8;
+        const int minBSPSquareHeight = 5;
+
+        //Minimum room sizes. Below 3 will break the algorithm (and make unwalkable rooms)
+        const int minRoomWidth = 4;
+        const int minRoomHeight = 4;
+
+        //Smaller numbers make larger areas more likely
+        //Numbers 5 or below make a significant difference
+        const int noSplitChance = 5;
+        //Multiple of BSPwidth above which we must split
+        const int mustSplitSize = 3;
+
+        //How the BSP squares are split as a ratio
+        const double minimumSplit = 0.4;
+        const double maximumSplit = 0.6;
+
+        //How much of the BSP square is filled by a room
+        const double minFill = 0.7;
         const double maxFill = 1.0;
+        
+        //Tree depth counter
+        int treeDepth;
+        bool newConnectionMade;
 
         public MapNode(int x, int y, int width, int height)
         {
@@ -37,17 +69,84 @@ namespace RogueBasin
             Horizontal, Vertical
         }
 
+        //Find a random point within a room
+        public Point RandomRoomPoint()
+        {
+            return FindRandomRoomPoint();
+        }
+
+        private Point FindRandomRoomPoint()
+        {
+            //Go down the tree to a random left. When there find a random point in the room and return it
+            Random rand = MapGeneratorBSP.rand;
+            
+            Point retPoint = new Point(-1, -1);
+
+            //If we have both children choose one
+            if (childLeft != null && childRight != null)
+            {
+
+                if (rand.Next(2) < 1)
+                {
+                    retPoint = childLeft.RandomRoomPoint();
+                }
+                else
+                {
+                    retPoint = childRight.RandomRoomPoint();
+                }
+            }
+            //Otherwise do the one we have
+            else
+            {
+                if (childLeft != null)
+                {
+                    retPoint = childLeft.RandomRoomPoint();
+                }
+
+                else
+                {
+                    if (childRight != null)
+                    {
+                        retPoint = childRight.RandomRoomPoint();
+                    }
+                }
+            }
+
+            //If it's the first leaf we've come to 
+            //Find point in the room
+            if (retPoint.x == -1)
+            {
+
+                int x = roomX + 1 + rand.Next(roomWidth - 2);
+                int y = roomY + 1 + rand.Next(roomHeight - 2);
+
+                return new Point(x, y);
+            }
+
+            return retPoint;
+        }
+
         public void Split() {
 
             Random rand = MapGeneratorBSP.rand;
             split = SplitType.Vertical;
 
-            if(rand.Next(2) == 1) {
+            //Long thin areas are more likely to be split widthways and vice versa
+            if(rand.Next(width + height) < width) {
                 split = SplitType.Horizontal;
             }
 
             if (split == SplitType.Horizontal)
             {
+                //Small chance that we don't recurse any further
+                int chanceNoSplitHoriz = mustSplitSize - (width / minBSPSquareWidth);
+                if (rand.Next(noSplitChance) < chanceNoSplitHoriz)
+                {
+                    childLeft = null;
+                    childRight = null;
+                    return;
+                }
+
                 int minSplit = (int)(width * minimumSplit);
                 int maxSplit = (int)(width * maximumSplit);
 
@@ -55,7 +154,7 @@ namespace RogueBasin
 
                 //Define the two child areas, make objects and then recursively split them
 
-                if (actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (actualSplit < minBSPSquareWidth)
                 {
                     childLeft = null;
                 }
@@ -65,7 +164,7 @@ namespace RogueBasin
                     childLeft.Split();
                 }
 
-                if (width - actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (width - actualSplit < minBSPSquareWidth)
                 {
                     childRight = null;
                 }
@@ -77,6 +176,15 @@ namespace RogueBasin
             }
             else {
                 //SplitType.Vertical
+
+                //Small chance that we don't recurse any further
+                int chanceNoSplitVert = mustSplitSize - (height / minBSPSquareHeight);
+                if (rand.Next(noSplitChance) < chanceNoSplitVert)
+                {
+                    childLeft = null;
+                    childRight = null;
+                }
+
                 int minSplit = (int)(height * minimumSplit);
                 int maxSplit = (int)(height * maximumSplit);
 
@@ -84,7 +192,7 @@ namespace RogueBasin
 
                 //Define the two child areas, make objects and then recursively split them
 
-                if (actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (actualSplit < minBSPSquareHeight)
                 {
                     childLeft = null;
                 }
@@ -94,7 +202,7 @@ namespace RogueBasin
                     childLeft.Split();
                 }
 
-                if (height - actualSplit < MapGeneratorBSP.minimumRoomSize)
+                if (height - actualSplit < minBSPSquareHeight)
                 {
                     childRight = null;
                 }
@@ -124,9 +232,22 @@ namespace RogueBasin
         public void DrawRoom(Map baseMap) {
             
             Random rand = MapGeneratorBSP.rand;
-            //Width and height ensures a 1 square border in the BSP square
-            int roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill) - 1 ) ));
-            int roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) - 1 ) ));
+            //Width and height are reduced by 1 from max filling to ensure there is always a free column / row for an L-shaped corridor
+            roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill)) ));
+            roomHeight = (int)(height * minFill + rand.Next((int) ( (height * maxFill) - (height * minFill) ) ));
+
+            if(width <= minRoomWidth) {
+                throw new ApplicationException("BSP too small for room");
+            }
+            if(height <= minRoomHeight) {
+                throw new ApplicationException("BSP too small for room");
+            }
+
+            if(roomWidth < minRoomWidth)
+                roomWidth = minRoomWidth;
+
+            if (roomHeight < minRoomHeight)
+                roomHeight = minRoomHeight;
 
             /*if (roomWidth < MapGeneratorBSP.minimumRoomSize)
                 roomWidth = MapGeneratorBSP.minimumRoomSize;
@@ -134,25 +255,88 @@ namespace RogueBasin
             if (roomHeight < MapGeneratorBSP.minimumRoomSize)
                 roomHeight = MapGeneratorBSP.minimumRoomSize;*/
 
-            int lx = x + 1 + rand.Next(width - roomWidth);
-            int rx = lx + roomWidth - 1;
-            int ty = y + 1 + rand.Next(height - roomHeight);
-            int by = ty + roomHeight - 1;
+            roomX = x + 1 + rand.Next(width - roomWidth);
+            int rx = roomX + roomWidth - 1;
+            roomY = y + 1 + rand.Next(height - roomHeight);
+            int by = roomY + roomHeight - 1;
 
-            for (int i = lx; i <= rx; i++)
+            //Walls
+
+            for (int i = roomX; i <= rx; i++)
             {
                 //Top row
-                baseMap.mapSquares[i, ty].Terrain = MapTerrain.Wall;
+                baseMap.mapSquares[i, roomY].Terrain = MapTerrain.Wall;
                 //Bottom row
                 baseMap.mapSquares[i, by].Terrain = MapTerrain.Wall;
             }
 
-            for (int i = ty; i <= by; i++)
+            for (int i = roomY; i <= by; i++)
             {
                 //Left row
-                baseMap.mapSquares[lx, i].Terrain = MapTerrain.Wall;
+                baseMap.mapSquares[roomX, i].Terrain = MapTerrain.Wall;
                 //Right row
                 baseMap.mapSquares[rx, i].Terrain = MapTerrain.Wall;
+            }
+
+            //Inside
+            //Set as empty
+            for (int i = roomX + 1; i < rx; i++)
+            {
+                for (int j = roomY + 1; j < by; j++)
+                {
+                    baseMap.mapSquares[i, j].Terrain = MapTerrain.Empty;
+                    baseMap.mapSquares[i, j].SetOpen();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add an extra connecting corridor somewhere on the map. Returns whether a new connection was drawn (may fail due to randomness, in which case retry)
+        /// </summary>
+        /// <param name="baseMap"></param>
+        public bool AddRandomConnection(Map baseMap)
+        {
+            treeDepth = 0;
+            newConnectionMade = false;
+            AddExtraConnectionBetweenChildren(baseMap);
+
+            return newConnectionMade;
+        }
+
+        public void AddExtraConnectionBetweenChildren(Map baseMap) {
+
+            //Wander down the tree to a leaf, keeping track of the number of nodes with 2 children (that could be possible connections)
+            //When we come back down the tree, try to get one of the 2 children nodes to draw a connection
+
+            if (childLeft != null && childRight != null)
+            {
+                treeDepth++;
+
+                //Pick one node at random
+                if(MapGeneratorBSP.rand.Next(2) < 1) {
+                    childLeft.AddExtraConnectionBetweenChildren(baseMap);
+                }
+                else {
+                    childRight.AddExtraConnectionBetweenChildren(baseMap);
+                }
+
+                //We reach here after we have hit the leaf
+                //If we haven't made a connection yet there's a chance we will connect our children
+
+                if (newConnectionMade == false &&
+                MapGeneratorBSP.rand.Next(treeDepth) < 1)
+                {
+                    newConnectionMade = true;
+
+                    //Draw a connecting corridor between our two children
+                    DrawConnectingCorriderBetweenChildren(baseMap);
+                }
+            }
+            else if(childLeft != null) {
+                childLeft.AddExtraConnectionBetweenChildren(baseMap);
+            }
+            else if(childRight != null) {
+                childRight.AddExtraConnectionBetweenChildren(baseMap);
             }
         }
 
@@ -161,18 +345,22 @@ namespace RogueBasin
             //Children should do their own drawing first
             //However, if we don't have children, return to our parent
 
-            if (childLeft == null)
-                return;
-            childLeft.DrawCorridorConnectingChildren(baseMap);
+            if (childLeft != null)
+                childLeft.DrawCorridorConnectingChildren(baseMap);
 
-            if (childRight == null)
-                return;
-            childRight.DrawCorridorConnectingChildren(baseMap);
+            if (childRight != null) 
+                childRight.DrawCorridorConnectingChildren(baseMap);
 
             //If we only have 1 child we can't connect them, but our parent will connect to them
             if (childLeft == null || childRight == null)
                 return;
 
+            //Draw a connecting corridor between our two children
+            DrawConnectingCorriderBetweenChildren(baseMap);
+        }
+
+        private void DrawConnectingCorriderBetweenChildren(Map baseMap)
+        {
             Random rand = MapGeneratorBSP.rand;
 
             if (split == SplitType.Horizontal)
@@ -212,7 +400,7 @@ namespace RogueBasin
                             leftX = i;
                             break;
                         }
-                        //A corridor 'seen coming' we can short cut too
+                        //A corridor 'seen coming' we can short cut to
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
                             leftX = i - 1;
@@ -258,7 +446,7 @@ namespace RogueBasin
                         //A corridor 'seen coming' we can short cut too
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
-                            rightX = i - 1;
+                            rightX = i + 1;
                             break;
                         }
                         //A 1-thick wall is OK
@@ -270,6 +458,7 @@ namespace RogueBasin
                     }
                 } while (rightX == -1);
 
+                //Screen.Instance.DrawMapDebugHighlight(baseMap, leftX, leftY, rightX, rightY);
 
                 //Now route a L corridor from (leftX, leftY) to (rightX, rightY)
                 //The L bend can occur within X: leftSafeX -> rightSafeX
@@ -285,7 +474,7 @@ namespace RogueBasin
                     notValidPath = false;
 
                     //L bend set randonly
-                    int lBendX = leftX + 1 + rand.Next(rightX - leftX - 2);
+                    int lBendX = leftX + 1 + rand.Next(rightX - leftX);
 
                     for (int i = leftX; i <= lBendX; i++)
                     {
@@ -321,7 +510,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
-                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain == MapTerrain.Wall)
                         {
                             notValidPath = true;
                             break;
@@ -333,8 +522,9 @@ namespace RogueBasin
                 foreach (Point sq in corridorRoute)
                 {
                     baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[sq.x, sq.y].SetOpen();
                 }
-                }
+            }
             else
             {
                 //Vertical
@@ -420,7 +610,7 @@ namespace RogueBasin
                         //A corridor 'seen coming' we can short cut too
                         else if (terrainNext2 == MapTerrain.Corridor)
                         {
-                            rightY = i - 1;
+                            rightY = i + 1;
                             break;
                         }
                         //A 1-thick wall is OK
@@ -447,7 +637,7 @@ namespace RogueBasin
                     notValidPath = false;
 
                     //L bend set randonly
-                    int lBendY = leftY + 1 + rand.Next(rightY - leftY - 2);
+                    int lBendY = leftY + 1 + rand.Next(rightY - leftY);
 
                     for (int i = leftY; i <= lBendY; i++)
                     {
@@ -483,7 +673,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
-                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain != MapTerrain.Empty)
+                        if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain == MapTerrain.Wall)
                         {
                             notValidPath = true;
                             break;
@@ -495,6 +685,7 @@ namespace RogueBasin
                 foreach (Point sq in corridorRoute)
                 {
                     baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[sq.x, sq.y].SetOpen();
                 }
 
 
@@ -508,9 +699,10 @@ namespace RogueBasin
         int height = 40;
 
         public static Random rand;
-        public const int minimumRoomSize = 6;
 
         Map baseMap;
+
+        MapNode rootNode;
 
         public MapGeneratorBSP()
         {
@@ -522,7 +714,7 @@ namespace RogueBasin
             rand = new Random();
         }
 
-        public Map GenerateMap()
+        public Map GenerateMap(int extraConnections)
         {
             LogFile.Log.LogEntry(String.Format("Generating BSP dungeon"));
 
@@ -530,17 +722,222 @@ namespace RogueBasin
 
             //Make a BSP tree for the rooms
 
-            MapNode rootNode = new MapNode(0, 0, width, height);
+            rootNode = new MapNode(0, 0, width, height);
             rootNode.Split();
             
             //Draw a room in each BSP leaf
             rootNode.DrawRoomAtLeaf(baseMap);
 
+            //debug
+            //Screen.Instance.DrawMapDebug(baseMap);
+
+            //Draw connecting corridors
             rootNode.DrawCorridorConnectingChildren(baseMap);
 
-            baseMap.PCStartLocation = new Point(0, 0);
+            //Add any extra connecting corridors as specified
+
+            for (int i = 0; i < extraConnections; i++)
+            {
+                rootNode.AddRandomConnection(baseMap);
+            }
+
+            //Add doors where single corridors terminate into rooms
+            AddDoors();
+
+            //Turn corridors into normal squares and surround with walls
+            CorridorsIntoRooms();
+
+            //Set which squares are light blocking
+            //Now done during creation
+            //SetLightBlocking(baseMap);
+
+            //Set the PC start location in a random room
+            baseMap.PCStartLocation = rootNode.RandomRoomPoint();
 
             return baseMap;
+        }
+
+        /// <summary>
+        /// Add doors at the end of single corridors into rooms (don't do so with double or triple corridors,
+        /// so we have to do this in a final pass)
+        /// </summary>
+        private void AddDoors()
+        {
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Corridor)
+                    {
+                        //North door
+                        //Check there is room first
+                        if (j - 1 >= 0 && i - 1 >= 0 && i + 1 < width)
+                        {
+                            //We need to check for the surrounding walls as well as the gap to avoid multi-corridors having multi-doors
+                            if (baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Empty &&
+                                baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+                        //South door
+                        if (j + 1 < height && i - 1 >= 0 && i + 1 < width)
+                        {
+                            if (baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Empty  &&
+                                baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+
+                        //West door
+                        if (i - 1 >= 0 && j - 1 >= 0 && j + 1 < height)
+                        {
+                            if (baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Empty &&
+                                baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+
+                        //East door
+                        if (i + 1 < width && j - 1 >= 0 && j + 1 < height)
+                        {
+                            if (baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Empty &&
+                                baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
+                            {
+                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                baseMap.mapSquares[i, j].SetBlocking();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Turn corridors into little rooms
+        /// </summary>
+        private void CorridorsIntoRooms()
+        {
+            //Surround each corridor edge with walls
+            //i.e. fill any adjacent (inc diagonals) void with walls
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Corridor)
+                    {
+                        int tx = i - 1;
+                        int ty = j - 1;
+                        int bx = i + 1;
+                        int by = j + 1;
+
+                        if (tx >= 0 && ty >= 0 &&
+                            baseMap.mapSquares[tx, ty].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[tx, ty].Terrain = MapTerrain.Wall;
+                        }
+                        if (ty >= 0 &&
+                            baseMap.mapSquares[i, ty].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[i, ty].Terrain = MapTerrain.Wall;
+                        }
+                        if (ty >= 0 && bx < width &&
+                            baseMap.mapSquares[bx, ty].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[bx, ty].Terrain = MapTerrain.Wall;
+                        }
+                        if (tx >= 0 &&
+                            baseMap.mapSquares[tx, j].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[tx, j].Terrain = MapTerrain.Wall;
+                        }
+                        if (bx < width &&
+                            baseMap.mapSquares[bx, j].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[bx, j].Terrain = MapTerrain.Wall;
+                        }
+                        if (by < height && tx >= 0 &&
+                            baseMap.mapSquares[tx, by].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[tx, by].Terrain = MapTerrain.Wall;
+                        }
+                        if (by < height &&
+                            baseMap.mapSquares[i, by].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[i, by].Terrain = MapTerrain.Wall;
+                        }
+                        if (by < height && bx < width &&
+                            baseMap.mapSquares[bx, by].Terrain == MapTerrain.Void)
+                        {
+                            baseMap.mapSquares[bx, by].Terrain = MapTerrain.Wall;
+                        }
+                    }
+                }
+            }
+
+            //Now turn all corridors into normal floor
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Corridor)
+                    {
+                        baseMap.mapSquares[i, j].Terrain = MapTerrain.Empty;
+                    }
+                }
+            }
+        }
+
+        private void SetLightBlocking(Map baseMap)
+        {
+            foreach (MapSquare square in baseMap.mapSquares)
+            {
+                if (square.Terrain == MapTerrain.Empty)
+                {
+                    square.BlocksLight = false;
+                }
+                else
+                {
+                    square.BlocksLight = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns only points in rooms (not corridors)
+        /// </summary>
+        /// <returns></returns>
+        public Point RandomPointInRoom()
+        {
+            return rootNode.RandomRoomPoint();
+        }
+
+        /// <summary>
+        /// Returns a point anywhere the terrain is empty
+        /// </summary>
+        /// <returns></returns>
+        public Point RandomWalkablePoint()
+        {
+            do
+            {
+                int x = Game.Random.Next(width);
+                int y = Game.Random.Next(height);
+
+                if (baseMap.mapSquares[x, y].Terrain == MapTerrain.Empty)
+                {
+                    return new Point(x, y);
+                }
+            }
+            while (true);
         }
 
         public int Width

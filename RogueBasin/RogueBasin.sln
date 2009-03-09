@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C# Express 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RogueBasin", "RogueBasin\RogueBasin.csproj", "{3D08DD25-6DF5-49E7-966D-9C843399C6FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libtcodWrapper", "..\..\resources\libtcod-net\libtcodWrapper.csproj", "{85E2DED9-AA04-4A3B-8587-562D577A8EAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libtcodWrapper", "libtcod-net\libtcodWrapper.csproj", "{85E2DED9-AA04-4A3B-8587-562D577A8EAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

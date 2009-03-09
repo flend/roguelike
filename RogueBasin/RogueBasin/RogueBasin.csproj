@@ -39,20 +39,47 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="Creature.cs" />
+    <Compile Include="CreatureEffect.cs" />
+    <Compile Include="Creatures\Rat.cs" />
     <Compile Include="Dungeon.cs" />
+    <Compile Include="DungeonEffect.cs" />
+    <Compile Include="Effect.cs" />
+    <Compile Include="EquipmentSlot.cs" />
+    <Compile Include="EquipmentSlotInfo.cs" />
+    <Compile Include="IEquippableItem.cs" />
+    <Compile Include="Feature.cs" />
+    <Compile Include="Features\StaircaseDown.cs" />
+    <Compile Include="Features\StaircaseUp.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="Inventory.cs" />
+    <Compile Include="InventoryListing.cs" />
+    <Compile Include="Item.cs" />
+    <Compile Include="Items\Potion.cs" />
+    <Compile Include="Items\ShortSword.cs" />
+    <Compile Include="ITurnAI.cs" />
+    <Compile Include="IUseableItem.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
+    <Compile Include="MapGeneratorCave.cs" />
+    <Compile Include="MapGeneratorFromASCIIFile.cs" />
     <Compile Include="MapGeneratorRogue.cs" />
+    <Compile Include="MapObject.cs" />
+    <Compile Include="MessageQueue.cs" />
+    <Compile Include="Monster.cs" />
+    <Compile Include="MonsterEffect.cs" />
+    <Compile Include="MonsterSimpleAI.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayerEffect.cs" />
+    <Compile Include="PlayerEffectInstant.cs" />
+    <Compile Include="PlayerEffectSimpleDuration.cs" />
+    <Compile Include="PlayerEffects\Healing.cs" />
+    <Compile Include="PlayerEffects\SpeedUp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />
     <Compile Include="Screen.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\resources\libtcod-net\libtcodWrapper.csproj">
-      <Project>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</Project>
-      <Name>libtcodWrapper</Name>
-    </ProjectReference>
+    <Compile Include="StringEquivalent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -60,5 +87,11 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libtcod-net\libtcodWrapper.csproj">
+      <Project>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</Project>
+      <Name>libtcodWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

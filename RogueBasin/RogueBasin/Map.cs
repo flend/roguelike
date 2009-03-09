@@ -12,29 +12,92 @@ namespace RogueBasin
             this.x = x;
             this.y = y;
         }
+
+        public static bool operator ==(Point i, Point j)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(i, j))
+            {
+                return true;
+            }
+
+            // If one is null, but not both, return false.
+            if (((object)i == null) || ((object)j == null))
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            if (i.x == j.x && i.y == j.y)
+                return true;
+            return false;
+        }
+
+        public static bool operator !=(Point i, Point j)
+        {
+            return !(i == j);
+        }
+
+        public override bool Equals(object obj)
+        {
+            //Value-wise comparison ensured by the cast
+            return this == (Point)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return x ^ y;
+        }
     }
     
     public enum MapTerrain
     {
-        Empty = 0,
-        Wall = 1,
-        Corridor = 2
+        Void,    //non-walkable
+        Empty,   //walkable
+        Wall,    //non-walkable
+        Corridor, //walkable
+        ClosedDoor, //non-walkable
+        OpenDoor //walkable
     }
 
     public class MapSquare
     {
-        MapTerrain terrain;
-        bool walkable;
+        MapTerrain terrain = MapTerrain.Empty;
+        
+        /// <summary>
+        /// Is the square walkable. This is recalculated based on creature positions etc. each turn
+        /// </summary>
+        bool walkable = false;
+
+        /// <summary>
+        /// Does the square block light. Shouldn't change after the map is made
+        /// </summary>
+        bool blocksLight = true;
+
+        /// <summary>
+        /// Has this square ever been in the FOV?
+        /// </summary>
+        bool seenByPlayer = false;
+
+        /// <summary>
+        /// In player's FOV - recalculated each turn
+        /// </summary>
+        bool inPlayerFOV = false;
+
+        /// <summary>
+        /// In a creature's FOV (may be debug only)
+        /// </summary>
+        bool inMonsterFOV = false;
 
         public MapTerrain Terrain
         {
             set
             {
                 terrain = value;
-                if (terrain == MapTerrain.Wall)
+                /*if (terrain == MapTerrain.Wall)
                     walkable = false;
                 else
-                    walkable = true;
+                    walkable = true;*/
             }
             get
             {
@@ -42,12 +105,96 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Is the square walkable. This is recalculated based on creature positions etc. each turn
+        /// </summary>
         public bool Walkable
         {
             get
             {
                 return walkable;
             }
+            set
+            {
+                walkable = value;
+            }
+        }
+
+        /// <summary>
+        /// Does the square block light. Shouldn't change after the map is made
+        /// </summary>
+        public bool BlocksLight
+        {
+            get
+            {
+                return blocksLight;
+            }
+            set
+            {
+                blocksLight = value;
+            }
+        }
+
+        /// <summary>
+        /// Has this square ever been in the FOV?
+        /// </summary>
+        public bool SeenByPlayer
+        {
+            get
+            {
+                return seenByPlayer;
+            }
+            set
+            {
+                seenByPlayer = value;
+            }
+        }
+
+        /// <summary>
+        /// In player's FOV - recalculated each turn
+        /// </summary>
+        public bool InPlayerFOV
+        {
+            get
+            {
+                return inPlayerFOV;
+            }
+            set
+            {
+                inPlayerFOV = value;
+            }
+        }
+
+        /// <summary>
+        /// In a creature's FOV (may be debug only)
+        /// </summary>
+        public bool InMonsterFOV
+        {
+            get
+            {
+                return inMonsterFOV;
+            }
+            set
+            {
+                inMonsterFOV = value;
+            }
+        }
+
+        /// <summary>
+        /// Sets walkable and non-light blocking
+        /// </summary>
+        public void SetOpen() {
+            BlocksLight = false;
+            Walkable = true;
+        }
+
+        /// <summary>
+        /// Sets non-walkable and light blocking
+        /// </summary>
+        public void SetBlocking()
+        {
+            BlocksLight = true;
+            Walkable = false;
         }
     }
 
@@ -70,9 +217,10 @@ namespace RogueBasin
                 for (int j = 0; j < height; j++)
                 {
                     mapSquares[i, j] = new MapSquare();
-                    mapSquares[i, j].Terrain = MapTerrain.Empty;
                 }
             }
+
+            Clear();
         }
 
         public void Clear()
@@ -81,7 +229,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < height; j++)
                 {
-                    mapSquares[i, j].Terrain = MapTerrain.Empty;
+                    mapSquares[i, j].Terrain = MapTerrain.Void;
                 }
             }
         }

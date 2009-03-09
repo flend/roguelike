@@ -405,7 +405,7 @@ namespace RogueBasin
             int corridorLengthY = endY - startY - 2;
 
             //Try to draw a random corridor. It may intersect with a pre-existing corridor in which case we need to start again
-            bool corridorFailed = false;
+            //bool corridorFailed = false;
 
             //Where to put the bend is the random variable
             int lBendCoord;
@@ -548,6 +548,7 @@ namespace RogueBasin
                 for (int i = startX; i <= startX + 1 + lBendCoord; i++)
                 {
                     baseMap.mapSquares[i, startY].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[i, startY].SetOpen();
                 }
 
                 //up / down
@@ -570,12 +571,14 @@ namespace RogueBasin
                 for (int j = corridorYStart; j <= corridorYEnd; j++)
                 {
                     baseMap.mapSquares[xCoord, j].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[xCoord, j].SetOpen();
                 }
 
                 //right
                 for (int i = xCoord + 1; i <= endX; i++)
                 {
                     baseMap.mapSquares[i, endY].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[i, endY].SetOpen();
                 }
             }
             else
@@ -585,6 +588,7 @@ namespace RogueBasin
                 for (int i = startY; i <= startY + 1 + lBendCoord; i++)
                 {
                     baseMap.mapSquares[startX, i].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[startX, i].SetOpen();
                 }
 
                 //left / right
@@ -607,12 +611,14 @@ namespace RogueBasin
                 for (int j = corridorXStart; j <= corridorXEnd; j++)
                 {
                     baseMap.mapSquares[j, yCoord].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[j, yCoord].SetOpen();
                 }
 
                 //down
                 for (int i = yCoord + 1; i <= endY; i++)
                 {
                     baseMap.mapSquares[endX, i].Terrain = MapTerrain.Corridor;
+                    baseMap.mapSquares[endX, i].SetOpen();
                 }
             }
         }
@@ -639,6 +645,15 @@ namespace RogueBasin
                 baseMap.mapSquares[lx, i].Terrain = MapTerrain.Wall;
                 //Right row
                 baseMap.mapSquares[rx, i].Terrain = MapTerrain.Wall;
+            }
+
+            //Inside
+            for (int i = lx + 1; i < rx; i++)
+            {
+                for (int j = ty + 1; j < by; j++)
+                {
+                    baseMap.mapSquares[i, j].SetOpen();
+                }
             }
         }
 
