@@ -62,6 +62,7 @@
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
+    <Compile Include="MapGeneratorBSPCave.cs" />
     <Compile Include="MapGeneratorCave.cs" />
     <Compile Include="MapGeneratorFromASCIIFile.cs" />
     <Compile Include="MapGeneratorRogue.cs" />

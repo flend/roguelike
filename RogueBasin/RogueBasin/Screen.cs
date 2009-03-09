@@ -127,7 +127,7 @@ namespace RogueBasin {
             //CustomFontRequest fontReq = new CustomFontRequest("terminal.png", 8, 8, CustomFontRequestFontTypes.Grayscale);
             RootConsole.Width = width;
             RootConsole.Height = height;
-            RootConsole.WindowTitle = "RogueBase";
+            RootConsole.WindowTitle = "DDRogue";
             RootConsole.Fullscreen = false;
             //RootConsole.Font = fontReq;
             /*

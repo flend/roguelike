@@ -201,6 +201,13 @@ namespace RogueBasin
                                 runMapLoop = false;
                                 timeAdvances = true;
                                 break;
+                            case 'f':
+                                //Full screen switch
+                                timeAdvances = false;
+                                RootConsole rootConsole = RootConsole.GetInstance();
+                                rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
+                                rootConsole.Flush();
+                                break;
                             case 'm':
                                 //Play movie
                                 Game.Dungeon.PlayerLearnsRandomMove();
@@ -787,7 +794,7 @@ namespace RogueBasin
             Random rand = new Random();
 
             //Create dungeon map (at least level 1)
-            MapGeneratorBSP mapGen1 = new MapGeneratorBSP();
+            MapGeneratorBSPCave mapGen1 = new MapGeneratorBSPCave();
             //MapGeneratorRogue mapGen = new MapGeneratorRogue();
             mapGen1.Width = 80;
             mapGen1.Height = 25;
@@ -942,6 +949,25 @@ namespace RogueBasin
         /// <param name="level"></param>
         /// <param name="location"></param>
         void AddFeatureToDungeonRandomPoint(Feature feature, MapGeneratorBSP mapGen, int level)
+        {
+            Point location;
+            //Loop until we find an acceptable location and the add works
+            do
+            {
+                location = mapGen.RandomWalkablePoint();
+
+            }
+            while (!dungeon.AddFeature(feature, level, location));
+        }
+
+        /// <summary>
+        /// Add a feature to the dungeon. Guarantees an acceptable placement.
+        /// Might loop forever if all squares in the dungeon are already taken up
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        void AddFeatureToDungeonRandomPoint(Feature feature, MapGeneratorBSPCave mapGen, int level)
         {
             Point location;
             //Loop until we find an acceptable location and the add works
