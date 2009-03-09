@@ -79,6 +79,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />
     <Compile Include="Screen.cs" />
+    <Compile Include="SpecialMove.cs" />
+    <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="StringEquivalent.cs" />
   </ItemGroup>
   <ItemGroup>

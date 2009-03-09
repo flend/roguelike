@@ -204,12 +204,17 @@ namespace RogueBasin
                             case '.':
                                 // Do nothing
                                 timeAdvances = true;
+                                SpecialMoveNonMoveAction();
                                 break;
                             case 'i':
                                 //Interact with feature
                                 timeAdvances = InteractWithFeature();
                                 if (!timeAdvances)
                                     UpdateScreen();
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+
                                 break;
                             case 'j':
                                 //Display the inventory
@@ -229,6 +234,9 @@ namespace RogueBasin
                                 //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
                                 if(!timeAdvances)
                                     UpdateScreen();
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
                                 break;
                             case 'e':
                                 //Select an item to equip
@@ -238,6 +246,9 @@ namespace RogueBasin
                                 DisablePlayerEquippedItemsSelectScreen();
                                 if (!timeAdvances)
                                 UpdateScreen();
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
                                 break;
                             case 'w':
                                 //Display currently equipped items
@@ -255,6 +266,8 @@ namespace RogueBasin
                                 //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
                                 if (!timeAdvances)
                                     UpdateScreen();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
                                 break;
                             case 'd':
                                 //Drop item
@@ -264,6 +277,8 @@ namespace RogueBasin
                                 DisablePlayerInventoryScreen();
                                 if (!timeAdvances)
                                     UpdateScreen();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
                                 break;
 
                             //Debug events
@@ -291,6 +306,8 @@ namespace RogueBasin
                                 timeAdvances = PlayerOpenDoor();
                                 if (!timeAdvances)
                                     UpdateScreen();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
                                 break;
                         }
                     }
@@ -308,8 +325,8 @@ namespace RogueBasin
                                 break;
 
                             case KeyCode.TCODK_KP5:
-                                //Don't move
-                                timeAdvances = true;
+                                //Does nothing
+                                //timeAdvances = true;
                                 break;
 
                             case KeyCode.TCODK_KP7:
@@ -364,6 +381,14 @@ namespace RogueBasin
             }
             
             return timeAdvances;
+        }
+
+        /// <summary>
+        /// Call when time moves on due to a PC action that isn't a move. This may cause some special moves to cancel.
+        /// </summary>
+        private void SpecialMoveNonMoveAction()
+        {
+            Game.Dungeon.PCActionNoMove();
         }
 
         private bool PlayerOpenDoor()
@@ -739,7 +764,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 3;
+            LogFile.Log.DebugLevel = 2;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();

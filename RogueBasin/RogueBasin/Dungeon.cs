@@ -43,6 +43,8 @@ namespace RogueBasin
         List<Item> items;
         List<Feature> features;
 
+        List<SpecialMove> specialMoves;
+
         Player player;
 
         long worldClock = 0;
@@ -60,8 +62,20 @@ namespace RogueBasin
             features = new List<Feature>();
             levelTCODMaps = new List<TCODFov>();
             effects = new List<DungeonEffect>();
+            specialMoves = new List<SpecialMove>();
+
+            SetupSpecialMoves();
 
             player = new Player();
+        }
+
+        /// <summary>
+        /// Add to the special moves list
+        /// </summary>
+        private void SetupSpecialMoves()
+        {
+            //Add here
+            specialMoves.Add(new SpecialMoves.WallVault());
         }
 
         /// <summary>
@@ -402,9 +416,47 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Move PC to an absolute square. Doesn't do any checking at the mo, should return false if there's a problem
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        internal bool MovePCAbsolute(int level, int x, int y)
+        {
+            player.LocationLevel = level;
+            player.LocationMap.x = x;
+            player.LocationMap.y = y;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Move PC to another square on the same level. Doesn't do any checking at the mo
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        internal bool MovePCAbsoluteSameLevel(int x, int y) {
+
+            player.LocationMap.x = x;
+            player.LocationMap.y = y;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Process a relative PC move, from a keypress
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         internal bool PCMove(int x, int y)
         {
             Point newPCLocation = new Point(Player.LocationMap.x + x, Player.LocationMap.y + y);
+
+            //Moves off the map don't work
 
             if (newPCLocation.x < 0 || newPCLocation.x >= levels[player.LocationLevel].width)
             {
@@ -414,13 +466,48 @@ namespace RogueBasin
             if (newPCLocation.y < 0 || newPCLocation.y >= levels[player.LocationLevel].height)
             {
                 return false;
-           }
+            }
+            
+            //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
 
-            //If this is not a valid square, return false
-           
+            foreach (SpecialMove move in specialMoves)
+            {
+                move.CheckAction(true, newPCLocation);
+            }
+            
+            //Are any moves ready, if so carry the first one out. All other are deleted (otherwise move interactions have to be worried about)
+
+            SpecialMove moveToDo = null;
+
+            foreach(SpecialMove move in specialMoves) {
+                if (move.MoveComplete())
+                {
+                    moveToDo = move;
+                    break;
+                }
+            }
+
+            //Carry out move, if one is ready
+            if (moveToDo != null)
+            {
+                moveToDo.DoMove();
+
+                //Clear all moves
+                foreach (SpecialMove move in specialMoves)
+                {
+                    move.ClearMove();
+                }
+                return true;
+            }
+            
+            //No special move this go, do normal moving
+
+
+            //Moving into void not allowed (but should never happen)
             if (!MapSquareCanBeEntered(player.LocationLevel, newPCLocation))
             {
-                return false;
+                //This now costs time since it could be part of a special move
+                return true;
             }
 
             //Check for monsters in the square
@@ -442,9 +529,12 @@ namespace RogueBasin
                     okToMoveIntoSquare = true;
                 }
             }
-            
-            if(okToMoveIntoSquare)
-                player.LocationMap = newPCLocation;
+
+            if (okToMoveIntoSquare)
+            {
+                MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y);
+            }
+             
             return true;
         }
 
@@ -464,6 +554,7 @@ namespace RogueBasin
         /// </summary>
         public void RemoveDeadMonsters()
         {
+            //Can use RemoveAll now
             List<Monster> deadMonsters = new List<Monster>();
 
             foreach (Monster monster in monsters)
@@ -978,6 +1069,46 @@ namespace RogueBasin
                 //Not a valid location - should not occur
                 LogFile.Log.LogEntry("Non-valid location for door requested");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Equivalent of PCMove for an action that doesn't have a move.
+        /// Tell the special moves that this was a non-move action
+        /// Theoretically I should also check to see if any of them fire, but I can't imagine why
+        /// </summary>
+        internal void PCActionNoMove()
+        {
+            //Check special moves.
+
+            foreach (SpecialMove move in specialMoves)
+            {
+                move.CheckAction(false, new Point(0, 0));
+            }
+
+            //Are any moves ready, if so carry the first one out. All other are deleted (otherwise move interactions have to be worried about)
+
+            SpecialMove moveToDo = null;
+
+            foreach (SpecialMove move in specialMoves)
+            {
+                if (move.MoveComplete())
+                {
+                    moveToDo = move;
+                    break;
+                }
+            }
+
+            //Carry out move, if one is ready
+            if (moveToDo != null)
+            {
+                moveToDo.DoMove();
+
+                //Clear all moves
+                foreach (SpecialMove move in specialMoves)
+                {
+                    move.ClearMove();
+                }
             }
         }
     }
