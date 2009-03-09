@@ -38,7 +38,9 @@ namespace RogueBasin.SpecialMoves
             if (moveCounter == 0)
             {
                 //Must be wall
-                if (dungeon.Levels[player.LocationLevel].mapSquares[locationAfterMove.x, locationAfterMove.y].Terrain != MapTerrain.Wall)
+                MapTerrain pushTerrain = dungeon.Levels[player.LocationLevel].mapSquares[locationAfterMove.x, locationAfterMove.y].Terrain;
+
+                if (pushTerrain != MapTerrain.Wall && pushTerrain != MapTerrain.ClosedDoor)
                 {
                     moveCounter = 0;
                     return;
@@ -146,7 +148,7 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove()
+        public override void DoMove(Point locationAfterMove)
         {
             //Move the PC to the new location
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);

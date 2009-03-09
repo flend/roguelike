@@ -76,6 +76,8 @@ namespace RogueBasin
         {
             //Add here
             specialMoves.Add(new SpecialMoves.WallVault());
+            specialMoves.Add(new SpecialMoves.StunBox());
+            specialMoves.Add(new SpecialMoves.WallPush());
         }
 
         /// <summary>
@@ -433,6 +435,23 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Move a creature to a location
+        /// </summary>
+        /// <param name="monsterToMove"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        internal bool MoveMonsterAbsolute(Monster monsterToMove, int level, Point location)
+        {
+            monsterToMove.LocationLevel = level;
+            monsterToMove.LocationMap = location;
+
+            //Do anything needed with the AI, not needed right now
+
+            return true;
+        }
+
+        /// <summary>
         /// Move PC to another square on the same level. Doesn't do any checking at the mo
         /// </summary>
         /// <param name="x"></param>
@@ -442,6 +461,16 @@ namespace RogueBasin
 
             player.LocationMap.x = x;
             player.LocationMap.y = y;
+
+            return true;
+        }
+        /// <summary>
+        /// Move PC to another square on the same level. Doesn't do any checking at the mo
+        /// </summary>
+        internal bool MovePCAbsoluteSameLevel(Point location)
+        {
+            player.LocationMap.x = location.x;
+            player.LocationMap.y = location.y;
 
             return true;
         }
@@ -490,7 +519,7 @@ namespace RogueBasin
             //Carry out move, if one is ready
             if (moveToDo != null)
             {
-                moveToDo.DoMove();
+                moveToDo.DoMove(newPCLocation);
 
                 //Clear all moves
                 foreach (SpecialMove move in specialMoves)
@@ -1102,7 +1131,7 @@ namespace RogueBasin
             //Carry out move, if one is ready
             if (moveToDo != null)
             {
-                moveToDo.DoMove();
+                moveToDo.DoMove(new Point(0,0));
 
                 //Clear all moves
                 foreach (SpecialMove move in specialMoves)
