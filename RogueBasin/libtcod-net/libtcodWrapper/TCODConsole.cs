@@ -716,7 +716,7 @@ namespace libtcodWrapper
         /// Set console full screen status
         /// </summary>
         /// <param name="fullScreen">Fullscreen?</param>
-        private void SetFullscreen(bool fullScreen)
+        public void SetFullscreen(bool fullScreen)
         {
             TCOD_console_set_fullscreen(fullScreen);
         }
@@ -725,7 +725,7 @@ namespace libtcodWrapper
         /// Is console currently fullscreen
         /// </summary>
         /// <returns>Fullscreen?</returns>
-        private bool IsFullscreen()
+        public bool IsFullscreen()
         {
             return TCOD_console_is_fullscreen();
         }
