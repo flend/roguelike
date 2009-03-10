@@ -151,8 +151,8 @@ namespace RogueBasin.SpecialMoves
                     MapTerrain squareTerrain = thisMap.mapSquares[squareX, squareY].Terrain;
                     SquareContents thisContents = dungeon.MapSquareContents(player.LocationLevel, new Point(squareX, squareY));
 
-                    //Into a wall
-                    if (squareTerrain != MapTerrain.OpenDoor && squareTerrain != MapTerrain.Empty)
+                    //Into something non-walkable
+                    if (!thisMap.mapSquares[squareX, squareY].Walkable)
                     {
                         break;
                     }

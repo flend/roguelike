@@ -114,7 +114,7 @@ namespace RogueBasin.SpecialMoves
                     SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(squareX, squareY));
 
                     //Into a wall
-                    if (squareTerrain != MapTerrain.OpenDoor && squareTerrain != MapTerrain.Empty)
+                    if (!thisMap.mapSquares[squareX, squareY].Walkable)
                     {
                         NoWhereToJumpFail();
                         return;
