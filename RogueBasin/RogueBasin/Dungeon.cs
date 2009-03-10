@@ -458,7 +458,36 @@ namespace RogueBasin
                 return levelTCODMaps;
             }
         }
-     
+
+        /// <summary>
+        /// For serialization only
+        /// </summary>
+        public List<DungeonEffect> Effects
+        {
+            get
+            {
+                return effects;
+            }
+            set
+            {
+                effects = value;
+            }
+        }
+
+        /// <summary>
+        /// For serialization only
+        /// </summary>
+        public List<SpecialMove> SpecialMoves
+        {
+            get
+            {
+                return specialMoves;
+            }
+            set
+            {
+                specialMoves = value;
+            }
+        }
 
         //Get the list of creatures
         public List<Monster> Monsters
@@ -466,6 +495,11 @@ namespace RogueBasin
             get
             {
                 return monsters;
+            }
+            //For serialization
+            set
+            {
+                monsters = value;
             }
         }
 
@@ -478,6 +512,11 @@ namespace RogueBasin
             {
                 return items;
             }
+            //For serialization
+            set
+            {
+                items = value;
+            }
         }
 
         /// <summary>
@@ -489,6 +528,11 @@ namespace RogueBasin
             {
                 return features;
             }
+            //For serialization
+            set
+            {
+                features = value;
+            }
         }
 
 
@@ -496,6 +540,11 @@ namespace RogueBasin
             get
             {
                 return player;
+            }
+            //For serialization
+            set
+            {
+                player = value;
             }
         }
 
@@ -1075,6 +1124,11 @@ namespace RogueBasin
             get
             {
                 return worldClock;
+            }
+            //For serialization
+            set
+            {
+                worldClock = value;
             }
         }
 

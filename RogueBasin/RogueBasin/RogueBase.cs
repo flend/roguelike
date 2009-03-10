@@ -4,13 +4,15 @@ using libtcodWrapper;
 using Console = System.Console;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace RogueBasin
 {
     public class RogueBase : IDisposable
     {
         //Master object representing the game
-        Dungeon dungeon;
+        
 
         //Are we running or have we exited?
         bool runMapLoop = true;
@@ -83,17 +85,17 @@ namespace RogueBasin
             while (runMapLoop)
             {
                 //Increment world clock
-                dungeon.IncrementWorldClock();
+                Game.Dungeon.IncrementWorldClock();
 
                 //Increment time on all global (dungeon) events
-                dungeon.IncrementEventTime();
+                Game.Dungeon.IncrementEventTime();
 
                 //All creatures get IncrementTurnTime() called on them each worldClock tick
                 //They internally keep track of when they should take another turn
 
                 //IncrementTurnTime() also increments time for all events on that creature
                 
-                foreach (Monster creature in dungeon.Monsters)
+                foreach (Monster creature in Game.Dungeon.Monsters)
                 {
                     if (creature.IncrementTurnTime())
                     {
@@ -109,18 +111,18 @@ namespace RogueBasin
                 }
 
                 //Remove dead monsters
-                dungeon.RemoveDeadMonsters();
+                Game.Dungeon.RemoveDeadMonsters();
 
                 //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
-                if (dungeon.Player.IncrementTurnTime())
+                if (Game.Dungeon.Player.IncrementTurnTime())
                 {
                     //Calculate the player's FOV
                     RecalculatePlayerFOV();
 
                     //Debug: show the FOV of all monsters
-                    foreach (Monster monster in dungeon.Monsters)
+                    foreach (Monster monster in Game.Dungeon.Monsters)
                     {
-                        dungeon.ShowCreatureFOVOnMap(monster);
+                        Game.Dungeon.ShowCreatureFOVOnMap(monster);
                     }
 
                     //Update screen just before PC's turn
@@ -207,6 +209,12 @@ namespace RogueBasin
                                 Game.Dungeon.SaveGame("game1");
                                 UpdateScreen();
                                 break;
+                            case 'l':
+                                timeAdvances = false;
+                                LoadGame("game1"); //omg
+                                UpdateScreen();
+                                break;
+
 
                             case 'f':
                                 //Full screen switch
@@ -336,11 +344,11 @@ namespace RogueBasin
                         switch (userKey.KeyCode)
                         {
                             case KeyCode.TCODK_KP1:
-                                timeAdvances = dungeon.PCMove(-1, 1);
+                                timeAdvances = Game.Dungeon.PCMove(-1, 1);
                                 break;
 
                             case KeyCode.TCODK_KP3:
-                                timeAdvances = dungeon.PCMove(1, 1);
+                                timeAdvances = Game.Dungeon.PCMove(1, 1);
                                 break;
 
                             case KeyCode.TCODK_KP5:
@@ -349,27 +357,27 @@ namespace RogueBasin
                                 break;
 
                             case KeyCode.TCODK_KP7:
-                                timeAdvances = dungeon.PCMove(-1, -1);
+                                timeAdvances = Game.Dungeon.PCMove(-1, -1);
                                 break;
                             case KeyCode.TCODK_KP9:
-                                timeAdvances = dungeon.PCMove(1, -1);
+                                timeAdvances = Game.Dungeon.PCMove(1, -1);
                                 break;
 
                             case KeyCode.TCODK_LEFT:
                             case KeyCode.TCODK_KP4:
-                                timeAdvances = dungeon.PCMove(-1, 0);
+                                timeAdvances = Game.Dungeon.PCMove(-1, 0);
                                 break;
                             case KeyCode.TCODK_RIGHT:
                             case KeyCode.TCODK_KP6:
-                                timeAdvances = dungeon.PCMove(1, 0);
+                                timeAdvances = Game.Dungeon.PCMove(1, 0);
                                 break;
                             case KeyCode.TCODK_UP:
                             case KeyCode.TCODK_KP8:
-                                timeAdvances = dungeon.PCMove(0, -1);
+                                timeAdvances = Game.Dungeon.PCMove(0, -1);
                                 break;
                             case KeyCode.TCODK_KP2:
                             case KeyCode.TCODK_DOWN:
-                                timeAdvances = dungeon.PCMove(0, 1);
+                                timeAdvances = Game.Dungeon.PCMove(0, 1);
                                 break;
                         }
                     }
@@ -400,6 +408,72 @@ namespace RogueBasin
             }
             
             return timeAdvances;
+        }
+
+        private void LoadGame(string filenameRoot)
+        {
+            //Save game filename
+            string filename = filenameRoot + ".sav";
+
+            //Deserialize the save game
+            XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
+
+            Stream stream = null;
+
+            try
+            {
+                stream = File.OpenRead(filename);
+                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(stream);
+
+                //Build a new dungeon object from the stored data
+                Dungeon newDungeon = new Dungeon();
+
+                newDungeon.Features = readData.features;
+                newDungeon.Items = readData.items;
+                newDungeon.Effects = readData.effects;
+                newDungeon.Monsters = readData.monsters;
+                newDungeon.Player = readData.player;
+                newDungeon.SpecialMoves = readData.specialMoves;
+                newDungeon.WorldClock = readData.worldClock;
+
+                //Process the maps back into map objects
+                foreach (SerializableMap serialMap in readData.levels)
+                {
+                    //Add a map. Note that this builds a TCOD map too
+                    newDungeon.AddMap(serialMap.MapFromSerializableMap());
+                }
+
+                //Build TCOD maps
+                newDungeon.RefreshTCODMaps();
+
+                //Worry about inventories generally
+                //Problem right now is that items in creature inventories will get made twice, once in dungeon and once on the player/creature
+                //Fix is to remove them from dungeon when in a creature's inventory and vice versa
+
+                //Rebuild InventoryListing for the all creatures
+                foreach (Monster monster in newDungeon.Monsters)
+                {
+                    monster.Inventory.RefreshInventoryListing();
+                }
+
+                newDungeon.Player.Inventory.RefreshInventoryListing();
+
+                //Set this new dungeon and player as the current global
+                Game.Dungeon = newDungeon;
+
+                Game.MessageQueue.AddMessage("Game : " + filenameRoot + " loaded successfully");
+                LogFile.Log.LogEntry("Game : " + filenameRoot + " loaded successfully");
+            }
+            catch (Exception ex)
+            {
+                Game.MessageQueue.AddMessage("Game : " + filenameRoot + " failed to load.");
+                LogFile.Log.LogEntry("Game : " + filenameRoot + " failed to load: "+ ex.Message);
+            }
+            finally
+            {
+                stream.Close();
+            }
+
         }
 
         /// <summary>
@@ -794,8 +868,7 @@ namespace RogueBasin
         private void SetupDungeon()
         {
             //Create dungeon and set it as current in Game
-            dungeon = new Dungeon();
-            Game.Dungeon = dungeon;
+            Game.Dungeon = new Dungeon();
 
             //Randomer
             Random rand = new Random();
@@ -831,10 +904,10 @@ namespace RogueBasin
             //}
 
             //Give map to dungeon
-            dungeon.AddMap(level1); //level 1
+            Game.Dungeon.AddMap(level1); //level 1
             //dungeon.AddMap(level2); //level 2
 
-            int caveLevel = dungeon.AddMap(cave);
+            int caveLevel = Game.Dungeon.AddMap(cave);
             cave1.AddStaircases(caveLevel);
 
 
@@ -850,7 +923,7 @@ namespace RogueBasin
                 MessageBox.Show("failed to add level 3: " + ex.Message);
             }
             //Setup PC
-            Player player = dungeon.Player;
+            Player player = Game.Dungeon.Player;
 
             player.Representation = '@';
             player.LocationMap = level1.PCStartLocation;
@@ -865,7 +938,7 @@ namespace RogueBasin
             AddFeatureToDungeon(new Features.StaircaseDown(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
 
             //Add a test short sword
-            dungeon.AddItem(new Items.ShortSword(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
+            Game.Dungeon.AddItem(new Items.ShortSword(), 0, new Point(player.LocationMap.x, player.LocationMap.y));
 
             //Create creatures and start positions
 
@@ -893,7 +966,7 @@ namespace RogueBasin
                         location = mapGen2.RandomWalkablePoint();
                     LogFile.Log.LogEntryDebug("Creature " + i.ToString() + " pos x: " + location.x + " y: " + location.y, LogDebugLevel.Low);
                 }
-                while (!dungeon.AddMonster(creature, level, location));
+                while (!Game.Dungeon.AddMonster(creature, level, location));
             }
 
             //Create features
@@ -944,7 +1017,7 @@ namespace RogueBasin
                 {
                     location = mapGen1.RandomWalkablePoint();
                 }
-                while (!dungeon.AddItem(item, level, location));
+                while (!Game.Dungeon.AddItem(item, level, location));
             }
         }
 
@@ -964,7 +1037,7 @@ namespace RogueBasin
                 location = mapGen.RandomWalkablePoint();
 
             }
-            while (!dungeon.AddFeature(feature, level, location));
+            while (!Game.Dungeon.AddFeature(feature, level, location));
         }
 
         /// <summary>
@@ -983,7 +1056,7 @@ namespace RogueBasin
                 location = mapGen.RandomWalkablePoint();
 
             }
-            while (!dungeon.AddFeature(feature, level, location));
+            while (!Game.Dungeon.AddFeature(feature, level, location));
         }
 
         /// <summary>
@@ -994,7 +1067,7 @@ namespace RogueBasin
         /// <param name="location"></param>
         bool AddFeatureToDungeon(Feature feature, int level, Point location)
         {
-            return dungeon.AddFeature(feature, level, location);
+            return Game.Dungeon.AddFeature(feature, level, location);
         }
     }
 }
