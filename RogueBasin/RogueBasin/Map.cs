@@ -8,6 +8,12 @@ namespace RogueBasin
         public int x;
         public int y;
 
+        //For serialization
+        Point()
+        {
+
+        }
+
         public Point(int x, int y) {
             this.x = x;
             this.y = y;
@@ -205,6 +211,14 @@ namespace RogueBasin
 
         public int width;
         public int height;
+
+        /// <summary>
+        /// Constructor for serialization
+        /// </summary>
+        Map()
+        {
+
+        }
 
         public Map(int width, int height)
         {

@@ -8,7 +8,7 @@ namespace RogueBasin.SpecialMoves
     /// Walk in a square to cause a stun effect or similar
     /// Square directions in a clockwise fashion
     /// </summary>
-    class StunBox : SpecialMove
+    public class StunBox : SpecialMove
     {
         int moveCounter = 0;
 

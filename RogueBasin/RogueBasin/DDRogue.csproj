@@ -80,6 +80,7 @@
     <Compile Include="PlayerEffects\SpeedUp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />
+    <Compile Include="SaveGameInfo.cs" />
     <Compile Include="Screen.cs" />
     <Compile Include="SpecialMove.cs" />
     <Compile Include="SpecialMoves\StunBox.cs" />

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    class ShortSword : Item, IEquippableItem
+    public class ShortSword : Item, IEquippableItem
     {
         public ShortSword()
         {

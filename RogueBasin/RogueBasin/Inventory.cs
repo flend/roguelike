@@ -108,6 +108,11 @@ namespace RogueBasin
             {
                 return items;
             }
+            //For serialization
+            set
+            {
+                items = value;
+            }
         }
 
         /// <summary>
@@ -131,6 +136,11 @@ namespace RogueBasin
             get
             {
                 return totalWeight;
+            }
+            //For serialization
+            set
+            {
+                totalWeight = value;
             }
         }
     }

@@ -17,6 +17,7 @@ namespace RogueBasin
     /// Subclasses will have things like better AI.
     /// Real monsters will inherit off whichever subclass they like
     /// </summary>
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Rat))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>

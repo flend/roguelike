@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Features
 {
-    class StaircaseDown : Feature
+    public class StaircaseDown : Feature
     {
         public StaircaseDown()
         {

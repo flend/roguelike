@@ -7,6 +7,9 @@ namespace RogueBasin
     /// <summary>
     /// Represents a temporary effect on the player
     /// </summary>
+
+    [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.Healing))]
+    [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.SpeedUp))]
     public abstract class PlayerEffect : CreatureEffect
     {
         protected Player player;

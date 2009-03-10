@@ -7,6 +7,8 @@ namespace RogueBasin
     /// <summary>
     /// Base class for all types of pickup-able items
     /// </summary>
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Potion))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
     public abstract class Item : MapObject
     {
         public Item()

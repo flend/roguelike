@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
+using System.Xml.Serialization;
+using System.IO;
+using System.Xml;
 
 
 namespace RogueBasin
@@ -83,6 +86,55 @@ namespace RogueBasin
             {
                 move.Known = true;
             }
+        }
+
+        /// <summary>
+        /// Save the game to disk. Throws exceptions
+        /// </summary>
+        /// <param name="saveGameName"></param>
+        public void SaveGame(string saveGameName)
+        {
+            FileStream stream = null;
+
+            try
+            {
+                //Copy across the data we need to save from dungeon
+
+                SaveGameInfo saveGameInfo = new SaveGameInfo();
+
+                saveGameInfo.effects = this.effects;
+                saveGameInfo.features = this.features;
+                saveGameInfo.items = this.items;
+                //saveGameInfo.levels = this.levels;
+                //saveGameInfo.levelTCODMaps = this.levelTCODMaps; //If this doens't work, we could easily recalculate them
+                saveGameInfo.monsters = this.monsters;
+                saveGameInfo.player = this.player;
+                saveGameInfo.specialMoves = this.specialMoves;
+                saveGameInfo.worldClock = this.worldClock;
+
+                //Construct save game filename
+                string filename = saveGameName + ".sav";
+
+                XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
+                stream = File.Open(filename, FileMode.Create);
+
+                XmlTextWriter writer = new XmlTextWriter(stream, System.Text.Encoding.UTF8);
+                writer.Formatting = Formatting.Indented;
+                serializer.Serialize(writer, saveGameInfo);
+
+                Game.MessageQueue.AddMessage("Game saved successfully");
+                LogFile.Log.LogEntry("Game saved successfully: " + filename);
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Save game failed. Name: " + saveGameName + " Reason: " + ex.Message);
+                throw new ApplicationException("Save game failed. Name: " + saveGameName + " Reason: " + ex.Message);
+            }
+            finally
+            {
+                stream.Close();
+            }
+
         }
 
         /// <summary>

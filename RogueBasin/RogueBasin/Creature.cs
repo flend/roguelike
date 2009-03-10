@@ -27,7 +27,7 @@ namespace RogueBasin
         /// <summary>
         /// Sight radius
         /// </summary>
-        int sightRadius = 5;
+        public int SightRadius {get; set;}
 
         /// <summary>
         /// Increment each game turn for the creature's internal clock. Turn at turnClockLimit
@@ -52,6 +52,21 @@ namespace RogueBasin
             get
             {
                 return equipmentSlots;
+            }
+        }
+
+        /// <summary>
+        /// For serialization
+        /// </summary>
+        public int TurnClock
+        {
+            get
+            {
+                return turnClock;
+            }
+            set
+            {
+                turnClock = value;
             }
         }
 
@@ -86,6 +101,8 @@ namespace RogueBasin
         {
             alive = true;
 
+            SightRadius = 5;
+
             inventory = new Inventory();
 
             equipmentSlots = new List<EquipmentSlotInfo>();
@@ -97,16 +114,6 @@ namespace RogueBasin
         private void RandomStartTurnClock()
         {
             turnClock = Game.Random.Next(turnClockLimit);
-        }
-
-        public int SightRadius
-        {
-            get {
-                return sightRadius;
-            }
-            set {
-                sightRadius = value;
-            }
         }
 
         /// <summary>
@@ -170,6 +177,11 @@ namespace RogueBasin
             get
             {
                 return inventory;
+            }
+            //For serialization
+            set
+            {
+                inventory = value;
             }
         }
     }

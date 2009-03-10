@@ -8,6 +8,9 @@ namespace RogueBasin
     /// Base class for SpecialMoves. Shouldn't be instantiated. Instantiate a child.
     /// Contains checks for whether we know a move or not.
     /// </summary>
+    [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.StunBox))]
+    [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallPush))]
+    [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallVault))]
     public class SpecialMove
     {
         /// <summary>

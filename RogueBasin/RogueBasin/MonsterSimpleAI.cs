@@ -5,20 +5,21 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    enum SimpleAIStates
+    public enum SimpleAIStates
     {
         RandomWalk,
         Pursuit
     }
 
-    abstract class MonsterSimpleAI : Monster
+    public abstract class MonsterSimpleAI : Monster
     {
-        SimpleAIStates AIState;
+        public SimpleAIStates AIState {get; set;}
         Creature currentTarget;
 
         public MonsterSimpleAI()
         {
             AIState = SimpleAIStates.RandomWalk;
+            currentTarget = null;
         }
         /// <summary>
         /// Run the Simple AI actions
@@ -39,8 +40,14 @@ namespace RogueBasin
             {
                 //Pursuit state, continue chasing and attacking target
 
+                //Check we have a valid target (may not after reload)
+                if (currentTarget == null)
+                {
+                    AIState = SimpleAIStates.RandomWalk;
+                }
+
                 //Is target yet living?
-                if (currentTarget.Alive == false)
+                else if (currentTarget.Alive == false)
                 {
                     //If not, go to non-chase state
                     AIState = SimpleAIStates.RandomWalk;

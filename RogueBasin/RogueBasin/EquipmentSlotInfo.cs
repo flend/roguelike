@@ -19,6 +19,12 @@ namespace RogueBasin
         /// </summary>
         public Item equippedItem = null;
 
+        //For serialization
+        EquipmentSlotInfo()
+        {
+
+        }
+
         public EquipmentSlotInfo(EquipmentSlot type) {
             slotType = type;
         }

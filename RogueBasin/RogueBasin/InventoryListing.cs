@@ -19,6 +19,14 @@ namespace RogueBasin
 
         List<int> itemIndex;
 
+        /// <summary>
+        /// For serialization only (nb: we rebuild inventory after serialization anyway)
+        /// </summary>
+        public InventoryListing()
+        {
+
+        }
+
         public InventoryListing(Inventory myInventory)
         {
             itemIndex = new List<int>();

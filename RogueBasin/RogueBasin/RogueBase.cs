@@ -201,6 +201,13 @@ namespace RogueBasin
                                 runMapLoop = false;
                                 timeAdvances = true;
                                 break;
+                            case 's':
+                                //Save the game
+                                timeAdvances = false;
+                                Game.Dungeon.SaveGame("game1");
+                                UpdateScreen();
+                                break;
+
                             case 'f':
                                 //Full screen switch
                                 timeAdvances = false;
@@ -295,7 +302,7 @@ namespace RogueBasin
 
                             //Debug events
 
-                            case 's':
+                            case 'y':
                                 //Add a speed up event on the player
                                 PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
                                 Game.Dungeon.Player.AddEffect(speedUp);

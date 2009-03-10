@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.SpecialMoves
 {
-    class WallVault : SpecialMove
+    public class WallVault : SpecialMove
     {
         int moveCounter = 0;
 
