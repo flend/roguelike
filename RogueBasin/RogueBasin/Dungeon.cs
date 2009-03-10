@@ -112,6 +112,15 @@ namespace RogueBasin
                 saveGameInfo.specialMoves = this.specialMoves;
                 saveGameInfo.worldClock = this.worldClock;
 
+                //Make maps into serializablemaps and store
+                List<SerializableMap> serializedLevels = new List<SerializableMap>();
+                foreach (Map level in levels)
+                {
+                    serializedLevels.Add(new SerializableMap(level));
+                }
+
+                saveGameInfo.levels = serializedLevels;
+
                 //Construct save game filename
                 string filename = saveGameName + ".sav";
 
