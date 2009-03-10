@@ -15,7 +15,7 @@ namespace RogueBasin.SpecialMoves
         int xDelta = 0;
         int yDelta = 0;
 
-        Point squareToMoveMonsterTo = null;
+        Point squareToMoveMonsterTo = new Point(0,0);
         Monster monsterToMove = null;
 
         public WallPush()

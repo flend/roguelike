@@ -25,16 +25,21 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Add an item to the inventory. The item will be marked as 'in inventory' so not displayed on the world map
+        /// Add an item to the inventory. The item will be marked as 'in inventory' so not displayed on the world map.
+        /// Now removes from the dungeon master item list (to stop replication when serializing)
         /// </summary>
         /// <param name="itemToAdd"></param>
         public void AddItem(Item itemToAdd) {
             
             itemToAdd.InInventory = true;
 
+            //Add to inventory
             items.Add(itemToAdd);
 
             totalWeight += itemToAdd.GetWeight();
+
+            //Remove from dungeon list
+            Game.Dungeon.RemoveItem(itemToAdd);
 
             //Refresh the listing
             RefreshInventoryListing();
@@ -42,13 +47,18 @@ namespace RogueBasin
 
         /// <summary>
         /// Removes an item from the inventory. Does NOT set InInventory = false. This should be done by the object that possesses the inventory (so it can update the position correctly)
+        /// Now adds from the dungeon master item list (to stop replication when serializing). If the caller forgets to set InInventory = false the item will not be displayed
         /// </summary>
         /// <param name="itemToRemove"></param>
         public void RemoveItem(Item itemToRemove)
         {
+            //Remove from inventory
             items.Remove(itemToRemove);
 
             totalWeight -= itemToRemove.GetWeight();
+
+            //Add to dungeon list
+            Game.Dungeon.Items.Add(itemToRemove);
 
             //Refresh the listing
             RefreshInventoryListing();

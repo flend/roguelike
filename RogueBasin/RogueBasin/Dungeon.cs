@@ -558,8 +558,7 @@ namespace RogueBasin
         internal bool MovePCAbsolute(int level, int x, int y)
         {
             player.LocationLevel = level;
-            player.LocationMap.x = x;
-            player.LocationMap.y = y;
+            player.LocationMap = new Point(x,y);
 
             return true;
         }
@@ -589,8 +588,7 @@ namespace RogueBasin
         /// <returns></returns>
         internal bool MovePCAbsoluteSameLevel(int x, int y) {
 
-            player.LocationMap.x = x;
-            player.LocationMap.y = y;
+            player.LocationMap = new Point(x,y);
 
             return true;
         }
@@ -599,8 +597,7 @@ namespace RogueBasin
         /// </summary>
         internal bool MovePCAbsoluteSameLevel(Point location)
         {
-            player.LocationMap.x = location.x;
-            player.LocationMap.y = location.y;
+            player.LocationMap = location;
 
             return true;
         }
@@ -1195,6 +1192,10 @@ namespace RogueBasin
             return null;
         }
 
+        /// <summary>
+        /// Removes an item from the master list.
+        /// </summary>
+        /// <param name="itemToUse"></param>
         internal void RemoveItem(Item itemToUse)
         {
             items.Remove(itemToUse);

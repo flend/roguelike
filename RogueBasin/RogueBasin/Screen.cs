@@ -553,6 +553,9 @@ namespace RogueBasin {
                 }
 
                 rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
+
+                rootConsole.Flush();
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
             }
 
         }

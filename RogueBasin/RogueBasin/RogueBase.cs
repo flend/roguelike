@@ -992,33 +992,33 @@ namespace RogueBasin
 
             //Add some random objects
 
-            int noItems = rand.Next(10) + 5;
+            //int noItems = rand.Next(10) + 5;
 
-            for (int i = 0; i < noItems; i++)
-            {
-                Item item;
+            //for (int i = 0; i < noItems; i++)
+            //{
+            //    Item item;
 
-                if (rand.Next(2) < 1)
-                {
-                    item = new Items.Potion();
-                }
-                else
-                {
-                    item = new Items.ShortSword();
-                }
+            //    if (rand.Next(2) < 1)
+            //    {
+            //        item = new Items.Potion();
+            //    }
+            //    else
+            //    {
+            //        item = new Items.ShortSword();
+            //    }
 
-                //item.Representation = Convert.ToChar(33 + rand.Next(12));
+            //    //item.Representation = Convert.ToChar(33 + rand.Next(12));
 
-                int level = 0;
-                Point location;
+            //    int level = 0;
+            //    Point location;
 
-                //Loop until we find an acceptable location and the add works
-                do
-                {
-                    location = mapGen1.RandomWalkablePoint();
-                }
-                while (!Game.Dungeon.AddItem(item, level, location));
-            }
+            //    //Loop until we find an acceptable location and the add works
+            //    do
+            //    {
+            //        location = mapGen1.RandomWalkablePoint();
+            //    }
+            //    while (!Game.Dungeon.AddItem(item, level, location));
+            //}
         }
 
         /// <summary>

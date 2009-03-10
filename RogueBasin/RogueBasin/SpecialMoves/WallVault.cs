@@ -11,11 +11,11 @@ namespace RogueBasin.SpecialMoves
         int xDelta = 0;
         int yDelta = 0;
 
-        Point squareToMoveTo = null;
+        Point squareToMoveTo;
 
         public WallVault()
         {
-            
+            squareToMoveTo = new Point(0, 0);
         }
 
         public override void CheckAction(bool isMove, Point locationAfterMove)

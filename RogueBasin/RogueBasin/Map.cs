@@ -4,15 +4,10 @@ using System.Text;
 namespace RogueBasin
 {
     //Represents a level map
-    public class Point {
+    public struct Point {
         public int x;
         public int y;
 
-        //For serialization
-        Point()
-        {
-
-        }
 
         public Point(int x, int y) {
             this.x = x;
