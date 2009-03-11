@@ -974,7 +974,7 @@ namespace RogueBasin
 
 
             
-            int noCreatures = rand.Next(10) + 5;
+            int noCreatures = rand.Next(10) + 15;
 
             for (int i = 0; i < noCreatures; i++)
             {

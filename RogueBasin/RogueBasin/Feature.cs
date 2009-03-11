@@ -9,6 +9,7 @@ namespace RogueBasin
     /// </summary>
     [System.Xml.Serialization.XmlInclude(typeof(Features.StaircaseDown))]
     [System.Xml.Serialization.XmlInclude(typeof(Features.StaircaseUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Features.Corpse))]
     public abstract class Feature : MapObject
     {
 

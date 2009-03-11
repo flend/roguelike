@@ -266,7 +266,7 @@ namespace RogueBasin
         /// <returns></returns>
         public bool AddFeature(Feature feature, int level, Point location)
         {
-            //Try to add a creature at the requested location
+            //Try to add a feature at the requested location
             //This may fail due to something else being there or being non-walkable
             try
             {
@@ -282,8 +282,8 @@ namespace RogueBasin
                 //Check another feature isn't there
                 foreach (Feature otherFeature in features)
                 {
-                    if (otherFeature.LocationLevel == feature.LocationLevel &&
-                        otherFeature.LocationMap == feature.LocationMap)
+                    if (otherFeature.LocationLevel == level &&
+                        otherFeature.LocationMap == location)
                     {
                         LogFile.Log.LogEntry("AddFeature: other feature already there");
                         return false;
@@ -299,7 +299,52 @@ namespace RogueBasin
             }
             catch (Exception ex)
             {
-                LogFile.Log.LogEntry(String.Format("AddItem: ") + ex.Message);
+                LogFile.Log.LogEntry(String.Format("AddFeature: ") + ex.Message);
+                return false;
+            }
+
+        }
+
+        /// <summary>
+        /// Add decoration feature to the dungeon. Make sure we don't cover up useful non-decoration features
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool AddDecorationFeature(Feature feature, int level, Point location)
+        {
+            //Try to add a feature at the requested location
+            //This may fail due to something else being there or being non-walkable
+            try
+            {
+                Map featureLevel = levels[level];
+
+                //Check another non-decoration feature isn't there
+                foreach (Feature otherFeature in features)
+                {
+                    if (otherFeature.LocationLevel == level &&
+                        otherFeature.LocationMap == location)
+                    {
+                        if (otherFeature as UseableFeature != null)
+                        {
+                            LogFile.Log.LogEntry("AddDecorationFeature: non-decoration feature already there");
+                            return false;
+                        }
+
+                        
+                    }
+                }
+
+                feature.LocationLevel = level;
+                feature.LocationMap = location;
+
+                features.Add(feature);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry(String.Format("AddFeatureStacking: ") + ex.Message);
                 return false;
             }
 
@@ -707,6 +752,9 @@ namespace RogueBasin
             //We can't take the monster out of the collection directly since we might still be iterating through them
             //Instead set a flag on the monster and remove it after all turns are complete
             monster.Alive = false;
+
+            //Leave a corpse
+            AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
         }
 
         /// <summary>
