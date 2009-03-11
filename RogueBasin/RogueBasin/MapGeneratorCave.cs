@@ -145,6 +145,27 @@ namespace RogueBasin
 
             } while (badMap);
 
+            //Add some water features
+            int noWaterFeatures = 15 + Game.Random.Next(4);
+
+            for (int i = 0; i < noWaterFeatures; i++)
+            {
+                int x, y;
+
+                //Loop until we find an empty place to start
+                do
+                {
+                    x = Game.Random.Next(Width);
+                    y = Game.Random.Next(Height);
+                } while (baseMap.mapSquares[x, y].Terrain != MapTerrain.Empty);
+
+                int deltaX = Game.Random.Next(3) - 1;
+                int deltaY = Game.Random.Next(3) - 1;
+
+                AddWaterFeature(x, y, deltaX, deltaY);
+            }
+
+
             LogFile.Log.LogEntry("Total maps made: " + mapsMade.ToString());
 
             return baseMap;
@@ -361,6 +382,55 @@ namespace RogueBasin
             //BR
             if (rand.Next(100) < DiggingChance)
                 Dig(x + 1, y + 1);
+        }
+
+        public void AddWaterFeature(int x, int y, int deltaX, int deltaY)
+        {
+            //Calculate this square's coords
+            int squareX = x + deltaX;
+            int squareY = y + deltaY;
+
+            //Check this is a valid square to operate on
+            if (squareX == 0 || squareY == 0 || squareX == Width - 1 || squareY == Height - 1)
+                return;
+
+            //Already water
+            //if (baseMap.mapSquares[x, y].Terrain == MapTerrain.Empty)
+            //    return;
+
+            //If this square is empty it becomes water
+            if (baseMap.mapSquares[x, y].Terrain == MapTerrain.Empty)
+            {
+                baseMap.mapSquares[x, y].Terrain = MapTerrain.Flooded;
+            }
+
+            //We are most likely to continue on the way we are going
+
+            int chance = Game.Random.Next(100);
+
+            if (chance < 75)
+            {
+                x += deltaX;
+                y += deltaY;
+
+                AddWaterFeature(x, y, deltaX, deltaY);
+                return;
+            }
+
+            //Chance we'll change direction
+            else if (chance < 98)
+            {
+                deltaX = Game.Random.Next(3) - 1;
+                deltaY = Game.Random.Next(3) - 1;
+
+                AddWaterFeature(x, y, deltaX, deltaY);
+                return;
+            }
+            //Otherwise we stop
+            else
+            {
+                return;
+            }
         }
 
         /// <summary>
