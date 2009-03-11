@@ -10,10 +10,12 @@ namespace RogueBasin.SpecialMoves
     /// </summary>
     public class StunBox : SpecialMove
     {
-        int moveCounter = 0;
+        //Really private, accessors for serialization only
 
-        int lastDeltaX = 0;
-        int lastDeltaY = 0;
+        public int moveCounter { get; set; }
+
+        public int lastDeltaX { get; set; }
+        public int lastDeltaY { get; set; }
 
 
         public StunBox()

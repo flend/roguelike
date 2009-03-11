@@ -6,10 +6,12 @@ namespace RogueBasin.SpecialMoves
 {
     public class WallVault : SpecialMove
     {
-        int moveCounter = 0;
+        //Really private, accessors for serialization only
 
-        int xDelta = 0;
-        int yDelta = 0;
+        public int moveCounter { get; set; }
+
+        public int xDelta { get; set; }
+        public int yDelta { get; set; } 
 
         Point squareToMoveTo;
 

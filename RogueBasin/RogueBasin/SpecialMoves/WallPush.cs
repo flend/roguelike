@@ -10,17 +10,21 @@ namespace RogueBasin.SpecialMoves
     /// </summary>
     public class WallPush : SpecialMove
     {
-        int moveCounter = 0;
+        //Really private, accessors for serialization only
 
-        int xDelta = 0;
-        int yDelta = 0;
+        public int moveCounter { get; set; }
+
+        public int xDelta {get; set;}
+        public int yDelta { get; set;} 
 
         Point squareToMoveMonsterTo = new Point(0,0);
         Monster monsterToMove = null;
 
         public WallPush()
         {
-            
+            moveCounter = 0;
+            xDelta = 0;
+            yDelta = 0;
         }
 
         public override void CheckAction(bool isMove, Point locationAfterMove)
