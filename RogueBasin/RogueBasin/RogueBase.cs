@@ -451,12 +451,15 @@ namespace RogueBasin
                 //Fix is to remove them from dungeon when in a creature's inventory and vice versa
 
                 //Rebuild InventoryListing for the all creatures
+                //Recalculate combat stats
                 foreach (Monster monster in newDungeon.Monsters)
                 {
                     monster.Inventory.RefreshInventoryListing();
+                    monster.CalculateCombatStats();
                 }
 
                 newDungeon.Player.Inventory.RefreshInventoryListing();
+                newDungeon.Player.CalculateCombatStats();
 
                 //Set this new dungeon and player as the current global
                 Game.Dungeon = newDungeon;
@@ -964,7 +967,7 @@ namespace RogueBasin
 
 
             
-            int noCreatures = rand.Next(10) + 215;
+            int noCreatures = rand.Next(10) + 5;
 
             for (int i = 0; i < noCreatures; i++)
             {

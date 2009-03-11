@@ -137,9 +137,10 @@ namespace RogueBasin
 
                 //If there are possible targets, find the closest and chase it
                 //Otherwise continue to move randomly
-
+                /*
                 if (creaturesInFOV.Count > 0)
                 {
+                    
                     //Find the closest creature
                     Creature closestCreature = null;
                     double closestDistance = Double.MaxValue; //a long way
@@ -158,10 +159,20 @@ namespace RogueBasin
                         }
                     }
 
+
+                    //Start chasing this creature
+                    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
+                    ChaseCreature(closestCreature);
+                }*/
+
+                //Current behaviour: only chase the PC
+                if(creaturesInFOV.Contains(Game.Dungeon.Player)) {
+                    Creature closestCreature = Game.Dungeon.Player;
                     //Start chasing this creature
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
                     ChaseCreature(closestCreature);
                 }
+
                 else
                 {
                     //Move randomly. If we walk into something attack it, but it does not become a new target
