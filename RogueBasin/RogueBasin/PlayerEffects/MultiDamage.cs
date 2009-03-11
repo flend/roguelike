@@ -60,7 +60,7 @@ namespace RogueBasin.PlayerEffects
             //We multiply the player's current
             int playerDamMod = Game.Dungeon.Player.DamageBase();
 
-            return playerDamMod * (multiplier - 1);
+            return playerDamMod * (multiplier);
         }
 
     }

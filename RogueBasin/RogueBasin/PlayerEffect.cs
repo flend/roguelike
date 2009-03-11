@@ -10,6 +10,7 @@ namespace RogueBasin
 
     [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.Healing))]
     [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.SpeedUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.MultiDamage))]
     public abstract class PlayerEffect : CreatureEffect
     {
         protected Player player;

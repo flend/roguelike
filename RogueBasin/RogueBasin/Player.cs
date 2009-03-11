@@ -264,6 +264,9 @@ namespace RogueBasin
 
                 monster.Hitpoints -= damage;
 
+                //Fairly evil switch case for special attack types. Sorry, no time to do it well
+                SpecialCombatEffectsOnMonster(monster);
+
                 //Is the monster dead, if so kill it?
                 if (monster.Hitpoints <= 0)
                 {
@@ -291,6 +294,30 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
+        }
+
+        /// <summary>
+        /// List of special combat effects that might happen to a HIT monster
+        /// </summary>
+        /// <param name="monster"></param>
+        private void SpecialCombatEffectsOnMonster(Monster monster)
+        {
+            //If short sword is equipped, do a slow down effect (EXAMPLE)
+            Item shortSword = null;
+            foreach (Item item in Inventory.Items)
+            {
+                if (item as Items.ShortSword != null)
+                {
+                    shortSword = item as Items.ShortSword;
+                    break;
+                }
+            }
+
+            //If we are using the short sword apply the slow effect
+            if (shortSword != null)
+            {
+                monster.AddEffect(new MonsterEffects.SlowDown(monster, 500, 50));
+            }
         }
 
         /// <summary>
@@ -507,7 +534,7 @@ namespace RogueBasin
             //Inventory.RefreshInventoryListing();
 
             //Message the user
-            LogFile.Log.LogEntryDebug("Item equipped: " + item.SingleItemDescription, LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Item equipped: " + item.SingleItemDescription, LogDebugLevel.Medium);
             Game.MessageQueue.AddMessage(item.SingleItemDescription + " equipped!");
 
             return true;

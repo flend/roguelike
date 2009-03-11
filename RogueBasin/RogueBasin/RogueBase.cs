@@ -697,6 +697,7 @@ namespace RogueBasin
 
                 //Message
                 Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up.");
+                LogFile.Log.LogEntry(itemToPickUp.SingleItemDescription + " picked up.");
             }
             return true;
         }

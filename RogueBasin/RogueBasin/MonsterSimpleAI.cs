@@ -122,7 +122,7 @@ namespace RogueBasin
                     //Otherwise add to list of possible targets
                     creaturesInFOV.Add(monster);
 
-                    LogFile.Log.LogEntryDebug(this.Representation + " spots " + monster.Representation, LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug(this.Representation + " spots " + monster.Representation, LogDebugLevel.Low);
                 }
 
                 //Check PC
@@ -131,7 +131,7 @@ namespace RogueBasin
                     if (currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
                     {
                         creaturesInFOV.Add(Game.Dungeon.Player);
-                        LogFile.Log.LogEntryDebug(this.Representation + " spots " + Game.Dungeon.Player.Representation, LogDebugLevel.Medium);
+                        LogFile.Log.LogEntryDebug(this.Representation + " spots " + Game.Dungeon.Player.Representation, LogDebugLevel.Low);
                     }
                 }
 
@@ -169,7 +169,7 @@ namespace RogueBasin
                 if(creaturesInFOV.Contains(Game.Dungeon.Player)) {
                     Creature closestCreature = Game.Dungeon.Player;
                     //Start chasing this creature
-                    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Low);
                     ChaseCreature(closestCreature);
                 }
 

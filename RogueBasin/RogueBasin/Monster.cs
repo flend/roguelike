@@ -160,6 +160,17 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Run an effect on the monster. Calls the effect's onStart and adds it to the current effects queue
+        /// </summary>
+        /// <param name="effect"></param>
+        internal void AddEffect(MonsterEffect effect)
+        {
+            effects.Add(effect);
+
+            effect.OnStart();
+        }
+
+        /// <summary>
         /// Increment time on all monster events. Events that expire will run their onExit() routines and then delete themselves from the list
         /// </summary>
         internal void IncrementEventTime()
