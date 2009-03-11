@@ -256,5 +256,51 @@ namespace RogueBasin
 
             return usedSuccessfully;
         }
+
+        /// <summary>
+        /// Simpler version of equip item, doesn't care about slots
+        /// </summary>
+        /// <param name="equipItem"></param>
+        internal bool EquipItemNoSlots(IEquippableItem equipItem)
+        {
+            Item item = equipItem as Item;
+
+            if (item == null)
+            {
+                //Should never happen
+                LogFile.Log.LogEntry("Problem with item equip");
+                Game.MessageQueue.AddMessage("You can't equip this item (bug)");
+                return false;
+            }
+
+            //Add the item to our inventory
+            item.IsEquipped = true;
+            Inventory.AddItem(item);
+
+            //Let the item do its equip action
+            //This is probably the only time it gets to do this and won't be refreshed after a load game
+            equipItem.Equip(this);
+
+
+
+            //Update the inventory listing since equipping an item changes its stackability
+            //No longer necessary since no equippable items get displayed in inventory
+            //Inventory.RefreshInventoryListing();
+
+            //Message the user
+            LogFile.Log.LogEntryDebug("Item equipped: " + item.SingleItemDescription, LogDebugLevel.Low);
+            Game.MessageQueue.AddMessage(item.SingleItemDescription + " equipped!");
+
+            return true;
+        }
+
+        /// <summary>
+        /// Add item to inventory
+        /// </summary>
+        /// <param name="itemToPickUp"></param>
+        internal void AddItemToInventory(Item itemToPickUp)
+        {
+            Inventory.AddItem(itemToPickUp);
+        }
     }
 }

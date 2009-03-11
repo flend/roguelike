@@ -15,6 +15,8 @@ namespace RogueBasin
 
         List<InventoryListing> inventoryListing;
 
+        List<InventoryListing> equipmentListing;
+
         int totalWeight = 0;
 
         public Inventory()
@@ -22,6 +24,7 @@ namespace RogueBasin
             items = new List<Item>();
 
             inventoryListing = new List<InventoryListing>();
+            equipmentListing = new List<InventoryListing>();
         }
 
         /// <summary>
@@ -69,6 +72,8 @@ namespace RogueBasin
         /// </summary>
         public void RefreshInventoryListing()
         {
+            //INVENTORY (non-equippable)
+
             //List of groups of similar items
             inventoryListing.Clear();
 
@@ -77,13 +82,15 @@ namespace RogueBasin
             {
                 Item item = items[i];
 
-                //Check if we have a similar item group already. If so, add the index of this item to that group
-                //Equipped items are not stacked
-
-                bool foundGroup = false;
-                
-                if (!item.IsEquipped)
+                //Equipped items are not displayed
+                if (item.IsEquipped)
                 {
+                    continue;
+                }
+                
+                //Check if we have a similar item group already. If so, add the index of this item to that group
+                bool foundGroup = false;
+
                     foreach (InventoryListing group in inventoryListing)
                     {
                         //Check that we are the same type (and therefore sort of item)
@@ -97,7 +104,7 @@ namespace RogueBasin
                             break;
                         }
                     }
-                }
+
 
                 //If there is no group, create a new one
                 if (!foundGroup)
@@ -106,6 +113,27 @@ namespace RogueBasin
                     newGroup.ItemIndex.Add(i);
                     inventoryListing.Add(newGroup);
                 }
+            }
+
+            //EQUIPPABLE (non-removable)
+
+            equipmentListing.Clear();
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                Item item = items[i];
+
+                //Non-equipped items are not displayed
+                if (!item.IsEquipped)
+                {
+                    continue;
+                }
+
+                //No stacking for equipment
+
+                InventoryListing newGroup = new InventoryListing(this);
+                newGroup.ItemIndex.Add(i);
+                equipmentListing.Add(newGroup);
             }
         }
 
@@ -136,7 +164,22 @@ namespace RogueBasin
             }
             set
             {
-                InventoryListing = value;
+                inventoryListing = value;
+            }
+        }
+
+        /// <summary>
+        /// Listing of the equipment, suitable for the user
+        /// </summary>
+        public List<InventoryListing> EquipmentListing
+        {
+            get
+            {
+                return equipmentListing;
+            }
+            set
+            {
+                equipmentListing = value;
             }
         }
 

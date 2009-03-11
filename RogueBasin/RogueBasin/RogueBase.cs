@@ -575,6 +575,7 @@ namespace RogueBasin
         {
             Screen.Instance.DisplayEquipment = true;
             Screen.Instance.CurrentEquipment = Game.Dungeon.Player.EquipmentSlots;
+            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
             Screen.Instance.InventoryTitle = "Equipped Items";
             Screen.Instance.InventoryInstructions = "Press (x) to exit";
         }
@@ -670,13 +671,30 @@ namespace RogueBasin
             if (itemToPickUp == null)
                 return false;
 
-            //Add item to PC inventory
-            player.Inventory.AddItem(itemToPickUp);
+            //Policy for DDRogue is that all equippable items are automatically equipped and never appear in the inventory
+            IEquippableItem equipItem = itemToPickUp as IEquippableItem;
 
-            //Message
-            Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up.");
+            if (equipItem != null)
+            {
+                //The item is equippable
+                player.EquipItemNoSlots(equipItem);
+            }
+            else
+            {
+                //Add item to PC inventory
+                //Better on player
+                player.AddItemToInventory(itemToPickUp);
+                
 
+                //Message
+                Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up.");
+            }
             return true;
+        }
+
+        private void EquipPickedUpItem()
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -992,16 +1010,16 @@ namespace RogueBasin
 
             //Add some random objects
 
-            //int noItems = rand.Next(10) + 5;
+            int noItems = rand.Next(10) + 5;
 
-            //for (int i = 0; i < noItems; i++)
-            //{
-            //    Item item;
+            for (int i = 0; i < noItems; i++)
+            {
+                Item item;
 
             //    if (rand.Next(2) < 1)
-            //    {
-            //        item = new Items.Potion();
-            //    }
+              //  {
+                    item = new Items.Potion();
+                //}
             //    else
             //    {
             //        item = new Items.ShortSword();
@@ -1009,16 +1027,16 @@ namespace RogueBasin
 
             //    //item.Representation = Convert.ToChar(33 + rand.Next(12));
 
-            //    int level = 0;
-            //    Point location;
+                int level = 0;
+                Point location;
 
             //    //Loop until we find an acceptable location and the add works
-            //    do
-            //    {
-            //        location = mapGen1.RandomWalkablePoint();
-            //    }
-            //    while (!Game.Dungeon.AddItem(item, level, location));
-            //}
+                do
+                {
+                    location = mapGen1.RandomWalkablePoint();
+                }
+                while (!Game.Dungeon.AddItem(item, level, location));
+            }
         }
 
         /// <summary>

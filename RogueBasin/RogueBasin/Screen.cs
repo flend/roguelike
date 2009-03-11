@@ -438,11 +438,65 @@ namespace RogueBasin {
             }
         }
 
+        /// <summary>
+        /// Display equipment select overview
+        /// </summary>
+        private void DrawEquipment()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame
+            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //List the inventory
+
+            //Inventory area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            List<InventoryListing> inventoryList = currentInventory.EquipmentListing;
+
+            for (int i = 0; i < inventoryListH; i++)
+            {
+                int inventoryIndex = topInventoryIndex + i;
+
+                //End of inventory
+                if (inventoryIndex == inventoryList.Count)
+                    break;
+
+                //Create entry string
+                char selectionChar = (char)((int)'a' + i);
+                string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description + " (equipped)";
+
+                //Add equipped status
+                //Only consider the first item in a stack, since equipped items can't stack
+                Item firstItemInStack = currentInventory.Items[inventoryList[inventoryIndex].ItemIndex[0]];
+
+                //EquipmentSlotInfo equippedInSlot = currentEquipment.Find(x => x.equippedItem == firstItemInStack);
+
+                //if (equippedInSlot != null)
+                //{
+                 //   entryString += " (equipped: " + StringEquivalent.EquipmentSlots[equippedInSlot.slotType] + ")";
+                //}
+
+                //Print entry
+                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+            }
+        }
 
         /// <summary>
         /// Display equipment overlay
         /// </summary>
-        private void DrawEquipment()
+        private void DrawEquipmentOld()
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
