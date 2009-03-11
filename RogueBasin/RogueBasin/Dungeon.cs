@@ -1280,5 +1280,10 @@ namespace RogueBasin
                 }
             }
         }
+
+        internal void PlayerDeath()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

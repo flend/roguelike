@@ -213,7 +213,7 @@ namespace RogueBasin
 
         int toHitRoll; //just so we can use it in debug
 
-        public int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
+        private int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
         {
             int attackToHit = hitModifier + hitMod;
             int attackDamageMod = damageModifier + damMod;
@@ -333,7 +333,8 @@ namespace RogueBasin
             effects.Add(effect);
 
             //Check if it altered our combat stats
-            CalculateCombatStats();
+            //CalculateCombatStats();
+            //Should be done in effect itself or optionally each time we attack
         }
 
         protected override char GetRepresentation()

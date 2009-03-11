@@ -33,6 +33,11 @@ namespace RogueBasin
             maxHitpoints = ClassMaxHitpoints();
 
             hitpoints = maxHitpoints;
+
+            //Calculate our combat stats
+            CalculateCombatStats();
+
+
         }
 
         /// <summary>
@@ -70,6 +75,27 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Player armour class. Auto-calculated so not serialized
+        /// </summary>
+        protected int armourClass;
+
+        /// <summary>
+        /// Player damage base. Auto-calculated so not serialized
+        /// </summary>
+        protected int damageBase;
+
+        /// <summary>
+        /// Player damage modifier. Auto-calculated so not serialized
+        /// </summary>
+        protected int damageModifier;
+
+        /// <summary>
+        /// Player damage modifier. Auto-calculated so not serialized
+        /// </summary>
+        protected int hitModifier;
+
+
+        /// <summary>
         /// Get the max hitpoints for this class of creature
         /// </summary>
         /// <returns></returns>
@@ -81,6 +107,56 @@ namespace RogueBasin
         public virtual void ProcessTurn()
         {
             //Base monster classes just sit still
+        }
+
+        public void CalculateCombatStats()
+        {
+            //Get defaults from class
+            armourClass = ArmourClass();
+            damageBase = DamageBase();
+            damageModifier = DamageModifier();
+            hitModifier = HitModifier();
+
+            //Check equipped items - unlikely to be implemented
+
+            foreach (Item item in Inventory.Items)
+            {
+                if (!item.IsEquipped)
+                    continue;
+
+                IEquippableItem equipItem = item as IEquippableItem;
+
+                //Error if non-equippable item is equipped
+                if (equipItem == null)
+                {
+                    LogFile.Log.LogEntry("Item " + item.SingleItemDescription + " is non-equippable but is equipped!");
+                    //Just skip
+                    continue;
+                }
+
+                armourClass += equipItem.ArmourClassModifier();
+                damageModifier += equipItem.DamageModifier();
+                hitModifier += equipItem.HitModifier();
+
+                if (equipItem.DamageBase() > damageBase)
+                {
+                    damageBase = equipItem.DamageBase();
+                }
+            }
+
+            //Check effects
+
+            foreach (MonsterEffect effect in effects)
+            {
+                armourClass += effect.ArmourClassModifier();
+                damageModifier += effect.DamageModifier();
+                hitModifier += effect.HitModifier();
+
+                if (effect.DamageBase() > damageBase)
+                {
+                    damageBase = effect.DamageBase();
+                }
+            }
         }
 
         /// <summary>

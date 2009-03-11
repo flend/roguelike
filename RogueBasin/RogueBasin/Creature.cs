@@ -110,7 +110,7 @@ namespace RogueBasin
             RandomStartTurnClock();
         }
 
-        //Creatures start with a random amount in their turn clock. This stops them all moving simultaneously (looks strange if the player is fast)
+                //Creatures start with a random amount in their turn clock. This stops them all moving simultaneously (looks strange if the player is fast)
         private void RandomStartTurnClock()
         {
             turnClock = Game.Random.Next(turnClockLimit);
