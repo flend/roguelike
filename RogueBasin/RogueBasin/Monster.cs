@@ -94,7 +94,6 @@ namespace RogueBasin
         /// </summary>
         protected int hitModifier;
 
-
         /// <summary>
         /// Get the max hitpoints for this class of creature
         /// </summary>
@@ -108,6 +107,7 @@ namespace RogueBasin
         {
             //Base monster classes just sit still
         }
+
 
         public void CalculateCombatStats()
         {

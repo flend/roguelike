@@ -181,6 +181,11 @@ namespace RogueBasin
         public abstract int DamageModifier();
 
         /// <summary>
+        /// An effect with combat stat changes has expired, so they need to be recalculated
+        /// </summary>
+        public bool RecalculateCombatStatsRequired { get; set; }
+
+        /// <summary>
         /// List of inventory items
         /// </summary>
         /// <returns></returns>

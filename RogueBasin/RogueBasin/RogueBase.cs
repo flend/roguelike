@@ -316,6 +316,12 @@ namespace RogueBasin
                                 Game.Dungeon.Player.AddEffect(speedUp);
                                 UpdateScreen();
                                 break;
+                            case 'v':
+                                //Add a multi damage event on the player
+                                PlayerEffects.MultiDamage multiD = new RogueBasin.PlayerEffects.MultiDamage(Game.Dungeon.Player, 500, 3);
+                                Game.Dungeon.Player.AddEffect(multiD);
+                                UpdateScreen();
+                                break;
                             case 'h':
                                 //Add a healing event on the player
                                 PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);

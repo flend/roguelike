@@ -321,6 +321,13 @@ namespace RogueBasin
 
         public override CombatResults AttackPlayer(Player player)
         {
+            //Recalculate combat stats if required
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (player.RecalculateCombatStatsRequired)
+                player.CalculateCombatStats();
+
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
 
@@ -362,6 +369,13 @@ namespace RogueBasin
 
         public override CombatResults AttackMonster(Monster monster)
         {
+            //Recalculate combat stats if required
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (monster.RecalculateCombatStatsRequired)
+                monster.CalculateCombatStats();
+
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
 

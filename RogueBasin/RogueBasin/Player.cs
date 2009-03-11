@@ -247,6 +247,13 @@ namespace RogueBasin
         /// <returns></returns>
         public CombatResults AttackMonster(Monster monster)
         {
+            //Do we need to recalculate combat stats?
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (monster.RecalculateCombatStatsRequired)
+                monster.CalculateCombatStats();
+
             //Calculate damage from a normal attack
             int damage = AttackWithModifiers(monster, 0, 0, 0, 0);
 
@@ -328,9 +335,9 @@ namespace RogueBasin
         /// <param name="effect"></param>
         internal void AddEffect(PlayerEffect effect)
         {
-            effect.OnStart();
-
             effects.Add(effect);
+
+            effect.OnStart();
 
             //Check if it altered our combat stats
             //CalculateCombatStats();
