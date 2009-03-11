@@ -240,12 +240,22 @@ namespace RogueBasin
             return 0;
         }
 
-        /// <summary>
-        /// Attack a monster
+         /// <summary>
+        /// Normal attack on a monster. Takes care of killing them off if required.
         /// </summary>
         /// <param name="monster"></param>
         /// <returns></returns>
         public CombatResults AttackMonster(Monster monster)
+        {
+            return AttackMonsterWithModifiers(monster, 0, 0, 0, 0);
+        }
+
+        /// <summary>
+        /// Attack a monster with modifiers. Takes care of killing them off if required.
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <returns></returns>
+        public CombatResults AttackMonsterWithModifiers(Monster monster, int hitModifierMod, int damageBaseMod, int damageModifierMod, int enemyACMod)
         {
             //Do we need to recalculate combat stats?
             if (this.RecalculateCombatStatsRequired)
@@ -255,7 +265,7 @@ namespace RogueBasin
                 monster.CalculateCombatStats();
 
             //Calculate damage from a normal attack
-            int damage = AttackWithModifiers(monster, 0, 0, 0, 0);
+            int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
 
             //Do we hit the monster?
             if (damage > 0)

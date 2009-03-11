@@ -81,6 +81,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.WallVault());
             specialMoves.Add(new SpecialMoves.StunBox());
             specialMoves.Add(new SpecialMoves.WallPush());
+            specialMoves.Add(new SpecialMoves.VaultBackstab());
 
             foreach (SpecialMove move in specialMoves)
             {
@@ -652,10 +653,10 @@ namespace RogueBasin
                 moveToDo.DoMove(newPCLocation);
 
                 //Clear all moves
-                foreach (SpecialMove move in specialMoves)
-                {
-                    move.ClearMove();
-                }
+                //foreach (SpecialMove move in specialMoves)
+                //{
+                //    move.ClearMove();
+                //}
                 return true;
             }
             

@@ -146,6 +146,8 @@ namespace RogueBasin.SpecialMoves
 
         public override void DoMove(Point locationAfterMove)
         {
+            ClearMove();
+            
             //Move into the destination square like normal
             Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove);
 

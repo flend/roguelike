@@ -89,6 +89,7 @@
     <Compile Include="Screen.cs" />
     <Compile Include="SpecialMove.cs" />
     <Compile Include="SpecialMoves\StunBox.cs" />
+    <Compile Include="SpecialMoves\VaultBackstab.cs" />
     <Compile Include="SpecialMoves\WallPush.cs" />
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="StringEquivalent.cs" />
