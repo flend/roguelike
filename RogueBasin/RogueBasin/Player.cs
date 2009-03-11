@@ -11,6 +11,8 @@ namespace RogueBasin
         /// </summary>
         List<PlayerEffect> effects;
 
+        public List<Monster> Kills { get; set;}
+
         /// <summary>
         /// Current hitpoints
         /// </summary>
@@ -49,6 +51,7 @@ namespace RogueBasin
         public Player()
         {
             effects = new List<PlayerEffect>();
+            Kills = new List<Monster>();
 
             Level = 1;
 
@@ -281,6 +284,9 @@ namespace RogueBasin
                 if (monster.Hitpoints <= 0)
                 {
                     Game.Dungeon.KillMonster(monster);
+
+                    //Add it to our list of kills (simply adding the whole object here)
+                    Kills.Add(monster);
 
                     //Debug string
                     string combatResultsMsg = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";

@@ -118,7 +118,7 @@ namespace RogueBasin
             //EQUIPPABLE (non-removable)
 
             equipmentListing.Clear();
-
+                
             for (int i = 0; i < items.Count; i++)
             {
                 Item item = items[i];

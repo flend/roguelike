@@ -64,7 +64,15 @@ namespace RogueBasin {
         /// Select new equipment screen is displayed
         /// </summary>
         bool displayEquipmentSelect;
-        
+
+        //Death members
+        public List<string> TotalKills { get; set; }
+        public List<string> DeathPreamble { get; set; }
+
+        Point DeathTL { get; set; }
+        int DeathWidth { get; set; }
+        int DeathHeight { get; set; }
+
         int selectedInventoryIndex;
         int topInventoryIndex;
 
@@ -117,6 +125,12 @@ namespace RogueBasin {
 
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
+
+            TotalKills = null;
+
+            DeathTL = new Point(1, 1);
+            DeathWidth = 89;
+            DeathHeight = 34;
         }
 
         //Setup the screen
@@ -339,6 +353,43 @@ namespace RogueBasin {
 
         }
 
+        //Draw the current dungeon map and objects
+        public void DrawDeathScreen()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Clear screen
+            rootConsole.Clear();
+
+            //Draw frame
+            rootConsole.DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("And it was all going so well...", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+
+            //Draw preamble
+            int count = 0;
+            foreach (string s in DeathPreamble)
+            {
+                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
+                count++;
+            }
+
+            //Draw kills
+
+            rootConsole.PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center);
+
+            foreach (string s in TotalKills)
+            {
+                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left);
+                count++;
+            }
+
+            //Draw instructions
+
+            rootConsole.PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
+        }
         /// <summary>
         /// Display inventory overlay
         /// </summary>

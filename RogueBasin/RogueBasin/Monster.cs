@@ -200,6 +200,17 @@ namespace RogueBasin
         public abstract CombatResults AttackMonster(Monster monster);
 
         /// <summary>
+        /// Rat
+        /// </summary>
+        /// <returns></returns>
+        public abstract string SingleDescription {get;}
+
+        /// <summary>
+        /// Rats
+        /// </summary>
+        public abstract string GroupDescription {get;}
+
+        /// <summary>
         /// Increment time on our events then use the base class to increment time on the monster's turn counter
         /// </summary>
         /// <returns></returns>

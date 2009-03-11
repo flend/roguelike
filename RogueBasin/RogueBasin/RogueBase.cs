@@ -15,7 +15,7 @@ namespace RogueBasin
         
 
         //Are we running or have we exited?
-        bool runMapLoop = true;
+        //public bool runMapLoop = true;
 
         enum InputState
         {
@@ -82,7 +82,7 @@ namespace RogueBasin
             //Now that creatures don't cause non-walkable squares, we only need to do this if the terrain changes
             RecalculateMapAfterMove();
 
-            while (runMapLoop)
+            while (Game.Dungeon.RunMainLoop)
             {
                 //Increment world clock
                 Game.Dungeon.IncrementWorldClock();
@@ -111,6 +111,7 @@ namespace RogueBasin
                 }
 
                 //Remove dead monsters
+                //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
                 Game.Dungeon.RemoveDeadMonsters();
 
                 //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
@@ -200,7 +201,7 @@ namespace RogueBasin
                         {
                             case 'x':
                                 //Exit from game
-                                runMapLoop = false;
+                                Game.Dungeon.PlayerDeath();
                                 timeAdvances = true;
                                 break;
                             case 's':

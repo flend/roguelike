@@ -47,5 +47,16 @@ namespace RogueBasin.Creatures
         {
             return 0;
         }
+
+        /// <summary>
+        /// Rat
+        /// </summary>
+        /// <returns></returns>
+        public override string SingleDescription { get { return "rat"; } }
+
+        /// <summary>
+        /// Rats
+        /// </summary>
+        public override string GroupDescription  { get { return "rats"; } }
     }
 }
