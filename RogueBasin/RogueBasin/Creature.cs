@@ -161,6 +161,26 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Creature AC. Set by type of creature.
+        /// </summary>
+        public abstract int ArmourClass();
+
+        /// <summary>
+        /// Creature 1dn damage.  Set by type of creature.
+        /// </summary>
+        public abstract int HitModifier();
+
+        /// <summary>
+        /// Creature 1dn damage.  Set by type of creature.
+        /// </summary>
+        public abstract int DamageBase();
+
+        /// <summary>
+        /// Creature damage modifier.  Set by type of creature.
+        /// </summary>
+        public abstract int DamageModifier();
+
+        /// <summary>
         /// List of inventory items
         /// </summary>
         /// <returns></returns>

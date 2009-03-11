@@ -12,5 +12,16 @@ namespace RogueBasin
         {
             this.creature = eventReceiver;
         }
+
+        //Creature effects can now define these which are used to calculate the creature or player's combat stats
+
+        public int ArmourClassModifier() { return 0; }
+
+        public int DamageBase() { return 0; }
+
+        public int DamageModifier() { return 0; }
+
+        public int HitModifier() { return 0; }
+
     }
 }

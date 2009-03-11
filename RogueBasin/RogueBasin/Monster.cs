@@ -31,6 +31,8 @@ namespace RogueBasin
             
             //Set up attributes from class start values
             maxHitpoints = ClassMaxHitpoints();
+
+            hitpoints = maxHitpoints;
         }
 
         /// <summary>

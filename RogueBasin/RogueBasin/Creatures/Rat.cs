@@ -18,5 +18,34 @@ namespace RogueBasin.Creatures
         {
             return classMaxHitpoints;
         }
+
+        /// <summary>
+        /// Creature AC. Set by type of creature.
+        /// </summary>
+        public override int ArmourClass()
+        {
+            return 10;
+        }
+
+        /// <summary>
+        /// Creature 1dn damage.  Set by type of creature.
+        /// </summary>
+        public override int DamageBase()
+        {
+            return 2;
+        }
+
+        /// <summary>
+        /// Creature damage modifier.  Set by type of creature.
+        /// </summary>
+        public override int DamageModifier()
+        {
+            return 0;
+        }
+
+        public override int HitModifier()
+        {
+            return 0;
+        }
     }
 }

@@ -21,15 +21,111 @@ namespace RogueBasin
         /// </summary>
         int maxHitpoints;
 
+        /// <summary>
+        /// Player level
+        /// </summary>
+        int Level { get; set; }
+
+        /// <summary>
+        /// Player armour class. Auto-calculated so not serialized
+        /// </summary>
+        int armourClass;
+
+        /// <summary>
+        /// Player damage base. Auto-calculated so not serialized
+        /// </summary>
+        int damageBase;
+
+        /// <summary>
+        /// Player damage modifier. Auto-calculated so not serialized
+        /// </summary>
+        int damageModifier;
+
+        /// <summary>
+        /// Player damage modifier. Auto-calculated so not serialized
+        /// </summary>
+        int hitModifier;
+
         public Player()
         {
             effects = new List<PlayerEffect>();
 
+            Level = 1;
+
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+
+            //Setup combat parameters
+            CalculateCombatStats();
         }
 
+        /// <summary>
+        /// Calculate the player's combat stats based on level and equipment
+        /// </summary>
+        public void CalculateCombatStats()
+        {
+            //Defaults (not necessary)
+            armourClass = 10;
+            damageBase = 4;
+            damageModifier = 0;
+            hitModifier = 0;
+
+            //Check level
+            switch (Level)
+            {
+                case 1:
+                    armourClass = 10;
+                    damageBase = 4;
+                    damageModifier = 0;
+                    hitModifier = 0;
+                    break;
+            }
+
+            //Check equipped items
+            
+            foreach (Item item in Inventory.Items)
+            {
+                if (!item.IsEquipped)
+                    continue;
+
+                IEquippableItem equipItem = item as IEquippableItem;
+                
+                //Error if non-equippable item is equipped
+                if(equipItem == null) {
+                    LogFile.Log.LogEntry("Item " + item.SingleItemDescription + " is non-equippable but is equipped!");
+                    //Just skip
+                    continue;
+                }
+
+                armourClass += equipItem.ArmourClassModifier();
+                damageModifier += equipItem.DamageModifier();
+                hitModifier += equipItem.HitModifier();
+
+                if (equipItem.DamageBase() > damageBase)
+                {
+                    damageBase = equipItem.DamageBase();
+                }
+            }
+
+            //Check effects
+
+            foreach (PlayerEffect effect in effects)
+            {
+                armourClass += effect.ArmourClassModifier();
+                damageModifier += effect.DamageModifier();
+                hitModifier += effect.HitModifier();
+
+                if (effect.DamageBase() > damageBase)
+                {
+                    damageBase = effect.DamageBase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Current HP
+        /// </summary>
         public int Hitpoints
         {
             get
@@ -42,6 +138,9 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Normal maximum hp
+        /// </summary>
         public int MaxHitpoints
         {
             get
@@ -52,6 +151,40 @@ namespace RogueBasin
             {
                 maxHitpoints = value;
             }
+        }
+
+        /// <summary>
+        /// Player can overdrive to 50% of normal hp. This is the max possible with this fact.
+        /// </summary>
+        public int OverdriveHitpoints { get; set; }
+
+        /// <summary>
+        /// Creature AC. Set by type of creature.
+        /// </summary>
+        public override int ArmourClass()
+        {
+            return armourClass;
+        }
+
+        /// <summary>
+        /// Creature 1dn damage.  Set by type of creature.
+        /// </summary>
+        public override int DamageBase()
+        {
+            return damageBase;
+        }
+
+        /// <summary>
+        /// Creature damage modifier.  Set by type of creature.
+        /// </summary>
+        public override int DamageModifier()
+        {
+            return damageModifier;
+        }
+
+        public override int HitModifier()
+        {
+            return hitModifier;
         }
 
         /// <summary>
@@ -67,17 +200,90 @@ namespace RogueBasin
             return false;
         }
 
+        /// <summary>
+        /// Work out the damage from an attack with the specified one-time modifiers (could be from a special attack etc.)
+        /// Note ACmod positive is a bonus to the monster AC
+        /// </summary>
+        /// <param name="hitMod"></param>
+        /// <param name="damBase"></param>
+        /// <param name="damMod"></param>
+        /// <param name="ACmod"></param>
+        /// <returns></returns>
+
+
+        int toHitRoll; //just so we can use it in debug
+
+        public int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
+        {
+            int attackToHit = hitModifier + hitMod;
+            int attackDamageMod = damageModifier + damMod;
+            
+            int attackDamageBase;
+
+            if(damBase > damageBase)
+                attackDamageBase = damBase;
+            else
+                attackDamageBase = damageBase;
+
+            int monsterAC = monster.ArmourClass() + ACmod;
+            toHitRoll = Utility.d20() + attackToHit;
+
+            if (toHitRoll >= monsterAC)
+            {
+                //Hit - calculate damage
+                int totalDamage = Utility.DamageRoll(attackDamageBase) + attackDamageMod;
+
+                return totalDamage;
+            }
+
+            //Miss
+            return 0;
+        }
+
+        /// <summary>
+        /// Attack a monster
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <returns></returns>
         public CombatResults AttackMonster(Monster monster)
         {
-            //The monster always dies
-            Game.Dungeon.KillMonster(monster);
+            //Calculate damage from a normal attack
+            int damage = AttackWithModifiers(monster, 0, 0, 0, 0);
 
-            string msg = monster.Representation + " was killed!";
-            Game.MessageQueue.AddMessage(msg);
-            LogFile.Log.LogEntry(msg);
+            //Do we hit the monster?
+            if (damage > 0)
+            {
+                int monsterOrigHP = monster.Hitpoints;
 
-            return CombatResults.DefenderDied;
+                monster.Hitpoints -= damage;
 
+                //Is the monster dead, if so kill it?
+                if (monster.Hitpoints <= 0)
+                {
+                    Game.Dungeon.KillMonster(monster);
+
+                    //Debug string
+                    string combatResultsMsg = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
+                    Game.MessageQueue.AddMessage(combatResultsMsg);
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Debug string
+                string combatResultsMsg3 = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
+                Game.MessageQueue.AddMessage(combatResultsMsg3);
+                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+            string combatResultsMsg2 = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
+            Game.MessageQueue.AddMessage(combatResultsMsg2);
+            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
         }
 
         /// <summary>
@@ -125,6 +331,9 @@ namespace RogueBasin
             effect.OnStart();
 
             effects.Add(effect);
+
+            //Check if it altered our combat stats
+            CalculateCombatStats();
         }
 
         protected override char GetRepresentation()
@@ -281,7 +490,9 @@ namespace RogueBasin
             //This is probably the only time it gets to do this and won't be refreshed after a load game
             equipItem.Equip(this);
 
+            //Update the player's combat stats which may have been affected
 
+            CalculateCombatStats();
 
             //Update the inventory listing since equipping an item changes its stackability
             //No longer necessary since no equippable items get displayed in inventory

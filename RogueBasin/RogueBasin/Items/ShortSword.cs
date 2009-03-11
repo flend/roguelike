@@ -61,5 +61,26 @@ namespace RogueBasin.Items
         {
             return '\\';
         }
+
+        public int ArmourClassModifier()
+        {
+            return 0;
+        }
+
+        public int DamageBase()
+        {
+            //1d6
+            return 6;
+        }
+
+        public int DamageModifier()
+        {
+            return 1;
+        }
+
+        public int HitModifier()
+        {
+            return 1;
+        }
     }
 }

@@ -38,5 +38,31 @@ namespace RogueBasin
         /// <param name="user"></param>
         /// <returns></returns>
         bool UnEquip(Creature user);
+
+        /// <summary>
+        /// AC modifier +1 -1 etc. 0 if none.
+        /// </summary>
+        /// <returns></returns>
+        int ArmourClassModifier();
+
+        /// <summary>
+        /// Damage base 1d(return value). Highest one will be picked of all equipped items. 0 if not a weapon type.
+        /// </summary>
+        /// <returns></returns>
+        int DamageBase();
+
+        /// <summary>
+        /// Damage modifier +1 -1 etc. 0 if none.
+        /// </summary>
+        /// <returns></returns>
+        int DamageModifier();
+
+        /// <summary>
+        /// Hit modifier +1 -1 etc. 0 if none.
+        /// </summary>
+        /// <returns></returns>
+        int HitModifier();
+
+
     }
 }
