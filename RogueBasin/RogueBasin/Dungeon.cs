@@ -810,6 +810,38 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Return a random monster on the level, or null if none
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public Monster RandomMonsterOnLevel(int level)
+        {
+            //Fail if we have been asked for an invalid level
+            if (level < 0 || level > levels.Count)
+            {
+                LogFile.Log.LogEntry("RandomMonsterOnLevel: Level " + level + " does not exist");
+                return null;
+            }
+
+            List<Monster> monstersOnLevel = new List<Monster>();
+
+            foreach (Monster monster in monsters)
+            {
+                if (monster.LocationLevel == level)
+                {
+                    monstersOnLevel.Add(monster);
+                }
+            }
+
+            if (monstersOnLevel.Count == 0)
+            {
+                return null;
+            }
+
+            return monstersOnLevel[Game.Random.Next(monstersOnLevel.Count)];
+        }
+
+        /// <summary>
         /// Process a relative PC move, from a keypress
         /// </summary>
         /// <param name="x"></param>

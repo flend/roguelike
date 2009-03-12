@@ -19,6 +19,8 @@ namespace RogueBasin
         int hallsExtraCorridorDefinite = 0;
         int hallsExtraCorridorRandom = 8;
 
+        int plotItemOnMonsterChance = 50;
+
         public DungeonMaker() {}
 
         /// <summary>
@@ -34,9 +36,10 @@ namespace RogueBasin
 
             SetupMaps();
 
+            SpawnInitialCreatures();
+
             SpawnItems();
 
-            SpawnInitialCreatures();
 
             return dungeon;
         }
@@ -64,7 +67,7 @@ namespace RogueBasin
 
             for (int i = 0; i < dungeon.NoLevels; i++)
             {
-                int noCreatures = 5 + Game.Random.Next(10);
+                int noCreatures = 1 + Game.Random.Next(1);
 
                 for (int j = 0; j < noCreatures; j++)
                 {
@@ -121,13 +124,40 @@ namespace RogueBasin
 
                 levelsWithPlotItems.Add(level);
 
-                //Find position in level and place item
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(level);
+                //50% chance they will be generated on a monster
+                bool putOnMonster = false;
 
-                    //May want to specify a minimum distance from staircases??? TODO
-                } while (!dungeon.AddItem(plotItem, level, location));
+                if(Game.Random.Next(100) < plotItemOnMonsterChance)
+                    putOnMonster = true;
+
+                if (putOnMonster)
+                {
+                    //On a monster
+
+                    //Find a random monster on this level
+                    Monster monster = dungeon.RandomMonsterOnLevel(level);
+
+                    //If no monster, it'll go on the floor
+                    if (monster == null)
+                    {
+                        putOnMonster = false;
+                    }
+
+                    //Give it to him!
+                    monster.PickUpItem(plotItem);
+                }
+
+                if(!putOnMonster)
+                {
+                    //On the floor
+                    //Find position in level and place item
+                    do
+                    {
+                        location = dungeon.RandomWalkablePointInLevel(level);
+
+                        //May want to specify a minimum distance from staircases??? TODO
+                    } while (!dungeon.AddItem(plotItem, level, location));
+                }
             }
 
             //Potions

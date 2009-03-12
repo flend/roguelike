@@ -68,6 +68,28 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Removes an item from the inventory. Does NOT set InInventory = false. This should be done by the object that possesses the inventory (so it can update the position correctly)
+        /// Now adds from the dungeon master item list (to stop replication when serializing). If the caller forgets to set InInventory = false the item will not be displayed
+        /// </summary>
+        /// <param name="itemToRemove"></param>
+        public void RemoveAllItems()
+        {
+            //Add all items to dungeon list
+            foreach (Item item in items)
+            {
+                Game.Dungeon.Items.Add(item);
+            }
+
+            totalWeight = 0;
+
+            //Remove all items from inventory
+            items.Clear();
+
+            //Refresh the listing
+            RefreshInventoryListing();
+        }
+
+        /// <summary>
         /// Update the listing groups
         /// </summary>
         public void RefreshInventoryListing()

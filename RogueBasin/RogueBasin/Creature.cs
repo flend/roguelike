@@ -169,12 +169,12 @@ namespace RogueBasin
         {
             foreach (Item item in inventory.Items)
             {
-                inventory.RemoveItem(item);
-
                 item.LocationLevel = this.LocationLevel;
                 item.LocationMap = this.LocationMap;
                 item.InInventory = false;
             }
+
+            inventory.RemoveAllItems();
 
             return true;
         }
