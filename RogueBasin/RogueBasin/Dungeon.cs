@@ -450,16 +450,16 @@ namespace RogueBasin
             }
 
             //A wall - should be caught above
-            if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Wall)
+            if (!Dungeon.IsTerrainWalkable(levels[level].mapSquares[location.x, location.y].Terrain))
             {
-                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Wall", LogDebugLevel.Low);
+                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: not walkable by terrain type", LogDebugLevel.High);
                 return false;
             }
 
             //Void (outside of map) - should be caught above
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Void)
             {
-                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Void", LogDebugLevel.Low);
+                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Void", LogDebugLevel.High);
                 return false;
             }
 
@@ -1274,6 +1274,51 @@ namespace RogueBasin
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Return a random walkable point in map level
+        /// </summary>
+        /// <param name="levelNo"></param>
+        /// <returns></returns>
+        public Point RandomWalkablePointInLevel(int level)
+        {
+            //Not a level
+            if (level < 0 || level > levels.Count)
+            {
+                string error = "Level " + level + "does not exist";
+                LogFile.Log.LogEntry(error);
+                throw new ApplicationException(error);
+            }
+
+            do
+            {
+                Map map = levels[level];
+
+                int x = Game.Random.Next(map.width);
+                int y = Game.Random.Next(map.height);
+
+                if (Dungeon.IsTerrainWalkable(map.mapSquares[x, y].Terrain))
+                {
+                    return new Point(x, y);
+                }
+            }
+            while (true);
+        }
+
+        /// <summary>
+        /// Master is terrain walkable from MapTerrain type (not universally used yet)
+        /// </summary>
+        /// <param name="terrain"></param>
+        /// <returns></returns>
+        public static bool IsTerrainWalkable(MapTerrain terrain)
+        {
+            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

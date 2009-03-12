@@ -43,7 +43,30 @@ namespace RogueBasin
 
         private void SpawnInitialCreatures()
         {
-            //throw new NotImplementedException();
+            //Add monsters to levels
+
+            //Could take into account depth and difficulty level
+
+            //For now just spawn some random creatures in each level
+
+            for (int i = 0; i < dungeon.NoLevels; i++)
+            {
+                int noCreatures = 5 + Game.Random.Next(10);
+
+                for (int j = 0; j < noCreatures; j++)
+                {
+                    Monster monster = new Creatures.Rat();
+                    Point location = new Point(0, 0);
+
+                    //Find an acceptable location (walkable and with no other creatures in it)
+                    //Note that there is no guarantee of connectivity on cave squares
+                    do
+                    {
+                        location = dungeon.RandomWalkablePointInLevel(i);
+                    } while (!dungeon.AddMonster(monster, i, location));
+                }
+            }
+
         }
 
         private void SpawnFloorItems()
@@ -51,6 +74,9 @@ namespace RogueBasin
             //throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Adds levels and interconnecting staircases
+        /// </summary>
         private void SetupMaps()
         {
             //Levels

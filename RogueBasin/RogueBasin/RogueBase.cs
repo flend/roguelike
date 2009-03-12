@@ -12,7 +12,7 @@ namespace RogueBasin
 {
     public class RogueBase : IDisposable
     {
-        //Master object representing the game
+        DungeonMaker dungeonMaker = null;
         
 
         //Are we running or have we exited?
@@ -98,6 +98,8 @@ namespace RogueBasin
                 
                 foreach (Monster creature in Game.Dungeon.Monsters)
                 {
+                    //Only process creatures on this level of the dungeon??? TODO
+
                     if (creature.IncrementTurnTime())
                     {
                         //dungeon.ShowCreatureFOVOnMap(creature);
@@ -973,7 +975,7 @@ namespace RogueBasin
             Game.MessageQueue = new MessageQueue();
 
             //Setup dungeon
-            DungeonMaker dungeonMaker = new DungeonMaker();
+            dungeonMaker = new DungeonMaker();
             Game.Dungeon = dungeonMaker.SpawnNewDungeon();
         }
 
