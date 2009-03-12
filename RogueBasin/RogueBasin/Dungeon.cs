@@ -49,6 +49,7 @@ namespace RogueBasin
     {
         List<Map> levels;
         List<TCODFov> levelTCODMaps;
+        //List<TCODFov> levelTCODMapsIgnoringClosedDoors; //used for adding monsters and items
         List<Monster> monsters;
         List<Item> items;
         List<Feature> features;
@@ -76,6 +77,7 @@ namespace RogueBasin
             items = new List<Item>();
             features = new List<Feature>();
             levelTCODMaps = new List<TCODFov>();
+            //levelTCODMapsIgnoringClosedDoors = new List<TCODFov>();
             effects = new List<DungeonEffect>();
             specialMoves = new List<SpecialMove>();
 
@@ -192,6 +194,121 @@ namespace RogueBasin
 
             //Play movie
             Screen.Instance.PlayMovie(specialMoves[moveToLearn].MovieRoot());
+        }
+
+        /// <summary>
+        /// Add monster. In addition to normal checks, check connectivity between monster and down stairs. This will ensure the monster is not placed in an unaccessible place
+        /// </summary>
+        /// <param name="creature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+
+        public bool AddMonsterCheckConnected(Monster creature, int level, Point location)
+        {
+            //Try to add a creature at the requested location
+            //This may fail due to something else being there or being non-walkable
+            try
+            {
+                Map creatureLevel = levels[level];
+
+                //Check square is accessable
+                if (!MapSquareCanBeEntered(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
+                    return false;
+                }
+
+                //Check square has nothing else on it
+                SquareContents contents = MapSquareContents(level, location);
+
+                if (contents.monster != null)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    return false;
+                }
+
+                if (contents.player != null)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
+                    return false;
+                }
+
+                //Check connectivity if required
+
+                if (!levels[level].GuaranteedConnected)
+                {
+
+                    //Find downstairs
+                    Features.StaircaseDown downStairs = null;
+                    Point stairlocation = new Point(0, 0);
+
+                    foreach (Feature feature in features)
+                    {
+
+                        if (feature.LocationLevel == level &&
+                            feature is Features.StaircaseDown)
+                        {
+                            downStairs = feature as Features.StaircaseDown;
+                            stairlocation = feature.LocationMap;
+                            break;
+                        }
+                    }
+
+                    //If this is a level w/o downstairs don't worry about this check
+                    if (downStairs != null)
+                    {
+                        if (!ArePointsConnected(level, location, stairlocation))
+                        {
+                            LogFile.Log.LogEntryDebug("AddMonster failure: Position not connected to stairs", LogDebugLevel.Medium);
+                            return false;
+                        }
+                    }
+                }
+
+                //Otherwise OK
+                creature.LocationLevel = level;
+                creature.LocationMap = location;
+
+                monsters.Add(creature);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry(String.Format("AddCreature: ") + ex.Message);
+                return false;
+            }
+
+        }
+
+        private bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)
+        {
+
+            //Build tcodmap
+            int Width = levels[level].width;
+            int Height = levels[level].height;
+
+            TCODFov tcodMap = levelTCODMaps[level];
+
+            //Try to walk the path between the 2 staircases
+            TCODPathFinding path = new TCODPathFinding(tcodMap, 1.0);
+            path.ComputePath(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y);
+
+            //Find the first step. We need to load x and y with the origin of the path
+            int x = firstPoint.x;
+            int y = firstPoint.y;
+
+            bool obstacleHit = false;
+
+            //If there's no routeable path
+            if (path.IsPathEmpty())
+            {
+                obstacleHit = true;
+            }
+
+            path.Dispose();
+
+            return (!obstacleHit);
         }
 
         public bool AddMonster(Monster creature, int level, Point location)
@@ -900,6 +1017,21 @@ namespace RogueBasin
                     tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
                 }
             }
+
+            /*
+            //Ignoring closed doors
+
+            tcodLevel = levelTCODMapsIgnoringClosedDoors[levelToRefresh];
+            for (int j = 0; j < level.width; j++)
+            {
+                for (int k = 0; k < level.height; k++)
+                {
+                    MapTerrain terrainHere = level.mapSquares[j, k].Terrain;
+
+                    tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable || terrainHere == MapTerrain.ClosedDoor);
+                }
+            }*/
+
         }
 
         /// <summary>

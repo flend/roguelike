@@ -210,6 +210,11 @@ namespace RogueBasin
         public int height;
 
         /// <summary>
+        /// Are we guaranteed to be connected?
+        /// </summary>
+        public bool GuaranteedConnected { get; set; }
+
+        /// <summary>
         /// Constructor for serialization
         /// </summary>
         Map()
@@ -230,6 +235,8 @@ namespace RogueBasin
                     mapSquares[i, j] = new MapSquare();
                 }
             }
+
+            GuaranteedConnected = false;
 
             Clear();
         }

@@ -149,6 +149,9 @@ namespace RogueBasin
 
             } while (badMap);
 
+            //Caves are not guaranteed connected
+            baseMap.GuaranteedConnected = false;
+
             //Set the player start location to that of the up staircase (only used on the first level)
             pcStartLocation = upStaircase;
 
@@ -235,8 +238,8 @@ namespace RogueBasin
             path.ComputePath(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y);
 
             //Find the first step. We need to load x and y with the origin of the path
-            int x = upStaircase.x;
-            int y = upStaircase.y;
+            int x = firstPoint.x;
+            int y = firstPoint.y;
 
             bool obstacleHit = false;
 

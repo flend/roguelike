@@ -63,7 +63,7 @@ namespace RogueBasin
                     do
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
-                    } while (!dungeon.AddMonster(monster, i, location));
+                    } while (!dungeon.AddMonsterCheckConnected(monster, i, location));
                 }
             }
 
@@ -183,6 +183,12 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Failed to load last level!: " + ex.Message);
                 throw new ApplicationException("Failed to load last level! Is the game installed correctly?");
             }
+
+            //Build TCOD maps
+            //Necessary so connectivity checks on items and monsters can work
+            dungeon.RecalculateWalkable();
+            dungeon.RefreshTCODMaps();
+
         }
     }
 }

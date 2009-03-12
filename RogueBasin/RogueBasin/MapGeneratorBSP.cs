@@ -725,6 +725,9 @@ namespace RogueBasin
 
             baseMap = new Map(width, height);
 
+            //BSP is always connected
+            baseMap.GuaranteedConnected = true;
+
             //Make a BSP tree for the rooms
 
             rootNode = new MapNode(0, 0, width, height);
