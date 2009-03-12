@@ -9,6 +9,15 @@ namespace RogueBasin
     /// </summary>
     [System.Xml.Serialization.XmlInclude(typeof(Items.Potion))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Badge))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Book))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Boots))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Bracelet))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Bracer))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.GlassGem))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Glove))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Greaves))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.LeadRing))]
     public abstract class Item : MapObject
     {
         public Item()

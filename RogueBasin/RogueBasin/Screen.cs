@@ -211,16 +211,16 @@ namespace RogueBasin {
                         offset++;
                     }
 
-                    Screen.Instance.FlushConsole();
-
                     //Wait for the specified time
                     if (keypressBetweenFrames == true)
                     {
                         rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                        Screen.Instance.FlushConsole();
                         KeyPress userKey = Keyboard.WaitForKeyPress(true);
                     }
                     else
                     {
+                        Screen.Instance.FlushConsole();
                         TCODSystem.Sleep(movieMSBetweenFrames);
                     }
 

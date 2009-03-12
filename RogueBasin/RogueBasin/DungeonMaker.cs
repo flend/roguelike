@@ -8,6 +8,17 @@ namespace RogueBasin
     {
         Dungeon dungeon = null;
 
+        int noCaveLevels = 5;
+        int noCaveWaterLevels = 3;
+
+        int noRuinedLevels = 5;
+        int ruinedExtraCorridorDefinite = 5;
+        int ruinedExtraCorridorRandom = 10;
+
+        int noHallLevels = 5;
+        int hallsExtraCorridorDefinite = 0;
+        int hallsExtraCorridorRandom = 8;
+
         public DungeonMaker() {}
 
         /// <summary>
@@ -75,18 +86,47 @@ namespace RogueBasin
         {
             LogFile.Log.LogEntry("Generating items...");
 
+            Point location = new Point(0, 0);
+
             //Plot items
 
             //These are max 1 per level
             //Not all of them necessarily appear in all games
             //They may be on the ground or carried by a creature
 
-            Point location = new Point(0, 0);
+            //Guarantee the glove (vamparic regeneration) on level 1 or 2
 
+            int gloveLevel = Game.Random.Next(2);
+            
             do
             {
-                location = dungeon.RandomWalkablePointInLevel(0);
+                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
             } while (!dungeon.AddItem(new Items.Glove(), 0, location));
+
+            //The rest of the plot items are split between the remaining cave and ruined levels
+
+            List<Item> plotItems = new List<Item> { new Items.Badge(), new Items.Band(), new Items.Book(), new Items.Boots(), new Items.Bracelet(), new Items.Bracer(), new Items.GlassGem(),
+            new Items.Greaves(), new Items.LeadRing() };
+
+            int level = 0;
+            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
+
+            foreach (Item plotItem in plotItems)
+            {
+                //Find random level w/o plotItem
+                do
+                {
+                    level = Game.Random.Next(noCaveLevels + noRuinedLevels);
+                } while (levelsWithPlotItems.Contains(level));
+
+                levelsWithPlotItems.Add(level);
+
+                //Find position in level and place item
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(level);
+                } while (!dungeon.AddItem(plotItem, level, location));
+            }
         }
 
         /// <summary>
@@ -103,16 +143,7 @@ namespace RogueBasin
             //16: Final encounter (ASCIIPaint)
             //17: Outside battleground (ASCIIPaint)
 
-            int noCaveLevels = 5;
-            int noCaveWaterLevels = 3;
-
-            int noRuinedLevels = 5;
-            int ruinedExtraCorridorDefinite = 5;
-            int ruinedExtraCorridorRandom = 10;
-
-            int noHallLevels = 5;
-            int hallsExtraCorridorDefinite = 0;
-            int hallsExtraCorridorRandom = 8;
+            
 
             //Make the generators
 
