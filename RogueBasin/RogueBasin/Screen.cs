@@ -335,7 +335,7 @@ namespace RogueBasin {
             //Draw fixed features
             DrawFeatures(dungeon.Features);
 
-            //Draw items
+            //Draw items (will appear on top of staircases etc.)
             DrawItems(dungeon.Items);
 
             //Draw creatures

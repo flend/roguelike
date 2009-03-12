@@ -161,6 +161,26 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Drop all inventory (perhaps you died). Currently drops all items on the floor, could extend by looking at surrounding squares. Use the dig algorithm
+        /// </summary>
+        /// <param name="itemToDrop"></param>
+        /// <returns></returns>
+        public virtual bool DropAllItems()
+        {
+            foreach (Item item in inventory.Items)
+            {
+                inventory.RemoveItem(item);
+
+                item.LocationLevel = this.LocationLevel;
+                item.LocationMap = this.LocationMap;
+                item.InInventory = false;
+            }
+
+            return true;
+        }
+
+
+        /// <summary>
         /// Creature AC. Set by type of creature.
         /// </summary>
         public abstract int ArmourClass();

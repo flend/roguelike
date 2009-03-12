@@ -899,6 +899,19 @@ namespace RogueBasin
             if (okToMoveIntoSquare)
             {
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y);
+
+                //Tell the player if there are multiple items in the square
+                if (MultipleItemAtSpace(player.LocationLevel, player.LocationMap))
+                {
+                    Game.MessageQueue.AddMessage("There are multiple items here.");
+                }
+
+                //If there is a feature and an item (feature will be hidden)
+                if (FeatureAtSpace(player.LocationLevel, player.LocationMap) != null &&
+                    ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
+                {
+                    Game.MessageQueue.AddMessage("There is a staircase here.");
+                }
             }
              
             return true;
@@ -913,6 +926,9 @@ namespace RogueBasin
             //We can't take the monster out of the collection directly since we might still be iterating through them
             //Instead set a flag on the monster and remove it after all turns are complete
             monster.Alive = false;
+
+            //Drop its inventory
+            monster.DropAllItems();
 
             //Leave a corpse
             AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
@@ -1380,7 +1396,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Return a (the first) feature at this location or null
+        /// Return a (the first) feature at this location or null. Ignores decorativefeatures
         /// </summary>
         /// <param name="locationLevel"></param>
         /// <param name="locationMap"></param>
@@ -1389,7 +1405,7 @@ namespace RogueBasin
         {
             foreach (Feature feature in features)
             {
-                if(feature.IsLocatedAt(locationLevel, locationMap)) {
+                if(feature.IsLocatedAt(locationLevel, locationMap) && feature is UseableFeature) {
                     return feature;
                 }
             }
@@ -1415,6 +1431,30 @@ namespace RogueBasin
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Are there multiple items here?
+        /// </summary>
+        /// <param name="locationLevel"></param>
+        /// <param name="locationMap"></param>
+        /// <returns></returns>
+        internal bool MultipleItemAtSpace(int locationLevel, Point locationMap)
+        {
+            int itemCount = 0;
+
+            foreach (Item item in items)
+            {
+                if (item.IsLocatedAt(locationLevel, locationMap) &&
+                    !item.InInventory)
+                {
+                    itemCount++;
+                }
+            }
+
+            if (itemCount < 2)
+                return false;
+            return true;
         }
 
         /// <summary>

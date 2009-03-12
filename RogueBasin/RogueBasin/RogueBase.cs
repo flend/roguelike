@@ -748,11 +748,20 @@ namespace RogueBasin
             {
                 //Add item to PC inventory
                 //Better on player
-                player.AddItemToInventory(itemToPickUp);
+                player.PickUpItem(itemToPickUp);
                 
 
                 //Message
-                Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up.");
+
+                //Tell the player if there's something behind it...!
+
+                if (dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
+                {
+                    Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up. There's something behind it!");
+                }
+                else
+                    Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up.");
+
                 LogFile.Log.LogEntry(itemToPickUp.SingleItemDescription + " picked up.");
             }
             return true;
@@ -785,18 +794,13 @@ namespace RogueBasin
             Item selectedItem = playerInventory.Items[selectedGroup.ItemIndex[0]];
 
             //Check there is no item here already
-            if(dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null) {
-                Game.MessageQueue.AddMessage("Can't drop - already an item here!");
-                return false;
-            }
+            //if(dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null) {
+            //    Game.MessageQueue.AddMessage("Can't drop - already an item here!");
+            //    return false;
+            //}
 
             //Remove from player inventory
-            playerInventory.RemoveItem(selectedItem);
-
-            //Drop the item here
-            selectedItem.InInventory = false;
-            selectedItem.LocationLevel = player.LocationLevel;
-            selectedItem.LocationMap = player.LocationMap;
+            player.DropItem(selectedItem);
 
             Game.MessageQueue.AddMessage(selectedItem.SingleItemDescription + " dropped.");
 

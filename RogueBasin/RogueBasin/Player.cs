@@ -565,15 +565,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Add item to inventory
-        /// </summary>
-        /// <param name="itemToPickUp"></param>
-        internal void AddItemToInventory(Item itemToPickUp)
-        {
-            Inventory.AddItem(itemToPickUp);
-        }
-
-        /// <summary>
         /// Level up the player!
         /// </summary>
         internal void LevelUp()

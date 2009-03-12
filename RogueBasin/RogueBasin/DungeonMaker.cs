@@ -125,7 +125,22 @@ namespace RogueBasin
                 do
                 {
                     location = dungeon.RandomWalkablePointInLevel(level);
+
+                    //May want to specify a minimum distance from staircases??? TODO
                 } while (!dungeon.AddItem(plotItem, level, location));
+            }
+
+            //Potions
+
+            //Stick 5 potions on level 1 for testing
+            for (int i = 0; i < 10; i++)
+            {
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(level);
+
+                    //May want to specify a minimum distance from staircases??? TODO
+                } while (!dungeon.AddItem(new Items.Potion(), 0, location));
             }
         }
 
