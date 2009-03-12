@@ -42,7 +42,7 @@ namespace RogueBasin {
         Color pcColor = ColorPresets.White;
 
         Color creatureColor = ColorPresets.White;
-        Color itemColor = ColorPresets.White;
+        Color itemColor = ColorPresets.Red ;
         Color featureColor = ColorPresets.White;
 
         //Keep enough state so that we can draw each screen
@@ -81,9 +81,9 @@ namespace RogueBasin {
         string inventoryTitle;
         string inventoryInstructions;
 
-        Point movieTL = new Point(25, 7);
-        int movieWidth = 40;
-        int movieHeight = 20;
+        Point movieTL = new Point(5, 5);
+        int movieWidth = 80;
+        int movieHeight = 25;
         uint movieMSBetweenFrames = 500;
 
         //Current movie
@@ -169,7 +169,7 @@ namespace RogueBasin {
         /// Play the movie indicated by the filename root.
         /// </summary>
         /// <param name="root"></param>
-        public void PlayMovie(string filenameRoot)
+        public void PlayMovie(string filenameRoot, bool keypressBetweenFrames)
         {
             try
             {
@@ -214,7 +214,15 @@ namespace RogueBasin {
                     Screen.Instance.FlushConsole();
 
                     //Wait for the specified time
-                    TCODSystem.Sleep(movieMSBetweenFrames);
+                    if (keypressBetweenFrames == true)
+                    {
+                        rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                        KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                    }
+                    else
+                    {
+                        TCODSystem.Sleep(movieMSBetweenFrames);
+                    }
 
                 }
 
@@ -224,7 +232,7 @@ namespace RogueBasin {
                 Screen.Instance.FlushConsole();
 
                 //Await keypress then redraw normal screen
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                KeyPress anyKey = Keyboard.WaitForKeyPress(true);
 
                 Draw();
                 Screen.Instance.FlushConsole();
@@ -657,6 +665,7 @@ namespace RogueBasin {
                     rootConsole.ForegroundColor = neverSeenFOVTerrainColor;
                 }
 
+                rootConsole.ForegroundColor = itemColor;
                 rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
 
                 //rootConsole.Flush();

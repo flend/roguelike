@@ -23,7 +23,7 @@ namespace RogueBasin
 
             SetupMaps();
 
-            SpawnFloorItems();
+            SpawnItems();
 
             SpawnInitialCreatures();
 
@@ -43,6 +43,8 @@ namespace RogueBasin
 
         private void SpawnInitialCreatures()
         {
+            LogFile.Log.LogEntry("Generating creatures...");
+
             //Add monsters to levels
 
             //Could take into account depth and difficulty level
@@ -63,15 +65,28 @@ namespace RogueBasin
                     do
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
-                    } while (!dungeon.AddMonsterCheckConnected(monster, i, location));
+                    } while (!dungeon.AddMonster(monster, i, location));
                 }
             }
 
         }
 
-        private void SpawnFloorItems()
+        private void SpawnItems()
         {
-            //throw new NotImplementedException();
+            LogFile.Log.LogEntry("Generating items...");
+
+            //Plot items
+
+            //These are max 1 per level
+            //Not all of them necessarily appear in all games
+            //They may be on the ground or carried by a creature
+
+            Point location = new Point(0, 0);
+
+            do
+            {
+                location = dungeon.RandomWalkablePointInLevel(0);
+            } while (!dungeon.AddItem(new Items.Glove(), 0, location));
         }
 
         /// <summary>

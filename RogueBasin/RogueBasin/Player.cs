@@ -85,6 +85,12 @@ namespace RogueBasin
                     damageModifier = 0;
                     hitModifier = 0;
                     break;
+                case 2:
+                    armourClass = 11;
+                    damageBase = 5;
+                    damageModifier = 1;
+                    hitModifier = 1;
+                    break;
             }
 
             //Check equipped items
@@ -565,6 +571,32 @@ namespace RogueBasin
         internal void AddItemToInventory(Item itemToPickUp)
         {
             Inventory.AddItem(itemToPickUp);
+        }
+
+        /// <summary>
+        /// Level up the player!
+        /// </summary>
+        internal void LevelUp()
+        {
+            //Level up!
+            Level++;
+
+            //Recalculate combat stats
+            CalculateCombatStats();
+
+            //Calculate HP etc
+            HPOnLevelUP();
+
+            LogFile.Log.LogEntry("Player levels up to: " + Level);
+        }
+
+        /// <summary>
+        /// Apply level up effect to current hitpoints
+        /// </summary>
+        private void HPOnLevelUP()
+        {
+            hitpoints += 10;
+            maxHitpoints += 10;
         }
     }
 }

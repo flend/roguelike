@@ -58,6 +58,7 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="Items\Glove.cs" />
     <Compile Include="Items\Potion.cs" />
     <Compile Include="Items\ShortSword.cs" />
     <Compile Include="ITurnAI.cs" />
