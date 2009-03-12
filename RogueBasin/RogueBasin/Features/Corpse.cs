@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Features
 {
-    class Corpse : DecorationFeature
+    public class Corpse : DecorationFeature
     {
         public Corpse()
         {

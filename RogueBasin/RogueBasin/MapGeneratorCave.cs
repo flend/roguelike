@@ -32,12 +32,16 @@ namespace RogueBasin
         Point upStaircase;
         Point downStaircase;
 
+        Point pcStartLocation;
+
+        public Map Map { get {return baseMap;} }
+
         public MapGeneratorCave()
         {
 
         }
 
-        public Map GenerateMap() {
+        public Map GenerateMap(bool isFirstLevel) {
 
             LogFile.Log.LogEntry("Making cave map");
 
@@ -145,8 +149,24 @@ namespace RogueBasin
 
             } while (badMap);
 
+            //Set the player start location to that of the up staircase (only used on the first level)
+            pcStartLocation = upStaircase;
+
+            LogFile.Log.LogEntry("Total maps made: " + mapsMade.ToString());
+
+            return baseMap;
+        }
+
+        /// <summary>
+        /// Add g + rand(noRandom) water features
+        /// 15, 4 is good
+        /// </summary>
+        /// <param name="noGuaranteed"></param>
+        /// <param name="noRandom"></param>
+        public void AddWaterToCave(int noGuaranteed, int noRandom)
+        {
             //Add some water features
-            int noWaterFeatures = 15 + Game.Random.Next(4);
+            int noWaterFeatures = noGuaranteed + Game.Random.Next(noRandom);
 
             for (int i = 0; i < noWaterFeatures; i++)
             {
@@ -164,11 +184,6 @@ namespace RogueBasin
 
                 AddWaterFeature(x, y, deltaX, deltaY);
             }
-
-
-            LogFile.Log.LogEntry("Total maps made: " + mapsMade.ToString());
-
-            return baseMap;
         }
 
         private void SetSquareClosed(int i, int j)
@@ -384,7 +399,7 @@ namespace RogueBasin
                 Dig(x + 1, y + 1);
         }
 
-        public void AddWaterFeature(int x, int y, int deltaX, int deltaY)
+        private void AddWaterFeature(int x, int y, int deltaX, int deltaY)
         {
             //Calculate this square's coords
             int squareX = x + deltaX;
@@ -441,6 +456,26 @@ namespace RogueBasin
 
             Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
             Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
+        }
+
+        /// <summary>
+        /// Add staircases to the map once it has been added to dungeon
+        /// </summary>
+        /// <param name="levelNo"></param>
+        public void AddDownStaircaseOnly(int levelNo)
+        {
+
+            //Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
+            Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
+        }
+
+        /// <summary>
+        /// Only used on the first level
+        /// </summary>
+        /// <returns></returns>
+        public Point GetPCStartLocation()
+        {
+            return pcStartLocation;
         }
     }
 }

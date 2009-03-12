@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml.Serialization;
+using System.IO.Compression;
 
 namespace RogueBasin
 {
@@ -311,6 +312,12 @@ namespace RogueBasin
 
                             //Debug events
 
+                            case 't':
+                                //teleport to stairs
+                                TeleportToDownStairs();
+                                UpdateScreen();
+                                break;
+
                             case 'y':
                                 //Add a speed up event on the player
                                 PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
@@ -417,6 +424,48 @@ namespace RogueBasin
             return timeAdvances;
         }
 
+        private void TeleportToDownStairs()
+        {
+            //Find down stairs on this level
+            List<Feature> features = Game.Dungeon.Features;
+
+            Player player = Game.Dungeon.Player;
+
+            Features.StaircaseDown downStairs = null;
+            Point stairlocation = new Point(0,0);
+
+            foreach (Feature feature in features)
+            {
+
+                if (feature.LocationLevel == Game.Dungeon.Player.LocationLevel &&
+                    feature is Features.StaircaseDown)
+                {
+                    downStairs = feature as Features.StaircaseDown;
+                    stairlocation = feature.LocationMap;
+                    break;
+                }
+            }
+
+            if (downStairs == null)
+            {
+                LogFile.Log.LogEntryDebug("Unable to teleport to stairs", LogDebugLevel.High);
+                return;
+            }
+            
+            //Kill any monster there
+            Monster m = Game.Dungeon.MonsterAtSpace(player.LocationLevel, player.LocationMap);
+
+            if (m != null)
+            {
+                Game.Dungeon.KillMonster(m);
+            }
+
+            //Move the player
+            player.LocationMap = stairlocation;
+
+            //featureAtSpace.PlayerInteraction(player);
+        }
+
         private void LoadGame(string filenameRoot)
         {
             //Save game filename
@@ -426,11 +475,14 @@ namespace RogueBasin
             XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
 
             Stream stream = null;
+            GZipStream compStream = null;
 
             try
             {
                 stream = File.OpenRead(filename);
-                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(stream);
+
+                compStream = new GZipStream(stream, CompressionMode.Decompress, true);
+                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(compStream);
 
                 //Build a new dungeon object from the stored data
                 Dungeon newDungeon = new Dungeon();
@@ -481,6 +533,7 @@ namespace RogueBasin
             }
             finally
             {
+                compStream.Close();
                 stream.Close();
             }
 
@@ -900,6 +953,9 @@ namespace RogueBasin
             //Setup screen
             Screen.Instance.InitialSetup();
 
+            //Setup global random
+            Random rand = new Random();
+
             //Setup logfile
             try
             {
@@ -916,16 +972,19 @@ namespace RogueBasin
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
 
-            SetupDungeon();
+            //Setup dungeon
+            DungeonMaker dungeonMaker = new DungeonMaker();
+            Game.Dungeon = dungeonMaker.SpawnNewDungeon();
         }
 
         private void SetupDungeon()
         {
+            /*
+
             //Create dungeon and set it as current in Game
             Game.Dungeon = new Dungeon();
 
-            //Randomer
-            Random rand = new Random();
+ 
 
             //Create dungeon map (at least level 1)
             MapGeneratorBSPCave mapGen1 = new MapGeneratorBSPCave();
@@ -945,7 +1004,7 @@ namespace RogueBasin
             cave1.Width = 80;
             cave1.Height = 25;
 
-            Map cave = cave1.GenerateMap();
+            Map cave = cave1.GenerateMap(true); ;
 
  
             //KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -979,11 +1038,6 @@ namespace RogueBasin
             //Setup PC
             Player player = Game.Dungeon.Player;
 
-            player.Representation = '@';
-            player.LocationMap = level1.PCStartLocation;
-
-            player.Hitpoints = 100;
-            player.MaxHitpoints = 100;
 
             //Give the player some items
             //player.PickUpItem(new Items.Potion());
@@ -1026,7 +1080,7 @@ namespace RogueBasin
             //Create features
 
             //Add some random features
-            /*
+            
             int noFeatures = rand.Next(5) + 2;
 
             for (int i = 0; i < noFeatures; i++)
@@ -1035,7 +1089,7 @@ namespace RogueBasin
 
                 feature.Representation = Convert.ToChar(58 + rand.Next(6));
                 AddFeatureToDungeon(feature, mapGen1, 0);
-            }*/
+            }
 
             //Add staircases to dungeons level 1 and 2
             AddFeatureToDungeonRandomPoint(new Features.StaircaseDown(), mapGen1, 0);
@@ -1072,7 +1126,7 @@ namespace RogueBasin
                     location = mapGen1.RandomWalkablePoint();
                 }
                 while (!Game.Dungeon.AddItem(item, level, location));
-            }
+            }*/
         }
 
         /// <summary>

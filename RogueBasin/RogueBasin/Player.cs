@@ -55,6 +55,8 @@ namespace RogueBasin
 
             Level = 1;
 
+            Representation = '@';
+
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));

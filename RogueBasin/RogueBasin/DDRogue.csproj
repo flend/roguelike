@@ -45,6 +45,7 @@
     <Compile Include="DecorationFeature.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="DungeonEffect.cs" />
+    <Compile Include="DungeonMaker.cs" />
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />

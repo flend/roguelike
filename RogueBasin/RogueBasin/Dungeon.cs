@@ -5,6 +5,7 @@ using libtcodWrapper;
 using System.Xml.Serialization;
 using System.IO;
 using System.Xml;
+using System.IO.Compression;
 
 
 namespace RogueBasin
@@ -109,7 +110,8 @@ namespace RogueBasin
         public void SaveGame(string saveGameName)
         {
             FileStream stream = null;
-
+            GZipStream compStream = null;
+            
             try
             {
                 //Copy across the data we need to save from dungeon
@@ -140,8 +142,9 @@ namespace RogueBasin
 
                 XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
                 stream = File.Open(filename, FileMode.Create);
+                compStream = new GZipStream(stream, CompressionMode.Compress, true);
 
-                XmlTextWriter writer = new XmlTextWriter(stream, System.Text.Encoding.UTF8);
+                XmlTextWriter writer = new XmlTextWriter(compStream, System.Text.Encoding.UTF8);
                 writer.Formatting = Formatting.Indented;
                 serializer.Serialize(writer, saveGameInfo);
 
@@ -155,6 +158,7 @@ namespace RogueBasin
             }
             finally
             {
+                compStream.Close();
                 stream.Close();
             }
 
@@ -1248,6 +1252,24 @@ namespace RogueBasin
                     !item.InInventory)
                 {
                     return item;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Return an creature if there is one at the requested square, or return null if not
+        /// </summary>
+        public Monster MonsterAtSpace(int locationLevel, Point locationMap)
+        {
+            List<Monster> monsters = Monsters;
+
+            foreach (Monster monster in monsters)
+            {
+                if (monster.LocationLevel == locationLevel && monster.LocationMap == locationMap)
+                {
+                    return monster;
                 }
             }
 

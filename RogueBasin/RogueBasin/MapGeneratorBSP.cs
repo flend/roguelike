@@ -704,6 +704,11 @@ namespace RogueBasin
 
         MapNode rootNode;
 
+
+        Point upStaircase;
+        Point downStaircase;
+
+
         public MapGeneratorBSP()
         {
 
@@ -746,6 +751,22 @@ namespace RogueBasin
 
             //Turn corridors into normal squares and surround with walls
             CorridorsIntoRooms();
+
+            //Work out where the staircases will be
+            
+            //We just want 2 places that aren't too close to each other. The map is guaranteed connected
+            double RequiredStairDistance = (width * 0.5);
+            double stairDistance;
+
+            do
+            {
+                upStaircase = RandomWalkablePoint();
+                downStaircase = RandomWalkablePoint();
+
+                stairDistance = Math.Sqrt(Math.Pow(upStaircase.x - downStaircase.x, 2) + Math.Pow(upStaircase.y - downStaircase.y, 2));
+
+            } while (stairDistance < RequiredStairDistance);
+
 
             //Set which squares are light blocking
             //Now done during creation
@@ -954,6 +975,15 @@ namespace RogueBasin
                 height = value;
             }
         }
+        /// <summary>
+        /// Add staircases to the map once it has been added to dungeon
+        /// </summary>
+        /// <param name="levelNo"></param>
+        public void AddStaircases(int levelNo)
+        {
 
+            Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
+            Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
+        }
     }
 }
