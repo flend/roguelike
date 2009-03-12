@@ -846,20 +846,45 @@ namespace RogueBasin
 
             //Otherwise require a space bar press between each
             //TODO: Wrap messages
-            for (int i = 0; i < messages.Count; i++)
+
+            //Make a list of the wrapped strings
+            List<string> wrappedMsg = new List<string>();
+
+            //Stick all the messages together in one long string
+            string allMsgs = "";
+            foreach (string message in messages)
             {
-                if (i != messages.Count - 1)
+                allMsgs += message + " ";
+            }
+
+            //Strip off the last piece of white space
+            allMsgs = allMsgs.Trim();
+
+            //Now make a list of trimmed msgs with <more> appended
+            List<string> wrappedMsgs = new List<string>();
+            do
+            {
+                //put function in utility
+                string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", 83);
+                wrappedMsgs.Add(trimmedMsg);
+                //make our allMsgs smaller
+                allMsgs = allMsgs.Substring(trimmedMsg.Length);
+            } while (allMsgs.Length > 0);
+
+            for (int i = 0; i < wrappedMsgs.Count; i++)
+            {
+                if (i != wrappedMsgs.Count - 1)
                 {
-                    Screen.Instance.PrintMessage(messages[i] + " <more>");
+                    Screen.Instance.PrintMessage(wrappedMsgs[i] + " <more>");
                     Screen.Instance.FlushConsole();
 
                     //Block for this keypress - may want to listen for exit too
-                    //KeyPress userKey;
-                    //userKey = Keyboard.WaitForKeyPress(true);
+                    KeyPress userKey;
+                    userKey = Keyboard.WaitForKeyPress(true);
                 }
                 else
                 {
-                    Screen.Instance.PrintMessage(messages[i]);
+                    Screen.Instance.PrintMessage(wrappedMsgs[i]);
                     Screen.Instance.FlushConsole();
                 }
             }

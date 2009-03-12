@@ -17,7 +17,7 @@ namespace RogueBasin.Features
         /// <returns></returns>
         public override bool PlayerInteraction(Player player)
         {
-            Game.MessageQueue.AddMessage("You search the corpse but find nothing");
+            Game.MessageQueue.AddMessage("Yuck! I'm not going to eat a corpse - what type of person do you think I am?");
 
             //Does not advance time
             return false;

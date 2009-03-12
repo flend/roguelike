@@ -135,6 +135,7 @@ namespace RogueBasin
                     }
                 }
 
+                //COMMENT THIS
                 //If there are possible targets, find the closest and chase it
                 //Otherwise continue to move randomly
                 /*
@@ -164,13 +165,15 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
                     ChaseCreature(closestCreature);
                 }*/
-
+                
+                  //UNCOMMENT THIS
                 //Current behaviour: only chase the PC
                 if(creaturesInFOV.Contains(Game.Dungeon.Player)) {
                     Creature closestCreature = Game.Dungeon.Player;
                     //Start chasing this creature
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Low);
                     ChaseCreature(closestCreature);
+                 //END COMMENTING
                 }
 
                 else
