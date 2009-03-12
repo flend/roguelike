@@ -959,8 +959,11 @@ namespace RogueBasin
             //Instead set a flag on the monster and remove it after all turns are complete
             monster.Alive = false;
 
-            //Drop its inventory
+            //Drop its inventory (including plot items we gave it)
             monster.DropAllItems();
+
+            //Drop any insta-create treasure
+            monster.InventoryDrop();
 
             //Leave a corpse
             AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);

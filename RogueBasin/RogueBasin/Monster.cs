@@ -101,6 +101,12 @@ namespace RogueBasin
         abstract protected int ClassMaxHitpoints();
 
         /// <summary>
+        /// Called when the creature is killed. Can be used to drop treasure.
+        /// </summary>
+        /// <returns></returns>
+        abstract public void InventoryDrop();
+
+        /// <summary>
         /// Run the creature's action AI
         /// </summary>
         public virtual void ProcessTurn()

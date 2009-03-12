@@ -14,6 +14,13 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
         }
 
+        public override void InventoryDrop()
+        {
+            //Nothing to drop
+
+            //Hmm, could use this corpses
+        }
+
         protected override int ClassMaxHitpoints()
         {
             return classMaxHitpoints;
