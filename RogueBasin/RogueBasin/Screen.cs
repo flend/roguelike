@@ -192,6 +192,8 @@ namespace RogueBasin {
 
                 Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
 
+                int frameNo = 0;
+
                 //Draw each frame of the movie
                 foreach (MovieFrame frame in movieFrames)
                 {
@@ -214,9 +216,13 @@ namespace RogueBasin {
                     //Wait for the specified time
                     if (keypressBetweenFrames == true)
                     {
-                        rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
-                        Screen.Instance.FlushConsole();
-                        KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                        //Don't ask for a key press if it's the last frame, one will happen below automatically
+                        if (frameNo != movieFrames.Count - 1)
+                        {
+                            rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                            Screen.Instance.FlushConsole();
+                            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                        }
                     }
                     else
                     {
@@ -224,6 +230,7 @@ namespace RogueBasin {
                         TCODSystem.Sleep(movieMSBetweenFrames);
                     }
 
+                    frameNo++;
                 }
 
                 //Print press any key
