@@ -273,7 +273,7 @@ namespace RogueBasin
             specialMoves[moveToLearn].Known = true;
 
             //Play movie
-            Screen.Instance.PlayMovie(specialMoves[moveToLearn].MovieRoot(), false);
+            Screen.Instance.PlayMovie(specialMoves[3].MovieRoot(), false);
         }
 
         /// <summary>

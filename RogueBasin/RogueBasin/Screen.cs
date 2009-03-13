@@ -169,6 +169,10 @@ namespace RogueBasin {
         /// Play the movie indicated by the filename root.
         /// </summary>
         /// <param name="root"></param>
+        /// 
+        Color normalMovieColor = ColorPresets.White;
+        Color flashMovieColor = ColorPresets.Red;
+
         public void PlayMovie(string filenameRoot, bool keypressBetweenFrames)
         {
             try
@@ -184,6 +188,7 @@ namespace RogueBasin {
                 LoadMovie(filenameRoot);
 
                 //Use the width and height of the first frame to centre the movie
+                //Unlikely to be any control codes on the first line
                 int width = movieFrames[0].width;
                 int height = movieFrames[0].height;
 
@@ -191,7 +196,7 @@ namespace RogueBasin {
                 int yOffset = (movieHeight - height) / 2;
 
                 Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
-
+                
                 int frameNo = 0;
 
                 //Draw each frame of the movie
@@ -202,18 +207,19 @@ namespace RogueBasin {
                     rootConsole.DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
 
                     //Draw content
-
                     List<string> scanLines = frame.scanLines;
 
-                    int offset = 0;
+                    bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL, width, true);
 
-                    foreach (string line in scanLines)
+                    if (hasFlashingChars)
                     {
-                        rootConsole.PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left);
-                        offset++;
+                        //Wait and then redraw without the highlight to make a flash effect
+                        Screen.Instance.FlushConsole();
+                        TCODSystem.Sleep(movieMSBetweenFrames);
+                        DrawMovieFrame(frame.scanLines, frameTL, width, false);
                     }
 
-                    //Wait for the specified time
+                    
                     if (keypressBetweenFrames == true)
                     {
                         //Don't ask for a key press if it's the last frame, one will happen below automatically
@@ -226,6 +232,8 @@ namespace RogueBasin {
                     }
                     else
                     {
+                        //Wait for the specified time
+
                         Screen.Instance.FlushConsole();
                         TCODSystem.Sleep(movieMSBetweenFrames);
                     }
@@ -248,6 +256,71 @@ namespace RogueBasin {
             {
                 MessageBox.Show("Failed to play movie: " + filenameRoot + " : " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Draw a frame. If flashOn then highlight flashing squares in red
+        /// </summary>
+        /// <param name="scanLines"></param>
+        /// <param name="frameTL"></param>
+        /// <param name="width"></param>
+        /// <param name="flashOn"></param>
+        private bool DrawMovieFrame(List<string> scanLines, Point frameTL, int width, bool flashOn)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            int offset = 0;
+
+            bool flashingChars = false;
+            char flashChar = '£';
+
+            foreach (string line in scanLines)
+            {
+                //Check for special characters
+                if (line.Contains(flashChar.ToString()))
+                {
+                    //We will return this, so that the caller knows to call us again with flashOn = false
+                    flashingChars = true;
+
+                    //Print char by char
+                    int coffset = 0;
+                    bool nextCharFlash = false;
+                    foreach (char c in line)
+                    {
+                        if (c == flashChar)
+                        {
+                            if (flashOn)
+                            {
+                                nextCharFlash = true;
+                            }
+                            //Skip this char
+                            continue;
+                        }
+
+                        if (nextCharFlash)
+                        {
+                            rootConsole.ForegroundColor = flashMovieColor;
+                            nextCharFlash = false;
+                        }
+                        else
+                        {
+                            rootConsole.ForegroundColor = normalMovieColor;
+                        }
+
+                        rootConsole.PutChar(frameTL.x + coffset, frameTL.y + offset, c);
+                        coffset++;
+                    }
+                }
+                else
+                {
+                    //Print whole line
+                    rootConsole.PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left);
+                }
+                offset++;
+            }
+
+            return flashingChars;
         }
 
         private void LoadMovie(string filenameRoot)

@@ -223,7 +223,7 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "wallvault";
+            return "vaultbackstab";
         }
     }
 }
