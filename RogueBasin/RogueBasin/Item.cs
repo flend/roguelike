@@ -10,6 +10,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Items.Potion))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Badge))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Band))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Book))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Boots))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Bracelet))]
@@ -75,5 +76,12 @@ namespace RogueBasin
         {
             get;
         }
+
+        /// <summary>
+        /// Use hidden name
+        /// </summary>
+        public virtual bool UseHiddenName { get { return false; } }
+
+        public virtual string HiddenSuffix { get { return ""; } }
     }
 }

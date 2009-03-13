@@ -77,6 +77,8 @@ namespace RogueBasin
 
         public List<SpecialMove> specialMoves;
 
+        public List<HiddenNameInfo> hiddenNameInfo;
+
         public Player player;
 
         public long worldClock = 0;

@@ -110,7 +110,17 @@ namespace RogueBasin
 
             List<Item> plotItems = new List<Item> { new Items.Badge(), new Items.Band(), new Items.Book(), new Items.Boots(), new Items.Bracelet(), new Items.Bracer(), new Items.GlassGem(),
             new Items.Greaves(), new Items.LeadRing() };
+            
+            /*
+            //debug
+            //Give them all to me!
 
+            foreach (Item item in plotItems)
+            {
+                dungeon.Player.PickUpItem(item);
+            }
+            */
+            
             int level = 0;
             List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
@@ -159,10 +169,11 @@ namespace RogueBasin
                     } while (!dungeon.AddItem(plotItem, level, location));
                 }
             }
-
+            
             //Potions
 
             //Stick 5 potions on level 1 for testing
+            level = 0;
             for (int i = 0; i < 10; i++)
             {
                 do

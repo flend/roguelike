@@ -36,6 +36,15 @@ namespace RogueBasin
                 { return str.Substring(0, (int)maxLength - appendWhenCut.Length) + appendWhenCut; }
             }
             return str;
-        } 
+        }
+
+        public static string RandomHiddenDescription()
+        {
+            //Return a random string 
+            List<string> hiddenDesc = new List<string>() { "gold", "brown", "small purple", "red", "orange", "metallic", "shiny", "effervesent", "sparkling", "black", "green" };
+
+            return hiddenDesc[Game.Random.Next(hiddenDesc.Count)];
+
+        }
     }
 }

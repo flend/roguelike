@@ -60,13 +60,22 @@ namespace RogueBasin
 
                 string descString = Number.ToString() + " ";
 
+                string nameString;
+
+                Item item = inventory.Items[itemIndex[0]];
+
+                if (item.UseHiddenName)
+                    nameString = Game.Dungeon.GetHiddenName(item);
+                else
+                    nameString = item.SingleItemDescription;
+
                 if (Number == 1)
                 {
-                    descString += inventory.Items[itemIndex[0]].SingleItemDescription;
+                    descString += nameString;
                 }
                 else
                 {
-                    descString += inventory.Items[itemIndex[0]].GroupItemDescription;
+                    descString += nameString;
                 }
                 return descString;
             }

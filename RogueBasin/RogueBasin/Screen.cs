@@ -1063,5 +1063,136 @@ namespace RogueBasin {
                 inventoryInstructions = value;
             }
         }
+
+        /// <summary>
+        /// Get a string from the user
+        /// </summary>
+        /// <returns></returns>
+       
+        internal string GetUserString(string introMessage)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            ClearMessageLine();
+
+            PrintMessage(introMessage + ": ");
+            FlushConsole();
+
+            bool continueInput = true;
+
+            int maxChars = 40;
+
+            string userString = "";
+
+            do
+            {
+                //Get user input
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                //Each state has different keys
+
+                        if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                        {
+                            char keyCode = (char)userKey.Character;
+                            if (userString.Length < maxChars)
+                            {
+                                userString += keyCode.ToString();
+                            }
+                        }
+                        else {
+                            //Special keys
+                            switch (userKey.KeyCode)
+                            {
+                                case KeyCode.TCODK_0:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "0";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_1:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "1";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_2:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "2";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_3:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "3";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_4:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "4";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_5:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "5";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_6:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "6";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_7:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "7";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_8:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "8";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_9:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += "9";
+                                    }
+                                    break;
+                                case KeyCode.TCODK_SPACE:
+                                    if (userString.Length < maxChars)
+                                    {
+                                        userString += " ";
+                                    }
+                                    break;
+
+
+                                case KeyCode.TCODK_ESCAPE:
+                                    //Exit
+                                    return null;
+                                case KeyCode.TCODK_BACKSPACE:
+                                    if (userString.Length != 0)
+                                    {
+                                        userString = userString.Substring(0, userString.Length - 1);
+                                    }
+                                    break;
+                                case KeyCode.TCODK_ENTER:
+                                    //Exit with what we have
+                                    return userString;
+                            }
+                        }
+
+                        PrintMessage(introMessage + ": " + userString + "_");
+                        FlushConsole();
+
+            } while (continueInput);
+
+            return null;
+        }
     }
 }

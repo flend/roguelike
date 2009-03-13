@@ -186,244 +186,283 @@ namespace RogueBasin
         private bool UserInput()
         {
             bool timeAdvances = false;
-
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-            //Each state has different keys
-
-            switch (inputState)
+            try
             {
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
-                //Normal movement on the map
-                case InputState.MapMovement:
+                //Each state has different keys
 
-                    if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                    {
-                        char keyCode = (char)userKey.Character;
-                        switch (keyCode)
+                switch (inputState)
+                {
+
+                    //Normal movement on the map
+                    case InputState.MapMovement:
+
+                        if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                         {
-                            case 'x':
-                                //Exit from game
-                                Game.Dungeon.PlayerDeath();
-                                timeAdvances = true;
-                                break;
-                            case 's':
-                                //Save the game
-                                timeAdvances = false;
-                                Game.Dungeon.SaveGame("game1");
-                                UpdateScreen();
-                                break;
-                            case 'l':
-                                timeAdvances = false;
-                                LoadGame("game1"); //omg
-                                UpdateScreen();
-                                break;
-
-
-                            case 'f':
-                                //Full screen switch
-                                timeAdvances = false;
-                                RootConsole rootConsole = RootConsole.GetInstance();
-                                rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
-                                rootConsole.Flush();
-                                break;
-                            case 'm':
-                                //Play movie
-                                Game.Dungeon.PlayerLearnsRandomMove();
-                                timeAdvances = false;
-                                break;
-                            case '.':
-                                // Do nothing
-                                timeAdvances = true;
-                                SpecialMoveNonMoveAction();
-                                break;
-                            case 'i':
-                                //Interact with feature
-                                timeAdvances = InteractWithFeature();
-                                if (!timeAdvances)
+                            char keyCode = (char)userKey.Character;
+                            switch (keyCode)
+                            {
+                                case 'x':
+                                    //Exit from game
+                                    Game.Dungeon.PlayerDeath();
+                                    timeAdvances = true;
+                                    break;
+                                case 's':
+                                    //Save the game
+                                    timeAdvances = false;
+                                    Game.Dungeon.SaveGame("game1");
                                     UpdateScreen();
+                                    break;
+                                case 'l':
+                                    timeAdvances = false;
+                                    LoadGame("game1"); //omg
+                                    UpdateScreen();
+                                    break;
 
-                                if (timeAdvances)
+
+                                case 'f':
+                                    //Full screen switch
+                                    timeAdvances = false;
+                                    RootConsole rootConsole = RootConsole.GetInstance();
+                                    rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
+                                    rootConsole.Flush();
+                                    break;
+                                case 'm':
+                                    //Play movie
+                                    Game.Dungeon.PlayerLearnsRandomMove();
+                                    timeAdvances = false;
+                                    break;
+                                case '.':
+                                    // Do nothing
+                                    timeAdvances = true;
                                     SpecialMoveNonMoveAction();
+                                    break;
+                                case 'i':
+                                    //Interact with feature
+                                    timeAdvances = InteractWithFeature();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
 
-                                break;
-                            case 'j':
-                                //Display the inventory
-                                inputState = InputState.InventoryShow;
-                                SetPlayerInventoryScreen();
-                                UpdateScreen();
-                                timeAdvances = false;
-                                break;
-                            case 'u':
-                                //Use an inventory item
-                                SetPlayerInventorySelectScreen();
-                                UpdateScreen();
-                                //This uses the generic 'select from inventory' input loop
-                                //Time advances if the item was used successfully
-                                timeAdvances = UseItem();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+
+                                    break;
+                                case 'j':
+                                    //Display the inventory
+                                    inputState = InputState.InventoryShow;
+                                    SetPlayerInventoryScreen();
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+                                case 'u':
+                                    //Use an inventory item
+                                    SetPlayerInventorySelectScreen();
+                                    UpdateScreen();
+                                    //This uses the generic 'select from inventory' input loop
+                                    //Time advances if the item was used successfully
+                                    timeAdvances = UseItem();
+                                    DisablePlayerInventoryScreen();
+                                    //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+                                case 'e':
+                                    //Select an item to equip
+                                    SetPlayerEquippedItemsSelectScreen();
+                                    UpdateScreen();
+                                    timeAdvances = EquipItem();
+                                    DisablePlayerEquippedItemsSelectScreen();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+                                case 'w':
+                                    //Display currently equipped items
+                                    SetPlayerEquippedItemsScreen();
+                                    UpdateScreen();
+                                    DisplayEquipment();
+                                    DisablePlayerEquippedItemsScreen();
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+
+                                case ',':
+                                    //Pick up item
+                                    timeAdvances = PickUpItem();
+                                    //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+                                case 'd':
+                                    //Drop item
+                                    SetPlayerInventorySelectScreen();
+                                    UpdateScreen();
+                                    timeAdvances = DropItem();
+                                    DisablePlayerInventoryScreen();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
+                                //Debug events
+
+                                case 't':
+                                    //teleport to stairs
+                                    TeleportToDownStairs();
+                                    UpdateScreen();
+                                    break;
+
+                                case 'y':
+                                    //Add a speed up event on the player
+                                    PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
+                                    Game.Dungeon.Player.AddEffect(speedUp);
+                                    UpdateScreen();
+                                    break;
+                                case 'v':
+                                    //Add a multi damage event on the player
+                                    PlayerEffects.MultiDamage multiD = new RogueBasin.PlayerEffects.MultiDamage(Game.Dungeon.Player, 500, 3);
+                                    Game.Dungeon.Player.AddEffect(multiD);
+                                    UpdateScreen();
+                                    break;
+                                case 'h':
+                                    //Add a healing event on the player
+                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                                    Game.Dungeon.Player.AddEffect(healing);
+                                    UpdateScreen();
+                                    break;
+                                case 'z':
+                                    //Add an anti-healing event on the player
+                                    PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
+                                    Game.Dungeon.Player.AddEffect(zhealing);
+                                    UpdateScreen();
+                                    break;
+                                case 'o':
+                                    //Open door
+                                    timeAdvances = PlayerOpenDoor();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+                                case 'n':
+                                    //Name object
+                                    SetPlayerInventorySelectScreen();
+                                    UpdateScreen();
+                                    //This uses the generic 'select from inventory' input loop
+                                    NameObject();
+                                    DisablePlayerInventoryScreen(); 
+                                    
+                                    UpdateScreen();
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            //Arrow keys for directions
+                            switch (userKey.KeyCode)
+                            {
+                                case KeyCode.TCODK_KP1:
+                                    timeAdvances = Game.Dungeon.PCMove(-1, 1);
+                                    break;
+
+                                case KeyCode.TCODK_KP3:
+                                    timeAdvances = Game.Dungeon.PCMove(1, 1);
+                                    break;
+
+                                case KeyCode.TCODK_KP5:
+                                    //Does nothing
+                                    //timeAdvances = true;
+                                    break;
+
+                                case KeyCode.TCODK_KP7:
+                                    timeAdvances = Game.Dungeon.PCMove(-1, -1);
+                                    break;
+                                case KeyCode.TCODK_KP9:
+                                    timeAdvances = Game.Dungeon.PCMove(1, -1);
+                                    break;
+
+                                case KeyCode.TCODK_LEFT:
+                                case KeyCode.TCODK_KP4:
+                                    timeAdvances = Game.Dungeon.PCMove(-1, 0);
+                                    break;
+                                case KeyCode.TCODK_RIGHT:
+                                case KeyCode.TCODK_KP6:
+                                    timeAdvances = Game.Dungeon.PCMove(1, 0);
+                                    break;
+                                case KeyCode.TCODK_UP:
+                                case KeyCode.TCODK_KP8:
+                                    timeAdvances = Game.Dungeon.PCMove(0, -1);
+                                    break;
+                                case KeyCode.TCODK_KP2:
+                                case KeyCode.TCODK_DOWN:
+                                    timeAdvances = Game.Dungeon.PCMove(0, 1);
+                                    break;
+                            }
+                        }
+                        break;
+
+                    //Inventory is displayed
+                    case InputState.InventoryShow:
+
+                        if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                        {
+                            char keyCode = (char)userKey.Character;
+
+                            //Exit out of inventory
+                            if (keyCode == 'x')
+                            {
+                                inputState = InputState.MapMovement;
                                 DisablePlayerInventoryScreen();
-                                //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
-                                if(!timeAdvances)
-                                    UpdateScreen();
-
-                                if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
-                                break;
-                            case 'e':
-                                //Select an item to equip
-                                SetPlayerEquippedItemsSelectScreen();
-                                UpdateScreen();
-                                timeAdvances = EquipItem();
-                                DisablePlayerEquippedItemsSelectScreen();
-                                if (!timeAdvances)
-                                UpdateScreen();
-
-                                if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
-                                break;
-                            case 'w':
-                                //Display currently equipped items
-                                SetPlayerEquippedItemsScreen();
-                                UpdateScreen();
-                                DisplayEquipment();
-                                DisablePlayerEquippedItemsScreen();
                                 UpdateScreen();
                                 timeAdvances = false;
-                                break;
-
-                            case ',':
-                                //Pick up item
-                                timeAdvances = PickUpItem();
-                                //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
-                                if (!timeAdvances)
-                                    UpdateScreen();
-                                if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
-                                break;
-                            case 'd':
-                                //Drop item
-                                SetPlayerInventorySelectScreen();
-                                UpdateScreen();
-                                timeAdvances = DropItem();
-                                DisablePlayerInventoryScreen();
-                                if (!timeAdvances)
-                                    UpdateScreen();
-                                if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
-                                break;
-
-                            //Debug events
-
-                            case 't':
-                                //teleport to stairs
-                                TeleportToDownStairs();
-                                UpdateScreen();
-                                break;
-
-                            case 'y':
-                                //Add a speed up event on the player
-                                PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
-                                Game.Dungeon.Player.AddEffect(speedUp);
-                                UpdateScreen();
-                                break;
-                            case 'v':
-                                //Add a multi damage event on the player
-                                PlayerEffects.MultiDamage multiD = new RogueBasin.PlayerEffects.MultiDamage(Game.Dungeon.Player, 500, 3);
-                                Game.Dungeon.Player.AddEffect(multiD);
-                                UpdateScreen();
-                                break;
-                            case 'h':
-                                //Add a healing event on the player
-                                PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
-                                Game.Dungeon.Player.AddEffect(healing);
-                                UpdateScreen();
-                                break;
-                            case 'z':
-                                //Add an anti-healing event on the player
-                                PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
-                                Game.Dungeon.Player.AddEffect(zhealing);
-                                UpdateScreen();
-                                break;
-                            case 'o':
-                                //Open door
-                                timeAdvances = PlayerOpenDoor();
-                                if (!timeAdvances)
-                                    UpdateScreen();
-                                if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
-                                break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        //Arrow keys for directions
-                        switch (userKey.KeyCode)
-                        {
-                            case KeyCode.TCODK_KP1:
-                                timeAdvances = Game.Dungeon.PCMove(-1, 1);
-                                break;
 
-                            case KeyCode.TCODK_KP3:
-                                timeAdvances = Game.Dungeon.PCMove(1, 1);
-                                break;
+                        break;
 
-                            case KeyCode.TCODK_KP5:
-                                //Does nothing
-                                //timeAdvances = true;
-                                break;
-
-                            case KeyCode.TCODK_KP7:
-                                timeAdvances = Game.Dungeon.PCMove(-1, -1);
-                                break;
-                            case KeyCode.TCODK_KP9:
-                                timeAdvances = Game.Dungeon.PCMove(1, -1);
-                                break;
-
-                            case KeyCode.TCODK_LEFT:
-                            case KeyCode.TCODK_KP4:
-                                timeAdvances = Game.Dungeon.PCMove(-1, 0);
-                                break;
-                            case KeyCode.TCODK_RIGHT:
-                            case KeyCode.TCODK_KP6:
-                                timeAdvances = Game.Dungeon.PCMove(1, 0);
-                                break;
-                            case KeyCode.TCODK_UP:
-                            case KeyCode.TCODK_KP8:
-                                timeAdvances = Game.Dungeon.PCMove(0, -1);
-                                break;
-                            case KeyCode.TCODK_KP2:
-                            case KeyCode.TCODK_DOWN:
-                                timeAdvances = Game.Dungeon.PCMove(0, 1);
-                                break;
-                        }
-                    }
-                    break;
-
-                //Inventory is displayed
-                case InputState.InventoryShow:
-
-                    if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                    {
-                        char keyCode = (char)userKey.Character;
-
-                        //Exit out of inventory
-                        if (keyCode == 'x')
-                        {
-                            inputState = InputState.MapMovement;
-                            DisablePlayerInventoryScreen();
-                            UpdateScreen();
-                            timeAdvances = false;
-                        }
-                    }
-
-                    break;
-                
-                //Select an item in the inventory
-                //case InputState.InventoryShow:
-                //    break;
+                    //Select an item in the inventory
+                    //case InputState.InventoryShow:
+                    //    break;
+                }
             }
-            
+            catch (Exception ex)
+            {
+                //This should catch most exceptions that happen as a result of user commands
+                MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
+            }
             return timeAdvances;
+        }
+
+        private void NameObject()
+        {
+            //User selects which item to name
+            int chosenIndex = PlayerChooseFromInventory();
+
+            //Player exited
+            if (chosenIndex == -1)
+                return;
+
+            Inventory playerInventory = Game.Dungeon.Player.Inventory;
+
+            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
+            int itemIndex = selectedGroup.ItemIndex[0];
+            Item itemToName = playerInventory.Items[itemIndex];
+
+            //Get user string
+            string newName = Screen.Instance.GetUserString("New name for " + Game.Dungeon.GetHiddenName(itemToName));
+            if (newName != null)
+            {
+                Game.Dungeon.AssociateNameWithItem(itemToName, newName);
+            }
         }
 
         private void TeleportToDownStairs()
@@ -496,6 +535,7 @@ namespace RogueBasin
                 newDungeon.Player = readData.player;
                 newDungeon.SpecialMoves = readData.specialMoves;
                 newDungeon.WorldClock = readData.worldClock;
+                newDungeon.HiddenNameInfo = readData.hiddenNameInfo;
 
                 //Process the maps back into map objects
                 foreach (SerializableMap serialMap in readData.levels)
@@ -697,8 +737,32 @@ namespace RogueBasin
             Inventory playerInventory = Game.Dungeon.Player.Inventory;
             
             InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
-            bool usedSuccessfully = Game.Dungeon.Player.UseItem(selectedGroup);
+            int itemIndex = selectedGroup.ItemIndex[0];
+            Item itemToName = playerInventory.Items[itemIndex];
 
+            bool usedSuccessfully = Game.Dungeon.Player.UseItem(selectedGroup);
+            
+            //THE BELOW DOESN'T WORK TOO WELL
+            //MESSAGES DON@T APPEAR
+            //TO IMPLEMENT PROPERLY PERHAPS USE A MEMORY DISPLAY(ALL POTIONS DRUNK) RATHER THAN THOSE IN INVENTORY
+            //WE WOULD HAVE TO STORE THIS IN PLAYER OR DUNGEON THOUGH - TODO
+            /*
+            Game.MessageQueue.AddMessage("<more>");
+            UpdateScreen();
+            RunMessageQueue();
+            //Screen.Instance.FlushConsole();
+            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+            //Let the player rename the item
+
+
+            //Get user string
+            string newName = Screen.Instance.GetUserString("New name for " + Game.Dungeon.GetHiddenName(itemToName));
+            if (newName != null)
+            {
+                Game.Dungeon.AssociateNameWithItem(itemToName, newName);
+            }
+            */
             return usedSuccessfully;
         }
 
@@ -755,14 +819,23 @@ namespace RogueBasin
 
                 //Tell the player if there's something behind it...!
 
-                if (dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
+                //Use a hidden name if required
+                string itemName;
+                if (itemToPickUp.UseHiddenName)
                 {
-                    Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up. There's something behind it!");
+                    itemName = Game.Dungeon.GetHiddenName(itemToPickUp);
                 }
                 else
-                    Game.MessageQueue.AddMessage(itemToPickUp.SingleItemDescription + " picked up.");
+                    itemName = itemToPickUp.SingleItemDescription;
 
-                LogFile.Log.LogEntry(itemToPickUp.SingleItemDescription + " picked up.");
+                if (dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
+                {
+                    Game.MessageQueue.AddMessage(itemName + " picked up. There's something behind it!");
+                }
+                else
+                    Game.MessageQueue.AddMessage(itemName + " picked up.");
+
+                LogFile.Log.LogEntry(itemName + " picked up.");
             }
             return true;
         }

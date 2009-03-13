@@ -10,6 +10,20 @@ using System.IO.Compression;
 
 namespace RogueBasin
 {
+    /// <summary>
+    /// Store the mapping between a hidden name and the actual name of a potion. Much nicer OO ways to do it but I don't have time!
+    /// </summary>
+    public class HiddenNameInfo
+    {
+        public string ActualName { get; set; } //SingleItemDescription
+        public string HiddenName { get; set; } //random each time
+        public string UserName { get; set; } //name the user has given it
+
+        public HiddenNameInfo() { } //for serialization
+
+        public HiddenNameInfo(string actual, string hidden, string user) { ActualName = actual; HiddenName = hidden; UserName = user; }
+    }
+
     public class KillCount
     {
         public Monster type;
@@ -53,6 +67,7 @@ namespace RogueBasin
         List<Monster> monsters;
         List<Item> items;
         List<Feature> features;
+        public List<HiddenNameInfo> HiddenNameInfo {get; set;} //for serialization
 
         List<SpecialMove> specialMoves;
 
@@ -80,14 +95,78 @@ namespace RogueBasin
             //levelTCODMapsIgnoringClosedDoors = new List<TCODFov>();
             effects = new List<DungeonEffect>();
             specialMoves = new List<SpecialMove>();
+            HiddenNameInfo = new List<HiddenNameInfo>();
 
             SetupSpecialMoves();
+
+            SetupHiddenNameMappings();
 
             player = new Player();
 
             RunMainLoop = true;
         }
 
+        /// <summary>
+        /// Create obfuscated names for the potions etc.
+        /// </summary>
+        private void SetupHiddenNameMappings()
+        {
+            //Add all potions here
+            List<Item> allPotions = new List<Item>() { new Items.Potion() };
+
+            foreach (Item potion in allPotions)
+            {
+                HiddenNameInfo info = new HiddenNameInfo(potion.SingleItemDescription, Utility.RandomHiddenDescription() + " " + potion.HiddenSuffix, null);
+                HiddenNameInfo.Add(info);
+            }
+        }
+
+        /// <summary>
+        /// Link a potion with a user-provided string
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="newName"></param>
+        public void AssociateNameWithItem(Item item, string newName)
+        {
+            HiddenNameInfo thisInfo = HiddenNameInfo.Find(x => x.ActualName == item.SingleItemDescription);
+
+            if(thisInfo == null) {
+                LogFile.Log.LogEntryDebug("Couldn't find an item to associate with this name", LogDebugLevel.High);
+                return;
+            }
+            LogFile.Log.LogEntryDebug("Renaming " + GetHiddenName(item) + " to " + newName, LogDebugLevel.Medium);
+            thisInfo.UserName = newName;
+        }
+
+        /// <summary>
+        /// Get the hidden name of an item
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        internal string GetHiddenName(Item item)
+        {
+            //Not a hidden item
+            if (!item.UseHiddenName)
+            {
+                LogFile.Log.LogEntryDebug("GetHiddenName called on non-hidden item", LogDebugLevel.High);
+                return item.SingleItemDescription;
+            }
+
+            HiddenNameInfo hiddenName = HiddenNameInfo.Find(x => x.ActualName == item.SingleItemDescription);
+
+            if(hiddenName == null) {
+                LogFile.Log.LogEntryDebug("Couldn't find hidden name for item", LogDebugLevel.High);
+                return item.SingleItemDescription;
+            }
+
+            if (hiddenName.UserName != null)
+            {
+                return hiddenName.UserName;
+            }
+            else
+                return hiddenName.HiddenName;
+        }
+        
         /// <summary>
         /// Add to the special moves list
         /// </summary>
@@ -128,6 +207,7 @@ namespace RogueBasin
                 saveGameInfo.monsters = this.monsters;
                 saveGameInfo.player = this.player;
                 saveGameInfo.specialMoves = this.specialMoves;
+                saveGameInfo.hiddenNameInfo = this.HiddenNameInfo;
                 saveGameInfo.worldClock = this.worldClock;
 
                 //Make maps into serializablemaps and store
@@ -1744,5 +1824,6 @@ namespace RogueBasin
                 }
             }
         }
+
     }
 }

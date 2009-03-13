@@ -60,5 +60,15 @@ namespace RogueBasin.Items
         {
             return '!';
         }
+
+        public override bool UseHiddenName { get { return true; } }
+
+        public override string HiddenSuffix
+        {
+            get
+            {
+                return "Vial";
+            }
+        }
     }
 }
