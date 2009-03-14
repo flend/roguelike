@@ -50,6 +50,8 @@ namespace RogueBasin
         /// </summary>
         public bool empty = false;
 
+        public bool offMap = false;
+
         public SquareContents()
         {
 
@@ -179,6 +181,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.VaultBackstab());
             specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
             specialMoves.Add(new SpecialMoves.Evade());
+            specialMoves.Add(new SpecialMoves.MultiAttack());
 
             foreach (SpecialMove move in specialMoves)
             {
@@ -609,6 +612,13 @@ namespace RogueBasin
         public SquareContents MapSquareContents(int level, Point location)
         {
             SquareContents contents = new SquareContents();
+
+            //Check if we're off the map
+            if (location.x < 0 || location.x >= levels[level].width || location.y < 0 || location.y > levels[level].height)
+            {
+                contents.offMap = true;
+                return contents;
+            }
 
             //Check creature that be blocking
             foreach (Monster creature in monsters)
