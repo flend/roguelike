@@ -851,6 +851,9 @@ namespace RogueBasin {
                 if (creature.LocationLevel != Game.Dungeon.Player.LocationLevel)
                     continue;
 
+                if (!creature.Alive)
+                    continue;
+
                 //Colour depending on FOV (for development)
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
 

@@ -37,7 +37,7 @@ namespace RogueBasin.Triggers
                 //hack
                 //Game.Dungeon.PlotItemsFound = 5;
 
-                Game.Dungeon.WorldClock = 2000000;
+                //Game.Dungeon.WorldClock = 2000000;
                 //TODO: Add pacifist ending
 
                 //Are we in time

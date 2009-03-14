@@ -1092,6 +1092,27 @@ namespace RogueBasin
 
             //Leave a corpse
             AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
+
+            //Deal with special monsters (bit rubbish programming)
+            Creatures.Lich lich = monster as Creatures.Lich;
+
+            if (lich != null)
+            {
+                //OK, we've killed the end baddy have a moral decision
+                Screen.Instance.PlayMovie("lichGem", true);
+
+                bool takeGem = Screen.Instance.YesNoQuestion("Take the gem?");
+
+                if (takeGem)
+                {
+                    Screen.Instance.PlayMovie("becomeLich", true);
+                    EndGame("became a powerful lich and begun a reign of terror over the surrounding land.");
+                }
+                else
+                {
+                    Screen.Instance.PlayMovie("crushLichGem", true);
+                }
+            }
         }
 
         /// <summary>
