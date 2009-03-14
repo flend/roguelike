@@ -632,7 +632,7 @@ namespace RogueBasin
             }
 
             //Check for PC blocking
-            if (player.LocationMap.x == location.x && player.LocationMap.y == location.y)
+            if (player.LocationLevel == level && player.LocationMap.x == location.x && player.LocationMap.y == location.y)
             {
                 contents.player = player;
             }

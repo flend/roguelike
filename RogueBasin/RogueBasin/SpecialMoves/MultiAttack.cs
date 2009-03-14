@@ -17,6 +17,8 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaY { get; set; }
 
         Monster target = null; //doesn't need to be serialized
+        public int lastSpeedInc { get; set; }
+        public int speedInc { get; set; }
         //Point monsterSquare = new Point(-1, -1);
 
         public MultiAttack()
@@ -46,6 +48,9 @@ namespace RogueBasin.SpecialMoves
                 //Set lastDeltaX to something unreasonable so we never repetition fail on the first move
                 lastDeltaX = -5;
                 lastDeltaY = -5;
+
+                //Reset speed counter
+                speedInc = 0;
 
                 //Check it is an attack
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x, locationAfterMove.y));
@@ -152,35 +157,43 @@ namespace RogueBasin.SpecialMoves
                 //Otherwise, pick a random monster to attack this turn
                 target = newMonsters[Game.Random.Next(newMonsters.Count)];
 
-                moveCounter = 2;
+                moveCounter++;
 
                 //Will attack it during DoMove
                 return;
             }
         }
 
+        private void ResetMove() {
+            moveCounter = 0;
+
+            //Remove any speed up effects given to the player
+            Game.Dungeon.Player.Speed -= speedInc;
+            speedInc = 0;
+        }
+
         private void FailNoNewMonsters()
         {
-            moveCounter = 0;
+            ResetMove();
             LogFile.Log.LogEntryDebug("MultiAttack ended - no new monsters", LogDebugLevel.Medium);
         }
 
         private void FailRepetition()
         {
-            moveCounter = 0;
+            ResetMove();
             LogFile.Log.LogEntryDebug("MultiAttack repetition fail", LogDebugLevel.Medium);
         }
 
         private void FailBlocked()
         {
             LogFile.Log.LogEntryDebug("MultiAttack ended - blocked", LogDebugLevel.Medium);
-            moveCounter = 0;
+            ResetMove();
         }
 
         private void FailInterrupted()
         {
             LogFile.Log.LogEntryDebug("MultiAttack ended - interrupted", LogDebugLevel.Medium);
-            moveCounter = 0;
+            ResetMove();
         }
 
         public override bool MoveComplete()
@@ -203,6 +216,14 @@ namespace RogueBasin.SpecialMoves
             //Bonus to hit and damage
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus * 2, 0, bonus * 2, 0);
              
+            //Give the player a small speed boost
+            if (bonus <= 5)
+            {
+                speedInc += 50;
+                Game.Dungeon.Player.Speed += 50;
+            }
+           
+
             //Move into destination square (already checked this was OK)
             Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
 

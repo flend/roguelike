@@ -61,6 +61,12 @@ namespace RogueBasin.SpecialMoves
                     return;
                 }
 
+                if (thisDeltaX == 0 && thisDeltaY == 0)
+                {
+                    FailWrongPattern();
+                    return;
+                }
+
                 //Otherwise OK
             }
             else

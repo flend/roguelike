@@ -156,6 +156,10 @@ namespace RogueBasin.SpecialMoves
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
             moveCounter = 0;
 
+            //Give the player a small speed up
+            //Seems to mean you get a free attack about 1 time in 2
+            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 50, 100));
+
             LogFile.Log.LogEntry("Wall vault complete");
             Game.MessageQueue.AddMessage("Wall Vault!");
         }
