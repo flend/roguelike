@@ -1,0 +1,9 @@
+Welcome to DDRogue!
+
+A 7DRL by flend.
+
+
+What is your name?
+
+(This will load a saved game of that name.)
+(No unusual characters please!)

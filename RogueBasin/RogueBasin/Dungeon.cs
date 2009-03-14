@@ -188,7 +188,7 @@ namespace RogueBasin
         /// Save the game to disk. Throws exceptions
         /// </summary>
         /// <param name="saveGameName"></param>
-        public void SaveGame(string saveGameName)
+        public void SaveGame()
         {
             FileStream stream = null;
             GZipStream compStream = null;
@@ -220,7 +220,7 @@ namespace RogueBasin
                 saveGameInfo.levels = serializedLevels;
 
                 //Construct save game filename
-                string filename = saveGameName + ".sav";
+                string filename = player.Name + ".sav";
 
                 XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
                 stream = File.Open(filename, FileMode.Create);
@@ -235,13 +235,20 @@ namespace RogueBasin
             }
             catch (Exception ex)
             {
-                LogFile.Log.LogEntry("Save game failed. Name: " + saveGameName + " Reason: " + ex.Message);
-                throw new ApplicationException("Save game failed. Name: " + saveGameName + " Reason: " + ex.Message);
+                LogFile.Log.LogEntry("Save game failed. Name: " + player.Name + ".sav" + " Reason: " + ex.Message);
+                throw new ApplicationException("Save game failed. Name: " + player.Name + ".sav" + " Reason: " + ex.Message);
             }
             finally
             {
-                compStream.Close();
-                stream.Close();
+                if (compStream != null)
+                {
+                    compStream.Close();
+                }
+
+                if (stream != null)
+                {
+                    stream.Close();
+                }
             }
 
         }

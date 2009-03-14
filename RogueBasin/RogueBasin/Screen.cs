@@ -14,8 +14,8 @@ namespace RogueBasin {
         static Screen instance = null;
 
         //Console/screen size
-        int width;
-        int height;
+        public int Width { get; set; }
+        public int Height { get; set; }
 
         //Top left coord to start drawing the map at
         Point mapTopLeft;
@@ -102,8 +102,8 @@ namespace RogueBasin {
 
         Screen()
         {
-            width = 90;
-            height = 35;
+            Width = 90;
+            Height = 35;
 
             mapTopLeft = new Point(5, 5);
 
@@ -139,8 +139,8 @@ namespace RogueBasin {
             //Note that 
 
             //CustomFontRequest fontReq = new CustomFontRequest("terminal.png", 8, 8, CustomFontRequestFontTypes.Grayscale);
-            RootConsole.Width = width;
-            RootConsole.Height = height;
+            RootConsole.Width = Width;
+            RootConsole.Height = Height;
             RootConsole.WindowTitle = "DDRogue";
             RootConsole.Fullscreen = false;
             //RootConsole.Font = fontReq;
@@ -441,7 +441,9 @@ namespace RogueBasin {
 
         }
 
-        //Draw the current dungeon map and objects
+        /// <summary>
+        /// Screen for player death
+        /// </summary>
         public void DrawDeathScreen()
         {
             //Get screen handle
@@ -1018,6 +1020,10 @@ namespace RogueBasin {
             ClearMessageBar();
         }
 
+        /// <summary>
+        /// Print message in message bar
+        /// </summary>
+        /// <param name="message"></param>
         internal void PrintMessage(string message)
         {
             //Get screen handle
@@ -1030,7 +1036,26 @@ namespace RogueBasin {
             ClearMessageBar();
 
             //Display new message
-            rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, width - msgDisplayTopLeft.x, msgDisplayNumLines, LineAlignment.Left);
+            rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, Width - msgDisplayTopLeft.x, msgDisplayNumLines, LineAlignment.Left);
+        }
+
+        /// <summary>
+        /// Print message at any point on screen
+        /// </summary>
+        /// <param name="message"></param>
+        internal void PrintMessage(string message, Point topLeft, int width)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Update state
+            lastMessage = message;
+
+            //Clear message bar
+            rootConsole.DrawRect(topLeft.x, topLeft.y, width, 1, true);
+
+            //Display new message
+            rootConsole.PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left);
         }
 
         void ClearMessageBar()
@@ -1038,7 +1063,7 @@ namespace RogueBasin {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
-            rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, width - msgDisplayTopLeft.x, msgDisplayNumLines, true);
+            rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, Width - msgDisplayTopLeft.x, msgDisplayNumLines, true);
         }
 
         public bool DisplayInventory
@@ -1138,7 +1163,7 @@ namespace RogueBasin {
         }
 
         /// <summary>
-        /// Get a string from the user
+        /// Get a string from the user. Uses the message bar
         /// </summary>
         /// <returns></returns>
        
@@ -1262,6 +1287,137 @@ namespace RogueBasin {
 
                         PrintMessage(introMessage + ": " + userString + "_");
                         FlushConsole();
+
+            } while (continueInput);
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get a string from the user. One line only.
+        /// maxChars is the max length of the input string (not including the introMessage)
+        /// </summary>
+        /// <returns></returns>
+
+        internal string GetUserString(string introMessage, Point topLeft, int maxChars)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            ClearMessageLine();
+
+            PrintMessage(introMessage + ": ", topLeft, introMessage.Length + 2 + maxChars);
+            FlushConsole();
+
+            bool continueInput = true;
+
+            string userString = "";
+
+            do
+            {
+                //Get user input
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                //Each state has different keys
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+                    char keyCode = (char)userKey.Character;
+                    if (userString.Length < maxChars)
+                    {
+                        userString += keyCode.ToString();
+                    }
+                }
+                else
+                {
+                    //Special keys
+                    switch (userKey.KeyCode)
+                    {
+                        case KeyCode.TCODK_0:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "0";
+                            }
+                            break;
+                        case KeyCode.TCODK_1:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "1";
+                            }
+                            break;
+                        case KeyCode.TCODK_2:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "2";
+                            }
+                            break;
+                        case KeyCode.TCODK_3:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "3";
+                            }
+                            break;
+                        case KeyCode.TCODK_4:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "4";
+                            }
+                            break;
+                        case KeyCode.TCODK_5:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "5";
+                            }
+                            break;
+                        case KeyCode.TCODK_6:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "6";
+                            }
+                            break;
+                        case KeyCode.TCODK_7:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "7";
+                            }
+                            break;
+                        case KeyCode.TCODK_8:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "8";
+                            }
+                            break;
+                        case KeyCode.TCODK_9:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += "9";
+                            }
+                            break;
+                        case KeyCode.TCODK_SPACE:
+                            if (userString.Length < maxChars)
+                            {
+                                userString += " ";
+                            }
+                            break;
+
+
+                        case KeyCode.TCODK_ESCAPE:
+                            //Exit
+                            return null;
+                        case KeyCode.TCODK_BACKSPACE:
+                            if (userString.Length != 0)
+                            {
+                                userString = userString.Substring(0, userString.Length - 1);
+                            }
+                            break;
+                        case KeyCode.TCODK_ENTER:
+                            //Exit with what we have
+                            return userString;
+                    }
+                }
+
+                PrintMessage(introMessage + ": " + userString + "_", topLeft, introMessage.Length + 2 + maxChars);
+                FlushConsole();
 
             } while (continueInput);
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace RogueBasin
 {
@@ -45,6 +46,98 @@ namespace RogueBasin
 
             return hiddenDesc[Game.Random.Next(hiddenDesc.Count)];
 
+        }
+
+        /// <summary>
+        /// Load text file (.txt appended) and return as strings. Takes a maximum width (width) and sets the height
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static List<string> LoadTextFile(string filename, int maxWidth, out int height)
+        {
+            try
+            {
+                LogFile.Log.LogEntry("Loading text file: " + filename);
+
+                List<string> inputLines = new List<string>();
+
+                string currentFilename = filename + ".txt";
+
+                //If this is the first frame check if there is at least one frame
+                if (!File.Exists(currentFilename))
+                {
+                    throw new ApplicationException("Can't find file: " + currentFilename);
+                }
+
+                //File exists, load the file
+                using (StreamReader reader = new StreamReader(currentFilename))
+                {
+                    string thisLine;
+
+                    inputLines = new List<string>();
+
+                    while ((thisLine = reader.ReadLine()) != null)
+                    {
+                        inputLines.Add(thisLine);
+                    }
+
+                    //Calculate dimensions
+                    int width = 0;
+
+                    foreach (string row in inputLines)
+                    {
+                        if (row.Length > width)
+                            width = row.Length;
+                    }
+
+                    //Do we need to wrap
+                    if (width <= maxWidth)
+                    {
+                        //No, set height and return
+                        height = inputLines.Count;
+
+                        return inputLines;
+                    }
+
+                    //Yes, wrap
+
+                    List<string> wrappedMsg = new List<string>();
+
+                    //Stick all the messages together in one long string
+                    //TODO: StringBuilder
+                    string allMsgs = "";
+                    foreach (string row in inputLines)
+                    {
+                        allMsgs += row + " ";
+                    }
+
+                    //Strip off the last piece of white space
+                    allMsgs = allMsgs.Trim();
+
+                    //Now make a list of trimmed msgs with <more> appended
+                    List<string> wrappedMsgs = new List<string>();
+                    do
+                    {
+                        //put function in utility
+                        string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", (uint)maxWidth);
+                        wrappedMsgs.Add(trimmedMsg);
+                        //make our allMsgs smaller
+                        allMsgs = allMsgs.Substring(trimmedMsg.Length);
+                    } while (allMsgs.Length > 0);
+
+                    //Set height
+                    height = wrappedMsgs.Count;
+
+                    return wrappedMsgs;
+                }
+            }
+            catch (Exception e)
+            {
+                LogFile.Log.LogEntry("Failed to load text file: " + e.Message);
+                //This is unlikely to be a particularly bad error, so don't rethrow, just return null
+                height = -1;
+                return null;
+            }
         }
     }
 }

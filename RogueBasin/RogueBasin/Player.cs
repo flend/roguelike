@@ -13,6 +13,8 @@ namespace RogueBasin
 
         public List<Monster> Kills { get; set;}
 
+        public string Name { get; set; }
+
         /// <summary>
         /// Current hitpoints
         /// </summary>

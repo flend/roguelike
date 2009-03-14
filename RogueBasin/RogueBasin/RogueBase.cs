@@ -211,12 +211,12 @@ namespace RogueBasin
                                 case 's':
                                     //Save the game
                                     timeAdvances = false;
-                                    Game.Dungeon.SaveGame("game1");
+                                    Game.Dungeon.SaveGame();
                                     UpdateScreen();
                                     break;
                                 case 'l':
                                     timeAdvances = false;
-                                    LoadGame("game1"); //omg
+                                    LoadGame(Game.Dungeon.Player.Name);
                                     UpdateScreen();
                                     break;
 
@@ -507,10 +507,23 @@ namespace RogueBasin
             //featureAtSpace.PlayerInteraction(player);
         }
 
-        private void LoadGame(string filenameRoot)
+        private bool DoesSaveGameExist(string playerName)
         {
             //Save game filename
-            string filename = filenameRoot + ".sav";
+            string filename = playerName + ".sav";
+
+            if (File.Exists(filename))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void LoadGame(string playerName)
+        {
+            //Save game filename
+            string filename = playerName + ".sav";
 
             //Deserialize the save game
             XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
@@ -565,18 +578,24 @@ namespace RogueBasin
                 //Set this new dungeon and player as the current global
                 Game.Dungeon = newDungeon;
 
-                Game.MessageQueue.AddMessage("Game : " + filenameRoot + " loaded successfully");
-                LogFile.Log.LogEntry("Game : " + filenameRoot + " loaded successfully");
+                Game.MessageQueue.AddMessage("Game : " + playerName + " loaded successfully");
+                LogFile.Log.LogEntry("Game : " + playerName + " loaded successfully");
             }
             catch (Exception ex)
             {
-                Game.MessageQueue.AddMessage("Game : " + filenameRoot + " failed to load.");
-                LogFile.Log.LogEntry("Game : " + filenameRoot + " failed to load: "+ ex.Message);
+                Game.MessageQueue.AddMessage("Game : " + playerName + " failed to load.");
+                LogFile.Log.LogEntry("Game : " + playerName + " failed to load: " + ex.Message);
             }
             finally
             {
-                compStream.Close();
-                stream.Close();
+                if (compStream != null)
+                {
+                    compStream.Close();
+                }
+                if (stream != null)
+                {
+                    stream.Close();
+                }
             }
 
         }
@@ -1048,12 +1067,41 @@ namespace RogueBasin
             //See all debug messages
             LogFile.Log.DebugLevel = 2;
 
+            //Intro screen pre-game (must come after screen)
+            GameIntro intro = new GameIntro();
+            intro.ShowIntroScreen();
+
+            string playerName = intro.PlayerName;
+
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
 
             //Setup dungeon
-            dungeonMaker = new DungeonMaker();
-            Game.Dungeon = dungeonMaker.SpawnNewDungeon();
+
+            //Is there a save game to load?
+            if (DoesSaveGameExist(playerName))
+            {
+                LoadGame(playerName);
+            }
+            else {
+
+                //If not, make a new dungeon for the new player
+
+                dungeonMaker = new DungeonMaker();
+                Game.Dungeon = dungeonMaker.SpawnNewDungeon();
+
+                Game.Dungeon.Player.Name = playerName;
+            }
+
+            //Fall into the main loop
+        }
+
+        /// <summary>
+        /// Intro screen for user
+        /// </summary>
+        private void IntroScreen()
+        {
+            
         }
 
         private void SetupDungeon()

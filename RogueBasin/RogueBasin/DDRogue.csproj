@@ -50,6 +50,7 @@
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
     <Compile Include="Features\Corpse.cs" />
+    <Compile Include="GameIntro.cs" />
     <Compile Include="IEquippableItem.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\StaircaseDown.cs" />
