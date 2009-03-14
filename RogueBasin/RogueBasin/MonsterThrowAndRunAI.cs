@@ -233,6 +233,18 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Flee ai cleverness. 10 loops performs pretty well, much higher is infallable
+        /// </summary>
+        /// <returns></returns>
+        protected virtual int GetTotalFleeLoops() { return 10; }
+
+        /// <summary>
+        /// Relax the requirement to flee in a direction away from the player at this loop. Very low makes the ai more stupid. Very high makes it more likely to fail completely.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual int RelaxDirectionAt() { return 0; }
+
         private void ChaseCreature(Creature newTarget)
         {
             //Confirm this as current target
@@ -260,13 +272,16 @@ namespace RogueBasin
 
                 Point nextStep = new Point(0,0);
 
+                int totalFleeLoops = GetTotalFleeLoops();
+                int relaxDirectionAt = RelaxDirectionAt();
+
                 do
                 {
                     fleeX = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].width);
                     fleeY = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].height);
 
                     //Relax conditions if we are having a hard time
-                    if (counter > 500)
+                    if (counter > relaxDirectionAt)
                         relaxDirection = true;
 
                     //Check these are in the direction away from the attacker
@@ -326,8 +341,8 @@ namespace RogueBasin
                     goodPath = true;
                     break;
 
-                    
-                } while (counter < 500);
+
+                } while (counter < totalFleeLoops);
 
                 //If we found a good path, walk it
                 if (goodPath)
