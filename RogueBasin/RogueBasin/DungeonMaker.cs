@@ -36,12 +36,22 @@ namespace RogueBasin
 
             SetupMaps();
 
-            SpawnInitialCreatures();
+            //SpawnInitialCreatures();
 
-            SpawnItems();
+            //SpawnItems();
+
+            SpawnUniques();
 
 
             return dungeon;
+        }
+
+        private void SpawnUniques()
+        {
+            int outsideLevel = dungeon.NoLevels - 1;
+            int battleLevel = dungeon.NoLevels - 2;
+
+
         }
 
         private void SetupPlayer()
@@ -90,7 +100,7 @@ namespace RogueBasin
             LogFile.Log.LogEntry("Generating items...");
 
             Point location = new Point(0, 0);
-
+            
             //Plot items
 
             //These are max 1 per level
@@ -233,7 +243,7 @@ namespace RogueBasin
 
             //Add a trigger here
             dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
-            
+            /*
             //Rest of the cave levels
             for (int i = 0; i < noCaveLevels - 1; i++)
             {
@@ -262,7 +272,7 @@ namespace RogueBasin
                 levelNo = dungeon.AddMap(hallsLevel);
                 hallsGen.AddStaircases(levelNo);
             }
-
+            */
             //Final battle level
 
             try

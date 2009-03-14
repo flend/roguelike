@@ -59,9 +59,13 @@ namespace RogueBasin
         Corridor, //walkable
         ClosedDoor, //non-walkable
         OpenDoor, //walkable
-        Flooded //walkable
-
-    }
+        Flooded, //walkable
+        River, //non-walkable
+        Mountains, //non-walkable
+        Trees, //non-walkable
+        Road, //walkable
+        Grass //walkable
+     }
 
     public class MapSquare
     {

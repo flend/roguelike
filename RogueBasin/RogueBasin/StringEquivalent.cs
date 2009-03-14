@@ -37,6 +37,11 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.ClosedDoor, '+');
             TerrainChars.Add(MapTerrain.OpenDoor, '/');
             TerrainChars.Add(MapTerrain.Flooded, '=');
+            TerrainChars.Add(MapTerrain.Grass, ',');
+            TerrainChars.Add(MapTerrain.River, '=');
+            TerrainChars.Add(MapTerrain.Trees, '*');
+            TerrainChars.Add(MapTerrain.Road, '-');
+            TerrainChars.Add(MapTerrain.Mountains, '^');
         }
 
         private static void SetupEquipmentSlots()

@@ -78,6 +78,7 @@ namespace RogueBasin
         public List<SpecialMove> specialMoves;
 
         public List<HiddenNameInfo> hiddenNameInfo;
+        public List<DungeonSquareTrigger> triggers;
 
         public Player player;
 

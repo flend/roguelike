@@ -18,6 +18,8 @@ namespace RogueBasin
     /// Real monsters will inherit off whichever subclass they like
     /// </summary>
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Rat))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Lich))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Friend))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>

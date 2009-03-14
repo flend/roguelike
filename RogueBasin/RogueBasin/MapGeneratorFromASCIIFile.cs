@@ -54,6 +54,13 @@ namespace RogueBasin
             specialChars.Add('1'); //battle trigger
             specialChars.Add('2'); //spot girl trigger
             specialChars.Add('3'); //help girl trigger
+            specialChars.Add('4'); //treasure room trigger
+            specialChars.Add('5'); //see corpses trigger
+            specialChars.Add('%'); //a corpse
+            specialChars.Add('G'); //your friend
+            specialChars.Add('Y'); //the lich
+
+
         }
 
         private void SetupFeatureMapping()
@@ -66,6 +73,11 @@ namespace RogueBasin
         {
             terrainMapping.Add(' ', MapTerrain.Void);
             terrainMapping.Add('.', MapTerrain.Empty);
+            terrainMapping.Add(',', MapTerrain.Grass);
+            terrainMapping.Add('=', MapTerrain.River);
+            terrainMapping.Add('^', MapTerrain.Mountains);
+            terrainMapping.Add('*', MapTerrain.Trees);
+            terrainMapping.Add('-', MapTerrain.Road);
             terrainMapping.Add('#', MapTerrain.Wall);
             terrainMapping.Add('+', MapTerrain.ClosedDoor);
         }
@@ -220,6 +232,18 @@ namespace RogueBasin
                             thisSquare.Walkable = true;
                             thisSquare.BlocksLight = false;
                             break;
+                        case MapTerrain.Mountains:
+                            thisSquare.Walkable = false;
+                            thisSquare.BlocksLight = true;
+                            break;
+                        case MapTerrain.Trees:
+                            thisSquare.Walkable = false;
+                            thisSquare.BlocksLight = false;
+                            break;
+                        case MapTerrain.River:
+                            thisSquare.Walkable = false;
+                            thisSquare.BlocksLight = false;
+                            break;
                     }
                 }
                 
@@ -264,6 +288,9 @@ namespace RogueBasin
             }
 
             //Sort out special characters
+
+            row = 0;
+
             foreach (string mapRow in storedMapRows)
             {
                 for (int i = 0; i < width; i++)
@@ -286,6 +313,21 @@ namespace RogueBasin
                                 break;
                             case '3':
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.HelpFriend());
+                                break;
+                            case '4':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TreasureRoom());
+                                break;
+                            case '5':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.SeeCorpses());
+                                break;
+                            case '%':
+                                Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
+                                break;
+                            case 'Y':
+                                Game.Dungeon.AddMonster(new Creatures.Lich(), levelNo, new Point(i, row));
+                                break;
+                            case 'G':
+                                Game.Dungeon.AddMonster(new Creatures.Friend(), levelNo, new Point(i, row));
                                 break;
                         }
                     }

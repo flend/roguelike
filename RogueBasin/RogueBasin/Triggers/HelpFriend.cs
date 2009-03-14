@@ -7,14 +7,14 @@ namespace RogueBasin.Triggers
     /// <summary>
     /// When you enter the entrance square
     /// </summary>
-    public class DungeonEntranceTrigger : DungeonSquareTrigger
+    public class HelpFriend : DungeonSquareTrigger
     {
         /// <summary>
         /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
         /// </summary>
         public static bool Triggered { get; set; }
 
-        public DungeonEntranceTrigger()
+        public HelpFriend()
         {
             Triggered = false;
         }
@@ -30,12 +30,8 @@ namespace RogueBasin.Triggers
 
             if (!Triggered)
             {
-                Screen.Instance.PlayMovie("enterDungeon", true);
+                Screen.Instance.PlayMovie("helpFriend", true);
                 Triggered = true;
-            }
-            else
-            {
-                Screen.Instance.PlayMovie("enterDungeonAgain", true);
             }
 
             return true;

@@ -216,6 +216,7 @@ namespace RogueBasin
                 saveGameInfo.specialMoves = this.specialMoves;
                 saveGameInfo.hiddenNameInfo = this.HiddenNameInfo;
                 saveGameInfo.worldClock = this.worldClock;
+                saveGameInfo.triggers = this.Triggers;
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -1131,6 +1132,26 @@ namespace RogueBasin
 
                             //Closed door
                             if (level.mapSquares[j, k].Terrain == MapTerrain.ClosedDoor)
+                            {
+                                walkable = false;
+                            }
+
+                            if (level.mapSquares[j, k].Terrain == MapTerrain.Mountains)
+                            {
+                                walkable = false;
+                            }
+
+                            if (level.mapSquares[j, k].Terrain == MapTerrain.Trees)
+                            {
+                                walkable = false;
+                            }
+
+                            if (level.mapSquares[j, k].Terrain == MapTerrain.Trees)
+                            {
+                                walkable = false;
+                            }
+
+                            if (level.mapSquares[j, k].Terrain == MapTerrain.River)
                             {
                                 walkable = false;
                             }
