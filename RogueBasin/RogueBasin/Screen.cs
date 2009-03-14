@@ -24,7 +24,7 @@ namespace RogueBasin {
         /// Dimensions of message display area
         /// </summary>
         Point msgDisplayTopLeft;
-        int msgDisplayNumLines;
+        public int msgDisplayNumLines;
 
         Point statsDisplayTopLeft;
 
@@ -108,7 +108,7 @@ namespace RogueBasin {
             mapTopLeft = new Point(5, 5);
 
             msgDisplayTopLeft = new Point(0, 1);
-            msgDisplayNumLines = 1;
+            msgDisplayNumLines = 3;
 
             statsDisplayTopLeft = new Point(0, 31);
 

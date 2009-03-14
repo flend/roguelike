@@ -177,6 +177,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.StunBox());
             specialMoves.Add(new SpecialMoves.WallPush());
             specialMoves.Add(new SpecialMoves.VaultBackstab());
+            specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
 
             foreach (SpecialMove move in specialMoves)
             {
@@ -960,7 +961,8 @@ namespace RogueBasin
                 }
             }
             
-            //Are any moves ready, if so carry the first one out. All other are deleted (otherwise move interactions have to be worried about)
+            //Are any moves ready, if so carry the first one out.
+            //Try allow multiple moves on one turn. Have to be careful to make sure there 
 
             SpecialMove moveToDo = null;
 
@@ -968,14 +970,14 @@ namespace RogueBasin
                 if (move.Known && move.MoveComplete())
                 {
                     moveToDo = move;
-                    break;
+                    move.DoMove(newPCLocation);
                 }
             }
 
             //Carry out move, if one is ready
             if (moveToDo != null)
             {
-                moveToDo.DoMove(newPCLocation);
+                //moveToDo.DoMove(newPCLocation);
 
                 //Clear all moves
                 //foreach (SpecialMove move in specialMoves)
@@ -1721,7 +1723,7 @@ namespace RogueBasin
             //Carry out move, if one is ready
             if (moveToDo != null)
             {
-                moveToDo.DoMove(new Point(0,0));
+                moveToDo.DoMove(new Point(-1,-1));
 
                 //Clear all moves
                 foreach (SpecialMove move in specialMoves)

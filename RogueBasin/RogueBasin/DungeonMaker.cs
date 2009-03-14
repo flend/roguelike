@@ -67,7 +67,7 @@ namespace RogueBasin
 
             for (int i = 0; i < dungeon.NoLevels; i++)
             {
-                int noCreatures = 1 + Game.Random.Next(1);
+                int noCreatures = 10 + Game.Random.Next(5);
 
                 for (int j = 0; j < noCreatures; j++)
                 {

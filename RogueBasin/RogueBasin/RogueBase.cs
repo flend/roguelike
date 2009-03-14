@@ -999,7 +999,7 @@ namespace RogueBasin
             //TODO: Wrap messages
 
             //Make a list of the wrapped strings
-            List<string> wrappedMsg = new List<string>();
+            //List<string> wrappedMsg = new List<string>();
 
             //Stick all the messages together in one long string
             string allMsgs = "";
@@ -1022,11 +1022,31 @@ namespace RogueBasin
                 allMsgs = allMsgs.Substring(trimmedMsg.Length);
             } while (allMsgs.Length > 0);
 
-            for (int i = 0; i < wrappedMsgs.Count; i++)
+            int noLines = Screen.Instance.msgDisplayNumLines;
+
+            int i = 0;
+            do
             {
-                if (i != wrappedMsgs.Count - 1)
+                //Require moreing
+                if (i < wrappedMsgs.Count - noLines)
                 {
-                    Screen.Instance.PrintMessage(wrappedMsgs[i] + " <more>");
+                    //Add the messages together for PrintMessage
+                    string outputMsg = "";
+
+                    for (int j = 0; j < noLines; j++)
+                    {
+                        outputMsg += wrappedMsgs[i + j].Trim();
+
+                        if (j != noLines - 1)
+                            outputMsg += "\n";
+                    }
+
+                    //Update line counter
+                    i += noLines;
+
+                    outputMsg.Trim();
+
+                    Screen.Instance.PrintMessage(outputMsg + " <more>");
                     Screen.Instance.FlushConsole();
 
                     //Block for this keypress - may want to listen for exit too
@@ -1035,10 +1055,29 @@ namespace RogueBasin
                 }
                 else
                 {
-                    Screen.Instance.PrintMessage(wrappedMsgs[i]);
+                    //Add the messages together for PrintMessage
+                    string outputMsg = "";
+
+                    for (int j = 0; j < noLines; j++)
+                    {
+                        if (i + j >= wrappedMsgs.Count)
+                            break;
+
+                        outputMsg += wrappedMsgs[i + j].Trim();
+
+                        if (j != noLines - 1)
+                            outputMsg += "\n";
+                    }
+
+                    outputMsg.Trim();
+
+                    //Update line counter
+                    i += noLines;
+
+                    Screen.Instance.PrintMessage(outputMsg);
                     Screen.Instance.FlushConsole();
                 }
-            }
+            } while (i < wrappedMsgs.Count);
             
             Game.MessageQueue.ClearList();
 
@@ -1067,15 +1106,18 @@ namespace RogueBasin
             //See all debug messages
             LogFile.Log.DebugLevel = 2;
 
+            //Setup message queue
+            Game.MessageQueue = new MessageQueue();
+
             //Intro screen pre-game (must come after screen)
+            /*
             GameIntro intro = new GameIntro();
             intro.ShowIntroScreen();
 
             string playerName = intro.PlayerName;
+            */
 
-            //Setup message queue
-            Game.MessageQueue = new MessageQueue();
-
+            string playerName = "Dave";
             //Setup dungeon
 
             //Is there a save game to load?

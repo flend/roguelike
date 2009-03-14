@@ -12,6 +12,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallPush))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallVault))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.VaultBackstab))]
+    [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.OpenSpaceAttack))]
     public class SpecialMove
     {
         /// <summary>
