@@ -36,9 +36,9 @@ namespace RogueBasin
 
             SetupMaps();
 
-            //SpawnInitialCreatures();
+            SpawnInitialCreatures();
 
-            //SpawnItems();
+            SpawnItems();
 
             Game.Dungeon.TotalPlotItems = 5;
 
@@ -112,14 +112,15 @@ namespace RogueBasin
             //They may be on the ground or carried by a creature
 
             //Guarantee the glove (vamparic regeneration) on level 1 or 2
-
-            int gloveLevel = Game.Random.Next(2);
             
+            int gloveLevel = Game.Random.Next(2);
+            /*
             do
             {
                 location = dungeon.RandomWalkablePointInLevel(gloveLevel);
             } while (!dungeon.AddItem(new Items.Glove(), 0, location));
-
+            */
+            dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
             //The rest of the plot items are split between the remaining cave and ruined levels
 
             List<Item> plotItems = new List<Item> { new Items.Badge(), new Items.Band(), new Items.Book(), new Items.Boots(), new Items.Bracelet(), new Items.Bracer(), new Items.GlassGem(),
@@ -247,7 +248,7 @@ namespace RogueBasin
 
             //Add a trigger here
             dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
-            /*
+            
             //Rest of the cave levels
             for (int i = 0; i < noCaveLevels - 1; i++)
             {
@@ -276,7 +277,7 @@ namespace RogueBasin
                 levelNo = dungeon.AddMap(hallsLevel);
                 hallsGen.AddStaircases(levelNo);
             }
-            */
+            
             //Final battle level
 
             try

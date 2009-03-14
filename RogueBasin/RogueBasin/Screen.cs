@@ -30,6 +30,7 @@ namespace RogueBasin {
 
         Point hitpointsOffset;
         Point maxHitpointsOffset;
+        Point overdriveHitpointsOffset;
         Point speedOffset;
         Point worldTickOffset;
         Point levelOffset;
@@ -114,10 +115,11 @@ namespace RogueBasin {
 
             hitpointsOffset = new Point(6, 0);
             maxHitpointsOffset = new Point(13, 0);
-            speedOffset = new Point(20, 0);
-            worldTickOffset = new Point(30, 0);
+            overdriveHitpointsOffset = new Point(17, 0);
+            speedOffset = new Point(25, 0);
+            worldTickOffset = new Point(35, 0);
 
-            levelOffset = new Point(40, 0);
+            levelOffset = new Point(45, 0);
 
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(75, 5);
@@ -732,9 +734,11 @@ namespace RogueBasin {
 
             string hitpointsString = "HP: " + player.Hitpoints.ToString();
             string maxHitpointsString = "/" + player.MaxHitpoints.ToString();
+            string overdriveHitpointsString = "(" + player.OverdriveHitpoints.ToString() + ")";
 
             rootConsole.PrintLine(hitpointsString, statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
             rootConsole.PrintLine(maxHitpointsString, statsDisplayTopLeft.x + maxHitpointsOffset.x, statsDisplayTopLeft.y + maxHitpointsOffset.y, LineAlignment.Left);
+            rootConsole.PrintLine(overdriveHitpointsString, statsDisplayTopLeft.x + overdriveHitpointsOffset.x, statsDisplayTopLeft.y + overdriveHitpointsOffset.y, LineAlignment.Left);
 
             string speedString = "Sp: " + player.Speed.ToString();
 

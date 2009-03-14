@@ -63,8 +63,18 @@ namespace RogueBasin
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
 
+            //Set initial HP
+            SetupInitialHP();
+
             //Setup combat parameters
             CalculateCombatStats();
+
+        }
+
+        private void SetupInitialHP()
+        {
+            hitpoints = 100;
+            maxHitpoints = 100;
         }
 
         /// <summary>
@@ -94,6 +104,9 @@ namespace RogueBasin
                     hitModifier = 1;
                     break;
             }
+
+            //Set overdrive HP
+            OverdriveHitpoints = (int)Math.Ceiling(maxHitpoints * 1.5);
 
             //Check equipped items
             
@@ -288,10 +301,11 @@ namespace RogueBasin
                 monster.Hitpoints -= damage;
 
                 //Fairly evil switch case for special attack types. Sorry, no time to do it well
-                SpecialCombatEffectsOnMonster(monster);
+                bool monsterDead = monster.Hitpoints <= 0;
+                SpecialCombatEffectsOnMonster(monster, damage, monsterDead);
 
                 //Is the monster dead, if so kill it?
-                if (monster.Hitpoints <= 0)
+                if (monsterDead)
                 {
                     Game.Dungeon.KillMonster(monster);
 
@@ -326,9 +340,10 @@ namespace RogueBasin
         /// List of special combat effects that might happen to a HIT monster
         /// </summary>
         /// <param name="monster"></param>
-        private void SpecialCombatEffectsOnMonster(Monster monster)
+        private void SpecialCombatEffectsOnMonster(Monster monster, int damage, bool isDead)
         {
             //If short sword is equipped, do a slow down effect (EXAMPLE)
+            /*
             Item shortSword = null;
             foreach (Item item in Inventory.Items)
             {
@@ -343,7 +358,76 @@ namespace RogueBasin
             if (shortSword != null)
             {
                 monster.AddEffect(new MonsterEffects.SlowDown(monster, 500, 50));
+            }*/
+
+            //If glove is equipped we leech some of the monster HP
+
+            Player player = Game.Dungeon.Player;
+            
+            Item glove = null;
+            foreach (Item item in Inventory.Items)
+            {
+                if (item as Items.Glove != null)
+                {
+                    glove = item as Items.Glove;
+                    break;
+                }
             }
+
+            if (glove != null)
+            {
+                //If the monster isn't dead we get 1/5th of the HP done
+                if (!isDead)
+                {
+                    double hpGain = damage / 5.0;
+
+                    if (hpGain > 0.9999)
+                    {
+                        GainHPFromLeech((int)Math.Ceiling(hpGain));
+                    }
+
+                    //If we're become 1 there's only a chance that we gain an HP
+                    else
+                    {
+                        int hpChance = (int) (hpGain * 100.0);
+                        if (Game.Random.Next(100) < hpChance)
+                            GainHPFromLeech(1);
+                    }
+                }
+
+                //If monster is dead we get 1/5 of the total HP
+                else
+                {
+                    double hpGain = monster.MaxHitpoints / 10.0;
+
+                    if (hpGain > 0.9999)
+                    {
+                        GainHPFromLeech((int)Math.Ceiling(hpGain));
+                    }
+
+                    //If we're become 1 there's only a chance that we gain an HP
+                    else
+                    {
+                        int hpChance = (int) (hpGain * 100.0);
+                        if (Game.Random.Next(100) < hpChance)
+                            GainHPFromLeech(1);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Increase HP from leech attack up to overdrive limit
+        /// </summary>
+        /// <param name="numHP"></param>
+        internal void GainHPFromLeech(int numHP)
+        {
+            hitpoints += numHP;
+
+            if (hitpoints > OverdriveHitpoints)
+                hitpoints = OverdriveHitpoints;
+
+            LogFile.Log.LogEntryDebug("Gain " + numHP + " hp from leech.", LogDebugLevel.Medium);
         }
 
         /// <summary>
@@ -379,7 +463,39 @@ namespace RogueBasin
         {
             IncrementEventTime();
 
+            OverdriveHitpointDecay();
+
             return base.IncrementTurnTime();
+        }
+
+
+        int overDriveDecayCounter = 0;
+
+        /// <summary>
+        /// If we're over our max hitpoint, they decay slowly
+        /// This function is typically called 100 times per turn for a normal speed character
+        /// </summary>
+        private void OverdriveHitpointDecay()
+        {
+            overDriveDecayCounter++;
+
+            if (hitpoints <= maxHitpoints)
+                return;
+
+            //Lose 1% of overdrive HP rounded up per turn
+            if (overDriveDecayCounter > 1000)
+            {
+                overDriveDecayCounter = 0;
+
+                //Proportional decay
+                double hpToLose = (hitpoints - maxHitpoints) / 100.0;
+                int hpLoss = (int)Math.Ceiling(hpToLose);
+
+                hitpoints -= hpLoss;
+
+                if (hitpoints < maxHitpoints)
+                    hitpoints = maxHitpoints;
+            }
         }
 
         /// <summary>
