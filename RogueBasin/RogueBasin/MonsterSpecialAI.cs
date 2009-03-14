@@ -558,10 +558,12 @@ namespace RogueBasin
                 Monster actualTarget = injuredTargets[Game.Random.Next(injuredTargets.Count)];
 
                 //Heal this monster
+                int oldHP = actualTarget.Hitpoints;
                 actualTarget.Hitpoints += Game.Random.Next(actualTarget.MaxHitpoints - actualTarget.Hitpoints) + 1;
 
                 //Update msg
-                Game.MessageQueue.AddMessage(this.SingleDescription + " heals " + actualTarget.SingleDescription);
+                Game.MessageQueue.AddMessage("The " + this.SingleDescription + " heals the " + actualTarget.SingleDescription);
+                LogFile.Log.LogEntryDebug(actualTarget.SingleDescription + " hp: " + oldHP + " -> " + actualTarget.Hitpoints, LogDebugLevel.Medium);
 
                 //We used this ability
                 return true;
@@ -609,7 +611,15 @@ namespace RogueBasin
                 Game.Dungeon.Features.Remove(actualCorpse); //should have a helper for this really
 
                 //Spawn a skelly
-                return Game.Dungeon.AddMonster(new Creatures.Skeleton(), corpseLevel, corpseMap);
+                bool raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Skeleton(), corpseLevel, corpseMap);
+
+                if (raisedSuccess)
+                {
+                    Game.MessageQueue.AddMessage("The " + this.SingleDescription + " tries to raise a corpse!");
+                    LogFile.Log.LogEntryDebug(this.SingleDescription + " raises corpse", LogDebugLevel.Medium);
+                }
+                return raisedSuccess;
+
             }
             else
             {
@@ -657,7 +667,7 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
 
-                    string playerMsg = "The " + this.SingleDescription + GetWeaponName() + " at you. It " + resultPhrase + ". You die.";
+                    string playerMsg = "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It " + resultPhrase + ". You die.";
                     Game.MessageQueue.AddMessage(playerMsg);
 
                     return CombatResults.DefenderDied;
@@ -666,7 +676,7 @@ namespace RogueBasin
                 //Debug string
                 string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
 
-                string playerMsg3 = "The " + this.SingleDescription + GetWeaponName() + " at you. It " + resultPhrase + ".";
+                string playerMsg3 = "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It " + resultPhrase + ".";
                 Game.MessageQueue.AddMessage(playerMsg3);
                 LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
@@ -676,7 +686,7 @@ namespace RogueBasin
             //Miss
             string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
             
-            string playerMsg2 = "The " + this.SingleDescription + GetWeaponName() + " at you. It " + resultPhrase + ".";
+            string playerMsg2 = "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It " + resultPhrase + ".";
             Game.MessageQueue.AddMessage(playerMsg2);
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 

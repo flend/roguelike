@@ -44,6 +44,7 @@
     <Compile Include="Creatures\Ferret.cs" />
     <Compile Include="Creatures\Friend.cs" />
     <Compile Include="Creatures\Goblin.cs" />
+    <Compile Include="Creatures\GoblinWitchdoctor.cs" />
     <Compile Include="Creatures\Lich.cs" />
     <Compile Include="Creatures\Orc.cs" />
     <Compile Include="Creatures\OrcShaman.cs" />

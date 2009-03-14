@@ -117,6 +117,9 @@ namespace RogueBasin
                     }
                 }
 
+                //Add summoned monsters
+                Game.Dungeon.AddDynamicMonsters();
+
                 //Remove dead monsters
                 //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
                 Game.Dungeon.RemoveDeadMonsters();

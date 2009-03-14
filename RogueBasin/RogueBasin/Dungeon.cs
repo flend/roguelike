@@ -76,6 +76,8 @@ namespace RogueBasin
 
         Player player;
 
+        private List<Monster> summonedMonsters; //no need to serialize
+
         /// <summary>
         /// Play movies and give plot exerpts for items
         /// </summary>
@@ -120,6 +122,8 @@ namespace RogueBasin
             RunMainLoop = true;
 
             PlotItemsFound = 0;
+
+            summonedMonsters = new List<Monster>();
         }
 
         public int TotalPlotItems { get; set; }
@@ -390,6 +394,64 @@ namespace RogueBasin
             catch (Exception ex)
             {
                 LogFile.Log.LogEntry(String.Format("AddCreature: ") + ex.Message);
+                return false;
+            }
+
+        }
+        /// <summary>
+        /// A creature does something that creates a new creature, e.g. raising summoning
+        /// </summary>
+        /// <param name="creature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool AddMonsterDynamic(Monster creature, int level, Point location)
+        {
+            //Try to add a creature at the requested location
+            //This may fail due to something else being there or being non-walkable
+            try
+            {
+                Map creatureLevel = levels[level];
+
+                //Check square is accessable
+                if (!MapSquareCanBeEntered(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
+                    return false;
+                }
+
+                //Check square has nothing else on it
+                SquareContents contents = MapSquareContents(level, location);
+
+                if (contents.monster != null)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    return false;
+                }
+
+                if (contents.player != null)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
+                    return false;
+                }
+
+                //Check connectivity if required
+                if (!CheckInConnectedPartOfMap(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Position not connected to stairs", LogDebugLevel.Medium);
+                    return false;
+                }
+
+                //Otherwise OK
+                creature.LocationLevel = level;
+                creature.LocationMap = location;
+
+                summonedMonsters.Add(creature);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry(String.Format("AddCreatureDynamic: ") + ex.Message);
                 return false;
             }
 
@@ -2191,6 +2253,18 @@ namespace RogueBasin
 
             //Stop the main loop
             RunMainLoop = false;
+        }
+
+        /// <summary>
+        /// Add monsters from the summoning queue to the actual dungeon. Clear at the end. Some monsters may not add if things have moved
+        /// </summary>
+        internal void AddDynamicMonsters()
+        {
+            foreach(Monster monster in summonedMonsters) {
+                Game.Dungeon.AddMonster(monster, monster.LocationLevel, monster.LocationMap);
+            }
+
+            summonedMonsters.Clear();
         }
     }
 }

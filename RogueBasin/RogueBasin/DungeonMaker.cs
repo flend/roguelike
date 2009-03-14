@@ -81,15 +81,15 @@ namespace RogueBasin
 
             for (int i = 0; i < dungeon.NoLevels; i++)
             {
-                int noCreatures = 15 + Game.Random.Next(5);
+                int noCreatures = 25 + Game.Random.Next(5);
 
                 for (int j = 0; j < noCreatures; j++)
                 {
                     Monster monster;
-                    if (Game.Random.Next(2) < 1)
+                    if (Game.Random.Next(8) < 6)
                         monster = new Creatures.Rat();
                     else
-                        monster = new Creatures.Goblin();
+                        monster = new Creatures.GoblinWitchdoctor();
 
                     Point location = new Point(0, 0);
 
