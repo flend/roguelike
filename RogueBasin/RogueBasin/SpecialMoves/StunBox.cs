@@ -17,6 +17,7 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaX { get; set; }
         public int lastDeltaY { get; set; }
 
+        double stunRadius = 3.05;
 
         public StunBox()
         {
@@ -156,6 +157,27 @@ namespace RogueBasin.SpecialMoves
             
             //Move into the destination square like normal
             Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove);
+
+            //Stun everyone within the radius
+
+            List<Monster> targets = new List<Monster>();
+            foreach (Monster monster in Game.Dungeon.Monsters)
+            {
+                if (monster.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                    continue;
+
+                if (Game.Dungeon.GetDistanceBetween(monster, Game.Dungeon.Player) < stunRadius)
+                {
+                    targets.Add(monster);
+                }
+            }
+
+            //Stun these monsters
+            foreach (Monster target in targets)
+            {
+                int duration = 250 + Game.Random.Next(500);
+                target.AddEffect(new MonsterEffects.SlowDown(target, duration, target.Speed / 2));
+            }
 
             LogFile.Log.LogEntry("StunBox!");
             Game.MessageQueue.AddMessage("Stun Box!");
