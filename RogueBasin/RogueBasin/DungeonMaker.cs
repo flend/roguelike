@@ -4,9 +4,65 @@ using System.Text;
 
 namespace RogueBasin
 {
+    class LevelOfMonsters
+    {
+        public List<Monster> monsterList;
+
+        public LevelOfMonsters()
+        {
+            monsterList = new List<Monster>();
+        }
+
+        public Monster GetRandomMonster()
+        {
+            Monster randomMonster = monsterList[Game.Random.Next(monsterList.Count)];
+
+            string randomMonsterName = randomMonster.SingleDescription;
+
+            switch (randomMonsterName)
+            {
+                case "ferret":
+                    return new Creatures.Ferret();
+                case "goblin":
+                    return new Creatures.Goblin();
+                case "goblin witch":
+                    return new Creatures.GoblinWitchdoctor();
+                case "necromancer":
+                    return new Creatures.Necromancer();
+                case "orc":
+                    return new Creatures.Orc();
+                case "orc shaman":
+                    return new Creatures.OrcShaman();
+                case "rat":
+                    return new Creatures.Rat();
+                case "skeleton":
+                    return new Creatures.Skeleton();
+                case "spider":
+                    return new Creatures.Spider();
+                case "zombie":
+                    return new Creatures.Zombie();
+            }
+
+            LogFile.Log.LogEntryDebug("Can't find monster type: " + randomMonster, LogDebugLevel.High);
+            return null;
+        }
+
+        internal void Add(Monster monster)
+        {
+            monsterList.Add(monster);
+        }
+    }
+
+    public enum GameDifficulty
+    {
+        Easy, Medium, Hard
+    }
+
     public class DungeonMaker
     {
         Dungeon dungeon = null;
+
+        GameDifficulty difficulty = GameDifficulty.Easy;
 
         int noCaveLevels = 5;
         int noCaveWaterLevels = 3;
@@ -75,35 +131,460 @@ namespace RogueBasin
 
             //Add monsters to levels
 
+            //The levels divide into 3 groups: cave, cave/halls and halls
+            //The difficulty in each set is roughly the same
+
+            //1-3: with water
+            //1-5: Cave
+            //5-10: Ruined Halls
+            //11-15: Halls
+
             //Could take into account depth and difficulty level
 
-            //For now just spawn some random creatures in each level
+            List<int> levelMonsterAmounts = new List<int>() {
 
-            for (int i = 0; i < dungeon.NoLevels; i++)
+                200, //1
+                220, //2
+                240, //3
+                260, //4
+                300, //5
+                320, //6
+                340, //7
+                360, //8
+                400, //9
+                440, //10
+                480, //11
+                520, //12
+                560, //13
+                600, //14
+                750 //15
+            };
+
+            //Monster Types
+            Creatures.Ferret ferret = new RogueBasin.Creatures.Ferret();
+            Creatures.Goblin goblin = new RogueBasin.Creatures.Goblin();
+            Creatures.GoblinWitchdoctor goblinWitch = new RogueBasin.Creatures.GoblinWitchdoctor();
+            Creatures.Necromancer necromancer = new RogueBasin.Creatures.Necromancer();
+            Creatures.Orc orc = new RogueBasin.Creatures.Orc();
+            Creatures.OrcShaman orcShaman = new RogueBasin.Creatures.OrcShaman();
+            Creatures.Rat rat = new RogueBasin.Creatures.Rat();
+            Creatures.Skeleton skeleton = new RogueBasin.Creatures.Skeleton();
+            Creatures.Spider spider = new RogueBasin.Creatures.Spider();
+            Creatures.Zombie zombie = new RogueBasin.Creatures.Zombie();
+
+            List<Monster> allMonsters = new List<Monster>() {
+                new RogueBasin.Creatures.Ferret(),
+                new RogueBasin.Creatures.Goblin(),
+                new RogueBasin.Creatures.GoblinWitchdoctor(),
+                new RogueBasin.Creatures.Necromancer(),
+                new RogueBasin.Creatures.Orc(),
+                new RogueBasin.Creatures.OrcShaman(),
+                new RogueBasin.Creatures.Rat(),
+                new RogueBasin.Creatures.Skeleton(),
+                new RogueBasin.Creatures.Spider(),
+                new RogueBasin.Creatures.Zombie()
+            };
+
+            List<LevelOfMonsters> levelList = new List<LevelOfMonsters>();
+            for (int i = 0; i < 5; i++)
             {
-                int noCreatures = 25 + Game.Random.Next(5);
+                levelList.Add(new LevelOfMonsters());
+            }
 
-                for (int j = 0; j < noCreatures; j++)
+            //Arrange the monsters into levels of difficulty
+            foreach (Monster monster in allMonsters)
+            {
+                levelList[monster.CreatureLevel() - 1].Add(monster);
+            }
+
+            if (difficulty == GameDifficulty.Medium)
+            {
+                for (int i = 0; i < levelMonsterAmounts.Count; i++)
                 {
-                    Monster monster;
-                    if (Game.Random.Next(8) < 6)
-                        monster = new Creatures.Rat();
-                    else
-                        monster = new Creatures.GoblinWitchdoctor();
-
-                    Point location = new Point(0, 0);
-
-                    //Find an acceptable location (walkable and with no other creatures in it)
-                    //Note that there is no guarantee of connectivity on cave squares
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                    } while (!dungeon.AddMonster(monster, i, location));
+                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 1.5);
                 }
             }
 
+            if (difficulty == GameDifficulty.Hard)
+            {
+                for (int i = 0; i < levelMonsterAmounts.Count; i++)
+                {
+                    levelMonsterAmounts[i] *= (int)(levelMonsterAmounts[i] * 2.5);
+                }
+            }
+
+            //Don't auto spawn for the last 2 levels
+            for (int i = 0; i < dungeon.NoLevels - 2; i++)
+            {
+                int randomNum;
+
+                //Switch on dungeon level
+                switch (i)
+                {
+                        //Early caves
+                    case 0:
+                    case 1:
+                    case 2:
+
+                        int costSpent = 0;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 75)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else if (randomNum < 98)
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+                            else
+                                monsterToAdd = levelList[2].GetRandomMonster();
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[i]);
+
+                        break;
+                    //Late caves
+                    case 3:
+                    case 4:
+                    case 5:
+
+                        costSpent = 0;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 50)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else if (randomNum < 75)
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+                            else if(randomNum < 98)
+                                monsterToAdd = levelList[2].GetRandomMonster();
+                            else
+                                monsterToAdd = levelList[3].GetRandomMonster();
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[i]);
+
+                        break;
+                    //Early cave/hall
+                    case 6:
+                    case 7:
+                    case 8:
+
+                        costSpent = 0;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 15)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else if (randomNum < 40)
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+                            else if (randomNum < 90)
+                                monsterToAdd = levelList[2].GetRandomMonster();
+                            else
+                                monsterToAdd = levelList[3].GetRandomMonster();
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[i]);
+
+                        break;
+
+                    //Late cave/hall
+                    case 9:
+                    case 10:
+
+                        costSpent = 0;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 5)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else if (randomNum < 20)
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+                            else if (randomNum < 50)
+                                monsterToAdd = levelList[2].GetRandomMonster();
+                            else if(randomNum < 90)
+                                monsterToAdd = levelList[3].GetRandomMonster();
+                            else
+                                monsterToAdd = levelList[4].GetRandomMonster();
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[i]);
+                        break;
+                        //Early halls
+                    case 11:
+                    case 12:
+                        case 13:
+
+                        costSpent = 0;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 5)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else if (randomNum < 10)
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+                            else if (randomNum < 20)
+                                monsterToAdd = levelList[2].GetRandomMonster();
+                            else if(randomNum < 70)
+                                monsterToAdd = levelList[3].GetRandomMonster();
+                            else
+                                monsterToAdd = levelList[4].GetRandomMonster();
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[i]);
+                        break;
+                             //Late halls
+                    case 14:
+                    case 15:
+
+                        costSpent = 0;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 2)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else if (randomNum < 5)
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+                            else if (randomNum < 10)
+                                monsterToAdd = levelList[2].GetRandomMonster();
+                            else if(randomNum < 40)
+                                monsterToAdd = levelList[3].GetRandomMonster();
+                            else
+                                monsterToAdd = levelList[4].GetRandomMonster();
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[i]);
+                        break;
+                }
+
+            }
+
+            /*
+                            int noCreatures = 25 + Game.Random.Next(5);
+
+                            for (int j = 0; j < noCreatures; j++)
+                            {
+                                Monster monster;
+                                if (Game.Random.Next(8) < 6)
+                                    monster = new Creatures.Rat();
+                                else
+                                    monster = new Creatures.GoblinWitchdoctor();
+
+                                Point location = new Point(0, 0);
+
+                                //Find an acceptable location (walkable and with no other creatures in it)
+                                //Note that there is no guarantee of connectivity on cave squares
+                                do
+                                {
+                                    location = dungeon.RandomWalkablePointInLevel(i);
+                                } while (!dungeon.AddMonster(monster, i, location));
+                            }
+                        }*/
+
         }
 
+        /// <summary>
+        /// Slightly unsafe due to infinite loop but not a big deal if it fails
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="levelToPlace"></param>
+        private void CheckSpecialMonsterGroups(Monster monster, int levelToPlace)
+        {
+            int minDistance = 8;
+
+            Point location = new Point();
+
+            //Certain monsters spawn in with groups of their friends
+            if (monster is Creatures.GoblinWitchdoctor)
+            {
+                //Spawn in with a random number of ferrets & goblins
+                int noFerrets = 1 + Game.Random.Next(4);
+                int noGoblins = 1 + Game.Random.Next(2);
+
+                for (int i = 0; i < noFerrets; i++)
+                {
+                    do {
+                        do {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                        } while(Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                    } while (!dungeon.AddMonster(new Creatures.Ferret(), levelToPlace, location));
+                }
+
+                for (int i = 0; i < noGoblins; i++)
+                {
+                    do
+                    {
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                    } while (!dungeon.AddMonster(new Creatures.Goblin(), levelToPlace, location));
+                }
+            }
+            else if (monster is Creatures.OrcShaman)
+            {
+                //Spawn in with a random number of orcs & spiders
+                int noOrcs = 1 + Game.Random.Next(4);
+                int noSpiders = 0 + Game.Random.Next(2);
+
+                for (int i = 0; i < noOrcs; i++)
+                {
+                    do
+                    {
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                    } while (!dungeon.AddMonster(new Creatures.Orc(), levelToPlace, location));
+                }
+
+                for (int i = 0; i < noSpiders; i++)
+                {
+                    do
+                    {
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                    } while (!dungeon.AddMonster(new Creatures.Spider(), levelToPlace, location));
+                }
+            }
+
+            else if (monster is Creatures.Necromancer)
+            {
+                //Spawn in with a random number of skels & zombs
+                int noSkel = 1 + Game.Random.Next(4);
+                int noZomb = 1 + Game.Random.Next(3);
+
+                for (int i = 0; i < noSkel; i++)
+                {
+                    do
+                    {
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                    } while (!dungeon.AddMonster(new Creatures.Skeleton(), levelToPlace, location));
+                }
+
+                for (int i = 0; i < noZomb; i++)
+                {
+                    do
+                    {
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                    } while (!dungeon.AddMonster(new Creatures.Zombie(), levelToPlace, location));
+                }
+            }
+        }
         private void SpawnItems()
         {
             LogFile.Log.LogEntry("Generating items...");
@@ -212,8 +693,8 @@ namespace RogueBasin
         {
             //Levels
 
+            //1-3: with water
             //1-5: Cave
-                //1-3: with water
             //5-10: Ruined Halls
             //11-15: Halls
             //16: Final encounter (ASCIIPaint)

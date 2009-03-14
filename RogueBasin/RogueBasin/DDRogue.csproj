@@ -46,6 +46,7 @@
     <Compile Include="Creatures\Goblin.cs" />
     <Compile Include="Creatures\GoblinWitchdoctor.cs" />
     <Compile Include="Creatures\Lich.cs" />
+    <Compile Include="Creatures\Necromancer.cs" />
     <Compile Include="Creatures\Orc.cs" />
     <Compile Include="Creatures\OrcShaman.cs" />
     <Compile Include="Creatures\Rat.cs" />
@@ -119,6 +120,8 @@
     <Compile Include="PlayerEffects\DamageUp.cs" />
     <Compile Include="PlayerEffects\MultiDamage.cs" />
     <Compile Include="PlayerEffects\Healing.cs" />
+    <Compile Include="PlayerEffects\PotionSightUp.cs" />
+    <Compile Include="PlayerEffects\SightRadiusUp.cs" />
     <Compile Include="PlayerEffects\SpeedUp.cs" />
     <Compile Include="PlayerEffects\ToHitUp.cs" />
     <Compile Include="Program.cs" />

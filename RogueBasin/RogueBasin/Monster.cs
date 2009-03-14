@@ -213,7 +213,7 @@ namespace RogueBasin
         /// <summary>
         /// Rats
         /// </summary>
-        public abstract string GroupDescription {get;}
+        public abstract string GroupDescription { get; }
 
         /// <summary>
         /// Increment time on our events then use the base class to increment time on the monster's turn counter
@@ -359,5 +359,17 @@ namespace RogueBasin
 
             return CombatResults.NeitherDied;
         }
+
+        /// <summary>
+        /// Creature cost for level gen
+        /// </summary>
+        /// <returns></returns>
+        abstract public int CreatureCost();
+
+        /// <summary>
+        /// Creature level for level gen
+        /// </summary>
+        /// <returns></returns>
+        abstract public int CreatureLevel();
     }
 }

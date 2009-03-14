@@ -90,5 +90,20 @@ namespace RogueBasin.Creatures
         {
             return Hitpoints;
         }
+
+        public override int CreatureCost()
+        {
+            return 10;
+        }
+
+        public override int CreatureLevel()
+        {
+            return 1;
+        }
+
+        public Ferret NewCreatureOfThisType()
+        {
+            return new Ferret();
+        }
     }
 }

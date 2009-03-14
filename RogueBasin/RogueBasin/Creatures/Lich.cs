@@ -70,7 +70,17 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return 'Y';
+            return 'L';
+        }
+
+        public override int CreatureCost()
+        {
+            return 1;
+        }
+
+        public override int CreatureLevel()
+        {
+            return 1;
         }
     }
 }

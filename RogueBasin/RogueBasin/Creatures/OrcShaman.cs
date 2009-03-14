@@ -105,5 +105,15 @@ namespace RogueBasin.Creatures
         {
             return "fires a bolt of flame";
         }
+
+        public override int CreatureCost()
+        {
+            return 75;
+        }
+
+        public override int CreatureLevel()
+        {
+            return 3;
+        }
     }
 }

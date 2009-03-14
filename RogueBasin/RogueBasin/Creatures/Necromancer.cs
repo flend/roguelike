@@ -5,19 +5,19 @@ using System.Text;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Medium threat, fights to the death. Fast.
+    /// Clever, fast, raiser. Long range. Bad news!
     /// </summary>
-    class Spider : MonsterFightAndRunAI
+    class Necromancer : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 6;
-        const int classMinHitpoints = 5;
+        const int classDeltaHitpoints = 8;
+        const int classMinHitpoints = 10;
 
-        public Spider()
+
+        public Necromancer()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
             SightRadius = 5;
-            Speed = 140;
         }
 
         public override void InventoryDrop()
@@ -37,7 +37,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 10;
+            return 14;
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 4;
+            return 2;
         }
 
         /// <summary>
@@ -58,47 +58,77 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 2;
+            return 8;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 50;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "spider"; } }
+        public override string SingleDescription { get { return "necromancer"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "spiders"; } }
+        public override string GroupDescription { get { return "necromancer"; } }
 
         protected override char GetRepresentation()
         {
-            return 's';
+            return 'N';
         }
 
-        protected override int GetChanceToRecover()
+        protected override SpecialAIType GetSpecialAIType()
         {
-            return 0;
+            return SpecialAIType.Raiser;
         }
 
-        protected override int GetChanceToFlee()
+        protected override int RelaxDirectionAt()
         {
-            return 0;
+            return 100;
         }
 
-        protected override int GetMaxHPWillFlee()
+        protected override int GetTotalFleeLoops()
         {
-            return 0;
+            return 500;
         }
+
+        protected override double GetMissileRange()
+        {
+            return 4.5;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "launches a dark bolt of the void";
+        }
+
+        protected override bool RaiseCorpse(int level, Point locationMap)
+        {
+            bool raisedSuccess;
+
+            if (Game.Random.Next(10) < 5)
+            {
+                raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Zombie(), level, locationMap);
+            }
+            else
+                raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Skeleton(), level, locationMap);
+
+            return raisedSuccess;
+        }
+
         public override int CreatureCost()
         {
-            return 30;
+            return 100;
         }
 
         public override int CreatureLevel()
         {
-            return 2;
+            return 5;
         }
     }
 }

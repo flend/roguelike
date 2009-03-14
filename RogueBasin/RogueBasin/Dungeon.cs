@@ -172,6 +172,17 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Return the distance between an objects and a point on the same level
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        public double GetDistanceBetween(MapObject obj1, Point p2)
+        {
+            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - p2.x, 2.0) + Math.Pow(obj1.LocationMap.y - p2.y, 2.0));
+            return distance;
+        }
+
+        /// <summary>
         /// Link a potion with a user-provided string
         /// </summary>
         /// <param name="item"></param>
