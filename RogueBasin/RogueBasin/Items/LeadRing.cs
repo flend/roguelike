@@ -36,6 +36,10 @@ namespace RogueBasin.Items
         {
             LogFile.Log.LogEntryDebug("Lead ring equipped", LogDebugLevel.Medium);
 
+            Game.Dungeon.PlotItemsFound++;
+
+
+
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.

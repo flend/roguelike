@@ -33,6 +33,15 @@ namespace RogueBasin.Triggers
             {
                 Screen.Instance.PlayMovie("treasureRoom", true);
                 Triggered = true;
+
+                //Teleport the player to the start location on the final level
+
+                //Increment player level
+                Player player = Game.Dungeon.Player;
+
+                player.LocationLevel++;
+                player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
+                Game.Dungeon.MovePCAbsolute(player.LocationLevel, player.LocationMap.x, player.LocationMap.y);
             }
 
             return true;

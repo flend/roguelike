@@ -31,7 +31,7 @@ namespace RogueBasin.Triggers
 
             if (!Triggered)
             {
-                Screen.Instance.PlayMovie("meetLich", true);
+                Screen.Instance.PlayMovie("lichBattle", true);
                 Triggered = true;
             }
             

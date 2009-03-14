@@ -480,6 +480,47 @@ namespace RogueBasin {
 
             rootConsole.PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
         }
+
+        /// <summary>
+        /// Screen for player victory
+        /// </summary>
+        public void DrawVictoryScreen()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Clear screen
+            rootConsole.Clear();
+
+            //Draw frame
+            rootConsole.DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+
+            //Draw preamble
+            int count = 0;
+            foreach (string s in DeathPreamble)
+            {
+                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
+                count++;
+            }
+
+            //Draw kills
+
+            rootConsole.PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center);
+
+            foreach (string s in TotalKills)
+            {
+                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left);
+                count++;
+            }
+
+            //Draw instructions
+
+            rootConsole.PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
+        }
+
         /// <summary>
         /// Display inventory overlay
         /// </summary>
@@ -1422,6 +1463,42 @@ namespace RogueBasin {
             } while (continueInput);
 
             return null;
+        }
+
+        internal bool YesNoQuestion(string introMessage)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            ClearMessageLine();
+
+            PrintMessage(introMessage + " (y / n):");
+            FlushConsole();
+
+            do
+            {
+                //Get user input
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                //Each state has different keys
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+
+                   char keyCode = (char)userKey.Character;
+                   switch (keyCode)
+                   {
+                       case 'y':
+                           ClearMessageLine();
+                           return true;
+                           
+                       case 'n':
+                           ClearMessageLine();
+                           return false;
+                           
+                   }
+                }
+            } while(true);
         }
     }
 }

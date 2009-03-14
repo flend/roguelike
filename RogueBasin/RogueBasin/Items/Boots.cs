@@ -36,6 +36,9 @@ namespace RogueBasin.Items
         {
             LogFile.Log.LogEntryDebug("Boots equipped", LogDebugLevel.Medium);
 
+            Game.Dungeon.PlotItemsFound++;
+
+
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.

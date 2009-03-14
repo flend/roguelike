@@ -39,6 +39,9 @@ namespace RogueBasin.Items
         {
             LogFile.Log.LogEntryDebug("Glove equipped", LogDebugLevel.Medium);
 
+            Game.Dungeon.PlotItemsFound++;
+
+
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.

@@ -79,6 +79,11 @@ namespace RogueBasin
         long worldClock = 0;
 
         /// <summary>
+        /// How many worldClock ticks do we have to rescue our friend?
+        /// </summary>
+        public long TimeToRescueFriend { get; set; }
+
+        /// <summary>
         /// Set to false to end the game
         /// </summary>
         public bool RunMainLoop { get; set;}
@@ -108,6 +113,21 @@ namespace RogueBasin
             player = new Player();
 
             RunMainLoop = true;
+
+            PlotItemsFound = 0;
+        }
+
+        public int TotalPlotItems { get; set; }
+        public int PlotItemsFound { get; set; }
+
+        /// <summary>
+        /// How much of your previous life do you remember?
+        /// </summary>
+        /// <returns></returns>
+        public int PercentRemembered()
+        {
+            double total = TotalPlotItems / (double)PlotItemsFound * 100.0;
+            return (int)Math.Ceiling(total);
         }
 
         /// <summary>
@@ -1672,7 +1692,7 @@ namespace RogueBasin
         /// <returns></returns>
         public static bool IsTerrainWalkable(MapTerrain terrain)
         {
-            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor)
+            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor || terrain == MapTerrain.Grass || terrain == MapTerrain.Road)
             {
                 return true;
             }
@@ -1885,6 +1905,93 @@ namespace RogueBasin
             trigger.mapPosition = point;
 
             Triggers.Add(trigger);
+        }
+
+        /// <summary>
+        /// Victory!
+        /// </summary>
+        /// <param name="p"></param>
+        internal void EndGame(string endPhrase)
+        {
+            //Set up the death screen
+
+            //Death preamble
+
+            List<string> deathPreamble = new List<string>();
+
+            string playerName = Game.Dungeon.player.Name;
+
+            deathPreamble.Add(playerName + " the assassin " + endPhrase);
+
+            //Total kills
+
+            //Make killCount list
+
+            List<Monster> kills = player.Kills;
+            List<KillCount> killCount = new List<KillCount>();
+
+            foreach (Monster kill in kills)
+            {
+                //Check that we are the same type (and therefore sort of item)
+                Type monsterType = kill.GetType();
+                bool foundGroup = false;
+
+                foreach (KillCount record in killCount)
+                {
+                    if (record.type.GetType() == monsterType)
+                    {
+                        record.count++;
+                        foundGroup = true;
+                        break;
+                    }
+
+                }
+                //Look only at the first item in the group (stored by index). All the items in this group must have the same type
+
+
+                //If there is no group, create a new one
+                if (!foundGroup)
+                {
+                    KillCount newGroup = new KillCount();
+                    newGroup.type = kill;
+                    newGroup.count = 1;
+                    killCount.Add(newGroup);
+                }
+            }
+
+            List<string> killRecord = new List<string>();
+
+            //Turn list into strings to be displayed
+            foreach (KillCount record in killCount)
+            {
+
+                string killStr = "";
+
+                if (record.count == 1)
+                {
+                    killStr += "1 " + record.type.SingleDescription;
+                }
+                else
+                {
+                    killStr += record.count.ToString() + " " + record.type.GroupDescription;
+                }
+
+                //Add to string list
+                killRecord.Add(killStr);
+            }
+
+            //Load up screen and display
+            Screen.Instance.TotalKills = killRecord;
+            Screen.Instance.DeathPreamble = deathPreamble;
+
+            Screen.Instance.DrawVictoryScreen();
+            Screen.Instance.FlushConsole();
+
+            //Wait for a keypress
+            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+            //Stop the main loop
+            RunMainLoop = false;
         }
     }
 }

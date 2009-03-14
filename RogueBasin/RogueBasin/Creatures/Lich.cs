@@ -6,7 +6,7 @@ namespace RogueBasin.Creatures
 {
     public class Lich : MonsterSimpleAI
     {
-        const int classMaxHitpoints = 100;
+        const int classMaxHitpoints = 1;
 
         public Lich()
         {

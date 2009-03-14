@@ -59,7 +59,7 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "lich"; } }
+        public override string SingleDescription { get { return "poor defenceless friend"; } }
 
         /// <summary>
         /// Rats

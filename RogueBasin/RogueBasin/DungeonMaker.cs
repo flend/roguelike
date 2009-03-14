@@ -40,7 +40,11 @@ namespace RogueBasin
 
             //SpawnItems();
 
+            Game.Dungeon.TotalPlotItems = 5;
+
             SpawnUniques();
+
+            Game.Dungeon.TimeToRescueFriend = 1000000;
 
 
             return dungeon;
