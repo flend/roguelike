@@ -51,6 +51,9 @@ namespace RogueBasin
         private void SetupSpecialChars()
         {
             specialChars.Add('x'); //PC start location
+            specialChars.Add('1'); //battle trigger
+            specialChars.Add('2'); //spot girl trigger
+            specialChars.Add('3'); //help girl trigger
         }
 
         private void SetupFeatureMapping()
@@ -64,6 +67,7 @@ namespace RogueBasin
             terrainMapping.Add(' ', MapTerrain.Void);
             terrainMapping.Add('.', MapTerrain.Empty);
             terrainMapping.Add('#', MapTerrain.Wall);
+            terrainMapping.Add('+', MapTerrain.ClosedDoor);
         }
 
         /// <summary>
@@ -274,7 +278,17 @@ namespace RogueBasin
                             case 'x':
                                 baseMap.PCStartLocation = new Point(i, row);
                                 break;
-                        }                    }
+                            case '1':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.LichBattle());
+                                break;
+                            case '2':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.SpotFriend());
+                                break;
+                            case '3':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.HelpFriend());
+                                break;
+                        }
+                    }
                 }
 
                 row++;
