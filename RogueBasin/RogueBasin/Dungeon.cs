@@ -178,6 +178,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.WallPush());
             specialMoves.Add(new SpecialMoves.VaultBackstab());
             specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
+            specialMoves.Add(new SpecialMoves.Evade());
 
             foreach (SpecialMove move in specialMoves)
             {
@@ -1002,7 +1003,7 @@ namespace RogueBasin
             bool okToMoveIntoSquare = false;
 
             //If it's empty, it's OK
-            if (contents.empty)
+            if (contents.monster == null)
             {
                 okToMoveIntoSquare = true;
             }

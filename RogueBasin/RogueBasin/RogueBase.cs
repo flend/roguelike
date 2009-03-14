@@ -236,7 +236,7 @@ namespace RogueBasin
                                 case '.':
                                     // Do nothing
                                     timeAdvances = true;
-                                    SpecialMoveNonMoveAction();
+                                    timeAdvances = Game.Dungeon.PCMove(0, 0);
                                     break;
                                 case 'i':
                                     //Interact with feature
@@ -380,6 +380,7 @@ namespace RogueBasin
 
                                 case KeyCode.TCODK_KP5:
                                     //Does nothing
+                                    timeAdvances = Game.Dungeon.PCMove(0, 0);
                                     //timeAdvances = true;
                                     break;
 

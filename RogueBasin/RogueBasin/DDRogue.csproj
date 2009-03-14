@@ -102,6 +102,7 @@
     <Compile Include="SaveGameInfo.cs" />
     <Compile Include="Screen.cs" />
     <Compile Include="SpecialMove.cs" />
+    <Compile Include="SpecialMoves\Evade.cs" />
     <Compile Include="SpecialMoves\OpenSpaceAttack.cs" />
     <Compile Include="SpecialMoves\StunBox.cs" />
     <Compile Include="SpecialMoves\VaultBackstab.cs" />
