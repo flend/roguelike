@@ -230,6 +230,9 @@ namespace RogueBasin
 
             //PC starts at what would be the up staircase
             dungeon.Player.LocationMap = caveGen.GetPCStartLocation();
+
+            //Add a trigger here
+            dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
             
             //Rest of the cave levels
             for (int i = 0; i < noCaveLevels - 1; i++)

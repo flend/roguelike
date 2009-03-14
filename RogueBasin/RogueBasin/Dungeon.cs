@@ -70,6 +70,7 @@ namespace RogueBasin
         List<Item> items;
         List<Feature> features;
         public List<HiddenNameInfo> HiddenNameInfo {get; set;} //for serialization
+        public List<DungeonSquareTrigger> Triggers { get; set; }
 
         List<SpecialMove> specialMoves;
 
@@ -98,6 +99,7 @@ namespace RogueBasin
             effects = new List<DungeonEffect>();
             specialMoves = new List<SpecialMove>();
             HiddenNameInfo = new List<HiddenNameInfo>();
+            Triggers = new List<DungeonSquareTrigger>();
 
             SetupSpecialMoves();
 
@@ -866,6 +868,8 @@ namespace RogueBasin
             player.LocationLevel = level;
             player.LocationMap = new Point(x,y);
 
+            RunDungeonTriggers(player.LocationLevel, player.LocationMap);
+
             return true;
         }
 
@@ -894,7 +898,7 @@ namespace RogueBasin
         /// <returns></returns>
         internal bool MovePCAbsoluteSameLevel(int x, int y) {
 
-            player.LocationMap = new Point(x,y);
+            MovePCAbsolute(player.LocationLevel, x, y);
 
             return true;
         }
@@ -1845,5 +1849,21 @@ namespace RogueBasin
             }
         }
 
+        public void RunDungeonTriggers(int level, Point mapLocation)
+        {
+            foreach (DungeonSquareTrigger trigger in Triggers)
+            {
+                trigger.CheckTrigger(level, mapLocation);
+            }
+        }
+
+        internal void AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
+        {
+            //Set the trigger position
+            trigger.Level = level;
+            trigger.mapPosition = point;
+
+            Triggers.Add(trigger);
+        }
     }
 }

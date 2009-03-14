@@ -44,6 +44,9 @@ namespace RogueBasin.Features
                     && feature as Features.StaircaseDown != null)
                 {
                     player.LocationMap = feature.LocationMap;
+                    //Use the dungeon move system to trigger any triggers
+                    Game.Dungeon.MovePCAbsolute(player.LocationLevel, player.LocationMap.x, player.LocationMap.y);
+
                     foundStaircase = feature as Features.StaircaseDown;
                     break;
                 }

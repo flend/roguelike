@@ -46,6 +46,7 @@
     <Compile Include="Dungeon.cs" />
     <Compile Include="DungeonEffect.cs" />
     <Compile Include="DungeonMaker.cs" />
+    <Compile Include="DungeonSquareTrigger.cs" />
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="SpecialMoves\WallPush.cs" />
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="StringEquivalent.cs" />
+    <Compile Include="Triggers\DungeonEntranceTrigger.cs" />
     <Compile Include="UseableFeature.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>

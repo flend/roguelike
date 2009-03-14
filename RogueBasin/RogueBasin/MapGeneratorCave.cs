@@ -171,6 +171,15 @@ namespace RogueBasin
             //Add some water features
             int noWaterFeatures = noGuaranteed + Game.Random.Next(noRandom);
 
+            //Guarantee water features starting from the upstaircase
+            for (int i = 0; i < 2; i++)
+            {
+                int deltaX = Game.Random.Next(3) - 1;
+                int deltaY = Game.Random.Next(3) - 1;
+
+                AddWaterFeature(upStaircase.x, upStaircase.y, deltaX, deltaY);
+            }
+
             for (int i = 0; i < noWaterFeatures; i++)
             {
                 int x, y;

@@ -1134,6 +1134,9 @@ namespace RogueBasin
                 Game.Dungeon = dungeonMaker.SpawnNewDungeon();
 
                 Game.Dungeon.Player.Name = playerName;
+
+                //Move the player to the start location, triggering any triggers
+                Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
             }
 
             //Fall into the main loop
