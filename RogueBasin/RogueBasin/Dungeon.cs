@@ -163,7 +163,7 @@ namespace RogueBasin
                 return -1.0;
             }
 
-            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - obj2.LocationMap.x, 2.0) + Math.Pow(obj1.LocationMap.y - obj1.LocationMap.y, 2.0));
+            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - obj2.LocationMap.x, 2.0) + Math.Pow(obj1.LocationMap.y - obj2.LocationMap.y, 2.0));
             return distance;
         }
 
@@ -226,6 +226,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
             specialMoves.Add(new SpecialMoves.Evade());
             specialMoves.Add(new SpecialMoves.MultiAttack());
+            specialMoves.Add(new SpecialMoves.BurstOfSpeed());
 
             foreach (SpecialMove move in specialMoves)
             {
