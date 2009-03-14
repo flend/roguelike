@@ -5,18 +5,18 @@ using System.Text;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Low threat, fights to the death. Good eyesight
+    /// Low threat, runs away easily. Poor eyesight.
     /// </summary>
-    public class Rat : MonsterFightAndRunAI
+    class Ferret : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 4;
+        const int classDeltaHitpoints = 5;
         const int classMinHitpoints = 1;
 
-        public Rat()
+        public Ferret()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            SightRadius = 6;
+            SightRadius = 4;
         }
 
         public override void InventoryDrop()
@@ -64,31 +64,31 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "rat"; } }
+        public override string SingleDescription { get { return "ferret"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "rats"; } }
+        public override string GroupDescription { get { return "ferrets"; } }
 
         protected override char GetRepresentation()
         {
-            return 'r';
+            return 'f';
         }
 
         protected override int GetChanceToRecover()
         {
-            return 0;
+            return 10;
         }
 
         protected override int GetChanceToFlee()
         {
-            return 0;
+            return 75;
         }
 
         protected override int GetMaxHPWillFlee()
         {
-            return 0;
+            return Hitpoints;
         }
     }
 }

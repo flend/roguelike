@@ -5,18 +5,19 @@ using System.Text;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Low threat, fights to the death. Good eyesight
+    /// Medium threat, faster than normal
     /// </summary>
-    public class Rat : MonsterFightAndRunAI
+    class Skeleton : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 4;
-        const int classMinHitpoints = 1;
+        const int classDeltaHitpoints = 12;
+        const int classMinHitpoints = 8;
 
-        public Rat()
+        public Skeleton()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            SightRadius = 6;
+            SightRadius = 5;
+            Speed = 110;
         }
 
         public override void InventoryDrop()
@@ -36,7 +37,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 5;
+            return 12;
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 2;
+            return 4;
         }
 
         /// <summary>
@@ -52,28 +53,28 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 0;
+            return 3;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "rat"; } }
+        public override string SingleDescription { get { return "skeleton"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "rats"; } }
+        public override string GroupDescription { get { return "skeleton"; } }
 
         protected override char GetRepresentation()
         {
-            return 'r';
+            return 'S';
         }
 
         protected override int GetChanceToRecover()

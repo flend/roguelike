@@ -41,10 +41,16 @@
   <ItemGroup>
     <Compile Include="Creature.cs" />
     <Compile Include="CreatureEffect.cs" />
+    <Compile Include="Creatures\Ferret.cs" />
     <Compile Include="Creatures\Friend.cs" />
     <Compile Include="Creatures\Goblin.cs" />
     <Compile Include="Creatures\Lich.cs" />
+    <Compile Include="Creatures\Orc.cs" />
+    <Compile Include="Creatures\OrcShaman.cs" />
     <Compile Include="Creatures\Rat.cs" />
+    <Compile Include="Creatures\Skeleton.cs" />
+    <Compile Include="Creatures\Spider.cs" />
+    <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="DungeonEffect.cs" />
@@ -99,6 +105,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MonsterSimpleThrowingAI.cs" />
+    <Compile Include="MonsterSpecialAI.cs" />
     <Compile Include="MovieFrame.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerEffect.cs" />

@@ -4,9 +4,13 @@ using System.Text;
 
 namespace RogueBasin.Creatures
 {
+    /// <summary>
+    /// Low threat. Stupid missile troop.
+    /// </summary>
     class Goblin : MonsterThrowAndRunAI
     {
-        const int classMaxHitpoints = 15;
+        const int classDeltaHitpoints = 3;
+        const int classMinHitpoints = 3;
 
         public Goblin()
         {
@@ -23,7 +27,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return classMaxHitpoints;
+            return classMinHitpoints + Game.Random.Next(classDeltaHitpoints) + 1;
         }
 
         /// <summary>
@@ -31,7 +35,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 10;
+            return 7;
         }
 
         /// <summary>
@@ -52,7 +56,7 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 0;
+            return 1;
         }
 
         protected override double GetMissileRange()
@@ -62,7 +66,7 @@ namespace RogueBasin.Creatures
 
         protected override string GetWeaponName()
         {
-            return "dagger";
+            return "throws a dagger";
         }
 
         /// <summary>
@@ -79,6 +83,16 @@ namespace RogueBasin.Creatures
         protected override char GetRepresentation()
         {
             return 'g';
+        }
+
+        protected override int RelaxDirectionAt()
+        {
+            return 0;
+        }
+
+        protected override int GetTotalFleeLoops()
+        {
+            return 10;
         }
     }
 }

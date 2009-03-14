@@ -5,18 +5,18 @@ using System.Text;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Low threat, fights to the death. Good eyesight
+    /// Healer. Clever missile troop
     /// </summary>
-    public class Rat : MonsterFightAndRunAI
+    class OrcShaman : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 4;
-        const int classMinHitpoints = 1;
+        const int classDeltaHitpoints = 12;
+        const int classMinHitpoints = 8;
 
-        public Rat()
+        public OrcShaman()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            SightRadius = 6;
+            SightRadius = 5;
         }
 
         public override void InventoryDrop()
@@ -36,7 +36,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 5;
+            return 12;
         }
 
         /// <summary>
@@ -52,43 +52,58 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 0;
+            return 3;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 25;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "rat"; } }
+        public override string SingleDescription { get { return "orc shaman"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "rats"; } }
+        public override string GroupDescription { get { return "orc shamen"; } }
 
         protected override char GetRepresentation()
         {
-            return 'r';
+            return 'O';
         }
 
-        protected override int GetChanceToRecover()
+        protected override SpecialAIType GetSpecialAIType()
         {
-            return 0;
+            return SpecialAIType.Healer;
         }
 
-        protected override int GetChanceToFlee()
+        protected override int RelaxDirectionAt()
         {
-            return 0;
+            return 10;
         }
 
-        protected override int GetMaxHPWillFlee()
+        protected override int GetTotalFleeLoops()
         {
-            return 0;
+            return 50;
+        }
+
+        protected override double GetMissileRange()
+        {
+            return 3.5;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "fires a bolt of flame";
         }
     }
 }

@@ -5,16 +5,29 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public abstract class MonsterSimpleThrowingAI : Monster
+    public enum SpecialAIType
+    {
+        Healer,
+        Raiser,
+        Summoner
+    };
+
+    /// <summary>
+    /// There are different types of special AI but they all use the MonsterThrowAndRun AI base.
+    /// Their special action (healing, raising, summoning etc.) differs. They all have missile weapons.
+    /// </summary>
+    public abstract class MonsterSpecialAI  : Monster
     {
         public SimpleAIStates AIState { get; set; }
         protected Creature currentTarget;
 
-        public MonsterSimpleThrowingAI()
+        public MonsterSpecialAI()
         {
             AIState = SimpleAIStates.RandomWalk;
             currentTarget = null;
         }
+
+        protected abstract SpecialAIType GetSpecialAIType();
 
         protected abstract double GetMissileRange();
 
@@ -246,6 +259,18 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Flee ai cleverness. 10 loops performs pretty well, much higher is infallable
+        /// </summary>
+        /// <returns></returns>
+        protected virtual int GetTotalFleeLoops() { return 10; }
+
+        /// <summary>
+        /// Relax the requirement to flee in a direction away from the player at this loop. Very low makes the ai more stupid. Very high makes it more likely to fail completely.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual int RelaxDirectionAt() { return 0; }
+
         private void ChaseCreature(Creature newTarget)
         {
             //Confirm this as current target
@@ -257,21 +282,141 @@ namespace RogueBasin
             //If we are in range, fire
             double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
 
-            if (range < GetMissileRange() + 0.005)
+            if (range < GetMissileRange() / 2.0)
             {
-                //In range
+                //Too close creature will try to back away
+                int deltaX = newTarget.LocationMap.x - this.LocationMap.x;
+                int deltaY = newTarget.LocationMap.y - this.LocationMap.y;
 
-                //Fire at the player
-                CombatResults result;
+                //Find a point in the dungeon to flee to
+                int fleeX = 0;
+                int fleeY = 0;
 
-                if (newTarget == Game.Dungeon.Player)
+                int counter = 0;
+
+                bool relaxDirection = false;
+                bool goodPath = false;
+
+                Point nextStep = new Point(0, 0);
+
+                int totalFleeLoops = GetTotalFleeLoops();
+                int relaxDirectionAt = RelaxDirectionAt();
+
+                do
                 {
-                    result = AttackPlayer(newTarget as Player);
+                    fleeX = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].width);
+                    fleeY = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].height);
+
+                    //Relax conditions if we are having a hard time
+                    if (counter > relaxDirectionAt)
+                        relaxDirection = true;
+
+                    //Check these are in the direction away from the attacker
+                    int deltaFleeX = fleeX - this.LocationMap.x;
+                    int deltaFleeY = fleeY - this.LocationMap.y;
+
+                    if (!relaxDirection)
+                    {
+                        if (deltaFleeX > 0 && deltaX > 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeX < 0 && deltaX < 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeY > 0 && deltaY > 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeY < 0 && deltaY < 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                    }
+
+                    //Check the square is empty
+                    bool isEnterable = Game.Dungeon.MapSquareCanBeEntered(this.LocationLevel, new Point(fleeX, fleeY));
+                    if (!isEnterable)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Check the square is empty of creatures
+                    SquareContents contents = Game.Dungeon.MapSquareContents(this.LocationLevel, new Point(fleeX, fleeY));
+                    if (contents.monster != null)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Check the square is pathable to
+                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+
+                    if (nextStep.x == -1 && nextStep.y == -1)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Otherwise we found it
+                    goodPath = true;
+                    break;
+
+
+                } while (counter < totalFleeLoops);
+
+                //If we found a good path, walk it
+                if (goodPath)
+                {
+                    LocationMap = nextStep;
                 }
                 else
                 {
-                    //It's a normal creature
-                    result = AttackMonster(newTarget as Monster);
+                    //if not, continue attacking
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+                }
+            }
+
+            else if (range < GetMissileRange() + 0.005)
+            {
+                //In preference they will use their special ability rather than fighting
+
+                //Try to use special
+                bool usingSpecial = UseSpecialAbility();
+
+                if (!usingSpecial)
+                {
+                    //In range
+
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
                 }
             }
             else
@@ -308,6 +453,172 @@ namespace RogueBasin
                 }
             }
         }
+        /*
+        private void ChaseCreature(Creature newTarget)
+        {
+            //Confirm this as current target
+            currentTarget = newTarget;
+
+            //Go into pursuit mode
+            AIState = SimpleAIStates.Pursuit;
+
+            //If we are in range, fire
+            double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
+
+            if (range < GetMissileRange() + 0.005)
+            {
+                //In preference they will use their special ability rather than fighting
+
+                //Try to use special
+                bool usingSpecial = UseSpecialAbility();
+
+                if (!usingSpecial)
+                {
+                   //In range
+
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+                }
+            }
+            else
+            {
+                //If not, move towards the player
+
+                //Find location of next step on the path towards them
+                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+
+                bool moveIntoSquare = true;
+
+                //If this is the same as the target creature's location, we are adjacent. Something is wrong, but attack anyway
+                if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+                {
+                    LogFile.Log.LogEntry("SimpleThrowingAI: Adjacent to target and still moving towardws");
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+                }
+
+                //Otherwise (or if the creature died), move towards it (or its corpse)
+                if (moveIntoSquare)
+                {
+                    LocationMap = nextStep;
+                }
+            }
+        }*/
+
+        private bool UseSpecialAbility()
+        {
+            //Check if they are going to use their special at all
+            if(Game.Random.Next(100) > GetUseSpecialChance()) {
+                return false;
+            }
+
+            if (GetSpecialAIType() == SpecialAIType.Healer)
+            {
+                //Look for injured creatures within range
+                List<Monster> targetsInRange = new List<Monster>();
+
+                foreach (Monster monster in Game.Dungeon.Monsters)
+                {
+                    if (this.LocationLevel != monster.LocationLevel)
+                        continue;
+
+                    if (Game.Dungeon.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005)
+                    {
+                        targetsInRange.Add(monster);
+                    }
+                }
+
+                //See if any of them are injured
+                List<Monster> injuredTargets = targetsInRange.FindAll(x => x.Hitpoints < x.MaxHitpoints);
+
+                if (injuredTargets.Count == 0)
+                    return false;
+
+                //Pick a random monster
+                Monster actualTarget = injuredTargets[Game.Random.Next(injuredTargets.Count)];
+
+                //Heal this monster
+                actualTarget.Hitpoints += Game.Random.Next(actualTarget.MaxHitpoints - actualTarget.Hitpoints) + 1;
+
+                //Update msg
+                Game.MessageQueue.AddMessage(this.SingleDescription + " heals " + actualTarget.SingleDescription);
+
+                //We used this ability
+                return true;
+
+            }
+
+            else if (GetSpecialAIType() == SpecialAIType.Raiser)
+            {
+                //Look for a nearby corpse
+                //Look for injured creatures within range
+                List<Feature> corpseInRange = new List<Feature>();
+
+                foreach (Feature feature in Game.Dungeon.Features)
+                {
+                    if (this.LocationLevel != feature.LocationLevel)
+                        continue;
+
+                    if (Game.Dungeon.GetDistanceBetween(this, feature) < GetMissileRange() + 0.005)
+                    {
+                        if (feature is Features.Corpse)
+                        {
+                            corpseInRange.Add(feature);
+                        }
+                    }
+                }
+
+                if (corpseInRange.Count == 0)
+                    return false;
+
+                //Pick a corpse at random
+                Feature actualCorpse = corpseInRange[Game.Random.Next(corpseInRange.Count)];
+
+                //Check this square is empty
+                int corpseLevel = actualCorpse.LocationLevel;
+                Point corpseMap = actualCorpse.LocationMap;
+
+                SquareContents contents = Game.Dungeon.MapSquareContents(corpseLevel, corpseMap);
+
+                if (!contents.empty)
+                    return false;
+
+                //Raise a creature here
+
+                //For now just raise skeletons I think we might need to make a separate AI for each raisey creature
+                Game.Dungeon.Features.Remove(actualCorpse); //should have a helper for this really
+
+                //Spawn a skelly
+                return Game.Dungeon.AddMonster(new Creatures.Skeleton(), corpseLevel, corpseMap);
+            }
+            else
+            {
+                //Summoner not implemented yet
+                return false;
+            }
+        }
+
+    protected abstract int GetUseSpecialChance();
 
         public override CombatResults AttackPlayer(Player player)
         {

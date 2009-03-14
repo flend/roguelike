@@ -5,18 +5,19 @@ using System.Text;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Low threat, fights to the death. Good eyesight
+    /// Medium threat, fights to the death. Fast.
     /// </summary>
-    public class Rat : MonsterFightAndRunAI
+    class Spider : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 4;
-        const int classMinHitpoints = 1;
+        const int classDeltaHitpoints = 6;
+        const int classMinHitpoints = 5;
 
-        public Rat()
+        public Spider()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            SightRadius = 6;
+            SightRadius = 5;
+            Speed = 140;
         }
 
         public override void InventoryDrop()
@@ -36,7 +37,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 5;
+            return 10;
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 2;
+            return 4;
         }
 
         /// <summary>
@@ -52,12 +53,12 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 0;
+            return 2;
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return 'r';
+            return 's';
         }
 
         protected override int GetChanceToRecover()
