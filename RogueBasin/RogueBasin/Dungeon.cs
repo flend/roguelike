@@ -429,7 +429,7 @@ namespace RogueBasin
             return ArePointsConnected(level, location, stairlocation);
         }
 
-        private bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)
+        public bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)
         {
 
             //Build tcodmap
@@ -1574,6 +1574,159 @@ namespace RogueBasin
             //Set the destination square as unwalkable again
             //levelTCODMaps[destCreature.LocationLevel].SetCell(destCreature.LocationMap.x, destCreature.LocationMap.y,
               //  !levels[destCreature.LocationLevel].mapSquares[destCreature.LocationMap.x, destCreature.LocationMap.y].BlocksLight, false);
+
+            //Point nextStep = new Point(x, y);
+
+            return nextStep;
+        }
+
+        /// <summary>
+        /// Returns the direction to go in (+-xy) for the next step towards the target
+        /// If there's no route at all, return -1, -1
+        /// If there's a route but its blocked by a creature return the originCreature's coords
+        /// </summary>
+        /// <param name="originCreature"></param>
+        /// <param name="destCreature"></param>
+        /// <returns></returns>
+        internal Point GetPathFromCreatureToPoint(int level, Monster originCreature, Point destCreature)
+        {
+            //If on different levels it's an error
+            
+            //Destination square needs to be walkable for the path finding algorithm. However it isn't walkable at the moment since there is the target creature on it
+            //Temporarily make it walkable, keeping transparency the same
+            //levelTCODMaps[destCreature.LocationLevel].SetCell(destCreature.LocationMap.x, destCreature.LocationMap.y,
+            //  !levels[destCreature.LocationLevel].mapSquares[destCreature.LocationMap.x, destCreature.LocationMap.y].BlocksLight, true);
+
+
+
+            //Try to walk the path
+            //If we fail, check if this square occupied by a creature
+            //If so, make that square temporarily unwalkable and try to re-route
+
+            List<Point> blockedSquares = new List<Point>();
+            bool goodPath = false;
+            bool pathBlockedByCreature = false;
+            Point nextStep = new Point(-1, -1);
+
+            do
+            {
+                //Generate path object
+                TCODPathFinding path = new TCODPathFinding(levelTCODMaps[level], 1.0);
+                path.ComputePath(originCreature.LocationMap.x, originCreature.LocationMap.y, destCreature.x, destCreature.y);
+
+                //Find the first step. We need to load x and y with the origin of the path
+                int x, y;
+                int xOrigin, yOrigin;
+
+                path.GetPathOrigin(out x, out y);
+                xOrigin = x; yOrigin = y;
+
+                path.WalkPath(ref x, ref y, false);
+
+                //If the x and y of the next step it means the path is blocked
+
+                if (x == xOrigin && y == yOrigin)
+                {
+                    //If there was no blocking creature then there is no possible route
+                    if (!pathBlockedByCreature)
+                    {
+                        return new Point(-1, -1);
+
+                        /*
+                        nextStep = new Point(x, y);
+                        bool trans;
+                        bool walkable;
+                        levelTCODMaps[0].GetCell(originCreature.LocationMap.x, originCreature.LocationMap.y, out trans, out walkable);
+                        levelTCODMaps[0].GetCell(destCreature.LocationMap.x, destCreature.LocationMap.y, out trans, out walkable);
+                        */
+
+                        //Uncomment this if you want to return -1, -1
+
+                        //nextStep = new Point(-1, -1);
+                        //goodPath = true;
+                        //continue;
+                    }
+                    else
+                    {
+                        //Blocking creature but no path
+                        nextStep = new Point(x, y);
+                        goodPath = true;
+                        continue;
+                    }
+                }
+
+
+                //Check if that square is occupied
+                Creature blockingCreature = null;
+
+                foreach (Monster creature in monsters)
+                {
+                    if (creature.LocationLevel != level)
+                        continue;
+
+                    //Is it the source creature itself?
+                    if (creature.LocationMap.x == originCreature.LocationMap.x &&
+                        creature.LocationMap.y == originCreature.LocationMap.y)
+                        continue;
+
+                    //Another creature is blocking
+                    if (creature.LocationMap.x == x && creature.LocationMap.y == y)
+                    {
+                        blockingCreature = creature;
+                    }
+                }
+                //Do the same for the player (if the creature is chasing another creature around the player)
+                    if (Player.LocationLevel == originCreature.LocationLevel &&
+                        Player.LocationMap.x == x && Player.LocationMap.y == y)
+                    {
+                        blockingCreature = Player;
+                    }
+
+
+                //If no blocking creature, the path is good
+                if (blockingCreature == null)
+                {
+                    goodPath = true;
+                    nextStep = new Point(x, y);
+                    path.Dispose();
+                }
+                else
+                {
+                    //Otherwise, there's a blocking creature. Make his square unwalkable temporarily and try to reroute
+                    pathBlockedByCreature = true;
+
+                    int blockingLevel = blockingCreature.LocationLevel;
+                    int blockingX = blockingCreature.LocationMap.x;
+                    int blockingY = blockingCreature.LocationMap.y;
+
+                    levelTCODMaps[blockingLevel].SetCell(blockingX, blockingY, !levels[blockingLevel].mapSquares[blockingX, blockingY].BlocksLight, false);
+
+                    //Add this square to a list of squares to put back
+                    blockedSquares.Add(new Point(blockingX, blockingY));
+
+                    //Dispose the old path
+                    path.Dispose();
+
+                    //We will try again
+                }
+            } while (!goodPath);
+
+            //Put back any squares we made unwalkable
+            foreach (Point sq in blockedSquares)
+            {
+                levelTCODMaps[originCreature.LocationLevel].SetCell(sq.x, sq.y, !levels[originCreature.LocationLevel].mapSquares[sq.x, sq.y].BlocksLight, true);
+            }
+
+            //path.WalkPath(ref x, ref y, false);
+
+            //path.GetPointOnPath(0, out x, out y); //crashes for some reason
+
+            //Dispose of path (bit wasteful seeming!)
+            //path.Dispose();
+
+            //Set the destination square as unwalkable again
+            //levelTCODMaps[destCreature.LocationLevel].SetCell(destCreature.LocationMap.x, destCreature.LocationMap.y,
+            //  !levels[destCreature.LocationLevel].mapSquares[destCreature.LocationMap.x, destCreature.LocationMap.y].BlocksLight, false);
 
             //Point nextStep = new Point(x, y);
 

@@ -123,6 +123,7 @@
     <Compile Include="SpecialMoves\WallPush.cs" />
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="StringEquivalent.cs" />
+    <Compile Include="MonsterThrowAndRunAI.cs" />
     <Compile Include="Triggers\DungeonEntranceTrigger.cs" />
     <Compile Include="Triggers\HelpFriend.cs" />
     <Compile Include="Triggers\LichBattle.cs" />

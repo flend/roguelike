@@ -5,21 +5,8 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public abstract class MonsterSimpleThrowingAI : Monster
+    public abstract class MonsterThrowAndRunAI : MonsterSimpleThrowingAI
     {
-        public SimpleAIStates AIState { get; set; }
-        protected Creature currentTarget;
-
-        public MonsterSimpleThrowingAI()
-        {
-            AIState = SimpleAIStates.RandomWalk;
-            currentTarget = null;
-        }
-
-        protected abstract double GetMissileRange();
-
-        protected abstract string GetWeaponName();
-        
         /// <summary>
         /// Run the Simple AI actions
         /// </summary>
@@ -257,7 +244,115 @@ namespace RogueBasin
             //If we are in range, fire
             double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
 
-            if (range < GetMissileRange() + 0.005)
+            if(range < GetMissileRange() / 2.0) {
+                //Too close creature will try to back away
+                int deltaX = newTarget.LocationMap.x - this.LocationMap.x;
+                int deltaY = newTarget.LocationMap.y - this.LocationMap.y;
+
+                //Find a point in the dungeon to flee to
+                int fleeX = 0;
+                int fleeY = 0;
+
+                int counter = 0;
+
+                bool relaxDirection = false;
+                bool goodPath = false;
+
+                Point nextStep = new Point(0,0);
+
+                do
+                {
+                    fleeX = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].width);
+                    fleeY = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].height);
+
+                    //Relax conditions if we are having a hard time
+                    if (counter > 500)
+                        relaxDirection = true;
+
+                    //Check these are in the direction away from the attacker
+                    int deltaFleeX = fleeX - this.LocationMap.x;
+                    int deltaFleeY = fleeY - this.LocationMap.y;
+
+                    if (!relaxDirection)
+                    {
+                        if (deltaFleeX > 0 && deltaX > 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeX < 0 && deltaX < 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeY > 0 && deltaY > 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeY < 0 && deltaY < 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                    }
+
+                    //Check the square is empty
+                    bool isEnterable = Game.Dungeon.MapSquareCanBeEntered(this.LocationLevel, new Point(fleeX, fleeY));
+                    if (!isEnterable)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Check the square is empty of creatures
+                    SquareContents contents = Game.Dungeon.MapSquareContents(this.LocationLevel, new Point(fleeX, fleeY));
+                    if (contents.monster != null)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Check the square is pathable to
+                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+
+                    if (nextStep.x == -1 && nextStep.y == -1)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Otherwise we found it
+                    goodPath = true;
+                    break;
+
+                    
+                } while (counter < 500);
+
+                //If we found a good path, walk it
+                if (goodPath)
+                {
+                    LocationMap = nextStep;
+                }
+                else
+                {
+                    //if not, continue attacking
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+                }
+            }
+
+            else if (range < GetMissileRange() + 0.005)
             {
                 //In range
 
@@ -307,117 +402,6 @@ namespace RogueBasin
                     LocationMap = nextStep;
                 }
             }
-        }
-
-        public override CombatResults AttackPlayer(Player player)
-        {
-            //Recalculate combat stats if required
-            if (this.RecalculateCombatStatsRequired)
-                this.CalculateCombatStats();
-
-            if (player.RecalculateCombatStatsRequired)
-                player.CalculateCombatStats();
-
-            //Calculate damage from a normal attack
-            int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
-
-            //Player side
-            string resultPhrase;
-            if (damage > 0)
-                resultPhrase = "hits";
-            else
-                resultPhrase = "misses";
-
-            //Do we hit the player?
-            if (damage > 0)
-            {
-                int monsterOrigHP = player.Hitpoints;
-
-                player.Hitpoints -= damage;
-
-                //Is the player dead, if so kill it?
-                if (player.Hitpoints <= 0)
-                {
-                    Game.Dungeon.PlayerDeath();
-
-                    //Debug string
-                    string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
-                    
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-
-                    string playerMsg = "The " + this.SingleDescription + " throw a " + GetWeaponName() + " at you. It " + resultPhrase + ". You die.";
-                    Game.MessageQueue.AddMessage(playerMsg);
-
-                    return CombatResults.DefenderDied;
-                }
-
-                //Debug string
-                string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
-
-                string playerMsg3 = "The " + this.SingleDescription + " throw a " + GetWeaponName() + " at you. It " + resultPhrase + ".";
-                Game.MessageQueue.AddMessage(playerMsg3);
-                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
-
-                return CombatResults.NeitherDied;
-            }
-
-            //Miss
-            string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
-            
-            string playerMsg2 = "The " + this.SingleDescription + " throw a " + GetWeaponName() + " at you. It " + resultPhrase + ".";
-            Game.MessageQueue.AddMessage(playerMsg2);
-            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
-
-            return CombatResults.NeitherDied;
-        }
-
-        public override CombatResults AttackMonster(Monster monster)
-        {
-            //Recalculate combat stats if required
-            if (this.RecalculateCombatStatsRequired)
-                this.CalculateCombatStats();
-
-            if (monster.RecalculateCombatStatsRequired)
-                monster.CalculateCombatStats();
-
-            //Calculate damage from a normal attack
-            int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
-
-            //Do we hit the player?
-            if (damage > 0)
-            {
-                int monsterOrigHP = monster.Hitpoints;
-
-                monster.Hitpoints -= damage;
-
-                //Is the player dead, if so kill it?
-                if (monster.Hitpoints <= 0)
-                {
-                    Game.Dungeon.KillMonster(monster);
-
-                    //Debug string
-                    string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    //Game.MessageQueue.AddMessage(combatResultsMsg);
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    return CombatResults.DefenderDied;
-                }
-
-                //Debug string
-                string combatResultsMsg3 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
-                //Game.MessageQueue.AddMessage(combatResultsMsg3);
-                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
-
-                return CombatResults.NeitherDied;
-            }
-
-            //Miss
-            string combatResultsMsg2 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
-            //Game.MessageQueue.AddMessage(combatResultsMsg2);
-            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
-
-            return CombatResults.NeitherDied;
         }
     }
 }

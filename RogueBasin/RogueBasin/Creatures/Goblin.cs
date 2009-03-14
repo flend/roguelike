@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Creatures
 {
-    class Goblin : MonsterSimpleThrowingAI
+    class Goblin : MonsterThrowAndRunAI
     {
         const int classMaxHitpoints = 15;
 
