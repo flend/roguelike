@@ -114,6 +114,7 @@
     <Compile Include="Screen.cs" />
     <Compile Include="SpecialMove.cs" />
     <Compile Include="SpecialMoves\BurstOfSpeed.cs" />
+    <Compile Include="SpecialMoves\CloseQuarters.cs" />
     <Compile Include="SpecialMoves\Evade.cs" />
     <Compile Include="SpecialMoves\MultiAttack.cs">
       <SubType>Code</SubType>

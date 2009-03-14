@@ -227,6 +227,8 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.Evade());
             specialMoves.Add(new SpecialMoves.MultiAttack());
             specialMoves.Add(new SpecialMoves.BurstOfSpeed());
+            specialMoves.Add(new SpecialMoves.CloseQuarters());
+
 
             foreach (SpecialMove move in specialMoves)
             {
