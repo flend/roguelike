@@ -81,11 +81,16 @@ namespace RogueBasin
 
             for (int i = 0; i < dungeon.NoLevels; i++)
             {
-                int noCreatures = 10 + Game.Random.Next(5);
+                int noCreatures = 15 + Game.Random.Next(5);
 
                 for (int j = 0; j < noCreatures; j++)
                 {
-                    Monster monster = new Creatures.Rat();
+                    Monster monster;
+                    if (Game.Random.Next(2) < 1)
+                        monster = new Creatures.Rat();
+                    else
+                        monster = new Creatures.Goblin();
+
                     Point location = new Point(0, 0);
 
                     //Find an acceptable location (walkable and with no other creatures in it)

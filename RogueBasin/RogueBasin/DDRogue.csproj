@@ -42,6 +42,7 @@
     <Compile Include="Creature.cs" />
     <Compile Include="CreatureEffect.cs" />
     <Compile Include="Creatures\Friend.cs" />
+    <Compile Include="Creatures\Goblin.cs" />
     <Compile Include="Creatures\Lich.cs" />
     <Compile Include="Creatures\Rat.cs" />
     <Compile Include="DecorationFeature.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="MonsterEffects\SlowDown.cs" />
     <Compile Include="MonsterNullAI.cs" />
     <Compile Include="MonsterSimpleAI.cs" />
+    <Compile Include="MonsterSimpleThrowingAI.cs" />
     <Compile Include="MovieFrame.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerEffect.cs" />

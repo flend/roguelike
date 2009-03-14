@@ -214,6 +214,7 @@ namespace RogueBasin.SpecialMoves
                 bonus = 5;
 
             //Bonus to hit and damage
+            Game.MessageQueue.AddMessage("MultiAttack!");
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus * 2, 0, bonus * 2, 0);
              
             //Give the player a small speed boost
@@ -228,7 +229,7 @@ namespace RogueBasin.SpecialMoves
             Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
 
             LogFile.Log.LogEntry("MultiAttack free attack: " + bonus);
-            Game.MessageQueue.AddMessage("MultiAttack!");
+            
         }
 
         public override void ClearMove()

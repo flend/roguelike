@@ -20,6 +20,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Rat))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Lich))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Friend))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Goblin))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>
@@ -203,10 +204,6 @@ namespace RogueBasin
             }
         }
 
-        public abstract CombatResults AttackPlayer(Player player);
-
-        public abstract CombatResults AttackMonster(Monster monster);
-
         /// <summary>
         /// Rat
         /// </summary>
@@ -229,5 +226,138 @@ namespace RogueBasin
             return base.IncrementTurnTime();
         }
 
+
+        
+
+
+        protected int toHitRoll;
+
+        //Could be in Monster
+        protected virtual int AttackCreatureWithModifiers(Creature player, int hitMod, int damBase, int damMod, int ACmod)
+        {
+            int attackToHit = hitModifier + hitMod;
+            int attackDamageMod = damageModifier + damMod;
+
+            int attackDamageBase;
+
+            if (damBase > damageBase)
+                attackDamageBase = damBase;
+            else
+                attackDamageBase = damageBase;
+
+            int playerAC = player.ArmourClass() + ACmod;
+            toHitRoll = Utility.d20() + attackToHit;
+
+            if (toHitRoll >= playerAC)
+            {
+                //Hit - calculate damage
+                int totalDamage = Utility.DamageRoll(attackDamageBase) + attackDamageMod;
+
+                return totalDamage;
+            }
+
+            //Miss
+            return 0;
+        }
+
+
+        public virtual CombatResults AttackPlayer(Player player)
+        {
+            //Recalculate combat stats if required
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (player.RecalculateCombatStatsRequired)
+                player.CalculateCombatStats();
+
+            //Calculate damage from a normal attack
+            int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
+
+            //Do we hit the player?
+            if (damage > 0)
+            {
+                int monsterOrigHP = player.Hitpoints;
+
+                player.Hitpoints -= damage;
+
+                //Is the player dead, if so kill it?
+                if (player.Hitpoints <= 0)
+                {
+                    Game.Dungeon.PlayerDeath();
+
+                    //Debug string
+                    string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
+                    string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
+                    Game.MessageQueue.AddMessage(playerMsg);
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Debug string
+                string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
+                string playerMsg3 = "The " + this.SingleDescription + " hits you.";
+                Game.MessageQueue.AddMessage(playerMsg3);
+                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+            string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
+            string playerMsg2 = "The " + this.SingleDescription + " misses you.";
+            Game.MessageQueue.AddMessage(playerMsg2);
+            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+        }
+
+        public virtual CombatResults AttackMonster(Monster monster)
+        {
+            //Recalculate combat stats if required
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (monster.RecalculateCombatStatsRequired)
+                monster.CalculateCombatStats();
+
+            //Calculate damage from a normal attack
+            int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
+
+            //Do we hit the player?
+            if (damage > 0)
+            {
+                int monsterOrigHP = monster.Hitpoints;
+
+                monster.Hitpoints -= damage;
+
+                //Is the player dead, if so kill it?
+                if (monster.Hitpoints <= 0)
+                {
+                    Game.Dungeon.KillMonster(monster);
+
+                    //Debug string
+                    string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
+                    //Game.MessageQueue.AddMessage(combatResultsMsg);
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Debug string
+                string combatResultsMsg3 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
+                //Game.MessageQueue.AddMessage(combatResultsMsg3);
+                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+            string combatResultsMsg2 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
+            //Game.MessageQueue.AddMessage(combatResultsMsg2);
+            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+        }
     }
 }

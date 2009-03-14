@@ -5,32 +5,30 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public enum SimpleAIStates
+    public abstract class MonsterSimpleThrowingAI : Monster
     {
-        RandomWalk,
-        Pursuit
-    }
-
-    public abstract class MonsterSimpleAI : Monster
-    {
-        public SimpleAIStates AIState {get; set;}
+        public SimpleAIStates AIState { get; set; }
         Creature currentTarget;
 
-        public MonsterSimpleAI()
+        public MonsterSimpleThrowingAI()
         {
             AIState = SimpleAIStates.RandomWalk;
             currentTarget = null;
         }
+
+        protected abstract double GetMissileRange();
+
+        protected abstract string GetWeaponName();
         /// <summary>
         /// Run the Simple AI actions
         /// </summary>
         public override void ProcessTurn()
         {
             //If in pursuit state, continue to pursue enemy until it is dead (or creature itself is killed) [no FOV used after initial target selected]
-            
+
             //If in randomWalk state, look for new enemies in FOV.
             //Closest enemy becomes new target
-            
+
             //If no targets, move randomly
 
             Random rand = Game.Random;
@@ -64,14 +62,15 @@ namespace RogueBasin
                     ChaseCreature(currentTarget);
                 }
             }
-            
-            if(AIState == SimpleAIStates.RandomWalk) {
+
+            if (AIState == SimpleAIStates.RandomWalk)
+            {
                 //RandomWalk state
 
                 //Search an area of sightRadius on either side for creatures and check they are in the FOV
 
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
-                
+
                 //Get the FOV from Dungeon (this also updates the map creature FOV state)
                 TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
                 //currentFOV.CalculateFOV(LocationMap.x, LocationMap.y, SightRadius);
@@ -95,7 +94,7 @@ namespace RogueBasin
 
                 if (xl < 0)
                     xl = 0;
-                if(xr >= currentMap.width)
+                if (xr >= currentMap.width)
                     xr = currentMap.width - 1;
                 if (yt < 0)
                     yt = 0;
@@ -165,15 +164,16 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
                     ChaseCreature(closestCreature);
                 }*/
-                
-                  //UNCOMMENT THIS
+
+                //UNCOMMENT THIS
                 //Current behaviour: only chase the PC
-                if(creaturesInFOV.Contains(Game.Dungeon.Player)) {
+                if (creaturesInFOV.Contains(Game.Dungeon.Player))
+                {
                     Creature closestCreature = Game.Dungeon.Player;
                     //Start chasing this creature
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Low);
                     ChaseCreature(closestCreature);
-                 //END COMMENTING
+                    //END COMMENTING
                 }
 
                 else
@@ -244,6 +244,7 @@ namespace RogueBasin
                 }
             }
         }
+
         private void ChaseCreature(Creature newTarget)
         {
             //Confirm this as current target
@@ -252,16 +253,14 @@ namespace RogueBasin
             //Go into pursuit mode
             AIState = SimpleAIStates.Pursuit;
 
-            //Find location of next step on the path towards them
-            Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+            //If we are in range, fire
+            double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
 
-            bool moveIntoSquare = true;
-
-            //If this is the same as the target creature's location, we are adjacent and can attack
-            if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+            if (range < GetMissileRange() + 0.005)
             {
-                //Attack the monster
-                //Ugly select here
+                //In range
+
+                //Fire at the player
                 CombatResults result;
 
                 if (newTarget == Game.Dungeon.Player)
@@ -273,21 +272,151 @@ namespace RogueBasin
                     //It's a normal creature
                     result = AttackMonster(newTarget as Monster);
                 }
-
-
-                //If we killed it, move into its square
-                if (result != CombatResults.DefenderDied)
-                {
-                    moveIntoSquare = false;
-                }
             }
-
-            //Otherwise (or if the creature died), move towards it (or its corpse)
-            if (moveIntoSquare)
+            else
             {
-                LocationMap = nextStep;
+                //If not, move towards the player
+
+                //Find location of next step on the path towards them
+                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+
+                bool moveIntoSquare = true;
+
+                //If this is the same as the target creature's location, we are adjacent. Something is wrong, but attack anyway
+                if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+                {
+                    LogFile.Log.LogEntry("SimpleThrowingAI: Adjacent to target and still moving towardws");
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+                }
+
+                //Otherwise (or if the creature died), move towards it (or its corpse)
+                if (moveIntoSquare)
+                {
+                    LocationMap = nextStep;
+                }
             }
         }
 
+        public override CombatResults AttackPlayer(Player player)
+        {
+            //Recalculate combat stats if required
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (player.RecalculateCombatStatsRequired)
+                player.CalculateCombatStats();
+
+            //Calculate damage from a normal attack
+            int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
+
+            //Player side
+            string resultPhrase;
+            if (damage > 0)
+                resultPhrase = "hits";
+            else
+                resultPhrase = "misses";
+
+            //Do we hit the player?
+            if (damage > 0)
+            {
+                int monsterOrigHP = player.Hitpoints;
+
+                player.Hitpoints -= damage;
+
+                //Is the player dead, if so kill it?
+                if (player.Hitpoints <= 0)
+                {
+                    Game.Dungeon.PlayerDeath();
+
+                    //Debug string
+                    string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
+                    
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+
+                    string playerMsg = "The " + this.SingleDescription + " throw a " + GetWeaponName() + " at you. It " + resultPhrase + ". You die.";
+                    Game.MessageQueue.AddMessage(playerMsg);
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Debug string
+                string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
+
+                string playerMsg3 = "The " + this.SingleDescription + " throw a " + GetWeaponName() + " at you. It " + resultPhrase + ".";
+                Game.MessageQueue.AddMessage(playerMsg3);
+                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+            string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
+            
+            string playerMsg2 = "The " + this.SingleDescription + " throw a " + GetWeaponName() + " at you. It " + resultPhrase + ".";
+            Game.MessageQueue.AddMessage(playerMsg2);
+            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+        }
+
+        public override CombatResults AttackMonster(Monster monster)
+        {
+            //Recalculate combat stats if required
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (monster.RecalculateCombatStatsRequired)
+                monster.CalculateCombatStats();
+
+            //Calculate damage from a normal attack
+            int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
+
+            //Do we hit the player?
+            if (damage > 0)
+            {
+                int monsterOrigHP = monster.Hitpoints;
+
+                monster.Hitpoints -= damage;
+
+                //Is the player dead, if so kill it?
+                if (monster.Hitpoints <= 0)
+                {
+                    Game.Dungeon.KillMonster(monster);
+
+                    //Debug string
+                    string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
+                    //Game.MessageQueue.AddMessage(combatResultsMsg);
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Debug string
+                string combatResultsMsg3 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
+                //Game.MessageQueue.AddMessage(combatResultsMsg3);
+                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+            string combatResultsMsg2 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
+            //Game.MessageQueue.AddMessage(combatResultsMsg2);
+            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+        }
     }
 }

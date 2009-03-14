@@ -151,6 +151,23 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Return the distance between 2 objects on the map
+        /// -1 means they are on different levels
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        public double GetDistanceBetween(MapObject obj1, MapObject obj2) {
+
+            if (obj1.LocationLevel != obj2.LocationLevel)
+            {
+                return -1.0;
+            }
+
+            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - obj2.LocationMap.x, 2.0) + Math.Pow(obj1.LocationMap.y - obj1.LocationMap.y, 2.0));
+            return distance;
+        }
+
+        /// <summary>
         /// Link a potion with a user-provided string
         /// </summary>
         /// <param name="item"></param>

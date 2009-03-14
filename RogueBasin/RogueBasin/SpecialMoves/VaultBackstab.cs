@@ -195,6 +195,7 @@ namespace RogueBasin.SpecialMoves
         public override void DoMove(Point locationAfterMove)
         {
             //Attack the monster with bonuses
+            Game.MessageQueue.AddMessage("Wall Backstab!");
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 3, 0, 4, -2);
             
             //Move into their square if the monster dies as normal
@@ -213,7 +214,6 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
 
             LogFile.Log.LogEntry("Wall backstab complete");
-            Game.MessageQueue.AddMessage("Wall Backstab!");
         }
 
         public override void ClearMove()

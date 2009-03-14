@@ -314,7 +314,8 @@ namespace RogueBasin
 
                     //Debug string
                     string combatResultsMsg = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    Game.MessageQueue.AddMessage(combatResultsMsg);
+                    string playerMsg = "You killed the " + monster.SingleDescription + ".";
+                    Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     return CombatResults.DefenderDied;
@@ -322,7 +323,8 @@ namespace RogueBasin
 
                 //Debug string
                 string combatResultsMsg3 = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
-                Game.MessageQueue.AddMessage(combatResultsMsg3);
+                string playerMsg2 = "You hit the " + monster.SingleDescription + ".";
+                Game.MessageQueue.AddMessage(playerMsg2);
                 LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
                 return CombatResults.NeitherDied;
@@ -330,7 +332,8 @@ namespace RogueBasin
 
             //Miss
             string combatResultsMsg2 = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
-            Game.MessageQueue.AddMessage(combatResultsMsg2);
+            string playerMsg3 = "You missed the " + monster.SingleDescription + ".";
+            Game.MessageQueue.AddMessage(playerMsg3);
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;

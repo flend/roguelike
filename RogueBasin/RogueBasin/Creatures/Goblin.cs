@@ -4,11 +4,11 @@ using System.Text;
 
 namespace RogueBasin.Creatures
 {
-    public class Rat : MonsterSimpleAI
+    class Goblin : MonsterSimpleThrowingAI
     {
-        const int classMaxHitpoints = 10;
+        const int classMaxHitpoints = 15;
 
-        public Rat()
+        public Goblin()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
@@ -55,20 +55,30 @@ namespace RogueBasin.Creatures
             return 0;
         }
 
+        protected override double GetMissileRange()
+        {
+            return 3.0;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "dagger";
+        }
+
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "rat"; } }
+        public override string SingleDescription { get { return "goblin"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription  { get { return "rats"; } }
+        public override string GroupDescription  { get { return "goblins"; } }
 
         protected override char GetRepresentation()
         {
-            return 'r';
+            return 'g';
         }
     }
 }

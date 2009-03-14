@@ -310,6 +310,7 @@ namespace RogueBasin.SpecialMoves
             int bonus = moveCounter - 1;
 
             //Bonus to hit and damage
+            Game.MessageQueue.AddMessage("OpenSpaceAttack!");
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0);
              
             //Move into destination square (already check this was OK)
@@ -318,7 +319,7 @@ namespace RogueBasin.SpecialMoves
             //ResetStatus();
 
             LogFile.Log.LogEntry("OpenSpaceAttack free attack: " + bonus);
-            Game.MessageQueue.AddMessage("OpenSpaceAttack!");
+            
 
             //Fifth move is end and requires another attack to restart
             if (moveCounter == 5)
