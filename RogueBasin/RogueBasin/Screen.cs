@@ -1472,14 +1472,14 @@ namespace RogueBasin {
             return null;
         }
 
-        internal bool YesNoQuestion(string introMessage)
+        internal bool YesNoQuestion(string introMessage, Point topLeft)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
-            ClearMessageLine();
+            //ClearMessageLine();
 
-            PrintMessage(introMessage + " (y / n):");
+            PrintMessage(introMessage + " (y / n):", topLeft, introMessage.Length + 8);
             FlushConsole();
 
             do
@@ -1506,6 +1506,42 @@ namespace RogueBasin {
                    }
                 }
             } while(true);
+        }
+
+        internal bool YesNoQuestion(string introMessage)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            ClearMessageLine();
+
+            PrintMessage(introMessage + " (y / n):");
+            FlushConsole();
+
+            do
+            {
+                //Get user input
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                //Each state has different keys
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+
+                    char keyCode = (char)userKey.Character;
+                    switch (keyCode)
+                    {
+                        case 'y':
+                            ClearMessageLine();
+                            return true;
+
+                        case 'n':
+                            ClearMessageLine();
+                            return false;
+
+                    }
+                }
+            } while (true);
         }
     }
 }

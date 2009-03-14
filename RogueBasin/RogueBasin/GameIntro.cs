@@ -11,6 +11,8 @@ namespace RogueBasin
     public class GameIntro
     {
         public string PlayerName { get; private set; }
+        public bool ShowMovies { get; private set; }
+
 
         public GameIntro() {
             PlayerName = null;
@@ -51,13 +53,26 @@ namespace RogueBasin
                 rootConsole.PrintLineRect(preamble[i], preambleTL.x, preambleTL.y + i, Screen.Instance.Width - 2 * preambleTL.x, 1, LineAlignment.Left);
             }
 
-            Point nameIntro = new Point(5, 5 + preamble.Count + 2);
+            int nameYCoord = 5 + preamble.Count + 2;
+            Point nameIntro = new Point(5, nameYCoord);
             do {
                 PlayerName = Screen.Instance.GetUserString("Rogue name", nameIntro, 5);
                 LogFile.Log.LogEntry("Player name: " + PlayerName);
             } while(PlayerName.Contains(" ") || PlayerName == "");
 
+            //Settings text
+            int settingsYCoord = nameYCoord + 2;
+            Point settingsTL = new Point(5, settingsYCoord);
 
+            List<string> settingsText = Utility.LoadTextFile("text/introSettings", Screen.Instance.Width - 2 * preambleTL.x, out height);
+
+            for (int i = 0; i < settingsText.Count; i++)
+            {
+                rootConsole.PrintLineRect(settingsText[i], settingsTL.x, settingsTL.y + i, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
+            }
+
+            //Ask settings questions
+            ShowMovies = Screen.Instance.YesNoQuestion("Show plot text and movies?", new Point(settingsTL.x, settingsTL.y + height + 1));
         }
 
         /// <summary>

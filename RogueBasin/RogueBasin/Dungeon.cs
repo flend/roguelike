@@ -76,6 +76,11 @@ namespace RogueBasin
 
         Player player;
 
+        /// <summary>
+        /// Play movies and give plot exerpts for items
+        /// </summary>
+        public bool PlayItemMovies { get; set; }
+
         long worldClock = 0;
 
         /// <summary>

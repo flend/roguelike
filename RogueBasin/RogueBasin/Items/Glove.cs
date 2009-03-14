@@ -39,21 +39,26 @@ namespace RogueBasin.Items
         {
             LogFile.Log.LogEntryDebug("Glove equipped", LogDebugLevel.Medium);
 
-            Game.Dungeon.PlotItemsFound++;
-
-
             //This is plot equipment
-
-            //Give player story. Mention level up if one will occur.
-
-            Screen.Instance.PlayMovie("plotglove", true);
+            Game.Dungeon.PlotItemsFound++;
 
             //Level up?
             Game.Dungeon.Player.LevelUp();
 
             //Add move?
             Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-            Screen.Instance.PlayMovie("vaultbackstab", false);
+
+            //Play movies if set
+            if (Game.Dungeon.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("plotglove", true);
+                Screen.Instance.PlayMovie("vaultbackstab", false);
+            }
+
+            //Messages
+            Game.MessageQueue.AddMessage("Found the Glove!");
+            Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("Learnt Vault Backstab!");
 
             return true;
         }

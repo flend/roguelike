@@ -1121,9 +1121,11 @@ namespace RogueBasin
             intro.ShowIntroScreen();
 
             string playerName = intro.PlayerName;
+            bool showMovies = intro.ShowMovies;
             */
 
             string playerName = "Dave";
+            bool showMovies = false;
             //Setup dungeon
 
             //Is there a save game to load?
@@ -1139,6 +1141,7 @@ namespace RogueBasin
                 Game.Dungeon = dungeonMaker.SpawnNewDungeon();
 
                 Game.Dungeon.Player.Name = playerName;
+                Game.Dungeon.PlayItemMovies = showMovies;
 
                 //Move the player to the start location, triggering any triggers
                 Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
