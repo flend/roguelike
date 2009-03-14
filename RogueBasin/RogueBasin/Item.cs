@@ -8,6 +8,9 @@ namespace RogueBasin
     /// Base class for all types of pickup-able items
     /// </summary>
     [System.Xml.Serialization.XmlInclude(typeof(Items.Potion))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionDamUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSpeedUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionToHitUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Badge))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Band))]

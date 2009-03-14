@@ -70,6 +70,9 @@
     <Compile Include="Items\Greaves.cs" />
     <Compile Include="Items\LeadRing.cs" />
     <Compile Include="Items\Potion.cs" />
+    <Compile Include="Items\PotionDamUp.cs" />
+    <Compile Include="Items\PotionToHitUp.cs" />
+    <Compile Include="Items\PotionSpeedUp.cs" />
     <Compile Include="Items\ShortSword.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />
@@ -94,9 +97,11 @@
     <Compile Include="PlayerEffectSimpleDuration.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PlayerEffects\DamageUp.cs" />
     <Compile Include="PlayerEffects\MultiDamage.cs" />
     <Compile Include="PlayerEffects\Healing.cs" />
     <Compile Include="PlayerEffects\SpeedUp.cs" />
+    <Compile Include="PlayerEffects\ToHitUp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RogueBase.cs" />
     <Compile Include="SaveGameInfo.cs" />

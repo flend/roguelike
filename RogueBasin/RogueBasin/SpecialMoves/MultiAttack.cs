@@ -7,7 +7,7 @@ namespace RogueBasin.SpecialMoves
     /// <summary>
     /// Attack a creature. Move into a square (have to move) adjacent to a different monster. Can't move back in the same direction
     /// </summary>
-    class MultiAttack : SpecialMove
+    public class MultiAttack : SpecialMove
     {
         //Really private, accessors for serialization only
 

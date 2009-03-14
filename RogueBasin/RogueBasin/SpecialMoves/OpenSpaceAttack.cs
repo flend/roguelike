@@ -7,7 +7,7 @@ namespace RogueBasin.SpecialMoves
     /// <summary>
     /// OpenSpaceAttack. Starts with an attack then you move in a clockwise diagonal box around the monster
     /// </summary>
-    class OpenSpaceAttack  : SpecialMove
+    public class OpenSpaceAttack : SpecialMove
     {
         //Really private, accessors for serialization only
 

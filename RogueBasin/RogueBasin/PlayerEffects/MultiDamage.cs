@@ -7,7 +7,7 @@ namespace RogueBasin.PlayerEffects
     /// <summary>
     /// Hmmm, there's no guarantee that this is called as the last effect... oh well, not a lot I can do about that other than hack in an exception
     /// </summary>
-    class MultiDamage : PlayerEffectSimpleDuration
+    public class MultiDamage : PlayerEffectSimpleDuration
     {
         int duration;
 

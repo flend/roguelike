@@ -7,7 +7,7 @@ namespace RogueBasin.SpecialMoves
     /// <summary>
     /// Evade . then direction of monster evades rather than attacks
     /// </summary>
-    class Evade : SpecialMove
+    public class Evade : SpecialMove
     {
         //Really private, accessors for serialization only
 
