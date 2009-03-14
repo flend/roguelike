@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Creatures
 {
-    public class Rat : MonsterSimpleAI
+    public class Rat : MonsterFightAndRunAI
     {
         const int classMaxHitpoints = 10;
 
@@ -64,11 +64,26 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription  { get { return "rats"; } }
+        public override string GroupDescription { get { return "rats"; } }
 
         protected override char GetRepresentation()
         {
             return 'r';
+        }
+
+        protected override int GetChanceToRecover()
+        {
+            return 0;
+        }
+
+        protected override int GetChanceToFlee()
+        {
+            return 0;
+        }
+
+        protected override int GetMaxHPWillFlee()
+        {
+            return 0;
         }
     }
 }

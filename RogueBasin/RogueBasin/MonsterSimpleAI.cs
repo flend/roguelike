@@ -5,12 +5,6 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public enum SimpleAIStates
-    {
-        RandomWalk,
-        Pursuit
-    }
-
     public abstract class MonsterSimpleAI : Monster
     {
         public SimpleAIStates AIState {get; set;}
