@@ -106,5 +106,19 @@ namespace RogueBasin.Creatures
         {
             return "fires a crackling bolt of energy";
         }
+
+        protected override bool RaiseCorpse(int level, Point locationMap)
+        {
+            bool raisedSuccess;
+
+            if (Game.Random.Next(10) < 6)
+            {
+                raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Ferret(), level, locationMap);
+            }
+            else
+                raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Goblin(), level, locationMap);
+
+            return raisedSuccess;
+        }
     }
 }

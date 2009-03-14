@@ -611,7 +611,7 @@ namespace RogueBasin
                 Game.Dungeon.Features.Remove(actualCorpse); //should have a helper for this really
 
                 //Spawn a skelly
-                bool raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Skeleton(), corpseLevel, corpseMap);
+                bool raisedSuccess = RaiseCorpse(actualCorpse.LocationLevel, actualCorpse.LocationMap);
 
                 if (raisedSuccess)
                 {
@@ -626,6 +626,16 @@ namespace RogueBasin
                 //Summoner not implemented yet
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Raise a corpse. Virtual so different raises can raise different things.
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="locationMap"></param>
+        /// <returns></returns>
+        protected virtual bool RaiseCorpse(int level, Point locationMap) {
+            return false;
         }
 
     protected abstract int GetUseSpecialChance();

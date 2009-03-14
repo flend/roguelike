@@ -106,7 +106,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MonsterSimpleThrowingAI.cs" />
-    <Compile Include="MonsterSpecialAI.cs" />
+    <Compile Include="MonsterSpecialAI.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MovieFrame.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerEffect.cs" />
