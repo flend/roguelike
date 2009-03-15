@@ -24,6 +24,9 @@ namespace RogueBasin.Items
                 return false;
             }
 
+            //Add a message
+            Game.MessageQueue.AddMessage("You drink the potion.");
+
             //Apply the healing effect to the player
             //Duration note 100 is normally 1 turn for a non-sped up player
 
@@ -31,8 +34,7 @@ namespace RogueBasin.Items
 
             player.AddEffect(new PlayerEffects.SightRadiusUp(player, duration, 1));
 
-            //Add a message
-            Game.MessageQueue.AddMessage("You drink the potion");
+
 
             //This uses up the potion
             usedUp = true;
@@ -47,7 +49,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "potion"; }
+            get { return "p7"; }
         }
 
         public override string GroupItemDescription

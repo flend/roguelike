@@ -75,7 +75,7 @@ namespace RogueBasin
         int hallsExtraCorridorDefinite = 0;
         int hallsExtraCorridorRandom = 8;
 
-        int plotItemOnMonsterChance = 50;
+        int potionOnMonsterChance = 75;
 
         public DungeonMaker(GameDifficulty diff) {
             difficulty = diff;
@@ -905,7 +905,7 @@ namespace RogueBasin
                     else
                         potion = new Items.PotionSuperSpeedUp();
 
-                    PlaceItemOnLevel(potion, i, 50);
+                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
                 }
             }
 
@@ -947,7 +947,7 @@ namespace RogueBasin
                     else
                         potion = new Items.PotionSuperSpeedUp();
 
-                    PlaceItemOnLevel(potion, i, 50);
+                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
                 }
             }
 
@@ -989,7 +989,7 @@ namespace RogueBasin
                     else
                         potion = new Items.PotionSuperSpeedUp();
 
-                    PlaceItemOnLevel(potion, i, 50);
+                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
                 }
             }
 

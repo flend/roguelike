@@ -218,6 +218,7 @@ namespace RogueBasin
                                         Game.Dungeon.PlayerDeath("quit");
                                         timeAdvances = true;
                                     }
+                                    UpdateScreen();
                                     break;
                                 case 'S':
                                     //Save the game

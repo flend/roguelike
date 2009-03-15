@@ -15,6 +15,7 @@ namespace RogueBasin.PlayerEffects
 
         public override void OnStart()
         {
+            Game.MessageQueue.AddMessage("You feel better!");
             LogFile.Log.LogEntry("Healed " + healingQuantity.ToString());
 
             player.Hitpoints += healingQuantity;

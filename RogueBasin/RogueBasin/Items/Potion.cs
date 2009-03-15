@@ -23,13 +23,15 @@ namespace RogueBasin.Items
             {
                 return false;
             }
+            
+            Game.MessageQueue.AddMessage("You drink the potion.");
 
             //Apply the healing effect to the player
             int healing = 10 + Game.Random.Next(10);
             player.AddEffect(new PlayerEffects.Healing(player, healing));
 
             //Add a message
-            Game.MessageQueue.AddMessage("You drink the potion");
+            
 
             //This uses up the potion
             usedUp = true;

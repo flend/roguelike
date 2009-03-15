@@ -24,12 +24,14 @@ namespace RogueBasin.Items
                 return false;
             }
 
+
+            //Add a message
+            Game.MessageQueue.AddMessage("You drink the potion.");
+
             //Apply the healing effect to the player
             int healing = 15 + Game.Random.Next(20);
             player.AddEffect(new PlayerEffects.Healing(player, healing));
 
-            //Add a message
-            Game.MessageQueue.AddMessage("You drink the potion");
 
             //This uses up the potion
             usedUp = true;
@@ -44,7 +46,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "potion"; }
+            get { return "p3"; }
         }
 
         public override string GroupItemDescription
