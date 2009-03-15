@@ -219,19 +219,16 @@ namespace RogueBasin
                                         timeAdvances = true;
                                     }
                                     break;
-                                case 's':
+                                case 'S':
                                     //Save the game
-                                    timeAdvances = false;
+                                    timeAdvances = true;
                                     Game.Dungeon.SaveGame();
+                                    Game.MessageQueue.AddMessage("Press any key to exit the game.");
                                     UpdateScreen();
+                                    userKey = Keyboard.WaitForKeyPress(true);
+                                    Game.Dungeon.RunMainLoop = false;
+                                    
                                     break;
-                                case 'l':
-                                    timeAdvances = false;
-                                    LoadGame(Game.Dungeon.Player.Name);
-                                    UpdateScreen();
-                                    break;
-
-
                                 case 'f':
                                     //Full screen switch
                                     timeAdvances = false;
@@ -239,17 +236,45 @@ namespace RogueBasin
                                     rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
                                     rootConsole.Flush();
                                     break;
-                                case 'm':
-                                    //Play movie
-                                    Game.Dungeon.PlayerLearnsRandomMove();
-                                    timeAdvances = false;
+
+
+                                case 'o':
+                                    //Open door
+                                    timeAdvances = PlayerOpenDoor();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
                                     break;
+                                case 'n':
+                                    //Name object
+                                    SetPlayerInventorySelectScreen();
+                                    UpdateScreen();
+                                    //This uses the generic 'select from inventory' input loop
+                                    NameObject();
+                                    DisablePlayerInventoryScreen();
+
+                                    UpdateScreen();
+                                    break;
+
+                                case ',':
+                                    //Pick up item
+                                    timeAdvances = PickUpItem();
+                                    //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
                                 case '.':
                                     // Do nothing
                                     timeAdvances = true;
                                     timeAdvances = Game.Dungeon.PCMove(0, 0);
                                     break;
-                                case 'i':
+                                
+                                case '>':
+                                case '<':
                                     //Interact with feature
                                     timeAdvances = InteractWithFeature();
                                     if (!timeAdvances)
@@ -259,7 +284,8 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
 
                                     break;
-                                case 'j':
+
+                                case 'i':
                                     //Display the inventory
                                     inputState = InputState.InventoryShow;
                                     SetPlayerInventoryScreen();
@@ -281,7 +307,22 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
+                                
                                 case 'e':
+                                    //Display currently equipped items
+                                    SetPlayerEquippedItemsScreen();
+                                    UpdateScreen();
+                                    DisplayEquipment();
+                                    DisablePlayerEquippedItemsScreen();
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+
+
+
+
+                                //Debug events
+                                case 'w':
                                     //Select an item to equip
                                     SetPlayerEquippedItemsSelectScreen();
                                     UpdateScreen();
@@ -293,25 +334,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-                                case 'w':
-                                    //Display currently equipped items
-                                    SetPlayerEquippedItemsScreen();
-                                    UpdateScreen();
-                                    DisplayEquipment();
-                                    DisablePlayerEquippedItemsScreen();
-                                    UpdateScreen();
-                                    timeAdvances = false;
-                                    break;
-
-                                case ',':
-                                    //Pick up item
-                                    timeAdvances = PickUpItem();
-                                    //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
-                                    if (!timeAdvances)
-                                        UpdateScreen();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
+                                //debug ones
                                 case 'd':
                                     //Drop item
                                     SetPlayerInventorySelectScreen();
@@ -324,7 +347,17 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                //Debug events
+                                case 'm':
+                                    //Play movie
+                                    Game.Dungeon.PlayerLearnsRandomMove();
+                                    timeAdvances = false;
+                                    break;
+
+                                case 'l':
+                                    timeAdvances = false;
+                                    LoadGame(Game.Dungeon.Player.Name);
+                                    UpdateScreen();
+                                    break;
 
                                 case 't':
                                     //teleport to stairs
@@ -356,24 +389,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(zhealing);
                                     UpdateScreen();
                                     break;
-                                case 'o':
-                                    //Open door
-                                    timeAdvances = PlayerOpenDoor();
-                                    if (!timeAdvances)
-                                        UpdateScreen();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-                                case 'n':
-                                    //Name object
-                                    SetPlayerInventorySelectScreen();
-                                    UpdateScreen();
-                                    //This uses the generic 'select from inventory' input loop
-                                    NameObject();
-                                    DisablePlayerInventoryScreen(); 
-                                    
-                                    UpdateScreen();
-                                    break;
+
                             }
                         }
                         else
@@ -1133,7 +1149,7 @@ namespace RogueBasin
             */
 
             string playerName = "Dave";
-            bool showMovies = false;
+            bool showMovies = true;
             //Setup dungeon
 
             //Is there a save game to load?

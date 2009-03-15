@@ -32,6 +32,9 @@ namespace RogueBasin.Features
             //Increment player level
             player.LocationLevel++;
 
+            //Set vision
+            player.SightRadius = (int)Math.Ceiling(player.NormalSightRadius * Game.Dungeon.Levels[player.LocationLevel].LightLevel);
+
             //(could consider making a helper function in dungeon for this)
 
             List<Feature> features = Game.Dungeon.Features;

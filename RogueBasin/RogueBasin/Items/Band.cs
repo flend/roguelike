@@ -42,14 +42,23 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            Screen.Instance.PlayMovie("plotband", true);
+            if (Game.Dungeon.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("plotband", true);
+                Screen.Instance.PlayMovie("vaultbackstab", false);
+            }
+
+            //Messages
+            Game.MessageQueue.AddMessage("Learnt VaultBackstab!");
+
+            //Screen.Instance.PlayMovie("plotband", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-            Screen.Instance.PlayMovie("vaultbackstab", false);
+            //Screen.Instance.PlayMovie("vaultbackstab", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;

@@ -42,16 +42,26 @@ namespace RogueBasin.Items
 
             //This is plot equipment
 
+            if (Game.Dungeon.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("plotleadring", true);
+                Screen.Instance.PlayMovie("evade", false);
+            }
+
+            //Messages
+            //Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("Learnt Evade!");
+
             //Give player story. Mention level up if one will occur.
 
-            Screen.Instance.PlayMovie("plotleadring", true);
+            //Screen.Instance.PlayMovie("plotleadring", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             Game.Dungeon.LearnMove(new SpecialMoves.Evade());
-            Screen.Instance.PlayMovie("evade", false);
+            //Screen.Instance.PlayMovie("evade", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;

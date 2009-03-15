@@ -11,7 +11,9 @@ namespace RogueBasin
     class MapGeneratorFromASCIIFile
     {
         bool fileLoaded = false;
-        
+
+        string mapFilename;
+
         Map baseMap;
 
         /// <summary>
@@ -91,6 +93,7 @@ namespace RogueBasin
 
             try
             {
+                mapFilename = filename;
                 LogFile.Log.LogEntry("Loading dungeon level from file: " + filename);
 
                 StreamReader reader = new StreamReader(filename);
@@ -214,7 +217,13 @@ namespace RogueBasin
                     }
                     else {
                         //if this square is a feature or special
-                        thisTerrain = MapTerrain.Empty;
+                        //hack
+                        if (mapFilename.Contains("last"))
+                        {
+                            thisTerrain = MapTerrain.Grass;
+                        }
+                        else
+                            thisTerrain = MapTerrain.Empty;
                     }
                     
                     //Set terrain and features
@@ -242,6 +251,14 @@ namespace RogueBasin
                             break;
                         case MapTerrain.River:
                             thisSquare.Walkable = false;
+                            thisSquare.BlocksLight = false;
+                            break;
+                        case MapTerrain.Road:
+                            thisSquare.Walkable = true;
+                            thisSquare.BlocksLight = false;
+                            break;
+                        case MapTerrain.Grass:
+                            thisSquare.Walkable = true;
                             thisSquare.BlocksLight = false;
                             break;
                     }

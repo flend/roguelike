@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    public class Badge : Item, IEquippableItem
+    public class Sash : Item, IEquippableItem
     {
         /// <summary>
         /// not used in this game
@@ -34,34 +34,34 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Crystal badge equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Sash equipped", LogDebugLevel.Medium);
 
             Game.Dungeon.PlotItemsFound++;
 
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.
-
             if (Game.Dungeon.PlayItemMovies)
             {
-                Screen.Instance.PlayMovie("plotbadge", true);
-                Screen.Instance.PlayMovie("multiattack", false);
+                Screen.Instance.PlayMovie("plotsash", true);
+                Screen.Instance.PlayMovie("burstofspeed", false);
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Learnt MultiAttack!");
+            Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("Learnt Burst of Speed!");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Screen.Instance.PlayMovie("plotsash", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            Game.Dungeon.LearnMove(new SpecialMoves.BurstOfSpeed());
+            //Screen.Instance.PlayMovie("burstofspeed", false);
 
             //Add any equipped (actually permanent) effects
-            Game.Dungeon.Player.Speed += 10;
+            //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
@@ -73,7 +73,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Crystal badge unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Sash unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -86,7 +86,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "steel badge"; }
+            get { return "red sash"; }
         }
 
         /// <summary>
@@ -94,17 +94,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "steel badge"; }
+            get { return "red sash"; }
         }
 
         protected override char GetRepresentation()
         {
-            return 'x';
+            return '\'';
         }
 
         public int ArmourClassModifier()
         {
-            return 0;
+            return 2;
         }
 
         public int DamageBase()

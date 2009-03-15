@@ -41,8 +41,14 @@ namespace RogueBasin.Items
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.
+            if (Game.Dungeon.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("plotbook", true);
+            }
 
-            Screen.Instance.PlayMovie("plotbook", true);
+            //Messages
+            Game.MessageQueue.AddMessage("Levelled up!");
+            
 
             //Level up?
             Game.Dungeon.Player.LevelUp();
@@ -90,7 +96,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return '~';
+            return '$';
         }
 
         public int ArmourClassModifier()

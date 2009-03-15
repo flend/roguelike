@@ -42,14 +42,24 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            Screen.Instance.PlayMovie("plotboots", true);
+            if (Game.Dungeon.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("plotboots", true);
+                Screen.Instance.PlayMovie("wallvault", false);
+            }
+
+            //Messages
+            //Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("Learnt Wall Vault!");
+
+            //Screen.Instance.PlayMovie("plotboots", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
-            Screen.Instance.PlayMovie("wallvault", false);
+            //Screen.Instance.PlayMovie("wallvault", false);
 
             //Add permanent speed increase
             Game.Dungeon.Player.Speed += 10;

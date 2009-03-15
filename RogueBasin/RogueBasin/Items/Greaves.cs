@@ -42,15 +42,24 @@ namespace RogueBasin.Items
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.
+            if (Game.Dungeon.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("plotgreaves", true);
+                Screen.Instance.PlayMovie("openspaceattack", false);
+            }
 
-            Screen.Instance.PlayMovie("plotgreaves", true);
+            //Messages
+            //Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("Learnt Open Space Attack!");
+
+            //Screen.Instance.PlayMovie("plotgreaves", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             Game.Dungeon.LearnMove(new SpecialMoves.OpenSpaceAttack());
-            Screen.Instance.PlayMovie("openspaceattack", false);
+            //Screen.Instance.PlayMovie("openspaceattack", false);
 
             //Add any equipped (actually permanent) effects
             Game.Dungeon.Player.Speed += 10;

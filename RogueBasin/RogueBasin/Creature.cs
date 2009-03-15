@@ -33,6 +33,8 @@ namespace RogueBasin
         /// </summary>
         public int SightRadius {get; set;}
 
+        public int NormalSightRadius { get; set; }
+
         /// <summary>
         /// Increment each game turn for the creature's internal clock. Turn at turnClockLimit
         /// </summary>
@@ -105,7 +107,7 @@ namespace RogueBasin
         {
             alive = true;
 
-            SightRadius = 5;
+            NormalSightRadius = 5;
 
             inventory = new Inventory();
 

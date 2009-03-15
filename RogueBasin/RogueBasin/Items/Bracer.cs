@@ -42,15 +42,24 @@ namespace RogueBasin.Items
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.
+            if (Game.Dungeon.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("plotbracer", true);
+                Screen.Instance.PlayMovie("closequarters", false);
+            }
 
-            Screen.Instance.PlayMovie("plotbracer", true);
+            //Messages
+            //Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("Learnt Close Quarters!");
+
+            //Screen.Instance.PlayMovie("plotbracer", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             Game.Dungeon.LearnMove(new SpecialMoves.CloseQuarters());
-            Screen.Instance.PlayMovie("closequarters", false);
+            //Screen.Instance.PlayMovie("closequarters", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -91,7 +100,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return '¬';
+            return '~';
         }
 
         public int ArmourClassModifier()

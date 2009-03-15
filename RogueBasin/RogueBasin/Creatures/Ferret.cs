@@ -17,7 +17,7 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            SightRadius = 4;
+            NormalSightRadius = 4;
         }
 
         public override void InventoryDrop()

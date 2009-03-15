@@ -18,7 +18,6 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            SightRadius = 5;
         }
 
         public override void InventoryDrop()
@@ -129,7 +128,7 @@ namespace RogueBasin.Creatures
 
         public override int CreatureLevel()
         {
-            return 2;
+            return 3;
         }
 
         public override Color CreatureColor()

@@ -305,7 +305,7 @@ namespace RogueBasin
                 writer.Formatting = Formatting.Indented;
                 serializer.Serialize(writer, saveGameInfo);
 
-                Game.MessageQueue.AddMessage("Game saved successfully");
+                Game.MessageQueue.AddMessage("Game saved successfully.");
                 LogFile.Log.LogEntry("Game saved successfully: " + filename);
             }
             catch (Exception ex)
@@ -406,6 +406,8 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
+                creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
+
                 monsters.Add(creature);
                 return true;
             }
@@ -463,6 +465,8 @@ namespace RogueBasin
                 //Otherwise OK
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
+
+                creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
 
                 summonedMonsters.Add(creature);
                 return true;

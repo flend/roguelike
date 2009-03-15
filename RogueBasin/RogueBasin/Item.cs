@@ -13,20 +13,24 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionToHitUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSpeedUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Bracelet))]
 
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Backpack))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Badge))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Band))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Book))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Boots))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Bracelet))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Bracer))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.GlassGem))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Glove))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Greaves))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.LeadRing))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Lockpicks))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Sash))]
+
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Glove))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Backpack))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Book))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Stone))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Medal))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Flint))]
     
     public abstract class Item : MapObject
     {

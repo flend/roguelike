@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    public class Badge : Item, IEquippableItem
+    public class Lockpicks : Item, IEquippableItem
     {
         /// <summary>
         /// not used in this game
@@ -34,7 +34,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Crystal badge equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Lockpicks equipped", LogDebugLevel.Medium);
 
             Game.Dungeon.PlotItemsFound++;
 
@@ -44,24 +44,25 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.PlayItemMovies)
             {
-                Screen.Instance.PlayMovie("plotbadge", true);
-                Screen.Instance.PlayMovie("multiattack", false);
+                Screen.Instance.PlayMovie("plotlockpicks", true);
+                Screen.Instance.PlayMovie("wallpush", false);
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Learnt MultiAttack!");
+            //Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("Learnt Wall Push!");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //creen.Instance.PlayMovie("plotlockpicks", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            Game.Dungeon.LearnMove(new SpecialMoves.WallPush());
+            //Screen.Instance.PlayMovie("wallpush", false);
 
             //Add any equipped (actually permanent) effects
-            Game.Dungeon.Player.Speed += 10;
+            //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
@@ -73,7 +74,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Crystal badge unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Lockpicks unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -86,7 +87,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "steel badge"; }
+            get { return "lockpicks"; }
         }
 
         /// <summary>
@@ -94,12 +95,12 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "steel badge"; }
+            get { return "lockpicks"; }
         }
 
         protected override char GetRepresentation()
         {
-            return 'x';
+            return '/';
         }
 
         public int ArmourClassModifier()
@@ -115,7 +116,7 @@ namespace RogueBasin.Items
 
         public int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public int HitModifier()

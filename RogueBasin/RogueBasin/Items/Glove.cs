@@ -37,7 +37,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Glove equipped", LogDebugLevel.Medium);
+            //LogFile.Log.LogEntryDebug("Glove equipped", LogDebugLevel.Medium);
 
             //This is plot equipment
             Game.Dungeon.PlotItemsFound++;
@@ -46,18 +46,18 @@ namespace RogueBasin.Items
             Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
+            //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
 
             //Play movies if set
             if (Game.Dungeon.PlayItemMovies)
             {
                 Screen.Instance.PlayMovie("plotglove", true);
-                Screen.Instance.PlayMovie("vaultbackstab", false);
+                //Screen.Instance.PlayMovie("vaultbackstab", false);
             }
 
             //Messages
             Game.MessageQueue.AddMessage("Levelled up!");
-            Game.MessageQueue.AddMessage("Learnt Vault Backstab!");
+            //Game.MessageQueue.AddMessage("Learnt Vault Backstab!");
 
             return true;
         }

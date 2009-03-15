@@ -96,6 +96,7 @@ namespace RogueBasin
         /// </summary>
         bool inMonsterFOV = false;
 
+
         public MapTerrain Terrain
         {
             set
@@ -213,6 +214,9 @@ namespace RogueBasin
         public int width;
         public int height;
 
+
+        public double LightLevel { get; set; }
+
         /// <summary>
         /// Are we guaranteed to be connected?
         /// </summary>
@@ -223,13 +227,15 @@ namespace RogueBasin
         /// </summary>
         Map()
         {
-
+            LightLevel = 1.0;
         }
 
         public Map(int width, int height)
         {
             this.width = width;
             this.height = height;
+
+            LightLevel = 1.0;
 
             mapSquares = new MapSquare[width, height];
             for (int i = 0; i < width; i++)

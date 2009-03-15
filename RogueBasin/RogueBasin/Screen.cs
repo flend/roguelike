@@ -657,13 +657,15 @@ namespace RogueBasin {
                 if (inventoryIndex == inventoryList.Count)
                     break;
 
-                //Create entry string
-                char selectionChar = (char)((int)'a' + i);
-                string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description + " (equipped)";
 
                 //Add equipped status
                 //Only consider the first item in a stack, since equipped items can't stack
                 Item firstItemInStack = currentInventory.Items[inventoryList[inventoryIndex].ItemIndex[0]];
+
+
+                //Create entry string
+                char selectionChar = (char)((int)'a' + i);
+                string entryString = "(" + selectionChar.ToString() + ") " + firstItemInStack.SingleItemDescription; //+" (equipped)";
 
                 //EquipmentSlotInfo equippedInSlot = currentEquipment.Find(x => x.equippedItem == firstItemInStack);
 
@@ -1034,11 +1036,11 @@ namespace RogueBasin {
                         //In FOV
                         //rootConsole.ForegroundColor = drawColor;
                     }
-                    //else if (map.mapSquares[i, j].InMonsterFOV)
-                    //{
+                    else if (map.mapSquares[i, j].InMonsterFOV)
+                    {
                         //Monster can see it
-                        //drawColor = inMonsterFOVTerrainColor;
-                    //}
+                        drawColor = inMonsterFOVTerrainColor;
+                    }
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen

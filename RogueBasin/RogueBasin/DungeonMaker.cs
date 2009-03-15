@@ -99,8 +99,7 @@ namespace RogueBasin
 
             SpawnItems();
 
-            Game.Dungeon.TotalPlotItems = 5;
-
+            
             SpawnUniques();
 
             Game.Dungeon.TimeToRescueFriend = 1000000;
@@ -226,10 +225,43 @@ namespace RogueBasin
                 {
                         //Early caves
                     case 0:
+
+                        int costSpent = 0;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 95)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[i]);
+
+                        break;
+
                     case 1:
                     case 2:
 
-                        int costSpent = 0;
+                        costSpent = 0;
 
                         do
                         {
@@ -626,9 +658,17 @@ namespace RogueBasin
             dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
             //The rest of the plot items are split between the remaining cave and ruined levels
 
-            List<Item> plotItems = new List<Item> { new Items.Badge(), new Items.Band(), new Items.Book(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
-            new Items.Greaves(), new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash(), new Items.Backpack() };
-            
+            List<Item> plotItems = new List<Item> { 
+                //special mode items (9)
+                new Items.Badge(), new Items.Band(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
+            new Items.Greaves(), new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash(), 
+            //levelling items 
+            new Items.Backpack(), new Items.Book(), new Items.Medal(), new Items.Stone(), new Items.Flint() };
+            //glove is separate
+
+            Game.Dungeon.TotalPlotItems = 15;
+
+
             int level = 0;
             List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
@@ -780,6 +820,9 @@ namespace RogueBasin
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(caveGen.Map);
                 caveGen.AddStaircases(levelNo);
+
+                //Set light
+                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //Ruined halls levels
@@ -829,6 +872,23 @@ namespace RogueBasin
             dungeon.RecalculateWalkable();
             dungeon.RefreshTCODMaps();
 
+        }
+
+        private double GetLightLevel(int levelNo)
+        {
+            int lightDelta = 5 + Game.Random.Next(15);
+            lightDelta -= levelNo;
+
+            double lightLevel = lightDelta / 10.0;
+
+            if (lightLevel < 0.4)
+                lightLevel = 0.4;
+
+            if (lightLevel > 2.0)
+            {
+                lightLevel = 2.0;
+            }
+            return lightLevel;
         }
     }
 }

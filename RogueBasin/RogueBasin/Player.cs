@@ -681,7 +681,7 @@ namespace RogueBasin
 
             //Message the user
             LogFile.Log.LogEntryDebug("Item equipped: " + item.SingleItemDescription, LogDebugLevel.Medium);
-            Game.MessageQueue.AddMessage(item.SingleItemDescription + " equipped!");
+            //Game.MessageQueue.AddMessage(item.SingleItemDescription + " found.");
 
             return true;
         }

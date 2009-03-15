@@ -40,6 +40,10 @@ namespace RogueBasin.Triggers
                 Player player = Game.Dungeon.Player;
 
                 player.LocationLevel++;
+
+                //Set vision
+                player.SightRadius = 100;
+
                 player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
                 Game.Dungeon.MovePCAbsolute(player.LocationLevel, player.LocationMap.x, player.LocationMap.y);
             }
