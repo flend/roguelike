@@ -5,6 +5,7 @@ using libtcodWrapper;
 using Console = System.Console;
 using System.IO;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace RogueBasin {
 
@@ -347,22 +348,30 @@ namespace RogueBasin {
 
                 movieFrames = new List<MovieFrame>();
 
+                Assembly _assembly = Assembly.GetExecutingAssembly();
+
+                //MessageBox.Show("Showing all embedded resource names");
+
+                //string[] names = _assembly.GetManifestResourceNames();
+                //foreach (string name in names)
+                //    MessageBox.Show(name);
+
                 do
                 {
-                    string currentFilename = "movies/" + filenameRoot + frameNo.ToString() + ".amf";
+                    string filename = "RogueBasin.bin.Debug.movies." + filenameRoot + frameNo.ToString() + ".amf";
+                    Stream _fileStream = _assembly.GetManifestResourceStream(filename);
 
                     //If this is the first frame check if there is at least one frame
                     if (frameNo == 0)
                     {
-                        if (!File.Exists(currentFilename))
+                        if (_fileStream == null)
                         {
-                            throw new ApplicationException("Can't find file: " + currentFilename);
+                            throw new ApplicationException("Can't find file: " + filename);
                         }
                     }
-
                     //Otherwise, not finding a file just means the end of a movie
 
-                    if (!File.Exists(currentFilename))
+                    if (_fileStream == null)
                     {
                         break;
                     }
@@ -370,7 +379,7 @@ namespace RogueBasin {
                     //File exists, load the frame
                     MovieFrame frame = new MovieFrame();
 
-                    using (StreamReader reader = new StreamReader(currentFilename))
+                    using (StreamReader reader = new StreamReader(_fileStream))
                     {
                         string thisLine;
 
@@ -405,7 +414,7 @@ namespace RogueBasin {
             }
             catch (Exception e)
             {
-                throw new ApplicationException("Failed to load movie: " + e.Message);
+                LogFile.Log.LogEntry("Failed to load movie: " + e.Message);
             }
         }
 
@@ -1611,7 +1620,7 @@ namespace RogueBasin {
 
             //ClearMessageLine();
 
-            PrintMessage(introMessage + " (e / m / h):", topLeft, introMessage.Length + 8);
+            PrintMessage(introMessage + " (e / m / h):", topLeft, introMessage.Length + 14);
             FlushConsole();
 
             do

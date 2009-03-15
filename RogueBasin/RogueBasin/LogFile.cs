@@ -24,13 +24,12 @@ namespace RogueBasin
         LogFile()
         {
             //Create logfile name
-
-
-            logFilename = "roguelog_" + LogTime(DateTime.Now) + ".txt";
+            logFilename = "logs/roguelog_" + LogTime(DateTime.Now) + ".txt";
 
             try
             {
                 //Open logfile
+                Directory.CreateDirectory("logs");
                 logFile = new StreamWriter(logFilename);
                 logFile.Close();
                 logFileWorking = true;

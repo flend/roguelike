@@ -157,7 +157,7 @@ namespace RogueBasin.SpecialMoves
 
             //Give the player a small speed up
             //Seems to mean you get a free attack about 1 time in 2
-            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 50, 100));
+            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 150, 150));
 
             LogFile.Log.LogEntry("Burst of Speed complete");
             Game.MessageQueue.AddMessage("Burst of Speed!");

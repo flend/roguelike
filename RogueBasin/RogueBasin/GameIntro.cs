@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
+using System.IO;
 
 namespace RogueBasin
 {
@@ -40,13 +41,13 @@ namespace RogueBasin
 
             //Draw frame
             //Why xpos 2 here?
-            rootConsole.DrawFrame(1, 2, Screen.Instance.Width - 2, Screen.Instance.Height - 3, true);
+            rootConsole.DrawFrame(1, 4, Screen.Instance.Width - 2, Screen.Instance.Height - 10, true);
 
             //Draw preample
-            preambleTL = new Point(5, 5);
+            preambleTL = new Point(5, 7);
 
             int height;
-            List<string> preamble = Utility.LoadTextFile("text/introPreamble", Screen.Instance.Width - 2 * preambleTL.x, out height);
+            List<string> preamble = Utility.LoadTextFile("introPreamble", Screen.Instance.Width - 2 * preambleTL.x, out height);
 
             for (int i = 0; i < preamble.Count; i++)
             {
@@ -60,11 +61,17 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Player name: " + PlayerName);
             } while(PlayerName.Contains(" ") || PlayerName == "");
 
+            //Check if this save game exists. If so we can exit now and the game will be loaded
+            if (File.Exists(PlayerName + ".sav"))
+            {
+                return;
+            }
+
             //Settings text
             int settingsYCoord = nameYCoord + 2;
             Point settingsTL = new Point(5, settingsYCoord);
 
-            List<string> settingsText = Utility.LoadTextFile("text/introSettings", Screen.Instance.Width - 2 * preambleTL.x, out height);
+            List<string> settingsText = Utility.LoadTextFile("introSettings", Screen.Instance.Width - 2 * preambleTL.x, out height);
 
             for (int i = 0; i < settingsText.Count; i++)
             {

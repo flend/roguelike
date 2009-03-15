@@ -36,7 +36,7 @@ namespace RogueBasin.Items
         {
             LogFile.Log.LogEntryDebug("Lead ring equipped", LogDebugLevel.Medium);
 
-            Game.Dungeon.PlotItemsFound++;
+            Game.Dungeon.Player.PlotItemsFound++;
 
 
 

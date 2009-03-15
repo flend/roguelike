@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Reflection;
 
 namespace RogueBasin
 {
@@ -54,24 +55,42 @@ namespace RogueBasin
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        public static List<string> LoadTextFile(string filename, int maxWidth, out int height)
+        public static List<string> LoadTextFile(string filenameRoot, int maxWidth, out int height)
         {
             try
             {
-                LogFile.Log.LogEntry("Loading text file: " + filename);
+                LogFile.Log.LogEntry("Loading text file: " + filenameRoot);
+
+                Assembly _assembly = Assembly.GetExecutingAssembly();
+
+                //MessageBox.Show("Showing all embedded resource names");
+
+                //string[] names = _assembly.GetManifestResourceNames();
+                //foreach (string name in names)
+                //    MessageBox.Show(name);
+
+
+                string filename = "RogueBasin.bin.Debug.text." + filenameRoot + ".txt";
+                Stream _fileStream = _assembly.GetManifestResourceStream(filename);
+
 
                 List<string> inputLines = new List<string>();
 
-                string currentFilename = filename + ".txt";
+                //string currentFilename = filename + ".txt";
 
                 //If this is the first frame check if there is at least one frame
-                if (!File.Exists(currentFilename))
+                // if (!File.Exists(currentFilename))
+                //{
+                //    throw new ApplicationException("Can't find file: " + currentFilename);
+                //}
+                if (_fileStream == null)
                 {
-                    throw new ApplicationException("Can't find file: " + currentFilename);
+                    //LogFile.Log.LogEntry("can't find file: " + filename);
+                    throw new ApplicationException("Can't find file");
                 }
 
                 //File exists, load the file
-                using (StreamReader reader = new StreamReader(currentFilename))
+                using (StreamReader reader = new StreamReader(_fileStream))
                 {
                     string thisLine;
 
@@ -137,7 +156,7 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Failed to load text file: " + e.Message);
                 //This is unlikely to be a particularly bad error, so don't rethrow, just return null
                 height = -1;
-                return null;
+                return new List<string>();
             }
         }
     }

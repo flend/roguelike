@@ -36,7 +36,7 @@ namespace RogueBasin.Items
         {
             LogFile.Log.LogEntryDebug("Greaves equipped", LogDebugLevel.Medium);
 
-            Game.Dungeon.PlotItemsFound++;
+            Game.Dungeon.Player.PlotItemsFound++;
 
 
             //This is plot equipment

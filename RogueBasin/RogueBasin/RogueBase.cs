@@ -614,10 +614,13 @@ namespace RogueBasin
                 }
 
                 newDungeon.Player.Inventory.RefreshInventoryListing();
-                newDungeon.Player.CalculateCombatStats();
 
                 //Set this new dungeon and player as the current global
                 Game.Dungeon = newDungeon;
+
+                newDungeon.Player.CalculateCombatStats();
+
+ 
 
                 Game.MessageQueue.AddMessage("Game : " + playerName + " loaded successfully");
                 LogFile.Log.LogEntry("Game : " + playerName + " loaded successfully");
@@ -1151,18 +1154,18 @@ namespace RogueBasin
             Game.MessageQueue = new MessageQueue();
 
             //Intro screen pre-game (must come after screen)
-            /*
+            
             GameIntro intro = new GameIntro();
             intro.ShowIntroScreen();
 
             string playerName = intro.PlayerName;
             bool showMovies = intro.ShowMovies;
             GameDifficulty diff = intro.Difficulty;
-            */
+            
 
-            string playerName = "Dave";
-            bool showMovies = true;
-            GameDifficulty diff = GameDifficulty.Easy;
+            //string playerName = "Dave";
+            //bool showMovies = true;
+            //GameDifficulty diff = GameDifficulty.Easy;
             //Setup dungeon
 
             //Is there a save game to load?

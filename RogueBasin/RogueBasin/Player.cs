@@ -21,6 +21,9 @@ namespace RogueBasin
         public long TimeToRescueFriend { get; set; }
 
 
+        public int TotalPlotItems { get; set; }
+        public int PlotItemsFound { get; set; }
+
         /// <summary>
         /// Play movies and give plot exerpts for items
         /// </summary>
@@ -165,54 +168,54 @@ namespace RogueBasin
                     switch (Level)
                     {
                         case 1:
-                            armourClass = 10;
+                            armourClass = 12;
                             damageBase = 4;
                             damageModifier = 0;
                             hitModifier = 0;
-                            maxHitpoints = 10;
+                            maxHitpoints = 15;
                             break;
                         case 2:
-                            armourClass = 10;
+                            armourClass = 13;
                             damageBase = 4;
                             damageModifier = 1;
                             hitModifier = 1;
-                            maxHitpoints = 15;
+                            maxHitpoints = 25;
                             break;
                         case 3:
-                            armourClass = 11;
+                            armourClass = 13;
                             damageBase = 6;
                             damageModifier = 0;
                             hitModifier = 2;
-                            maxHitpoints = 25;
+                            maxHitpoints = 35;
                             break;
                         case 4:
-                            armourClass = 11;
+                            armourClass = 14;
                             damageBase = 6;
                             damageModifier = 1;
                             hitModifier = 3;
-                            maxHitpoints = 30;
+                            maxHitpoints = 45;
                             break;
                         case 5:
-                            armourClass = 12;
+                            armourClass = 15;
                             damageBase = 8;
                             damageModifier = 0;
                             hitModifier = 4;
-                            maxHitpoints = 35;
+                            maxHitpoints = 55;
                             break;
                         case 6:
-                            armourClass = 13;
+                            armourClass = 16;
                             damageBase = 8;
                             damageModifier = 1;
                             hitModifier = 5;
-                            maxHitpoints = 40;
+                            maxHitpoints = 65;
                             break;
                         case 7:
                         default:
-                            armourClass = 14;
+                            armourClass = 17;
                             damageBase = 12;
                             damageModifier = 0;
                             hitModifier = 6;
-                            maxHitpoints = 45;
+                            maxHitpoints = 75;
                             break;
                     }
                     break;

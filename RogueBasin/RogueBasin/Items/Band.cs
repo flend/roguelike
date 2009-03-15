@@ -36,7 +36,7 @@ namespace RogueBasin.Items
         {
             LogFile.Log.LogEntryDebug("Band equipped", LogDebugLevel.Medium);
 
-            Game.Dungeon.PlotItemsFound++;
+            Game.Dungeon.Player.PlotItemsFound++;
 
             //This is plot equipment
 

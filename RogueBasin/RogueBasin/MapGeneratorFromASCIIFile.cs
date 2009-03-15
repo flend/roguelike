@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace RogueBasin
 {
@@ -89,14 +91,27 @@ namespace RogueBasin
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        public void LoadASCIIFile(string filename) {
+        public void LoadASCIIFile(string filenameRoot) {
 
             try
             {
+                Assembly _assembly = Assembly.GetExecutingAssembly();
+
+                //MessageBox.Show("Showing all embedded resource names");
+
+                //string[] names = _assembly.GetManifestResourceNames();
+                //foreach (string name in names)
+                //    MessageBox.Show(name);
+
+
+                string filename = "RogueBasin.bin.Debug." + filenameRoot;
+                Stream _fileStream = _assembly.GetManifestResourceStream(filename);
+
+
                 mapFilename = filename;
                 LogFile.Log.LogEntry("Loading dungeon level from file: " + filename);
 
-                StreamReader reader = new StreamReader(filename);
+                StreamReader reader = new StreamReader(_fileStream);
                 string thisLine;
 
                 List<string> mapRows = new List<string>();
@@ -175,8 +190,8 @@ namespace RogueBasin
             }
             catch (Exception e)
             {
-                LogFile.Log.LogEntry("Can't load file: " + filename + " because: " + e.Message);
-                throw new ApplicationException("Can't load file: " + filename + " because: " + e.Message);
+                LogFile.Log.LogEntry("Can't load file: " + filenameRoot + " because: " + e.Message);
+                throw new ApplicationException("Can't load file: " + filenameRoot + " because: " + e.Message);
             }
         }
 

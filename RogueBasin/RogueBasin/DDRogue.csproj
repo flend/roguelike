@@ -12,6 +12,8 @@
     <AssemblyName>RogueBasin</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -144,6 +146,11 @@
     <Compile Include="PlayerEffects\SpeedUp.cs" />
     <Compile Include="PlayerEffects\ToHitUp.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="RogueBase.cs" />
     <Compile Include="SaveGameInfo.cs" />
     <Compile Include="Screen.cs" />
@@ -182,5 +189,86 @@
       <Project>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</Project>
       <Name>libtcodWrapper</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\becomeLich0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\burstofspeed0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\burstofspeed1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\burstofspeed2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\closequarters0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\cruelEnding0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\crushLichGem0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\deadFriendEnding0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\enterDungeon0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\enterDungeonAgain.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\enterDungeonAgain0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\evade0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\evade1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\forgetfulEnding0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\forgetfulEndingDeadFriend0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helpFriend0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\lichBattle0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\lichGem0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\multiattack0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\multiattack1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\multiattack2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\multiattack3.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\openspaceattack0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\openspaceattack1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\openspaceattack2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\openspaceattack3.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\openspaceattack4.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotbackpack0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotbadge0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotband0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotbook0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotboots0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotbracer0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotflint0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotglassgem0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotglove0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotgreaves0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotleadring0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotlockpicks0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotmedal0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotsash0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\plotstone0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\romanceEnding0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\seeCorpses0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\seeCorpsesForgetful0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spotFriend0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\stunbox0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\stunbox1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\stunbox2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\stunbox3.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\treasureRoom0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\vaultbackstab0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\vaultbackstab1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\vaultbackstab2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallpush0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallpush1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallpush2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallvault0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallvault1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallvault2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallvault3.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\text\introSettings.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\text\introPreamble.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\last.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\battle.txt" />
   </ItemGroup>
 </Project>

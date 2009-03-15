@@ -122,15 +122,11 @@ namespace RogueBasin
 
             RunMainLoop = true;
 
-            PlotItemsFound = 0;
-
             summonedMonsters = new List<Monster>();
 
             SaveScumming = false;
         }
 
-        public int TotalPlotItems { get; set; }
-        public int PlotItemsFound { get; set; }
 
         /// <summary>
         /// How much of your previous life do you remember?
@@ -138,7 +134,7 @@ namespace RogueBasin
         /// <returns></returns>
         public int PercentRemembered()
         {
-            double total = TotalPlotItems / (double)PlotItemsFound * 100.0;
+            double total = player.PlotItemsFound / (double)player.TotalPlotItems * 100.0;
             return (int)Math.Ceiling(total);
         }
 
@@ -247,7 +243,6 @@ namespace RogueBasin
         /// </summary>
         private void SetupSpecialMoves()
         {
-            //Add here
             specialMoves.Add(new SpecialMoves.WallVault());
             specialMoves.Add(new SpecialMoves.StunBox());
             specialMoves.Add(new SpecialMoves.WallPush());
@@ -261,7 +256,7 @@ namespace RogueBasin
 
             foreach (SpecialMove move in specialMoves)
             {
-                move.Known = true;
+                move.Known = false;
             }
         }
 
@@ -363,7 +358,10 @@ namespace RogueBasin
             specialMoves[moveToLearn].Known = true;
 
             //Play movie
-            Screen.Instance.PlayMovie(specialMoves[3].MovieRoot(), false);
+            foreach (SpecialMove m1 in specialMoves)
+            {
+                Screen.Instance.PlayMovie(m1.MovieRoot(), false);
+            }
         }
 
         /// <summary>
@@ -1233,7 +1231,7 @@ namespace RogueBasin
                 if (takeGem)
                 {
                     Screen.Instance.PlayMovie("becomeLich", true);
-                    EndGame("became a powerful lich and begun a reign of terror over the surrounding land.");
+                    EndGame("became a powerful lich and begun his reign of terror.");
                 }
                 else
                 {
@@ -2111,7 +2109,7 @@ namespace RogueBasin
             deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
             deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
             deathPreamble.Add("");
-            deathPreamble.Add("He found " + Game.Dungeon.PlotItemsFound + " of " + Game.Dungeon.TotalPlotItems + " plot items.");
+            deathPreamble.Add("He found " + Game.Dungeon.Player.PlotItemsFound + " of " + Game.Dungeon.Player.TotalPlotItems + " plot items.");
 
             //Total kills
             
@@ -2249,7 +2247,7 @@ namespace RogueBasin
             deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
             deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
             deathPreamble.Add("");
-            deathPreamble.Add("He found " + Game.Dungeon.PlotItemsFound + " of " + Game.Dungeon.TotalPlotItems + " plot items.");
+            deathPreamble.Add("He found " + Game.Dungeon.Player.PlotItemsFound + " of " + Game.Dungeon.Player.TotalPlotItems + " plot items.");
 
             //Total kills
 
@@ -2363,7 +2361,9 @@ namespace RogueBasin
                 DateTime dateTime = DateTime.Now;
                 string timeStamp = dateTime.Year.ToString("0000") + "-" + dateTime.Month.ToString("00") + "-" + dateTime.Day.ToString("00") + "_" + dateTime.Hour.ToString("00") + "-" + dateTime.Minute.ToString("00") + "-" + dateTime.Second.ToString("00");
 
-                string obFilename = Game.Dungeon.player.Name + " epilogue " + timeStamp + ".txt";
+                
+                Directory.CreateDirectory("obituary");
+                string obFilename = "obituary/" + Game.Dungeon.player.Name + " epilogue " + timeStamp + ".txt";
 
                 StreamWriter obFile = new StreamWriter(obFilename);
 

@@ -143,32 +143,32 @@ namespace RogueBasin
 
                 if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
                 {
-                    lich.MaxSummons = 8;
+                    lich.MaxSummons = 3;
                 }
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
                 {
-                    lich.MaxSummons = 12;
+                    lich.MaxSummons = 6;
                 }
                 else
                 {
-                    lich.MaxSummons = 20;
+                    lich.MaxSummons = 8;
                 }
 
 
                 if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
                 {
-                    lich.MaxHitpoints = 50;
-                    lich.Hitpoints = 50;
+                    lich.MaxHitpoints = 40;
+                    lich.Hitpoints = 40;
                 }
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
                 {
-                    lich.MaxHitpoints = 75;
-                    lich.Hitpoints = 75;
+                    lich.MaxHitpoints = 60;
+                    lich.Hitpoints = 60;
                 }
                 else
                 {
-                    lich.MaxHitpoints = 100;
-                    lich.Hitpoints = 100;
+                    lich.MaxHitpoints = 75;
+                    lich.Hitpoints = 75;
                 }
             }
 
@@ -283,7 +283,7 @@ namespace RogueBasin
             {
                 for (int i = 0; i < levelMonsterAmounts.Count; i++)
                 {
-                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 0.75);
+                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 0.7);
                 }
             }
 
@@ -291,7 +291,7 @@ namespace RogueBasin
             {
                 for (int i = 0; i < levelMonsterAmounts.Count; i++)
                 {
-                    levelMonsterAmounts[i] *= (int)(levelMonsterAmounts[i] * 1);
+                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 1);
                 }
             }
 
@@ -620,8 +620,8 @@ namespace RogueBasin
             if (monster is Creatures.GoblinWitchdoctor)
             {
                 //Spawn in with a random number of ferrets & goblins
-                int noFerrets = 2 + Game.Random.Next(4);
-                int noGoblins = 1 + Game.Random.Next(2);
+                int noFerrets = 1 + Game.Random.Next(4);
+                int noGoblins = 0 + Game.Random.Next(3);
 
                 for (int i = 0; i < noFerrets; i++)
                 {
@@ -652,7 +652,7 @@ namespace RogueBasin
             {
                 //Spawn in with a random number of orcs & spiders
                 int noOrcs = 1 + Game.Random.Next(3);
-                int noSpiders = 1 + Game.Random.Next(2);
+                int noSpiders = 0 + Game.Random.Next(2);
 
                 for (int i = 0; i < noOrcs; i++)
                 {
@@ -741,7 +741,8 @@ namespace RogueBasin
             new Items.Backpack(), new Items.Book(), new Items.Medal(), new Items.Stone(), new Items.Flint() };
             //glove is separate
 
-            Game.Dungeon.TotalPlotItems = 15;
+            Game.Dungeon.Player.TotalPlotItems = 15;
+            Game.Dungeon.Player.PlotItemsFound = 0;
 
             /*
             int level = 0;

@@ -40,7 +40,7 @@ namespace RogueBasin.Items
             //LogFile.Log.LogEntryDebug("Glove equipped", LogDebugLevel.Medium);
 
             //This is plot equipment
-            Game.Dungeon.PlotItemsFound++;
+            Game.Dungeon.Player.PlotItemsFound++;
 
             //Level up?
             Game.Dungeon.Player.LevelUp();
