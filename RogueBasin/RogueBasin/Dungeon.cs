@@ -2174,7 +2174,7 @@ namespace RogueBasin
             }
 
             deathPreamble.Add("");
-            deathPreamble.Add("He killed " + totalKills + " creatures");
+            deathPreamble.Add("He killed " + totalKills + " creatures.");
 
             //Load up screen and display
             Screen.Instance.TotalKills = killRecord;
