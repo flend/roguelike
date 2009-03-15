@@ -292,7 +292,7 @@ namespace RogueBasin
                 //Is the player dead, if so kill it?
                 if (player.Hitpoints <= 0)
                 {
-                    Game.Dungeon.PlayerDeath();
+                    Game.Dungeon.PlayerDeath("was killed by a " + this.SingleDescription);
 
                     //Debug string
                     string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";

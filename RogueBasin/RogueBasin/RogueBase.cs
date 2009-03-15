@@ -210,10 +210,14 @@ namespace RogueBasin
                             char keyCode = (char)userKey.Character;
                             switch (keyCode)
                             {
-                                case 'x':
+                                case 'Q':
                                     //Exit from game
-                                    Game.Dungeon.PlayerDeath();
-                                    timeAdvances = true;
+                                    bool response = Screen.Instance.YesNoQuestion("Really quit?");
+                                    if (response == true)
+                                    {
+                                        Game.Dungeon.PlayerDeath("quit");
+                                        timeAdvances = true;
+                                    }
                                     break;
                                 case 's':
                                     //Save the game

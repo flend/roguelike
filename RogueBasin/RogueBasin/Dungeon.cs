@@ -76,6 +76,8 @@ namespace RogueBasin
 
         Player player;
 
+        public bool SaveScumming { get; set; }
+
         public GameDifficulty Difficulty { get; set; }
 
         private List<Monster> summonedMonsters; //no need to serialize
@@ -126,6 +128,8 @@ namespace RogueBasin
             PlotItemsFound = 0;
 
             summonedMonsters = new List<Monster>();
+
+            SaveScumming = false;
         }
 
         public int TotalPlotItems { get; set; }
@@ -2067,7 +2071,7 @@ namespace RogueBasin
         /// <summary>
         /// It's all gone wrong!
         /// </summary>
-        internal void PlayerDeath()
+        internal void PlayerDeath(string verb)
         {
             //Set up the death screen
 
@@ -2075,7 +2079,7 @@ namespace RogueBasin
 
             List<string> deathPreamble = new List<string>();
 
-            deathPreamble.Add(Game.Dungeon.player.Name + " the assassin perished on level " + (player.LocationLevel + 1).ToString() + " of the dungeon.");
+            deathPreamble.Add(Game.Dungeon.player.Name + " the assassin " + verb + " on level " + (player.LocationLevel + 1).ToString() + " of the dungeon.");
             deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
             deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
             deathPreamble.Add("");
@@ -2153,6 +2157,11 @@ namespace RogueBasin
             Screen.Instance.FlushConsole();
 
             SaveObituary(deathPreamble, killRecord);
+
+            if (!Game.Dungeon.SaveScumming)
+            {
+                DeleteSaveFile();
+            }
 
             //Wait for a keypress
             KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -2281,6 +2290,11 @@ namespace RogueBasin
 
             SaveObituary(deathPreamble, killRecord);
 
+            if (!Game.Dungeon.SaveScumming)
+            {
+                DeleteSaveFile();
+            }
+
             //Load up screen and display
             Screen.Instance.TotalKills = killRecord;
             Screen.Instance.DeathPreamble = deathPreamble;
@@ -2293,6 +2307,23 @@ namespace RogueBasin
 
             //Stop the main loop
             RunMainLoop = false;
+        }
+
+        /// <summary>
+        /// Delete save file on player death
+        /// </summary>
+        private void DeleteSaveFile()
+        {
+            try
+            {
+                string filename = player.Name + ".sav";
+
+                File.Delete(filename);
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Couldn't delete save file: " + ex.Message);
+            }
         }
 
         private void SaveObituary(List<string> deathPreamble, List<string> killRecord)
