@@ -69,6 +69,7 @@ namespace RogueBasin
             //Setup combat parameters
             CalculateCombatStats();
 
+            TurnCount = 0;
         }
 
         private void SetupInitialHP()

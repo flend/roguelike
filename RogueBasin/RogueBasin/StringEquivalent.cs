@@ -22,6 +22,8 @@ namespace RogueBasin
 
         public static Dictionary<MapTerrain, Color> TerrainColors { get; private set; }
 
+        public static Dictionary<GameDifficulty, string> GameDifficultyString { get; private set; }
+
         static StringEquivalent()
         {
             EquipmentSlots = new Dictionary<EquipmentSlot, string>();
@@ -32,6 +34,11 @@ namespace RogueBasin
 
             TerrainColors = new Dictionary<MapTerrain, Color>();
             SetupTerrainColors();
+
+            GameDifficultyString = new Dictionary<GameDifficulty, string>();
+            GameDifficultyString.Add(GameDifficulty.Easy, "Easy");
+            GameDifficultyString.Add(GameDifficulty.Medium, "Medium");
+            GameDifficultyString.Add(GameDifficulty.Hard, "Hard");
         }
 
         private static void SetupTerrainChars()

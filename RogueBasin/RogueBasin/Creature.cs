@@ -24,6 +24,10 @@ namespace RogueBasin
         /// </summary>
         bool alive;
 
+
+        public uint TurnCount { get; set; }
+
+
         /// <summary>
         /// Sight radius
         /// </summary>
@@ -127,6 +131,7 @@ namespace RogueBasin
             {
                 turnClock -= turnClockLimit;
 
+                TurnCount++;
                 return true;
             }
             else return false;

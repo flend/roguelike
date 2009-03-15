@@ -558,6 +558,7 @@ namespace RogueBasin
                 newDungeon.WorldClock = readData.worldClock;
                 newDungeon.HiddenNameInfo = readData.hiddenNameInfo;
                 newDungeon.Triggers = readData.triggers;
+                newDungeon.Difficulty = readData.difficulty;
 
                 //Process the maps back into map objects
                 foreach (SerializableMap serialMap in readData.levels)

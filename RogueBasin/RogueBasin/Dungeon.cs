@@ -76,6 +76,8 @@ namespace RogueBasin
 
         Player player;
 
+        public GameDifficulty Difficulty { get; set; }
+
         private List<Monster> summonedMonsters; //no need to serialize
 
         /// <summary>
@@ -277,6 +279,7 @@ namespace RogueBasin
                 saveGameInfo.hiddenNameInfo = this.HiddenNameInfo;
                 saveGameInfo.worldClock = this.worldClock;
                 saveGameInfo.triggers = this.Triggers;
+                saveGameInfo.difficulty = this.Difficulty;
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -2072,8 +2075,11 @@ namespace RogueBasin
 
             List<string> deathPreamble = new List<string>();
 
-            deathPreamble.Add("Bob the Elven bloke perished on level " + (player.LocationLevel + 1).ToString() + " of the dungeon.");
-            deathPreamble.Add("Prat.");
+            deathPreamble.Add(Game.Dungeon.player.Name + " the assassin perished on level " + (player.LocationLevel + 1).ToString() + " of the dungeon.");
+            deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
+            deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
+            deathPreamble.Add("");
+            deathPreamble.Add("He found " + Game.Dungeon.PlotItemsFound + " of " + Game.Dungeon.TotalPlotItems + " plot items.");
 
             //Total kills
             
@@ -2082,8 +2088,12 @@ namespace RogueBasin
             List<Monster> kills = player.Kills;
             List<KillCount> killCount = new List<KillCount>();
 
+            int totalKills = 0;
+
             foreach (Monster kill in kills)
             {
+                totalKills++;
+
                 //Check that we are the same type (and therefore sort of item)
                 Type monsterType = kill.GetType();
                 bool foundGroup = false;
@@ -2132,12 +2142,17 @@ namespace RogueBasin
                 killRecord.Add(killStr);
             }
 
+            deathPreamble.Add("");
+            deathPreamble.Add("He killed " + totalKills + " creatures");
+
             //Load up screen and display
             Screen.Instance.TotalKills = killRecord;
             Screen.Instance.DeathPreamble = deathPreamble;
 
             Screen.Instance.DrawDeathScreen();
             Screen.Instance.FlushConsole();
+
+            SaveObituary(deathPreamble, killRecord);
 
             //Wait for a keypress
             KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -2194,6 +2209,10 @@ namespace RogueBasin
             string playerName = Game.Dungeon.player.Name;
 
             deathPreamble.Add(playerName + " the assassin " + endPhrase);
+            deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
+            deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
+            deathPreamble.Add("");
+            deathPreamble.Add("He found " + Game.Dungeon.PlotItemsFound + " of " + Game.Dungeon.TotalPlotItems + " plot items.");
 
             //Total kills
 
@@ -2202,8 +2221,12 @@ namespace RogueBasin
             List<Monster> kills = player.Kills;
             List<KillCount> killCount = new List<KillCount>();
 
+            int totalKills = 0;
+
             foreach (Monster kill in kills)
             {
+                totalKills++;
+
                 //Check that we are the same type (and therefore sort of item)
                 Type monsterType = kill.GetType();
                 bool foundGroup = false;
@@ -2252,6 +2275,12 @@ namespace RogueBasin
                 killRecord.Add(killStr);
             }
 
+            deathPreamble.Add("");
+            deathPreamble.Add("He killed " + totalKills + " creatures");
+
+
+            SaveObituary(deathPreamble, killRecord);
+
             //Load up screen and display
             Screen.Instance.TotalKills = killRecord;
             Screen.Instance.DeathPreamble = deathPreamble;
@@ -2264,6 +2293,37 @@ namespace RogueBasin
 
             //Stop the main loop
             RunMainLoop = false;
+        }
+
+        private void SaveObituary(List<string> deathPreamble, List<string> killRecord)
+        {
+            try
+            {
+
+                //Date stamp
+                DateTime dateTime = DateTime.Now;
+                string timeStamp = dateTime.Year.ToString("0000") + "-" + dateTime.Month.ToString("00") + "-" + dateTime.Day.ToString("00") + "_" + dateTime.Hour.ToString("00") + "-" + dateTime.Minute.ToString("00") + "-" + dateTime.Second.ToString("00");
+
+                string obFilename = Game.Dungeon.player.Name + " epilogue " + timeStamp + ".txt";
+
+                StreamWriter obFile = new StreamWriter(obFilename);
+
+                foreach (string s in deathPreamble)
+                {
+                    obFile.WriteLine(s);
+                }
+
+                foreach (string s in killRecord)
+                {
+                    obFile.WriteLine(s);
+                }
+                obFile.Close();
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Couldn't write obituary file " + ex.Message);
+            }
+
         }
 
         /// <summary>

@@ -82,6 +82,8 @@ namespace RogueBasin
 
         public Player player;
 
+        public GameDifficulty difficulty;
+
         public long worldClock = 0;
 
         /// <summary>

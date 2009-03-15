@@ -62,7 +62,7 @@ namespace RogueBasin
     {
         Dungeon dungeon = null;
 
-        GameDifficulty difficulty = GameDifficulty.Easy;
+        public GameDifficulty difficulty { get; set; }
 
         int noCaveLevels = 5;
         int noCaveWaterLevels = 3;
@@ -77,7 +77,9 @@ namespace RogueBasin
 
         int plotItemOnMonsterChance = 50;
 
-        public DungeonMaker() {}
+        public DungeonMaker() {
+            difficulty = GameDifficulty.Easy;
+        }
 
         /// <summary>
         /// Big function that spawns and fills a new dungeon
@@ -87,6 +89,7 @@ namespace RogueBasin
         {
             dungeon = new Dungeon();
             Game.Dungeon = dungeon; //not classy but I have to do it here since some other classes (e.g. map gen) call it
+
 
             SetupPlayer();
 
