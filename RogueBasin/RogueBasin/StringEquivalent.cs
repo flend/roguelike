@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin
 {
@@ -19,6 +20,8 @@ namespace RogueBasin
         /// </summary>
         public static Dictionary<MapTerrain, char> TerrainChars { get; private set; }
 
+        public static Dictionary<MapTerrain, Color> TerrainColors { get; private set; }
+
         static StringEquivalent()
         {
             EquipmentSlots = new Dictionary<EquipmentSlot, string>();
@@ -26,6 +29,9 @@ namespace RogueBasin
 
             TerrainChars = new Dictionary<MapTerrain, char>();
             SetupTerrainChars();
+
+            TerrainColors = new Dictionary<MapTerrain, Color>();
+            SetupTerrainColors();
         }
 
         private static void SetupTerrainChars()
@@ -42,6 +48,22 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Trees, '*');
             TerrainChars.Add(MapTerrain.Road, '-');
             TerrainChars.Add(MapTerrain.Mountains, '^');
+        }
+
+        private static void SetupTerrainColors()
+        {
+            TerrainColors.Add(MapTerrain.Empty, ColorPresets.White);
+            TerrainColors.Add(MapTerrain.Wall, ColorPresets.DarkSlateGray);
+            TerrainColors.Add(MapTerrain.Corridor, ColorPresets.Gray);
+            TerrainColors.Add(MapTerrain.Void, ColorPresets.Black);
+            TerrainColors.Add(MapTerrain.ClosedDoor, ColorPresets.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.OpenDoor, ColorPresets.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.Flooded, ColorPresets.Blue);
+            TerrainColors.Add(MapTerrain.Grass, ColorPresets.Green);
+            TerrainColors.Add(MapTerrain.River, ColorPresets.Blue);
+            TerrainColors.Add(MapTerrain.Trees, ColorPresets.DarkGreen);
+            TerrainColors.Add(MapTerrain.Road, ColorPresets.Brown);
+            TerrainColors.Add(MapTerrain.Mountains, ColorPresets.Gray);
         }
 
         private static void SetupEquipmentSlots()

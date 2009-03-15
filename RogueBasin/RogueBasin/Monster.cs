@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin
 {
@@ -366,6 +367,11 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
+        }
+
+        virtual public Color CreatureColor()
+        {
+            return ColorPresets.White;
         }
 
         /// <summary>

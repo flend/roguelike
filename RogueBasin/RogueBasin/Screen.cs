@@ -864,17 +864,17 @@ namespace RogueBasin {
                 if (creatureSquare.InPlayerFOV)
                 {
                     //In FOV
-                    rootConsole.ForegroundColor = inFOVTerrainColor;
+                    rootConsole.ForegroundColor = creature.CreatureColor();
                 }
                 else if (creatureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
+                    rootConsole.ForegroundColor = creature.CreatureColor();
                 }
                 else
                 {
                     //Never in FOV
-                    rootConsole.ForegroundColor = neverSeenFOVTerrainColor;
+                    rootConsole.ForegroundColor = creature.CreatureColor();
                 }
 
                 rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
@@ -1027,28 +1027,31 @@ namespace RogueBasin {
 
                     char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
 
-                    Color drawColor = inFOVTerrainColor;
+                    Color drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain]; ;
 
                     if (map.mapSquares[i, j].InPlayerFOV)
                     {
                         //In FOV
-                        rootConsole.ForegroundColor = inFOVTerrainColor;
+                        //rootConsole.ForegroundColor = drawColor;
                     }
-                    else if (map.mapSquares[i, j].InMonsterFOV)
-                    {
+                    //else if (map.mapSquares[i, j].InMonsterFOV)
+                    //{
                         //Monster can see it
-                        rootConsole.ForegroundColor = inMonsterFOVTerrainColor;
-                    }
+                        //drawColor = inMonsterFOVTerrainColor;
+                    //}
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
+                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.3);
+
+                        //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                     }
                     else
                     {
                         //Never in FOV
-                        rootConsole.ForegroundColor = neverSeenFOVTerrainColor;
+                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.6);
                     }
+                    rootConsole.ForegroundColor = drawColor;
                     rootConsole.PutChar(screenX, screenY, screenChar);
                 }
             }

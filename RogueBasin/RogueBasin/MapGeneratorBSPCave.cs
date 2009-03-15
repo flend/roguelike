@@ -201,6 +201,9 @@ namespace RogueBasin
         /// </summary>
         private void AddDoors()
         {
+            int doorChanceMax = 5;
+            int closedDoorChance = 2;
+
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < height; j++)
@@ -216,19 +219,35 @@ namespace RogueBasin
                                 baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
                                 baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
                             {
-                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
-                                baseMap.mapSquares[i, j].SetBlocking();
+                                if (Game.Random.Next(doorChanceMax) < closedDoorChance)
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                    baseMap.mapSquares[i, j].SetBlocking();
+                                }
+                                else
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.OpenDoor;
+                                    baseMap.mapSquares[i, j].SetOpen();
+                                }
                             }
                         }
                         //South door
                         if (j + 1 < height && i - 1 >= 0 && i + 1 < width)
                         {
-                            if (baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Empty  &&
+                            if (baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Empty &&
                                 baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
                                 baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
                             {
-                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
-                                baseMap.mapSquares[i, j].SetBlocking();
+                                if (Game.Random.Next(doorChanceMax) < closedDoorChance)
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                    baseMap.mapSquares[i, j].SetBlocking();
+                                }
+                                else
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.OpenDoor;
+                                    baseMap.mapSquares[i, j].SetOpen();
+                                }
                             }
                         }
 
@@ -239,8 +258,16 @@ namespace RogueBasin
                                 baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
                                 baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
                             {
-                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
-                                baseMap.mapSquares[i, j].SetBlocking();
+                                if (Game.Random.Next(doorChanceMax) < closedDoorChance)
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                    baseMap.mapSquares[i, j].SetBlocking();
+                                }
+                                else
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.OpenDoor;
+                                    baseMap.mapSquares[i, j].SetOpen();
+                                }
                             }
                         }
 
@@ -251,8 +278,16 @@ namespace RogueBasin
                                 baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
                                 baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
                             {
-                                baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
-                                baseMap.mapSquares[i, j].SetBlocking();
+                                if (Game.Random.Next(doorChanceMax) < closedDoorChance)
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.ClosedDoor;
+                                    baseMap.mapSquares[i, j].SetBlocking();
+                                }
+                                else
+                                {
+                                    baseMap.mapSquares[i, j].Terrain = MapTerrain.OpenDoor;
+                                    baseMap.mapSquares[i, j].SetOpen();
+                                }
                             }
                         }
                     }

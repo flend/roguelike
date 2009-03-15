@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
@@ -104,6 +105,11 @@ namespace RogueBasin.Creatures
         public Ferret NewCreatureOfThisType()
         {
             return new Ferret();
+        }
+
+        public override Color CreatureColor()
+        {
+            return ColorPresets.WhiteSmoke;
         }
     }
 }

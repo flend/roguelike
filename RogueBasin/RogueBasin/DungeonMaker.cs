@@ -497,6 +497,7 @@ namespace RogueBasin
         private void CheckSpecialMonsterGroups(Monster monster, int levelToPlace)
         {
             int minDistance = 8;
+            int loopCount = 0;
 
             Point location = new Point();
 
@@ -510,9 +511,12 @@ namespace RogueBasin
                 for (int i = 0; i < noFerrets; i++)
                 {
                     do {
-                        do {
+                        loopCount = 0;
+                        do
+                        {
                             location = dungeon.RandomWalkablePointInLevel(i);
-                        } while(Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
                     } while (!dungeon.AddMonster(new Creatures.Ferret(), levelToPlace, location));
                 }
 
@@ -520,10 +524,12 @@ namespace RogueBasin
                 {
                     do
                     {
+                        loopCount = 0;
                         do
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
                     } while (!dungeon.AddMonster(new Creatures.Goblin(), levelToPlace, location));
                 }
             }
@@ -537,10 +543,12 @@ namespace RogueBasin
                 {
                     do
                     {
+                        loopCount = 0;
                         do
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
                     } while (!dungeon.AddMonster(new Creatures.Orc(), levelToPlace, location));
                 }
 
@@ -548,10 +556,12 @@ namespace RogueBasin
                 {
                     do
                     {
+                        loopCount = 0;
                         do
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
                     } while (!dungeon.AddMonster(new Creatures.Spider(), levelToPlace, location));
                 }
             }
@@ -566,10 +576,12 @@ namespace RogueBasin
                 {
                     do
                     {
+                        loopCount = 0;
                         do
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
                     } while (!dungeon.AddMonster(new Creatures.Skeleton(), levelToPlace, location));
                 }
 
@@ -577,10 +589,12 @@ namespace RogueBasin
                 {
                     do
                     {
+                        loopCount = 0;
                         do
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
                     } while (!dungeon.AddMonster(new Creatures.Zombie(), levelToPlace, location));
                 }
             }

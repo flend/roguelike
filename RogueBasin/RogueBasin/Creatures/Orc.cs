@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
@@ -98,6 +99,12 @@ namespace RogueBasin.Creatures
         public override int CreatureLevel()
         {
             return 3;
+        }
+
+
+        public override Color CreatureColor()
+        {
+            return ColorPresets.Lime;
         }
     }
 }
