@@ -180,7 +180,7 @@ namespace RogueBasin.SpecialMoves
             }
 
             LogFile.Log.LogEntry("StunBox!");
-            Game.MessageQueue.AddMessage("Stun Box!");
+            Game.MessageQueue.AddMessage("Stunning Sphere!");
         }
 
         public override string MovieRoot()

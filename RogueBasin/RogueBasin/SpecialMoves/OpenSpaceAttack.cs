@@ -360,7 +360,7 @@ namespace RogueBasin.SpecialMoves
             int bonus = moveCounter - 1;
 
             //Bonus to hit and damage
-            Game.MessageQueue.AddMessage("OpenSpaceAttack!");
+            Game.MessageQueue.AddMessage("Open Ground Attack!");
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0);
              
             //Move into destination square (already check this was OK)

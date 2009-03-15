@@ -18,7 +18,7 @@ namespace RogueBasin {
         public int Width { get; set; }
         public int Height { get; set; }
 
-        bool debugMode = true;
+        bool debugMode = false;
 
         //Top left coord to start drawing the map at
         Point mapTopLeft;
@@ -120,14 +120,14 @@ namespace RogueBasin {
             msgDisplayTopLeft = new Point(0, 1);
             msgDisplayNumLines = 3;
 
-            statsDisplayTopLeft = new Point(8, 31);
+            statsDisplayTopLeft = new Point(7, 31);
 
             hitpointsOffset = new Point(6, 0);
             maxHitpointsOffset = new Point(12, 0);
             overdriveHitpointsOffset = new Point(16, 0);
-            armourOffset = new Point(21, 0);
-            damageOffset = new Point(28, 0);          
-            speedOffset = new Point(62, 0);
+            armourOffset = new Point(22, 0);
+            damageOffset = new Point(29, 0);          
+            speedOffset = new Point(64, 0);
             playerLevelOffset = new Point(49, 0);
             worldTickOffset = new Point(69, 0);
             levelOffset = new Point(56, 0);
@@ -1624,7 +1624,7 @@ namespace RogueBasin {
 
             //ClearMessageLine();
 
-            PrintMessage(introMessage + " (e / m / h):", topLeft, introMessage.Length + 14);
+            PrintMessage(introMessage + " (e / m / h)", topLeft, introMessage.Length + 14);
             FlushConsole();
 
             do

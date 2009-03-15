@@ -85,88 +85,127 @@ namespace RogueBasin
 
             while (Game.Dungeon.RunMainLoop)
             {
-                //Increment world clock
-                Game.Dungeon.IncrementWorldClock();
-
-                //Increment time on all global (dungeon) events
-                Game.Dungeon.IncrementEventTime();
-
-                //All creatures get IncrementTurnTime() called on them each worldClock tick
-                //They internally keep track of when they should take another turn
-
-                //IncrementTurnTime() also increments time for all events on that creature
-                
-                foreach (Monster creature in Game.Dungeon.Monsters)
+                try
                 {
-                    //Only process creatures on this level of the dungeon??? TODO
+                    //Increment world clock
+                    Game.Dungeon.IncrementWorldClock();
 
-                    if (creature.IncrementTurnTime())
+                    //Increment time on all global (dungeon) events
+                    Game.Dungeon.IncrementEventTime();
+
+                    //All creatures get IncrementTurnTime() called on them each worldClock tick
+                    //They internally keep track of when they should take another turn
+
+                    //IncrementTurnTime() also increments time for all events on that creature
+
+                    foreach (Monster creature in Game.Dungeon.Monsters)
                     {
-                        //dungeon.ShowCreatureFOVOnMap(creature);
-
-                        //Creatures may be killed by other creatures so check they are alive before processing
-                        if (creature.Alive)
+                        try
                         {
-                            //Only process creatures on the same level as the player
-                            if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                            //Only process creatures on this level of the dungeon??? TODO
+
+                            if (creature.IncrementTurnTime())
                             {
-                                creature.ProcessTurn();
+                                //dungeon.ShowCreatureFOVOnMap(creature);
+
+                                //Creatures may be killed by other creatures so check they are alive before processing
+                                if (creature.Alive)
+                                {
+                                    //Only process creatures on the same level as the player
+                                    if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                                    {
+                                        creature.ProcessTurn();
+                                    }
+                                    //RecalculateMapAfterMove();
+                                }
                             }
-                            //RecalculateMapAfterMove();
+                        }
+                        catch (Exception e)
+                        {
+                            LogFile.Log.LogEntry("Exception thrown" + e.Message);
                         }
                     }
-                }
 
-                //Add summoned monsters
-                Game.Dungeon.AddDynamicMonsters();
-
-                //Remove dead monsters
-                //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
-                Game.Dungeon.RemoveDeadMonsters();
-
-                //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
-                if (Game.Dungeon.Player.IncrementTurnTime())
-                {
-                    //Calculate the player's FOV
-                    RecalculatePlayerFOV();
-
-                    //Debug: show the FOV of all monsters
-                    foreach (Monster monster in Game.Dungeon.Monsters)
+                    try
                     {
-                        Game.Dungeon.ShowCreatureFOVOnMap(monster);
+                        //Add summoned monsters
+                        Game.Dungeon.AddDynamicMonsters();
+                    }
+                    catch (Exception e)
+                    {
+                        LogFile.Log.LogEntry("Exception thrown" + e.Message);
                     }
 
-                    //For effects that end to update the screen correctly
-                    if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
-                        Game.Dungeon.Player.CalculateCombatStats();
-
-                    //Update screen just before PC's turn
-                    UpdateScreen();
-
-                    //KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                    //Screen.Instance.DrawFOVDebug(0);
-
-
-                    //Deal with PCs turn as appropriate
-                    bool timeAdvances = false;
-                    do
+                    //Remove dead monsters
+                    //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
+                    try
                     {
-                        timeAdvances = UserInput();
-                    } while (!timeAdvances);
+                        Game.Dungeon.RemoveDeadMonsters();
+                    }
+                    catch (Exception e)
+                    {
+                        LogFile.Log.LogEntry("Exception thrown" + e.Message);
+                    }
+                    try
+                    {
 
-                    //RecalculateMapAfterMove();
+                        //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
+                        if (Game.Dungeon.Player.IncrementTurnTime())
+                        {
+                            //Calculate the player's FOV
+                            RecalculatePlayerFOV();
 
-                    //Reset the creature FOV display
-                    Game.Dungeon.ResetCreatureFOVOnMap();
+                            //Debug: show the FOV of all monsters
+                            foreach (Monster monster in Game.Dungeon.Monsters)
+                            {
+                                Game.Dungeon.ShowCreatureFOVOnMap(monster);
+                            }
 
-                    //these 2 go together to generate a new dungeon on every keypress
-                    //SetupDungeon();
-                    //RecalculateMapAfterMove();
+                            //For effects that end to update the screen correctly
+                            if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
+                                Game.Dungeon.Player.CalculateCombatStats();
 
-                    //UpdateScreen();
+                            //Update screen just before PC's turn
+                            UpdateScreen();
 
-                    //Game.MessageQueue.AddMessage("Finished PC move");
+                            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                            //Screen.Instance.DrawFOVDebug(0);
+
+
+                            //Deal with PCs turn as appropriate
+                            bool timeAdvances = false;
+                            do
+                            {
+                                timeAdvances = UserInput();
+                            } while (!timeAdvances);
+
+                            //RecalculateMapAfterMove();
+
+                            //Reset the creature FOV display
+                            Game.Dungeon.ResetCreatureFOVOnMap();
+
+                            //these 2 go together to generate a new dungeon on every keypress
+                            //SetupDungeon();
+                            //RecalculateMapAfterMove();
+
+                            //UpdateScreen();
+
+                            //Game.MessageQueue.AddMessage("Finished PC move");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                        LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+
                 }
             }
         }
@@ -324,7 +363,7 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-
+                                    /*
 
 
                                 //Debug events
@@ -408,7 +447,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.LevelUp();
                                     UpdateScreen();
                                     break;
-
+                                    */
                             }
                         }
                         else
@@ -630,7 +669,7 @@ namespace RogueBasin
 
  
 
-                Game.MessageQueue.AddMessage("Game : " + playerName + " loaded successfully");
+                Game.MessageQueue.AddMessage("Game : " + playerName + " loaded successfully.");
                 LogFile.Log.LogEntry("Game : " + playerName + " loaded successfully");
             }
             catch (Exception ex)

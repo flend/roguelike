@@ -41,7 +41,7 @@ namespace RogueBasin
 
             //Draw frame
             //Why xpos 2 here?
-            rootConsole.DrawFrame(1, 4, Screen.Instance.Width - 2, Screen.Instance.Height - 10, true);
+            rootConsole.DrawFrame(1, 4, Screen.Instance.Width - 2, Screen.Instance.Height - 9, true);
 
             //Draw preample
             preambleTL = new Point(5, 7);
@@ -82,7 +82,7 @@ namespace RogueBasin
             ShowMovies = Screen.Instance.YesNoQuestion("Show plot text and movies?", new Point(settingsTL.x, settingsTL.y + height + 1));
 
             //Ask settings questions
-            Difficulty = Screen.Instance.DifficultyQuestion("Game Difficulty Easy / Medium / Hard?", new Point(settingsTL.x, settingsTL.y + height + 3));
+            Difficulty = Screen.Instance.DifficultyQuestion("Game difficulty: Easy / Medium / Hard?", new Point(settingsTL.x, settingsTL.y + height + 3));
 
         }
 

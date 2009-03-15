@@ -50,7 +50,7 @@ namespace RogueBasin.Items
 
             //Messages
             //Game.MessageQueue.AddMessage("Levelled up!");
-            Game.MessageQueue.AddMessage("Learnt Open Space Attack!");
+            Game.MessageQueue.AddMessage("Learnt Open Ground Attack!");
 
             //Screen.Instance.PlayMovie("plotgreaves", true);
 

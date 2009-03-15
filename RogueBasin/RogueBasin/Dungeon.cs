@@ -112,7 +112,7 @@ namespace RogueBasin
             HiddenNameInfo = new List<HiddenNameInfo>();
             Triggers = new List<DungeonSquareTrigger>();
 
-            PlayerImmortal = true;
+            PlayerImmortal = false;
 
             SetupSpecialMoves();
 

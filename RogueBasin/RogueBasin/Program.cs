@@ -20,7 +20,7 @@ namespace RogueBasin
             }
             catch (Exception e)
             {
-                MessageBox.Show("Error occurred: " + e.Message);
+                MessageBox.Show("Error occurred, please check the log file. Terminating. Error: " + e.Message);
                 return 1;
             }
         }
