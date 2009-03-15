@@ -291,7 +291,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'n':
+                                case 'r':
                                     //Name object
                                     SetPlayerInventorySelectScreen();
                                     UpdateScreen();
@@ -337,7 +337,7 @@ namespace RogueBasin
                                     UpdateScreen();
                                     timeAdvances = false;
                                     break;
-                                case 'u':
+                                case 'd':
                                     //Use an inventory item
                                     SetPlayerInventorySelectScreen();
                                     UpdateScreen();
@@ -361,6 +361,37 @@ namespace RogueBasin
                                     DisablePlayerEquippedItemsScreen();
                                     UpdateScreen();
                                     timeAdvances = false;
+                                    break;
+
+                                    //Vi keys
+
+                                case 'b':
+                                    timeAdvances = Game.Dungeon.PCMove(-1, 1);
+                                    break;
+
+                                case 'n':
+                                    timeAdvances = Game.Dungeon.PCMove(1, 1);
+                                    break;
+
+                                case 'y':
+                                    timeAdvances = Game.Dungeon.PCMove(-1, -1);
+                                    break;
+
+                                case 'u':
+                                    timeAdvances = Game.Dungeon.PCMove(1, -1);
+                                    break;
+
+                                case 'h':
+                                    timeAdvances = Game.Dungeon.PCMove(-1, 0);
+                                    break;
+                                case 'l':
+                                    timeAdvances = Game.Dungeon.PCMove(1, 0);
+                                    break;
+                                case 'k':
+                                    timeAdvances = Game.Dungeon.PCMove(0, -1);
+                                    break;
+                                case 'j':
+                                    timeAdvances = Game.Dungeon.PCMove(0, 1);
                                     break;
 
                                     /*
