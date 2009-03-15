@@ -239,7 +239,7 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "multiAttack";
+            return "multiattack";
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    public class Badge  : Item, IEquippableItem
+    public class Badge : Item, IEquippableItem
     {
         /// <summary>
         /// not used in this game
@@ -42,17 +42,17 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            //Screen.Instance.PlayMovie("plotglove", true);
+            Screen.Instance.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-            //Screen.Instance.PlayMovie("vaultbackstab", false);
+            Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
+            Screen.Instance.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
-            //Game.Dungeon.Player.Speed += 10;
+            Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
@@ -77,7 +77,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "crystal badge"; }
+            get { return "steel badge"; }
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "crystal badge"; }
+            get { return "steel badge"; }
         }
 
         protected override char GetRepresentation()

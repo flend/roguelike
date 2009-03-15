@@ -44,14 +44,14 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            //Screen.Instance.PlayMovie("plotglove", true);
+            Screen.Instance.PlayMovie("plotleadring", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-            //Screen.Instance.PlayMovie("vaultbackstab", false);
+            Game.Dungeon.LearnMove(new SpecialMoves.Evade());
+            Screen.Instance.PlayMovie("evade", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -79,7 +79,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "lead ring"; }
+            get { return "obsidian ring"; }
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "lead rings"; }
+            get { return "obsidian rings"; }
         }
 
         protected override char GetRepresentation()
@@ -97,7 +97,7 @@ namespace RogueBasin.Items
 
         public int ArmourClassModifier()
         {
-            return 0;
+            return 2;
         }
 
         public int DamageBase()
@@ -113,7 +113,7 @@ namespace RogueBasin.Items
 
         public int HitModifier()
         {
-            return 2;
+            return 0;
         }
     }
 }

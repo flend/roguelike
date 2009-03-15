@@ -7,7 +7,7 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Clever, fast, raiser. Long range. Bad news!
     /// </summary>
-    class Necromancer : MonsterSpecialAI
+    public class Necromancer : MonsterSpecialAI
     {
         const int classDeltaHitpoints = 8;
         const int classMinHitpoints = 10;

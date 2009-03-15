@@ -42,14 +42,14 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            //Screen.Instance.PlayMovie("plotglove", true);
+            Screen.Instance.PlayMovie("plotband", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-            //Screen.Instance.PlayMovie("vaultbackstab", false);
+            Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
+            Screen.Instance.PlayMovie("vaultbackstab", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -77,7 +77,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "metallic band"; }
+            get { return "wolf-skin band"; }
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "metallic bands"; }
+            get { return "wolf-skin bands"; }
         }
 
         protected override char GetRepresentation()
@@ -95,13 +95,13 @@ namespace RogueBasin.Items
 
         public int ArmourClassModifier()
         {
-            return 1;
+            return 0;
         }
 
         public int DamageBase()
         {
             //1d6
-            return 0;
+            return 1;
         }
 
         public int DamageModifier()
@@ -111,7 +111,7 @@ namespace RogueBasin.Items
 
         public int HitModifier()
         {
-            return 0;
+            return 1;
         }
     }
 }

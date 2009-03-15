@@ -43,14 +43,14 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            //Screen.Instance.PlayMovie("plotglove", true);
+            Screen.Instance.PlayMovie("plotbracer", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-            //Screen.Instance.PlayMovie("vaultbackstab", false);
+            Game.Dungeon.LearnMove(new SpecialMoves.CloseQuarters());
+            Screen.Instance.PlayMovie("closequarters", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -107,12 +107,12 @@ namespace RogueBasin.Items
 
         public int DamageModifier()
         {
-            return 0;
+            return 2;
         }
 
         public int HitModifier()
         {
-            return 2;
+            return 1;
         }
     }
 }

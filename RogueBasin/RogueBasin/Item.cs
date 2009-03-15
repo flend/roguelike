@@ -11,7 +11,10 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionDamUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSpeedUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionToHitUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSpeedUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
+
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Backpack))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Badge))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Band))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Book))]
@@ -22,6 +25,9 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Items.Glove))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Greaves))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.LeadRing))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Lockpicks))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Sash))]
+    
     public abstract class Item : MapObject
     {
         public Item()

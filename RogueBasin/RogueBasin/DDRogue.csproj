@@ -71,6 +71,7 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="Items\Backpack.cs" />
     <Compile Include="Items\Badge.cs" />
     <Compile Include="Items\Book.cs" />
     <Compile Include="Items\Boots.cs" />
@@ -81,10 +82,12 @@
     <Compile Include="Items\Glove.cs" />
     <Compile Include="Items\Greaves.cs" />
     <Compile Include="Items\LeadRing.cs" />
+    <Compile Include="Items\Lockpicks.cs" />
     <Compile Include="Items\Potion.cs" />
     <Compile Include="Items\PotionDamUp.cs" />
     <Compile Include="Items\PotionToHitUp.cs" />
     <Compile Include="Items\PotionSpeedUp.cs" />
+    <Compile Include="Items\Sash.cs" />
     <Compile Include="Items\ShortSword.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />

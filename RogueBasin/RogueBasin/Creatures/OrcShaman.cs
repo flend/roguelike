@@ -7,7 +7,7 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Healer. Clever missile troop
     /// </summary>
-    class OrcShaman : MonsterSpecialAI
+    public class OrcShaman : MonsterSpecialAI
     {
         const int classDeltaHitpoints = 12;
         const int classMinHitpoints = 8;

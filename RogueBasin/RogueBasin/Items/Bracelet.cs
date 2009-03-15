@@ -43,7 +43,7 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            //Screen.Instance.PlayMovie("plotglove", true);
+            Screen.Instance.PlayMovie("plotbracelet", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();

@@ -7,7 +7,7 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Medium brawler. Will run
     /// </summary>
-    class Orc : MonsterFightAndRunAI
+    public class Orc : MonsterFightAndRunAI
     {
         const int classDeltaHitpoints = 12;
         const int classMinHitpoints = 8;

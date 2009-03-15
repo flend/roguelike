@@ -336,7 +336,7 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "openSpaceAttack";
+            return "openspaceattack";
         }
     }
 }

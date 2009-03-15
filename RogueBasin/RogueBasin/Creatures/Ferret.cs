@@ -7,7 +7,7 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Low threat, runs away easily. Poor eyesight.
     /// </summary>
-    class Ferret : MonsterFightAndRunAI
+    public class Ferret : MonsterFightAndRunAI
     {
         const int classDeltaHitpoints = 5;
         const int classMinHitpoints = 1;

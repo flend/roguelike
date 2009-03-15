@@ -56,7 +56,6 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Found the Glove!");
             Game.MessageQueue.AddMessage("Levelled up!");
             Game.MessageQueue.AddMessage("Learnt Vault Backstab!");
 

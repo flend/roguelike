@@ -7,7 +7,7 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Medium threat, faster than normal
     /// </summary>
-    class Skeleton : MonsterFightAndRunAI
+    public class Skeleton : MonsterFightAndRunAI
     {
         const int classDeltaHitpoints = 12;
         const int classMinHitpoints = 8;

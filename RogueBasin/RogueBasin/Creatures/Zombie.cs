@@ -7,7 +7,7 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Medium threat. Slow. Hurts when it hits.
     /// </summary>
-    class Zombie : MonsterFightAndRunAI
+    public class Zombie : MonsterFightAndRunAI
     {
         const int classDeltaHitpoints = 13;
         const int classMinHitpoints = 12;

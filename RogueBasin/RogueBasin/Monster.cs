@@ -21,6 +21,14 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Lich))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Friend))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Goblin))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.GoblinWitchdoctor))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Necromancer))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Orc))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.OrcShaman))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Skeleton))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Spider))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Zombie))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Ferret))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.SpecialMoves
 {
-    class CloseQuarters : SpecialMove
+    public class CloseQuarters : SpecialMove
     {
         //Really private, accessors for serialization only
 
@@ -144,7 +144,7 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "openSpaceAttack";
+            return "closequarters";
         }
     }
 }

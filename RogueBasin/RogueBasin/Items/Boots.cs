@@ -38,19 +38,18 @@ namespace RogueBasin.Items
 
             Game.Dungeon.PlotItemsFound++;
 
-
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.
 
-            //Screen.Instance.PlayMovie("plotglove", true);
+            Screen.Instance.PlayMovie("plotboots", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-            //Screen.Instance.PlayMovie("vaultbackstab", false);
+            Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
+            Screen.Instance.PlayMovie("wallvault", false);
 
             //Add permanent speed increase
             Game.Dungeon.Player.Speed += 10;
