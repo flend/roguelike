@@ -655,20 +655,15 @@ namespace RogueBasin
 
             //Guarantee the glove (vamparic regeneration) on level 1 or 2
             
-            int gloveLevel = Game.Random.Next(2);
-            /*
-            do
-            {
-                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
-            } while (!dungeon.AddItem(new Items.Glove(), 0, location));
-            */
-            dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
+            //dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
             //The rest of the plot items are split between the remaining cave and ruined levels
 
             List<Item> plotItems = new List<Item> { 
                 //special mode items (9)
                 new Items.Badge(), new Items.Band(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
-            new Items.Greaves(), new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash(), 
+            new Items.Greaves(), new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash() };
+
+            List<Item> plotLevelItems = new List<Item> {
             //levelling items 
             new Items.Backpack(), new Items.Book(), new Items.Medal(), new Items.Stone(), new Items.Flint() };
             //glove is separate
@@ -704,21 +699,98 @@ namespace RogueBasin
 
             
             int level = 0;
+            int loopCount = 0;
+
+            int gloveLevel = 0;
+
+            do
+            {
+                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
+            } while (!dungeon.AddItem(new Items.Glove(), gloveLevel, location));
+            
+            //Include glove on level 1
             List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
-            foreach (Item plotItem in plotItems)
+            List<Item> itemsPlaced = new List<Item>();
+
+            //Levelling items are distributed through the first 12 levels
+
+            for (int i = 0; i < plotLevelItems.Count; i++)
             {
-                //Find random level w/o plotItem
-                int loopCount = 0;
-                
+
+                Item plotItem;
                 do
                 {
+                    plotItem = plotLevelItems[Game.Random.Next(plotLevelItems.Count)];
+                } while (itemsPlaced.Contains(plotItem));
+                
+                loopCount = 0;
+
+                do
+                {
+                    level = 2 * i + 1;
+
+                    if (Game.Random.Next(10) < 2)
+                    {
+                        level--;
+                    }
+                    else if (Game.Random.Next(10) < 4)
+                    {
+                        level++;
+                    }
+
                     level = Game.Random.Next(noCaveLevels + noRuinedLevels);
+                    loopCount++;
+
+                } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
+
+
+
+                //Put on the floor
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(level);
+
+                    //May want to specify a minimum distance from staircases??? TODO
+                } while (!dungeon.AddItem(plotItem, level, location));
+
+                levelsWithPlotItems.Add(level);
+                itemsPlaced.Add(plotItem);
+            }
+
+            //Distribute the move items randomly on other levels
+
+            for (int i = 0; i < plotItems.Count; i++)
+            {
+                //Find random level w/o plotItem
+                loopCount = 0;
+                Item plotItem;
+               
+                do
+                {
+                    plotItem = plotItems[Game.Random.Next(plotItems.Count)];
+                } while (itemsPlaced.Contains(plotItem));
+
+                do
+                {
+                    level = Game.Random.Next(13);
                     loopCount++;
                 } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
 
                 levelsWithPlotItems.Add(level);
+                itemsPlaced.Add(plotItem);
 
+                //On the floor
+                //Find position in level and place item
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(level);
+
+                    //May want to specify a minimum distance from staircases??? TODO
+                } while (!dungeon.AddItem(plotItem, level, location));
+
+
+                /*
                 //50% chance they will be generated on a monster
                 bool putOnMonster = false;
 
@@ -744,15 +816,8 @@ namespace RogueBasin
 
                 if(!putOnMonster)
                 {
-                    //On the floor
-                    //Find position in level and place item
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(level);
-
-                        //May want to specify a minimum distance from staircases??? TODO
-                    } while (!dungeon.AddItem(plotItem, level, location));
                 }
+                 * */
             }
             
             //Potions
