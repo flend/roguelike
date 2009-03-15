@@ -609,9 +609,23 @@ namespace RogueBasin
             dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
             //The rest of the plot items are split between the remaining cave and ruined levels
 
-            List<Item> plotItems = new List<Item> { new Items.Badge(), new Items.Band(), new Items.Book(), new Items.Boots(), new Items.Bracelet(), new Items.Bracer(), new Items.GlassGem(),
-            new Items.Greaves(), new Items.LeadRing() };
+            List<Item> plotItems = new List<Item> { new Items.Badge(), new Items.Band(), new Items.Book(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
+            new Items.Greaves(), new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash(), new Items.Backpack() };
             
+            int level = 0;
+            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
+
+            foreach (Item plotItem in plotItems)
+            {
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(level);
+
+                    //May want to specify a minimum distance from staircases??? TODO
+                } while (!dungeon.AddItem(plotItem, 0, location));
+            }
+
+
             /*
             //debug
             //Give them all to me!
@@ -621,7 +635,10 @@ namespace RogueBasin
                 dungeon.Player.PickUpItem(item);
             }
             */
-            
+            //Stick them all on the first level
+
+
+            /*
             int level = 0;
             List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
@@ -669,7 +686,7 @@ namespace RogueBasin
                         //May want to specify a minimum distance from staircases??? TODO
                     } while (!dungeon.AddItem(plotItem, level, location));
                 }
-            }
+            }*/
             
             //Potions
 
