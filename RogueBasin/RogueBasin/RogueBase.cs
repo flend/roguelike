@@ -389,6 +389,14 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(healing);
                                     UpdateScreen();
                                     break;
+                                case 'x':
+                                    //Add a healing event on the player
+                                    PlayerEffects.DamageUp healing3 = new RogueBasin.PlayerEffects.DamageUp(Game.Dungeon.Player, 500, 5);
+                                    Game.Dungeon.Player.AddEffect(healing3);
+                                    PlayerEffects.ToHitUp healing2 = new RogueBasin.PlayerEffects.ToHitUp(Game.Dungeon.Player, 500, 5);
+                                    Game.Dungeon.Player.AddEffect(healing2);
+                                    UpdateScreen();
+                                    break;
                                 case 'z':
                                     //Add an anti-healing event on the player
                                     PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);

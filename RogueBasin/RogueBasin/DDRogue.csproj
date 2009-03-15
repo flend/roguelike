@@ -165,6 +165,7 @@
     <Compile Include="SpecialMoves\StunBox.cs" />
     <Compile Include="SpecialMoves\VaultBackstab.cs" />
     <Compile Include="SpecialMoves\WallPush.cs" />
+    <Compile Include="SpecialMoves\WallVaultPre.cs" />
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="StringEquivalent.cs" />
     <Compile Include="MonsterThrowAndRunAI.cs" />

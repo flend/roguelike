@@ -120,17 +120,17 @@ namespace RogueBasin {
             msgDisplayTopLeft = new Point(0, 1);
             msgDisplayNumLines = 3;
 
-            statsDisplayTopLeft = new Point(0, 31);
+            statsDisplayTopLeft = new Point(8, 31);
 
             hitpointsOffset = new Point(6, 0);
-            maxHitpointsOffset = new Point(13, 0);
-            overdriveHitpointsOffset = new Point(17, 0);
-            armourOffset = new Point(22, 0);
-            damageOffset = new Point(29, 0);          
-            speedOffset = new Point(47, 0);
-            playerLevelOffset = new Point(55, 0);
+            maxHitpointsOffset = new Point(12, 0);
+            overdriveHitpointsOffset = new Point(16, 0);
+            armourOffset = new Point(21, 0);
+            damageOffset = new Point(28, 0);          
+            speedOffset = new Point(62, 0);
+            playerLevelOffset = new Point(49, 0);
             worldTickOffset = new Point(69, 0);
-            levelOffset = new Point(62, 0);
+            levelOffset = new Point(56, 0);
 
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(75, 5);
@@ -767,11 +767,15 @@ namespace RogueBasin {
 
             rootConsole.PrintLine(armourString, statsDisplayTopLeft.x + armourOffset.x, statsDisplayTopLeft.y + armourOffset.y, LineAlignment.Left);
 
-            string damageString = "Dam: 1d" + player.DamageBase() + "+" + player.DamageModifier() + "(+" + player.HitModifier() + ")";
+            string damageString = "Hit: +" + player.HitModifier() + " Dam: 1d" + player.DamageBase() + "+" + player.DamageModifier();
 
             rootConsole.PrintLine(damageString, statsDisplayTopLeft.x + damageOffset.x, statsDisplayTopLeft.y + damageOffset.y, LineAlignment.Left);
-
-            string speedString = "Sp: " + player.Speed.ToString();
+            string speedString = "Normal";
+            
+            if (player.Speed > 100)
+                speedString = "Fast";
+            if (player.Speed > 200)
+                speedString = "Very Fast";
 
             rootConsole.PrintLine(speedString, statsDisplayTopLeft.x + speedOffset.x, statsDisplayTopLeft.y + speedOffset.y, LineAlignment.Left);
 
@@ -781,7 +785,7 @@ namespace RogueBasin {
 
             string ticksString = "Tk: " + Game.Dungeon.WorldClock.ToString();
 
-            rootConsole.PrintLine(ticksString, statsDisplayTopLeft.x + worldTickOffset.x, statsDisplayTopLeft.y + worldTickOffset.y, LineAlignment.Left);
+            //rootConsole.PrintLine(ticksString, statsDisplayTopLeft.x + worldTickOffset.x, statsDisplayTopLeft.y + worldTickOffset.y, LineAlignment.Left);
 
             string levelString = "DL: " + Game.Dungeon.Player.LocationLevel.ToString();
 

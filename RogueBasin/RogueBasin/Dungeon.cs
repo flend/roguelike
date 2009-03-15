@@ -246,6 +246,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.WallVault());
             specialMoves.Add(new SpecialMoves.StunBox());
             specialMoves.Add(new SpecialMoves.WallPush());
+            specialMoves.Add(new SpecialMoves.WallVaultPre());
             specialMoves.Add(new SpecialMoves.VaultBackstab());
             specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
             specialMoves.Add(new SpecialMoves.Evade());

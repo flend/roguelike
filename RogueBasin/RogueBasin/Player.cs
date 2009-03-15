@@ -271,7 +271,7 @@ namespace RogueBasin
                             damageBase = 12;
                             damageModifier = 0;
                             hitModifier = 6;
-                            maxHitpoints = 45;
+                            maxHitpoints = 50;
                             break;
                     }
                     break;
