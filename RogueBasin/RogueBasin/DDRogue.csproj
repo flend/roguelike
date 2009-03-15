@@ -108,6 +108,7 @@
     <Compile Include="MonsterEffectSimpleDuration.cs" />
     <Compile Include="MonsterEffects\SlowDown.cs" />
     <Compile Include="MonsterFightAndRunAI.cs" />
+    <Compile Include="MonsterLichAI.cs" />
     <Compile Include="MonsterNullAI.cs" />
     <Compile Include="MonsterSimpleAI.cs">
       <SubType>Code</SubType>

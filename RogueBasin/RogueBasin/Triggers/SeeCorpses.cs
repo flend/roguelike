@@ -31,7 +31,14 @@ namespace RogueBasin.Triggers
 
             if (!Triggered)
             {
-                Screen.Instance.PlayMovie("seeCorpses", true);
+                if (Game.Dungeon.PercentRemembered() > 80)
+                {
+                    Screen.Instance.PlayMovie("seeCorpses", true);
+                }
+                else
+                {
+                    Screen.Instance.PlayMovie("seeCorpsesForgetful", true);
+                }
                 Triggered = true;
             }
 

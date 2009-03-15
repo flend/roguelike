@@ -32,6 +32,27 @@ namespace RogueBasin.Triggers
             if (!Triggered)
             {
                 Screen.Instance.PlayMovie("lichBattle", true);
+
+                //Wake up the lich
+                Creatures.Lich lich = null;
+                foreach (Monster m in Game.Dungeon.Monsters)
+                {
+                    if(m is Creatures.Lich) {
+                        lich = m as Creatures.Lich;
+                    }
+                }
+
+                if (lich == null)
+                {
+                    LogFile.Log.LogEntry("Can't find the lich to start the final battle");
+                }
+                else
+                {
+                    lich.Sleeping = false;
+                }
+
+
+
                 Triggered = true;
             }
             

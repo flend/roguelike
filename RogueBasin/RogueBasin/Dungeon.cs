@@ -80,6 +80,8 @@ namespace RogueBasin
 
         public GameDifficulty Difficulty { get; set; }
 
+        public bool PlayerImmortal { get; set; }
+
         private List<Monster> summonedMonsters; //no need to serialize
 
         /// <summary>
@@ -116,6 +118,8 @@ namespace RogueBasin
             specialMoves = new List<SpecialMove>();
             HiddenNameInfo = new List<HiddenNameInfo>();
             Triggers = new List<DungeonSquareTrigger>();
+
+            PlayerImmortal = true;
 
             SetupSpecialMoves();
 
@@ -1205,8 +1209,18 @@ namespace RogueBasin
             //Deal with special monsters (bit rubbish programming)
             Creatures.Lich lich = monster as Creatures.Lich;
 
+
             if (lich != null)
             {
+
+                //Kill all other monsters on the level
+
+                foreach (Monster m in monsters)
+                {
+                    if (m.LocationLevel == lich.LocationLevel && m != lich)
+                        KillMonster(m);
+                }
+
                 //OK, we've killed the end baddy have a moral decision
                 Screen.Instance.PlayMovie("lichGem", true);
 
@@ -1558,7 +1572,10 @@ namespace RogueBasin
                     //If there was no blocking creature then there is no possible route (hopefully impossible in a fully connected dungeon)
                     if (!pathBlockedByCreature)
                     {
-                        throw new ApplicationException("Path blocked in connected dungeon!");
+                        //This gets thrown a lot mainly when you cheat
+                        LogFile.Log.LogEntry("Path blocked in connected dungeon!");
+                        return originCreature.LocationMap;
+                        //throw new ApplicationException("Path blocked in connected dungeon!");
                         
                         /*
                         nextStep = new Point(x, y);
@@ -2077,6 +2094,9 @@ namespace RogueBasin
         /// </summary>
         internal void PlayerDeath(string verb)
         {
+            if (PlayerImmortal && !verb.Contains("quit"))
+                return;
+
             //Set up the death screen
 
             //Death preamble

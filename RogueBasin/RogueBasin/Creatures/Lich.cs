@@ -5,15 +5,30 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    public class Lich : MonsterSimpleAI
+    public class Lich : MonsterLichAI
     {
-        const int classMaxHitpoints = 1;
+        const int classMaxHitpoints = 100;
 
         public Lich()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            NormalSightRadius = 7;
+            NormalSightRadius = 0;
+
+            if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
+            {
+                MaxSummons = 8;
+            }
+           else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
+            {
+                MaxSummons = 12;
+            }
+            else
+            {
+                MaxSummons = 20;
+            }
+
+            Speed = 150;
         }
 
         public override void InventoryDrop()
@@ -25,7 +40,18 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return classMaxHitpoints;
+            if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
+            {
+                return 50;
+            }
+            else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
+            {
+                return 100;
+            }
+            else
+            {
+                return 150;
+            }
         }
 
         /// <summary>
@@ -33,7 +59,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 10;
+            return 15;
         }
 
         /// <summary>
@@ -41,7 +67,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 8;
+            return 4;
         }
 
         /// <summary>
@@ -54,7 +80,27 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 10;
+            return 12;
+        }
+        
+        protected override double GetMissileRange()
+        {
+            return 5;
+        }
+
+        protected override int RelaxDirectionAt()
+        {
+            return 100;
+        }
+
+        protected override int GetTotalFleeLoops()
+        {
+            return 500;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "launches a dark sphere of the void";
         }
 
         /// <summary>

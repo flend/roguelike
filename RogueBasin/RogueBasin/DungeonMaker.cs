@@ -89,7 +89,7 @@ namespace RogueBasin
         {
             dungeon = new Dungeon();
             Game.Dungeon = dungeon; //not classy but I have to do it here since some other classes (e.g. map gen) call it
-
+            Game.Dungeon.Difficulty = difficulty;
 
             SetupPlayer();
 
@@ -831,6 +831,9 @@ namespace RogueBasin
                 Map ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
                 levelNo = dungeon.AddMap(ruinedLevel);
                 ruinedGen.AddStaircases(levelNo);
+
+                //Set light
+                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //Halls
@@ -839,6 +842,9 @@ namespace RogueBasin
                 Map hallsLevel = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
                 levelNo = dungeon.AddMap(hallsLevel);
                 hallsGen.AddStaircases(levelNo);
+
+                //Set light
+                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
             
             //Final battle level

@@ -195,6 +195,8 @@ namespace RogueBasin
 
             baseMap = new Map(width, height);
 
+            baseMap.LightLevel = 0;
+
             int row = 0;
             
             //Sort out the terrain first
