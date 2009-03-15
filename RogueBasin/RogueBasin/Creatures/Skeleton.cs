@@ -9,8 +9,8 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class Skeleton : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 12;
-        const int classMinHitpoints = 8;
+        const int classDeltaHitpoints = 20;
+        const int classMinHitpoints = 5;
 
         public Skeleton()
         {
@@ -44,7 +44,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 4;
+            return 6;
         }
 
         /// <summary>

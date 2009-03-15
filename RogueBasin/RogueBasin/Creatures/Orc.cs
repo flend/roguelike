@@ -36,7 +36,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 10;
+            return 12;
         }
 
         /// <summary>
@@ -79,6 +79,11 @@ namespace RogueBasin.Creatures
         protected override int GetChanceToRecover()
         {
             return 20;
+        }
+
+        protected override int GetChanceToRecoverOnBeingHit()
+        {
+            return 50;
         }
 
         protected override int GetChanceToFlee()

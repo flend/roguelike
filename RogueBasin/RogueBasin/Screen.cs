@@ -17,6 +17,8 @@ namespace RogueBasin {
         public int Width { get; set; }
         public int Height { get; set; }
 
+        bool debugMode = true;
+
         //Top left coord to start drawing the map at
         Point mapTopLeft;
 
@@ -35,6 +37,10 @@ namespace RogueBasin {
         Point worldTickOffset;
         Point levelOffset;
 
+        Point armourOffset;
+        Point damageOffset;
+        Point playerLevelOffset;
+
         Color inFOVTerrainColor = ColorPresets.White;
         Color seenNotInFOVTerrainColor = ColorPresets.Gray;
         Color neverSeenFOVTerrainColor;
@@ -45,6 +51,8 @@ namespace RogueBasin {
         Color creatureColor = ColorPresets.White;
         Color itemColor = ColorPresets.Red ;
         Color featureColor = ColorPresets.White;
+
+        Color hiddenColor = ColorPresets.Black;
 
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
@@ -116,15 +124,19 @@ namespace RogueBasin {
             hitpointsOffset = new Point(6, 0);
             maxHitpointsOffset = new Point(13, 0);
             overdriveHitpointsOffset = new Point(17, 0);
-            speedOffset = new Point(25, 0);
-            worldTickOffset = new Point(35, 0);
-
-            levelOffset = new Point(45, 0);
+            armourOffset = new Point(22, 0);
+            damageOffset = new Point(29, 0);          
+            speedOffset = new Point(47, 0);
+            playerLevelOffset = new Point(55, 0);
+            worldTickOffset = new Point(69, 0);
+            levelOffset = new Point(62, 0);
 
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(75, 5);
             inventoryBL = new Point(5, 30);
 
+            
+           
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
 
@@ -140,7 +152,7 @@ namespace RogueBasin {
         {
             //Note that 
 
-            //CustomFontRequest fontReq = new CustomFontRequest("terminal.png", 8, 8, CustomFontRequestFontTypes.Grayscale);
+            CustomFontRequest fontReq = new CustomFontRequest("terminal.png", 16, 16, CustomFontRequestFontTypes.Grayscale);
             RootConsole.Width = Width;
             RootConsole.Height = Height;
             RootConsole.WindowTitle = "DDRogue";
@@ -742,15 +754,27 @@ namespace RogueBasin {
             rootConsole.PrintLine(maxHitpointsString, statsDisplayTopLeft.x + maxHitpointsOffset.x, statsDisplayTopLeft.y + maxHitpointsOffset.y, LineAlignment.Left);
             rootConsole.PrintLine(overdriveHitpointsString, statsDisplayTopLeft.x + overdriveHitpointsOffset.x, statsDisplayTopLeft.y + overdriveHitpointsOffset.y, LineAlignment.Left);
 
+            string armourString = "AC: " + player.ArmourClass().ToString();
+
+            rootConsole.PrintLine(armourString, statsDisplayTopLeft.x + armourOffset.x, statsDisplayTopLeft.y + armourOffset.y, LineAlignment.Left);
+
+            string damageString = "Dam: 1d" + player.DamageBase() + "+" + player.DamageModifier() + "(+" + player.HitModifier() + ")";
+
+            rootConsole.PrintLine(damageString, statsDisplayTopLeft.x + damageOffset.x, statsDisplayTopLeft.y + damageOffset.y, LineAlignment.Left);
+
             string speedString = "Sp: " + player.Speed.ToString();
 
             rootConsole.PrintLine(speedString, statsDisplayTopLeft.x + speedOffset.x, statsDisplayTopLeft.y + speedOffset.y, LineAlignment.Left);
+
+            string pLvlString = "Lvl: " + player.Level;
+
+            rootConsole.PrintLine(pLvlString, statsDisplayTopLeft.x + playerLevelOffset.x, statsDisplayTopLeft.y + playerLevelOffset.y, LineAlignment.Left);
 
             string ticksString = "Tk: " + Game.Dungeon.WorldClock.ToString();
 
             rootConsole.PrintLine(ticksString, statsDisplayTopLeft.x + worldTickOffset.x, statsDisplayTopLeft.y + worldTickOffset.y, LineAlignment.Left);
 
-            string levelString = "Level: " + Game.Dungeon.Player.LocationLevel.ToString();
+            string levelString = "DL: " + Game.Dungeon.Player.LocationLevel.ToString();
 
             rootConsole.PrintLine(levelString, statsDisplayTopLeft.x + levelOffset.x, statsDisplayTopLeft.y + levelOffset.y, LineAlignment.Left);
         }
@@ -778,23 +802,30 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare itemSquare = Game.Dungeon.Levels[item.LocationLevel].mapSquares[item.LocationMap.x, item.LocationMap.y];
 
+                Color itemColorToUse = itemColor;
+
                 if (itemSquare.InPlayerFOV)
                 {
                     //In FOV
-                    rootConsole.ForegroundColor = inFOVTerrainColor;
+                    //rootConsole.ForegroundColor = inFOVTerrainColor;
                 }
                 else if (itemSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
+                    //Not in FOV but seen
+                    itemColorToUse = Color.Interpolate(itemColor, ColorPresets.Black, 0.5);
+                    //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                 }
                 else
                 {
                     //Never in FOV
-                    rootConsole.ForegroundColor = neverSeenFOVTerrainColor;
+                    if (debugMode)
+                        itemColorToUse = neverSeenFOVTerrainColor;
+                    else
+                        itemColorToUse = hiddenColor;
                 }
 
-                rootConsole.ForegroundColor = itemColor;
+                rootConsole.ForegroundColor = itemColorToUse;
                 rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
 
                 //rootConsole.Flush();
@@ -822,22 +853,30 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare featureSquare = Game.Dungeon.Levels[feature.LocationLevel].mapSquares[feature.LocationMap.x, feature.LocationMap.y];
 
+                Color featureColor = ColorPresets.White;
+
                 if (featureSquare.InPlayerFOV)
                 {
                     //In FOV
-                    rootConsole.ForegroundColor = inFOVTerrainColor;
+                    //rootConsole.ForegroundColor = inFOVTerrainColor;
                 }
                 else if (featureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
+                    featureColor = Color.Interpolate(featureColor, ColorPresets.Black, 0.3);
+
+                    //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                 }
                 else
                 {
                     //Never in FOV
-                    rootConsole.ForegroundColor = neverSeenFOVTerrainColor;
+                    if(debugMode)
+                        featureColor = neverSeenFOVTerrainColor;
+                    else
+                        featureColor = hiddenColor;
                 }
 
+                rootConsole.ForegroundColor = featureColor;
                 rootConsole.PutChar(mapTopLeft.x + feature.LocationMap.x, mapTopLeft.y + feature.LocationMap.y, feature.Representation);
             }
 
@@ -862,24 +901,34 @@ namespace RogueBasin {
 
                 //Colour depending on FOV (for development)
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
+                Color creatureColor = creature.CreatureColor();
+
+                bool drawCreature = true;
 
                 if (creatureSquare.InPlayerFOV)
                 {
                     //In FOV
-                    rootConsole.ForegroundColor = creature.CreatureColor();
+                    //rootConsole.ForegroundColor = creature.CreatureColor();
                 }
                 else if (creatureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    rootConsole.ForegroundColor = creature.CreatureColor();
+                    if (!debugMode)
+                        drawCreature = false;
+                        //creatureColor = hiddenColor;
                 }
                 else
                 {
                     //Never in FOV
-                    rootConsole.ForegroundColor = creature.CreatureColor();
+                    if(!debugMode)
+                        drawCreature = false;
+                    
                 }
-
-                rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
+                if (drawCreature)
+                {
+                    rootConsole.ForegroundColor = creatureColor;
+                    rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
+                }
             }
         }
 
@@ -1029,29 +1078,35 @@ namespace RogueBasin {
 
                     char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
 
-                    Color drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain]; ;
+                    Color drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
 
                     if (map.mapSquares[i, j].InPlayerFOV)
                     {
                         //In FOV
                         //rootConsole.ForegroundColor = drawColor;
                     }
-                    else if (map.mapSquares[i, j].InMonsterFOV)
-                    {
-                        //Monster can see it
-                        drawColor = inMonsterFOVTerrainColor;
-                    }
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.3);
+                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.5);
 
                         //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
+                    }
+                    else if (map.mapSquares[i, j].InMonsterFOV)
+                    {
+                        //Monster can see it
+                        if (debugMode)
+                            drawColor = inMonsterFOVTerrainColor;
+                        else
+                            drawColor = hiddenColor;
                     }
                     else
                     {
                         //Never in FOV
-                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.6);
+                        if (debugMode)
+                            drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.6);
+                        else
+                            drawColor = hiddenColor;
                     }
                     rootConsole.ForegroundColor = drawColor;
                     rootConsole.PutChar(screenX, screenY, screenChar);

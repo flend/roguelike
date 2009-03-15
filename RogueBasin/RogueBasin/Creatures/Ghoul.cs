@@ -5,19 +5,16 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Medium threat. Slow. Hurts when it hits.
-    /// </summary>
-    public class Zombie : MonsterFightAndRunAI
+    class Ghoul : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 10;
+        const int classDeltaHitpoints = 25;
+        const int classMinHitpoints = 15;
 
-        public Zombie()
+        public Ghoul()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 75;
+            Speed = 90;
         }
 
         public override void InventoryDrop()
@@ -37,7 +34,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 10;
+            return 12;
         }
 
         /// <summary>
@@ -45,7 +42,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 6;
+            return 8;
         }
 
         /// <summary>
@@ -53,28 +50,28 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 3;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 3;
+            return 4;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "zombie"; } }
+        public override string SingleDescription { get { return "ghoul"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "zombies"; } }
+        public override string GroupDescription { get { return "ghouls"; } }
 
         protected override char GetRepresentation()
         {
-            return 'Z';
+            return 'G';
         }
 
         protected override int GetChanceToRecover()
@@ -94,17 +91,17 @@ namespace RogueBasin.Creatures
 
         public override int CreatureCost()
         {
-            return 40;
+            return 60;
         }
 
         public override int CreatureLevel()
         {
-            return 4;
+            return 5;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Cornsilk;
+            return ColorPresets.YellowGreen;
         }
     }
 }

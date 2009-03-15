@@ -28,7 +28,7 @@ namespace RogueBasin
         /// <summary>
         /// Player level
         /// </summary>
-        int Level { get; set; }
+        public int Level { get; set; }
 
         /// <summary>
         /// Player armour class. Auto-calculated so not serialized
@@ -97,50 +97,50 @@ namespace RogueBasin
                     damageBase = 4;
                     damageModifier = 0;
                     hitModifier = 0;
-                    maxHitpoints = 20;
+                    maxHitpoints = 10;
                     break;
                 case 2:
-                    armourClass = 11;
+                    armourClass = 10;
                     damageBase = 4;
                     damageModifier = 1;
                     hitModifier = 1;
-                    maxHitpoints = 30;
+                    maxHitpoints = 15;
                     break;
                 case 3:
-                    armourClass = 12;
+                    armourClass = 11;
                     damageBase = 6;
-                    damageModifier = 1;
+                    damageModifier = 0;
                     hitModifier = 2;
-                    maxHitpoints = 40;
+                    maxHitpoints = 25;
                     break;
                 case 4:
-                    armourClass = 13;
+                    armourClass = 11;
                     damageBase = 6;
-                    damageModifier = 2;
+                    damageModifier = 1;
                     hitModifier = 3;
-                    maxHitpoints = 50;
+                    maxHitpoints = 30;
                     break;
                 case 5:
-                    armourClass = 14;
+                    armourClass = 12;
                     damageBase = 8;
-                    damageModifier = 2;
+                    damageModifier = 0;
                     hitModifier = 4;
-                    maxHitpoints = 60;
+                    maxHitpoints = 35;
                     break;
                 case 6:
-                    armourClass = 15;
+                    armourClass = 13;
                     damageBase = 8;
-                    damageModifier = 3;
+                    damageModifier = 1;
                     hitModifier = 5;
-                    maxHitpoints = 70;
+                    maxHitpoints = 40;
                     break;
                 case 7:
                 default:
-                    armourClass = 16;
+                    armourClass = 14;
                     damageBase = 12;
-                    damageModifier = 4;
+                    damageModifier = 0;
                     hitModifier = 6;
-                    maxHitpoints = 80;
+                    maxHitpoints = 45;
                     break;
             }
 
@@ -342,6 +342,14 @@ namespace RogueBasin
                 //Fairly evil switch case for special attack types. Sorry, no time to do it well
                 bool monsterDead = monster.Hitpoints <= 0;
                 SpecialCombatEffectsOnMonster(monster, damage, monsterDead);
+
+                //Evil: check to see if the monster is fleeing and if so, give it a chance not to
+                MonsterFightAndRunAI aiMonster = monster as MonsterFightAndRunAI;
+
+                if (aiMonster != null)
+                {
+                    aiMonster.RecoverOnBeingHit();
+                }
 
                 //Is the monster dead, if so kill it?
                 if (monsterDead)

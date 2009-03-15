@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Medium threat. Slow. Hurts when it hits.
-    /// </summary>
-    public class Zombie : MonsterFightAndRunAI
+    class SkeletalArcher : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 10;
+        const int classDeltaHitpoints = 20;
+        const int classMinHitpoints = 5;
 
-        public Zombie()
+        public SkeletalArcher()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 75;
+            Speed = 100;
         }
 
         public override void InventoryDrop()
@@ -45,7 +41,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 6;
+            return 4;
         }
 
         /// <summary>
@@ -53,7 +49,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 3;
+            return 1;
         }
 
         public override int HitModifier()
@@ -65,16 +61,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "zombie"; } }
+        public override string SingleDescription { get { return "skeletal archer"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "zombies"; } }
+        public override string GroupDescription { get { return "skeletal archers"; } }
 
         protected override char GetRepresentation()
         {
-            return 'Z';
+            return 'A';
         }
 
         protected override int GetChanceToRecover()
@@ -91,20 +87,14 @@ namespace RogueBasin.Creatures
         {
             return 0;
         }
-
         public override int CreatureCost()
         {
-            return 40;
+            return 35;
         }
 
         public override int CreatureLevel()
         {
             return 4;
-        }
-
-        public override Color CreatureColor()
-        {
-            return ColorPresets.Cornsilk;
         }
     }
 }

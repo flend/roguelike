@@ -216,12 +216,12 @@ namespace RogueBasin
                     if (contents.monster != null)
                     {
                         //Attack the monster
-                        CombatResults result = AttackMonster(contents.monster);
+                        //CombatResults result = AttackMonster(contents.monster);
 
-                        if (result == CombatResults.DefenderDied)
-                        {
-                            okToMoveIntoSquare = true;
-                        }
+                        //if (result == CombatResults.DefenderDied)
+                        //{
+                        //    okToMoveIntoSquare = true;
+                        //}
                     }
 
                     //Move if allowed

@@ -10,8 +10,8 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class GoblinWitchdoctor : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 3;
-        const int classMinHitpoints = 3;
+        const int classDeltaHitpoints = 10;
+        const int classMinHitpoints = 5;
 
 
         public GoblinWitchdoctor()
@@ -63,7 +63,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetUseSpecialChance()
         {
-            return 25;
+            return 75;
         }
 
         /// <summary>

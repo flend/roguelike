@@ -233,16 +233,16 @@ namespace RogueBasin
                         }
                     }
 
-                    if (contents.monster != null)
-                    {
+                   //if (contents.monster != null)
+                    //{
                         //Attack the monster
-                        CombatResults result = AttackMonster(contents.monster);
+                        //CombatResults result = AttackMonster(contents.monster);
 
-                        if (result == CombatResults.DefenderDied)
-                        {
-                            okToMoveIntoSquare = true;
-                        }
-                    }
+                        //if (result == CombatResults.DefenderDied)
+                        //{
+                        //    okToMoveIntoSquare = true;
+                        //}
+                    //}
 
                     //Move if allowed
                     if (okToMoveIntoSquare)
@@ -469,6 +469,16 @@ namespace RogueBasin
             }
         }
 
+        public void RecoverOnBeingHit()
+        {
+            if (AIState == SimpleAIStates.Fleeing &&
+                Game.Random.Next(100) < GetChanceToRecoverOnBeingHit())
+            {
+                AIState = SimpleAIStates.Pursuit;
+                LogFile.Log.LogEntry(this.SingleDescription + "recovers and returns to the fight");
+            }
+        }
+
         /// <summary>
         /// out of 100, recover back to persuit when fleeing
         /// </summary>
@@ -477,6 +487,16 @@ namespace RogueBasin
         {
             return 0;
         }
+
+        /// <summary>
+        /// out of 100, recover back to persuit when fleeing
+        /// </summary>
+        /// <returns></returns>
+        protected virtual int GetChanceToRecoverOnBeingHit()
+        {
+            return 50;
+        }
+
         /// <summary>
         /// out of 100, chance to flee when below flee hp
         /// </summary>

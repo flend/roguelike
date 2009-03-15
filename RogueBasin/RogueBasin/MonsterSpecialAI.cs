@@ -542,6 +542,10 @@ namespace RogueBasin
                     if (this.LocationLevel != monster.LocationLevel)
                         continue;
 
+                    //Can't heal yourself
+                    if (monster == this)
+                        continue;
+
                     if (Game.Dungeon.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005)
                     {
                         targetsInRange.Add(monster);

@@ -104,7 +104,7 @@ namespace RogueBasin.Items
 
         public int ArmourClassModifier()
         {
-            return 2;
+            return 0;
         }
 
         public int DamageBase()

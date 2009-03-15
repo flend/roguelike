@@ -6,7 +6,7 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Healer. Clever missile troop
+    /// Healer. Quite clever missile troop
     /// </summary>
     public class OrcShaman : MonsterSpecialAI
     {
@@ -62,7 +62,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetUseSpecialChance()
         {
-            return 25;
+            return 50;
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace RogueBasin.Creatures
 
         protected override int RelaxDirectionAt()
         {
-            return 10;
+            return 5;
         }
 
         protected override int GetTotalFleeLoops()

@@ -10,7 +10,7 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class Ferret : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 5;
+        const int classDeltaHitpoints = 4;
         const int classMinHitpoints = 1;
 
         public Ferret()

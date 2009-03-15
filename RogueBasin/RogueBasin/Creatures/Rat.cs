@@ -10,8 +10,8 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class Rat : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 4;
-        const int classMinHitpoints = 1;
+        const int classDeltaHitpoints = 6;
+        const int classMinHitpoints = 2;
 
         public Rat()
         {

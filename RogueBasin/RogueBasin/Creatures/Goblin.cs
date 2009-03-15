@@ -10,8 +10,8 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class Goblin : MonsterThrowAndRunAI
     {
-        const int classDeltaHitpoints = 3;
-        const int classMinHitpoints = 3;
+        const int classDeltaHitpoints = 5;
+        const int classMinHitpoints = 5;
 
         public Goblin()
         {

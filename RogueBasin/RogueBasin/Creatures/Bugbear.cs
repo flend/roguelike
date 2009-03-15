@@ -5,19 +5,15 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Medium threat. Slow. Hurts when it hits.
-    /// </summary>
-    public class Zombie : MonsterFightAndRunAI
+    class Bugbear : MonsterThrowAndRunAI
     {
-        const int classDeltaHitpoints = 15;
+        const int classDeltaHitpoints = 5;
         const int classMinHitpoints = 10;
 
-        public Zombie()
+        public Bugbear()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 75;
         }
 
         public override void InventoryDrop()
@@ -45,7 +41,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 6;
+            return 4;
         }
 
         /// <summary>
@@ -53,58 +49,62 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 3;
+            return 0;
         }
 
         public override int HitModifier()
         {
-            return 3;
+            return 2;
+        }
+
+        protected override double GetMissileRange()
+        {
+            return 3.0;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "throws a knife";
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "zombie"; } }
+        public override string SingleDescription { get { return "bugbear"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "zombies"; } }
+        public override string GroupDescription { get { return "bugbears"; } }
 
         protected override char GetRepresentation()
         {
-            return 'Z';
+            return 'b';
         }
 
-        protected override int GetChanceToRecover()
+        protected override int RelaxDirectionAt()
         {
             return 0;
         }
 
-        protected override int GetChanceToFlee()
+        protected override int GetTotalFleeLoops()
         {
-            return 0;
+            return 10;
         }
-
-        protected override int GetMaxHPWillFlee()
-        {
-            return 0;
-        }
-
         public override int CreatureCost()
         {
-            return 40;
+            return 30;
         }
 
         public override int CreatureLevel()
         {
-            return 4;
+            return 2;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Cornsilk;
+            return ColorPresets.DarkGreen;
         }
     }
 }

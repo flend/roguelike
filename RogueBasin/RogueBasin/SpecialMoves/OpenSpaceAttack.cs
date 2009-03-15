@@ -49,11 +49,11 @@ namespace RogueBasin.SpecialMoves
                 firstDeltaY = locationAfterMove.y - player.LocationMap.y;
 
                 //Any non-diagonal move
-                if (firstDeltaX != 0 && firstDeltaY != 0)
-                {
+                //if (firstDeltaX != 0 && firstDeltaY != 0)
+                //{
                     //FailWrongPattern();
-                    return;
-                }
+                //    return;
+                //}
 
                 //Check it is an attack
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x, locationAfterMove.y));
@@ -102,13 +102,63 @@ namespace RogueBasin.SpecialMoves
                 int thisDeltaY = locationAfterMove.y - player.LocationMap.y;
 
                 //South
-                if (firstDeltaX == 0 && firstDeltaY == 1)
-                {
+                if (firstDeltaX == 0 && firstDeltaY == 1) {
+                   
                     if (thisDeltaX != 1 || thisDeltaY != 1)
                     {
                         FailWrongPattern();
                         return;
                     }
+                }
+
+                //SW attack
+                //Cheat to adopt the normal pattern
+                if (firstDeltaX == -1 && firstDeltaY == 1)
+                {
+
+                    if (thisDeltaX != 0 || thisDeltaY != 1)
+                    {
+                        FailWrongPattern();
+                        return;
+                    }
+
+                    thisDeltaX = 1; thisDeltaY = 1;
+                }
+
+                //NW attack
+                if (firstDeltaX == -1 && firstDeltaY == -1)
+                {
+
+                    if (thisDeltaX != -1 || thisDeltaY != 0)
+                    {
+                        FailWrongPattern();
+                        return;
+                    }
+                    thisDeltaX = -1; thisDeltaY = 1;
+                }
+
+                //NE attack
+                if (firstDeltaX == 1 && firstDeltaY == -1)
+                {
+
+                    if (thisDeltaX != 0 || thisDeltaY != -1)
+                    {
+                        FailWrongPattern();
+                        return;
+                    }
+                    thisDeltaX = -1; thisDeltaY = 1;
+                }
+
+                //SE attack
+                if (firstDeltaX == 1 && firstDeltaY == 1)
+                {
+
+                    if (thisDeltaX != 1 || thisDeltaY != 0)
+                    {
+                        FailWrongPattern();
+                        return;
+                    }
+                    thisDeltaX = 1; thisDeltaY = -1;
                 }
 
                 //East

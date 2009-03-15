@@ -61,7 +61,7 @@ namespace RogueBasin.Items
             //Screen.Instance.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
-            Game.Dungeon.Player.Speed += 10;
+            //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }

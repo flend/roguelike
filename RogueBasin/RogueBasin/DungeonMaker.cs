@@ -25,6 +25,8 @@ namespace RogueBasin
                     return new Creatures.Ferret();
                 case "goblin":
                     return new Creatures.Goblin();
+                case "bugbear":
+                    return new Creatures.Bugbear();
                 case "goblin witch":
                     return new Creatures.GoblinWitchdoctor();
                 case "necromancer":
@@ -41,6 +43,10 @@ namespace RogueBasin
                     return new Creatures.Spider();
                 case "zombie":
                     return new Creatures.Zombie();
+                case "ghoul":
+                    return new Creatures.Zombie();
+                case "skeletal archer":
+                    return new Creatures.SkeletalArcher();
             }
 
             LogFile.Log.LogEntryDebug("Can't find monster type: " + randomMonster, LogDebugLevel.High);
@@ -67,11 +73,11 @@ namespace RogueBasin
         int noCaveLevels = 5;
         int noCaveWaterLevels = 3;
 
-        int noRuinedLevels = 5;
+        int noRuinedLevels = 8;
         int ruinedExtraCorridorDefinite = 5;
         int ruinedExtraCorridorRandom = 10;
 
-        int noHallLevels = 5;
+        int noHallLevels = 2;
         int hallsExtraCorridorDefinite = 0;
         int hallsExtraCorridorRandom = 8;
 
@@ -188,7 +194,7 @@ namespace RogueBasin
             List<int> levelMonsterAmounts = new List<int>();
             
             for(int i=0;i<15;i++) {
-                int num = 100 + 40 * i;
+                int num = 200 + 80 * i;
                 levelMonsterAmounts.Add(num);
             }
             
@@ -233,7 +239,10 @@ namespace RogueBasin
                 new RogueBasin.Creatures.Rat(),
                 new RogueBasin.Creatures.Skeleton(),
                 new RogueBasin.Creatures.Spider(),
-                new RogueBasin.Creatures.Zombie()
+                new RogueBasin.Creatures.Zombie(),
+                new RogueBasin.Creatures.Bugbear(),
+                new RogueBasin.Creatures.Ghoul(),
+                new RogueBasin.Creatures.SkeletalArcher()
             };
 
             List<LevelOfMonsters> levelList = new List<LevelOfMonsters>();
@@ -589,8 +598,8 @@ namespace RogueBasin
             if (monster is Creatures.GoblinWitchdoctor)
             {
                 //Spawn in with a random number of ferrets & goblins
-                int noFerrets = 1 + Game.Random.Next(4);
-                int noGoblins = 0 + Game.Random.Next(2);
+                int noFerrets = 2 + Game.Random.Next(4);
+                int noGoblins = 1 + Game.Random.Next(3);
 
                 for (int i = 0; i < noFerrets; i++)
                 {
@@ -620,8 +629,8 @@ namespace RogueBasin
             else if (monster is Creatures.OrcShaman)
             {
                 //Spawn in with a random number of orcs & spiders
-                int noOrcs = 1 + Game.Random.Next(2);
-                int noSpiders = 0 + Game.Random.Next(2);
+                int noOrcs = 2 + Game.Random.Next(3);
+                int noSpiders = 1 + Game.Random.Next(2);
 
                 for (int i = 0; i < noOrcs; i++)
                 {
@@ -653,8 +662,8 @@ namespace RogueBasin
             else if (monster is Creatures.Necromancer)
             {
                 //Spawn in with a random number of skels & zombs
-                int noSkel = 1 + Game.Random.Next(2);
-                int noZomb = 0 + Game.Random.Next(2);
+                int noSkel = 1 + Game.Random.Next(4);
+                int noZomb = 1 + Game.Random.Next(3);
 
                 for (int i = 0; i < noSkel; i++)
                 {
@@ -773,11 +782,13 @@ namespace RogueBasin
                 {
                     level = 2 * i + 1;
 
-                    if (Game.Random.Next(10) < 2)
+                    /*if (Game.Random.Next(10) < 2)
                     {
                         level--;
                     }
-                    else if (Game.Random.Next(10) < 4)
+                    else*/
+                    
+                    if (Game.Random.Next(10) < 5)
                     {
                         level++;
                     }
@@ -869,7 +880,7 @@ namespace RogueBasin
 
             for (int i = 0; i < noCaveLevels; i++)
             {
-                int totalPotions = 5 + Game.Random.Next(5);
+                int totalPotions = 1 + Game.Random.Next(5);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -911,7 +922,7 @@ namespace RogueBasin
 
             for (int i = noRuinedLevels; i < noRuinedLevels + noCaveLevels; i++)
             {
-                int totalPotions = 5 + Game.Random.Next(5);
+                int totalPotions = 1 + Game.Random.Next(5);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -953,7 +964,7 @@ namespace RogueBasin
 
             for (int i = noRuinedLevels + noCaveLevels; i < noRuinedLevels + noCaveLevels + noHallLevels; i++)
             {
-                int totalPotions = 5 + Game.Random.Next(5);
+                int totalPotions = 1 + Game.Random.Next(5);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -1176,8 +1187,8 @@ namespace RogueBasin
 
             double lightLevel = lightDelta / 10.0;
 
-            if (lightLevel < 0.4)
-                lightLevel = 0.4;
+            if (lightLevel < 0.8)
+                lightLevel = 0.8;
 
             if (lightLevel > 2.0)
             {

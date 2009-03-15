@@ -62,7 +62,7 @@ namespace RogueBasin.Items
             //Screen.Instance.PlayMovie("wallvault", false);
 
             //Add permanent speed increase
-            Game.Dungeon.Player.Speed += 10;
+            //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
@@ -105,7 +105,7 @@ namespace RogueBasin.Items
 
         public int ArmourClassModifier()
         {
-            return 2;
+            return 0;
         }
 
         public int DamageBase()

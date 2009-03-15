@@ -62,7 +62,7 @@ namespace RogueBasin.Items
             //Screen.Instance.PlayMovie("openspaceattack", false);
 
             //Add any equipped (actually permanent) effects
-            Game.Dungeon.Player.Speed += 10;
+            //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
@@ -105,7 +105,7 @@ namespace RogueBasin.Items
 
         public int ArmourClassModifier()
         {
-            return 1;
+            return 0;
         }
 
         public int DamageBase()

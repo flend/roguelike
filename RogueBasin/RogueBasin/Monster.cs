@@ -30,6 +30,9 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Spider))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Zombie))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Ferret))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Bugbear))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Ghoul))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.SkeletalArcher))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>
