@@ -273,7 +273,7 @@ namespace RogueBasin
                                     Game.Dungeon.RunMainLoop = false;
                                     
                                     break;
-                                case 'f':
+                                case 'F':
                                     //Full screen switch
                                     timeAdvances = false;
                                     RootConsole rootConsole = RootConsole.GetInstance();
@@ -1226,7 +1226,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 2;
+            LogFile.Log.DebugLevel = -1;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
