@@ -675,7 +675,7 @@ namespace RogueBasin
 
             Game.Dungeon.TotalPlotItems = 15;
 
-
+            /*
             int level = 0;
             List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
@@ -688,7 +688,7 @@ namespace RogueBasin
                     //May want to specify a minimum distance from staircases??? TODO
                 } while (!dungeon.AddItem(plotItem, 0, location));
             }
-
+            */
 
             /*
             //debug
@@ -702,17 +702,20 @@ namespace RogueBasin
             //Stick them all on the first level
 
 
-            /*
+            
             int level = 0;
             List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
             foreach (Item plotItem in plotItems)
             {
                 //Find random level w/o plotItem
+                int loopCount = 0;
+                
                 do
                 {
                     level = Game.Random.Next(noCaveLevels + noRuinedLevels);
-                } while (levelsWithPlotItems.Contains(level));
+                    loopCount++;
+                } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
 
                 levelsWithPlotItems.Add(level);
 
@@ -750,7 +753,7 @@ namespace RogueBasin
                         //May want to specify a minimum distance from staircases??? TODO
                     } while (!dungeon.AddItem(plotItem, level, location));
                 }
-            }*/
+            }
             
             //Potions
 

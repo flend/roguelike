@@ -55,6 +55,8 @@ namespace RogueBasin.SpecialMoves
                 //Must be no direction
                 if (Game.Dungeon.Player.LocationMap != locationAfterMove)
                 {
+                    moveCounter = 0;
+                    LogFile.Log.LogEntryDebug("Burst of Speed failed, move on 2", LogDebugLevel.Medium);
                     return;
                 }
 
