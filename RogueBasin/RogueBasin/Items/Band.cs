@@ -42,7 +42,7 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            if (Game.Dungeon.PlayItemMovies)
+            if (Game.Dungeon.Player.PlayItemMovies)
             {
                 Screen.Instance.PlayMovie("plotband", true);
                 Screen.Instance.PlayMovie("vaultbackstab", false);

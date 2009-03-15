@@ -41,7 +41,7 @@ namespace RogueBasin.Triggers
                 //TODO: Add pacifist ending
 
                 //Are we in time
-                if (Game.Dungeon.WorldClock < Game.Dungeon.TimeToRescueFriend)
+                if (Game.Dungeon.WorldClock < Game.Dungeon.Player.TimeToRescueFriend)
                 {
 
                     Screen.Instance.PlayMovie("helpFriend", true);

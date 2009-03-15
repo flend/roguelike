@@ -70,10 +70,10 @@ namespace RogueBasin
 
         public GameDifficulty difficulty { get; set; }
 
-        int noCaveLevels = 5;
-        int noCaveWaterLevels = 3;
+        int noCaveLevels = 10;
+        int noCaveWaterLevels = 5;
 
-        int noRuinedLevels = 8;
+        int noRuinedLevels = 3;
         int ruinedExtraCorridorDefinite = 5;
         int ruinedExtraCorridorRandom = 10;
 
@@ -81,7 +81,7 @@ namespace RogueBasin
         int hallsExtraCorridorDefinite = 0;
         int hallsExtraCorridorRandom = 8;
 
-        int potionOnMonsterChance = 75;
+        int potionOnMonsterChance = 60;
 
         public DungeonMaker(GameDifficulty diff) {
             difficulty = diff;
@@ -108,9 +108,18 @@ namespace RogueBasin
             
             SpawnUniques();
 
-            Game.Dungeon.TimeToRescueFriend = 1000000;
-
-
+            switch (difficulty)
+            {
+                case GameDifficulty.Easy:
+                    Game.Dungeon.Player.TimeToRescueFriend = 800000;
+                    break;
+                case GameDifficulty.Medium:
+                    Game.Dungeon.Player.TimeToRescueFriend = 700000;
+                    break;
+                case GameDifficulty.Hard:
+                    Game.Dungeon.Player.TimeToRescueFriend = 600000;
+                    break;
+            }
             return dungeon;
         }
 
@@ -162,6 +171,8 @@ namespace RogueBasin
                     lich.Hitpoints = 100;
                 }
             }
+
+
         }
 
         private void SetupPlayer()
@@ -169,6 +180,9 @@ namespace RogueBasin
             Player player = dungeon.Player;
 
             player.Representation = '@';
+
+            player.CalculateCombatStats();
+            player.Hitpoints = player.MaxHitpoints;
 
             //player.Hitpoints = 100;
             //player.MaxHitpoints = 100;
@@ -257,11 +271,19 @@ namespace RogueBasin
                 levelList[monster.CreatureLevel() - 1].Add(monster);
             }
 
+            if (difficulty == GameDifficulty.Easy)
+            {
+                for (int i = 0; i < levelMonsterAmounts.Count; i++)
+                {
+                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 0.5);
+                }
+            }
+
             if (difficulty == GameDifficulty.Medium)
             {
                 for (int i = 0; i < levelMonsterAmounts.Count; i++)
                 {
-                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 1.5);
+                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 0.75);
                 }
             }
 
@@ -269,7 +291,7 @@ namespace RogueBasin
             {
                 for (int i = 0; i < levelMonsterAmounts.Count; i++)
                 {
-                    levelMonsterAmounts[i] *= (int)(levelMonsterAmounts[i] * 2.5);
+                    levelMonsterAmounts[i] *= (int)(levelMonsterAmounts[i] * 1);
                 }
             }
 
@@ -599,7 +621,7 @@ namespace RogueBasin
             {
                 //Spawn in with a random number of ferrets & goblins
                 int noFerrets = 2 + Game.Random.Next(4);
-                int noGoblins = 1 + Game.Random.Next(3);
+                int noGoblins = 1 + Game.Random.Next(2);
 
                 for (int i = 0; i < noFerrets; i++)
                 {
@@ -629,7 +651,7 @@ namespace RogueBasin
             else if (monster is Creatures.OrcShaman)
             {
                 //Spawn in with a random number of orcs & spiders
-                int noOrcs = 2 + Game.Random.Next(3);
+                int noOrcs = 1 + Game.Random.Next(3);
                 int noSpiders = 1 + Game.Random.Next(2);
 
                 for (int i = 0; i < noOrcs; i++)
@@ -662,8 +684,8 @@ namespace RogueBasin
             else if (monster is Creatures.Necromancer)
             {
                 //Spawn in with a random number of skels & zombs
-                int noSkel = 1 + Game.Random.Next(4);
-                int noZomb = 1 + Game.Random.Next(3);
+                int noSkel = 1 + Game.Random.Next(3);
+                int noZomb = 0 + Game.Random.Next(2);
 
                 for (int i = 0; i < noSkel; i++)
                 {
@@ -711,8 +733,8 @@ namespace RogueBasin
 
             List<Item> plotItems = new List<Item> { 
                 //special mode items (9)
-                new Items.Badge(), new Items.Band(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
-            new Items.Greaves(), new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash() };
+                new Items.Badge(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
+            new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash() };
 
             List<Item> plotLevelItems = new List<Item> {
             //levelling items 
@@ -765,6 +787,26 @@ namespace RogueBasin
 
             List<Item> itemsPlaced = new List<Item>();
 
+            //Guarantee Greaves or band on level 1
+            Item firstItem;
+
+            if (Game.Random.Next(2) < 1)
+            {
+                firstItem = new Items.Greaves();
+                plotItems.Add(new Items.Band());
+            }
+            else
+            {
+                firstItem = new Items.Band();
+                plotItems.Add(new Items.Greaves());
+            }
+            do
+            {
+                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
+            } while (!dungeon.AddItem(firstItem, gloveLevel, location));
+
+            itemsPlaced.Add(firstItem);
+
             //Levelling items are distributed through the first 12 levels
 
             for (int i = 0; i < plotLevelItems.Count; i++)
@@ -814,6 +856,8 @@ namespace RogueBasin
 
             //Distribute the move items randomly on other levels
 
+            //Guarantee a few special move items early on
+
             for (int i = 0; i < plotItems.Count; i++)
             {
                 //Find random level w/o plotItem
@@ -825,12 +869,19 @@ namespace RogueBasin
                     plotItem = plotItems[Game.Random.Next(plotItems.Count)];
                 } while (itemsPlaced.Contains(plotItem));
 
-                do
-                {
-                    level = Game.Random.Next(totalNormalLevels - 2);
-                    loopCount++;
-                } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
-
+                //guarantee some items early on
+              //  if (i < 2)
+               // {
+              //      level = Game.Random.Next(2);
+              //  }
+             //   else
+//{
+                    do
+                    {
+                        level = Game.Random.Next(totalNormalLevels - 2);
+                        loopCount++;
+                    } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
+               // }
                 levelsWithPlotItems.Add(level);
                 itemsPlaced.Add(plotItem);
 
@@ -878,9 +929,9 @@ namespace RogueBasin
 
             //Cave levels
 
-            for (int i = 0; i < noCaveLevels; i++)
+            for (int i = 0; i < 1; i++)
             {
-                int totalPotions = 1 + Game.Random.Next(5);
+                int totalPotions = 3 + Game.Random.Next(5);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -920,9 +971,51 @@ namespace RogueBasin
                 }
             }
 
-            for (int i = noRuinedLevels; i < noRuinedLevels + noCaveLevels; i++)
+            for (int i = 1; i < noCaveLevels; i++)
             {
-                int totalPotions = 1 + Game.Random.Next(5);
+                int totalPotions = 3 + Game.Random.Next(5);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 45)
+                        potion = new Items.Potion();
+                    else if (randomChance < 65)
+                        potion = new Items.PotionToHitUp();
+                    else if (randomChance < 70)
+                        potion = new Items.PotionDamUp();
+                    else if (randomChance < 85)
+                        potion = new Items.PotionSpeedUp();
+                    else if (randomChance < 90)
+                        potion = new Items.PotionSightUp();
+
+                    else if (randomChance < 93)
+                        potion = new Items.PotionMajHealing();
+                    else if (randomChance < 94)
+                        potion = new Items.PotionMajDamUp();
+                    else if (randomChance < 95)
+                        potion = new Items.PotionMajSpeedUp();
+                    else if (randomChance < 96)
+                        potion = new Items.PotionMajSightUp();
+                    else if (randomChance < 97)
+                        potion = new Items.PotionSuperHealing();
+                    else if (randomChance < 98)
+                        potion = new Items.PotionSuperDamUp();
+                    else if (randomChance < 99)
+                        potion = new Items.PotionSuperToHitUp();
+                    else
+                        potion = new Items.PotionSuperSpeedUp();
+
+                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
+                }
+            }
+
+            for (int i = noRuinedLevels; i < noRuinedLevels + noCaveLevels - 2; i++)
+            {
+                int totalPotions = 3 + Game.Random.Next(5);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -962,7 +1055,7 @@ namespace RogueBasin
                 }
             }
 
-            for (int i = noRuinedLevels + noCaveLevels; i < noRuinedLevels + noCaveLevels + noHallLevels; i++)
+            for (int i = noRuinedLevels + noCaveLevels - 2; i < noRuinedLevels + noCaveLevels + noHallLevels; i++)
             {
                 int totalPotions = 1 + Game.Random.Next(5);
 

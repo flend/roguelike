@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    class Ghoul : MonsterFightAndRunAI
+    public class Ghoul : MonsterFightAndRunAI
     {
         const int classDeltaHitpoints = 25;
         const int classMinHitpoints = 15;

@@ -42,7 +42,7 @@ namespace RogueBasin.Items
             //This is plot equipment
 
             //Give player story. Mention level up if one will occur.
-            if (Game.Dungeon.PlayItemMovies)
+            if (Game.Dungeon.Player.PlayItemMovies)
             {
                 Screen.Instance.PlayMovie("plotgreaves", true);
                 Screen.Instance.PlayMovie("openspaceattack", false);

@@ -84,17 +84,10 @@ namespace RogueBasin
 
         private List<Monster> summonedMonsters; //no need to serialize
 
-        /// <summary>
-        /// Play movies and give plot exerpts for items
-        /// </summary>
-        public bool PlayItemMovies { get; set; }
 
         long worldClock = 0;
 
-        /// <summary>
-        /// How many worldClock ticks do we have to rescue our friend?
-        /// </summary>
-        public long TimeToRescueFriend { get; set; }
+
 
         /// <summary>
         /// Set to false to end the game

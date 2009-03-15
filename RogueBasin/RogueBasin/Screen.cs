@@ -820,7 +820,7 @@ namespace RogueBasin {
                 {
                     //Never in FOV
                     if (debugMode)
-                        itemColorToUse = neverSeenFOVTerrainColor;
+                        itemColorToUse = itemColor;
                     else
                         itemColorToUse = hiddenColor;
                 }

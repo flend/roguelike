@@ -220,8 +220,8 @@ namespace RogueBasin.SpecialMoves
             //Give the player a small speed boost
             if (bonus <= 5)
             {
-                speedInc += 50;
-                Game.Dungeon.Player.Speed += 50;
+                speedInc += 25;
+                Game.Dungeon.Player.Speed += 25;
             }
            
 

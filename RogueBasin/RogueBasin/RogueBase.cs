@@ -136,6 +136,10 @@ namespace RogueBasin
                         Game.Dungeon.ShowCreatureFOVOnMap(monster);
                     }
 
+                    //For effects that end to update the screen correctly
+                    if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
+                        Game.Dungeon.Player.CalculateCombatStats();
+
                     //Update screen just before PC's turn
                     UpdateScreen();
 
@@ -247,6 +251,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
+
                                 case 'n':
                                     //Name object
                                     SetPlayerInventorySelectScreen();
@@ -388,6 +393,11 @@ namespace RogueBasin
                                     //Add an anti-healing event on the player
                                     PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
                                     Game.Dungeon.Player.AddEffect(zhealing);
+                                    UpdateScreen();
+                                    break;
+                                case 'c':
+                                    //Level up
+                                    Game.Dungeon.Player.LevelUp();
                                     UpdateScreen();
                                     break;
 
@@ -1168,7 +1178,7 @@ namespace RogueBasin
                 Game.Dungeon = dungeonMaker.SpawnNewDungeon();
 
                 Game.Dungeon.Player.Name = playerName;
-                Game.Dungeon.PlayItemMovies = showMovies;
+                Game.Dungeon.Player.PlayItemMovies = showMovies;
                 Game.Dungeon.Difficulty = diff;
 
                 //Move the player to the start location, triggering any triggers

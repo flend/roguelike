@@ -24,7 +24,8 @@ namespace RogueBasin.PlayerEffects
         public override void OnStart()
         {
             LogFile.Log.LogEntry("ToHitUp start");
-            Game.MessageQueue.AddMessage("Your aim feels true");
+            Game.MessageQueue.AddMessage("Your aim feels true.");
+            Game.Dungeon.Player.CalculateCombatStats();
         }
 
         /// <summary>
@@ -33,7 +34,8 @@ namespace RogueBasin.PlayerEffects
         public override void OnEnd()
         {
             LogFile.Log.LogEntry("ToHitUp ended");
-            Game.MessageQueue.AddMessage("You return to normal");
+            Game.MessageQueue.AddMessage("You return to normal.");
+            Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
         }
 
         protected override int GetDuration()

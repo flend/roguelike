@@ -648,6 +648,10 @@ namespace RogueBasin
                 if (this.LocationLevel != monster.LocationLevel)
                     continue;
 
+                //Can't heal yourself
+                if (monster == this)
+                    continue;
+
                 if (Game.Dungeon.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005)
                 {
                     targetsInRange.Add(monster);
@@ -665,7 +669,7 @@ namespace RogueBasin
 
             //Heal this monster
             int oldHP = actualTarget.Hitpoints;
-            actualTarget.Hitpoints += Game.Random.Next(actualTarget.MaxHitpoints - actualTarget.Hitpoints) + 1;
+            actualTarget.Hitpoints += (int)(Game.Random.Next(actualTarget.MaxHitpoints - actualTarget.Hitpoints) / 3.0);
 
             //Update msg
             Game.MessageQueue.AddMessage("The " + this.SingleDescription + " heals the " + actualTarget.SingleDescription);

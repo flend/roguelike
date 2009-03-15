@@ -563,7 +563,7 @@ namespace RogueBasin
 
                 //Heal this monster
                 int oldHP = actualTarget.Hitpoints;
-                actualTarget.Hitpoints += Game.Random.Next(actualTarget.MaxHitpoints - actualTarget.Hitpoints) + 1;
+                actualTarget.Hitpoints += (int)(Game.Random.Next(actualTarget.MaxHitpoints - actualTarget.Hitpoints) / 3.0);
 
                 //Update msg
                 Game.MessageQueue.AddMessage("The " + this.SingleDescription + " heals the " + actualTarget.SingleDescription);

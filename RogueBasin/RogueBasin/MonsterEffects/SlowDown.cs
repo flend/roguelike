@@ -34,7 +34,7 @@ namespace RogueBasin.MonsterEffects
         public override void OnEnd()
         {
             LogFile.Log.LogEntry("SlowDown ended");
-            Game.MessageQueue.AddMessage("The " + monster.SingleDescription + "recovers.");
+            Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " recovers.");
 
             monster.Speed += speedEffect;
         }

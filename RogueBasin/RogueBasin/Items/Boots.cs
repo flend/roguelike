@@ -42,7 +42,7 @@ namespace RogueBasin.Items
 
             //Give player story. Mention level up if one will occur.
 
-            if (Game.Dungeon.PlayItemMovies)
+            if (Game.Dungeon.Player.PlayItemMovies)
             {
                 Screen.Instance.PlayMovie("plotboots", true);
                 Screen.Instance.PlayMovie("wallvault", false);
@@ -50,7 +50,7 @@ namespace RogueBasin.Items
 
             //Messages
             //Game.MessageQueue.AddMessage("Levelled up!");
-            Game.MessageQueue.AddMessage("Learnt Wall Vault!");
+            Game.MessageQueue.AddMessage("Learnt Charge Attack!");
 
             //Screen.Instance.PlayMovie("plotboots", true);
 

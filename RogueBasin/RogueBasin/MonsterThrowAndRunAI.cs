@@ -21,6 +21,8 @@ namespace RogueBasin
 
             Random rand = Game.Random;
 
+            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
 
             if (AIState == SimpleAIStates.Pursuit)
             {
@@ -43,6 +45,13 @@ namespace RogueBasin
                 {
                     AIState = SimpleAIStates.RandomWalk;
                 }
+                //Has the target left our FOV
+                else if (!currentFOV.CheckTileFOV(currentTarget.LocationMap.x, currentTarget.LocationMap.y))
+                {
+                    AIState = SimpleAIStates.RandomWalk;
+                }
+
+
                 else
                 {
                     //Otherwise continue to chase
@@ -60,7 +69,7 @@ namespace RogueBasin
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
 
                 //Get the FOV from Dungeon (this also updates the map creature FOV state)
-                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+                
                 //currentFOV.CalculateFOV(LocationMap.x, LocationMap.y, SightRadius);
 
                 //Check for other creatures within this creature's FOV

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.Creatures
 {
-    class SkeletalArcher : MonsterFightAndRunAI
+    public class SkeletalArcher : MonsterThrowAndRunAI
     {
         const int classDeltaHitpoints = 20;
         const int classMinHitpoints = 5;
@@ -14,6 +14,16 @@ namespace RogueBasin.Creatures
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
             Speed = 100;
+        }
+
+        protected override double GetMissileRange()
+        {
+            return 3;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "shoots an arrow";
         }
 
         public override void InventoryDrop()
@@ -73,20 +83,6 @@ namespace RogueBasin.Creatures
             return 'A';
         }
 
-        protected override int GetChanceToRecover()
-        {
-            return 0;
-        }
-
-        protected override int GetChanceToFlee()
-        {
-            return 0;
-        }
-
-        protected override int GetMaxHPWillFlee()
-        {
-            return 0;
-        }
         public override int CreatureCost()
         {
             return 35;

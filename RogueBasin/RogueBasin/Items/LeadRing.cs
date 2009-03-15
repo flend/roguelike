@@ -42,7 +42,7 @@ namespace RogueBasin.Items
 
             //This is plot equipment
 
-            if (Game.Dungeon.PlayItemMovies)
+            if (Game.Dungeon.Player.PlayItemMovies)
             {
                 Screen.Instance.PlayMovie("plotleadring", true);
                 Screen.Instance.PlayMovie("evade", false);

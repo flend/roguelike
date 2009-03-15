@@ -49,7 +49,7 @@ namespace RogueBasin.Items
             //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
 
             //Play movies if set
-            if (Game.Dungeon.PlayItemMovies)
+            if (Game.Dungeon.Player.PlayItemMovies)
             {
                 Screen.Instance.PlayMovie("plotglove", true);
                 //Screen.Instance.PlayMovie("vaultbackstab", false);

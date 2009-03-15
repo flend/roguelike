@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    class Bugbear : MonsterThrowAndRunAI
+    public class Bugbear : MonsterThrowAndRunAI
     {
         const int classDeltaHitpoints = 5;
         const int classMinHitpoints = 10;
@@ -59,7 +59,7 @@ namespace RogueBasin.Creatures
 
         protected override double GetMissileRange()
         {
-            return 3.0;
+            return 3;
         }
 
         protected override string GetWeaponName()
@@ -99,7 +99,7 @@ namespace RogueBasin.Creatures
 
         public override int CreatureLevel()
         {
-            return 2;
+            return 3;
         }
 
         public override Color CreatureColor()

@@ -62,7 +62,7 @@ namespace RogueBasin.Creatures
 
         protected override double GetMissileRange()
         {
-            return 3.0;
+            return 2.0;
         }
 
         protected override string GetWeaponName()
@@ -93,7 +93,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetTotalFleeLoops()
         {
-            return 10;
+            return 5;
         }
         public override int CreatureCost()
         {

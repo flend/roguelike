@@ -62,7 +62,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetUseSpecialChance()
         {
-            return 50;
+            return 35;
         }
 
         /// <summary>

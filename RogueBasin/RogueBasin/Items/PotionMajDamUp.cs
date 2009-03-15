@@ -30,8 +30,8 @@ namespace RogueBasin.Items
             //Add a message
             Game.MessageQueue.AddMessage("You drink the potion.");
 
-            int duration = 1000 + Game.Random.Next(3000);
-            int toHitUp = 4 + Game.Random.Next(5);
+            int duration = 1000 + Game.Random.Next(2000);
+            int toHitUp = 2 + Game.Random.Next(3);
 
             player.AddEffect(new PlayerEffects.DamageUp(player, duration, toHitUp));
 
