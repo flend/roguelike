@@ -74,8 +74,8 @@ namespace RogueBasin
 
         private void SetupInitialHP()
         {
-            hitpoints = 100;
-            maxHitpoints = 100;
+            CalculateCombatStats();
+            hitpoints = maxHitpoints;
         }
 
         /// <summary>
@@ -97,12 +97,50 @@ namespace RogueBasin
                     damageBase = 4;
                     damageModifier = 0;
                     hitModifier = 0;
+                    maxHitpoints = 20;
                     break;
                 case 2:
                     armourClass = 11;
-                    damageBase = 5;
+                    damageBase = 4;
                     damageModifier = 1;
                     hitModifier = 1;
+                    maxHitpoints = 30;
+                    break;
+                case 3:
+                    armourClass = 12;
+                    damageBase = 6;
+                    damageModifier = 1;
+                    hitModifier = 2;
+                    maxHitpoints = 40;
+                    break;
+                case 4:
+                    armourClass = 13;
+                    damageBase = 6;
+                    damageModifier = 2;
+                    hitModifier = 3;
+                    maxHitpoints = 50;
+                    break;
+                case 5:
+                    armourClass = 14;
+                    damageBase = 8;
+                    damageModifier = 2;
+                    hitModifier = 4;
+                    maxHitpoints = 60;
+                    break;
+                case 6:
+                    armourClass = 15;
+                    damageBase = 8;
+                    damageModifier = 3;
+                    hitModifier = 5;
+                    maxHitpoints = 70;
+                    break;
+                case 7:
+                default:
+                    armourClass = 16;
+                    damageBase = 12;
+                    damageModifier = 4;
+                    hitModifier = 6;
+                    maxHitpoints = 80;
                     break;
             }
 
@@ -694,11 +732,15 @@ namespace RogueBasin
             //Level up!
             Level++;
 
+            int lastMaxHP = maxHitpoints;
+
             //Recalculate combat stats
             CalculateCombatStats();
 
+            hitpoints += maxHitpoints - lastMaxHP;
+
             //Calculate HP etc
-            HPOnLevelUP();
+            //HPOnLevelUP();
 
             LogFile.Log.LogEntry("Player levels up to: " + Level);
         }

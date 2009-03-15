@@ -122,8 +122,8 @@ namespace RogueBasin
 
             player.Representation = '@';
 
-            player.Hitpoints = 100;
-            player.MaxHitpoints = 100;
+            //player.Hitpoints = 100;
+            //player.MaxHitpoints = 100;
 
         }
 
