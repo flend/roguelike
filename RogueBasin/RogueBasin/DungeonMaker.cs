@@ -143,24 +143,31 @@ namespace RogueBasin
 
             //Could take into account depth and difficulty level
 
-            List<int> levelMonsterAmounts = new List<int>() {
+            List<int> levelMonsterAmounts = new List<int>();
+            
+            for(int i=0;i<15;i++) {
+                int num = 100 + 40 * i;
+                levelMonsterAmounts.Add(num);
+            }
+            
+            /*{
 
-                200, //1
-                220, //2
-                240, //3
-                260, //4
-                300, //5
-                320, //6
-                340, //7
-                360, //8
-                400, //9
-                440, //10
-                480, //11
-                520, //12
-                560, //13
-                600, //14
-                750 //15
-            };
+                150, //1
+                120, //2
+                140, //3
+                160, //4
+                200, //5
+                220, //6
+                240, //7
+                260, //8
+                300, //9
+                340, //10
+                380, //11
+                420, //12
+                460, //13
+                500, //14
+                550 //15
+            };*/
 
             //Monster Types
             Creatures.Ferret ferret = new RogueBasin.Creatures.Ferret();
@@ -347,7 +354,7 @@ namespace RogueBasin
 
                             Monster monsterToAdd = null;
 
-                            if (randomNum < 15)
+                            if (randomNum < 25)
                             {
                                 monsterToAdd = levelList[0].GetRandomMonster();
                             }
@@ -387,15 +394,15 @@ namespace RogueBasin
 
                             Monster monsterToAdd = null;
 
-                            if (randomNum < 5)
+                            if (randomNum < 10)
                             {
                                 monsterToAdd = levelList[0].GetRandomMonster();
                             }
-                            else if (randomNum < 20)
+                            else if (randomNum < 30)
                             {
                                 monsterToAdd = levelList[1].GetRandomMonster();
                             }
-                            else if (randomNum < 50)
+                            else if (randomNum < 60)
                                 monsterToAdd = levelList[2].GetRandomMonster();
                             else if(randomNum < 90)
                                 monsterToAdd = levelList[3].GetRandomMonster();
@@ -428,17 +435,17 @@ namespace RogueBasin
 
                             Monster monsterToAdd = null;
 
-                            if (randomNum < 5)
+                            if (randomNum < 15)
                             {
                                 monsterToAdd = levelList[0].GetRandomMonster();
                             }
-                            else if (randomNum < 10)
+                            else if (randomNum < 25)
                             {
                                 monsterToAdd = levelList[1].GetRandomMonster();
                             }
-                            else if (randomNum < 20)
+                            else if (randomNum < 35)
                                 monsterToAdd = levelList[2].GetRandomMonster();
-                            else if(randomNum < 70)
+                            else if(randomNum < 80)
                                 monsterToAdd = levelList[3].GetRandomMonster();
                             else
                                 monsterToAdd = levelList[4].GetRandomMonster();
@@ -468,17 +475,17 @@ namespace RogueBasin
 
                             Monster monsterToAdd = null;
 
-                            if (randomNum < 2)
+                            if (randomNum < 10)
                             {
                                 monsterToAdd = levelList[0].GetRandomMonster();
                             }
-                            else if (randomNum < 5)
+                            else if (randomNum < 20)
                             {
                                 monsterToAdd = levelList[1].GetRandomMonster();
                             }
-                            else if (randomNum < 10)
+                            else if (randomNum < 30)
                                 monsterToAdd = levelList[2].GetRandomMonster();
-                            else if(randomNum < 40)
+                            else if(randomNum < 70)
                                 monsterToAdd = levelList[3].GetRandomMonster();
                             else
                                 monsterToAdd = levelList[4].GetRandomMonster();
@@ -541,7 +548,7 @@ namespace RogueBasin
             {
                 //Spawn in with a random number of ferrets & goblins
                 int noFerrets = 1 + Game.Random.Next(4);
-                int noGoblins = 1 + Game.Random.Next(2);
+                int noGoblins = 0 + Game.Random.Next(2);
 
                 for (int i = 0; i < noFerrets; i++)
                 {
@@ -571,7 +578,7 @@ namespace RogueBasin
             else if (monster is Creatures.OrcShaman)
             {
                 //Spawn in with a random number of orcs & spiders
-                int noOrcs = 1 + Game.Random.Next(4);
+                int noOrcs = 1 + Game.Random.Next(2);
                 int noSpiders = 0 + Game.Random.Next(2);
 
                 for (int i = 0; i < noOrcs; i++)
@@ -604,8 +611,8 @@ namespace RogueBasin
             else if (monster is Creatures.Necromancer)
             {
                 //Spawn in with a random number of skels & zombs
-                int noSkel = 1 + Game.Random.Next(4);
-                int noZomb = 1 + Game.Random.Next(3);
+                int noSkel = 1 + Game.Random.Next(2);
+                int noZomb = 0 + Game.Random.Next(2);
 
                 for (int i = 0; i < noSkel; i++)
                 {
