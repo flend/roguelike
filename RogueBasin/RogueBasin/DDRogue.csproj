@@ -87,6 +87,15 @@
     <Compile Include="Items\Medal.cs" />
     <Compile Include="Items\Potion.cs" />
     <Compile Include="Items\PotionDamUp.cs" />
+    <Compile Include="Items\PotionMajDamUp.cs" />
+    <Compile Include="Items\PotionMajHealing.cs" />
+    <Compile Include="Items\PotionMajToHitUp.cs" />
+    <Compile Include="Items\PotionMajSightUp.cs" />
+    <Compile Include="Items\PotionMajSpeedUp.cs" />
+    <Compile Include="Items\PotionSuperDamUp.cs" />
+    <Compile Include="Items\PotionSuperHealing.cs" />
+    <Compile Include="Items\PotionSuperToHitUp.cs" />
+    <Compile Include="Items\PotionSuperSpeedUp.cs" />
     <Compile Include="Items\PotionToHitUp.cs" />
     <Compile Include="Items\PotionSpeedUp.cs" />
     <Compile Include="Items\Sash.cs" />
@@ -127,7 +136,7 @@
     <Compile Include="PlayerEffects\DamageUp.cs" />
     <Compile Include="PlayerEffects\MultiDamage.cs" />
     <Compile Include="PlayerEffects\Healing.cs" />
-    <Compile Include="PlayerEffects\PotionSightUp.cs" />
+    <Compile Include="Items\PotionSightUp.cs" />
     <Compile Include="PlayerEffects\SightRadiusUp.cs" />
     <Compile Include="PlayerEffects\SpeedUp.cs" />
     <Compile Include="PlayerEffects\ToHitUp.cs" />

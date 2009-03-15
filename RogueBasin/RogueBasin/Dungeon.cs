@@ -155,12 +155,23 @@ namespace RogueBasin
         private void SetupHiddenNameMappings()
         {
             //Add all potions here
-            List<Item> allPotions = new List<Item>() { new Items.Potion() };
+            List<Item> allPotions = new List<Item>() { new Items.Potion(), new Items.PotionDamUp(), new Items.PotionMajDamUp(), new Items.PotionMajHealing(), new Items.PotionMajSightUp(),
+                new Items.PotionMajSpeedUp(),    new Items.PotionMajToHitUp(), new Items.PotionSightUp(), new Items.PotionSpeedUp(), new Items.PotionSuperDamUp(),
+                new Items.PotionSuperHealing(), new Items.PotionSuperSpeedUp(), new Items.PotionSuperToHitUp(), new Items.PotionToHitUp()};
+
+            List<string> descsUsed = new List<string>();
 
             foreach (Item potion in allPotions)
             {
-                HiddenNameInfo info = new HiddenNameInfo(potion.SingleItemDescription, Utility.RandomHiddenDescription() + " " + potion.HiddenSuffix, null);
+                string hiddenDesc;
+                do
+                {
+                    hiddenDesc = Utility.RandomHiddenDescription();
+                } while (descsUsed.Contains(hiddenDesc));
+
+                HiddenNameInfo info = new HiddenNameInfo(potion.SingleItemDescription, hiddenDesc + " " + potion.HiddenSuffix, null);
                 HiddenNameInfo.Add(info);
+                descsUsed.Add(hiddenDesc);
             }
         }
 

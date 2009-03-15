@@ -4,11 +4,11 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    public class Potion : Item, IUseableItem
+    public class PotionSuperDamUp : Item, IUseableItem
     {
         bool usedUp;
 
-        public Potion()
+        public PotionSuperDamUp()
         {
             usedUp = false;
         }
@@ -25,8 +25,12 @@ namespace RogueBasin.Items
             }
 
             //Apply the healing effect to the player
-            int healing = 10 + Game.Random.Next(10);
-            player.AddEffect(new PlayerEffects.Healing(player, healing));
+            //Duration note 100 is normally 1 turn for a non-sped up player
+
+            int duration = 1000 + Game.Random.Next(2000);
+            int toHitUp = 5 + Game.Random.Next(10);
+
+            player.AddEffect(new PlayerEffects.DamageUp(player, duration, toHitUp));
 
             //Add a message
             Game.MessageQueue.AddMessage("You drink the potion");

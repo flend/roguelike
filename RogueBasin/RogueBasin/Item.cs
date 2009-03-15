@@ -11,7 +11,20 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionDamUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSpeedUp))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionToHitUp))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSpeedUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSightUp))]
+
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionMajHealing))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionMajDamUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionMajSpeedUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionMajToHitUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionMajSightUp))]
+
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSuperHealing))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSuperDamUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSuperSpeedUp))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.PotionSuperToHitUp))]
+
+
     [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Bracelet))]
 

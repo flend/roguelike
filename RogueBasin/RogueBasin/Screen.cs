@@ -1548,5 +1548,45 @@ namespace RogueBasin {
                 }
             } while (true);
         }
+
+        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //ClearMessageLine();
+
+            PrintMessage(introMessage + " (e / m / h):", topLeft, introMessage.Length + 8);
+            FlushConsole();
+
+            do
+            {
+                //Get user input
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                //Each state has different keys
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+
+                   char keyCode = (char)userKey.Character;
+                   switch (keyCode)
+                   {
+                       case 'e':
+                           ClearMessageLine();
+                           return GameDifficulty.Easy;
+                           
+                       case 'm':
+                           ClearMessageLine();
+                           return GameDifficulty.Medium;
+
+                       case 'h':
+                           ClearMessageLine();
+                           return GameDifficulty.Hard;
+                           
+                   }
+                }
+            } while(true);
+        }
     }
 }

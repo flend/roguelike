@@ -41,8 +41,9 @@ namespace RogueBasin
 
         public static string RandomHiddenDescription()
         {
-            //Return a random string 
-            List<string> hiddenDesc = new List<string>() { "gold", "brown", "small purple", "red", "orange", "metallic", "shiny", "effervesent", "sparkling", "black", "green" };
+            //Return a random string . Need at least 14
+            List<string> hiddenDesc = new List<string>() { "gold", "brown", "purple", "red", "orange", "metallic", "shiny", "effervesent", "sparkling", "black", "green", "putrid",
+            "transparent", "opaque", "bubbling", "hissing", "sticky", "syrupy", "corrosive", "sweet-smelling", "dark" };
 
             return hiddenDesc[Game.Random.Next(hiddenDesc.Count)];
 

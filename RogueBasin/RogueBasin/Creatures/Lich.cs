@@ -14,7 +14,7 @@ namespace RogueBasin.Creatures
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
             NormalSightRadius = 0;
-
+            /*
             if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
             {
                 MaxSummons = 8;
@@ -26,7 +26,8 @@ namespace RogueBasin.Creatures
             else
             {
                 MaxSummons = 20;
-            }
+            }*/
+            MaxSummons = 8;
 
             Speed = 150;
         }
@@ -40,6 +41,8 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
+            return 50;
+            /*
             if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
             {
                 return 50;
@@ -51,7 +54,7 @@ namespace RogueBasin.Creatures
             else
             {
                 return 150;
-            }
+            }*/
         }
 
         /// <summary>

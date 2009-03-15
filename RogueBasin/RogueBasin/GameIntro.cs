@@ -12,7 +12,7 @@ namespace RogueBasin
     {
         public string PlayerName { get; private set; }
         public bool ShowMovies { get; private set; }
-
+        public GameDifficulty Difficulty { get; private set; }
 
         public GameIntro() {
             PlayerName = null;
@@ -73,6 +73,10 @@ namespace RogueBasin
 
             //Ask settings questions
             ShowMovies = Screen.Instance.YesNoQuestion("Show plot text and movies?", new Point(settingsTL.x, settingsTL.y + height + 1));
+
+            //Ask settings questions
+            Difficulty = Screen.Instance.DifficultyQuestion("Game Difficulty Easy / Medium / Hard?", new Point(settingsTL.x, settingsTL.y + height + 3));
+
         }
 
         /// <summary>

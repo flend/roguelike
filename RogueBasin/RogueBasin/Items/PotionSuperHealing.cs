@@ -4,11 +4,11 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    public class Potion : Item, IUseableItem
+    public class PotionSuperHealing : Item, IUseableItem
     {
         bool usedUp;
 
-        public Potion()
+        public PotionSuperHealing()
         {
             usedUp = false;
         }
@@ -25,7 +25,7 @@ namespace RogueBasin.Items
             }
 
             //Apply the healing effect to the player
-            int healing = 10 + Game.Random.Next(10);
+            int healing = 30 + Game.Random.Next(20);
             player.AddEffect(new PlayerEffects.Healing(player, healing));
 
             //Add a message

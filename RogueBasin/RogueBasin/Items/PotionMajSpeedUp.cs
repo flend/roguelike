@@ -4,11 +4,11 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    public class Potion : Item, IUseableItem
+    public class PotionMajSpeedUp : Item, IUseableItem
     {
         bool usedUp;
 
-        public Potion()
+        public PotionMajSpeedUp()
         {
             usedUp = false;
         }
@@ -24,9 +24,13 @@ namespace RogueBasin.Items
                 return false;
             }
 
-            //Apply the healing effect to the player
-            int healing = 10 + Game.Random.Next(10);
-            player.AddEffect(new PlayerEffects.Healing(player, healing));
+            //Apply the speed up effect to the player
+            //Duration note 100 is normally 1 turn for a non-sped up player
+
+            int duration = 3000 + Game.Random.Next(5000);
+            int speedUpAmount = 75 + Game.Random.Next(50);
+
+            player.AddEffect(new PlayerEffects.SpeedUp(player, duration, speedUpAmount));
 
             //Add a message
             Game.MessageQueue.AddMessage("You drink the potion");
