@@ -2,4 +2,4 @@ Plot excerpts and special move movies will be given throughout the
 game. If you've already completed DDRogue a few times, you may wish to
 switch these off, but a new player should leave them on.
 
-Easy difficult is recommended to new players.
+Easy difficulty is recommended to new players.

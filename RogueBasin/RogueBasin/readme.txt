@@ -37,6 +37,12 @@ start the game again and give the name of your rogue the save game
 will be loaded. Dying or quitting will delete the save game. You have
 been warned :)
 
+Acknowledgements
+----------------
+
+jice - libtcod
+Chris et al - libtcod-net
+
 Release History
 ---------------
 
