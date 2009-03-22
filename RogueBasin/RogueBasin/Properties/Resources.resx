@@ -1,0 +1,316 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="battle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\battle.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="becomeLich0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\becomeLich0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="burstofspeed0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\burstofspeed0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="burstofspeed1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\burstofspeed1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="burstofspeed2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\burstofspeed2.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="closequarters0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\closequarters0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cruelEnding0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\cruelEnding0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="crushLichGem0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\crushLichGem0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="deadFriendEnding0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\deadFriendEnding0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="enterDungeon0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\enterDungeon0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="enterDungeonAgain" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\enterDungeonAgain.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="enterDungeonAgain0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\enterDungeonAgain0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="evade0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\evade0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="evade1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\evade1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="forgetfulEnding0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\forgetfulEnding0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="forgetfulEndingDeadFriend0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\forgetfulEndingDeadFriend0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="helpFriend0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\helpFriend0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="introPreamble" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\text\introPreamble.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="introSettings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\text\introSettings.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="last" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\last.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="lichBattle0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\lichBattle0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lichGem0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\lichGem0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="multiattack0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\multiattack0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="multiattack1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\multiattack1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="multiattack2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\multiattack2.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="multiattack3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\multiattack3.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="openspaceattack0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\openspaceattack0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="openspaceattack1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\openspaceattack1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="openspaceattack2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\openspaceattack2.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="openspaceattack3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\openspaceattack3.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="openspaceattack4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\openspaceattack4.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotbackpack0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotbackpack0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotbadge0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotbadge0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotband0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotband0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotbook0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotbook0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotboots0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotboots0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotbracer0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotbracer0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotflint0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotflint0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotglassgem0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotglassgem0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotglove0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotglove0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotgreaves0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotgreaves0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotleadring0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotleadring0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotlockpicks0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotlockpicks0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotmedal0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotmedal0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotsash0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotsash0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="plotstone0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\plotstone0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="romanceEnding0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\romanceEnding0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="seeCorpses0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\seeCorpses0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="seeCorpsesForgetful0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\seeCorpsesForgetful0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="spotFriend0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\spotFriend0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="stunbox0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\stunbox0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="stunbox1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\stunbox1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="stunbox2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\stunbox2.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="stunbox3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\stunbox3.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="treasureRoom0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\treasureRoom0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="vaultbackstab0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\vaultbackstab0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="vaultbackstab1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\vaultbackstab1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="vaultbackstab2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\vaultbackstab2.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallpush0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallpush0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallpush1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallpush1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallpush2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallpush2.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallvault0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallvault0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallvault1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallvault1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallvault2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallvault2.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallvault3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallvault3.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+</root>
