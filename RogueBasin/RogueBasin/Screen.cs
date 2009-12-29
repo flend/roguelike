@@ -1401,6 +1401,7 @@ namespace RogueBasin {
                                     }
                                     break;
                                 case KeyCode.TCODK_ENTER:
+                                case KeyCode.TCODK_KPENTER:
                                     //Exit with what we have
                                     return userString;
                             }

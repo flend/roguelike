@@ -266,6 +266,8 @@ namespace RogueBasin
                                 case 'S':
                                     //Save the game
                                     timeAdvances = true;
+                                    Game.MessageQueue.AddMessage("Saving game...");
+                                    UpdateScreen();
                                     Game.Dungeon.SaveGame();
                                     Game.MessageQueue.AddMessage("Press any key to exit the game.");
                                     UpdateScreen();
@@ -314,8 +316,7 @@ namespace RogueBasin
 
                                 case '.':
                                     // Do nothing
-                                    timeAdvances = true;
-                                    timeAdvances = Game.Dungeon.PCMove(0, 0);
+                                    timeAdvances = DoNothing();
                                     break;
                                 
                                 case '>':
@@ -494,10 +495,10 @@ namespace RogueBasin
                                     timeAdvances = Game.Dungeon.PCMove(1, 1);
                                     break;
 
+                                case KeyCode.TCODK_KPDEC:
                                 case KeyCode.TCODK_KP5:
                                     //Does nothing
-                                    timeAdvances = Game.Dungeon.PCMove(0, 0);
-                                    //timeAdvances = true;
+                                    timeAdvances = DoNothing();
                                     break;
 
                                 case KeyCode.TCODK_KP7:
@@ -557,6 +558,11 @@ namespace RogueBasin
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
             }
             return timeAdvances;
+        }
+
+        private bool DoNothing()
+        {
+            return Game.Dungeon.PCMove(0, 0);
         }
 
         private void NameObject()
