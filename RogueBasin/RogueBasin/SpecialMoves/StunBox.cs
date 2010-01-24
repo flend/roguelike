@@ -45,7 +45,7 @@ namespace RogueBasin.SpecialMoves
             }
 
             //Bad terrain
-            if(!dungeon.MapSquareCanBeEntered(player.LocationLevel, locationAfterMove)) {
+            if(!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove)) {
                 FailBlocked();
                 return;
             }

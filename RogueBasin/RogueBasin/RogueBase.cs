@@ -79,11 +79,6 @@ namespace RogueBasin
             //Loop through creatures
             //If their internal clocks signal another turn then take one
 
-            //Refresh the map with walkable etc. information
-            //Now that creatures don't cause non-walkable squares, we only need to do this if the terrain changes
-            //RecalculateMapAfterMove();
-            //Now done at the end of map gen, so unnecessary
-
             while (Game.Dungeon.RunMainLoop)
             {
                 try
@@ -103,8 +98,6 @@ namespace RogueBasin
                     {
                         try
                         {
-                            //Only process creatures on this level of the dungeon??? TODO
-
                             if (creature.IncrementTurnTime())
                             {
                                 //dungeon.ShowCreatureFOVOnMap(creature);
@@ -117,7 +110,6 @@ namespace RogueBasin
                                     {
                                         creature.ProcessTurn();
                                     }
-                                    //RecalculateMapAfterMove();
                                 }
                             }
                         }
@@ -169,11 +161,6 @@ namespace RogueBasin
                             //Update screen just before PC's turn
                             UpdateScreen();
 
-                            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                            //Screen.Instance.DrawFOVDebug(0);
-
-
                             //Deal with PCs turn as appropriate
                             bool timeAdvances = false;
                             do
@@ -181,25 +168,15 @@ namespace RogueBasin
                                 timeAdvances = UserInput();
                             } while (!timeAdvances);
 
-                            //RecalculateMapAfterMove();
-
                             //Reset the creature FOV display
                             Game.Dungeon.ResetCreatureFOVOnMap();
-
-                            //these 2 go together to generate a new dungeon on every keypress
-                            //SetupDungeon();
-                            //RecalculateMapAfterMove();
-
-                            //UpdateScreen();
 
                             //Game.MessageQueue.AddMessage("Finished PC move");
                         }
                     }
                     catch (Exception ex)
                     {
-
                         LogFile.Log.LogEntry("Exception thrown" + ex.Message);
-
                     }
                 }
                 catch (Exception ex)
@@ -214,23 +191,6 @@ namespace RogueBasin
         private void RecalculatePlayerFOV()
         {
             Game.Dungeon.CalculatePlayerFOV();
-        }
-
-        /// <summary>
-        /// After each move, recalculate the walkable parameter on each map square.
-        /// Now only required on a change of terrain features
-        /// May need to keep with/without doors version
-        /// </summary>
-        private void RecalculateMapAfterMove()
-        {
-            //Recalculate walkable
-            Game.Dungeon.RecalculateWalkable();
-
-            //Light blocking doesn't change
-
-            //Refresh the TCOD maps
-            //Uses the Walkable and BlocksLight flags on mapSquares
-            Game.Dungeon.RefreshTCODMaps();
         }
 
         //Deal with user input

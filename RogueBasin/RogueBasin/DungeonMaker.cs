@@ -1270,6 +1270,7 @@ namespace RogueBasin
 
             //Build TCOD maps
             //Necessary so connectivity checks on items and monsters can work
+            //Only place where this happens now
             CalculateWalkableAndTCOD();
 
         }

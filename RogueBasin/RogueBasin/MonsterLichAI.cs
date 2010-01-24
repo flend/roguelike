@@ -226,7 +226,7 @@ namespace RogueBasin
                     bool validMove = false;
                     Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
 
-                    validMove = Game.Dungeon.MapSquareCanBeEntered(LocationLevel, newLocation);
+                    validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation);
 
                     //Give up if this is not a valid move
                     if (!validMove)
@@ -365,7 +365,7 @@ namespace RogueBasin
                     }
 
                     //Check the square is empty
-                    bool isEnterable = Game.Dungeon.MapSquareCanBeEntered(this.LocationLevel, new Point(fleeX, fleeY));
+                    bool isEnterable = Game.Dungeon.MapSquareIsWalkable(this.LocationLevel, new Point(fleeX, fleeY));
                     if (!isEnterable)
                     {
                         counter++;
@@ -581,7 +581,7 @@ namespace RogueBasin
             {
                 for (int j = -1; j <= 1; j++)
                 {
-                    bool enterable = dungeon.MapSquareCanBeEntered(player.LocationLevel, new Point(playerSq.x + i, playerSq.y + j));
+                    bool enterable = dungeon.MapSquareIsWalkable(player.LocationLevel, new Point(playerSq.x + i, playerSq.y + j));
                     SquareContents sq = dungeon.MapSquareContents(player.LocationLevel, new Point(playerSq.x + i, playerSq.y + j));
 
                     if (enterable && sq.empty)

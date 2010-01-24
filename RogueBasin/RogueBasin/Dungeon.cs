@@ -382,7 +382,7 @@ namespace RogueBasin
                 Map creatureLevel = levels[level];
 
                 //Check square is accessable
-                if (!MapSquareCanBeEntered(level, location))
+                if (!MapSquareIsWalkable(level, location))
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
                     return false;
@@ -441,7 +441,7 @@ namespace RogueBasin
                 Map creatureLevel = levels[level];
 
                 //Check square is accessable
-                if (!MapSquareCanBeEntered(level, location))
+                if (!MapSquareIsWalkable(level, location))
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
                     return false;
@@ -571,7 +571,7 @@ namespace RogueBasin
                 Map creatureLevel = levels[level];
 
                 //Check square is accessable
-                if (!MapSquareCanBeEntered(level, location))
+                if (!MapSquareIsWalkable(level, location))
                 {
                     return false;
                 }
@@ -612,7 +612,7 @@ namespace RogueBasin
                 Map featureLevel = levels[level];
 
                 //Check square is accessable
-                if (!MapSquareCanBeEntered(level, location))
+                if (!MapSquareIsWalkable(level, location))
                 {
                     LogFile.Log.LogEntry("AddFeature: map square can't be entered");
                     return false;
@@ -660,7 +660,7 @@ namespace RogueBasin
                 Map featureLevel = levels[level];
 
                 //Check square is accessable
-                if (!MapSquareCanBeEntered(level, location))
+                if (!MapSquareIsWalkable(level, location))
                 {
                     LogFile.Log.LogEntry("AddFeature: map square can't be entered");
                     return false;
@@ -811,7 +811,7 @@ namespace RogueBasin
         /// <param name="level"></param>
         /// <param name="location"></param>
         /// <returns></returns>
-        public bool MapSquareCanBeEntered(int level, Point location)
+        public bool MapSquareIsWalkable(int level, Point location)
         {
             //Off the map
             if (location.x < 0 || location.x >= levels[level].width)
@@ -831,6 +831,8 @@ namespace RogueBasin
                 return false;
             }
 
+            //These are duplicates that use different code, so should be obsoleted
+            
             //A wall - should be caught above
             if (!Dungeon.IsTerrainWalkable(levels[level].mapSquares[location.x, location.y].Terrain))
             {
@@ -1127,24 +1129,16 @@ namespace RogueBasin
                 }
             }
 
-            //Carry out move, if one is ready
+            //Moving is handled by the special move, return
             if (moveToDo != null)
             {
-                //moveToDo.DoMove(newPCLocation);
-
-                //Clear all moves
-                //foreach (SpecialMove move in specialMoves)
-                //{
-                //    move.ClearMove();
-                //}
                 return true;
             }
             
             //No special move this go, do normal moving
 
-
             //Moving into void not allowed (but should never happen)
-            if (!MapSquareCanBeEntered(player.LocationLevel, newPCLocation))
+            if (!MapSquareIsWalkable(player.LocationLevel, newPCLocation))
             {
                 //This now costs time since it could be part of a special move
                 return true;
@@ -1286,6 +1280,12 @@ namespace RogueBasin
 
                             bool walkable = true;
 
+                            //Use new function
+
+                            if (!Dungeon.IsTerrainWalkable(level.mapSquares[j, k].Terrain))
+                                walkable = false;
+
+                            /*
                             //Walls
                             if (level.mapSquares[j, k].Terrain == MapTerrain.Wall)
                             {
@@ -1314,16 +1314,11 @@ namespace RogueBasin
                                 walkable = false;
                             }
 
-                            if (level.mapSquares[j, k].Terrain == MapTerrain.Trees)
-                            {
-                                walkable = false;
-                            }
-
                             if (level.mapSquares[j, k].Terrain == MapTerrain.River)
                             {
                                 walkable = false;
                             }
-
+                            */
                             level.mapSquares[j, k].Walkable = walkable;
                         }
                     }

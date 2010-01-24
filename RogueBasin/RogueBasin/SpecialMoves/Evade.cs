@@ -62,7 +62,7 @@ namespace RogueBasin.SpecialMoves
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, locationAfterMove);
 
                 //Bad terrain
-                if (!dungeon.MapSquareCanBeEntered(player.LocationLevel, locationAfterMove))
+                if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
                 {
                     FailBlocked();
                     return;

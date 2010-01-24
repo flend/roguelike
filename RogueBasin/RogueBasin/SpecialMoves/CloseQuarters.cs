@@ -64,16 +64,16 @@ namespace RogueBasin.SpecialMoves
 
                 int noCardinals = 0;
 
-                if (!dungeon.MapSquareCanBeEntered(squareContents.monster.LocationLevel, new Point(monsterLoc.x - 1, monsterLoc.y)))
+                if (!dungeon.MapSquareIsWalkable(squareContents.monster.LocationLevel, new Point(monsterLoc.x - 1, monsterLoc.y)))
                     noCardinals++;
 
-                if (!dungeon.MapSquareCanBeEntered(squareContents.monster.LocationLevel, new Point(monsterLoc.x + 1, monsterLoc.y)))
+                if (!dungeon.MapSquareIsWalkable(squareContents.monster.LocationLevel, new Point(monsterLoc.x + 1, monsterLoc.y)))
                     noCardinals++;
 
-                if (!dungeon.MapSquareCanBeEntered(squareContents.monster.LocationLevel, new Point(monsterLoc.x, monsterLoc.y + 1)))
+                if (!dungeon.MapSquareIsWalkable(squareContents.monster.LocationLevel, new Point(monsterLoc.x, monsterLoc.y + 1)))
                     noCardinals++;
 
-                if (!dungeon.MapSquareCanBeEntered(squareContents.monster.LocationLevel, new Point(monsterLoc.x, monsterLoc.y - 1)))
+                if (!dungeon.MapSquareIsWalkable(squareContents.monster.LocationLevel, new Point(monsterLoc.x, monsterLoc.y - 1)))
                     noCardinals++;
 
                 if (noCardinals > 2)
