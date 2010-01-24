@@ -57,12 +57,12 @@ namespace RogueBasin
             int nameYCoord = 5 + preamble.Count + 2;
             Point nameIntro = new Point(5, nameYCoord);
             do {
-                PlayerName = Screen.Instance.GetUserString("Rogue name", nameIntro, 5);
+                PlayerName = Screen.Instance.GetUserString("Rogue name", nameIntro, 20);
                 LogFile.Log.LogEntry("Player name: " + PlayerName);
             } while(PlayerName.Contains(" ") || PlayerName == "");
 
             //Check if this save game exists. If so we can exit now and the game will be loaded
-            if (File.Exists(PlayerName + ".sav"))
+            if (Utility.DoesSaveGameExist(PlayerName))
             {
                 return;
             }

@@ -88,7 +88,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Big function that spawns and fills a new dungeon
+        /// Sets up player, dungeons, creatures, uniques
         /// </summary>
         /// <returns></returns>
         public Dungeon SpawnNewDungeon()
@@ -789,6 +789,7 @@ namespace RogueBasin
             List<Item> itemsPlaced = new List<Item>();
 
             //Guarantee Greaves or band on level 1
+            //Add the one we don't place to the array of spare items
             Item firstItem;
 
             if (Game.Random.Next(2) < 1)
@@ -1269,9 +1270,16 @@ namespace RogueBasin
 
             //Build TCOD maps
             //Necessary so connectivity checks on items and monsters can work
-            dungeon.RecalculateWalkable();
-            dungeon.RefreshTCODMaps();
+            CalculateWalkableAndTCOD();
 
+        }
+
+        private void CalculateWalkableAndTCOD() {
+
+            dungeon.RecalculateWalkable();
+
+            //TCOD routine uses Walkable flag set above
+            dungeon.RefreshTCODMaps();
         }
 
         private double GetLightLevel(int levelNo)

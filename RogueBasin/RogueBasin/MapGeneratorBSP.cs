@@ -1019,7 +1019,6 @@ namespace RogueBasin
         /// <param name="levelNo"></param>
         public void AddStaircases(int levelNo)
         {
-
             Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
             Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
         }

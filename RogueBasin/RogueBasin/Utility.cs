@@ -159,5 +159,19 @@ namespace RogueBasin
                 return new List<string>();
             }
         }
+
+        public static bool DoesSaveGameExist(string playerName)
+        {
+            //Save game filename
+            string filename = playerName + ".sav";
+
+            if (File.Exists(filename))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }

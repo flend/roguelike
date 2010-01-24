@@ -81,7 +81,8 @@ namespace RogueBasin
 
             //Refresh the map with walkable etc. information
             //Now that creatures don't cause non-walkable squares, we only need to do this if the terrain changes
-            RecalculateMapAfterMove();
+            //RecalculateMapAfterMove();
+            //Now done at the end of map gen, so unnecessary
 
             while (Game.Dungeon.RunMainLoop)
             {
@@ -228,6 +229,7 @@ namespace RogueBasin
             //Light blocking doesn't change
 
             //Refresh the TCOD maps
+            //Uses the Walkable and BlocksLight flags on mapSquares
             Game.Dungeon.RefreshTCODMaps();
         }
 
@@ -628,19 +630,6 @@ namespace RogueBasin
             player.LocationMap = stairlocation;
 
             //featureAtSpace.PlayerInteraction(player);
-        }
-
-        private bool DoesSaveGameExist(string playerName)
-        {
-            //Save game filename
-            string filename = playerName + ".sav";
-
-            if (File.Exists(filename))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private void LoadGame(string playerName)
@@ -1253,13 +1242,14 @@ namespace RogueBasin
             //Setup dungeon
 
             //Is there a save game to load?
-            if (DoesSaveGameExist(playerName))
+            if (Utility.DoesSaveGameExist(playerName))
             {
                 LoadGame(playerName);
             }
             else {
 
                 //If not, make a new dungeon for the new player
+                //Dungeon really contains all the state, so also sets up player etc.
 
                 dungeonMaker = new DungeonMaker(diff);
                 Game.Dungeon = dungeonMaker.SpawnNewDungeon();
@@ -1273,14 +1263,6 @@ namespace RogueBasin
             }
 
             //Fall into the main loop
-        }
-
-        /// <summary>
-        /// Intro screen for user
-        /// </summary>
-        private void IntroScreen()
-        {
-            
         }
 
         private void SetupDungeon()

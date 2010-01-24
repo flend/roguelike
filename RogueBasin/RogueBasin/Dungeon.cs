@@ -994,7 +994,8 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Move PC to an absolute square. Doesn't do any checking at the mo, should return false if there's a problem
+        /// Move PC to an absolute square (doesn't check the contents). Runs triggers.
+        /// Doesn't do any checking at the mo, should return false if there's a problem.
         /// </summary>
         /// <param name="level"></param>
         /// <param name="x"></param>
