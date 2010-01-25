@@ -348,7 +348,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Player learns a random move. Play movie.
+        /// Player learns a random move. Play all movies?.
         /// </summary>
         public void PlayerLearnsRandomMove()
         {
@@ -362,6 +362,18 @@ namespace RogueBasin
             foreach (SpecialMove m1 in specialMoves)
             {
                 Screen.Instance.PlayMovie(m1.MovieRoot(), false);
+            }
+        }
+
+        /// <summary>
+        /// Player learns all move. Debug. Movies not played.
+        /// </summary>
+        public void PlayerLearnsAllMoves()
+        {
+            //Play movie
+            foreach (SpecialMove m1 in specialMoves)
+            {
+                m1.Known = true;
             }
         }
 
@@ -2197,7 +2209,6 @@ namespace RogueBasin
         /// <summary>
         /// The player learns a new move. Right now doesn't use the parameter (except as a reference) and just updates the Known parameter
         /// </summary>
-        /// <param name="vaultBackstab"></param>
         internal void LearnMove(SpecialMove moveToLearn)
         {
             foreach (SpecialMove move in specialMoves)

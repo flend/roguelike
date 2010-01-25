@@ -357,9 +357,35 @@ namespace RogueBasin
                                     timeAdvances = Game.Dungeon.PCMove(0, 1);
                                     break;
 
+                                    //Debug events
+
+                                case 'c':
+                                    //Level up
+                                    Game.Dungeon.Player.LevelUp();
+                                    UpdateScreen();
+                                    break;
+
+                                case 'm':
+                                    //Play movie
+                                    Game.Dungeon.PlayerLearnsAllMoves();
+                                    timeAdvances = false;
+                                    break;
+
+
+                                case 't':
+                                    //teleport to stairs
+                                    TeleportToDownStairs();
+                                    UpdateScreen();
+                                    break;
+
+                                case 'z':
+                                    //Add a healing event on the player
+                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                                    Game.Dungeon.Player.AddEffect(healing);
+                                    UpdateScreen();
+                                    break;
+
                                     /*
-
-
                                 //Debug events
                                 case 'w':
                                     //Select an item to equip
@@ -386,23 +412,13 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'm':
-                                    //Play movie
-                                    Game.Dungeon.PlayerLearnsRandomMove();
-                                    timeAdvances = false;
-                                    break;
-
+                                
                                 case 'l':
                                     timeAdvances = false;
                                     LoadGame(Game.Dungeon.Player.Name);
                                     UpdateScreen();
                                     break;
 
-                                case 't':
-                                    //teleport to stairs
-                                    TeleportToDownStairs();
-                                    UpdateScreen();
-                                    break;
 
                                 case 'y':
                                     //Add a speed up event on the player
@@ -1181,7 +1197,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = -1;
+            LogFile.Log.DebugLevel = 2;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
