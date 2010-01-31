@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3D08DD25-6DF5-49E7-966D-9C843399C6FC}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -158,6 +158,7 @@
     <Compile Include="Screen.cs" />
     <Compile Include="SpecialMove.cs" />
     <Compile Include="SpecialMoves\BurstOfSpeed.cs" />
+    <Compile Include="SpecialMoves\ChargeAttack.cs" />
     <Compile Include="SpecialMoves\CloseQuarters.cs" />
     <Compile Include="SpecialMoves\Evade.cs" />
     <Compile Include="SpecialMoves\MultiAttack.cs">
@@ -167,7 +168,6 @@
     <Compile Include="SpecialMoves\StunBox.cs" />
     <Compile Include="SpecialMoves\VaultBackstab.cs" />
     <Compile Include="SpecialMoves\WallPush.cs" />
-    <Compile Include="SpecialMoves\WallVaultPre.cs" />
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="StringEquivalent.cs" />
     <Compile Include="MonsterThrowAndRunAI.cs" />
@@ -257,10 +257,10 @@
     <EmbeddedResource Include="bin\Debug\movies\wallpush0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\wallpush1.amf" />
     <EmbeddedResource Include="bin\Debug\movies\wallpush2.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\wallvault0.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\wallvault1.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\wallvault2.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\wallvault3.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\chargeattack0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\chargeattack1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\chargeattack2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\chargeattack3.amf" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\text\introSettings.txt" />

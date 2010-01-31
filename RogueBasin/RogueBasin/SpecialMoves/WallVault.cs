@@ -4,23 +4,23 @@ using System.Text;
 
 namespace RogueBasin.SpecialMoves
 {
-    public class ChargeAttack : SpecialMove
+    /// <summary>
+    /// This move is learnt with VaultBackstab and provides the initial move before the backstab
+    /// </summary>
+    public class WallVault : SpecialMove
     {
         //Really private, accessors for serialization only
 
         public int moveCounter { get; set; }
 
         public int xDelta { get; set; }
-        public int yDelta { get; set; }
+        public int yDelta { get; set; } 
 
-        Monster target;
         Point squareToMoveTo;
-        bool moveReady;
 
-        public ChargeAttack()
+        public WallVault()
         {
             squareToMoveTo = new Point(0, 0);
-            moveReady = false;
         }
 
         public override bool CheckAction(bool isMove, Point locationAfterMove)
@@ -28,7 +28,8 @@ namespace RogueBasin.SpecialMoves
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
 
-            //First move is no direction move
+            //First move is pushing off against a wall
+            //Second move is jumping over 0 or more creatures
 
             //Not a move or attack = reset
             if (!isMove)
@@ -41,152 +42,131 @@ namespace RogueBasin.SpecialMoves
 
             if (moveCounter == 0)
             {
-                //Must be no direction
-                if (Game.Dungeon.Player.LocationMap != locationAfterMove)
+                //Must be wall
+                MapTerrain pushTerrain = dungeon.Levels[player.LocationLevel].mapSquares[locationAfterMove.x, locationAfterMove.y].Terrain;
+
+                if (pushTerrain != MapTerrain.Wall && pushTerrain != MapTerrain.ClosedDoor)
                 {
+                    moveCounter = 0;
                     return false;
                 }
 
-                //Otherwise we're on
+                //Is wall
+                
+                //Success
                 moveCounter = 1;
-                LogFile.Log.LogEntryDebug("Charge started", LogDebugLevel.Medium);
 
-                return true;
+                //Need to remember the direction of the first push, since we can only vault opposite this
+                xDelta = locationAfterMove.x - player.LocationMap.x;
+                yDelta = locationAfterMove.y - player.LocationMap.y;
+
+                LogFile.Log.LogEntryDebug("Wall vault stage 1", LogDebugLevel.Medium);
+
+                return true;                   
             }
 
             //Second move
 
-            //Any direction without a monster. Subsequent moves needs to be in the same direction
-
             if (moveCounter == 1)
             {
-                //Needs to be no monster in the direction of movement
+                //Only implementing this for player for now!
 
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, locationAfterMove);
+                //Check that this direction opposes the initial push
 
-                //Bad terrain
-                if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
+                int secondXDelta = locationAfterMove.x - player.LocationMap.x;
+                int secondYDelta = locationAfterMove.y - player.LocationMap.y;
+
+                if (secondXDelta != -xDelta || secondYDelta != -yDelta)
                 {
-                    FailBlocked();
+                    //Reset
+
+                    moveCounter = 0;
                     return false;
                 }
 
-                //Monster
-                if (squareContents.monster != null)
+                //OK, going in right direction
+
+                //Need to check what's ahead of the player
+
+                //Empty squares, can jump 2
+                Map thisMap = dungeon.Levels[player.LocationLevel];
+
+                //We run forward until we find a square to jump to
+                //If we run off the map or can't find a good square, we abort and the move is cancelled
+
+                //First empty square
+                int loopCounter = 1;
+
+                do
                 {
-                    FailBlockingMonster();
-                    return false;
-                }
+                    int squareX = player.LocationMap.x + secondXDelta * loopCounter;
+                    int squareY = player.LocationMap.y + secondYDelta * loopCounter;
 
-                xDelta = locationAfterMove.x - player.LocationMap.x;
-                yDelta = locationAfterMove.y - player.LocationMap.y;
+                    //Off the map
+                    if (squareX < 0 || squareX > thisMap.width)
+                    {
+                        NoWhereToJumpFail();
+                        return false;
+                    }
+                    if (squareY < 0 || squareY > thisMap.height)
+                    {
+                        NoWhereToJumpFail();
+                        return false;
+                    }
 
-                moveCounter++;
+                    
+                    MapTerrain squareTerrain = thisMap.mapSquares[squareX, squareY].Terrain;
+                    SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(squareX, squareY));
 
-                LogFile.Log.LogEntryDebug("Charge move: " + moveCounter, LogDebugLevel.Medium);
-                return true;
+                    //Into a wall
+                    if (!thisMap.mapSquares[squareX, squareY].Walkable)
+                    {
+                        NoWhereToJumpFail();
+                        return false;
+                    }
+
+                    //Is there no monster here? If so, this is our destination
+                    if (squareContents.monster == null)
+                    {
+                        squareToMoveTo = new Point(squareX, squareY);
+                        moveCounter = 2;
+                        break;
+                    }
+
+                    //Monster here? Keep looping until we hit an empty or something bad
+
+                    loopCounter++;
+                } while (true);
             }
 
-            //Later moves
-            //if(moveCounter > 1) {
-            else {
-                //Needs to be no monster in the direction of movement
-
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, locationAfterMove);
-
-
-                int thisxDelta = locationAfterMove.x - player.LocationMap.x;
-                int thisyDelta = locationAfterMove.y - player.LocationMap.y;
-
-                //Different direction
-                if(thisxDelta != xDelta || thisyDelta != yDelta) {
-                    FailWrongDirection();
-                    return false;
-                }
-
-                //Bad terrain
-                if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
-                {
-                    FailBlocked();
-                    return false;
-                }
-
-                //Monster - move is on
-                if (squareContents.monster != null)
-                {
-                    moveReady = true;
-                    target = squareContents.monster;
-                    return true;
-                }
-                
-                //Otherwise keep charging
-
-                moveCounter++;
-
-                LogFile.Log.LogEntryDebug("Charge move: " + moveCounter, LogDebugLevel.Medium);
-                return true;
-            }
-          
+            return true;
         }
 
-        private void FailWrongDirection() {
-
-            moveCounter = 0;
-            LogFile.Log.LogEntryDebug("Charge failed since wrong direction", LogDebugLevel.Medium);
-        }
-
-        private void FailBlocked()
+        private void NoWhereToJumpFail()
         {
             moveCounter = 0;
-            LogFile.Log.LogEntryDebug("Charge failed since blocked", LogDebugLevel.Medium);
-        }
-
-        private void FailBlockingMonster()
-        {
-            moveCounter = 0;
-            LogFile.Log.LogEntryDebug("Charge failed since monster at stage 1", LogDebugLevel.Medium);
+            LogFile.Log.LogEntry("WallVault failed due to nowhere to jump to");
         }
 
         public override bool MoveComplete()
         {
-            return moveReady;
+            if (moveCounter == 2)
+                return true;
+            return false;
         }
 
         public override void DoMove(Point locationAfterMove)
         {
-            //Bonus to hit and damage
-            Game.MessageQueue.AddMessage("Charge attack!");
-            int bonus = moveCounter;
-
-            if (moveCounter > 5)
-                bonus = 5;
-
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0);
-
+            //Move the PC to the new location
+            Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
             moveCounter = 0;
-            moveReady = false;
-
-            //Standard move into square, copied from PCMove
-
-            bool okToMoveIntoSquare = false;
-
-            if (results == CombatResults.DefenderDied)
-            {
-                okToMoveIntoSquare = true;
-            }
-
-
-            if (okToMoveIntoSquare)
-            {
-                Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
-            }
 
             //Give the player a small speed up
             //Seems to mean you get a free attack about 1 time in 2
-            //Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 50, 100));
-            
-            LogFile.Log.LogEntry("Charge complete");
-            //Game.MessageQueue.AddMessage("Wall Vault!");
+            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 50, 150));
+
+            LogFile.Log.LogEntry("Wall vault complete");
+            Game.MessageQueue.AddMessage("Wall Vault!");
         }
 
         public override void ClearMove()
@@ -196,21 +176,17 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "chargeattack";
+            return "NOMOVIE";
         }
 
         public override string Abbreviation()
         {
-            return "Chrg";
+            return "WlVt";
         }
 
-        /// <summary>
-        /// Effectively infinite, but bonus maxxes at 5
-        /// </summary>
-        /// <returns></returns>
         public override int TotalStages()
         {
-            return 5;
+            return 2;
         }
 
         public override int CurrentStage()
