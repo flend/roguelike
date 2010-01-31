@@ -30,7 +30,7 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -39,7 +39,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 FailInterrupted();
-                return;
+                return false;
             }
 
             //First move must be an attack in a square direction
@@ -67,13 +67,15 @@ namespace RogueBasin.SpecialMoves
                     monsterSquare = target.LocationMap;
 
                     LogFile.Log.LogEntryDebug("OpenSpaceAttack Stage: " + moveCounter, LogDebugLevel.Medium);
+
+                    return true;
                 }
                 else
                 {
                     //Not an attack
                     moveCounter = 0;
+                    return false;
                 }
-                return;
             }
 
             //Move after an attack
@@ -86,14 +88,14 @@ namespace RogueBasin.SpecialMoves
                 if (squareContents.monster != null)
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Bad terrain
                 if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Check the sequence is correct
@@ -107,7 +109,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 1 || thisDeltaY != 1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -119,7 +121,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 0 || thisDeltaY != 1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
 
                     thisDeltaX = 1; thisDeltaY = 1;
@@ -132,7 +134,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != -1 || thisDeltaY != 0)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                     thisDeltaX = -1; thisDeltaY = 1;
                 }
@@ -144,7 +146,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 0 || thisDeltaY != -1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                     thisDeltaX = -1; thisDeltaY = 1;
                 }
@@ -156,7 +158,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 1 || thisDeltaY != 0)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                     thisDeltaX = 1; thisDeltaY = -1;
                 }
@@ -167,7 +169,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 1 || thisDeltaY != -1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -177,7 +179,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != -1 || thisDeltaY != -1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -187,7 +189,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != -1 || thisDeltaY != 1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -198,13 +200,13 @@ namespace RogueBasin.SpecialMoves
                 //Check there the monster is still in its square and hasn't died
                 if(!target.Alive) {
                     FailTarget();
-                    return;
+                    return false;
                 }
 
                 if (target.LocationMap != monsterSquare)
                 {
                     FailTarget();
-                    return;
+                    return false;
                 }
 
                 //Monster is still alive and in right square
@@ -213,7 +215,7 @@ namespace RogueBasin.SpecialMoves
                 LogFile.Log.LogEntryDebug("OpenSpaceAttack Stage: " + moveCounter, LogDebugLevel.Medium);
 
                 //Will attack it during DoMove, and move into its square
-                return;
+                return true;
             }
 
             //Later moves follow a clockwise box
@@ -226,14 +228,14 @@ namespace RogueBasin.SpecialMoves
                 if (squareContents.monster != null)
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Bad terrain
                 if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Check the sequence is correct
@@ -248,7 +250,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 1 || thisDeltaY != 1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -259,7 +261,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != -1 || thisDeltaY != 1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -270,7 +272,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != -1 || thisDeltaY != -1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -281,7 +283,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 1 || thisDeltaY != -1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -293,13 +295,13 @@ namespace RogueBasin.SpecialMoves
                 if (!target.Alive)
                 {
                     FailTarget();
-                    return;
+                    return false;
                 }
 
                 if (target.LocationMap != monsterSquare)
                 {
                     FailTarget();
-                    return;
+                    return false;
                 }
 
                 //Monster is still alive and in right square
@@ -308,11 +310,11 @@ namespace RogueBasin.SpecialMoves
                 LogFile.Log.LogEntryDebug("OpenSpaceAttack Stage: " + moveCounter, LogDebugLevel.Medium);
 
                 //Will attack it during DoMove, and move into its square
-                return;
+                return true;
             }
 
             LogFile.Log.LogEntry("OpenSpaceAttack: moveCounter wrong");
-            return;
+            return false;
         }
 
         private void FailWrongPattern()

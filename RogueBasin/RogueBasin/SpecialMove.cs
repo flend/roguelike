@@ -31,12 +31,14 @@ namespace RogueBasin
 
         /// <summary>
         /// Check the player's last action, does it fit with the move?
+        /// Return code: true is fits, false if it caused a failure.
+        /// We run this function twice if it fails at first. This is because a move may cause a failure at second stage, but be valid as a new first stage. The first run clears sta
         /// </summary>
         /// <param name="isMove"></param>
         /// <param name="isAttack"></param>
         /// <param name="locationAfterMove"></param>
-        public virtual void CheckAction(bool isMove, Point locationAfterMove) { 
-        
+        public virtual bool CheckAction(bool isMove, Point locationAfterMove) {
+            return true;
         }
 
         /// <summary>

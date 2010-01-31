@@ -1124,7 +1124,16 @@ namespace RogueBasin
             {
                 if (move.Known)
                 {
-                    move.CheckAction(true, newPCLocation);
+                    //Test the move twice
+                    //The first check may cause a long chain to fail but the move could be a valid new start move
+                    //The second check picks this up
+
+                    bool moveSuccess = move.CheckAction(true, newPCLocation);
+
+                    if (!moveSuccess)
+                    {
+                        move.CheckAction(true, newPCLocation);
+                    }
                 }
             }
 

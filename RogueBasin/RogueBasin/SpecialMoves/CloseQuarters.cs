@@ -27,7 +27,7 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -36,7 +36,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 //FailInterrupted();
-                return;
+                return false;
             }
 
             //1 step attack, when single enemy in contact and 3 cardinal directions of target are walls or other unwalkable things
@@ -81,13 +81,13 @@ namespace RogueBasin.SpecialMoves
                     target = squareContents.monster;
                     moveCounter = 1;
                     LogFile.Log.LogEntryDebug("CloseQuarters OK", LogDebugLevel.Low);
-                    return;
+                    return true;
                 }
                 LogFile.Log.LogEntryDebug("CloseQuarters: not enough cardinals", LogDebugLevel.Low);
             }
 
             //Otherwise it's not a close quarters attack
-            return;
+            return false;
         }
 
         public override bool MoveComplete()

@@ -23,7 +23,7 @@ namespace RogueBasin.SpecialMoves
             moveReady = false;
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -34,7 +34,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 moveCounter = 0;
-                return;
+                return false;
             }
 
             //First move
@@ -44,14 +44,14 @@ namespace RogueBasin.SpecialMoves
                 //Must be no direction
                 if (Game.Dungeon.Player.LocationMap != locationAfterMove)
                 {
-                    return;
+                    return false;
                 }
 
                 //Otherwise we're on
                 moveCounter = 1;
                 LogFile.Log.LogEntryDebug("Charge started", LogDebugLevel.Medium);
 
-                return;
+                return true;
             }
 
             //Second move
@@ -68,14 +68,14 @@ namespace RogueBasin.SpecialMoves
                 if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Monster
                 if (squareContents.monster != null)
                 {
                     FailBlockingMonster();
-                    return;
+                    return false;
                 }
 
                 xDelta = locationAfterMove.x - player.LocationMap.x;
@@ -84,11 +84,12 @@ namespace RogueBasin.SpecialMoves
                 moveCounter++;
 
                 LogFile.Log.LogEntryDebug("Charge move: " + moveCounter, LogDebugLevel.Medium);
-                return;
+                return true;
             }
 
             //Later moves
-            if(moveCounter > 1) {
+            //if(moveCounter > 1) {
+            else {
                 //Needs to be no monster in the direction of movement
 
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, locationAfterMove);
@@ -100,14 +101,14 @@ namespace RogueBasin.SpecialMoves
                 //Different direction
                 if(thisxDelta != xDelta || thisyDelta != yDelta) {
                     FailWrongDirection();
-                    return;
+                    return false;
                 }
 
                 //Bad terrain
                 if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Monster - move is on
@@ -115,7 +116,7 @@ namespace RogueBasin.SpecialMoves
                 {
                     moveReady = true;
                     target = squareContents.monster;
-                    return;
+                    return true;
                 }
                 
                 //Otherwise keep charging
@@ -123,12 +124,9 @@ namespace RogueBasin.SpecialMoves
                 moveCounter++;
 
                 LogFile.Log.LogEntryDebug("Charge move: " + moveCounter, LogDebugLevel.Medium);
-                return;
+                return true;
             }
-
-            return;
-
-           
+          
         }
 
         private void FailWrongDirection() {

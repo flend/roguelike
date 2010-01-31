@@ -20,7 +20,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -32,7 +32,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 moveCounter = 0;
-                return;
+                return false;
             }
 
             //First move
@@ -45,7 +45,7 @@ namespace RogueBasin.SpecialMoves
                 if (pushTerrain != MapTerrain.Wall && pushTerrain != MapTerrain.ClosedDoor)
                 {
                     moveCounter = 0;
-                    return;
+                    return false;
                 }
 
                 //Is wall
@@ -59,7 +59,7 @@ namespace RogueBasin.SpecialMoves
 
                 LogFile.Log.LogEntryDebug("Wall vault stage 1", LogDebugLevel.Medium);
 
-                return;                   
+                return true;                   
             }
 
             //Second move
@@ -78,7 +78,7 @@ namespace RogueBasin.SpecialMoves
                     //Reset
 
                     moveCounter = 0;
-                    return;
+                    return false;
                 }
 
                 //OK, going in right direction
@@ -103,12 +103,12 @@ namespace RogueBasin.SpecialMoves
                     if (squareX < 0 || squareX > thisMap.width)
                     {
                         NoWhereToJumpFail();
-                        return;
+                        return false;
                     }
                     if (squareY < 0 || squareY > thisMap.height)
                     {
                         NoWhereToJumpFail();
-                        return;
+                        return false;
                     }
 
                     
@@ -119,7 +119,7 @@ namespace RogueBasin.SpecialMoves
                     if (!thisMap.mapSquares[squareX, squareY].Walkable)
                     {
                         NoWhereToJumpFail();
-                        return;
+                        return false;
                     }
 
                     //Is there no monster here? If so, this is our destination
@@ -135,6 +135,8 @@ namespace RogueBasin.SpecialMoves
                     loopCounter++;
                 } while (true);
             }
+
+            return true;
         }
 
         private void NoWhereToJumpFail()

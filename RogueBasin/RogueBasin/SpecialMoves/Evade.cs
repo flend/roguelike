@@ -20,7 +20,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -31,7 +31,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 moveCounter = 0;
-                return;
+                return false;
             }
 
             //First move
@@ -41,14 +41,14 @@ namespace RogueBasin.SpecialMoves
                 //Must be no direction
                 if (Game.Dungeon.Player.LocationMap != locationAfterMove)
                 {
-                    return;
+                    return false;
                 }
 
                 //Otherwise we're on
                 moveCounter = 1;
                 LogFile.Log.LogEntryDebug("Evade started", LogDebugLevel.Medium);
 
-                return;
+                return true;
             }
 
             //Second move
@@ -65,13 +65,13 @@ namespace RogueBasin.SpecialMoves
                 if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //No Monster
                 if(squareContents.monster == null) {
                     FailNoMonster();
-                    return;
+                    return false;
                 }
 
                 //OK, so we have a monster to evade
@@ -133,12 +133,14 @@ namespace RogueBasin.SpecialMoves
                 if (squareToMoveTo == player.LocationMap)
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Otherwise we are on and will move in DoMove
                 moveCounter = 2;
             }
+
+            return true;
         }
 
         private void FailBlocked()

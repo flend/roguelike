@@ -26,7 +26,7 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -35,7 +35,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove || locationAfterMove == player.LocationMap)
             {
                 FailInterrupted();
-                return;
+                return false;
             }
 
             //First move must be an attack
@@ -63,13 +63,14 @@ namespace RogueBasin.SpecialMoves
                     target = squareContents.monster;
 
                     LogFile.Log.LogEntryDebug("MultiAttack Begins", LogDebugLevel.Medium);
+                    return true;
                 }
                 else
                 {
                     //Not an attack
                     moveCounter = 0;
+                    return false;
                 }
-                return;
             }
 
             //Any subsequent move can be an attack if
@@ -87,7 +88,7 @@ namespace RogueBasin.SpecialMoves
                     //Reset
 
                     FailRepetition();
-                    return;
+                    return false;
                 }
 
                 lastDeltaX = secondXDelta;
@@ -100,14 +101,14 @@ namespace RogueBasin.SpecialMoves
                 if (squareContents.monster != null)
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Bad terrain
                 if (!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove))
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Check our surrounding squares and make a list of possible targets
@@ -151,7 +152,7 @@ namespace RogueBasin.SpecialMoves
                 if (newMonsters.Count == 0)
                 {
                     FailNoNewMonsters();
-                    return;
+                    return false;
                 }
 
                 //Otherwise, pick a random monster to attack this turn
@@ -160,7 +161,7 @@ namespace RogueBasin.SpecialMoves
                 moveCounter++;
 
                 //Will attack it during DoMove
-                return;
+                return true;
             }
         }
 

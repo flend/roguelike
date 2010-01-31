@@ -23,7 +23,7 @@ namespace RogueBasin.SpecialMoves
         {
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -32,7 +32,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 FailInterrupted();
-                return;
+                return false;
             }
 
             //Something in the square we're trying to enter blocks us
@@ -41,13 +41,13 @@ namespace RogueBasin.SpecialMoves
             //Monster
             if(squareContents.monster != null) {
                 FailBlocked();
-                return;
+                return false;
             }
 
             //Bad terrain
             if(!dungeon.MapSquareIsWalkable(player.LocationLevel, locationAfterMove)) {
                 FailBlocked();
-                return;
+                return false;
             }
 
             int thisDeltaX = locationAfterMove.x - player.LocationMap.x;
@@ -59,13 +59,13 @@ namespace RogueBasin.SpecialMoves
                 if (thisDeltaX != 0 && thisDeltaY != 0)
                 {
                     FailWrongPattern();
-                    return;
+                    return false;
                 }
 
                 if (thisDeltaX == 0 && thisDeltaY == 0)
                 {
                     FailWrongPattern();
-                    return;
+                    return false;
                 }
 
                 //Otherwise OK
@@ -79,7 +79,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 0 || thisDeltaY != -1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -88,7 +88,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 1 || thisDeltaY != 0)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -97,7 +97,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != 0 || thisDeltaY != 1)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 }
 
@@ -106,7 +106,7 @@ namespace RogueBasin.SpecialMoves
                     if (thisDeltaX != -1 || thisDeltaY != 0)
                     {
                         FailWrongPattern();
-                        return;
+                        return false;
                     }
                 } 
             }
@@ -119,6 +119,8 @@ namespace RogueBasin.SpecialMoves
             //Save the old deltas
             lastDeltaX = thisDeltaX;
             lastDeltaY = thisDeltaY;
+
+            return true;
         }
 
         private void FailWrongPattern()

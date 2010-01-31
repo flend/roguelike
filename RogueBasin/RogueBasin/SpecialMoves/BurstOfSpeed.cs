@@ -17,7 +17,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -28,7 +28,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 moveCounter = 0;
-                return;
+                return false;
             }
 
             //First move
@@ -38,14 +38,14 @@ namespace RogueBasin.SpecialMoves
                 //Must be no direction
                 if (Game.Dungeon.Player.LocationMap != locationAfterMove)
                 {
-                    return;
+                    return false;
                 }
 
                 //Otherwise we're on
                 moveCounter = 1;
                 LogFile.Log.LogEntryDebug("Burst of Speed started", LogDebugLevel.Medium);
 
-                return;
+                return true;
             }
 
             //Second move
@@ -57,14 +57,14 @@ namespace RogueBasin.SpecialMoves
                 {
                     moveCounter = 0;
                     LogFile.Log.LogEntryDebug("Burst of Speed failed, move on 2", LogDebugLevel.Medium);
-                    return;
+                    return false;
                 }
 
                 //Otherwise we're on
                 moveCounter = 2;
                 LogFile.Log.LogEntryDebug("Burst of Speed 2", LogDebugLevel.Medium);
 
-                return;
+                return true;
             }
 
 
@@ -128,12 +128,16 @@ namespace RogueBasin.SpecialMoves
                 if (squareToMoveTo == player.LocationMap)
                 {
                     FailBlocked();
-                    return;
+                    return false;
                 }
 
                 //Otherwise we are on and will move in DoMove
                 moveCounter = 3;
+                return true;
             }
+
+            LogFile.Log.LogEntryDebug("Burst of speed: moveCounter wrong", LogDebugLevel.Medium);
+            return false;
         }
 
         private void FailBlocked()

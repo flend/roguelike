@@ -27,7 +27,7 @@ namespace RogueBasin.SpecialMoves
             yDelta = 0;
         }
 
-        public override void CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point locationAfterMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -39,7 +39,7 @@ namespace RogueBasin.SpecialMoves
             if (!isMove)
             {
                 moveCounter = 0;
-                return;
+                return false;
             }
 
             //First move
@@ -53,7 +53,7 @@ namespace RogueBasin.SpecialMoves
                 if (pushTerrain != MapTerrain.Wall && pushTerrain != MapTerrain.ClosedDoor)
                 {
                     moveCounter = 0;
-                    return;
+                    return false;
                 }
 
                 //Is wall
@@ -67,7 +67,7 @@ namespace RogueBasin.SpecialMoves
 
                 LogFile.Log.LogEntryDebug("Wall push stage 1", LogDebugLevel.Medium);
 
-                return;                   
+                return true;                   
             }
 
             //Second move
@@ -81,7 +81,7 @@ namespace RogueBasin.SpecialMoves
                 if (thisDeltaX != xDelta || thisDeltaY != yDelta)
                 {
                     FailPattern();
-                    return;
+                    return false;
                 }
 
                 //Success
@@ -89,10 +89,11 @@ namespace RogueBasin.SpecialMoves
 
                 LogFile.Log.LogEntryDebug("Wall push stage 2", LogDebugLevel.Medium);
 
-                return;
+                return true;
             }
             
-            if (moveCounter == 2)
+            //if (moveCounter == 2)
+            else
             {
                 //Only implementing this for player for now!
 
@@ -105,7 +106,7 @@ namespace RogueBasin.SpecialMoves
                 {
                     //Reset
                     FailPattern();
-                    return;
+                    return false;
                 }
 
                 //OK, going in right direction
@@ -116,7 +117,7 @@ namespace RogueBasin.SpecialMoves
                 if (squareContents.monster == null)
                 {
                     FailNoMonsterToPush();
-                    return;
+                    return false;
                 }
 
                 //Need to check what's ahead of the pushed monster
@@ -175,6 +176,8 @@ namespace RogueBasin.SpecialMoves
 
                 //Complete move
                 moveCounter = 3;
+
+                return true;
             }
         }
 
