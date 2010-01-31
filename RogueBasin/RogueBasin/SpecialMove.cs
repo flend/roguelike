@@ -10,8 +10,8 @@ namespace RogueBasin
     /// </summary>
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.StunBox))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallPush))]
+    [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.ChargeAttack))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallVault))]
-    [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallVaultPre))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.VaultBackstab))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.OpenSpaceAttack))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.Evade))]

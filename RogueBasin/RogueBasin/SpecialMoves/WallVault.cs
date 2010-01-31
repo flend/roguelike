@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.SpecialMoves
 {
-    public class WallVault : SpecialMove
+    public class ChargeAttack : SpecialMove
     {
         //Really private, accessors for serialization only
 
@@ -17,7 +17,7 @@ namespace RogueBasin.SpecialMoves
         Point squareToMoveTo;
         bool moveReady;
 
-        public WallVault()
+        public ChargeAttack()
         {
             squareToMoveTo = new Point(0, 0);
             moveReady = false;
@@ -196,7 +196,7 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "wallvault";
+            return "chargeattack";
         }
 
         public override string Abbreviation()

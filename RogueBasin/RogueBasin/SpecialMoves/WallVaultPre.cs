@@ -4,7 +4,10 @@ using System.Text;
 
 namespace RogueBasin.SpecialMoves
 {
-    public class WallVaultPre : SpecialMove
+    /// <summary>
+    /// This move is learnt with VaultBackstab and provides the initial move before the backstab
+    /// </summary>
+    public class WallVault : SpecialMove
     {
         //Really private, accessors for serialization only
 
@@ -15,7 +18,7 @@ namespace RogueBasin.SpecialMoves
 
         Point squareToMoveTo;
 
-        public WallVaultPre()
+        public WallVault()
         {
             squareToMoveTo = new Point(0, 0);
         }
@@ -173,7 +176,7 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "wallvault";
+            return "NOMOVIE";
         }
 
         public override string Abbreviation()

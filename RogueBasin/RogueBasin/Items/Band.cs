@@ -57,7 +57,7 @@ namespace RogueBasin.Items
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            Game.Dungeon.LearnMove(new SpecialMoves.WallVaultPre());
+            Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
             Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
             //Screen.Instance.PlayMovie("vaultbackstab", false);
 

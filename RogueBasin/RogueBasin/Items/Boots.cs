@@ -58,7 +58,7 @@ namespace RogueBasin.Items
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
-            Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
+            Game.Dungeon.LearnMove(new SpecialMoves.ChargeAttack());
             //Screen.Instance.PlayMovie("wallvault", false);
 
             //Add permanent speed increase
