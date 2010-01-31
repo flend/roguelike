@@ -117,23 +117,9 @@ namespace RogueBasin.SpecialMoves
                 okToMoveIntoSquare = true;
             }
 
-
             if (okToMoveIntoSquare)
             {
                 Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
-
-                //Tell the player if there are multiple items in the square
-                if (Game.Dungeon.MultipleItemAtSpace(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap))
-                {
-                    Game.MessageQueue.AddMessage("There are multiple items here.");
-                }
-
-                //If there is a feature and an item (feature will be hidden)
-                if (Game.Dungeon.FeatureAtSpace(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap) != null &&
-                    Game.Dungeon.ItemAtSpace(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap) != null)
-                {
-                    Game.MessageQueue.AddMessage("There is a staircase here.");
-                }
             }
         }
 
@@ -145,6 +131,21 @@ namespace RogueBasin.SpecialMoves
         public override string MovieRoot()
         {
             return "closequarters";
+        }
+
+        public override string Abbreviation()
+        {
+            return "ClQs";
+        }
+
+        public override int TotalStages()
+        {
+            return 1;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
         }
     }
 }

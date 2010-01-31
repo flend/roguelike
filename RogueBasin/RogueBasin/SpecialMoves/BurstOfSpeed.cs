@@ -172,5 +172,20 @@ namespace RogueBasin.SpecialMoves
         {
             return "burstofspeed";
         }
+
+        public override string Abbreviation()
+        {
+            return "BoS";
+        }
+
+        public override int TotalStages()
+        {
+            return 3;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }

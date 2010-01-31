@@ -226,5 +226,20 @@ namespace RogueBasin.SpecialMoves
         {
             return "wallpush";
         }
+
+        public override string Abbreviation()
+        {
+            return "WlPs";
+        }
+
+        public override int TotalStages()
+        {
+            return 3;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }

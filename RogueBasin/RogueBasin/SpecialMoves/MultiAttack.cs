@@ -241,5 +241,24 @@ namespace RogueBasin.SpecialMoves
         {
             return "multiattack";
         }
+
+        public override string Abbreviation()
+        {
+            return "Mult";
+        }
+
+        /// <summary>
+        /// Effectively goes on for ever, but stop getting better at 5
+        /// </summary>
+        /// <returns></returns>
+        public override int TotalStages()
+        {
+            return 5;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }

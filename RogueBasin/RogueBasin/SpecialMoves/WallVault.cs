@@ -74,7 +74,7 @@ namespace RogueBasin.SpecialMoves
                 //Monster
                 if (squareContents.monster != null)
                 {
-                    FailNoMonster();
+                    FailBlockingMonster();
                     return;
                 }
 
@@ -143,7 +143,7 @@ namespace RogueBasin.SpecialMoves
             LogFile.Log.LogEntryDebug("Charge failed since blocked", LogDebugLevel.Medium);
         }
 
-        private void FailNoMonster()
+        private void FailBlockingMonster()
         {
             moveCounter = 0;
             LogFile.Log.LogEntryDebug("Charge failed since monster at stage 1", LogDebugLevel.Medium);
@@ -181,19 +181,6 @@ namespace RogueBasin.SpecialMoves
             if (okToMoveIntoSquare)
             {
                 Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
-
-                //Tell the player if there are multiple items in the square
-                if (Game.Dungeon.MultipleItemAtSpace(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap))
-                {
-                    Game.MessageQueue.AddMessage("There are multiple items here.");
-                }
-
-                //If there is a feature and an item (feature will be hidden)
-                if (Game.Dungeon.FeatureAtSpace(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap) != null &&
-                    Game.Dungeon.ItemAtSpace(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap) != null)
-                {
-                    Game.MessageQueue.AddMessage("There is a staircase here.");
-                }
             }
 
             //Give the player a small speed up
@@ -212,6 +199,25 @@ namespace RogueBasin.SpecialMoves
         public override string MovieRoot()
         {
             return "wallvault";
+        }
+
+        public override string Abbreviation()
+        {
+            return "Chrg";
+        }
+
+        /// <summary>
+        /// Effectively infinite, but bonus maxxes at 5
+        /// </summary>
+        /// <returns></returns>
+        public override int TotalStages()
+        {
+            return 5;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
         }
     }
 }

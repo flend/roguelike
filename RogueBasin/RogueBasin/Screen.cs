@@ -42,6 +42,8 @@ namespace RogueBasin {
         Point damageOffset;
         Point playerLevelOffset;
 
+        Point specialMoveStatusLine;
+
         Color inFOVTerrainColor = ColorPresets.White;
         Color seenNotInFOVTerrainColor = ColorPresets.Gray;
         Color neverSeenFOVTerrainColor;
@@ -136,7 +138,7 @@ namespace RogueBasin {
             inventoryTR = new Point(75, 5);
             inventoryBL = new Point(5, 30);
 
-            
+            specialMoveStatusLine = new Point(7, 33);
            
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
@@ -755,6 +757,8 @@ namespace RogueBasin {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
+            //Draw status line
+
             string hitpointsString = "HP: " + player.Hitpoints.ToString();
             string maxHitpointsString = "/" + player.MaxHitpoints.ToString();
             string overdriveHitpointsString = "(" + player.OverdriveHitpoints.ToString() + ")";
@@ -790,6 +794,60 @@ namespace RogueBasin {
             string levelString = "DL: " + Game.Dungeon.Player.LocationLevel.ToString();
 
             rootConsole.PrintLine(levelString, statsDisplayTopLeft.x + levelOffset.x, statsDisplayTopLeft.y + levelOffset.y, LineAlignment.Left);
+
+            //Draw moves line
+
+            //Count special moves
+            int totalSpecialMoves = Game.Dungeon.SpecialMoves.Count;
+
+            //Abbreviations are 4 characters long + space
+            int totalSpecialMoveWidth = 4 * totalSpecialMoves + totalSpecialMoves - 1;
+
+            int specialMoveLineX = (Width - totalSpecialMoveWidth) / 2;
+            Point specialMoveDraw = new Point(specialMoveLineX, specialMoveStatusLine.y);
+
+            //Draw each special move status
+            foreach (SpecialMove move in Game.Dungeon.SpecialMoves)
+            {
+                Color drawColor = new Color();
+
+                //Calculate the colour
+                
+                //Not known - black
+                if (!move.Known)
+                {
+                    drawColor = ColorPresets.DarkGray;
+                }
+                
+                //Known but not in progress, white
+
+                else if (move.CurrentStage() == 0)
+                {
+                    drawColor = ColorPresets.White;
+                }
+
+                //In progress, get increasingly red with stage
+                else
+                {
+                    double percentDone = move.CurrentStage() / (double)move.TotalStages();
+
+                    if (percentDone > 1)
+                        percentDone = 1;
+
+                    //Interpolate between red and white
+                    drawColor = Color.Interpolate(ColorPresets.White, ColorPresets.Red, percentDone);
+                }
+
+                //Draw name of move
+                rootConsole.ForegroundColor = drawColor;
+                rootConsole.PrintLine(move.Abbreviation(), specialMoveDraw.x, specialMoveDraw.y, LineAlignment.Left);
+
+                //Move along
+                specialMoveDraw.x += 5;
+            }
+
+            //Restore to normal colour - not nice
+            rootConsole.ForegroundColor = ColorPresets.White;
         }
 
         private void DrawItems(List<Item> itemList)

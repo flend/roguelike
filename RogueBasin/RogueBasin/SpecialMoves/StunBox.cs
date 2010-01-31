@@ -187,5 +187,20 @@ namespace RogueBasin.SpecialMoves
         {
             return "stunbox";
         }
+
+        public override string Abbreviation()
+        {
+            return "Stun";
+        }
+
+        public override int TotalStages()
+        {
+            return 4;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }

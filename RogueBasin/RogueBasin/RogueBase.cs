@@ -366,8 +366,9 @@ namespace RogueBasin
                                     break;
 
                                 case 'm':
-                                    //Play movie
+                                    //Learn all moves
                                     Game.Dungeon.PlayerLearnsAllMoves();
+                                    Game.MessageQueue.AddMessage("Learnt all moves.");
                                     timeAdvances = false;
                                     break;
 

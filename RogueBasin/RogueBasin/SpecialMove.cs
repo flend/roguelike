@@ -56,8 +56,26 @@ namespace RogueBasin
         public virtual void ClearMove() { }
 
         /// <summary>
+        /// Return a 4 character abbrevation for the move
+        /// </summary>
+        /// <returns></returns>
+        public virtual string Abbreviation() { return ""; }
+
+        /// <summary>
         /// Return the root of the movie for this special move
         /// </summary>
         public virtual string MovieRoot() { return ""; }
+
+        /// <summary>
+        /// Total stages in move
+        /// </summary>
+        /// <returns></returns>
+        public virtual int TotalStages() { return 0; }
+
+        /// <summary>
+        /// Current stage in move
+        /// </summary>
+        /// <returns></returns>
+        public virtual int CurrentStage() { return 0; }
     }
 }

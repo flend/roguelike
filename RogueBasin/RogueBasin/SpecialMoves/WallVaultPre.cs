@@ -173,5 +173,20 @@ namespace RogueBasin.SpecialMoves
         {
             return "wallvault";
         }
+
+        public override string Abbreviation()
+        {
+            return "WlVt";
+        }
+
+        public override int TotalStages()
+        {
+            return 2;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }

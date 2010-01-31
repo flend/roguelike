@@ -179,5 +179,20 @@ namespace RogueBasin.SpecialMoves
         {
             return "evade";
         }
+
+        public override string Abbreviation()
+        {
+            return "Eva";
+        }
+
+        public override int TotalStages()
+        {
+            return 2;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }

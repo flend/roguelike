@@ -1117,7 +1117,7 @@ namespace RogueBasin
             {
                 return false;
             }
-            
+
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
 
             foreach (SpecialMove move in specialMoves)
@@ -1127,13 +1127,14 @@ namespace RogueBasin
                     move.CheckAction(true, newPCLocation);
                 }
             }
-            
+
             //Are any moves ready, if so carry the first one out.
             //Try allow multiple moves on one turn. Have to be careful to make sure there 
 
             SpecialMove moveToDo = null;
 
-            foreach(SpecialMove move in specialMoves) {
+            foreach (SpecialMove move in specialMoves)
+            {
                 if (move.Known && move.MoveComplete())
                 {
                     moveToDo = move;
@@ -1141,59 +1142,59 @@ namespace RogueBasin
                 }
             }
 
-            //Moving is handled by the special move, return
-            if (moveToDo != null)
+            //If there's no special move, do a conventional move
+            if (moveToDo == null)
             {
-                return true;
-            }
-            
-            //No special move this go, do normal moving
+                //Moving into void not allowed (but should never happen)
+                if (!MapSquareIsWalkable(player.LocationLevel, newPCLocation))
+                {
+                    //This now costs time since it could be part of a special move
+                    return true;
+                }
 
-            //Moving into void not allowed (but should never happen)
-            if (!MapSquareIsWalkable(player.LocationLevel, newPCLocation))
-            {
-                //This now costs time since it could be part of a special move
-                return true;
-            }
+                //Check for monsters in the square
+                SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
+                bool okToMoveIntoSquare = false;
 
-            //Check for monsters in the square
-            SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
-            bool okToMoveIntoSquare = false;
-
-            //If it's empty, it's OK
-            if (contents.monster == null)
-            {
-                okToMoveIntoSquare = true;
-            }
-            
-            //Monster - attack it
-            if (contents.monster != null)
-            {
-                CombatResults results = player.AttackMonster(contents.monster);
-                if (results == CombatResults.DefenderDied)
+                //If it's empty, it's OK
+                if (contents.monster == null)
                 {
                     okToMoveIntoSquare = true;
                 }
-            }
 
-            if (okToMoveIntoSquare)
-            {
+                //Monster - attack it
+                if (contents.monster != null)
+                {
+                    CombatResults results = player.AttackMonster(contents.monster);
+                    if (results == CombatResults.DefenderDied)
+                    {
+                        okToMoveIntoSquare = true;
+                    }
+                }
+
+                //If not OK to move, return here
+                if (!okToMoveIntoSquare)
+                    return true;
+
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y);
-
-                //Tell the player if there are multiple items in the square
-                if (MultipleItemAtSpace(player.LocationLevel, player.LocationMap))
-                {
-                    Game.MessageQueue.AddMessage("There are multiple items here.");
-                }
-
-                //If there is a feature and an item (feature will be hidden)
-                if (FeatureAtSpace(player.LocationLevel, player.LocationMap) != null &&
-                    ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
-                {
-                    Game.MessageQueue.AddMessage("There is a staircase here.");
-                }
             }
-             
+
+            //Run any entering square messages
+            //Happens for both normal and special moves
+
+            //Tell the player if there are multiple items in the square
+            if (MultipleItemAtSpace(player.LocationLevel, player.LocationMap))
+            {
+                Game.MessageQueue.AddMessage("There are multiple items here.");
+            }
+
+            //If there is a feature and an item (feature will be hidden)
+            if (FeatureAtSpace(player.LocationLevel, player.LocationMap) != null &&
+                ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
+            {
+                Game.MessageQueue.AddMessage("There is a staircase here.");
+            }
+
             return true;
         }
 

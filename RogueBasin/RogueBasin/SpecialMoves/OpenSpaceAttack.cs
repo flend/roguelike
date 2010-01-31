@@ -388,5 +388,20 @@ namespace RogueBasin.SpecialMoves
         {
             return "openspaceattack";
         }
+
+        public override string Abbreviation()
+        {
+            return "Open";
+        }
+
+        public override int TotalStages()
+        {
+            return 5;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }

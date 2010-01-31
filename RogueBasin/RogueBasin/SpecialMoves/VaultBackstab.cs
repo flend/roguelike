@@ -225,5 +225,20 @@ namespace RogueBasin.SpecialMoves
         {
             return "vaultbackstab";
         }
+
+        public override string Abbreviation()
+        {
+            return "VtBS";
+        }
+
+        public override int TotalStages()
+        {
+            return 3;
+        }
+
+        public override int CurrentStage()
+        {
+            return moveCounter;
+        }
     }
 }
