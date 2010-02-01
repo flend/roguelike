@@ -372,6 +372,15 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
+                                case 's':
+                                    //Show movies
+                                    SetSpecialMoveMovieScreen();
+                                    UpdateScreen();
+                                    MovieScreenInteraction();
+                                    DisableSpecialMoveMovieScreen();
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
 
                                 case 't':
                                     //teleport to stairs
@@ -799,6 +808,22 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Set state as movie screen
+        /// </summary>
+        private void SetSpecialMoveMovieScreen()
+        {
+            Screen.Instance.DisplaySpecialMoveMovies = true;
+        }
+
+        /// <summary>
+        /// Disable movie overlay
+        /// </summary>
+        private void DisableSpecialMoveMovieScreen()
+        {
+            Screen.Instance.DisplaySpecialMoveMovies = false;
+        }
+
+        /// <summary>
         /// Disable equipped items overlay
         /// </summary>
         private void DisablePlayerEquippedItemsScreen()
@@ -1012,6 +1037,44 @@ namespace RogueBasin
                     if (keyCode == 'x')
                     {
                         return;
+                    }
+                }
+            } while (true);
+        }
+
+        /// <summary>
+        /// Movie screen overlay
+        /// </summary>
+        private void MovieScreenInteraction()
+        {
+
+            //Player presses a key from a-w to select a special move
+
+            //Build a list of the moves (in the same order as displayed)
+            List<SpecialMove> knownMoves = Game.Dungeon.SpecialMoves.FindAll(x => x.Known);
+
+            do
+            {
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+
+                    char keyCode = (char)userKey.Character;
+
+                    if (keyCode == 'x')
+                    {
+                        //Exit
+                        return;
+                    }
+                    else
+                    {
+                        //Otherwise, check if it's valid and play the movie
+                        int charIndex = (int)keyCode - (int)'a';
+                        if (charIndex < knownMoves.Count && charIndex < 24)
+                        {
+                            Screen.Instance.PlayMovie(knownMoves[charIndex].MovieRoot(), false);
+                        }
                     }
                 }
             } while (true);

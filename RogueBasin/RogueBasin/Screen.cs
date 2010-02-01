@@ -77,6 +77,8 @@ namespace RogueBasin {
         /// </summary>
         bool displayEquipmentSelect;
 
+        bool displaySpecialMoveMovies;
+
         //Death members
         public List<string> TotalKills { get; set; }
         public List<string> DeathPreamble { get; set; }
@@ -463,6 +465,8 @@ namespace RogueBasin {
                 DrawEquipment();
             else if (displayEquipmentSelect)
                 DrawEquipmentSelect();
+            else if (displaySpecialMoveMovies)
+                DrawMovieOverlay();
 
         }
 
@@ -699,6 +703,56 @@ namespace RogueBasin {
 
                 //Print entry
                 rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+            }
+        }
+
+        /// <summary>
+        /// Display movie screen overlay
+        /// </summary>
+        private void DrawMovieOverlay()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("Special moves known", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect("Select move to replay move pattern or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //List the special moves known
+
+            //Active area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            int moveIndex = 0;
+            List<SpecialMove> knownMoves = new List<SpecialMove>();
+
+            foreach (SpecialMove move in Game.Dungeon.SpecialMoves) {
+
+                //Run out of room - won't happen as written
+                if (moveIndex == inventoryListH)
+                    break;
+
+                //Don't list unknown moves
+                if (!move.Known)
+                    continue;
+
+                knownMoves.Add(move);
+
+                char selectionChar = (char)((int)'a' + moveIndex);
+                string entryString = "(" + selectionChar.ToString() + ") " + move.MovieRoot(); //+" (equipped)";
+
+                //Print entry
+                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + moveIndex, inventoryListW, 1, LineAlignment.Left);
+
+                moveIndex++;
             }
         }
 
@@ -1245,14 +1299,20 @@ namespace RogueBasin {
             rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, Width - msgDisplayTopLeft.x, msgDisplayNumLines, true);
         }
 
+        private void ResetOverlayScreens() {
+            displayEquipment = false;
+            displayEquipmentSelect = false;
+            displayInventory = false;
+            displaySpecialMoveMovies = false;
+        }
+
         public bool DisplayInventory
         {
             set
             {
                 if (value == true)
                 {
-                    displayEquipment = false;
-                    displayEquipmentSelect = false;
+                    ResetOverlayScreens();
                 }
                 
                 displayInventory = value;
@@ -1265,8 +1325,7 @@ namespace RogueBasin {
             {
                 if (value == true)
                 {
-                    displayInventory = false;
-                    displayEquipmentSelect = false;
+                   ResetOverlayScreens();
                 }
 
                 displayEquipment = value;
@@ -1279,11 +1338,22 @@ namespace RogueBasin {
             {
                 if (value == true)
                 {
-                    displayInventory = false;
-                    displayEquipment = false;
+                    ResetOverlayScreens();
                 }
 
                 displayEquipmentSelect = value;
+            }
+        }
+
+        public bool DisplaySpecialMoveMovies
+        {
+            set
+            {
+                if (value == true)
+                {
+                    ResetOverlayScreens();
+                }
+                displaySpecialMoveMovies = value;
             }
         }
 
