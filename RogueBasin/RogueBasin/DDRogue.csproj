@@ -275,4 +275,8 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\battle.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\wallvault0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallvault1.amf" />
+  </ItemGroup>
 </Project>

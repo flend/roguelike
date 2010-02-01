@@ -176,7 +176,12 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "NOMOVIE";
+            return "wallvault";
+        }
+
+        public override string MoveName()
+        {
+            return "Wall Vault";
         }
 
         public override string Abbreviation()

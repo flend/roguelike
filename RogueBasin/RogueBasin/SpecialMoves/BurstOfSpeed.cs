@@ -177,6 +177,11 @@ namespace RogueBasin.SpecialMoves
             return "burstofspeed";
         }
 
+        public override string MoveName()
+        {
+            return "Burst of Speed";
+        }
+
         public override string Abbreviation()
         {
             return "BoS";

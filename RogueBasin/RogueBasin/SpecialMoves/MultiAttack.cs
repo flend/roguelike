@@ -243,6 +243,11 @@ namespace RogueBasin.SpecialMoves
             return "multiattack";
         }
 
+        public override string MoveName()
+        {
+            return "Multiple Targets";
+        }
+
         public override string Abbreviation()
         {
             return "Mult";

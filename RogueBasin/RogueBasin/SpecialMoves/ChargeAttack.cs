@@ -194,6 +194,11 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
+        public override string MoveName()
+        {
+            return "Charge Attack";
+        }
+
         public override string MovieRoot()
         {
             return "chargeattack";

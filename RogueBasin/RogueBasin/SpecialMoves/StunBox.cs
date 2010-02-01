@@ -190,6 +190,11 @@ namespace RogueBasin.SpecialMoves
             return "stunbox";
         }
 
+        public override string MoveName()
+        {
+            return "Stun Box";
+        }
+
         public override string Abbreviation()
         {
             return "Stun";

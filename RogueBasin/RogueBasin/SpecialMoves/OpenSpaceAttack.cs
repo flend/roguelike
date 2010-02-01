@@ -391,6 +391,11 @@ namespace RogueBasin.SpecialMoves
             return "openspaceattack";
         }
 
+        public override string MoveName()
+        {
+            return "Open Space Attack";
+        }
+
         public override string Abbreviation()
         {
             return "Open";

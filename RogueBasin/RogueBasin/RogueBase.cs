@@ -369,6 +369,7 @@ namespace RogueBasin
                                     //Learn all moves
                                     Game.Dungeon.PlayerLearnsAllMoves();
                                     Game.MessageQueue.AddMessage("Learnt all moves.");
+                                    UpdateScreen();
                                     timeAdvances = false;
                                     break;
 
@@ -1071,6 +1072,10 @@ namespace RogueBasin
                     {
                         //Otherwise, check if it's valid and play the movie
                         int charIndex = (int)keyCode - (int)'a';
+
+                        if (charIndex < 0)
+                            continue;
+
                         if (charIndex < knownMoves.Count && charIndex < 24)
                         {
                             Screen.Instance.PlayMovie(knownMoves[charIndex].MovieRoot(), false);
@@ -1107,6 +1112,10 @@ namespace RogueBasin
                     else
                     {
                         int charIndex = (int)keyCode - (int)'a';
+
+                        if (charIndex < 0)
+                            continue;
+
                         if (charIndex < numInventoryListing && charIndex < 24)
                             return charIndex;
 

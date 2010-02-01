@@ -69,6 +69,11 @@ namespace RogueBasin
         public virtual string MovieRoot() { return ""; }
 
         /// <summary>
+        /// Return a presentable string for the name
+        /// </summary>
+        public virtual string MoveName() { return ""; }
+
+        /// <summary>
         /// Total stages in move
         /// </summary>
         /// <returns></returns>

@@ -747,7 +747,7 @@ namespace RogueBasin {
                 knownMoves.Add(move);
 
                 char selectionChar = (char)((int)'a' + moveIndex);
-                string entryString = "(" + selectionChar.ToString() + ") " + move.MovieRoot(); //+" (equipped)";
+                string entryString = "(" + selectionChar.ToString() + ") " + move.MoveName(); //+" (equipped)";
 
                 //Print entry
                 rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + moveIndex, inventoryListW, 1, LineAlignment.Left);

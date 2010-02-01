@@ -313,4 +313,10 @@
   <data name="chargeattack3" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\bin\Debug\movies\chargeattack3.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="wallvault0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallvault0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="wallvault1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Debug\movies\wallvault1.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

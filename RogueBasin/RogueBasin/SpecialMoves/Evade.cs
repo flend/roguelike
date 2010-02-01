@@ -182,6 +182,11 @@ namespace RogueBasin.SpecialMoves
             return "evade";
         }
 
+        public override string MoveName()
+        {
+            return "Evade";
+        }
+
         public override string Abbreviation()
         {
             return "Eva";

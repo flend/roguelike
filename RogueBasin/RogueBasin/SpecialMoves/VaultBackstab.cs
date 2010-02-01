@@ -232,6 +232,11 @@ namespace RogueBasin.SpecialMoves
             return "vaultbackstab";
         }
 
+        public override string MoveName()
+        {
+            return "Vault Backstab";
+        }
+
         public override string Abbreviation()
         {
             return "VtBS";

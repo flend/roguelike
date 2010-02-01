@@ -548,5 +548,19 @@ namespace RogueBasin.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        internal static byte[] wallvault0 {
+            get {
+                object obj = ResourceManager.GetObject("wallvault0", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] wallvault1 {
+            get {
+                object obj = ResourceManager.GetObject("wallvault1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

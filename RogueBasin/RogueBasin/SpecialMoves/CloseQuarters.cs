@@ -138,6 +138,11 @@ namespace RogueBasin.SpecialMoves
             return "ClQs";
         }
 
+        public override string MoveName()
+        {
+            return "Close Quarters";
+        }
+
         public override int TotalStages()
         {
             return 1;

@@ -230,6 +230,11 @@ namespace RogueBasin.SpecialMoves
             return "wallpush";
         }
 
+        public override string MoveName()
+        {
+            return "Wall Push";
+        }
+
         public override string Abbreviation()
         {
             return "WlPs";
