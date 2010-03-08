@@ -14,7 +14,8 @@ namespace RogueBasin
     }
 
     /// <summary>
-    /// Simple AI runs when it is down to a certain number of HP
+    /// Simple AI runs when it is down to a certain number of HP.
+    /// Now all the throwing AIs inherit off this as well
     /// </summary>
     public abstract class MonsterFightAndRunAI : Monster
     {
@@ -68,13 +69,15 @@ namespace RogueBasin
             //If we are returning to the PC, continue to do so unless we are attacked
             if (AIState == SimpleAIStates.Returning)
             {
+                //Don't do this to stop charms being frozen in front of missile troops
+
                 //We have been attacked by someone new
-                if (LastAttackedBy != null && LastAttackedBy.Alive)
-                {
+                //if (LastAttackedBy != null && LastAttackedBy.Alive)
+                //{
                     //Reset the AI, will drop through and chase the nearest target
-                    AIState = SimpleAIStates.RandomWalk;
-                }
-                else {
+                //    AIState = SimpleAIStates.RandomWalk;
+                //}
+                //else {
 
                     //Are we close enough to the PC?
                     double distance = GetDistance(this, Game.Dungeon.Player);
@@ -88,7 +91,7 @@ namespace RogueBasin
                     
                     //Otherwise follow the PC back
                     FollowPC();
-                }
+                //}
             }
 
             if (AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit)
@@ -597,7 +600,8 @@ namespace RogueBasin
                         {
                             LogFile.Log.LogEntryDebug(this.SingleDescription + " returns to PC", LogDebugLevel.Medium);
                             AIState = SimpleAIStates.Returning;
-                            LastAttackedBy = null; //bit of a hack
+                            //LastAttackedBy = null; //bit of a hack
+                            //Don't do this, the charmed monster will just return to the PC and not get caught in a frozen loop
                             FollowPC();
                         }
                     }
