@@ -255,6 +255,24 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                case 'C':
+                                    //Charm creature
+                                    timeAdvances = PlayerCharmCreature();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
+                                case 'U':
+                                    //Uncharm creature
+                                    timeAdvances = PlayerUnCharmCreature();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
                                 case 'r':
                                     //Name object
                                     SetPlayerInventorySelectScreen();
@@ -549,6 +567,8 @@ namespace RogueBasin
             return timeAdvances;
         }
 
+
+
         private bool DoNothing()
         {
             return Game.Dungeon.PCMove(0, 0);
@@ -712,19 +732,55 @@ namespace RogueBasin
             Game.Dungeon.PCActionNoMove();
         }
 
-        private bool PlayerOpenDoor()
+        /// <summary>
+        /// Get a keypress and interpret it as a direction
+        /// </summary>
+        /// <returns></returns>
+        private bool GetDirectionKeypress(out Point direction)
         {
-            //Ask user for a direction
-            Game.MessageQueue.AddMessage("Select a direction:");
-            UpdateScreen();
-
             //Get direction
             KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
-            Point direction = new Point(0, 0);
+            if (GetDirectionFromKeypress(userKey, out direction))
+            {
+                return true;
+            }
 
+            return false;
+        }
+
+        /// <summary>
+        /// Get a direction from a keypress. Will return false if not valid. Otherwise in parameter.
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        private bool GetDirectionFromKeypress(KeyPress userKey, out Point direction) {
+
+            direction = new Point(9, 9);
+
+            //Arrow keys for directions
             switch (userKey.KeyCode)
             {
+                case KeyCode.TCODK_KP1:
+                    direction = new Point(-1, 1);
+                    break;
+
+                case KeyCode.TCODK_KP3:
+                    direction = new Point(1, 1);
+                    break;
+
+                case KeyCode.TCODK_KPDEC:
+                case KeyCode.TCODK_KP5:
+                    //Does nothing
+                    direction = new Point(0, 0);
+                    break;
+
+                case KeyCode.TCODK_KP7:
+                    direction = new Point(-1, -1);
+                    break;
+                case KeyCode.TCODK_KP9:
+                    direction = new Point(1, -1);
+                    break;
 
                 case KeyCode.TCODK_LEFT:
                 case KeyCode.TCODK_KP4:
@@ -744,8 +800,24 @@ namespace RogueBasin
                     break;
             }
 
-            //No direction, fail
-            if (direction == new Point(0, 0))
+            //Not valid
+            if (direction == new Point(9, 9))
+                return false;
+
+            return true;
+        }
+
+        private bool PlayerOpenDoor()
+        {
+            //Ask user for a direction
+            Game.MessageQueue.AddMessage("Select a direction:");
+            UpdateScreen();
+
+            //Get direction
+            Point direction = new Point(0, 0);
+            bool gotDirection = GetDirectionKeypress(out direction);
+            
+            if (!gotDirection)
             {
                 Game.MessageQueue.AddMessage("No direction");
                 return false;
@@ -764,6 +836,52 @@ namespace RogueBasin
             }
             return true;
         }
+
+        private bool PlayerUnCharmCreature()
+        {
+            //Ask user for a direction
+            Game.MessageQueue.AddMessage("Select a direction:");
+            UpdateScreen();
+
+            //Get direction
+            Point direction = new Point(0, 0);
+            bool gotDirection = GetDirectionKeypress(out direction);
+
+            if (!gotDirection)
+            {
+                Game.MessageQueue.AddMessage("No direction");
+                return false;
+            }
+
+            //Attempt to uncharm a monster in that square
+            bool timePasses = Game.Dungeon.UnCharmMonsterByPlayer(direction);
+
+            return timePasses;
+        }
+
+
+        private bool PlayerCharmCreature()
+        {
+            //Ask user for a direction
+            Game.MessageQueue.AddMessage("Select a direction:");
+            UpdateScreen();
+
+            //Get direction
+            Point direction = new Point(0, 0);
+            bool gotDirection = GetDirectionKeypress(out direction);
+
+            if (!gotDirection)
+            {
+                Game.MessageQueue.AddMessage("No direction");
+                return false;
+            }
+
+            //Attempt to charm a monster in that square
+            bool timePasses = Game.Dungeon.AttemptCharmMonsterByPlayer(direction);
+
+            return timePasses;
+        }
+
 
         private static void DisablePlayerInventoryScreen()
         {
@@ -1277,17 +1395,20 @@ namespace RogueBasin
 
             //Intro screen pre-game (must come after screen)
             
+            /*
             GameIntro intro = new GameIntro();
             intro.ShowIntroScreen();
 
             string playerName = intro.PlayerName;
             bool showMovies = intro.ShowMovies;
             GameDifficulty diff = intro.Difficulty;
-            
+            */
 
-            //string playerName = "Dave";
-            //bool showMovies = true;
-            //GameDifficulty diff = GameDifficulty.Easy;
+            string playerName = "Dave";
+            bool showMovies = false;
+            GameDifficulty diff = GameDifficulty.Easy;
+
+
             //Setup dungeon
 
             //Is there a save game to load?

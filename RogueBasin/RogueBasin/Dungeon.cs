@@ -1207,6 +1207,8 @@ namespace RogueBasin
             return true;
         }
 
+        
+
         /// <summary>
         /// Kill a monster. This monster won't get any further turns.
         /// </summary>
@@ -1222,6 +1224,9 @@ namespace RogueBasin
 
             //Drop any insta-create treasure
             monster.InventoryDrop();
+
+            //If the creature was charmed, delete 1 charmed creature from the player total
+            Game.Dungeon.Player.RemoveCharmedCreature();
 
             //Leave a corpse
             AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
@@ -2413,6 +2418,133 @@ namespace RogueBasin
             }
 
             summonedMonsters.Clear();
+        }
+
+
+        /// <summary>
+        /// Attempt to charm a monster in a target direction.
+        /// Returns whether time passes (not if there is a successful charm)
+        /// </summary>
+        /// <param name="direction"></param>
+        internal bool AttemptCharmMonsterByPlayer(Point direction)
+        {
+            //Work out the monster's location
+
+            Point targetLocation = new Point(Game.Dungeon.Player.LocationMap.x + direction.x, Game.Dungeon.Player.LocationMap.y + direction.y);
+
+            Player player = Game.Dungeon.Player;
+
+            //Is there a monster here?
+
+            if (!Game.Dungeon.MapSquareIsWalkable(player.LocationLevel, targetLocation))
+            {
+                //No monster
+                Game.MessageQueue.AddMessage("No target.");
+                return false;
+            }
+            else
+            {
+                //Check for monsters in the square
+                SquareContents contents = MapSquareContents(player.LocationLevel, targetLocation);
+
+                //Monster - try to charm it
+                if (contents.monster != null)
+                {
+                    Monster monster = contents.monster;
+
+                    //Is the creature already charmed?
+                    if (monster.Charmed)
+                    {
+                        Game.MessageQueue.AddMessage("The creature is already charmed.");
+                        return false;
+                    }
+
+                    //Do some check or roll
+
+                    //Check if the player has any more charms
+                    bool playerOK = player.AddCharmCreatureIfPossible();
+
+                    if (!playerOK)
+                    {
+                        Game.MessageQueue.AddMessage("Too many charmed creatures.");
+                        return true;
+                    }
+
+                    //All OK do the charm
+                    string msg = "The " + monster.SingleDescription + " looks at you lovingly.";
+
+                    Game.MessageQueue.AddMessage(msg);
+                    contents.monster.CharmCreature();
+
+                    return true;
+
+                }
+                else
+                {
+                    //No monster
+                    Game.MessageQueue.AddMessage("No target.");
+                    return false;
+                }
+            }
+
+        }
+            /// <summary>
+        /// Attempt to uncharm a monster in a target direction.
+        /// Returns whether time passes (not if there is a successful charm)
+        /// </summary>
+        /// <param name="direction"></param>
+        internal bool UnCharmMonsterByPlayer(Point direction)
+        {
+            //Work out the monster's location
+
+            Point targetLocation = new Point(Game.Dungeon.Player.LocationMap.x + direction.x, Game.Dungeon.Player.LocationMap.y + direction.y);
+
+            Player player = Game.Dungeon.Player;
+
+            //Is there a monster here?
+
+            if (!Game.Dungeon.MapSquareIsWalkable(player.LocationLevel, targetLocation))
+            {
+                //No monster
+                Game.MessageQueue.AddMessage("No target.");
+                return false;
+            }
+            else
+            {
+                //Check for monsters in the square
+                SquareContents contents = MapSquareContents(player.LocationLevel, targetLocation);
+
+                //Monster - is it already charmed
+                if (contents.monster != null)
+                {
+                    Monster monster = contents.monster;
+
+                    //Is the creature already charmed?
+                    if (monster.Charmed)
+                    {
+                        Game.MessageQueue.AddMessage("The creature looks wistful and then goes about its business.");
+                        monster.UncharmCreature();
+                        monster.PassifyCreature();
+
+                        player.RemoveCharmedCreature();
+
+                        return true;
+                    }
+                    else
+                    {
+                        //Not charmed
+
+                        Game.MessageQueue.AddMessage("The creature is not charmed.");
+                        return false;
+                    }
+                }
+                else
+                {
+                    //No monster
+                    Game.MessageQueue.AddMessage("No target.");
+                    return false;
+                }
+            }
         }
     }
 }

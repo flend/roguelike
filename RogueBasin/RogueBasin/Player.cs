@@ -64,6 +64,13 @@ namespace RogueBasin
         /// </summary>
         int hitModifier;
 
+        public int MaxCharmedCreatures { get; set; }
+
+        public int CurrentCharmedCreatures { get; set; }
+
+
+
+
         public Player()
         {
             effects = new List<PlayerEffect>();
@@ -72,6 +79,9 @@ namespace RogueBasin
             Level = 1;
 
             Representation = '@';
+
+            MaxCharmedCreatures = 0;
+            CurrentCharmedCreatures = 0;
 
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
@@ -117,6 +127,7 @@ namespace RogueBasin
                             damageModifier = 0;
                             hitModifier = 0;
                             maxHitpoints = 15;
+                            MaxCharmedCreatures = 1;
                             break;
                         case 2:
                             armourClass = 13;
@@ -909,6 +920,31 @@ namespace RogueBasin
         {
             hitpoints += 10;
             maxHitpoints += 10;
+        }
+
+        /// <summary>
+        /// Try to add another charmed creature. Will return false if already at max.
+        /// </summary>
+        internal bool AddCharmCreatureIfPossible()
+        {
+            if (CurrentCharmedCreatures < MaxCharmedCreatures)
+            {
+                CurrentCharmedCreatures++;
+                return true;
+            }
+
+            return false;
+        }
+
+        internal void RemoveCharmedCreature()
+        {
+            CurrentCharmedCreatures--;
+
+            if (CurrentCharmedCreatures < 0)
+            {
+                LogFile.Log.LogEntryDebug("tried to remove a charmed creature when there were 0", LogDebugLevel.High);
+                CurrentCharmedCreatures = 0;
+            }
         }
     }
 }

@@ -52,7 +52,8 @@ namespace RogueBasin
             //Calculate our combat stats
             CalculateCombatStats();
 
-
+            Charmed = false;
+            Passive = false;
         }
 
         /// <summary>
@@ -88,6 +89,16 @@ namespace RogueBasin
                 maxHitpoints = value;
             }
         }
+
+        /// <summary>
+        /// Special effect that means the monster fights for the player. Could be a real effect in future, and use this as an accessor
+        /// </summary>
+        public bool Charmed { get; set; }
+
+        /// <summary>
+        /// Special effect that means the monster won't fight be player. Could be a real effect in future, and use this as an accessor
+        /// </summary>
+        public bool Passive { get; set; }
 
         /// <summary>
         /// Player armour class. Auto-calculated so not serialized
@@ -129,6 +140,36 @@ namespace RogueBasin
             //Base monster classes just sit still
         }
 
+        /// <summary>
+        /// Set creature's status to charmed. Check if it worked at a higher level
+        /// </summary>
+        public void CharmCreature()
+        {
+            Charmed = true;
+        }
+        /// <summary>
+        /// Set creature's status to uncharmed (normal). Check if it worked at a higher level
+        /// </summary>
+        public void UncharmCreature()
+        {
+            Charmed = false;
+        }
+
+        /// <summary>
+        /// Set creature's status to passive. Check if it worked at a higher level
+        /// </summary>
+        public void PassifyCreature()
+        {
+            Passive = true;
+        }
+
+        /// <summary>
+        /// Set creature's status to non-passive (normal). Check if it worked at a higher level
+        /// </summary>
+        public void UnpassifyCreature()
+        {
+            Passive = false;
+        }
 
         public void CalculateCombatStats()
         {

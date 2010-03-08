@@ -30,6 +30,7 @@ namespace RogueBasin {
         public int msgDisplayNumLines;
 
         Point statsDisplayTopLeft;
+        Point princessStatsTopLeft;
 
         Point hitpointsOffset;
         Point maxHitpointsOffset;
@@ -41,6 +42,8 @@ namespace RogueBasin {
         Point armourOffset;
         Point damageOffset;
         Point playerLevelOffset;
+
+        Point charmOffset;
 
         Point specialMoveStatusLine;
 
@@ -139,6 +142,9 @@ namespace RogueBasin {
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(75, 5);
             inventoryBL = new Point(5, 30);
+
+            princessStatsTopLeft = new Point(7, 32);
+            charmOffset = new Point(6, 0);
 
             specialMoveStatusLine = new Point(7, 33);
            
@@ -848,6 +854,11 @@ namespace RogueBasin {
             string levelString = "DL: " + Game.Dungeon.Player.LocationLevel.ToString();
 
             rootConsole.PrintLine(levelString, statsDisplayTopLeft.x + levelOffset.x, statsDisplayTopLeft.y + levelOffset.y, LineAlignment.Left);
+
+            //Draw PrincessRL specific line
+
+            string charmedString = "Chm: " + Game.Dungeon.Player.CurrentCharmedCreatures.ToString() + "/" + Game.Dungeon.Player.MaxCharmedCreatures.ToString();
+            rootConsole.PrintLine(charmedString, princessStatsTopLeft.x + charmOffset.x, princessStatsTopLeft.y + charmOffset.y, LineAlignment.Left);
 
             //Draw moves line
 
