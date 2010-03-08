@@ -374,6 +374,9 @@ namespace RogueBasin
             if (monster.RecalculateCombatStatsRequired)
                 monster.CalculateCombatStats();
 
+            //Set the attacked by marker
+            monster.LastAttackedBy = this;
+
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
 

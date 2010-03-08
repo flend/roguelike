@@ -1226,7 +1226,8 @@ namespace RogueBasin
             monster.InventoryDrop();
 
             //If the creature was charmed, delete 1 charmed creature from the player total
-            Game.Dungeon.Player.RemoveCharmedCreature();
+            if(monster.Charmed)
+                Game.Dungeon.Player.RemoveCharmedCreature();
 
             //Leave a corpse
             AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);

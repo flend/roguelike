@@ -211,7 +211,8 @@ namespace RogueBasin
                 int num = 200 + 80 * i;
                 levelMonsterAmounts.Add(num);
             }
-            
+
+            levelMonsterAmounts[0] = 500;
             /*{
 
                 150, //1
@@ -316,11 +317,13 @@ namespace RogueBasin
 
                             if (randomNum < 95)
                             {
-                                monsterToAdd = levelList[0].GetRandomMonster();
+                                monsterToAdd = new Creatures.Orc();
+                                //monsterToAdd = levelList[0].GetRandomMonster();
                             }
                             else
                             {
-                                monsterToAdd = levelList[1].GetRandomMonster();
+                                //monsterToAdd = levelList[1].GetRandomMonster();
+                                monsterToAdd = levelList[0].GetRandomMonster();
                             }
 
                             Point location;

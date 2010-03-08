@@ -27,6 +27,11 @@ namespace RogueBasin
 
         public uint TurnCount { get; set; }
 
+        /// <summary>
+        /// The creature we were last attacked by
+        /// </summary>
+
+        public Creature LastAttackedBy { get; set; }
 
         /// <summary>
         /// Sight radius
@@ -106,6 +111,8 @@ namespace RogueBasin
         public Creature()
         {
             alive = true;
+
+            LastAttackedBy = null;
 
             NormalSightRadius = 5;
 

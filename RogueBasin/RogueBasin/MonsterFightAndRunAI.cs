@@ -63,10 +63,25 @@ namespace RogueBasin
                 {
                     AIState = SimpleAIStates.RandomWalk;
                 }
+                //Have we just become charmed? Reset AI (stop chasing player)
+                else if (currentTarget == Game.Dungeon.Player && Charmed)
+                {
+                    AIState = SimpleAIStates.RandomWalk;
+                }
+                //Have we just become passive? Reset AI (stop chasing player)
+                else if (currentTarget == Game.Dungeon.Player && Passive)
+                {
+                    AIState = SimpleAIStates.RandomWalk;
+                }
+                //Have we just been attacked by a new enemy?
+                else if (LastAttackedBy != null && LastAttackedBy.Alive && LastAttackedBy != currentTarget)
+                {
+                    //Reset the AI for now
+                    AIState = SimpleAIStates.RandomWalk;
+                }
                 else
                 {
-                    //Otherwise continue to flee
-
+                    //Otherwise continue to pursue or flee
                     ChaseCreature(currentTarget);
                 }
 
@@ -109,36 +124,150 @@ namespace RogueBasin
                 if (yb >= currentMap.height)
                     yb = currentMap.height - 1;
 
-                //List will contain monsters & player
-                List<Creature> creaturesInFOV = new List<Creature>();
+                //AI branches here depending on if we are charmed or passive
 
-                foreach (Monster monster in Game.Dungeon.Monsters)
+                if (this.Charmed)
                 {
-                    //Same monster
-                    if (monster == this)
-                        continue;
+                    //Charmed - will fight for the PC
+                    //Won't attack passive creatures (otherwise will de-passify them and it would be annoying)
 
-                    //Not on the same level
-                    if (monster.LocationLevel != this.LocationLevel)
-                        continue;
+                    //Look for creatures in FOV
+                    
+                    //List will contain monsters & player
+                    List<Monster> monstersInFOV = new List<Monster>();
 
-                    //Not in FOV
-                    if (!currentFOV.CheckTileFOV(monster.LocationMap.x, monster.LocationMap.y))
-                        continue;
-
-                    //Otherwise add to list of possible targets
-                    creaturesInFOV.Add(monster);
-
-                    LogFile.Log.LogEntryDebug(this.Representation + " spots " + monster.Representation, LogDebugLevel.Low);
-                }
-
-                //Check PC
-                if (Game.Dungeon.Player.LocationLevel == this.LocationLevel)
-                {
-                    if (currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
+                    foreach (Monster monster in Game.Dungeon.Monsters)
                     {
-                        creaturesInFOV.Add(Game.Dungeon.Player);
-                        LogFile.Log.LogEntryDebug(this.Representation + " spots " + Game.Dungeon.Player.Representation, LogDebugLevel.Low);
+                        //Same monster
+                        if (monster == this)
+                            continue;
+
+                        //Not on the same level
+                        if (monster.LocationLevel != this.LocationLevel)
+                            continue;
+
+                        //Not in FOV
+                        if (!currentFOV.CheckTileFOV(monster.LocationMap.x, monster.LocationMap.y))
+                            continue;
+
+                        //Otherwise add to list of possible targets
+                        monstersInFOV.Add(monster);
+
+                        LogFile.Log.LogEntryDebug(this.Representation + " spots " + monster.Representation, LogDebugLevel.Low);
+                    }
+
+                    //Look for creatures which aren't passive or charmed
+                    List<Monster> notPassiveTargets = monstersInFOV.FindAll(x => !x.Passive);
+                    List<Monster> notCharmedTargets = notPassiveTargets.FindAll(x => !x.Charmed);
+                    
+                    //Go chase a not-passive creature
+                    if (notCharmedTargets.Count > 0)
+                    {
+                        //Find the closest creature
+                        Monster closestCreature = null;
+                        double closestDistance = Double.MaxValue; //a long way
+
+                        foreach (Monster creature in notCharmedTargets)
+                        {
+                            double distanceSq = Math.Pow(creature.LocationMap.x - this.LocationMap.x, 2) +
+                                Math.Pow(creature.LocationMap.y - this.LocationMap.y, 2);
+
+                            double distance = Math.Sqrt(distanceSq);
+
+                            if (distance < closestDistance)
+                            {
+                                closestDistance = distance;
+                                closestCreature = creature;
+                            }
+                        }
+
+                        //Start chasing this creature
+                        LogFile.Log.LogEntryDebug(this.Representation + " charm chases " + closestCreature.Representation, LogDebugLevel.Medium);
+                        AIState = SimpleAIStates.Pursuit;
+                        ChaseCreature(closestCreature);
+                    }
+                    else
+                    {
+                        //No creature to chase, go find PC
+                        FollowPC();
+                    }
+
+                }
+                else if (Passive)
+                {
+                    //Passive - Won't attack the PC
+                    MoveRandomSquareNoAttack();
+                }
+                else
+                {
+                    //Normal fighting behaviour
+
+                    //Find creatures & PC in FOV
+
+                    List<Creature> monstersInFOV = new List<Creature>();
+
+                    foreach (Creature monster in Game.Dungeon.Monsters)
+                    {
+                        //Same monster
+                        if (monster == this)
+                            continue;
+
+                        //Not on the same level
+                        if (monster.LocationLevel != this.LocationLevel)
+                            continue;
+
+                        //Not in FOV
+                        if (!currentFOV.CheckTileFOV(monster.LocationMap.x, monster.LocationMap.y))
+                            continue;
+
+                        //Otherwise add to list of possible targets
+                        monstersInFOV.Add(monster);
+
+                        LogFile.Log.LogEntryDebug(this.Representation + " spots " + monster.Representation, LogDebugLevel.Low);
+                    }
+
+                    if (Game.Dungeon.Player.LocationLevel == this.LocationLevel)
+                    {
+                        if (currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
+                        {
+                            monstersInFOV.Add(Game.Dungeon.Player);
+                            LogFile.Log.LogEntryDebug(this.Representation + " spots " + Game.Dungeon.Player.Representation, LogDebugLevel.Low);
+                        }
+                    }
+
+                    //Have we just been attacked by a new enemy?
+                    if (LastAttackedBy != null && LastAttackedBy.Alive && LastAttackedBy != currentTarget)
+                    {
+                        //Is this target within FOV? If so, attack it
+                        if(monstersInFOV.Contains(LastAttackedBy)) {
+
+                            LogFile.Log.LogEntryDebug(this.Representation + " changes target to " + LastAttackedBy.Representation, LogDebugLevel.Medium);
+                            AIState = SimpleAIStates.Pursuit;
+                            ChaseCreature(LastAttackedBy);
+                            return;
+                        }
+                        else {
+                            //Continue chasing whoever it was we were chasing last
+                            AIState = SimpleAIStates.Pursuit;
+                            ChaseCreature(currentTarget);
+                            return;
+                        }
+                    }
+                    
+                    //The next bit could be tidied up now
+
+                    //Attack PC if seen
+                    if (monstersInFOV.Contains(Game.Dungeon.Player))
+                    {
+                        Creature closestCreature = Game.Dungeon.Player;
+                        //Start chasing this creature
+                        LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
+                        AIState = SimpleAIStates.Pursuit;
+                        ChaseCreature(closestCreature);
+                    }
+                    else
+                    {
+                        MoveRandomSquareNoAttack();
                     }
                 }
 
@@ -171,7 +300,7 @@ namespace RogueBasin
                     //Start chasing this creature
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
                     ChaseCreature(closestCreature);
-                }*/
+                }
                 
                   //UNCOMMENT THIS
                 //Current behaviour: only chase the PC
@@ -182,76 +311,79 @@ namespace RogueBasin
                     AIState = SimpleAIStates.Pursuit;
                     ChaseCreature(closestCreature);
                  //END COMMENTING
-                }
+                }*/
 
-                else
-                {
-                    //Move randomly. If we walk into something attack it, but it does not become a new target
 
-                    int direction = rand.Next(9);
-
-                    int moveX = 0;
-                    int moveY = 0;
-
-                    moveX = direction / 3 - 1;
-                    moveY = direction % 3 - 1;
-
-                    //If we're not moving quit at this point, otherwise the target square will be the one we're in
-                    if (moveX == 0 && moveY == 0)
-                    {
-                        return;
-                    }
-
-                    //Check this is a valid move
-                    bool validMove = false;
-                    Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
-
-                    validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation);
-
-                    //Give up if this is not a valid move
-                    if (!validMove)
-                        return;
-
-                    //Check if the square is occupied by a PC or monster
-                    SquareContents contents = Game.Dungeon.MapSquareContents(LocationLevel, newLocation);
-                    bool okToMoveIntoSquare = false;
-
-                    if (contents.empty)
-                    {
-                        okToMoveIntoSquare = true;
-                    }
-
-                    if (contents.player != null)
-                    {
-                        //Attack the player
-                        CombatResults result = AttackPlayer(contents.player);
-
-                        if (result == CombatResults.DefenderDied)
-                        {
-                            //Bad news for the player here!
-                            okToMoveIntoSquare = true;
-                        }
-                    }
-
-                   //if (contents.monster != null)
-                    //{
-                        //Attack the monster
-                        //CombatResults result = AttackMonster(contents.monster);
-
-                        //if (result == CombatResults.DefenderDied)
-                        //{
-                        //    okToMoveIntoSquare = true;
-                        //}
-                    //}
-
-                    //Move if allowed
-                    if (okToMoveIntoSquare)
-                    {
-                        LocationMap = newLocation;
-                    }
-                }
             }
         }
+
+        private void MoveRandomSquareNoAttack()
+        {
+            //Move randomly.
+            int direction = Game.Random.Next(9);
+
+            int moveX = 0;
+            int moveY = 0;
+
+            moveX = direction / 3 - 1;
+            moveY = direction % 3 - 1;
+
+            //If we're not moving quit at this point, otherwise the target square will be the one we're in
+            if (moveX == 0 && moveY == 0)
+            {
+                return;
+            }
+
+            //Check this is a valid move
+            bool validMove = false;
+            Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
+
+            validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation);
+
+            //Give up if this is not a valid move
+            if (!validMove)
+                return;
+
+            //Check if the square is occupied by a PC or monster
+            SquareContents contents = Game.Dungeon.MapSquareContents(LocationLevel, newLocation);
+            bool okToMoveIntoSquare = false;
+
+            if (contents.empty)
+            {
+                okToMoveIntoSquare = true;
+            }
+
+            //Move if allowed
+            if (okToMoveIntoSquare)
+            {
+                LocationMap = newLocation;
+            }
+
+            //if (contents.player != null)
+            //{
+            //    //Attack the player
+            //    CombatResults result = AttackPlayer(contents.player);
+
+            //    if (result == CombatResults.DefenderDied)
+            //    {
+            //        //Bad news for the player here!
+            //        okToMoveIntoSquare = true;
+            //    }
+            //}
+
+            //if (contents.monster != null)
+            //{
+            //Attack the monster
+            //CombatResults result = AttackMonster(contents.monster);
+
+            //if (result == CombatResults.DefenderDied)
+            //{
+            //    okToMoveIntoSquare = true;
+            //}
+            //}
+
+        }
+
         private void ChaseCreature(Creature newTarget)
         {
             //Confirm this as current target
@@ -277,13 +409,18 @@ namespace RogueBasin
             }
             else
             {
-                //Check if we want to flee. Only recheck after we've been injured again
-                if (Hitpoints <= maxHitPointsWillFlee && Hitpoints < lastHitpoints)
+                //Only not-charmed creatures will flee
+
+                if (!Charmed)
                 {
-                    if (Game.Random.Next(100) < chanceToFlee)
+                    //Check if we want to flee. Only recheck after we've been injured again
+                    if (Hitpoints <= maxHitPointsWillFlee && Hitpoints < lastHitpoints)
                     {
-                        AIState = SimpleAIStates.Fleeing;
-                        LogFile.Log.LogEntryDebug(this.SingleDescription + " fleeing", LogDebugLevel.Medium);
+                        if (Game.Random.Next(100) < chanceToFlee)
+                        {
+                            AIState = SimpleAIStates.Fleeing;
+                            LogFile.Log.LogEntryDebug(this.SingleDescription + " fleeing", LogDebugLevel.Medium);
+                        }
                     }
                 }
             }
@@ -387,87 +524,82 @@ namespace RogueBasin
                 else
                 {
                     //No good place to flee, attack instead
-                    //Copied from below
-
-                    //Find location of next step on the path towards them
-                    nextStep = Game.Dungeon.GetPathTo(this, newTarget);
-
-                    bool moveIntoSquare = true;
-
-                    //If this is the same as the target creature's location, we are adjacent and can attack
-                    if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
-                    {
-                        //Attack the monster
-                        //Ugly select here
-                        CombatResults result;
-
-                        if (newTarget == Game.Dungeon.Player)
-                        {
-                            result = AttackPlayer(newTarget as Player);
-                        }
-                        else
-                        {
-                            //It's a normal creature
-                            result = AttackMonster(newTarget as Monster);
-                        }
-
-
-                        //If we killed it, move into its square
-                        if (result != CombatResults.DefenderDied)
-                        {
-                            moveIntoSquare = false;
-                        }
-                    }
-
-                    //Otherwise (or if the creature died), move towards it (or its corpse)
-                    if (moveIntoSquare)
-                    {
-                        LocationMap = nextStep;
-                    }
+                    FollowAndAttack(newTarget);
                 }
 
             }
             else
             {
-                //Persui and attack
-
-                //Find location of next step on the path towards them
-                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
-
-                bool moveIntoSquare = true;
-
-                //If this is the same as the target creature's location, we are adjacent and can attack
-                if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
-                {
-                    //Attack the monster
-                    //Ugly select here
-                    CombatResults result;
-
-                    if (newTarget == Game.Dungeon.Player)
-                    {
-                        result = AttackPlayer(newTarget as Player);
-                    }
-                    else
-                    {
-                        //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
-                    }
-
-
-                    //If we killed it, move into its square
-                    if (result != CombatResults.DefenderDied)
-                    {
-                        moveIntoSquare = false;
-                    }
-                }
-
-                //Otherwise (or if the creature died), move towards it (or its corpse)
-                if (moveIntoSquare)
-                {
-                    LocationMap = nextStep;
-                }
+                //Persue and attack
+                FollowAndAttack(newTarget);
             }
         }
+
+        void FollowAndAttack(Creature newTarget)
+        {
+            //Find location of next step on the path towards them
+            
+            Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+
+            bool moveIntoSquare = true;
+
+            //If this is the same as the target creature's location, we are adjacent and can attack
+            if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+            {
+                //Attack the monster
+                //Ugly select here
+                CombatResults result;
+
+                if (newTarget == Game.Dungeon.Player)
+                {
+                    result = AttackPlayer(newTarget as Player);
+                }
+                else
+                {
+                    //It's a normal creature
+                    result = AttackMonster(newTarget as Monster);
+                }
+
+
+                //If we killed it, move into its square
+                if (result != CombatResults.DefenderDied)
+                {
+                    moveIntoSquare = false;
+                }
+            }
+
+            //Otherwise (or if the creature died), move towards it (or its corpse)
+            if (moveIntoSquare)
+            {
+                LocationMap = nextStep;
+            }
+        }
+
+        /// <summary>
+        /// Follow the PC but don't attack him
+        /// </summary>
+        void FollowPC()
+        {
+            Player player = Game.Dungeon.Player;
+
+            //Find location of next step on the path towards them
+            Point nextStep = Game.Dungeon.GetPathTo(this, player);
+
+            bool moveIntoSquare = true;
+
+            //Check we don't walk on top of him
+            if (nextStep.x == player.LocationMap.x && nextStep.y == player.LocationMap.y)
+            {
+                moveIntoSquare = false;
+            }
+
+            //Move into square - seems low level but GetPathTo return no move if not possible
+            if (moveIntoSquare)
+            {
+                LocationMap = nextStep;
+            }
+        }
+    
 
         public void RecoverOnBeingHit()
         {
