@@ -76,6 +76,7 @@ namespace RogueBasin
         public List<Feature> features;
 
         public List<SpecialMove> specialMoves;
+        public List<Spell> spells;
 
         public List<HiddenNameInfo> hiddenNameInfo;
         public List<DungeonSquareTrigger> triggers;

@@ -74,6 +74,8 @@ namespace RogueBasin
 
         List<SpecialMove> specialMoves;
 
+        List<Spell> spells;
+
         Player player;
 
         public bool SaveScumming { get; set; }
@@ -109,12 +111,15 @@ namespace RogueBasin
             //levelTCODMapsIgnoringClosedDoors = new List<TCODFov>();
             effects = new List<DungeonEffect>();
             specialMoves = new List<SpecialMove>();
+            spells = new List<Spell>();
             HiddenNameInfo = new List<HiddenNameInfo>();
             Triggers = new List<DungeonSquareTrigger>();
 
             PlayerImmortal = false;
 
             SetupSpecialMoves();
+
+            SetupSpells();
 
             SetupHiddenNameMappings();
 
@@ -193,6 +198,43 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Find the closest creature to the map object
+        /// </summary>
+        /// <param name="originCreature"></param>
+        /// <returns></returns>
+        public Creature FindClosestCreature(MapObject origin)
+        {
+            //Find the closest creature
+            Creature closestCreature = null;
+            double closestDistance = Double.MaxValue; //a long way
+
+            double distance;
+
+            foreach (Monster creature in monsters)
+            {
+                distance = GetDistanceBetween(origin, creature);
+
+                if (distance > 0 && distance < closestDistance && origin != creature)
+                {
+                    closestDistance = distance;
+                    closestCreature = creature;
+                }
+            }
+
+            //And check for player
+
+            distance = GetDistanceBetween(origin, Game.Dungeon.Player);
+
+            if (distance > 0 && distance < closestDistance && origin != Game.Dungeon.Player)
+            {
+                closestDistance = distance;
+                closestCreature = Game.Dungeon.Player;
+            }
+
+            return closestCreature;
+        }
+
+        /// <summary>
         /// Link a potion with a user-provided string
         /// </summary>
         /// <param name="item"></param>
@@ -262,6 +304,20 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Add to the spells list
+        /// </summary>
+        private void SetupSpells()
+        {
+            spells.Add(new Spells.MagicMissile());
+            //specialMoves.Add(new SpecialMoves.CloseQuarters());
+
+            foreach (Spell move in spells)
+            {
+                move.Known = false;
+            }
+        }
+
+        /// <summary>
         /// Save the game to disk. Throws exceptions
         /// </summary>
         /// <param name="saveGameName"></param>
@@ -284,6 +340,7 @@ namespace RogueBasin
                 saveGameInfo.monsters = this.monsters;
                 saveGameInfo.player = this.player;
                 saveGameInfo.specialMoves = this.specialMoves;
+                saveGameInfo.spells = this.spells;
                 saveGameInfo.hiddenNameInfo = this.HiddenNameInfo;
                 saveGameInfo.worldClock = this.worldClock;
                 saveGameInfo.triggers = this.Triggers;
@@ -372,6 +429,18 @@ namespace RogueBasin
         {
             //Play movie
             foreach (SpecialMove m1 in specialMoves)
+            {
+                m1.Known = true;
+            }
+        }
+
+        /// <summary>
+        /// Player learns all spells. Debug. Movies not played.
+        /// </summary>
+        public void PlayerLearnsAllSpells()
+        {
+            //Play movie
+            foreach (Spell m1 in spells)
             {
                 m1.Known = true;
             }
@@ -945,6 +1014,21 @@ namespace RogueBasin
             set
             {
                 specialMoves = value;
+            }
+        }
+
+        /// <summary>
+        /// For serialization only
+        /// </summary>
+        public List<Spell> Spells
+        {
+            get
+            {
+                return spells;
+            }
+            set
+            {
+                spells = value;
             }
         }
 
@@ -2258,6 +2342,20 @@ namespace RogueBasin
                 if (move.GetType() == moveToLearn.GetType())
                 {
                     move.Known = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The player learns a new spell. Right now doesn't use the parameter (except as a reference) and just updates the Known parameter
+        /// </summary>
+        internal void LearnSpell(Spell moveToLearn)
+        {
+            foreach (Spell spell in spells)
+            {
+                if (spell.GetType() == moveToLearn.GetType())
+                {
+                    spell.Known = true;
                 }
             }
         }

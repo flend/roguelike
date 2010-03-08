@@ -257,7 +257,7 @@ namespace RogueBasin
 
                                 case 'Z':
                                     //Cast spell (just target for now)
-                                    timeAdvances = PlayerTargetSpell();
+                                    timeAdvances = CastSpell();
                                     if (!timeAdvances)
                                         UpdateScreen();
                                     if (timeAdvances)
@@ -396,6 +396,8 @@ namespace RogueBasin
                                     //Learn all moves
                                     Game.Dungeon.PlayerLearnsAllMoves();
                                     Game.MessageQueue.AddMessage("Learnt all moves.");
+                                    Game.Dungeon.PlayerLearnsAllSpells();
+                                    Game.MessageQueue.AddMessage("Learnt all spells.");
                                     UpdateScreen();
                                     timeAdvances = false;
                                     break;
@@ -989,21 +991,156 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Cast a spell. Returns if time passes.
+        /// </summary>
+        /// <returns></returns>
+        private bool CastSpell()
+        {
+            
+            //Get the user's selection
+            Spell toCast = SelectSpell();
+
+            //User exited
+            if (toCast == null)
+                return false;
+
+            //Check MP
+
+            
+            //Get a target if needed
+
+            Point target = new Point();
+            bool targettingSuccess = false;
+
+            if (toCast.NeedsTarget())
+            {
+                targettingSuccess = TargetSpell(out target);
+            }
+
+            //User exited
+            if (!targettingSuccess)
+                return false;
+
+            //Actually cast the spell
+            bool success = toCast.DoSpell(target);
+
+            //Remove MP if successful
+
+            //Time only goes past if successfully cast
+            return success;
+        }
+
+        /// <summary>
+        /// Player selects a spell. Returns the spell into all knownSpells or -1 if none selected
+        /// </summary>
+        /// <returns></returns>
+        private Spell SelectSpell()
+        {
+            //Select a spell to cast
+
+            Screen.Instance.DisplaySpells = true;
+            UpdateScreen();
+
+            //Player presses a key from a-w to select a spell
+
+            //Build a list of the moves (in the same order as displayed)
+            List<Spell> knownSpells = Game.Dungeon.Spells.FindAll(x => x.Known);
+
+            int selectedSpell = -1;
+
+            do
+            {
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+
+                    char keyCode = (char)userKey.Character;
+
+                    if (keyCode == 'x')
+                    {
+                        //Exit
+                        break;
+                    }
+                    else
+                    {
+                        //Otherwise, check if it's valid and play the movie
+                        int charIndex = (int)keyCode - (int)'a';
+
+                        if (charIndex < 0)
+                            continue;
+
+                        if (charIndex < knownSpells.Count && charIndex < 24)
+                        {
+                            selectedSpell = charIndex;
+                            break;
+                        }
+                    }
+                }
+            } while (true);
+
+            //Select a spell to cast
+
+            Screen.Instance.DisplaySpells = false;
+            UpdateScreen();
+
+            if (selectedSpell == -1)
+                return null;
+
+            return knownSpells[selectedSpell];
+        }
+
+        /// <summary>
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private bool PlayerTargetSpell()
+        private bool TargetSpell(out Point target)
         {
-            //Start on the PC
-            Point target = new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
+            Player player = Game.Dungeon.Player;
+
+            //Start on the nearest creature
+            Creature closeCreature = Game.Dungeon.FindClosestCreature(player);
+
+            //Get the FOV from Dungeon (this also updates the map creature FOV state)
+            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
+
+            Point startPoint;
+
+            //Is that creature in FOV
+            if (currentFOV.CheckTileFOV(closeCreature.LocationMap.x, closeCreature.LocationMap.y))
+            {
+                //If so, target
+                startPoint = new Point(closeCreature.LocationMap.x, closeCreature.LocationMap.y);
+            }
+            else
+            {
+                //If not, target the PC
+                startPoint = new Point(player.LocationMap.x, player.LocationMap.y);
+            }
+
+            //Get the desired target from the player
+
+            return GetTargetFromPlayer(startPoint, out target);
+        }
+
+        /// <summary>
+        /// Gets a target from the player. false showed an escape. otherwise target is the target selected.
+        /// </summary>
+        /// <param name="?"></param>
+        /// <returns></returns>
+        private bool GetTargetFromPlayer(Point start, out Point target)
+        {
 
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
-            Screen.Instance.Target = target;
+            Screen.Instance.Target = start;
+            Game.MessageQueue.AddMessage("Find a target. Z to fire. ESC to exit.");
             UpdateScreen();
 
             bool keepLooping = true;
             bool validFire = false;
+
+            target = start;
 
             do
             {
@@ -1059,6 +1196,7 @@ namespace RogueBasin
 
                     //Update screen
                     Screen.Instance.Target = newPoint;
+                    Game.MessageQueue.AddMessage("Find a target. Z to fire. ESC to exit.");
                     UpdateScreen();
 
                 }
@@ -1069,8 +1207,8 @@ namespace RogueBasin
             UpdateScreen();
 
             return validFire;
-        }
 
+        }
 
         /// <summary>
         /// Player uses item. Returns true if item was used and time should advance

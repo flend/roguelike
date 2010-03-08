@@ -89,6 +89,8 @@ namespace RogueBasin {
 
         bool displaySpecialMoveMovies;
 
+        bool displaySpells;
+
         //Death members
         public List<string> TotalKills { get; set; }
         public List<string> DeathPreamble { get; set; }
@@ -505,6 +507,8 @@ namespace RogueBasin {
                 DrawEquipmentSelect();
             else if (displaySpecialMoveMovies)
                 DrawMovieOverlay();
+            else if (displaySpells)
+                DrawSpellOverlay();
 
         }
 
@@ -813,6 +817,57 @@ namespace RogueBasin {
                 rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + moveIndex, inventoryListW, 1, LineAlignment.Left);
 
                 moveIndex++;
+            }
+        }
+
+        /// <summary>
+        /// Display spell screen overlay
+        /// </summary>
+        private void DrawSpellOverlay()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("Spells known", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect("Select a spell to cast or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //List the special moves known
+
+            //Active area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            int spellIndex = 0;
+            List<Spell> knownSpells = new List<Spell>();
+
+            foreach (Spell spell in Game.Dungeon.Spells)
+            {
+
+                //Run out of room - won't happen as written
+                if (spellIndex == inventoryListH)
+                    break;
+
+                //Don't list unknown moves
+                if (!spell.Known)
+                    continue;
+
+                knownSpells.Add(spell);
+
+                char selectionChar = (char)((int)'a' + spellIndex);
+                string entryString = "(" + selectionChar.ToString() + ") " + spell.SpellName() + " MP: " + spell.MPCost().ToString(); //+" (equipped)";
+
+                //Print entry
+                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + spellIndex, inventoryListW, 1, LineAlignment.Left);
+
+                spellIndex++;
             }
         }
 
@@ -1380,6 +1435,7 @@ namespace RogueBasin {
             displayEquipmentSelect = false;
             displayInventory = false;
             displaySpecialMoveMovies = false;
+            displaySpells = false;
         }
 
         public bool DisplayInventory
@@ -1430,6 +1486,18 @@ namespace RogueBasin {
                     ResetOverlayScreens();
                 }
                 displaySpecialMoveMovies = value;
+            }
+        }
+
+        public bool DisplaySpells
+        {
+            set
+            {
+                if (value == true)
+                {
+                    ResetOverlayScreens();
+                }
+                displaySpells = value;
             }
         }
 
