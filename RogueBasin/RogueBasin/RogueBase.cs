@@ -255,6 +255,15 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                case 'Z':
+                                    //Cast spell (just target for now)
+                                    timeAdvances = PlayerTargetSpell();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
                                 case 'C':
                                     //Charm creature
                                     timeAdvances = PlayerCharmCreature();
@@ -978,6 +987,90 @@ namespace RogueBasin
             //Interact with feature - these will normally put success / failure messages in queue
             return featureAtSpace.PlayerInteraction(player);
         }
+
+        /// <summary>
+        /// Let the user target something
+        /// </summary>
+        /// <returns></returns>
+        private bool PlayerTargetSpell()
+        {
+            //Start on the PC
+            Point target = new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
+
+            //Turn targetting mode on the screen
+            Screen.Instance.TargettingModeOn();
+            Screen.Instance.Target = target;
+            UpdateScreen();
+
+            bool keepLooping = true;
+            bool validFire = false;
+
+            do
+            {
+                //Get direction from the user or 'Z' to fire
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                Point direction = new Point();
+
+                bool validDirection = false;
+
+
+                if (GetDirectionFromKeypress(userKey, out direction))
+                {
+                    //Valid direction
+                    validDirection = true;
+                }
+                else
+                {
+                    //Look for firing
+                    if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                    {
+                        char keyCode = (char)userKey.Character;
+                        switch (keyCode)
+                        {
+
+                            case 'Z':
+
+                                validFire = true;
+                                keepLooping = false;
+                                break;
+                        }
+                    }
+
+                    if (userKey.KeyCode == KeyCode.TCODK_ESCAPE)
+                    {
+                        keepLooping = false;
+                    }
+                }
+
+                //If direction, update the location and redraw
+
+                if (validDirection)
+                {
+                    Point newPoint = new Point(target.x + direction.x, target.y + direction.y);
+
+                    int level = Game.Dungeon.Player.LocationLevel;
+
+                    if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y > Game.Dungeon.Levels[level].height)
+                        continue;
+
+                    //Otherwise OK
+                    target = newPoint;
+
+                    //Update screen
+                    Screen.Instance.Target = newPoint;
+                    UpdateScreen();
+
+                }
+            } while (keepLooping);
+
+            //Turn targetting mode off
+            Screen.Instance.TargettingModeOff();
+            UpdateScreen();
+
+            return validFire;
+        }
+
 
         /// <summary>
         /// Player uses item. Returns true if item was used and time should advance

@@ -64,6 +64,9 @@ namespace RogueBasin {
         Color passiveBackground = ColorPresets.DarkMagenta;
         Color normalBackground = ColorPresets.Black;
 
+        Color targetBackground = ColorPresets.White;
+        Color targetForeground = ColorPresets.Black;
+
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
 
@@ -106,6 +109,16 @@ namespace RogueBasin {
         int movieWidth = 80;
         int movieHeight = 25;
         uint movieMSBetweenFrames = 500;
+
+        /// <summary>
+        /// Targetting mode
+        /// </summary>
+        bool targettingMode = false;
+
+        /// <summary>
+        /// Targetting cursor
+        /// </summary>
+        public Point Target { get; set; }
 
         //Current movie
         List <MovieFrame> movieFrames;
@@ -192,6 +205,17 @@ namespace RogueBasin {
             RootConsole rootConsole = RootConsole.GetInstance();
 
             rootConsole.Flush();
+        }
+
+        
+
+        public void TargettingModeOn() {
+            targettingMode = true;
+        }
+
+        public void TargettingModeOff()
+        {
+            targettingMode = false;
         }
 
         /// <summary>
@@ -468,6 +492,10 @@ namespace RogueBasin {
             //Draw Stats
             DrawStats(dungeon.Player);
 
+            //Draw targetting cursor
+            if (targettingMode)
+                DrawTargettingCursor();
+
             //Draw any overlay screens
             if (displayInventory)
                 DrawInventory();
@@ -477,6 +505,28 @@ namespace RogueBasin {
                 DrawEquipmentSelect();
             else if (displaySpecialMoveMovies)
                 DrawMovieOverlay();
+
+        }
+
+        private void DrawTargettingCursor()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            int xLoc = mapTopLeft.x + Target.x;
+            int yLoc = mapTopLeft.y + Target.y;
+
+            //Get what's there
+            char charAtPoint = rootConsole.GetChar(xLoc, yLoc);
+
+            //Replace with the same but with targetting background
+
+            rootConsole.BackgroundColor = targetBackground;
+            rootConsole.ForegroundColor = targetForeground;
+
+            rootConsole.PutChar(xLoc, yLoc, charAtPoint);
+
+            rootConsole.BackgroundColor = normalBackground;
 
         }
 
