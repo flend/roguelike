@@ -315,15 +315,16 @@ namespace RogueBasin
 
                             Monster monsterToAdd = null;
 
-                            if (randomNum < 95)
+                            if (randomNum < 50)
                             {
                                 monsterToAdd = new Creatures.Orc();
                                 //monsterToAdd = levelList[0].GetRandomMonster();
                             }
                             else
                             {
+                                monsterToAdd = new Creatures.Bugbear();
                                 //monsterToAdd = levelList[1].GetRandomMonster();
-                                monsterToAdd = levelList[0].GetRandomMonster();
+                                //monsterToAdd = levelList[0].GetRandomMonster();
                             }
 
                             Point location;

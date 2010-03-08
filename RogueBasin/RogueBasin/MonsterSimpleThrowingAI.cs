@@ -5,24 +5,24 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public abstract class MonsterSimpleThrowingAI : Monster
+    public abstract class MonsterSimpleThrowingAI : MonsterFightAndRunAI
     {
-        public SimpleAIStates AIState { get; set; }
-        protected Creature currentTarget;
+        //public SimpleAIStates AIState { get; set; }
+        //protected Creature currentTarget;
 
-        public MonsterSimpleThrowingAI()
+        public MonsterSimpleThrowingAI() : base()
         {
-            AIState = SimpleAIStates.RandomWalk;
-            currentTarget = null;
         }
 
         protected abstract double GetMissileRange();
 
         protected abstract string GetWeaponName();
         
+        /*
         /// <summary>
         /// Run the Simple AI actions
         /// </summary>
+        ///
         public override void ProcessTurn()
         {
             //If in pursuit state, continue to pursue enemy until it is dead (or creature itself is killed) [no FOV used after initial target selected]
@@ -138,7 +138,7 @@ namespace RogueBasin
                 //COMMENT THIS
                 //If there are possible targets, find the closest and chase it
                 //Otherwise continue to move randomly
-                /*
+                
                 if (creaturesInFOV.Count > 0)
                 {
                     
@@ -164,7 +164,7 @@ namespace RogueBasin
                     //Start chasing this creature
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
                     ChaseCreature(closestCreature);
-                }*/
+                }
 
                 //UNCOMMENT THIS
                 //Current behaviour: only chase the PC
@@ -244,8 +244,45 @@ namespace RogueBasin
                     }
                 }
             }
+        }*/
+
+        /// <summary>
+        /// Override the following code from the hand to hand AI to give us some range
+        /// </summary>
+        /// <param name="newTarget"></param>
+        protected override void FollowAndAttack(Creature newTarget)
+        {
+            //If we are in range, fire
+            double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
+
+            if (range < GetMissileRange() + 0.005)
+            {
+                //In range
+
+                //Fire at the player
+                CombatResults result;
+
+                if (newTarget == Game.Dungeon.Player)
+                {
+                    result = AttackPlayer(newTarget as Player);
+                }
+                else
+                {
+                    //It's a normal creature
+                    result = AttackMonster(newTarget as Monster);
+                }
+            }
+            else
+            {
+                //If not, move towards the player
+
+                //Find location of next step on the path towards them
+                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+                LocationMap = nextStep;
+            }
         }
 
+        /*
         private void ChaseCreature(Creature newTarget)
         {
             //Confirm this as current target
@@ -286,7 +323,7 @@ namespace RogueBasin
                 //If this is the same as the target creature's location, we are adjacent. Something is wrong, but attack anyway
                 if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
                 {
-                    LogFile.Log.LogEntry("SimpleThrowingAI: Adjacent to target and still moving towardws");
+                    LogFile.Log.LogEntryDebug("SimpleThrowingAI: Adjacent to target and still moving towards", LogDebugLevel.Low);
                     //Fire at the player
                     CombatResults result;
 
@@ -307,7 +344,9 @@ namespace RogueBasin
                     LocationMap = nextStep;
                 }
             }
-        }
+        }*/
+
+        //This seems only to differ by the log strings
 
         public override CombatResults AttackPlayer(Player player)
         {
@@ -372,6 +411,8 @@ namespace RogueBasin
             return CombatResults.NeitherDied;
         }
 
+        //This seems to be identical to the base
+        /*
         public override CombatResults AttackMonster(Monster monster)
         {
             //Recalculate combat stats if required
@@ -380,6 +421,9 @@ namespace RogueBasin
 
             if (monster.RecalculateCombatStatsRequired)
                 monster.CalculateCombatStats();
+
+           //Set the attacked by marker
+            monster.LastAttackedBy = this;
 
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
@@ -419,5 +463,6 @@ namespace RogueBasin
 
             return CombatResults.NeitherDied;
         }
+         * */
     }
 }

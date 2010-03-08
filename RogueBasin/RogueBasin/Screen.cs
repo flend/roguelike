@@ -1078,6 +1078,9 @@ namespace RogueBasin {
                     rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
                 }
             }
+
+            //Reset the background
+            rootConsole.BackgroundColor = normalBackground;
         }
 
         public void DrawFOVDebug(int levelNo)

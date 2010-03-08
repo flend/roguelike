@@ -10,6 +10,8 @@ namespace RogueBasin
         /// <summary>
         /// Run the Simple AI actions
         /// </summary>
+        /// 
+        /*
         public override void ProcessTurn()
         {
             //If in pursuit state, continue to pursue enemy until it is dead (or creature itself is killed) [no FOV used after initial target selected]
@@ -160,7 +162,7 @@ namespace RogueBasin
                     //Start chasing this creature
                     LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
                     ChaseCreature(closestCreature);
-                }*/
+                }
 
                 //UNCOMMENT THIS
                 //Current behaviour: only chase the PC
@@ -240,8 +242,9 @@ namespace RogueBasin
                     }
                 }
             }
-        }
+        }*/
 
+        /*
         /// <summary>
         /// Flee ai cleverness. 10 loops performs pretty well, much higher is infallable
         /// </summary>
@@ -253,7 +256,184 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         protected virtual int RelaxDirectionAt() { return 0; }
+        */
 
+        /// <summary>
+        /// Override the following code from the hand to hand AI to give us some range
+        /// </summary>
+        /// <param name="newTarget"></param>
+        protected override void FollowAndAttack(Creature newTarget) {
+            
+            //If we are in range, fire
+            double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
+
+            if(range < GetMissileRange() / 2.0) {
+                //Too close creature will try to back away
+                int deltaX = newTarget.LocationMap.x - this.LocationMap.x;
+                int deltaY = newTarget.LocationMap.y - this.LocationMap.y;
+
+                //Find a point in the dungeon to flee to
+                int fleeX = 0;
+                int fleeY = 0;
+
+                int counter = 0;
+
+                bool relaxDirection = false;
+                bool goodPath = false;
+
+                Point nextStep = new Point(0,0);
+
+                int totalFleeLoops = GetTotalFleeLoops();
+                int relaxDirectionAt = RelaxDirectionAt();
+
+                do
+                {
+                    fleeX = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].width);
+                    fleeY = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].height);
+
+                    //Relax conditions if we are having a hard time
+                    if (counter > relaxDirectionAt)
+                        relaxDirection = true;
+
+                    //Check these are in the direction away from the attacker
+                    int deltaFleeX = fleeX - this.LocationMap.x;
+                    int deltaFleeY = fleeY - this.LocationMap.y;
+
+                    if (!relaxDirection)
+                    {
+                        if (deltaFleeX > 0 && deltaX > 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeX < 0 && deltaX < 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeY > 0 && deltaY > 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                        if (deltaFleeY < 0 && deltaY < 0)
+                        {
+                            counter++;
+                            continue;
+                        }
+                    }
+
+                    //Check the square is empty
+                    bool isEnterable = Game.Dungeon.MapSquareIsWalkable(this.LocationLevel, new Point(fleeX, fleeY));
+                    if (!isEnterable)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Check the square is empty of creatures
+                    SquareContents contents = Game.Dungeon.MapSquareContents(this.LocationLevel, new Point(fleeX, fleeY));
+                    if (contents.monster != null)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Check the square is pathable to
+                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+
+                    if (nextStep.x == -1 && nextStep.y == -1)
+                    {
+                        counter++;
+                        continue;
+                    }
+
+                    //Otherwise we found it
+                    goodPath = true;
+                    break;
+
+
+                } while (counter < totalFleeLoops);
+
+                //If we found a good path, walk it
+                if (goodPath)
+                {
+                    LocationMap = nextStep;
+                }
+                else
+                {
+                    //if not, continue attacking
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+                }
+            }
+
+            else if (range < GetMissileRange() + 0.005)
+            {
+                //In range
+
+                //Fire at the player
+                CombatResults result;
+
+                if (newTarget == Game.Dungeon.Player)
+                {
+                    result = AttackPlayer(newTarget as Player);
+                }
+                else
+                {
+                    //It's a normal creature
+                    result = AttackMonster(newTarget as Monster);
+                }
+            }
+            else
+            {
+                //If not, move towards the player
+
+                //Find location of next step on the path towards them
+                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+
+                bool moveIntoSquare = true;
+
+                //If this is the same as the target creature's location, we are adjacent. Something is wrong, but attack anyway
+                if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+                {
+                    LogFile.Log.LogEntryDebug("SimpleThrowingAI: Adjacent to target and still moving towards", LogDebugLevel.High);
+                    //Fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+                }
+
+                //Otherwise (or if the creature died), move towards it (or its corpse)
+                if (moveIntoSquare)
+                {
+                    LocationMap = nextStep;
+                }
+            }
+        }
+    }
+}
+
+
+        /*
         private void ChaseCreature(Creature newTarget)
         {
             //Confirm this as current target
@@ -428,4 +608,4 @@ namespace RogueBasin
             }
         }
     }
-}
+}*/

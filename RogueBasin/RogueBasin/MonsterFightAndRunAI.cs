@@ -19,18 +19,18 @@ namespace RogueBasin
     public abstract class MonsterFightAndRunAI : Monster
     {
         public SimpleAIStates AIState {get; set;}
-        Creature currentTarget;
-        int lastHitpoints;
+        protected Creature currentTarget;
+        protected int lastHitpoints;
 
         /// <summary>
         /// Longest distance charmed creature will go away from the PC
         /// </summary>
-        const double maxChaseDistance = 5.0;
+        protected const double maxChaseDistance = 5.0;
 
         /// <summary>
         /// Close enough to the PC to go back to duty
         /// </summary>
-        const double recoverDistance = 2.0;
+        protected const double recoverDistance = 2.0;
 
         public MonsterFightAndRunAI()
         {
@@ -608,7 +608,7 @@ namespace RogueBasin
             }
         }
 
-        void FollowAndAttack(Creature newTarget)
+        protected virtual void FollowAndAttack(Creature newTarget)
         {
             //Find location of next step on the path towards them
             
@@ -632,7 +632,6 @@ namespace RogueBasin
                     //It's a normal creature
                     result = AttackMonster(newTarget as Monster);
                 }
-
 
                 //If we killed it, move into its square
                 if (result != CombatResults.DefenderDied)
