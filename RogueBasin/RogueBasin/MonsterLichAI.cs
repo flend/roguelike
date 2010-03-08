@@ -489,6 +489,16 @@ namespace RogueBasin
             return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It misses.";
         }
 
+        protected override string HitsMonsterCombatString(Monster target)
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It hits.";
+        }
+
+        protected override string MissesMonsterCombatString(Monster target)
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It misses.";
+        }
+
         /*
         private void ChaseCreature(Creature newTarget)
         {

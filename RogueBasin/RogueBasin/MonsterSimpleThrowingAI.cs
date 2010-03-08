@@ -356,6 +356,17 @@ namespace RogueBasin
             return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It misses.";
         }
 
+        protected override string HitsMonsterCombatString(Monster target)
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It hits.";
+        }
+
+        protected override string MissesMonsterCombatString(Monster target)
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It misses.";
+        }
+
+
         //This seems only to differ by the log strings
         /*
         public override CombatResults AttackPlayer(Player player)

@@ -745,6 +745,16 @@ namespace RogueBasin
             return "The " + this.SingleDescription + " hits you.";
         }
 
+        protected override string HitsMonsterCombatString(Monster target)
+        {
+            return "The " + this.SingleDescription + " hits the " + target.SingleDescription + ".";
+        }
+
+        protected override string MissesMonsterCombatString(Monster target)
+        {
+            return "The " + this.SingleDescription + " hits the " + target.SingleDescription + ".";
+        }
+
         public override bool CanBeCharmed()
         {
             return true;

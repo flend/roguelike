@@ -321,6 +321,10 @@ namespace RogueBasin
 
         protected abstract string MissesPlayerCombatString();
 
+        protected abstract string HitsMonsterCombatString(Monster target);
+
+        protected abstract string MissesMonsterCombatString(Monster target);
+
         /// <summary>
         /// Can the creature be charmed by the charm power? Put in to exclude classes of monsters by the AI they have. Some AIs don't have charm and passive rules
         /// </summary>
@@ -406,7 +410,9 @@ namespace RogueBasin
 
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
-
+            
+            string playerMsg;
+            
             //Do we hit the player?
             if (damage > 0)
             {
@@ -421,6 +427,8 @@ namespace RogueBasin
 
                     //Debug string
                     string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
+                    playerMsg = HitsMonsterCombatString(monster) + " It dies.";
+                    Game.MessageQueue.AddMessage(playerMsg);
                     //Game.MessageQueue.AddMessage(combatResultsMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
@@ -429,7 +437,8 @@ namespace RogueBasin
 
                 //Debug string
                 string combatResultsMsg3 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
-                //Game.MessageQueue.AddMessage(combatResultsMsg3);
+                playerMsg = HitsMonsterCombatString(monster);
+                Game.MessageQueue.AddMessage(playerMsg);
                 LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
                 return CombatResults.NeitherDied;
@@ -438,6 +447,8 @@ namespace RogueBasin
             //Miss
             string combatResultsMsg2 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
             //Game.MessageQueue.AddMessage(combatResultsMsg2);
+            playerMsg = MissesMonsterCombatString(monster);
+            Game.MessageQueue.AddMessage(playerMsg);
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
