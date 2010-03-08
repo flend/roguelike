@@ -321,6 +321,21 @@ namespace RogueBasin
 
         protected abstract string MissesPlayerCombatString();
 
+        /// <summary>
+        /// Can the creature be charmed by the charm power? Put in to exclude classes of monsters by the AI they have. Some AIs don't have charm and passive rules
+        /// </summary>
+        public virtual bool CanBeCharmed() {
+            return false;
+        }
+
+        /// <summary>
+        /// Can the creature be passified by the charm power? Put in to exclude classes of monsters by the AI they have. Some AIs don't have charm and passive rules
+        /// </summary>
+        public virtual bool CanBePassified()
+        {
+            return false;
+        }
+
         public virtual CombatResults AttackPlayer(Player player)
         {
             //Recalculate combat stats if required

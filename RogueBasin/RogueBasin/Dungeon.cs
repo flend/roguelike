@@ -2486,24 +2486,62 @@ namespace RogueBasin
                         return false;
                     }
 
-                    //Do some check or roll
-
-                    //Check if the player has any more charms
-                    bool playerOK = player.AddCharmCreatureIfPossible();
-
-                    if (!playerOK)
+                    //Check if this class of creature can be charmed or passified
+                    if (!monster.CanBeCharmed() && !monster.CanBePassified())
                     {
-                        Game.MessageQueue.AddMessage("Too many charmed creatures.");
+                        Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " laughs at your feeble attempt.");
                         return true;
                     }
 
+                    bool canCharm = true;
+
+                    if (!monster.CanBeCharmed())
+                    {
+                        //On for passify only
+                        canCharm = false;
+                    }
+
+                    //Try to charm, may fail if the player has no more charms
+                    
+                    bool playerOK = false;
+                    if (canCharm)
+                    {
+                        //Check if the player has any more charms
+                        playerOK = player.AddCharmCreatureIfPossible();
+                    }
+
+                    if (!playerOK)
+                    {
+                        canCharm = false;
+                        //Game.MessageQueue.AddMessage("Too many charmed creatures.");
+                        //return true;
+                    }
+
                     //All OK do the charm
-                    string msg = "The " + monster.SingleDescription + " looks at you lovingly.";
+                    if (canCharm)
+                    {
+                        //Test against statistic here
 
-                    Game.MessageQueue.AddMessage(msg);
-                    contents.monster.CharmCreature();
+                        string msg = "The " + monster.SingleDescription + " looks at you lovingly.";
 
-                    return true;
+                        Game.MessageQueue.AddMessage(msg);
+                        contents.monster.CharmCreature();
+
+                        return true;
+                    }
+
+                    //Only a passify
+                    else
+                    {
+                        //Test against statistic here
+
+                        string msg = "The " + monster.SingleDescription + " sighs and turns away.";
+
+                        Game.MessageQueue.AddMessage(msg);
+                        contents.monster.PassifyCreature();
+
+                        return true;
+                    }
 
                 }
                 else

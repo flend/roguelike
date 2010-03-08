@@ -372,7 +372,7 @@ namespace RogueBasin
             }
         }
 
-        private void MoveRandomSquareNoAttack()
+        protected void MoveRandomSquareNoAttack()
         {
             //Move randomly.
             int direction = Game.Random.Next(9);
@@ -743,6 +743,16 @@ namespace RogueBasin
         protected override string MissesPlayerCombatString()
         {
             return "The " + this.SingleDescription + " hits you.";
+        }
+
+        public override bool CanBeCharmed()
+        {
+            return true;
+        }
+
+        public override bool CanBePassified()
+        {
+            return true;
         }
     }
 }
