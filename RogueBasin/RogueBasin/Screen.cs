@@ -60,6 +60,10 @@ namespace RogueBasin {
 
         Color hiddenColor = ColorPresets.Black;
 
+        Color charmBackground = ColorPresets.DarkKhaki;
+        Color passiveBackground = ColorPresets.DarkMagenta;
+        Color normalBackground = ColorPresets.Black;
+
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
 
@@ -1063,6 +1067,14 @@ namespace RogueBasin {
                 if (drawCreature)
                 {
                     rootConsole.ForegroundColor = creatureColor;
+                    //Set background depending on status
+                    if (creature.Charmed)
+                        rootConsole.BackgroundColor = charmBackground;
+                    else if (creature.Passive)
+                        rootConsole.BackgroundColor = passiveBackground;
+                    else
+                        rootConsole.BackgroundColor = normalBackground;
+
                     rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
                 }
             }

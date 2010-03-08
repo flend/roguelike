@@ -145,6 +145,7 @@ namespace RogueBasin
         /// </summary>
         public void CharmCreature()
         {
+            LogFile.Log.LogEntryDebug(this.SingleDescription + "charmed", LogDebugLevel.Medium);
             Charmed = true;
         }
         /// <summary>
@@ -152,6 +153,7 @@ namespace RogueBasin
         /// </summary>
         public void UncharmCreature()
         {
+            LogFile.Log.LogEntryDebug(this.SingleDescription + "uncharmed", LogDebugLevel.Medium);
             Charmed = false;
         }
 
@@ -160,6 +162,7 @@ namespace RogueBasin
         /// </summary>
         public void PassifyCreature()
         {
+            LogFile.Log.LogEntryDebug(this.SingleDescription + "passified", LogDebugLevel.Medium);
             Passive = true;
         }
 
@@ -168,6 +171,7 @@ namespace RogueBasin
         /// </summary>
         public void UnpassifyCreature()
         {
+            LogFile.Log.LogEntryDebug(this.SingleDescription + "unpassified", LogDebugLevel.Medium);
             Passive = false;
         }
 

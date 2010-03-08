@@ -149,6 +149,10 @@ namespace RogueBasin.SpecialMoves
                 //Does our list of possible targets contain a new monster
                 List<Monster> newMonsters = possibleTargets.FindAll(x => x != target);
 
+                //Don't count charmed and passives
+                newMonsters = newMonsters.FindAll(x => !x.Passive);
+                newMonsters = newMonsters.FindAll(x => !x.Charmed);
+
                 if (newMonsters.Count == 0)
                 {
                     FailNoNewMonsters();

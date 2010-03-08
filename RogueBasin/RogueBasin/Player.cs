@@ -492,6 +492,9 @@ namespace RogueBasin
             //Set the attacked by marker
             monster.LastAttackedBy = this;
 
+            //Was this a passive creature? It loses that flag
+            monster.UnpassifyCreature();
+
             //Calculate damage from a normal attack
             int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
 

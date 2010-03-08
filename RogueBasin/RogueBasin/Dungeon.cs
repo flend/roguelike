@@ -1171,13 +1171,39 @@ namespace RogueBasin
                     okToMoveIntoSquare = true;
                 }
 
-                //Monster - attack it
+                //Monster - check for charm / passive / normal status
                 if (contents.monster != null)
                 {
-                    CombatResults results = player.AttackMonster(contents.monster);
-                    if (results == CombatResults.DefenderDied)
+                    Monster monster = contents.monster;
+
+                    if (monster.Charmed)
                     {
+                        //Switch monster to PC position
+                        monster.LocationMap = new Point(Player.LocationMap.x, Player.LocationMap.y);
+                        
+                        //PC will move to monster's old location
                         okToMoveIntoSquare = true;
+
+                    }
+                    else if (monster.Passive)
+                    {
+                        //Attack the passive creature.
+                        CombatResults results = player.AttackMonster(contents.monster);
+                        if (results == CombatResults.DefenderDied)
+                        {
+                            okToMoveIntoSquare = true;
+                        }
+
+                    }
+                    else
+                    {
+                        //Monster hostile 
+
+                        CombatResults results = player.AttackMonster(contents.monster);
+                        if (results == CombatResults.DefenderDied)
+                        {
+                            okToMoveIntoSquare = true;
+                        }
                     }
                 }
 
