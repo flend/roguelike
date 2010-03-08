@@ -18,7 +18,7 @@ namespace RogueBasin {
         public int Width { get; set; }
         public int Height { get; set; }
 
-        bool debugMode = false;
+        bool debugMode = true;
 
         //Top left coord to start drawing the map at
         Point mapTopLeft;

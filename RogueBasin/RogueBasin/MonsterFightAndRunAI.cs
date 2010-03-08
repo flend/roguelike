@@ -9,7 +9,8 @@ namespace RogueBasin
     {
         RandomWalk,
         Pursuit,
-        Fleeing
+        Fleeing,
+        Returning
     }
 
     /// <summary>
@@ -21,6 +22,16 @@ namespace RogueBasin
         Creature currentTarget;
         int lastHitpoints;
 
+        /// <summary>
+        /// Longest distance charmed creature will go away from the PC
+        /// </summary>
+        const double maxChaseDistance = 5.0;
+
+        /// <summary>
+        /// Close enough to the PC to go back to duty
+        /// </summary>
+        const double recoverDistance = 2.0;
+
         public MonsterFightAndRunAI()
         {
             AIState = SimpleAIStates.RandomWalk;
@@ -28,6 +39,18 @@ namespace RogueBasin
 
             lastHitpoints = ClassMaxHitpoints();
         }
+
+        double GetDistance(Creature creature1, Creature creature2)
+        {
+            double distanceSq = Math.Pow(creature1.LocationMap.x - creature2.LocationMap.x, 2) +
+                                    Math.Pow(creature1.LocationMap.y - creature2.LocationMap.y, 2);
+
+            double distance = Math.Sqrt(distanceSq);
+
+            return distance;
+        }
+
+
         /// <summary>
         /// Run the Simple AI actions
         /// </summary>
@@ -42,6 +65,32 @@ namespace RogueBasin
 
             Random rand = Game.Random;
             
+            //If we are returning to the PC, continue to do so unless we are attacked
+            if (AIState == SimpleAIStates.Returning)
+            {
+                //We have been attacked by someone new
+                if (LastAttackedBy != null && LastAttackedBy.Alive)
+                {
+                    //Reset the AI, will drop through and chase the nearest target
+                    AIState = SimpleAIStates.RandomWalk;
+                }
+                else {
+
+                    //Are we close enough to the PC?
+                    double distance = GetDistance(this, Game.Dungeon.Player);
+
+                    if (distance <= recoverDistance)
+                    {
+                        //Reset AI and fall through
+                        AIState = SimpleAIStates.RandomWalk;
+                        LogFile.Log.LogEntryDebug(this.Representation + " close enough to PC", LogDebugLevel.Medium);
+                    }
+                    
+                    //Otherwise follow the PC back
+                    FollowPC();
+                }
+            }
+
             if (AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit)
             {
 
@@ -83,10 +132,13 @@ namespace RogueBasin
                 {
                     //Otherwise continue to pursue or flee
                     ChaseCreature(currentTarget);
+                    return;
                 }
 
             }
             
+            //Check: now no drop through from chasecreature() call above
+
             if(AIState == SimpleAIStates.RandomWalk) {
                 //RandomWalk state
 
@@ -530,6 +582,27 @@ namespace RogueBasin
             }
             else
             {
+                //If charmed creatures get too far away chasing they will come back
+                if (Charmed)
+                {
+                    //Calculate distance between PC and creature
+                    if (Game.Dungeon.Player.LocationLevel == this.LocationLevel)
+                    {
+
+                        double distanceSq = Math.Pow(Game.Dungeon.Player.LocationMap.x - this.LocationMap.x, 2) +
+                                    Math.Pow(Game.Dungeon.Player.LocationMap.y - this.LocationMap.y, 2);
+                        double distance = Math.Sqrt(distanceSq);
+
+                        if (distance > maxChaseDistance)
+                        {
+                            LogFile.Log.LogEntryDebug(this.SingleDescription + " returns to PC", LogDebugLevel.Medium);
+                            AIState = SimpleAIStates.Returning;
+                            LastAttackedBy = null; //bit of a hack
+                            FollowPC();
+                        }
+                    }
+                }
+
                 //Persue and attack
                 FollowAndAttack(newTarget);
             }
