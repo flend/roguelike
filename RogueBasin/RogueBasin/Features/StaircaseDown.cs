@@ -29,6 +29,19 @@ namespace RogueBasin.Features
 
             //Otherwise move down
 
+            //Turn all charmed creatures on this level into passified creatures
+            //Just do it for all monsters
+            foreach (Monster monster in Game.Dungeon.Monsters)
+            {
+                if (monster.Charmed)
+                {
+                    monster.UncharmCreature();
+                    monster.PassifyCreature();
+
+                    Game.Dungeon.Player.RemoveCharmedCreature();
+                }
+            }
+
             //Increment player level
             player.LocationLevel++;
 
