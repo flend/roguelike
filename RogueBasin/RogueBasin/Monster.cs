@@ -317,6 +317,9 @@ namespace RogueBasin
             return 0;
         }
 
+        protected abstract string HitsPlayerCombatString();
+
+        protected abstract string MissesPlayerCombatString();
 
         public virtual CombatResults AttackPlayer(Player player)
         {
@@ -342,9 +345,12 @@ namespace RogueBasin
                 {
                     Game.Dungeon.PlayerDeath("was killed by a " + this.SingleDescription);
 
-                    //Debug string
+                    //Message queue string
                     string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
-                    string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
+                    
+                    
+                    //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
+                    string playerMsg = HitsPlayerCombatString() + " You die.";
                     Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
@@ -353,7 +359,8 @@ namespace RogueBasin
 
                 //Debug string
                 string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
-                string playerMsg3 = "The " + this.SingleDescription + " hits you.";
+                //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
+                string playerMsg3 = HitsPlayerCombatString();
                 Game.MessageQueue.AddMessage(playerMsg3);
                 LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
@@ -362,7 +369,8 @@ namespace RogueBasin
 
             //Miss
             string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
-            string playerMsg2 = "The " + this.SingleDescription + " misses you.";
+            //string playerMsg2 = "The " + this.SingleDescription + " misses you.";
+            string playerMsg2 = MissesPlayerCombatString();
             Game.MessageQueue.AddMessage(playerMsg2);
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 

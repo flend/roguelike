@@ -731,5 +731,14 @@ namespace RogueBasin
         /// <returns></returns>
         protected virtual int RelaxDirectionAt() { return 0; }
 
+        protected override string HitsPlayerCombatString()
+        {
+            return "The " + this.SingleDescription + " hits you.";
+        }
+
+        protected override string MissesPlayerCombatString()
+        {
+            return "The " + this.SingleDescription + " hits you.";
+        }
     }
 }

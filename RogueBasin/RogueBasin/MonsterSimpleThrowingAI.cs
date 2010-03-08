@@ -346,8 +346,18 @@ namespace RogueBasin
             }
         }*/
 
-        //This seems only to differ by the log strings
+        protected override string HitsPlayerCombatString()
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It hits.";
+        }
 
+        protected override string MissesPlayerCombatString()
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It misses.";
+        }
+
+        //This seems only to differ by the log strings
+        /*
         public override CombatResults AttackPlayer(Player player)
         {
             //Recalculate combat stats if required
@@ -409,7 +419,7 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
-        }
+        }*/
 
         //This seems to be identical to the base
         /*

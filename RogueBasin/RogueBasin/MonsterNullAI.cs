@@ -17,6 +17,16 @@ namespace RogueBasin
         {
         }
 
+        protected override string HitsPlayerCombatString()
+        {
+            return "";
+        }
+
+        protected override string MissesPlayerCombatString()
+        {
+            return "";
+        }
+
         public override CombatResults AttackMonster(Monster monster)
         {
             return CombatResults.NeitherDied;

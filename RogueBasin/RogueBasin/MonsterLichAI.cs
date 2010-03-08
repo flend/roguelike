@@ -478,6 +478,17 @@ namespace RogueBasin
                 }
             }
         }
+
+        protected override string HitsPlayerCombatString()
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It hits.";
+        }
+
+        protected override string MissesPlayerCombatString()
+        {
+            return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It misses.";
+        }
+
         /*
         private void ChaseCreature(Creature newTarget)
         {
@@ -689,7 +700,7 @@ namespace RogueBasin
             return false;
         }
 
-
+        /*
         public override CombatResults AttackPlayer(Player player)
         {
             //Recalculate combat stats if required
@@ -799,6 +810,7 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
-        }
+        }*/
+
     }
 }
