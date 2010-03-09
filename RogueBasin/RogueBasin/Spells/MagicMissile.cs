@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Spells
 {
-    class MagicMissile : Spell
+    public class MagicMissile : Spell
     {
         public override bool DoSpell(Point target)
         {
