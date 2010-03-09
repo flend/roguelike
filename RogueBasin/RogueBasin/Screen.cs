@@ -46,6 +46,7 @@ namespace RogueBasin {
         Point charmOffset;
 
         Point specialMoveStatusLine;
+        Point spellStatusLine;
 
         Color inFOVTerrainColor = ColorPresets.White;
         Color seenNotInFOVTerrainColor = ColorPresets.Gray;
@@ -166,6 +167,7 @@ namespace RogueBasin {
             charmOffset = new Point(6, 0);
 
             specialMoveStatusLine = new Point(7, 33);
+            spellStatusLine = new Point(7, 34);
            
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
@@ -1015,6 +1017,45 @@ namespace RogueBasin {
                 //Draw name of move
                 rootConsole.ForegroundColor = drawColor;
                 rootConsole.PrintLine(move.Abbreviation(), specialMoveDraw.x, specialMoveDraw.y, LineAlignment.Left);
+
+                //Move along
+                specialMoveDraw.x += 5;
+            }
+
+            //Draw moves line
+
+            //Count special moves
+            int totalSpells = Game.Dungeon.Spells.Count;
+
+            //Abbreviations are 4 characters long + space
+            totalSpecialMoveWidth = 4 * totalSpells + totalSpells - 1;
+
+            specialMoveLineX = (Width - totalSpecialMoveWidth) / 2;
+            specialMoveDraw = new Point(specialMoveLineX, spellStatusLine.y);
+
+            //Draw each spells status
+            foreach (Spell spell in Game.Dungeon.Spells)
+            {
+                Color drawColor = new Color();
+
+                //Calculate the colour
+
+                //Not known - black
+                if (!spell.Known)
+                {
+                    drawColor = ColorPresets.DarkGray;
+                }
+
+                //Known, white
+
+                else
+                {
+                    drawColor = ColorPresets.White;
+                }
+
+                //Draw name of move
+                rootConsole.ForegroundColor = drawColor;
+                rootConsole.PrintLine(spell.Abbreviation(), specialMoveDraw.x, specialMoveDraw.y, LineAlignment.Left);
 
                 //Move along
                 specialMoveDraw.x += 5;
