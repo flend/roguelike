@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin.Spells
 {
@@ -10,6 +11,20 @@ namespace RogueBasin.Spells
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
+
+            //Check the target is within FOV
+            
+            //Get the FOV from Dungeon (this also updates the map creature FOV state)
+            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
+
+            //Is the target in FOV
+            if (!currentFOV.CheckTileFOV(target.x, target.y))
+            {
+                LogFile.Log.LogEntryDebug("Target out of FOV", LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("Can't target out of sight.");
+
+                return false;
+            }
 
             //Check there is a monster at target
             SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);

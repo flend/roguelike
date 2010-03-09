@@ -303,9 +303,12 @@ namespace RogueBasin
                         }
                         else {
                             //Continue chasing whoever it was we were chasing last
-                            AIState = SimpleAIStates.Pursuit;
-                            ChaseCreature(currentTarget);
-                            return;
+                            if (currentTarget != null)
+                            {
+                                AIState = SimpleAIStates.Pursuit;
+                                ChaseCreature(currentTarget);
+                            }
+                                return;
                         }
                     }
                     

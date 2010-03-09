@@ -465,6 +465,18 @@ namespace RogueBasin
             return 0;
         }
 
+        public bool CastSpell(Spell toCast, Point target)
+        {
+            //Check MP
+
+            //Actually cast the spell
+            bool success = toCast.DoSpell(target);
+
+            //Remove MP if successful
+
+            return success;
+        }
+
          /// <summary>
         /// Normal attack on a monster. Takes care of killing them off if required.
         /// </summary>

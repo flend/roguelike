@@ -257,7 +257,16 @@ namespace RogueBasin
 
                                 case 'Z':
                                     //Cast spell (just target for now)
-                                    timeAdvances = CastSpell();
+                                    timeAdvances = SelectAndCastSpell();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
+                                case 'X':
+                                    //Recast last spells
+                                    timeAdvances = RecastSpell();
                                     if (!timeAdvances)
                                         UpdateScreen();
                                     if (timeAdvances)
@@ -990,12 +999,17 @@ namespace RogueBasin
             return featureAtSpace.PlayerInteraction(player);
         }
 
+        Spell lastSpell = null;
+        Creature lastSpellTarget = null;
+
         /// <summary>
         /// Cast a spell. Returns if time passes.
         /// </summary>
         /// <returns></returns>
-        private bool CastSpell()
+        private bool SelectAndCastSpell()
         {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
             
             //Get the user's selection
             Spell toCast = SelectSpell();
@@ -1003,10 +1017,7 @@ namespace RogueBasin
             //User exited
             if (toCast == null)
                 return false;
-
-            //Check MP
-
-            
+         
             //Get a target if needed
 
             Point target = new Point();
@@ -1021,12 +1032,68 @@ namespace RogueBasin
             if (!targettingSuccess)
                 return false;
 
-            //Actually cast the spell
-            bool success = toCast.DoSpell(target);
+            bool success = Game.Dungeon.Player.CastSpell(toCast, target);
 
-            //Remove MP if successful
+            //Store details for a recast
+            lastSpell = toCast;
+
+            //Spell target is the creature (monster or PC)
+            
+            SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
+
+            //Is there a creature here? If so, store
+            if (squareContents.monster != null)
+                lastSpellTarget = squareContents.monster;
+
+            if (squareContents.player != null)
+                lastSpellTarget = squareContents.player;
 
             //Time only goes past if successfully cast
+            return success;
+        }
+
+        /// <summary>
+        /// Recast the last spell at the same target
+        /// </summary>
+        /// <returns></returns>
+        private bool RecastSpell()
+        {
+            //Do we have a valid spell?
+            if (lastSpell == null)
+            {
+                Game.MessageQueue.AddMessage("Choose a spell first.");
+                LogFile.Log.LogEntry("Tried to recast spell with no spell selected");
+                return false;
+            }
+
+            //Do we need a target?
+            if (lastSpell.NeedsTarget())
+            {
+                if (lastSpellTarget == null)
+                {
+                    Game.MessageQueue.AddMessage("Choose a spell first.");
+                    LogFile.Log.LogEntryDebug("Tried to recast spell with no valid spell target selected", LogDebugLevel.High);
+                    return false;
+                }
+            }
+            
+            //Try to cast the spell
+
+            //Just for sanity, check the creature is still alive
+            //Could autotarget the next one?
+            //OK if we just have combat spells
+            if (!lastSpellTarget.Alive)
+            {
+                //Find the next closest creature (need to check charm / passive status)... to do
+                Game.MessageQueue.AddMessage("Need new target.");
+                LogFile.Log.LogEntryDebug("Target for spell already dead", LogDebugLevel.Medium);
+            }
+
+            //Convert the stored Creature last target into a square
+            Point spellTargetSq = new Point(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y);
+
+            bool success = Game.Dungeon.Player.CastSpell(lastSpell, spellTargetSq);
+
             return success;
         }
 
