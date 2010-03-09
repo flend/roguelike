@@ -1084,9 +1084,19 @@ namespace RogueBasin
             //OK if we just have combat spells
             if (!lastSpellTarget.Alive)
             {
-                //Find the next closest creature (need to check charm / passive status)... to do
-                Game.MessageQueue.AddMessage("Need new target.");
-                LogFile.Log.LogEntryDebug("Target for spell already dead", LogDebugLevel.Medium);
+                //Find the next closest creature (need to check charm / passive status)
+                
+                lastSpellTarget = Game.Dungeon.FindClosestHostileCreature(Game.Dungeon.Player);
+
+                if (lastSpellTarget == null)
+                {
+                    Game.MessageQueue.AddMessage("No new target for spell.");
+                    LogFile.Log.LogEntryDebug("No new target for quick cast", LogDebugLevel.Medium);
+                    return false;
+                }
+
+                Game.MessageQueue.AddMessage("Targetting closest creature.");
+                LogFile.Log.LogEntryDebug("New target for quick cast", LogDebugLevel.Medium);
             }
 
             //Convert the stored Creature last target into a square
