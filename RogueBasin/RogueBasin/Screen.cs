@@ -530,6 +530,13 @@ namespace RogueBasin {
             if (targettingMode)
                 DrawTargettingCursor();
 
+            //If we're in town draw town overlays
+            if (Game.Dungeon.Player.LocationLevel == 0)
+            {
+                DrawCalendar();
+                DrawStatsBox();
+            }
+
             //Draw any overlay screens
             if (displayInventory)
                 DrawInventory();
@@ -1775,12 +1782,6 @@ namespace RogueBasin {
                 }
             }
 
-            //If we're in town draw town overlays
-            if (Game.Dungeon.Player.LocationLevel == 0)
-            {
-                DrawCalendar();
-                DrawStatsBox();
-            }
         }
         internal void ConsoleLine(string datedEntry)
         {

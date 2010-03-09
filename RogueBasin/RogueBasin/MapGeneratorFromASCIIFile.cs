@@ -69,7 +69,7 @@ namespace RogueBasin
 
         private void SetupFeatureMapping()
         {
-            featureChars.Add('>');
+            featureChars.Add('~');
             featureChars.Add('<');
         }
 
@@ -302,8 +302,8 @@ namespace RogueBasin
                         bool featureAddSuccess = false;
                        switch (mapChar)
                         {
-                            case '>':
-                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, new Point(i, row));
+                            case '~':
+                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntryDungeon1(), levelNo, new Point(i, row));
                                 break;
                             case '<':
                                 featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, new Point(i, row));
@@ -340,7 +340,7 @@ namespace RogueBasin
                                 baseMap.PCStartLocation = new Point(i, row);
                                 break;
                             case '1':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.LichBattle());
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.BackToSchool());
                                 break;
                             case '2':
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.SpotFriend());

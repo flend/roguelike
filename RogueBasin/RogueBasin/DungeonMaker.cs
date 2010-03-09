@@ -70,6 +70,8 @@ namespace RogueBasin
 
         public GameDifficulty difficulty { get; set; }
 
+        int caveDungeonNoLevels = 4;
+
         int noCaveLevels = 10;
         int noCaveWaterLevels = 5;
 
@@ -1171,6 +1173,9 @@ namespace RogueBasin
         {
             //Levels
 
+            //1: town
+            //2: wilderness
+
             //1-3: with water
             //1-5: Cave
             //5-10: Ruined Halls
@@ -1185,8 +1190,8 @@ namespace RogueBasin
             MapGeneratorCave caveGen = new MapGeneratorCave();
             MapGeneratorBSPCave ruinedGen = new MapGeneratorBSPCave();
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
-            MapGeneratorFromASCIIFile asciiGen = new MapGeneratorFromASCIIFile();
-            TownGeneratorFromASCIIFile asciiTown = new TownGeneratorFromASCIIFile();
+            
+            
 
             //Set width height of all maps to 80 / 25
             caveGen.Width = 80;
@@ -1198,7 +1203,9 @@ namespace RogueBasin
             hallsGen.Width = 80;
             hallsGen.Height = 25;
 
-            //First level is now the town
+            //level 0 - town
+
+            TownGeneratorFromASCIIFile asciiTown = new TownGeneratorFromASCIIFile();
 
             try
             {
@@ -1212,32 +1219,52 @@ namespace RogueBasin
             }
 
             //PC starts at start location
+            dungeon.Player.LocationLevel = 0;
             dungeon.Player.LocationMap = asciiTown.GetPCStartLocation();
 
-            /*
+            //level 1 - wilderness
+
+            MapGeneratorFromASCIIFile asciiGen = new MapGeneratorFromASCIIFile();
+
+            try
+            {
+                asciiGen.LoadASCIIFile("wilderness.txt");
+                asciiGen.AddMapToDungeon();
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Failed to load wilderness level!: " + ex.Message);
+                throw new ApplicationException("Failed to wilderness town level! Is the game installed correctly?");
+            }
+
+            //Dungeon 1 - levels 2-5
+
+            //Store in dungeon
+            Game.Dungeon.Dungeon1StartLevel = 2;
+
             //Generate and add cave levels
 
-            //First level is a bit different
-            //Has a PC start location and only a downstaircase
-            
-            caveGen.GenerateMap(true);
+            //level 2
+            //top level has special up staircase leading to wilderness
+
+            caveGen.GenerateMap();
             caveGen.AddWaterToCave(15, 5);
             int levelNo = dungeon.AddMap(caveGen.Map);
             caveGen.AddDownStaircaseOnly(levelNo);
-
-            //PC starts at what would be the up staircase
-            dungeon.Player.LocationMap = caveGen.GetPCStartLocation();
+            caveGen.AddExitStaircaseOnly(levelNo);
+            //Set light
+            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
             
-            //Rest of the cave levels
-            for (int i = 0; i < noCaveLevels - 1; i++)
+            //level 3-4
+            
+            for (int i = 0; i < caveDungeonNoLevels - 2; i++)
             {
-                caveGen.GenerateMap(false);
+                caveGen.GenerateMap();
 
-                if (i < noCaveWaterLevels)
-                    caveGen.AddWaterToCave(15, 4);  
+                caveGen.AddWaterToCave(15, 4);  
 
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(caveGen.Map);
@@ -1247,6 +1274,22 @@ namespace RogueBasin
                 Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
+            //level 5
+
+            //Lowest level doens't have a downstaircase
+            caveGen.GenerateMap();
+            caveGen.AddWaterToCave(15, 4);
+
+            levelNo = dungeon.AddMap(caveGen.Map);
+            caveGen.AddUpStaircaseOnly(levelNo);
+
+            //Set light
+            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+
+
+            
+            
+            /*
             //Ruined halls levels
             for (int i = 0; i < noRuinedLevels; i++)
             {

@@ -4,56 +4,37 @@ using System.Text;
 
 namespace RogueBasin.Features
 {
-    public class StaircaseDown : UseableFeature
+    /// <summary>
+    /// Staircase up. Leave up to the wilderness (i.e. go home)
+    /// Would like to inherit off normal downstaircase but I can't just look for a generic upstaircase, since the top staircase is an exit staircase. Could alter it to look for both
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    public class StaircaseEntryDungeon1 : UseableFeature
     {
-        public StaircaseDown()
+        public StaircaseEntryDungeon1()
         {
         }
 
-        /// <summary>
-        /// Move to the next lowest level
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
         public override bool PlayerInteraction(Player player)
         {
             Dungeon dungeon = Game.Dungeon;
 
-            //If we are trying to go deeper than the dungeon exists
-            if (player.LocationLevel + 1 == dungeon.NoLevels)
-            {
-                LogFile.Log.LogEntry("Tried to go down stairs to level " + (player.LocationLevel + 1).ToString() + " which doesn't exist");
-                Game.MessageQueue.AddMessage("Bizarrely, the stairs don't work.");
-                return false;
-            }
-
-            //Otherwise move down
-
-            //Turn all charmed creatures on this level into passified creatures
-            //Just do it for all monsters
-            foreach (Monster monster in Game.Dungeon.Monsters)
-            {
-                if (monster.Charmed)
-                {
-                    monster.UncharmCreature();
-                    monster.PassifyCreature();
-
-                    Game.Dungeon.Player.RemoveCharmedCreature();
-                }
-            }
+            //Enter dungeon 1
 
             //Increment player level
-            player.LocationLevel++;
+            player.LocationLevel = Game.Dungeon.Dungeon1StartLevel;
 
             //Set vision
             player.SightRadius = (int)Math.Ceiling(player.NormalSightRadius * Game.Dungeon.Levels[player.LocationLevel].LightLevel);
 
             PlacePlayerOnUpstairs();
-
+            
             return true;
         }
 
-        protected void PlacePlayerOnUpstairs() {
+        protected void PlacePlayerOnUpstairs()
+        {
 
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -65,10 +46,10 @@ namespace RogueBasin.Features
             foreach (Feature feature in features)
             {
                 if (feature.LocationLevel == player.LocationLevel
-                    && feature as Features.StaircaseUp != null)
+                    && feature as Features.StaircaseExit != null)
                 {
                     player.LocationMap = feature.LocationMap;
-                    foundStaircase = feature as Features.StaircaseUp;
+                    foundStaircase = feature as Features.StaircaseExit;
                     //Use the dungeon move system to trigger any triggers
                     Game.Dungeon.MovePCAbsolute(player.LocationLevel, player.LocationMap.x, player.LocationMap.y);
                     break;

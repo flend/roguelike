@@ -86,6 +86,7 @@ namespace RogueBasin
 
         private List<Monster> summonedMonsters; //no need to serialize
 
+        public int Dungeon1StartLevel { get; set;}
 
         long worldClock = 0;
 
@@ -184,7 +185,7 @@ namespace RogueBasin
             if (dateCounter % 7 != 5)
                 return false;
 
-            if (dateCounter == 26)
+            if (dateCounter % 28 == 26)
                 return false;
 
             return true;

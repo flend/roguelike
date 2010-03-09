@@ -64,7 +64,7 @@ namespace RogueBasin
             specialChars.Add('7'); 
             specialChars.Add('8');
             specialChars.Add('9');
-
+            specialChars.Add('0');
 
            
         }
@@ -375,6 +375,9 @@ namespace RogueBasin
                                 break;
                             case '9':
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainLeaveSchoolTrigger());
+                                break;
+                            case '0':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TownToWilderness());
                                 break;
                             case '%':
                                 Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));

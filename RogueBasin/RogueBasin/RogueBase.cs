@@ -363,7 +363,7 @@ namespace RogueBasin
                                     break;
 
                                     //Vi keys
-
+                                    /*
                                 case 'b':
                                     timeAdvances = Game.Dungeon.PCMove(-1, 1);
                                     break;
@@ -392,7 +392,7 @@ namespace RogueBasin
                                 case 'j':
                                     timeAdvances = Game.Dungeon.PCMove(0, 1);
                                     break;
-
+                                    */
                                     //Debug events
 
                                 case 'c':
@@ -421,9 +421,21 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
+                                case 'T':
+                                    Game.Dungeon.MoveToNextDate();
+                                    timeAdvances = true;
+                                    break;
+
+
                                 case 't':
                                     //teleport to stairs
                                     TeleportToDownStairs();
+                                    UpdateScreen();
+                                    break;
+
+                                case 'y':
+                                    //teleport to stairs
+                                    TeleportToUpStairs();
                                     UpdateScreen();
                                     break;
 
@@ -645,6 +657,56 @@ namespace RogueBasin
                 return;
             }
             
+            //Kill any monster there
+            Monster m = Game.Dungeon.MonsterAtSpace(player.LocationLevel, player.LocationMap);
+
+            if (m != null)
+            {
+                Game.Dungeon.KillMonster(m);
+            }
+
+            //Move the player
+            player.LocationMap = stairlocation;
+
+            //featureAtSpace.PlayerInteraction(player);
+        }
+
+        private void TeleportToUpStairs()
+        {
+            //Find down stairs on this level
+            List<Feature> features = Game.Dungeon.Features;
+
+            Player player = Game.Dungeon.Player;
+
+            Features.StaircaseUp downStairs = null;
+            Features.StaircaseExit exitStairs = null;
+            Point stairlocation = new Point(0, 0);
+
+            foreach (Feature feature in features)
+            {
+
+                if (feature.LocationLevel == Game.Dungeon.Player.LocationLevel &&
+                    feature is Features.StaircaseUp)
+                {
+                    downStairs = feature as Features.StaircaseUp;
+                    stairlocation = feature.LocationMap;
+                    break;
+                }
+                if (feature.LocationLevel == Game.Dungeon.Player.LocationLevel &&
+                    feature is Features.StaircaseExit)
+                {
+                    exitStairs = feature as Features.StaircaseExit;
+                    stairlocation = feature.LocationMap;
+                    break;
+                }
+            }
+
+            if (downStairs == null && exitStairs == null)
+            {
+                LogFile.Log.LogEntryDebug("Unable to teleport to stairs", LogDebugLevel.High);
+                return;
+            }
+
             //Kill any monster there
             Monster m = Game.Dungeon.MonsterAtSpace(player.LocationLevel, player.LocationMap);
 

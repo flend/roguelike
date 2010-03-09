@@ -69,11 +69,17 @@
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
     <Compile Include="Features\Corpse.cs" />
+    <Compile Include="Features\StaircaseEntryDungeon1.cs" />
+    <Compile Include="Features\StaircaseExit.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Features\StaircaseUp.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GameIntro.cs" />
     <Compile Include="IEquippableItem.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\StaircaseDown.cs" />
-    <Compile Include="Features\StaircaseUp.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
@@ -179,6 +185,7 @@
     <Compile Include="MonsterThrowAndRunAI.cs" />
     <Compile Include="TownGeneratorFromASCIIFile.cs" />
     <Compile Include="TrainStats.cs" />
+    <Compile Include="Triggers\BackToSchool.cs" />
     <Compile Include="Triggers\DungeonEntranceTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -186,6 +193,7 @@
     <Compile Include="Triggers\LichBattle.cs" />
     <Compile Include="Triggers\SeeCorpses.cs" />
     <Compile Include="Triggers\SpotFriend.cs" />
+    <Compile Include="Triggers\TownToWilderness.cs" />
     <Compile Include="Triggers\TrainAthleticsTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -198,7 +206,9 @@
     <Compile Include="Triggers\TrainGeographyLibraryTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\TrainLeaveSchoolTrigger.cs" />
+    <Compile Include="Triggers\TrainLeaveSchoolTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\TrainMagicLibraryTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -210,7 +220,9 @@
     <Compile Include="Triggers\TrainTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\TreasureRoom.cs" />
+    <Compile Include="Triggers\TreasureRoom.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UseableFeature.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
@@ -315,5 +327,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\town.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\wilderness.txt" />
   </ItemGroup>
 </Project>
