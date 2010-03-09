@@ -64,13 +64,16 @@ namespace RogueBasin
         Mountains, //non-walkable
         Trees, //non-walkable
         Road, //walkable
-        Grass //walkable
+        Grass, //walkable
+        Literal //no walkable
      }
 
     public class MapSquare
     {
         MapTerrain terrain = MapTerrain.Empty;
-        
+        //Used for textual terrain
+        public char terrainLiteral {get; set;}
+
         /// <summary>
         /// Is the square walkable. This is recalculated based on creature positions etc. each turn
         /// </summary>

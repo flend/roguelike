@@ -68,8 +68,14 @@ namespace RogueBasin
 
         public int CurrentCharmedCreatures { get; set; }
 
+        //Training stats
 
-
+        public int MaxHitpointsStat { get; set; }
+        public int HitpointsStat { get; set; }
+        public int AttackStat { get; set; }
+        public int SpeedStat { get; set; }
+        public int CharmStat { get; set; }
+        public int MagicStat { get; set; }
 
         public Player()
         {
@@ -90,10 +96,23 @@ namespace RogueBasin
             //Set initial HP
             SetupInitialHP();
 
+            //Setup initial training stats
+            SetupInitialTrainingStats();
+
             //Setup combat parameters
             //CalculateCombatStats();
 
             TurnCount = 0;
+        }
+
+        private void SetupInitialTrainingStats()
+        {
+            MaxHitpointsStat = 50;
+            HitpointsStat = 50;
+            SpeedStat = 10;
+            AttackStat = 10;
+            CharmStat = 2;
+            MagicStat = 2;
         }
 
         private void SetupInitialHP()

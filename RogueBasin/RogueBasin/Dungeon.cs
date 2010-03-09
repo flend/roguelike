@@ -89,7 +89,10 @@ namespace RogueBasin
 
         long worldClock = 0;
 
-
+        /// <summary>
+        /// Count the days in the year
+        /// </summary>
+        int dateCounter = 0;
 
         /// <summary>
         /// Set to false to end the game
@@ -132,6 +135,107 @@ namespace RogueBasin
             SaveScumming = false;
         }
 
+        public int DateCounter
+        {
+            get
+            {
+                return dateCounter;
+            }
+            set
+            {
+                dateCounter = value;
+            }
+        }
+
+        /// <summary>
+        /// Return the calendar month, 1-12
+        /// </summary>
+        /// <returns></returns>
+        public int GetDateMonth()
+        {
+            return (int)Math.Floor(dateCounter / 28.0) + 1;
+        }
+
+        /// <summary>
+        /// Return the calendar day, 1-28
+        /// </summary>
+        /// <returns></returns>
+        public int GetDateDay()
+        {
+            int day = dateCounter % 28;
+            return day + 1;
+        }
+
+        /// <summary>
+        /// Are we at the start of the working week
+        /// </summary>
+        /// <returns></returns>
+        public bool IsWeekday()
+        {
+            return (dateCounter % 7 == 0);
+        }
+
+        /// <summary>
+        /// Are we at the start of the working week
+        /// </summary>
+        /// <returns></returns>
+        public bool IsNormalWeekend()
+        {
+            if (dateCounter % 7 != 5)
+                return false;
+
+            if (dateCounter == 26)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// An adventure weekend
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAdventureWeekend()
+        {
+            if (dateCounter == 26)
+                return true;
+
+            return false;
+
+        }
+
+        /// <summary>
+        /// Move to the next date event, be it weekend, or end of month adventure
+        /// </summary>
+        public void MoveToNextDate()
+        {
+            //Calendar
+
+            //1-5 Weekday
+            //6-7 Weekend
+            //8-12 Weekday
+            //13-14 Weekend
+            //15-19 Weekday
+            //20-21 Weekend
+            //22-26 Weekday
+            //27-28 Special Weekend
+
+            if (dateCounter % 7 == 0)
+            {
+                dateCounter += 5;
+                return;
+            }
+
+            if (dateCounter % 7 == 5)
+            {
+                dateCounter += 2;
+                return;
+            }
+
+            //Shouldn't get here
+            LogFile.Log.LogEntryDebug("Impossible date reached: " + dateCounter.ToString(), LogDebugLevel.High);
+
+            return;
+        }
 
         /// <summary>
         /// How much of your previous life do you remember?
@@ -2738,6 +2842,15 @@ namespace RogueBasin
                     return false;
                 }
             }
+        }
+
+        /// <summary>
+        /// Teleport the user back to town
+        /// </summary>
+        internal void PlayerBackToTown()
+        {
+            Player.LocationLevel = 0;
+            Player.LocationMap = levels[0].PCStartLocation;
         }
     }
 }

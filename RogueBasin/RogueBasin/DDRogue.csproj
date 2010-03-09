@@ -115,7 +115,9 @@
     <Compile Include="MapGeneratorBSP.cs" />
     <Compile Include="MapGeneratorBSPCave.cs" />
     <Compile Include="MapGeneratorCave.cs" />
-    <Compile Include="MapGeneratorFromASCIIFile.cs" />
+    <Compile Include="MapGeneratorFromASCIIFile.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MapGeneratorRogue.cs" />
     <Compile Include="MapObject.cs" />
     <Compile Include="MessageQueue.cs" />
@@ -175,11 +177,16 @@
     <Compile Include="Spells\MagicMissile.cs" />
     <Compile Include="StringEquivalent.cs" />
     <Compile Include="MonsterThrowAndRunAI.cs" />
-    <Compile Include="Triggers\DungeonEntranceTrigger.cs" />
+    <Compile Include="TownGeneratorFromASCIIFile.cs" />
+    <Compile Include="TrainStats.cs" />
+    <Compile Include="Triggers\DungeonEntranceTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\HelpFriend.cs" />
     <Compile Include="Triggers\LichBattle.cs" />
     <Compile Include="Triggers\SeeCorpses.cs" />
     <Compile Include="Triggers\SpotFriend.cs" />
+    <Compile Include="Triggers\TrainRestTrigger.cs" />
     <Compile Include="Triggers\TreasureRoom.cs" />
     <Compile Include="UseableFeature.cs" />
     <Compile Include="Utility.cs" />
@@ -282,5 +289,8 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\wallvault0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\wallvault1.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\town.txt" />
   </ItemGroup>
 </Project>

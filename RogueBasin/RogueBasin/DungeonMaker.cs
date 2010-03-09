@@ -101,12 +101,12 @@ namespace RogueBasin
 
             SetupMaps();
 
-            SpawnInitialCreatures();
+            //SpawnInitialCreatures();
 
-            SpawnItems();
+            //SpawnItems();
 
             
-            SpawnUniques();
+            //SpawnUniques();
 
             switch (difficulty)
             {
@@ -207,7 +207,7 @@ namespace RogueBasin
 
             List<int> levelMonsterAmounts = new List<int>();
             
-            for(int i=0;i<15;i++) {
+            for(int i=0;i<16;i++) {
                 int num = 200 + 80 * i;
                 levelMonsterAmounts.Add(num);
             }
@@ -307,6 +307,11 @@ namespace RogueBasin
                         //Early caves
                     case 0:
 
+                        //0 is the town
+
+                        int costSpent = 0;
+
+                        /*
                         int costSpent = 0;
 
                         do
@@ -339,7 +344,7 @@ namespace RogueBasin
                             costSpent += monsterToAdd.CreatureCost();
 
                         } while (costSpent < levelMonsterAmounts[i]);
-
+                        */
                         break;
 
                     case 1:
@@ -1181,6 +1186,7 @@ namespace RogueBasin
             MapGeneratorBSPCave ruinedGen = new MapGeneratorBSPCave();
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
             MapGeneratorFromASCIIFile asciiGen = new MapGeneratorFromASCIIFile();
+            TownGeneratorFromASCIIFile asciiTown = new TownGeneratorFromASCIIFile();
 
             //Set width height of all maps to 80 / 25
             caveGen.Width = 80;
@@ -1192,6 +1198,23 @@ namespace RogueBasin
             hallsGen.Width = 80;
             hallsGen.Height = 25;
 
+            //First level is now the town
+
+            try
+            {
+                asciiTown.LoadASCIIFile("town.txt");
+                asciiTown.AddMapToDungeon();
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Failed to load town level!: " + ex.Message);
+                throw new ApplicationException("Failed to load town level! Is the game installed correctly?");
+            }
+
+            //PC starts at start location
+            dungeon.Player.LocationMap = asciiTown.GetPCStartLocation();
+
+            /*
             //Generate and add cave levels
 
             //First level is a bit different
@@ -1271,6 +1294,8 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Failed to load last level!: " + ex.Message);
                 throw new ApplicationException("Failed to load last level! Is the game installed correctly?");
             }
+            */
+
 
             //Build TCOD maps
             //Necessary so connectivity checks on items and monsters can work

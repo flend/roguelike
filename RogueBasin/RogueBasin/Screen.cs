@@ -47,6 +47,9 @@ namespace RogueBasin {
 
         Point specialMoveStatusLine;
         Point spellStatusLine;
+        Point trainStatsLine;
+
+        Point calendarOffset;
 
         Color inFOVTerrainColor = ColorPresets.White;
         Color seenNotInFOVTerrainColor = ColorPresets.Gray;
@@ -68,6 +71,8 @@ namespace RogueBasin {
         Color targetBackground = ColorPresets.White;
         Color targetForeground = ColorPresets.Black;
 
+        Color literalColor = ColorPresets.White;
+
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
 
@@ -75,6 +80,11 @@ namespace RogueBasin {
         Point inventoryTL;
         Point inventoryTR;
         Point inventoryBL;
+
+        //Training
+        Point trainingTL;
+        Point trainingTR;
+        Point trainingBL;
 
         bool displayInventory;
         
@@ -91,6 +101,8 @@ namespace RogueBasin {
         bool displaySpecialMoveMovies;
 
         bool displaySpells;
+
+        bool displayTrainingUI;
 
         //Death members
         public List<string> TotalKills { get; set; }
@@ -163,11 +175,18 @@ namespace RogueBasin {
             inventoryTR = new Point(75, 5);
             inventoryBL = new Point(5, 30);
 
+            trainingTL = new Point(10, 10);
+            trainingTR = new Point(70, 10);
+            trainingBL = new Point(25, 25);
+
             princessStatsTopLeft = new Point(7, 32);
             charmOffset = new Point(6, 0);
 
+            calendarOffset = new Point(20, 0);
+
             specialMoveStatusLine = new Point(7, 33);
             spellStatusLine = new Point(7, 34);
+            trainStatsLine = new Point(7, 30);
            
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
@@ -177,6 +196,8 @@ namespace RogueBasin {
             DeathTL = new Point(1, 1);
             DeathWidth = 89;
             DeathHeight = 34;
+
+            trainingStatsRecord = new List<TrainStats>();
         }
 
         //Setup the screen
@@ -460,6 +481,15 @@ namespace RogueBasin {
             }
         }
 
+        /// <summary>
+        /// Draws and updates the screen. Doesn't run message queue, since that's in RogueBase and not accessible
+        /// </summary>
+        public void DrawAndFlush()
+        {
+            Screen.Instance.Draw();
+            Screen.Instance.FlushConsole();
+        }
+
         //Draw the current dungeon map and objects
         public void Draw()
         {
@@ -511,6 +541,8 @@ namespace RogueBasin {
                 DrawMovieOverlay();
             else if (displaySpells)
                 DrawSpellOverlay();
+            else if (displayTrainingUI)
+                DrawTrainingOverlay();
 
         }
 
@@ -873,6 +905,158 @@ namespace RogueBasin {
             }
         }
 
+        public string TrainingTypeString { get; set; }
+
+        bool trainingPause = true;
+
+        public bool TrainingPause
+        {
+            get
+            {
+                return trainingPause;
+            }
+            set
+            {
+                trainingPause = value;
+            }
+        }
+
+        List<TrainStats> trainingStatsRecord;
+
+        public void ClearTrainingStatsRecord()
+        {
+            trainingStatsRecord.Clear();
+        }
+
+        public void AddTrainingStatsRecord(TrainStats newStats)
+        {
+            trainingStatsRecord.Add(newStats);
+        }
+
+
+        /// <summary>
+        /// Display training overlay. Just put up the border and write some text. Calls from the caller will add info.
+        /// </summary>
+        private void DrawTrainingOverlay()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            Point statsHeaderOffset = new Point(10, 0);
+            Point statsModOffset = new Point(5, 0);
+            Point statsDayOffset = new Point(2, 0);
+
+            Point fitnessOffset = new Point(0, 0);
+            Point healthOffset = new Point(8, 0);
+            Point speedOffset = new Point(16, 0);
+            Point combatOffset = new Point(23, 0);
+            Point charmOffset = new Point(30, 0);
+            Point magicOffset = new Point(36, 0);
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(trainingTL.x, trainingTL.y, trainingTR.x - trainingTL.x + 1, trainingBL.y - trainingTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("Training!", (trainingTL.x + trainingTR.x) / 2, trainingTL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect("Press (x) to exit", (trainingTL.x + trainingTR.x) / 2, trainingBL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw headings
+            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw stats
+            int headerY = trainingTL.y + 4;
+
+            rootConsole.PrintLine("Fitness", trainingTL.x + statsHeaderOffset.x + fitnessOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Health", trainingTL.x + statsHeaderOffset.x + healthOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Speed", trainingTL.x + statsHeaderOffset.x + speedOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Combat", trainingTL.x + statsHeaderOffset.x + combatOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Charm", trainingTL.x + statsHeaderOffset.x + charmOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Magic", trainingTL.x + statsHeaderOffset.x + magicOffset.x, headerY, LineAlignment.Left);
+
+            //Work out the start day
+            List<string> dayNames = new List<string>();
+            
+            if(Game.Dungeon.IsWeekday()) {
+                dayNames.Add("Monday");
+                dayNames.Add("Tuesday");
+                dayNames.Add("Wednesday");
+                dayNames.Add("Thursday");
+                dayNames.Add("Friday");
+            }
+            else {
+                dayNames.Add("Saturday");
+                dayNames.Add("Sunday");
+            }
+
+            //Draw all updates
+            int lineCount = 0;
+
+            foreach (TrainStats stats in trainingStatsRecord)
+            {
+                //Pause
+                if (trainingPause)
+                    TCODSystem.Sleep(200);
+
+                FlushConsole();
+
+                string dayName;
+                if (lineCount < dayNames.Count)
+                    dayName = dayNames[lineCount];
+                else
+                {
+                    dayName = "";
+                    LogFile.Log.LogEntryDebug("Error - couldn't find right day name in training", LogDebugLevel.High);
+                }
+
+                int thisYLine = trainingTL.y + 6 + lineCount;
+
+                rootConsole.PrintLine(dayName, trainingTL.x + statsDayOffset.x, thisYLine, LineAlignment.Left);
+                string trainingString = stats.HitpointsStatDelta.ToString();
+                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + fitnessOffset.x, thisYLine, LineAlignment.Left);
+                trainingString = stats.MaxHitpointsStatDelta.ToString();
+                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + healthOffset.x, thisYLine, LineAlignment.Left);
+                trainingString = stats.SpeedStatDelta.ToString();
+                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + speedOffset.x, thisYLine, LineAlignment.Left);
+                trainingString = stats.AttackStatDelta.ToString();
+                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + combatOffset.x, thisYLine, LineAlignment.Left);
+                trainingString = stats.CharmStatDelta.ToString();
+                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + charmOffset.x, thisYLine, LineAlignment.Left);
+                trainingString = stats.MagicStatDelta.ToString();
+                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + magicOffset.x, thisYLine, LineAlignment.Left);
+
+                lineCount++;
+                
+            }
+
+           
+        }
+        /*
+        /// <summary>
+        /// Display training overlay. Just put up the border and write some text. Calls from the caller will add info.
+        /// </summary>
+        private void DrawTrainingOverlay()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(trainingTL.x, trainingTL.y, trainingTR.x - trainingTL.x + 1, trainingBL.y - trainingTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("Training!", (trainingTL.x + trainingTR.x) / 2, trainingTL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw headings
+            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw stats
+            string statsRow = "Fitness  Health  Speed  Combat  Charm  Magic";
+
+            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 4, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+        }*/
+
+
         /// <summary>
         /// Display equipment overlay
         /// </summary>
@@ -966,10 +1150,36 @@ namespace RogueBasin {
 
             rootConsole.PrintLine(levelString, statsDisplayTopLeft.x + levelOffset.x, statsDisplayTopLeft.y + levelOffset.y, LineAlignment.Left);
 
+            //Draw PrincessRL training stats
+
+            string trainHitpointsString = "HP: " + player.HitpointsStat.ToString();
+            string trainMaxHitpointsString = "MaxHP: " + player.MaxHitpointsStat.ToString();
+            string trainAttackString = "Attk: " + player.AttackStat.ToString();
+            string trainSpeedString = "Speed: " + player.SpeedStat.ToString();
+            string trainCharmString = "Charm: " + player.CharmStat.ToString();
+            string trainMagicString = "Magic: " + player.MagicStat.ToString();
+
+            rootConsole.PrintLine(trainHitpointsString, trainStatsLine.x + 0, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainMaxHitpointsString, trainStatsLine.x + 8, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainAttackString, trainStatsLine.x + 19, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainSpeedString, trainStatsLine.x + 29, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainCharmString, trainStatsLine.x + 40, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainMagicString, trainStatsLine.x + 50, trainStatsLine.y, LineAlignment.Left);
+
             //Draw PrincessRL specific line
 
             string charmedString = "Chm: " + Game.Dungeon.Player.CurrentCharmedCreatures.ToString() + "/" + Game.Dungeon.Player.MaxCharmedCreatures.ToString();
             rootConsole.PrintLine(charmedString, princessStatsTopLeft.x + charmOffset.x, princessStatsTopLeft.y + charmOffset.y, LineAlignment.Left);
+
+            string calendarString = "Month: " + Game.Dungeon.GetDateMonth() + " Day: " + Game.Dungeon.GetDateDay();
+            if (Game.Dungeon.IsWeekday())
+                calendarString += " Monday";
+            else if (Game.Dungeon.IsNormalWeekend())
+                calendarString += " Saturday";
+            else if (Game.Dungeon.IsAdventureWeekend())
+                calendarString += " End of Month";
+
+            rootConsole.PrintLine(calendarString, princessStatsTopLeft.x + calendarOffset.x, princessStatsTopLeft.y + calendarOffset.y, LineAlignment.Left);
 
             //Draw moves line
 
@@ -1373,9 +1583,21 @@ namespace RogueBasin {
                     int screenX = mapTopLeft.x + i;
                     int screenY = mapTopLeft.y + j;
 
-                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
+                    char screenChar;
+                    Color drawColor;
 
-                    Color drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
+                    //Exception for literals
+                    if (map.mapSquares[i, j].Terrain == MapTerrain.Literal)
+                    {
+                        screenChar = map.mapSquares[i, j].terrainLiteral;
+                        drawColor = literalColor;
+                    }
+                    else
+                    {
+                        screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
+                        drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
+                    }
+                    
 
                     if (map.mapSquares[i, j].InPlayerFOV)
                     {
@@ -1477,6 +1699,20 @@ namespace RogueBasin {
             displayInventory = false;
             displaySpecialMoveMovies = false;
             displaySpells = false;
+            displayTrainingUI = false;
+        }
+
+        public bool DisplayTrainingUI
+        {
+            set
+            {
+                if (value == true)
+                {
+                    ResetOverlayScreens();
+                }
+
+                displayTrainingUI = value;
+            }
         }
 
         public bool DisplayInventory
