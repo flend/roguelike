@@ -6,40 +6,19 @@ using libtcodWrapper;
 namespace RogueBasin.Triggers
 {
     /// <summary>
-    /// Generic train trigger, provides some useful functionality
+    /// Magic library
     /// </summary>
-    public abstract class TrainTrigger : DungeonSquareTrigger
+    public class TrainMasterTrigger : DungeonSquareTrigger
     {
         /// <summary>
         /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
         /// </summary>
         public static bool Triggered { get; set; }
 
-        public TrainTrigger()
+        public TrainMasterTrigger()
         {
             Triggered = false;
         }
-
-        /// <summary>
-        /// First run movie
-        /// </summary>
-        /// <returns></returns>
-        protected virtual string GetIntroMovieName() { return ""; }
-
-        /// <summary>
-        /// Name to display
-        /// </summary>
-        protected abstract string GetTrainingTypeString();
-
-        /// <summary>
-        /// Override with appropriate weekday training
-        /// </summary>
-        protected abstract TrainStats DoWeekdayTraining();
-
-        /// <summary>
-        /// Override with appropriate weekend training
-        /// </summary>
-        protected abstract TrainStats DoWeekendTraining();
 
         public override bool CheckTrigger(int level, Point mapLocation)
         {
@@ -51,48 +30,26 @@ namespace RogueBasin.Triggers
             
             //Otherwise in the right place
 
-            //If this is the first time, give some flavour text
-            string movieName = GetIntroMovieName();
+            //If this is the first time, give some flavour text - to do
+            string movieName = "";
             
             if(movieName != "")
                 Screen.Instance.PlayMovie(movieName, false);
 
-
             Triggered = true;
-
-            
-            //We run the training regime depending on the inherited class
 
             Dungeon dungeon = Game.Dungeon;
 
             bool doesTraining = false;
-            
 
             if(dungeon.IsWeekday()) {
 
-                //Carry out training and load up the UI
-
-                Screen.Instance.TrainingTypeString = GetTrainingTypeString();
-                Screen.Instance.ClearTrainingStatsRecord();
-
-                for (int i = 0; i < 5; i++)
-                {
-                    TrainStats train = DoWeekdayTraining();
-                    Screen.Instance.AddTrainingStatsRecord(train);
-                }
-                doesTraining = true;
+                //Adventure weekend
+                Game.MessageQueue.AddMessage("You're expected in classes during the week.");
             }
             else if(dungeon.IsNormalWeekend()) {
 
-                Screen.Instance.TrainingTypeString = GetTrainingTypeString();
-                Screen.Instance.ClearTrainingStatsRecord();
-
-                for (int i = 0; i < 2; i++)
-                {
-                    TrainStats train = DoWeekendTraining();
-                    Screen.Instance.AddTrainingStatsRecord(train);
-                }
-                doesTraining = true;
+                //To do
             }
             else {
 

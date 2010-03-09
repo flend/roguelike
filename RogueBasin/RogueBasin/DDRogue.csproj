@@ -195,11 +195,21 @@
     <Compile Include="Triggers\TrainCombatTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Triggers\TrainGeographyLibraryTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\TrainLeaveSchoolTrigger.cs" />
+    <Compile Include="Triggers\TrainMagicLibraryTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\TrainMagicTrigger.cs" />
+    <Compile Include="Triggers\TrainMasterTrigger.cs" />
     <Compile Include="Triggers\TrainRestTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\TrainTrigger.cs" />
+    <Compile Include="Triggers\TrainTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\TreasureRoom.cs" />
     <Compile Include="UseableFeature.cs" />
     <Compile Include="Utility.cs" />

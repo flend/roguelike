@@ -13,6 +13,11 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.SeeCorpses))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.SpotFriend))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TreasureRoom))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainAthleticsTrigger))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainCharmTrigger))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainCombatTrigger))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainRestTrigger))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainMagicTrigger))]
     public abstract class DungeonSquareTrigger
     {
         public int Level { get; set; }

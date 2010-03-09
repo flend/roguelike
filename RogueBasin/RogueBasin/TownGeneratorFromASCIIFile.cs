@@ -59,7 +59,13 @@ namespace RogueBasin
             specialChars.Add('2'); //spot girl trigger
             specialChars.Add('3'); //help girl trigger
             specialChars.Add('4'); //treasure room trigger
-            specialChars.Add('5'); //see corpses trigger
+            specialChars.Add('5'); 
+            specialChars.Add('6'); 
+            specialChars.Add('7'); 
+            specialChars.Add('8');
+            specialChars.Add('9');
+
+
            
         }
 
@@ -357,6 +363,18 @@ namespace RogueBasin
                                 break;
                             case '5':
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainMagicTrigger());
+                                break;
+                            case '6':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainMagicLibraryTrigger());
+                                break;
+                            case '7':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainGeographyLibraryTrigger());
+                                break;
+                            case '8':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainMasterTrigger());
+                                break;
+                            case '9':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainLeaveSchoolTrigger());
                                 break;
                             case '%':
                                 Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
