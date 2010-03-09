@@ -693,6 +693,110 @@ namespace RogueBasin {
         }
 
         /// <summary>
+        /// Draw a calendar overlay
+        /// </summary>
+        private void DrawCalendar()
+        {
+
+            Point calendarTL = new Point(58, 6);
+            Point calendarBR = new Point(81, 16);
+
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame
+            rootConsole.DrawFrame(calendarTL.x, calendarTL.y, calendarBR.x - calendarTL.x + 1, calendarBR.y - calendarTL.y + 1, true);
+
+            //Draw title
+            //rootConsole.PrintLineRect("Calendar", (calendarTL.x + calendarBR.x) / 2, calendarTL.y, calendarBR.x - calendarTL.x, 1, LineAlignment.Center);
+
+            //Draw calendar
+
+            int monthNo = Game.Dungeon.GetDateMonth();
+            int dayNo = Game.Dungeon.GetDateDay();
+
+            //Draw month name
+            string [] monthNames = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+            rootConsole.PrintLineRect(monthNames[monthNo - 1], (calendarTL.x + calendarBR.x) / 2, calendarTL.y, calendarBR.x - calendarTL.x, 1, LineAlignment.Center);
+
+            Point calendarOffset = new Point(2, 2);
+
+            Color selectedDayColor = ColorPresets.Red;
+            Color normalDayColor = ColorPresets.White;
+
+            //Draw days
+            for (int j = 0; j < 4; j++)
+            {
+                for (int i = 0; i < 7; i++)
+                {
+                    int thisDay = (j * 7 + i) + 1;
+
+                    if (thisDay == dayNo)
+                    {
+                        rootConsole.ForegroundColor = selectedDayColor;
+                    }
+
+                    rootConsole.PrintLine(thisDay.ToString(), (calendarTL.x + calendarOffset.x + i * 3), calendarTL.y + calendarOffset.y + 2 * j, LineAlignment.Left);
+                    rootConsole.ForegroundColor = normalDayColor;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Draw a stats box overlay
+        /// </summary>
+        private void DrawStatsBox()
+        {
+
+            Point statsBoxTL = new Point(58, 18);
+            Point statsBoxBR = new Point(81, 27);
+
+            Point statTitleOffset = new Point(3, 2);
+            Point statDataOffset = new Point(17, 2);
+
+            Color statNumberColor = ColorPresets.CadetBlue;
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame
+            rootConsole.DrawFrame(statsBoxTL.x, statsBoxTL.y, statsBoxBR.x - statsBoxTL.x + 1, statsBoxBR.y - statsBoxTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("Statistics", (statsBoxTL.x + statsBoxBR.x) / 2, statsBoxTL.y, statsBoxBR.x - statsBoxTL.x, 1, LineAlignment.Center);
+
+            //Draw PrincessRL training stats
+
+            Player player = Game.Dungeon.Player;
+
+            string trainHitpointsString = player.HitpointsStat.ToString();
+            string trainMaxHitpointsString = player.MaxHitpointsStat.ToString();
+            string trainAttackString = player.AttackStat.ToString();
+            string trainSpeedString = player.SpeedStat.ToString();
+            string trainCharmString = player.CharmStat.ToString();
+            string trainMagicString = player.MagicStat.ToString();
+
+            rootConsole.PrintLine("Stamina:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 0, LineAlignment.Left);
+            rootConsole.PrintLine("Health:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 1, LineAlignment.Left);
+            rootConsole.PrintLine("Combat Skill:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 2, LineAlignment.Left);
+            rootConsole.PrintLine("Dexterity:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 3, LineAlignment.Left);
+            rootConsole.PrintLine("Charm:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 4, LineAlignment.Left);
+            rootConsole.PrintLine("Magic skill:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 5, LineAlignment.Left);
+
+            rootConsole.ForegroundColor = statNumberColor;
+
+            rootConsole.PrintLine(trainHitpointsString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 0, LineAlignment.Left);
+            rootConsole.PrintLine(trainMaxHitpointsString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 1, LineAlignment.Left);
+            rootConsole.PrintLine(trainAttackString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 2, LineAlignment.Left);
+            rootConsole.PrintLine(trainSpeedString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 3, LineAlignment.Left);
+            rootConsole.PrintLine(trainCharmString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 4, LineAlignment.Left);
+            rootConsole.PrintLine(trainMagicString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 5, LineAlignment.Left);
+
+            rootConsole.ForegroundColor = ColorPresets.White;
+        }
+
+        /// <summary>
         /// Display equipment select overview
         /// </summary>
         private void DrawEquipmentSelect()
@@ -968,7 +1072,7 @@ namespace RogueBasin {
             //Draw stats
             int headerY = trainingTL.y + 4;
 
-            rootConsole.PrintLine("Fitness", trainingTL.x + statsHeaderOffset.x + fitnessOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Stamina", trainingTL.x + statsHeaderOffset.x + fitnessOffset.x, headerY, LineAlignment.Left);
             rootConsole.PrintLine("Health", trainingTL.x + statsHeaderOffset.x + healthOffset.x, headerY, LineAlignment.Left);
             rootConsole.PrintLine("Speed", trainingTL.x + statsHeaderOffset.x + speedOffset.x, headerY, LineAlignment.Left);
             rootConsole.PrintLine("Combat", trainingTL.x + statsHeaderOffset.x + combatOffset.x, headerY, LineAlignment.Left);
@@ -1152,19 +1256,19 @@ namespace RogueBasin {
 
             //Draw PrincessRL training stats
 
-            string trainHitpointsString = "HP: " + player.HitpointsStat.ToString();
-            string trainMaxHitpointsString = "MaxHP: " + player.MaxHitpointsStat.ToString();
-            string trainAttackString = "Attk: " + player.AttackStat.ToString();
+            string trainHitpointsString = "Stamina: " + player.HitpointsStat.ToString();
+            string trainMaxHitpointsString = "Health: " + player.MaxHitpointsStat.ToString();
+            string trainAttackString = "Attack: " + player.AttackStat.ToString();
             string trainSpeedString = "Speed: " + player.SpeedStat.ToString();
             string trainCharmString = "Charm: " + player.CharmStat.ToString();
             string trainMagicString = "Magic: " + player.MagicStat.ToString();
 
             rootConsole.PrintLine(trainHitpointsString, trainStatsLine.x + 0, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainMaxHitpointsString, trainStatsLine.x + 8, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainAttackString, trainStatsLine.x + 19, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainSpeedString, trainStatsLine.x + 29, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainCharmString, trainStatsLine.x + 40, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainMagicString, trainStatsLine.x + 50, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainMaxHitpointsString, trainStatsLine.x + 13, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainAttackString, trainStatsLine.x + 25, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainSpeedString, trainStatsLine.x + 37, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainCharmString, trainStatsLine.x + 49, trainStatsLine.y, LineAlignment.Left);
+            rootConsole.PrintLine(trainMagicString, trainStatsLine.x + 61, trainStatsLine.y, LineAlignment.Left);
 
             //Draw PrincessRL specific line
 
@@ -1630,6 +1734,13 @@ namespace RogueBasin {
                     rootConsole.ForegroundColor = drawColor;
                     rootConsole.PutChar(screenX, screenY, screenChar);
                 }
+            }
+
+            //If we're in town draw town overlays
+            if (Game.Dungeon.Player.LocationLevel == 0)
+            {
+                DrawCalendar();
+                DrawStatsBox();
             }
         }
         internal void ConsoleLine(string datedEntry)
