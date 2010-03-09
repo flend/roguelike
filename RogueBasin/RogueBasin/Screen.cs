@@ -1037,6 +1037,8 @@ namespace RogueBasin {
             trainingStatsRecord.Add(newStats);
         }
 
+        int trainingXTemp;
+        int trainingYTemp;
 
         /// <summary>
         /// Display training overlay. Just put up the border and write some text. Calls from the caller will add info.
@@ -1047,7 +1049,7 @@ namespace RogueBasin {
             RootConsole rootConsole = RootConsole.GetInstance();
 
             Point statsHeaderOffset = new Point(10, 0);
-            Point statsModOffset = new Point(5, 0);
+            Point statsModOffset = new Point(15, 0);
             Point statsDayOffset = new Point(2, 0);
 
             Point fitnessOffset = new Point(0, 0);
@@ -1070,6 +1072,7 @@ namespace RogueBasin {
             rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
 
             //Draw stats
+            /*
             int headerY = trainingTL.y + 4;
 
             rootConsole.PrintLine("Stamina", trainingTL.x + statsHeaderOffset.x + fitnessOffset.x, headerY, LineAlignment.Left);
@@ -1078,7 +1081,7 @@ namespace RogueBasin {
             rootConsole.PrintLine("Combat", trainingTL.x + statsHeaderOffset.x + combatOffset.x, headerY, LineAlignment.Left);
             rootConsole.PrintLine("Charm", trainingTL.x + statsHeaderOffset.x + charmOffset.x, headerY, LineAlignment.Left);
             rootConsole.PrintLine("Magic", trainingTL.x + statsHeaderOffset.x + magicOffset.x, headerY, LineAlignment.Left);
-
+            */
             //Work out the start day
             List<string> dayNames = new List<string>();
             
@@ -1101,7 +1104,7 @@ namespace RogueBasin {
             {
                 //Pause
                 if (trainingPause)
-                    TCODSystem.Sleep(200);
+                    TCODSystem.Sleep(400);
 
                 FlushConsole();
 
@@ -1114,27 +1117,63 @@ namespace RogueBasin {
                     LogFile.Log.LogEntryDebug("Error - couldn't find right day name in training", LogDebugLevel.High);
                 }
 
-                int thisYLine = trainingTL.y + 6 + lineCount;
 
-                rootConsole.PrintLine(dayName, trainingTL.x + statsDayOffset.x, thisYLine, LineAlignment.Left);
-                string trainingString = stats.HitpointsStatDelta.ToString();
-                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + fitnessOffset.x, thisYLine, LineAlignment.Left);
-                trainingString = stats.MaxHitpointsStatDelta.ToString();
-                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + healthOffset.x, thisYLine, LineAlignment.Left);
-                trainingString = stats.SpeedStatDelta.ToString();
-                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + speedOffset.x, thisYLine, LineAlignment.Left);
-                trainingString = stats.AttackStatDelta.ToString();
-                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + combatOffset.x, thisYLine, LineAlignment.Left);
-                trainingString = stats.CharmStatDelta.ToString();
-                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + charmOffset.x, thisYLine, LineAlignment.Left);
-                trainingString = stats.MagicStatDelta.ToString();
-                rootConsole.PrintLine(trainingString, trainingTL.x + statsHeaderOffset.x + statsModOffset.x + magicOffset.x, thisYLine, LineAlignment.Left);
+
+                trainingYTemp = trainingTL.y + 6 + lineCount;
+
+                //Concatenate display string
+                trainingXTemp = statsModOffset.x;
+
+                rootConsole.ForegroundColor = ColorPresets.White;
+                rootConsole.PrintLine(dayName + " : ", trainingTL.x + statsDayOffset.x, trainingYTemp, LineAlignment.Left);
+
+                ProcessDelta("Stamina", stats.HitpointsStatDelta);
+                ProcessDelta("Health", stats.MaxHitpointsStatDelta);
+                ProcessDelta("Combat", stats.AttackStatDelta);
+                ProcessDelta("Speed", stats.SpeedStatDelta);
+                ProcessDelta("Charm", stats.CharmStatDelta);
+                ProcessDelta("Magic", stats.MagicStatDelta);
+
+                //No change
+                if (trainingXTemp == statsModOffset.x)
+                {
+                    rootConsole.ForegroundColor = ColorPresets.White;
+                    rootConsole.PrintLine("No change!", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
+                }
 
                 lineCount++;
                 
             }
 
+            rootConsole.ForegroundColor = ColorPresets.White;
            
+        }
+
+        private void ProcessDelta(string statName, int delta)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            string outString;
+            Color colorToPrint;
+
+            if (delta == 0)
+                return;
+
+            if (delta > 0)
+            {
+                outString = statName+ "(+" + delta.ToString() + ")";
+                colorToPrint = ColorPresets.Green;
+            }
+            else
+            {
+                outString = statName + "(" + delta.ToString() + ")";
+                colorToPrint = ColorPresets.Red;
+            }
+            rootConsole.ForegroundColor = colorToPrint;
+            rootConsole.PrintLine(outString, trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
+
+            trainingXTemp += outString.Length + 1;
         }
         /*
         /// <summary>
