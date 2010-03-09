@@ -344,19 +344,19 @@ namespace RogueBasin
                                 baseMap.PCStartLocation = new Point(i, row);
                                 break;
                             case '1':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainRestTrigger());
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainAthleticsTrigger());
                                 break;
                             case '2':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.SpotFriend());
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainCombatTrigger());
                                 break;
                             case '3':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.HelpFriend());
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainRestTrigger());
                                 break;
                             case '4':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TreasureRoom());
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainCharmTrigger());
                                 break;
                             case '5':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.SeeCorpses());
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TrainMagicTrigger());
                                 break;
                             case '%':
                                 Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));

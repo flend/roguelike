@@ -1598,10 +1598,10 @@ namespace RogueBasin {
                         drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
                     }
                     
-
-                    if (map.mapSquares[i, j].InPlayerFOV)
+                   
+                    if (map.mapSquares[i, j].InPlayerFOV || Game.Dungeon.Player.LocationLevel == 0)
                     {
-                        //In FOV
+                        //In FOV or in town
                         //rootConsole.ForegroundColor = drawColor;
                     }
                     else if (map.mapSquares[i, j].SeenByPlayer)

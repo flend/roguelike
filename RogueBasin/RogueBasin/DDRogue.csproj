@@ -186,7 +186,20 @@
     <Compile Include="Triggers\LichBattle.cs" />
     <Compile Include="Triggers\SeeCorpses.cs" />
     <Compile Include="Triggers\SpotFriend.cs" />
-    <Compile Include="Triggers\TrainRestTrigger.cs" />
+    <Compile Include="Triggers\TrainAthleticsTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\TrainCharmTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\TrainCombatTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\TrainMagicTrigger.cs" />
+    <Compile Include="Triggers\TrainRestTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\TrainTrigger.cs" />
     <Compile Include="Triggers\TreasureRoom.cs" />
     <Compile Include="UseableFeature.cs" />
     <Compile Include="Utility.cs" />

@@ -6,26 +6,26 @@ using libtcodWrapper;
 namespace RogueBasin.Triggers
 {
     /// <summary>
-    /// When you enter the entrance square
+    /// Athletics training
     /// </summary>
-    public class TrainRestTrigger : TrainTrigger
+    public class TrainAthleticsTrigger : TrainTrigger
     {
         protected override string GetTrainingTypeString()
         {
-            return "Training: Day off!";
+            return "Training: Athletics Workout!";
         }
 
         protected override TrainStats DoWeekdayTraining()
         {
             TrainStats train = new TrainStats();
-            train.WeekdayTrainRest(Game.Dungeon.Player);
+            train.WeekdayTrainAthletics(Game.Dungeon.Player);
             return train;
         }
 
         protected override TrainStats DoWeekendTraining()
         {
             TrainStats train = new TrainStats();
-            train.WeekendTrainRest(Game.Dungeon.Player);
+            train.WeekendTrainAthletics(Game.Dungeon.Player);
             return train;
         }
     }
