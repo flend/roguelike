@@ -5,25 +5,29 @@ using System.Text;
 namespace RogueBasin.Features
 {
     /// <summary>
-    /// Staircase up. Leave up to the wilderness (i.e. go home)
-    /// Would like to inherit off normal downstaircase but I can't just look for a generic upstaircase, since the top staircase is an exit staircase. Could alter it to look for both
+    /// Enter a dungeon. i.e. teleport to a particular level from the wilderness
     /// </summary>
     /// <param name="player"></param>
     /// <returns></returns>
-    public class StaircaseEntryDungeon1 : UseableFeature
+    public class StaircaseEntry : UseableFeature
     {
-        public StaircaseEntryDungeon1()
+        int dungeonStartLevel;
+
+        /// <summary>
+        /// Construct with the level of the dungeon to transition to
+        /// </summary>
+        /// <param name="dungeonStartLevel"></param>
+        public StaircaseEntry(int dungeonStartLevel)
         {
+            this.dungeonStartLevel = dungeonStartLevel;
         }
 
         public override bool PlayerInteraction(Player player)
         {
             Dungeon dungeon = Game.Dungeon;
 
-            //Enter dungeon 1
-
-            //Increment player level
-            player.LocationLevel = Game.Dungeon.Dungeon1StartLevel;
+            //Enter dungeon
+            player.LocationLevel = dungeonStartLevel;
 
             //Set vision
             player.SightRadius = (int)Math.Ceiling(player.NormalSightRadius * Game.Dungeon.Levels[player.LocationLevel].LightLevel);

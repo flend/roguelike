@@ -64,6 +64,11 @@ namespace RogueBasin
         /// </summary>
         int hitModifier;
 
+        /// <summary>
+        /// Number of times we get knocked out
+        /// </summary>
+        public int NumDeaths { get; set; }
+
         public int MaxCharmedCreatures { get; set; }
 
         public int CurrentCharmedCreatures { get; set; }
@@ -88,6 +93,8 @@ namespace RogueBasin
 
             MaxCharmedCreatures = 0;
             CurrentCharmedCreatures = 0;
+
+            NumDeaths = 0;
 
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
@@ -559,7 +566,7 @@ namespace RogueBasin
 
                     //Debug string
                     string combatResultsMsg = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    string playerMsg = "You killed the " + monster.SingleDescription + ".";
+                    string playerMsg = "You knocked out the " + monster.SingleDescription + ".";
                     Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 

@@ -320,19 +320,34 @@ namespace RogueBasin {
                 }
 
                 //Print press any key
-                rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                rootConsole.PrintLineRect("Press ENTER to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
 
                 Screen.Instance.FlushConsole();
 
                 //Await keypress then redraw normal screen
-                KeyPress anyKey = Keyboard.WaitForKeyPress(true);
+                WaitForEnterKey();
 
-                Draw();
-                Screen.Instance.FlushConsole();
+                DrawAndFlush();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to play movie: " + filenameRoot + " : " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Wait for ENTER
+        /// </summary>
+        private void WaitForEnterKey()
+        {
+            while (true)
+            {
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                if (userKey.KeyCode == KeyCode.TCODK_ENTER)
+                {
+                    break;
+                }
             }
         }
 

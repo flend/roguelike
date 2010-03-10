@@ -70,6 +70,7 @@ namespace RogueBasin
         private void SetupFeatureMapping()
         {
             featureChars.Add('~');
+            featureChars.Add('/');
             featureChars.Add('<');
         }
 
@@ -303,7 +304,10 @@ namespace RogueBasin
                        switch (mapChar)
                         {
                             case '~':
-                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntryDungeon1(), levelNo, new Point(i, row));
+                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon1StartLevel), levelNo, new Point(i, row));
+                                break;
+                            case '/':
+                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon2StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '<':
                                 featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, new Point(i, row));

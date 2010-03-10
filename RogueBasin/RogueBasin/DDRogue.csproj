@@ -69,7 +69,7 @@
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
     <Compile Include="Features\Corpse.cs" />
-    <Compile Include="Features\StaircaseEntryDungeon1.cs" />
+    <Compile Include="Features\StaircaseEntry.cs" />
     <Compile Include="Features\StaircaseExit.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -330,5 +330,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\wilderness.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\knockedout0.amf" />
   </ItemGroup>
 </Project>

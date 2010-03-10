@@ -36,6 +36,9 @@ namespace RogueBasin.Triggers
                 Triggered = true;
             }
 
+            //Update the player's stats for the adventure
+            Game.Dungeon.SyncStatsWithTraining();
+
             //Teleport the player to the start location in the wilderness
 
             //Increment player level

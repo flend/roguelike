@@ -427,15 +427,48 @@ namespace RogueBasin
                 height = value;
             }
         }
+        
+        public Point GetUpStaircaseLocation()
+        {
+            return upStaircase;
+        }
+
         /// <summary>
         /// Add staircases to the map once it has been added to dungeon
         /// </summary>
         /// <param name="levelNo"></param>
         public void AddStaircases(int levelNo)
         {
-
             Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
             Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
+        }
+
+        /// <summary>
+        /// Add staircases to the map once it has been added to dungeon
+        /// </summary>
+        /// <param name="levelNo"></param>
+        public void AddUpStaircaseOnly(int levelNo)
+        {
+            Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
+            //Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
+        }
+
+        /// <summary>
+        /// Add staircases to the map once it has been added to dungeon
+        /// </summary>
+        /// <param name="levelNo"></param>
+        public void AddDownStaircaseOnly(int levelNo)
+        {
+            //Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
+            Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
+        }
+        
+        /// <summary>
+        /// Add an exit staircase at the up staircase location
+        /// </summary>
+        internal void AddExitStaircaseOnly(int levelNo)
+        {
+            Game.Dungeon.AddFeature(new Features.StaircaseExit(), levelNo, upStaircase);
         }
     }
 }

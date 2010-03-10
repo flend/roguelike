@@ -340,6 +340,11 @@ namespace RogueBasin
             return false;
         }
 
+        /// <summary>
+        /// Important to keep this the only place where the player gets injured
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
         public virtual CombatResults AttackPlayer(Player player)
         {
             //Recalculate combat stats if required
@@ -362,14 +367,14 @@ namespace RogueBasin
                 //Is the player dead, if so kill it?
                 if (player.Hitpoints <= 0)
                 {
-                    Game.Dungeon.PlayerDeath("was killed by a " + this.SingleDescription);
+                    Game.Dungeon.PlayerDeath("was knocked out by a " + this.SingleDescription);
 
                     //Message queue string
                     string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
                     
                     
                     //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
-                    string playerMsg = HitsPlayerCombatString() + " You die.";
+                    string playerMsg = HitsPlayerCombatString() + " You are knocked out.";
                     Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
@@ -427,7 +432,7 @@ namespace RogueBasin
 
                     //Debug string
                     string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    playerMsg = HitsMonsterCombatString(monster) + " It dies.";
+                    playerMsg = HitsMonsterCombatString(monster) + " It's knocked out.";
                     Game.MessageQueue.AddMessage(playerMsg);
                     //Game.MessageQueue.AddMessage(combatResultsMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);

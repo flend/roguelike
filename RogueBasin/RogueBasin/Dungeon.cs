@@ -87,6 +87,19 @@ namespace RogueBasin
         private List<Monster> summonedMonsters; //no need to serialize
 
         public int Dungeon1StartLevel { get; set;}
+        public int Dungeon1EndLevel { get; set; }
+
+        public int Dungeon2StartLevel { get; set; }
+        public int Dungeon2EndLevel { get; set; }
+
+        public int Dungeon3StartLevel { get; set; }
+        public int Dungeon3EndLevel { get; set; }
+
+        public int Dungeon4StartLevel { get; set; }
+        public int Dungeon4EndLevel { get; set; }
+
+        public int Dungeon5StartLevel { get; set; }
+        public int Dungeon5EndLevel { get; set; }
 
         long worldClock = 0;
 
@@ -2369,6 +2382,25 @@ namespace RogueBasin
             if (PlayerImmortal && !verb.Contains("quit"))
                 return;
 
+            //In PrincessRL death is not permanent, but quitting is!
+
+            //Knocked out, go back to school
+            if(!verb.Contains("quit")) {
+
+                Screen.Instance.PlayMovie("knockedout", false);
+
+                //Up date counter
+                player.NumDeaths++;
+
+                //Game.MessageQueue.ClearList(); //If want to lose the last message, fit it in calling function
+                MoveToNextDate();
+                PlayerBackToTown();
+
+                return;
+            }
+
+            //Right now, only seen on a quit (will be changed too)
+
             //Set up the death screen
 
             //Death preamble
@@ -2852,6 +2884,18 @@ namespace RogueBasin
         {
             Player.LocationLevel = 0;
             Player.LocationMap = levels[0].PCStartLocation;
+        }
+
+        /// <summary>
+        /// Set the player's real stats as determined by their training stats.
+        /// Done before adventuring.
+        /// </summary>
+        internal void SyncStatsWithTraining()
+        {
+            Player player = Game.Dungeon.player;
+
+            player.Hitpoints = player.HitpointsStat;
+            //etc
         }
     }
 }

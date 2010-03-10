@@ -103,7 +103,7 @@ namespace RogueBasin
 
             SetupMaps();
 
-            //SpawnInitialCreatures();
+            SpawnInitialCreatures();
 
             //SpawnItems();
 
@@ -195,6 +195,8 @@ namespace RogueBasin
         {
             LogFile.Log.LogEntry("Generating creatures...");
 
+            Dungeon dungeon = Game.Dungeon;
+
             //Add monsters to levels
 
             //The levels divide into 3 groups: cave, cave/halls and halls
@@ -208,13 +210,14 @@ namespace RogueBasin
             //Could take into account depth and difficulty level
 
             List<int> levelMonsterAmounts = new List<int>();
-            
-            for(int i=0;i<16;i++) {
-                int num = 200 + 80 * i;
+
+            for (int i = dungeon.Dungeon1StartLevel; i <= dungeon.Dungeon1EndLevel; i++)
+            {
+                int num = 200 + 80 * (i - dungeon.Dungeon1StartLevel);
                 levelMonsterAmounts.Add(num);
             }
 
-            levelMonsterAmounts[0] = 500;
+            //levelMonsterAmounts[0] = 500;
             /*{
 
                 150, //1
@@ -298,6 +301,60 @@ namespace RogueBasin
                 }
             }
 
+            //Dungeon 1 - caves
+            //levels 2 - 5
+
+            for (int i = dungeon.Dungeon1StartLevel; i <= dungeon.Dungeon1EndLevel; i++)
+            {
+                int randomNum;
+
+                //Switch on dungeon level
+                switch (i)
+                {
+                    //Early caves
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+
+                        int costSpent = 0;
+                        int indexIntoMonsterAmounts = i - dungeon.Dungeon1StartLevel;
+
+                        do
+                        {
+                            randomNum = Game.Random.Next(100);
+
+                            Monster monsterToAdd = null;
+
+                            if (randomNum < 75)
+                            {
+                                monsterToAdd = levelList[0].GetRandomMonster();
+                            }
+                            else if (randomNum < 98)
+                            {
+                                monsterToAdd = levelList[1].GetRandomMonster();
+                            }
+                            else
+                                monsterToAdd = levelList[2].GetRandomMonster();
+
+                            Point location;
+
+                            do
+                            {
+                                location = dungeon.RandomWalkablePointInLevel(i);
+                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+
+                            CheckSpecialMonsterGroups(monsterToAdd, i);
+
+                            costSpent += monsterToAdd.CreatureCost();
+
+                        } while (costSpent < levelMonsterAmounts[indexIntoMonsterAmounts]);
+
+                        break;
+                }
+            }
+
+            /*
             //Don't auto spawn for the last 2 levels
             for (int i = 0; i < dungeon.NoLevels - 2; i++)
             {
@@ -313,7 +370,7 @@ namespace RogueBasin
 
                         int costSpent = 0;
 
-                        /*
+                       
                         int costSpent = 0;
 
                         do
@@ -346,7 +403,7 @@ namespace RogueBasin
                             costSpent += monsterToAdd.CreatureCost();
 
                         } while (costSpent < levelMonsterAmounts[i]);
-                        */
+                        
                         break;
 
                     case 1:
@@ -590,7 +647,7 @@ namespace RogueBasin
                 }
 
             }
-
+            */
             /*
                             int noCreatures = 25 + Game.Random.Next(5);
 
@@ -1171,19 +1228,24 @@ namespace RogueBasin
         /// </summary>
         private void SetupMaps()
         {
+            Dungeon dungeon = Game.Dungeon;
+
             //Levels
 
             //1: town
             //2: wilderness
 
-            //1-3: with water
-            //1-5: Cave
-            //5-10: Ruined Halls
-            //11-15: Halls
-            //16: Final encounter (ASCIIPaint)
-            //17: Outside battleground (ASCIIPaint)
+            //Dungeon 1: levels 3-5: Caves
+            //Dungeon 2: levels 6-9: Ruined Halls
+            //Dungeon 3: level 10-13: Halls
 
-            
+            //Set up the levels. Needs to be done here so the wilderness is initialized properly.
+            Game.Dungeon.Dungeon1StartLevel = 2;
+            Game.Dungeon.Dungeon1EndLevel = 5;
+
+            Game.Dungeon.Dungeon2StartLevel = 6;
+            Game.Dungeon.Dungeon2EndLevel = 9;
+
 
             //Make the generators
 
@@ -1237,10 +1299,7 @@ namespace RogueBasin
                 throw new ApplicationException("Failed to wilderness town level! Is the game installed correctly?");
             }
 
-            //Dungeon 1 - levels 2-5
-
-            //Store in dungeon
-            Game.Dungeon.Dungeon1StartLevel = 2;
+            //DUNGEON 1 - levels 2-5
 
             //Generate and add cave levels
 
@@ -1287,6 +1346,50 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
+            //DUNGEON 2 - levels 6-9
+
+            //Store in dungeon
+            Game.Dungeon.Dungeon2StartLevel = 6;
+            Game.Dungeon.Dungeon2EndLevel = 9;
+
+            //Generate and add cave levels
+
+            //level 6
+            //top level has special up staircase leading to wilderness
+            
+            Map ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
+            levelNo = dungeon.AddMap(ruinedLevel);
+            ruinedGen.AddDownStaircaseOnly(levelNo);
+            ruinedGen.AddExitStaircaseOnly(levelNo); 
+            
+            //Set light
+            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+
+            //Add a trigger here
+            dungeon.AddTrigger(0, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
+
+            //level 7-8
+
+            for (int i = dungeon.Dungeon2StartLevel + 1; i < dungeon.Dungeon2EndLevel; i++)
+            {
+                ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
+                levelNo = dungeon.AddMap(ruinedLevel);
+                ruinedGen.AddStaircases(levelNo);
+
+                //Set light
+                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            }
+
+            //level 9
+
+            //Lowest level doens't have a downstaircase
+            ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
+            levelNo = dungeon.AddMap(ruinedLevel);
+
+            ruinedGen.AddUpStaircaseOnly(levelNo);
+
+            //Set light
+            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             
             
             /*
