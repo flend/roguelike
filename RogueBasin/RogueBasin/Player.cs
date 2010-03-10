@@ -73,6 +73,13 @@ namespace RogueBasin
 
         public int CurrentCharmedCreatures { get; set; }
 
+        /// <summary>
+        /// PrincessRL has a maximum no of equipped items when using EquipItemNoSlots
+        /// </summary>
+        public int MaximumEquippedItems { get; set; }
+
+        public int CurrentEquippedItems { get; set; }
+
         //Training stats
 
         public int MaxHitpointsStat { get; set; }
@@ -93,6 +100,7 @@ namespace RogueBasin
 
             MaxCharmedCreatures = 0;
             CurrentCharmedCreatures = 0;
+            MaximumEquippedItems = 2;
 
             NumDeaths = 0;
 
@@ -127,6 +135,15 @@ namespace RogueBasin
             //CalculateCombatStats();
             maxHitpoints = 10;
             hitpoints = maxHitpoints;
+        }
+
+        /// <summary>
+        /// Remove all our items and reset our equipped items count
+        /// </summary>
+        public void RemoveAllItems()
+        {
+            Inventory.RemoveAllItems();
+            CurrentEquippedItems = 0;
         }
 
         /// <summary>
@@ -914,27 +931,58 @@ namespace RogueBasin
                 return false;
             }
 
-            //Add the item to our inventory
-            item.IsEquipped = true;
-            Inventory.AddItem(item);
+            //Set the item as found
+            item.IsFound = true;
 
-            //Let the item do its equip action
-            //This is probably the only time it gets to do this and won't be refreshed after a load game
-            equipItem.Equip(this);
+            //If we have room in our equipped slots, equip and add the item to the inventory
+            if (CurrentEquippedItems < MaximumEquippedItems)
+            {
+                //Add the item to our inventory
+                item.IsEquipped = true;
+                Inventory.AddItem(item);
 
-            //Update the player's combat stats which may have been affected
+                CurrentEquippedItems++;
 
-            CalculateCombatStats();
+                //Let the item do its equip action
+                //This can happen multiple times in PrincessRL since items can be dropped
+                //Probably just play a video
+                equipItem.Equip(this);
 
-            //Update the inventory listing since equipping an item changes its stackability
-            //No longer necessary since no equippable items get displayed in inventory
-            //Inventory.RefreshInventoryListing();
+                //Update the player's combat stats which may have been affected
 
-            //Message the user
-            LogFile.Log.LogEntryDebug("Item equipped: " + item.SingleItemDescription, LogDebugLevel.Medium);
-            //Game.MessageQueue.AddMessage(item.SingleItemDescription + " found.");
+                CalculateCombatStats();
 
-            return true;
+                //Update the inventory listing since equipping an item changes its stackability
+                //No longer necessary since no equippable items get displayed in inventory
+                //Inventory.RefreshInventoryListing();
+
+                //Message the user
+                LogFile.Log.LogEntryDebug("Item equipped: " + item.SingleItemDescription, LogDebugLevel.Medium);
+                //Game.MessageQueue.AddMessage(item.SingleItemDescription + " found.");
+
+                return true;
+            }
+            else if (LocationLevel == 0)
+            {
+                //If not, and we're in town, don't pick it up
+                Game.MessageQueue.AddMessage("You can't carry anymore items. Press 'd' to drop your current items.");
+                LogFile.Log.LogEntryDebug("Max number of items reached", LogDebugLevel.Medium);
+
+                return false;
+            }
+            else
+            {
+                //If not, and we're not in town, set it as inInventory so it won't be drawn. It'll get returned to town on when go back
+                item.InInventory = true;
+
+                //Play the video
+                equipItem.Equip(this);
+
+                Game.MessageQueue.AddMessage("You place the" + item.SingleItemDescription + " in your backpack.");
+                LogFile.Log.LogEntryDebug("Max number of items reached. Item returns to town.", LogDebugLevel.Medium);
+
+                return true;
+            }          
         }
 
         /// <summary>

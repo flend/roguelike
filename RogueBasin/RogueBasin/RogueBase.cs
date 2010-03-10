@@ -337,6 +337,13 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
                                 case 'd':
+                                    //Drop items if in town
+                                    DropItems();
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+
+                                case 'k':
                                     //Use an inventory item
                                     SetPlayerInventorySelectScreen();
                                     UpdateScreen();
@@ -597,6 +604,24 @@ namespace RogueBasin
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
             }
             return timeAdvances;
+        }
+
+        /// <summary>
+        /// Drop the player's items if in town. Otherwise doesn't do anything
+        /// </summary>
+        private void DropItems()
+        {
+            if (Game.Dungeon.Player.LocationLevel == 0)
+            {
+                Game.Dungeon.PutItemsInStore();
+                Game.MessageQueue.AddMessage("You drop the items off in the store.");
+                LogFile.Log.LogEntry("Items returned to store.");
+            }
+            else
+            {
+                Game.MessageQueue.AddMessage("You don't want to drop your precious items in this place!");
+                LogFile.Log.LogEntry("Items drop requested away from town.");
+            }
         }
 
 

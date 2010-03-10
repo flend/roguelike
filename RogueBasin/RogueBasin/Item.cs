@@ -51,6 +51,8 @@ namespace RogueBasin
         {
             inInventory = false;
             IsEquipped = false;
+
+            IsFound = false;
         }
 
         /// <summary>
@@ -80,6 +82,11 @@ namespace RogueBasin
                 inInventory = value;
             }
         }
+
+        /// <summary>
+        /// Has the object been found (i.e. picked up) by the player. For PrincessRL
+        /// </summary>
+        public bool IsFound { get; set; }
 
         /// <summary>
         /// Return the weight of the object. Set in derived classes

@@ -153,6 +153,9 @@ namespace RogueBasin
         /// <returns>False if the item won't fit in the inventory for some reason</returns>
         public virtual bool PickUpItem(Item itemToPickUp)
         {
+            //Set the item as found
+            itemToPickUp.IsFound = true;
+
             inventory.AddItem(itemToPickUp);
 
             return true;

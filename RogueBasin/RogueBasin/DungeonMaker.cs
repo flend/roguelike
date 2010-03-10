@@ -105,7 +105,9 @@ namespace RogueBasin
 
             SpawnInitialCreatures();
 
-            //SpawnItems();
+            
+
+            SpawnItems();
 
             
             //SpawnUniques();
@@ -786,401 +788,407 @@ namespace RogueBasin
         {
             LogFile.Log.LogEntry("Generating items...");
 
-            Point location = new Point(0, 0);
+            //Spawn a test item at level 0
+
+            dungeon.AddItemNoChecks(new Items.Glove(), 0, dungeon.Player.LocationMap);
+            dungeon.AddItemNoChecks(new Items.Bracer(), 0, new Point(dungeon.Player.LocationMap.x + 1, dungeon.Player.LocationMap.y));
+            dungeon.AddItemNoChecks(new Items.Boots(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
+
+//            Point location = new Point(0, 0);
             
-            //Plot items
+//            //Plot items
 
-            //These are max 1 per level
-            //Not all of them necessarily appear in all games
-            //They may be on the ground or carried by a creature
+//            //These are max 1 per level
+//            //Not all of them necessarily appear in all games
+//            //They may be on the ground or carried by a creature
 
-            //Guarantee the glove (vamparic regeneration) on level 1 or 2
+//            //Guarantee the glove (vamparic regeneration) on level 1 or 2
             
-            //dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
-            //The rest of the plot items are split between the remaining cave and ruined levels
+//            //dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
+//            //The rest of the plot items are split between the remaining cave and ruined levels
 
-            List<Item> plotItems = new List<Item> { 
-                //special mode items (9)
-                new Items.Badge(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
-            new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash() };
+//            List<Item> plotItems = new List<Item> { 
+//                //special mode items (9)
+//                new Items.Badge(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
+//            new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash() };
 
-            List<Item> plotLevelItems = new List<Item> {
-            //levelling items 
-            new Items.Backpack(), new Items.Book(), new Items.Medal(), new Items.Stone(), new Items.Flint() };
-            //glove is separate
+//            List<Item> plotLevelItems = new List<Item> {
+//            //levelling items 
+//            new Items.Backpack(), new Items.Book(), new Items.Medal(), new Items.Stone(), new Items.Flint() };
+//            //glove is separate
 
-            Game.Dungeon.Player.TotalPlotItems = 15;
-            Game.Dungeon.Player.PlotItemsFound = 0;
+//            Game.Dungeon.Player.TotalPlotItems = 15;
+//            Game.Dungeon.Player.PlotItemsFound = 0;
 
-            /*
-            int level = 0;
-            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
+//            /*
+//            int level = 0;
+//            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
-            foreach (Item plotItem in plotItems)
-            {
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(level);
+//            foreach (Item plotItem in plotItems)
+//            {
+//                do
+//                {
+//                    location = dungeon.RandomWalkablePointInLevel(level);
 
-                    //May want to specify a minimum distance from staircases??? TODO
-                } while (!dungeon.AddItem(plotItem, 0, location));
-            }
-            */
+//                    //May want to specify a minimum distance from staircases??? TODO
+//                } while (!dungeon.AddItem(plotItem, 0, location));
+//            }
+//            */
 
-            /*
-            //debug
-            //Give them all to me!
+//            /*
+//            //debug
+//            //Give them all to me!
 
-            foreach (Item item in plotItems)
-            {
-                dungeon.Player.PickUpItem(item);
-            }
-            */
-            //Stick them all on the first level
+//            foreach (Item item in plotItems)
+//            {
+//                dungeon.Player.PickUpItem(item);
+//            }
+//            */
+//            //Stick them all on the first level
 
 
-            int totalNormalLevels = noCaveLevels + noHallLevels + noRuinedLevels;
+//            int totalNormalLevels = noCaveLevels + noHallLevels + noRuinedLevels;
 
-            int level = 0;
-            int loopCount = 0;
+//            int level = 0;
+//            int loopCount = 0;
 
-            int gloveLevel = 0;
+//            int gloveLevel = 0;
 
-            do
-            {
-                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
-            } while (!dungeon.AddItem(new Items.Glove(), gloveLevel, location));
+//            do
+//            {
+//                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
+//            } while (!dungeon.AddItem(new Items.Glove(), gloveLevel, location));
             
-            //Include glove on level 1
-            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
+//            //Include glove on level 1
+//            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
 
-            List<Item> itemsPlaced = new List<Item>();
+//            List<Item> itemsPlaced = new List<Item>();
 
-            //Guarantee Greaves or band on level 1
-            //Add the one we don't place to the array of spare items
-            Item firstItem;
+//            //Guarantee Greaves or band on level 1
+//            //Add the one we don't place to the array of spare items
+//            Item firstItem;
 
-            if (Game.Random.Next(2) < 1)
-            {
-                firstItem = new Items.Greaves();
-                plotItems.Add(new Items.Band());
-            }
-            else
-            {
-                firstItem = new Items.Band();
-                plotItems.Add(new Items.Greaves());
-            }
-            do
-            {
-                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
-            } while (!dungeon.AddItem(firstItem, gloveLevel, location));
+//            if (Game.Random.Next(2) < 1)
+//            {
+//                firstItem = new Items.Greaves();
+//                plotItems.Add(new Items.Band());
+//            }
+//            else
+//            {
+//                firstItem = new Items.Band();
+//                plotItems.Add(new Items.Greaves());
+//            }
+//            do
+//            {
+//                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
+//            } while (!dungeon.AddItem(firstItem, gloveLevel, location));
 
-            itemsPlaced.Add(firstItem);
+//            itemsPlaced.Add(firstItem);
 
-            //Levelling items are distributed through the first 12 levels
+//            //Levelling items are distributed through the first 12 levels
 
-            for (int i = 0; i < plotLevelItems.Count; i++)
-            {
+//            for (int i = 0; i < plotLevelItems.Count; i++)
+//            {
 
-                Item plotItem;
-                do
-                {
-                    plotItem = plotLevelItems[Game.Random.Next(plotLevelItems.Count)];
-                } while (itemsPlaced.Contains(plotItem));
+//                Item plotItem;
+//                do
+//                {
+//                    plotItem = plotLevelItems[Game.Random.Next(plotLevelItems.Count)];
+//                } while (itemsPlaced.Contains(plotItem));
                 
-                loopCount = 0;
+//                loopCount = 0;
 
-                do
-                {
-                    level = 2 * i + 1;
+//                do
+//                {
+//                    level = 2 * i + 1;
 
-                    /*if (Game.Random.Next(10) < 2)
-                    {
-                        level--;
-                    }
-                    else*/
+//                    /*if (Game.Random.Next(10) < 2)
+//                    {
+//                        level--;
+//                    }
+//                    else*/
                     
-                    if (Game.Random.Next(10) < 5)
-                    {
-                        level++;
-                    }
+//                    if (Game.Random.Next(10) < 5)
+//                    {
+//                        level++;
+//                    }
 
-                    level = Game.Random.Next(noCaveLevels + noRuinedLevels);
-                    loopCount++;
+//                    level = Game.Random.Next(noCaveLevels + noRuinedLevels);
+//                    loopCount++;
 
-                } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
+//                } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
 
 
 
-                //Put on the floor
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(level);
+//                //Put on the floor
+//                do
+//                {
+//                    location = dungeon.RandomWalkablePointInLevel(level);
 
-                    //May want to specify a minimum distance from staircases??? TODO
-                } while (!dungeon.AddItem(plotItem, level, location));
+//                    //May want to specify a minimum distance from staircases??? TODO
+//                } while (!dungeon.AddItem(plotItem, level, location));
 
-                levelsWithPlotItems.Add(level);
-                itemsPlaced.Add(plotItem);
-            }
+//                levelsWithPlotItems.Add(level);
+//                itemsPlaced.Add(plotItem);
+//            }
 
-            //Distribute the move items randomly on other levels
+//            //Distribute the move items randomly on other levels
 
-            //Guarantee a few special move items early on
+//            //Guarantee a few special move items early on
 
-            for (int i = 0; i < plotItems.Count; i++)
-            {
-                //Find random level w/o plotItem
-                loopCount = 0;
-                Item plotItem;
+//            for (int i = 0; i < plotItems.Count; i++)
+//            {
+//                //Find random level w/o plotItem
+//                loopCount = 0;
+//                Item plotItem;
                
-                do
-                {
-                    plotItem = plotItems[Game.Random.Next(plotItems.Count)];
-                } while (itemsPlaced.Contains(plotItem));
+//                do
+//                {
+//                    plotItem = plotItems[Game.Random.Next(plotItems.Count)];
+//                } while (itemsPlaced.Contains(plotItem));
 
-                //guarantee some items early on
-              //  if (i < 2)
-               // {
-              //      level = Game.Random.Next(2);
-              //  }
-             //   else
-//{
-                    do
-                    {
-                        level = Game.Random.Next(totalNormalLevels - 2);
-                        loopCount++;
-                    } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
-               // }
-                levelsWithPlotItems.Add(level);
-                itemsPlaced.Add(plotItem);
+//                //guarantee some items early on
+//              //  if (i < 2)
+//               // {
+//              //      level = Game.Random.Next(2);
+//              //  }
+//             //   else
+////{
+//                    do
+//                    {
+//                        level = Game.Random.Next(totalNormalLevels - 2);
+//                        loopCount++;
+//                    } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
+//               // }
+//                levelsWithPlotItems.Add(level);
+//                itemsPlaced.Add(plotItem);
 
-                //On the floor
-                //Find position in level and place item
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(level);
+//                //On the floor
+//                //Find position in level and place item
+//                do
+//                {
+//                    location = dungeon.RandomWalkablePointInLevel(level);
 
-                    //May want to specify a minimum distance from staircases??? TODO
-                } while (!dungeon.AddItem(plotItem, level, location));
+//                    //May want to specify a minimum distance from staircases??? TODO
+//                } while (!dungeon.AddItem(plotItem, level, location));
 
 
-                /*
-                //50% chance they will be generated on a monster
-                bool putOnMonster = false;
+//                /*
+//                //50% chance they will be generated on a monster
+//                bool putOnMonster = false;
 
-                if(Game.Random.Next(100) < plotItemOnMonsterChance)
-                    putOnMonster = true;
+//                if(Game.Random.Next(100) < plotItemOnMonsterChance)
+//                    putOnMonster = true;
 
-                if (putOnMonster)
-                {
-                    //On a monster
+//                if (putOnMonster)
+//                {
+//                    //On a monster
 
-                    //Find a random monster on this level
-                    Monster monster = dungeon.RandomMonsterOnLevel(level);
+//                    //Find a random monster on this level
+//                    Monster monster = dungeon.RandomMonsterOnLevel(level);
 
-                    //If no monster, it'll go on the floor
-                    if (monster == null)
-                    {
-                        putOnMonster = false;
-                    }
+//                    //If no monster, it'll go on the floor
+//                    if (monster == null)
+//                    {
+//                        putOnMonster = false;
+//                    }
 
-                    //Give it to him!
-                    monster.PickUpItem(plotItem);
-                }
+//                    //Give it to him!
+//                    monster.PickUpItem(plotItem);
+//                }
 
-                if(!putOnMonster)
-                {
-                }
-                 * */
-            }
+//                if(!putOnMonster)
+//                {
+//                }
+//                 * */
+//            }
             
-            //Potions
+//            //Potions
 
-            //Cave levels
+//            //Cave levels
 
-            for (int i = 0; i < 1; i++)
-            {
-                int totalPotions = 3 + Game.Random.Next(5);
+//            for (int i = 0; i < 1; i++)
+//            {
+//                int totalPotions = 3 + Game.Random.Next(5);
 
-                for (int j = 0; j < totalPotions; j++)
-                {
-                    int randomChance = Game.Random.Next(100);
+//                for (int j = 0; j < totalPotions; j++)
+//                {
+//                    int randomChance = Game.Random.Next(100);
 
-                    Item potion;
+//                    Item potion;
 
-                    if (randomChance < 45)
-                        potion = new Items.Potion();
-                    else if (randomChance < 65)
-                        potion = new Items.PotionToHitUp();
-                    else if (randomChance < 70)
-                        potion = new Items.PotionDamUp();
-                    else if (randomChance < 85)
-                        potion = new Items.PotionSpeedUp();
-                    else if (randomChance < 90)
-                        potion = new Items.PotionSightUp();
+//                    if (randomChance < 45)
+//                        potion = new Items.Potion();
+//                    else if (randomChance < 65)
+//                        potion = new Items.PotionToHitUp();
+//                    else if (randomChance < 70)
+//                        potion = new Items.PotionDamUp();
+//                    else if (randomChance < 85)
+//                        potion = new Items.PotionSpeedUp();
+//                    else if (randomChance < 90)
+//                        potion = new Items.PotionSightUp();
 
-                    else if (randomChance < 93)
-                        potion = new Items.PotionMajHealing();
-                    else if (randomChance < 94)
-                        potion = new Items.PotionMajDamUp();
-                    else if (randomChance < 95)
-                        potion = new Items.PotionMajSpeedUp();
-                    else if (randomChance < 96)
-                        potion = new Items.PotionMajSightUp();
-                    else if (randomChance < 97)
-                        potion = new Items.PotionSuperHealing();
-                    else if (randomChance < 98)
-                        potion = new Items.PotionSuperDamUp();
-                    else if (randomChance < 99)
-                        potion = new Items.PotionSuperToHitUp();
-                    else
-                        potion = new Items.PotionSuperSpeedUp();
+//                    else if (randomChance < 93)
+//                        potion = new Items.PotionMajHealing();
+//                    else if (randomChance < 94)
+//                        potion = new Items.PotionMajDamUp();
+//                    else if (randomChance < 95)
+//                        potion = new Items.PotionMajSpeedUp();
+//                    else if (randomChance < 96)
+//                        potion = new Items.PotionMajSightUp();
+//                    else if (randomChance < 97)
+//                        potion = new Items.PotionSuperHealing();
+//                    else if (randomChance < 98)
+//                        potion = new Items.PotionSuperDamUp();
+//                    else if (randomChance < 99)
+//                        potion = new Items.PotionSuperToHitUp();
+//                    else
+//                        potion = new Items.PotionSuperSpeedUp();
 
-                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-                }
-            }
+//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
+//                }
+//            }
 
-            for (int i = 1; i < noCaveLevels; i++)
-            {
-                int totalPotions = 3 + Game.Random.Next(5);
+//            for (int i = 1; i < noCaveLevels; i++)
+//            {
+//                int totalPotions = 3 + Game.Random.Next(5);
 
-                for (int j = 0; j < totalPotions; j++)
-                {
-                    int randomChance = Game.Random.Next(100);
+//                for (int j = 0; j < totalPotions; j++)
+//                {
+//                    int randomChance = Game.Random.Next(100);
 
-                    Item potion;
+//                    Item potion;
 
-                    if (randomChance < 45)
-                        potion = new Items.Potion();
-                    else if (randomChance < 65)
-                        potion = new Items.PotionToHitUp();
-                    else if (randomChance < 70)
-                        potion = new Items.PotionDamUp();
-                    else if (randomChance < 85)
-                        potion = new Items.PotionSpeedUp();
-                    else if (randomChance < 90)
-                        potion = new Items.PotionSightUp();
+//                    if (randomChance < 45)
+//                        potion = new Items.Potion();
+//                    else if (randomChance < 65)
+//                        potion = new Items.PotionToHitUp();
+//                    else if (randomChance < 70)
+//                        potion = new Items.PotionDamUp();
+//                    else if (randomChance < 85)
+//                        potion = new Items.PotionSpeedUp();
+//                    else if (randomChance < 90)
+//                        potion = new Items.PotionSightUp();
 
-                    else if (randomChance < 93)
-                        potion = new Items.PotionMajHealing();
-                    else if (randomChance < 94)
-                        potion = new Items.PotionMajDamUp();
-                    else if (randomChance < 95)
-                        potion = new Items.PotionMajSpeedUp();
-                    else if (randomChance < 96)
-                        potion = new Items.PotionMajSightUp();
-                    else if (randomChance < 97)
-                        potion = new Items.PotionSuperHealing();
-                    else if (randomChance < 98)
-                        potion = new Items.PotionSuperDamUp();
-                    else if (randomChance < 99)
-                        potion = new Items.PotionSuperToHitUp();
-                    else
-                        potion = new Items.PotionSuperSpeedUp();
+//                    else if (randomChance < 93)
+//                        potion = new Items.PotionMajHealing();
+//                    else if (randomChance < 94)
+//                        potion = new Items.PotionMajDamUp();
+//                    else if (randomChance < 95)
+//                        potion = new Items.PotionMajSpeedUp();
+//                    else if (randomChance < 96)
+//                        potion = new Items.PotionMajSightUp();
+//                    else if (randomChance < 97)
+//                        potion = new Items.PotionSuperHealing();
+//                    else if (randomChance < 98)
+//                        potion = new Items.PotionSuperDamUp();
+//                    else if (randomChance < 99)
+//                        potion = new Items.PotionSuperToHitUp();
+//                    else
+//                        potion = new Items.PotionSuperSpeedUp();
 
-                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-                }
-            }
+//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
+//                }
+//            }
 
-            for (int i = noRuinedLevels; i < noRuinedLevels + noCaveLevels - 2; i++)
-            {
-                int totalPotions = 3 + Game.Random.Next(5);
+//            for (int i = noRuinedLevels; i < noRuinedLevels + noCaveLevels - 2; i++)
+//            {
+//                int totalPotions = 3 + Game.Random.Next(5);
 
-                for (int j = 0; j < totalPotions; j++)
-                {
-                    int randomChance = Game.Random.Next(100);
+//                for (int j = 0; j < totalPotions; j++)
+//                {
+//                    int randomChance = Game.Random.Next(100);
 
-                    Item potion;
+//                    Item potion;
 
-                    if (randomChance < 5)
-                        potion = new Items.Potion();
-                    else if (randomChance < 10)
-                        potion = new Items.PotionToHitUp();
-                    else if (randomChance < 15)
-                        potion = new Items.PotionDamUp();
-                    else if (randomChance < 20)
-                        potion = new Items.PotionSpeedUp();
-                    else if (randomChance < 25)
-                        potion = new Items.PotionSightUp();
+//                    if (randomChance < 5)
+//                        potion = new Items.Potion();
+//                    else if (randomChance < 10)
+//                        potion = new Items.PotionToHitUp();
+//                    else if (randomChance < 15)
+//                        potion = new Items.PotionDamUp();
+//                    else if (randomChance < 20)
+//                        potion = new Items.PotionSpeedUp();
+//                    else if (randomChance < 25)
+//                        potion = new Items.PotionSightUp();
 
-                    else if (randomChance < 55)
-                        potion = new Items.PotionMajHealing();
-                    else if (randomChance < 65)
-                        potion = new Items.PotionMajDamUp();
-                    else if (randomChance < 75)
-                        potion = new Items.PotionMajSpeedUp();
-                    else if (randomChance < 85)
-                        potion = new Items.PotionMajSightUp();
-                    else if (randomChance < 93)
-                        potion = new Items.PotionSuperHealing();
-                    else if (randomChance < 95)
-                        potion = new Items.PotionSuperDamUp();
-                    else if (randomChance < 98)
-                        potion = new Items.PotionSuperToHitUp();
-                    else
-                        potion = new Items.PotionSuperSpeedUp();
+//                    else if (randomChance < 55)
+//                        potion = new Items.PotionMajHealing();
+//                    else if (randomChance < 65)
+//                        potion = new Items.PotionMajDamUp();
+//                    else if (randomChance < 75)
+//                        potion = new Items.PotionMajSpeedUp();
+//                    else if (randomChance < 85)
+//                        potion = new Items.PotionMajSightUp();
+//                    else if (randomChance < 93)
+//                        potion = new Items.PotionSuperHealing();
+//                    else if (randomChance < 95)
+//                        potion = new Items.PotionSuperDamUp();
+//                    else if (randomChance < 98)
+//                        potion = new Items.PotionSuperToHitUp();
+//                    else
+//                        potion = new Items.PotionSuperSpeedUp();
 
-                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-                }
-            }
+//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
+//                }
+//            }
 
-            for (int i = noRuinedLevels + noCaveLevels - 2; i < noRuinedLevels + noCaveLevels + noHallLevels; i++)
-            {
-                int totalPotions = 1 + Game.Random.Next(5);
+//            for (int i = noRuinedLevels + noCaveLevels - 2; i < noRuinedLevels + noCaveLevels + noHallLevels; i++)
+//            {
+//                int totalPotions = 1 + Game.Random.Next(5);
 
-                for (int j = 0; j < totalPotions; j++)
-                {
-                    int randomChance = Game.Random.Next(100);
+//                for (int j = 0; j < totalPotions; j++)
+//                {
+//                    int randomChance = Game.Random.Next(100);
 
-                    Item potion;
+//                    Item potion;
 
-                    if (randomChance < 5)
-                        potion = new Items.Potion();
-                    else if (randomChance < 7)
-                        potion = new Items.PotionToHitUp();
-                    else if (randomChance < 9)
-                        potion = new Items.PotionDamUp();
-                    else if (randomChance < 11)
-                        potion = new Items.PotionSpeedUp();
-                    else if (randomChance < 14)
-                        potion = new Items.PotionSightUp();
+//                    if (randomChance < 5)
+//                        potion = new Items.Potion();
+//                    else if (randomChance < 7)
+//                        potion = new Items.PotionToHitUp();
+//                    else if (randomChance < 9)
+//                        potion = new Items.PotionDamUp();
+//                    else if (randomChance < 11)
+//                        potion = new Items.PotionSpeedUp();
+//                    else if (randomChance < 14)
+//                        potion = new Items.PotionSightUp();
 
-                    else if (randomChance < 35)
-                        potion = new Items.PotionMajHealing();
-                    else if (randomChance < 40)
-                        potion = new Items.PotionMajDamUp();
-                    else if (randomChance < 45)
-                        potion = new Items.PotionMajSpeedUp();
-                    else if (randomChance < 50)
-                        potion = new Items.PotionMajSightUp();
-                    else if (randomChance < 70)
-                        potion = new Items.PotionSuperHealing();
-                    else if (randomChance < 80)
-                        potion = new Items.PotionSuperDamUp();
-                    else if (randomChance < 90)
-                        potion = new Items.PotionSuperToHitUp();
-                    else
-                        potion = new Items.PotionSuperSpeedUp();
+//                    else if (randomChance < 35)
+//                        potion = new Items.PotionMajHealing();
+//                    else if (randomChance < 40)
+//                        potion = new Items.PotionMajDamUp();
+//                    else if (randomChance < 45)
+//                        potion = new Items.PotionMajSpeedUp();
+//                    else if (randomChance < 50)
+//                        potion = new Items.PotionMajSightUp();
+//                    else if (randomChance < 70)
+//                        potion = new Items.PotionSuperHealing();
+//                    else if (randomChance < 80)
+//                        potion = new Items.PotionSuperDamUp();
+//                    else if (randomChance < 90)
+//                        potion = new Items.PotionSuperToHitUp();
+//                    else
+//                        potion = new Items.PotionSuperSpeedUp();
 
-                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-                }
-            }
+//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
+//                }
+//            }
 
-            /*
-            //Add a few healing potions
+//            /*
+//            //Add a few healing potions
 
-            for (int i = 0; i < 10; i++)
-            {
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(level);
+//            for (int i = 0; i < 10; i++)
+//            {
+//                do
+//                {
+//                    location = dungeon.RandomWalkablePointInLevel(level);
 
-                    //May want to specify a minimum distance from staircases??? TODO
-                } while (!dungeon.AddItem(new Items.Potion(), 0, location));
+//                    //May want to specify a minimum distance from staircases??? TODO
+//                } while (!dungeon.AddItem(new Items.Potion(), 0, location));
 
                 
-            }*/
+//            }*/
         }
 
         private void PlaceItemOnLevel(Item item, int level, int onMonsterChance)

@@ -831,6 +831,43 @@ namespace RogueBasin
             }
 
         }
+
+        /// <summary>
+        /// Debug. Add an item to the dungeon. May fail if location is invalid or unwalkable
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool AddItemNoChecks(Item item, int level, Point location)
+        {
+            //Try to add a item at the requested location
+            //This may fail due to the square being inaccessable
+            try
+            {
+                Map creatureLevel = levels[level];
+
+                //Check square is accessable
+                if (!MapSquareIsWalkable(level, location))
+                {
+                    return false;
+                }
+
+                //Otherwise OK
+                item.LocationLevel = level;
+                item.LocationMap = location;
+
+                items.Add(item);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry(String.Format("AddItem: ") + ex.Message);
+                return false;
+            }
+
+        }
+
         /// <summary>
         /// Add feature to the dungeon
         /// </summary>
@@ -2888,8 +2925,54 @@ namespace RogueBasin
         /// </summary>
         internal void PlayerBackToTown()
         {
+            //Move to town
             Player.LocationLevel = 0;
             Player.LocationMap = levels[0].PCStartLocation;
+
+            //Drop all the player's equipped items
+            PutItemsInStore();
+        }
+
+
+        Point storeTL = new Point(33, 2);
+        Point storeBR = new Point(39, 3);
+
+        /// <summary>
+        /// Put all the user's items in the store
+        /// </summary>
+        public void PutItemsInStore()
+        {
+            //Drop all the items from the player.
+            //This returns them to the master list in Dungeon
+            Game.Dungeon.player.RemoveAllItems();
+                
+            //Place all the found objects in the store room
+            int xLoc = storeTL.x;
+            int yLoc = storeTL.y;
+            
+            foreach (Item item in items)
+            {
+                if (item.IsFound)
+                {
+                    item.InInventory = false;
+                    item.LocationLevel = 0;
+                    item.LocationMap = new Point(xLoc, yLoc);
+
+                    xLoc++;
+
+                    if (xLoc > storeBR.x)
+                    {
+                        yLoc++;
+                    }
+
+                    if (yLoc > storeBR.y)
+                    {
+                        //Run out of room - shouldn't happen
+                        LogFile.Log.LogEntryDebug("Run out of room in store for items!", LogDebugLevel.High);
+                        break;
+                    }
+                }
+            }
         }
 
         /// <summary>
