@@ -7,8 +7,10 @@ namespace RogueBasin.Items
     /// <summary>
     /// Plot item
     /// </summary>
-    public class Glove : Item, IEquippableItem
+    public class Glove : Item, IEquippableItem, IUseableItem
     {
+        bool usedUp;
+
         /// <summary>
         /// not used in this game
         /// </summary>
@@ -60,6 +62,42 @@ namespace RogueBasin.Items
             //Game.MessageQueue.AddMessage("Learnt Vault Backstab!");
 
             return true;
+        }
+
+        /// <summary>
+        /// For a test let the glove me useable
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public bool Use(Creature user)
+        {
+            //Currently healing is implemented as a player effect so we need to check the user is a player
+            Player player = user as Player;
+
+            //Not a player
+            if (player == null)
+            {
+                return false;
+            }
+
+            Game.MessageQueue.AddMessage("You drink the potion.");
+
+            //Apply the healing effect to the player
+            int healing = 10 + Game.Random.Next(10);
+            player.AddEffect(new PlayerEffects.Healing(player, healing));
+
+            //Add a message
+
+
+            //This uses up the potion
+            usedUp = false;
+
+            return true;
+        }
+
+        public bool UsedUp
+        {
+            get { return usedUp; }
         }
 
         /// <summary>

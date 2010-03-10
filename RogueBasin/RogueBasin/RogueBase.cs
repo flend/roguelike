@@ -363,10 +363,15 @@ namespace RogueBasin
                                     //Display currently equipped items
                                     SetPlayerEquippedItemsScreen();
                                     UpdateScreen();
-                                    DisplayEquipment();
+                                    timeAdvances = DisplayEquipment();
                                     DisablePlayerEquippedItemsScreen();
-                                    UpdateScreen();
-                                    timeAdvances = false;
+
+                                    //Using an item can break a special move sequence
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
                                     break;
 
                                     //Vi keys
@@ -1030,7 +1035,7 @@ namespace RogueBasin
             Screen.Instance.CurrentEquipment = Game.Dungeon.Player.EquipmentSlots;
             Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
             Screen.Instance.InventoryTitle = "Equipped Items";
-            Screen.Instance.InventoryInstructions = "Press (x) to exit";
+            Screen.Instance.InventoryInstructions = "Press the letter of an item to use (if useable) or (x) to exit";
         }
 
         /// <summary>
@@ -1533,27 +1538,23 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Display equipment overlay
+        /// Display equipment overlay. If any items are useable let the user select them
         /// </summary>
-        private void DisplayEquipment()
+        private bool DisplayEquipment()
         {
-            //Wait until the player presses exit
-            do
-            {
+            //User selects which item to use
+            int chosenIndex = PlayerChooseFromEquipment();
 
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+            //Player exited
+            if (chosenIndex == -1)
+                return false;
 
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
+            Inventory playerInventory = Game.Dungeon.Player.Inventory;
 
-                    char keyCode = (char)userKey.Character;
+            InventoryListing selectedGroup = playerInventory.EquipmentListing[chosenIndex];
+            int itemIndex = selectedGroup.ItemIndex[0];
 
-                    if (keyCode == 'x')
-                    {
-                        return;
-                    }
-                }
-            } while (true);
+            return Game.Dungeon.Player.UseItem(selectedGroup);
         }
 
         /// <summary>
@@ -1596,6 +1597,41 @@ namespace RogueBasin
                     }
                 }
             } while (true);
+        }
+
+        private int PlayerChooseFromEquipment() {
+
+            //Player presses a key from e-w to select an equipment listing or x to exit
+            //Check how many items are available
+            Inventory playerInventory = Game.Dungeon.Player.Inventory;
+            int numInventoryListing = playerInventory.EquipmentListing.Count;
+
+            do {
+
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+            
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR) {
+                    
+                    char keyCode = (char)userKey.Character;
+
+                    if (keyCode == 'x')
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        int charIndex = (int)keyCode - (int)'a';
+
+                        if (charIndex < 0)
+                            continue;
+
+                        if (charIndex < numInventoryListing && charIndex < 24)
+                            return charIndex;
+
+                    }
+                }
+            } while (true);
+
         }
 
         /// <summary>
