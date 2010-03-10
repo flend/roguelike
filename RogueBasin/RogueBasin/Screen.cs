@@ -56,8 +56,7 @@ namespace RogueBasin {
         Color neverSeenFOVTerrainColor;
         Color inMonsterFOVTerrainColor = ColorPresets.Blue;
 
-        Color pcColor = ColorPresets.White;
-
+        
         Color creatureColor = ColorPresets.White;
         Color itemColor = ColorPresets.Red ;
         Color featureColor = ColorPresets.White;
@@ -138,6 +137,8 @@ namespace RogueBasin {
         //Current movie
         List <MovieFrame> movieFrames;
 
+        public Color PCColor { get; set;}
+
         public static Screen Instance
         {
             get
@@ -196,6 +197,8 @@ namespace RogueBasin {
             DeathTL = new Point(1, 1);
             DeathWidth = 89;
             DeathHeight = 34;
+
+            PCColor = ColorPresets.White;
 
             trainingStatsRecord = new List<TrainStats>();
         }
@@ -535,8 +538,9 @@ namespace RogueBasin {
 
             Point PClocation = player.LocationMap;
 
-            rootConsole.ForegroundColor = pcColor;
-            rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, player.Representation);        
+            rootConsole.ForegroundColor = PCColor;
+            rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, player.Representation);
+            rootConsole.ForegroundColor = ColorPresets.White;
 
             //Draw Stats
             DrawStats(dungeon.Player);
@@ -1333,18 +1337,23 @@ namespace RogueBasin {
 
             //Draw PrincessRL specific line
 
-            string charmedString = "Chm: " + Game.Dungeon.Player.CurrentCharmedCreatures.ToString() + "/" + Game.Dungeon.Player.MaxCharmedCreatures.ToString();
+            Point charmPointOffset = new Point(20, 0);
+
+            string charmedString = "ChmMax: " + Game.Dungeon.Player.CurrentCharmedCreatures.ToString() + "/" + Game.Dungeon.Player.MaxCharmedCreatures.ToString();
             rootConsole.PrintLine(charmedString, princessStatsTopLeft.x + charmOffset.x, princessStatsTopLeft.y + charmOffset.y, LineAlignment.Left);
 
-            string calendarString = "Month: " + Game.Dungeon.GetDateMonth() + " Day: " + Game.Dungeon.GetDateDay();
-            if (Game.Dungeon.IsWeekday())
-                calendarString += " Monday";
-            else if (Game.Dungeon.IsNormalWeekend())
-                calendarString += " Saturday";
-            else if (Game.Dungeon.IsAdventureWeekend())
-                calendarString += " End of Month";
+            string charmAbilityStr = "Chm: " + Game.Dungeon.Player.CharmPoints.ToString();
+            rootConsole.PrintLine(charmAbilityStr, princessStatsTopLeft.x + charmPointOffset.x, princessStatsTopLeft.y + charmPointOffset.y, LineAlignment.Left);
 
-            rootConsole.PrintLine(calendarString, princessStatsTopLeft.x + calendarOffset.x, princessStatsTopLeft.y + calendarOffset.y, LineAlignment.Left);
+            //string calendarString = "Month: " + Game.Dungeon.GetDateMonth() + " Day: " + Game.Dungeon.GetDateDay();
+            //if (Game.Dungeon.IsWeekday())
+            //    calendarString += " Monday";
+            //else if (Game.Dungeon.IsNormalWeekend())
+            //    calendarString += " Saturday";
+            //else if (Game.Dungeon.IsAdventureWeekend())
+            //    calendarString += " End of Month";
+
+            //rootConsole.PrintLine(calendarString, princessStatsTopLeft.x + calendarOffset.x, princessStatsTopLeft.y + calendarOffset.y, LineAlignment.Left);
 
             //Draw moves line
 
@@ -1463,7 +1472,10 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare itemSquare = Game.Dungeon.Levels[item.LocationLevel].mapSquares[item.LocationMap.x, item.LocationMap.y];
 
-                Color itemColorToUse = itemColor;
+                //Use the item's colour if it has one
+                Color itemColorToUse = item.GetColour();
+
+                //Color itemColorToUse = itemColor;
 
                 if (itemSquare.InPlayerFOV)
                 {
@@ -1481,7 +1493,7 @@ namespace RogueBasin {
                 {
                     //Never in FOV
                     if (debugMode)
-                        itemColorToUse = itemColor;
+                        itemColorToUse = itemColorToUse;
                     else
                         itemColorToUse = hiddenColor;
                 }

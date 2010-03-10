@@ -62,11 +62,14 @@ namespace RogueBasin
         Flooded, //walkable
         River, //non-walkable
         Mountains, //non-walkable
+        SkeletonWall, //non-walkable
+        Volcano, //non-walkable
         Trees, //non-walkable
         Road, //walkable
         Grass, //walkable
         Literal, //no walkable
         Gravestone, //walkable
+        Rubble, //walkable
         Forest //not walkable
      }
 

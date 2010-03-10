@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class ShortSword : Item, IEquippableItem
+    public class SparklingEarrings : Item, IEquippableItem
     {
         /// <summary>
         /// not used in this game
@@ -35,7 +35,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Wielding Short Sword", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Wielding Sparkling Earrings", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -46,7 +46,7 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Wielding Short Sword");
+            Game.MessageQueue.AddMessage("You put on a pair sparkling earrings. Why isn't there a mirror nearby when you need one?");
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 
@@ -83,7 +83,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "short sword"; }
+            get { return "sparkling earrings"; }
         }
 
         /// <summary>
@@ -91,17 +91,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "short sword"; }
+            get { return "sparkling earrings"; }
         }
 
         protected override char GetRepresentation()
         {
-            return '/';
+            return '8';
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return ColorPresets.Gold;
         }
 
         public int ArmourClassModifier()

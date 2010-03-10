@@ -45,6 +45,7 @@ namespace RogueBasin
         {
             TerrainChars.Add(MapTerrain.Empty, '.');
             TerrainChars.Add(MapTerrain.Wall, '#');
+            TerrainChars.Add(MapTerrain.SkeletonWall, '8');
             TerrainChars.Add(MapTerrain.Corridor, '|');
             TerrainChars.Add(MapTerrain.Void, ' ');
             TerrainChars.Add(MapTerrain.ClosedDoor, '+');
@@ -53,8 +54,10 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Grass, ',');
             TerrainChars.Add(MapTerrain.River, '=');
             TerrainChars.Add(MapTerrain.Trees, '*');
+            TerrainChars.Add(MapTerrain.Rubble, '*');
             TerrainChars.Add(MapTerrain.Road, '-');
             TerrainChars.Add(MapTerrain.Mountains, '^');
+            TerrainChars.Add(MapTerrain.Volcano, '^');
             TerrainChars.Add(MapTerrain.Forest, '%');
             TerrainChars.Add(MapTerrain.Gravestone, '+');
         }
@@ -64,6 +67,7 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.Empty, ColorPresets.White);
             TerrainColors.Add(MapTerrain.Wall, ColorPresets.DarkSlateGray);
             TerrainColors.Add(MapTerrain.Corridor, ColorPresets.Gray);
+            TerrainColors.Add(MapTerrain.SkeletonWall, ColorPresets.BlanchedAlmond);
             TerrainColors.Add(MapTerrain.Void, ColorPresets.Black);
             TerrainColors.Add(MapTerrain.ClosedDoor, ColorPresets.DarkGoldenrod);
             TerrainColors.Add(MapTerrain.OpenDoor, ColorPresets.DarkGoldenrod);
@@ -72,9 +76,11 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.River, ColorPresets.Blue);
             TerrainColors.Add(MapTerrain.Trees, ColorPresets.DarkGreen);
             TerrainColors.Add(MapTerrain.Road, ColorPresets.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.Rubble, ColorPresets.SaddleBrown);
             TerrainColors.Add(MapTerrain.Mountains, ColorPresets.Gray);
+            TerrainColors.Add(MapTerrain.Volcano, ColorPresets.Red);
             TerrainColors.Add(MapTerrain.Forest, ColorPresets.DarkSeaGreen);
-            TerrainColors.Add(MapTerrain.Gravestone, ColorPresets.SaddleBrown);
+            TerrainColors.Add(MapTerrain.Gravestone, ColorPresets.Gray);
         }
 
         private static void SetupEquipmentSlots()

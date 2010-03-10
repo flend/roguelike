@@ -451,6 +451,13 @@ namespace RogueBasin
                                     UpdateScreen();
                                     break;
 
+                                case 'Y':
+                                    //Take me to first dungeon
+                                    Game.Dungeon.Player.LocationLevel = 18;
+                                    TeleportToDownStairs();
+                                    UpdateScreen();
+                                    break;
+
                                 case 'z':
                                     //Add a healing event on the player
                                     PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin
 {
@@ -47,6 +48,8 @@ namespace RogueBasin
     
     public abstract class Item : MapObject
     {
+        Color defaultItemColor = ColorPresets.Red;
+
         public Item()
         {
             inInventory = false;
@@ -116,5 +119,7 @@ namespace RogueBasin
         public virtual bool UseHiddenName { get { return false; } }
 
         public virtual string HiddenSuffix { get { return ""; } }
+
+        public virtual Color GetColour() { return defaultItemColor; }
     }
 }

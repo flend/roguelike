@@ -36,9 +36,17 @@ namespace RogueBasin
 
         public Map Map { get {return baseMap;} }
 
+
+        private List<MapTerrain> closedTerrainType;
+        private List<MapTerrain> openTerrainType;
+
         public MapGeneratorCave()
         {
+            closedTerrainType = new List<MapTerrain>();
+            openTerrainType = new List<MapTerrain>();
 
+            closedTerrainType.Add(MapTerrain.Wall);
+            openTerrainType.Add(MapTerrain.Empty);
         }
 
         public Map GenerateMap() {
@@ -189,7 +197,7 @@ namespace RogueBasin
                 {
                     x = Game.Random.Next(Width);
                     y = Game.Random.Next(Height);
-                } while (baseMap.mapSquares[x, y].Terrain != MapTerrain.Empty);
+                } while (!openTerrainType.Contains( baseMap.mapSquares[x, y].Terrain ));
 
                 int deltaX = Game.Random.Next(3) - 1;
                 int deltaY = Game.Random.Next(3) - 1;
@@ -198,16 +206,46 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Call before adding list of new terrain types
+        /// </summary>
+        public void ResetClosedSquareTerrainType()
+        {
+            closedTerrainType.Clear();
+        }
+
+        /// <summary>
+        /// Call before adding list of new terrain types
+        /// </summary>
+        public void ResetOpenSquareTerrainType()
+        {
+            openTerrainType.Clear();
+        }
+
+        public void SetClosedSquareTerrainType(MapTerrain type)
+        {
+            closedTerrainType.Add(type);
+        }
+
+        public void SetOpenSquareTerrainType(MapTerrain type)
+        {
+            openTerrainType.Add(type);
+        }
+
         private void SetSquareClosed(int i, int j)
         {
-            baseMap.mapSquares[i, j].Terrain = MapTerrain.Wall;
+            int noClosedTerrain = closedTerrainType.Count;
+
+            baseMap.mapSquares[i, j].Terrain = closedTerrainType[Game.Random.Next(noClosedTerrain)];
             baseMap.mapSquares[i, j].BlocksLight = true;
             baseMap.mapSquares[i, j].Walkable = false;
         }
 
         private void SetSquareOpen(int i, int j)
         {
-            baseMap.mapSquares[i, j].Terrain = MapTerrain.Empty;
+            int noOpenTerrain = openTerrainType.Count;
+
+            baseMap.mapSquares[i, j].Terrain = openTerrainType[Game.Random.Next(noOpenTerrain)];
             baseMap.mapSquares[i, j].BlocksLight = false;
             baseMap.mapSquares[i, j].Walkable = true;
         }
@@ -220,7 +258,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < Height; j++)
                 {
-                    if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Empty)
+                    if (openTerrainType.Contains(baseMap.mapSquares[i, j].Terrain))
                         totalOpen++;
                 }
             }
@@ -360,7 +398,7 @@ namespace RogueBasin
                 int x = Game.Random.Next(Width);
                 int y = Game.Random.Next(Height);
 
-                if (baseMap.mapSquares[x, y].Terrain == MapTerrain.Empty)
+                if (openTerrainType.Contains(baseMap.mapSquares[x, y].Terrain))
                 {
                     return new Point(x, y);
                 }
@@ -375,7 +413,7 @@ namespace RogueBasin
                 return;
 
             //Already dug
-            if (baseMap.mapSquares[x, y].Terrain == MapTerrain.Empty)
+            if (openTerrainType.Contains(baseMap.mapSquares[x, y].Terrain))
                 return;
 
             //Set this as open

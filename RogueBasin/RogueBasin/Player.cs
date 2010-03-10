@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin
 {
@@ -74,6 +75,11 @@ namespace RogueBasin
         public int CurrentCharmedCreatures { get; set; }
 
         /// <summary>
+        /// Combat stat calculated from training stat and items
+        /// </summary>
+        public int CharmPoints { get; set; }
+
+        /// <summary>
         /// PrincessRL has a maximum no of equipped items when using EquipItemNoSlots
         /// </summary>
         public int MaximumEquippedItems { get; set; }
@@ -88,6 +94,12 @@ namespace RogueBasin
         public int SpeedStat { get; set; }
         public int CharmStat { get; set; }
         public int MagicStat { get; set; }
+
+        public int ArmourClassAccess { get { return armourClass; }  set { armourClass = value; } }
+        public int DamageBaseAccess { get { return damageBase; } set { damageBase = value; } }
+        public int DamageModifierAccess { get { return damageModifier; } set { damageModifier = value; } }
+        public int HitModifierAccess { get { return hitModifier; } set { hitModifier = value; } }
+
 
         public Player()
         {
@@ -151,6 +163,104 @@ namespace RogueBasin
         /// </summary>
         public void CalculateCombatStats()
         {
+
+            
+            /*            
+                        armourClass = 12;
+                                        damageBase = 4;
+                                        damageModifier = 0;
+                                        hitModifier = 0;
+                                        maxHitpoints = 15;
+                                        MaxCharmedCreatures = 1;
+             */
+
+            Inventory inv = Inventory;
+
+            //Armour class
+            ArmourClassAccess = 12;
+
+            //Charm points
+            CharmPoints = CharmStat;
+
+            //Max charmed creatures
+            if (inv.ContainsItem(new Items.SparklingEarrings()))
+            {
+                MaxCharmedCreatures = 2;
+            }
+            else
+                MaxCharmedCreatures = 1;
+
+            //To Hit
+
+            int toHit;
+
+            if (AttackStat > 60)
+            {
+                toHit = (int)Math.Round((AttackStat - 60) / 30.0) + 3;
+            }
+            else
+            {
+                toHit = AttackStat / 20;
+            }
+
+            HitModifierAccess = toHit;
+
+            //Damage base
+
+            int damageBase;
+            if (AttackStat > 100)
+            {
+                damageBase = 10;
+            }
+            else if (AttackStat > 60)
+            {
+                damageBase = 8;
+            }
+            else if (AttackStat > 30)
+            {
+                damageBase = 6;
+            }
+            else
+                damageBase = 4;
+
+            DamageBaseAccess = damageBase;
+            Screen.Instance.PCColor = ColorPresets.White;
+
+            //Consider equipped clothing items (only 1 will work)
+            if (inv.ContainsItem(new Items.MetalArmour()))
+            {
+                ArmourClassAccess += 4;
+                Screen.Instance.PCColor = ColorPresets.SteelBlue;
+            }
+            else if (inv.ContainsItem(new Items.LeatherArmour()))
+            {
+                ArmourClassAccess += 2;
+                Screen.Instance.PCColor = ColorPresets.BurlyWood;
+            }
+            else if (inv.ContainsItem(new Items.PrettyDress()))
+            {
+                CharmPoints += 20;
+                Screen.Instance.PCColor = ColorPresets.BlueViolet;
+            }
+
+            //Consider equipped weapons (only 1 will work)
+            if (inv.ContainsItem(new Items.GodSword()))
+            {
+                DamageModifierAccess += 4;
+            }
+            else if (inv.ContainsItem(new Items.LongSword()))
+            {
+                DamageModifierAccess += 2;
+            }
+            else if (inv.ContainsItem(new Items.ShortSword()))
+            {
+                DamageModifierAccess += 1;
+            }
+
+
+            /*
+
+
             //Defaults (not necessary)
             armourClass = 10;
             damageBase = 4;
@@ -359,7 +469,7 @@ namespace RogueBasin
                     damageBase = equipItem.DamageBase();
                 }
             }
-
+            */
             //Check effects
 
             bool toHitEffectOn = false;

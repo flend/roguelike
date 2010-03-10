@@ -90,6 +90,25 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Do we contain an item of the same type (i.e. class)
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <returns></returns>
+        public bool ContainsItem(Item itemName)
+        {
+            foreach (Item item in items)
+            {
+                if (Object.ReferenceEquals(itemName.GetType(), item.GetType()))
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Update the listing groups
         /// </summary>
         public void RefreshInventoryListing()
