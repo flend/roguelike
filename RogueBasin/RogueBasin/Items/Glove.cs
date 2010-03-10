@@ -90,13 +90,14 @@ namespace RogueBasin.Items
 
 
             //This uses up the potion
-            usedUp = false;
+            usedUp = true;
 
             return true;
         }
 
         public bool UsedUp
         {
+            set { usedUp = value; }
             get { return usedUp; }
         }
 

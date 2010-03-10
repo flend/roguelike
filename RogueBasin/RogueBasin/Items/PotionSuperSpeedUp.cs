@@ -60,6 +60,7 @@ namespace RogueBasin.Items
 
         public bool UsedUp
         {
+            set { usedUp = value; }
             get { return usedUp; }
         }
 

@@ -19,6 +19,7 @@ namespace RogueBasin
         bool UsedUp
         {
             get;
+            set;
         }
     }
 }

@@ -909,7 +909,13 @@ namespace RogueBasin
             {
                 //Remove item from inventory and don't drop on floor
                 Inventory.RemoveItem(itemToUse);
-                Game.Dungeon.RemoveItem(itemToUse);
+                
+                //This permanently deletes it from the game
+                //Game.Dungeon.RemoveItem(itemToUse);
+
+                //If the line above is commented, the item will be returned to town. Will want to un-use it in this case
+                useableItem.UsedUp = false;
+                
             }
 
             return usedSuccessfully;
