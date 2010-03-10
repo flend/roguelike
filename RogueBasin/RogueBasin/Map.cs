@@ -65,7 +65,9 @@ namespace RogueBasin
         Trees, //non-walkable
         Road, //walkable
         Grass, //walkable
-        Literal //no walkable
+        Literal, //no walkable
+        Gravestone, //walkable
+        Forest //not walkable
      }
 
     public class MapSquare

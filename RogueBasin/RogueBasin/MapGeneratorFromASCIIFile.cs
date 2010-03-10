@@ -60,7 +60,11 @@ namespace RogueBasin
             specialChars.Add('3'); //help girl trigger
             specialChars.Add('4'); //treasure room trigger
             specialChars.Add('5'); //see corpses trigger
-            specialChars.Add('%'); //a corpse
+            specialChars.Add('6'); //see corpses trigger
+            specialChars.Add('7'); //see corpses trigger
+            specialChars.Add('8'); //see corpses trigger
+            specialChars.Add('9'); //see corpses trigger
+            //specialChars.Add('%'); //a corpse
             specialChars.Add('G'); //your friend
             specialChars.Add('Y'); //the lich
 
@@ -84,7 +88,8 @@ namespace RogueBasin
             terrainMapping.Add('*', MapTerrain.Trees);
             terrainMapping.Add('-', MapTerrain.Road);
             terrainMapping.Add('#', MapTerrain.Wall);
-            terrainMapping.Add('+', MapTerrain.ClosedDoor);
+            terrainMapping.Add('+', MapTerrain.Gravestone);
+            terrainMapping.Add('%', MapTerrain.Forest);
         }
 
         /// <summary>
@@ -264,7 +269,7 @@ namespace RogueBasin
                             thisSquare.BlocksLight = true;
                             break;
                         case MapTerrain.Trees:
-                            thisSquare.Walkable = false;
+                            thisSquare.Walkable = true;
                             thisSquare.BlocksLight = false;
                             break;
                         case MapTerrain.River:
@@ -278,6 +283,14 @@ namespace RogueBasin
                         case MapTerrain.Grass:
                             thisSquare.Walkable = true;
                             thisSquare.BlocksLight = false;
+                            break;
+                        case MapTerrain.Gravestone:
+                            thisSquare.Walkable = true;
+                            thisSquare.BlocksLight = false;
+                            break;
+                        case MapTerrain.Forest:
+                            thisSquare.Walkable = false;
+                            thisSquare.BlocksLight = true;
                             break;
                     }
                 }
@@ -337,6 +350,9 @@ namespace RogueBasin
 
                     if (specialChars.Contains(mapChar))
                     {
+
+                        bool addingSuccess = true;
+
                         switch (mapChar)
                         {
                             //PC start location is meaningless for everything except the first level
@@ -347,26 +363,41 @@ namespace RogueBasin
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.BackToSchool());
                                 break;
                             case '2':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.SpotFriend());
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon1StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '3':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.HelpFriend());
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon2StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '4':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TreasureRoom());
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon3StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '5':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.SeeCorpses());
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon4StartLevel), levelNo, new Point(i, row));
                                 break;
-                            case '%':
-                                Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
+                            case '6':
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon5StartLevel), levelNo, new Point(i, row));
                                 break;
+                            case '7':
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon6StartLevel), levelNo, new Point(i, row));
+                                break;
+                            case '8':
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon7StartLevel), levelNo, new Point(i, row));
+                                break;
+                            //case '%':
+                              //  Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
+                                //break;
                             case 'Y':
                                 Game.Dungeon.AddMonster(new Creatures.Lich(), levelNo, new Point(i, row));
                                 break;
                             case 'G':
                                 Game.Dungeon.AddMonster(new Creatures.Friend(), levelNo, new Point(i, row));
                                 break;
+                        }
+
+                        if (!addingSuccess)
+                        {
+                            LogFile.Log.LogEntry("MapGeneratorFromASCIIFile::AddMapToDungeon: Failed to add special terrain feature");
+                            throw new ApplicationException("Failed to add feature");
                         }
                     }
                 }

@@ -101,6 +101,12 @@ namespace RogueBasin
         public int Dungeon5StartLevel { get; set; }
         public int Dungeon5EndLevel { get; set; }
 
+        public int Dungeon6StartLevel { get; set; }
+        public int Dungeon6EndLevel { get; set; }
+
+        public int Dungeon7StartLevel { get; set; }
+        public int Dungeon7EndLevel { get; set; }
+
         long worldClock = 0;
 
         /// <summary>
@@ -2277,7 +2283,7 @@ namespace RogueBasin
         /// <returns></returns>
         public static bool IsTerrainWalkable(MapTerrain terrain)
         {
-            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor || terrain == MapTerrain.Grass || terrain == MapTerrain.Road)
+            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor || terrain == MapTerrain.Grass || terrain == MapTerrain.Road || terrain == MapTerrain.Gravestone || terrain == MapTerrain.Trees)
             {
                 return true;
             }

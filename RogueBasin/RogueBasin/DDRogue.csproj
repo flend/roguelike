@@ -334,4 +334,14 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\knockedout0.amf" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\trainathletics0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\traincharm0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\traincombat0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\trainmagic0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\trainmagiclibrary0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\trainmaplibrary0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\trainmaster0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\trainrest0.amf" />
+  </ItemGroup>
 </Project>

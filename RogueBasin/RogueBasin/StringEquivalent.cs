@@ -55,6 +55,8 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Trees, '*');
             TerrainChars.Add(MapTerrain.Road, '-');
             TerrainChars.Add(MapTerrain.Mountains, '^');
+            TerrainChars.Add(MapTerrain.Forest, '%');
+            TerrainChars.Add(MapTerrain.Gravestone, '+');
         }
 
         private static void SetupTerrainColors()
@@ -71,6 +73,8 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.Trees, ColorPresets.DarkGreen);
             TerrainColors.Add(MapTerrain.Road, ColorPresets.DarkGoldenrod);
             TerrainColors.Add(MapTerrain.Mountains, ColorPresets.Gray);
+            TerrainColors.Add(MapTerrain.Forest, ColorPresets.DarkSeaGreen);
+            TerrainColors.Add(MapTerrain.Gravestone, ColorPresets.SaddleBrown);
         }
 
         private static void SetupEquipmentSlots()
