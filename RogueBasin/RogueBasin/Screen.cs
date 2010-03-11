@@ -213,6 +213,39 @@ namespace RogueBasin {
         }
 
         /// <summary>
+        /// Draw a fireball effect
+        /// </summary>
+        /// <param name="sqs"></param>
+        /// <param name="color"></param>
+        public void DrawFlashSquares(List<Point> sqs, Color color)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw the screen as normal
+            Draw();
+
+            //Draw the flash overlay
+
+            foreach (Point sq in sqs)
+            {
+                rootConsole.ForegroundColor = color;
+                rootConsole.PutChar(mapTopLeft.x + sq.x, mapTopLeft.y + sq.y, '*');
+            }
+
+            rootConsole.ForegroundColor = normalForeground;
+
+            FlushConsole();
+
+            //Wait
+            TCODSystem.Sleep(200);
+
+            //Redraw
+            Draw();
+            FlushConsole();
+        }
+
+        /// <summary>
         /// Draw a flash effect of a line
         /// Start is the origin (line is not drawn here, but origin used to calculate shape of line)
         /// </summary>
@@ -251,9 +284,9 @@ namespace RogueBasin {
             else if(deltaX > 0 && deltaY > 0)
                 drawChar = '\\';
             else if(deltaY == 0)
-                drawChar = '|';
-            else if(deltaX == 0)
                 drawChar = '-';
+            else if(deltaX == 0)
+                drawChar = '|';
 
             rootConsole.ForegroundColor = color;
 

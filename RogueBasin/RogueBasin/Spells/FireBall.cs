@@ -66,6 +66,8 @@ namespace RogueBasin.Spells
                     HitMonster(player, squareContents.monster);
                 }
             }
+
+            Screen.Instance.DrawFlashSquares(splashSquares, ColorPresets.Red);
             
             return true;
         }
