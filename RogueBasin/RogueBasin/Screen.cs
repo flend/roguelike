@@ -213,6 +213,67 @@ namespace RogueBasin {
         }
 
         /// <summary>
+        /// Draw a flash effect of a line
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="color"></param>
+        public void DrawFlashLine(Point start, Point end, Color color)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw the screen as normal
+            Draw();
+
+            //Draw the line overlay
+
+            //Cast a line between the start and end
+            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
+            int currentX = start.x;
+            int currentY = start.y;
+
+            int deltaX = end.x - start.x;
+            int deltaY = end.y - start.y;
+
+            char drawChar = '-';
+
+            if(deltaX < 0 && deltaY < 0)
+                drawChar = '\\';
+            else if(deltaX < 0 && deltaY > 0)
+                drawChar = '/';
+            else if(deltaX > 0 && deltaY < 0)
+                drawChar = '/';
+            else if(deltaX > 0 && deltaY > 0)
+                drawChar = '\\';
+            else if(deltaX == 0)
+                drawChar = '|';
+            else if(deltaY == 0)
+                drawChar = '-';
+
+            bool finishedLine;
+
+            rootConsole.ForegroundColor = color;
+            do {
+
+                rootConsole.PutChar(mapTopLeft.x + currentX, mapTopLeft.y + currentY, drawChar);
+                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+            } while (finishedLine == false);
+
+            rootConsole.ForegroundColor = normalForeground;
+
+            FlushConsole();
+
+            //Wait
+            TCODSystem.Sleep(200);
+
+            //Redraw
+            Draw();
+            FlushConsole();
+        }
+
+        /// <summary>
         /// Call after all drawing is complete to output onto screen
         /// </summary>
         public void FlushConsole()

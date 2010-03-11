@@ -26,6 +26,8 @@ namespace RogueBasin.Spells
 
             int x, y;
 
+            spellRange = 5 + player.MagicStat / 30;
+
             do {
                 loopCount++;
                 //Random location in dungeon
@@ -52,7 +54,7 @@ namespace RogueBasin.Spells
                 //Otherwise OK
                 endLoop = true;
                 
-            } while(loopCount < 1000);
+            } while(!endLoop && loopCount < 1000);
 
             //Sanity check
             if(loopCount == 1000) {
@@ -60,7 +62,9 @@ namespace RogueBasin.Spells
                 Game.MessageQueue.AddMessage("You feel rooted to the spot.");
                 return false;
             }
+
             //Otherwise move there
+            Game.MessageQueue.AddMessage("Blink! The world shifts momentarily.");
             dungeon.MovePCAbsoluteSameLevel(new Point(x, y));
 
             return true;

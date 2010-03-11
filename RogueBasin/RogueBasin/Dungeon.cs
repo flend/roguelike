@@ -467,6 +467,9 @@ namespace RogueBasin
             spells.Add(new Spells.MagicMissile());
             spells.Add(new Spells.MageArmour());
             spells.Add(new Spells.Blink());
+            spells.Add(new Spells.SlowMonster());
+            spells.Add(new Spells.FireLance());
+            spells.Add(new Spells.FireBall());
 
             foreach (Spell move in spells)
             {

@@ -200,12 +200,17 @@
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="Spell.cs" />
     <Compile Include="Spells\Blink.cs" />
+    <Compile Include="Spells\FireBall.cs" />
+    <Compile Include="Spells\FireLance.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Spells\MageArmour.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Spells\MagicMissile.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Spells\SlowMonster.cs" />
     <Compile Include="StringEquivalent.cs" />
     <Compile Include="MonsterThrowAndRunAI.cs" />
     <Compile Include="TownGeneratorFromASCIIFile.cs" />

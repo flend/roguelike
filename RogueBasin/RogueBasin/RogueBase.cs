@@ -1148,7 +1148,7 @@ namespace RogueBasin
             if (success)
             {
                 //Only do this for certain spells
-                if (toCast.GetType() != typeof(Spells.MagicMissile))
+                if (toCast.GetType() != typeof(Spells.MagicMissile) && toCast.GetType() != typeof(Spells.FireLance))
                     return success;
 
                 lastSpell = toCast;
@@ -1205,10 +1205,9 @@ namespace RogueBasin
             
             //Try to cast the spell
 
-            //Just for sanity, check the creature is still alive
-            //Could autotarget the next one?
-            //OK if we just have combat spells
-            if (!lastSpellTarget.Alive)
+            //Try the last target
+
+            if (!lastSpellTarget.Alive || Game.Dungeon.Player.LocationLevel != lastSpellTarget.LocationLevel)
             {
                 //Find the next closest creature (need to check charm / passive status)
                 
@@ -1216,8 +1215,22 @@ namespace RogueBasin
 
                 if (lastSpellTarget == null)
                 {
-                    Game.MessageQueue.AddMessage("No new target for spell.");
+                    Game.MessageQueue.AddMessage("No target in sight.");
                     LogFile.Log.LogEntryDebug("No new target for quick cast", LogDebugLevel.Medium);
+                    return false;
+                }
+
+                //Check they are in FOV
+
+                //Get the FOV from Dungeon (this also updates the map creature FOV state)
+                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+                //Is the target in FOV
+                if (!currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
+                {
+                    LogFile.Log.LogEntryDebug("Nearest creature out of FOV", LogDebugLevel.Medium);
+                    Game.MessageQueue.AddMessage("No target in sight.");
+
                     return false;
                 }
 
@@ -1857,7 +1870,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 2;
+            LogFile.Log.DebugLevel = 3;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();

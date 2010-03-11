@@ -21,7 +21,7 @@ namespace RogueBasin.Spells
             if (!currentFOV.CheckTileFOV(target.x, target.y))
             {
                 LogFile.Log.LogEntryDebug("Target out of FOV", LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("Can't target out of sight.");
+                Game.MessageQueue.AddMessage("Target is out of sight.");
 
                 return false;
             }
@@ -70,7 +70,63 @@ namespace RogueBasin.Spells
                 //Apply damage
                 player.ApplyDamageToMonster(squareContents.monster, damage);
                 
-                //Subtract MP
+                //Graphical effect
+
+                int deltaX = target.x - player.LocationMap.x;
+                int deltaY = target.y - player.LocationMap.y;
+
+                int unitX = 0;
+                int unitY = 0;
+
+                if (deltaX < 0 && deltaY < 0)
+                {
+                    unitX = -1;
+                    unitY = -1;
+                }
+                else if (deltaX < 0 && deltaY > 0)
+                {
+                    unitX = -1;
+                    unitY = 1;
+                }
+                else if (deltaX > 0 && deltaY < 0)
+                {
+                    unitX = 1;
+                    unitY = -1;
+                }
+                else if (deltaX > 0 && deltaY > 0)
+                {
+                    unitX = 1;
+                    unitY = 1;
+                }
+                else if (deltaX == 0 && deltaY > 0)
+                {
+                    unitX = 0;
+                    unitY = 1;
+                }
+                else if (deltaX == 0 && deltaY < 0)
+                {
+                    unitX = 0;
+                    unitY = -1;
+                }
+                else if (deltaY == 0 && deltaX < 0)
+                {
+                    unitX = -1;
+                    unitY = 0;
+                }
+                else if (deltaY == 0 && deltaX > 0)
+                {
+                    unitX = 1;
+                    unitY = 0;
+                }
+
+                //Draw a graphical effect
+                int startX = player.LocationMap.x + unitX;
+                int startY = player.LocationMap.y + unitY;
+
+                int endY = target.y - unitY;
+                int endX = target.x - unitX;
+
+                Screen.Instance.DrawFlashLine(new Point(startX, startY), new Point(endX, endY), ColorPresets.Violet);
 
                 return true;
             }

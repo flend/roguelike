@@ -23,7 +23,7 @@ namespace RogueBasin.MonsterEffects
         public override void OnStart()
         {
             LogFile.Log.LogEntry("SlowDown started");
-            Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " looks stunned!");
+            Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " slows!");
 
             monster.Speed -= speedEffect;
         }
