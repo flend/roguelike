@@ -22,6 +22,11 @@ namespace RogueBasin.SpecialMoves
         Monster target = null; //doesn't need to be serialized
         Point monsterSquare = new Point(-1, -1);
 
+        /// <summary>
+        /// No squares we are next to, use for damage and hit bonus
+        /// </summary>
+        int noCardinals;
+
         public CloseQuarters()
         {
             moveCounter = 0;
@@ -62,7 +67,7 @@ namespace RogueBasin.SpecialMoves
                 //Are 3 cardinal directions around the monster unwalkable?
                 Point monsterLoc = squareContents.monster.LocationMap;
 
-                int noCardinals = 0;
+                noCardinals = 0;
 
                 if (!dungeon.MapSquareIsWalkable(squareContents.monster.LocationLevel, new Point(monsterLoc.x - 1, monsterLoc.y)))
                     noCardinals++;
@@ -76,11 +81,11 @@ namespace RogueBasin.SpecialMoves
                 if (!dungeon.MapSquareIsWalkable(squareContents.monster.LocationLevel, new Point(monsterLoc.x, monsterLoc.y - 1)))
                     noCardinals++;
 
-                if (noCardinals > 2)
+                if (noCardinals > 1)
                 {
                     target = squareContents.monster;
                     moveCounter = 1;
-                    LogFile.Log.LogEntryDebug("CloseQuarters OK", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("CloseQuarters OK. No cards: " + noCardinals, LogDebugLevel.Low);
                     return true;
                 }
                 LogFile.Log.LogEntryDebug("CloseQuarters: not enough cardinals", LogDebugLevel.Low);
@@ -104,7 +109,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("CloseQuarters!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 2 , 0, 2, 0);
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, noCardinals, 0, noCardinals, 0);
 
             moveCounter = 0;
 
