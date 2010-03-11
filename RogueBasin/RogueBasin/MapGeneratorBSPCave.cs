@@ -23,7 +23,10 @@ namespace RogueBasin
         Point upStaircase;
         Point downStaircase;
 
-        MapTerrain wallType;
+        /// <summary>
+        /// Alternative wall types. Normal walls get converted into these in a final pass
+        /// </summary>
+        List<MapTerrain> wallType;
 
         public MapGeneratorBSPCave()
         {
@@ -31,7 +34,7 @@ namespace RogueBasin
             possibleEmptyTypes = new List<MapTerrain>();
             possibleEmptyTypes.Add(MapTerrain.Corridor);
 
-            wallType = MapTerrain.Wall;
+            wallType = new List<MapTerrain>();
         }
 
         static MapGeneratorBSPCave()
@@ -39,9 +42,14 @@ namespace RogueBasin
             rand = new Random();
         }
 
-        public void SetWallType(MapTerrain terrain)
+        public void ClearWallType()
         {
-            wallType = terrain;
+            wallType.Clear();
+        }
+
+        public void AddWallType(MapTerrain terrain)
+        {
+            wallType.Add(terrain);
         }
 
         public void AddRubbleType(MapTerrain terrain)
@@ -168,7 +176,7 @@ namespace RogueBasin
             }
 
             //Do a final pass to convert Wall into something more exciting
-            if (wallType != MapTerrain.Wall)
+            if (wallType.Count > 0)
             {
                 for (int i = 0; i < width; i++)
                 {
@@ -176,7 +184,7 @@ namespace RogueBasin
                     {
                         if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Wall)
                         {
-                            baseMap.mapSquares[i, j].Terrain = wallType;
+                            baseMap.mapSquares[i, j].Terrain = wallType[rand.Next(wallType.Count)];
                         }
                     }
                 }

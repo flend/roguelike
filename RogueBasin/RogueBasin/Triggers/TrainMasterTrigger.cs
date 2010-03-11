@@ -31,11 +31,13 @@ namespace RogueBasin.Triggers
             //Otherwise in the right place
 
             //If this is the first time, give some flavour text - to do
-            string movieName = "";
-            
-            if(movieName != "")
-                Screen.Instance.PlayMovie(movieName, false);
+            if (!Triggered)
+            {
+                string movieName = "trainmaster";
 
+                if (movieName != "")
+                    Screen.Instance.PlayMovie(movieName, false);
+            }
             Triggered = true;
 
             Dungeon dungeon = Game.Dungeon;

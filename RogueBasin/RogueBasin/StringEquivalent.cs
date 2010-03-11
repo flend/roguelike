@@ -46,6 +46,7 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Empty, '.');
             TerrainChars.Add(MapTerrain.Wall, '#');
             TerrainChars.Add(MapTerrain.SkeletonWall, '8');
+            TerrainChars.Add(MapTerrain.SkeletonWallWhite, '8');
             TerrainChars.Add(MapTerrain.Corridor, '|');
             TerrainChars.Add(MapTerrain.Void, ' ');
             TerrainChars.Add(MapTerrain.ClosedDoor, '+');
@@ -68,6 +69,7 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.Wall, ColorPresets.DarkSlateGray);
             TerrainColors.Add(MapTerrain.Corridor, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.SkeletonWall, ColorPresets.BlanchedAlmond);
+            TerrainColors.Add(MapTerrain.SkeletonWallWhite, ColorPresets.GhostWhite);
             TerrainColors.Add(MapTerrain.Void, ColorPresets.Black);
             TerrainColors.Add(MapTerrain.ClosedDoor, ColorPresets.DarkGoldenrod);
             TerrainColors.Add(MapTerrain.OpenDoor, ColorPresets.DarkGoldenrod);

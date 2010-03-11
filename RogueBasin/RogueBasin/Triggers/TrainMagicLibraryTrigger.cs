@@ -10,6 +10,7 @@ namespace RogueBasin.Triggers
     /// </summary>
     public class TrainMagicLibraryTrigger : DungeonSquareTrigger
     {
+       
         /// <summary>
         /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
         /// </summary>
@@ -31,11 +32,13 @@ namespace RogueBasin.Triggers
             //Otherwise in the right place
 
             //If this is the first time, give some flavour text - to do
-            string movieName = "";
-            
-            if(movieName != "")
-                Screen.Instance.PlayMovie(movieName, false);
+            if (!Triggered)
+            {
+                string movieName = "trainmagiclibrary";
 
+                if (movieName != "")
+                    Screen.Instance.PlayMovie(movieName, false);
+            }
             Triggered = true;
 
             Dungeon dungeon = Game.Dungeon;

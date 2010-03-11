@@ -10,6 +10,11 @@ namespace RogueBasin.Triggers
     /// </summary>
     public class TrainCombatTrigger : TrainTrigger
     {
+        protected override string GetIntroMovieName()
+        {
+            return "traincombat";
+        }
+
         protected override string GetTrainingTypeString()
         {
             return "Training: Combat practice";

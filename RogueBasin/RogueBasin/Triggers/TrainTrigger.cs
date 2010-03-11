@@ -11,9 +11,9 @@ namespace RogueBasin.Triggers
     public abstract class TrainTrigger : DungeonSquareTrigger
     {
         /// <summary>
-        /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
+        /// Have we been seen before?
         /// </summary>
-        public static bool Triggered { get; set; }
+        public bool Triggered { get; set; }
 
         public TrainTrigger()
         {
@@ -52,15 +52,16 @@ namespace RogueBasin.Triggers
             //Otherwise in the right place
 
             //If this is the first time, give some flavour text
-            string movieName = GetIntroMovieName();
-            
-            if(movieName != "")
-                Screen.Instance.PlayMovie(movieName, false);
+            if (Triggered == false)
+            {
+                string movieName = GetIntroMovieName();
 
+                if (movieName != "")
+                    Screen.Instance.PlayMovie(movieName, false);
+            }
 
             Triggered = true;
 
-            
             //We run the training regime depending on the inherited class
 
             Dungeon dungeon = Game.Dungeon;

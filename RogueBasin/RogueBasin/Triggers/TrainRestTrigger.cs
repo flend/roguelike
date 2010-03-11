@@ -10,6 +10,11 @@ namespace RogueBasin.Triggers
     /// </summary>
     public class TrainRestTrigger : TrainTrigger
     {
+        protected override string GetIntroMovieName()
+        {
+            return "trainrest";
+        }
+
         protected override string GetTrainingTypeString()
         {
             return "Training: Day off!";

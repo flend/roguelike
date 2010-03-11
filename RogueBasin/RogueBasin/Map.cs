@@ -63,6 +63,7 @@ namespace RogueBasin
         River, //non-walkable
         Mountains, //non-walkable
         SkeletonWall, //non-walkable
+        SkeletonWallWhite, //non-walkable
         Volcano, //non-walkable
         Trees, //non-walkable
         Road, //walkable

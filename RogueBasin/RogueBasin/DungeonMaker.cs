@@ -1316,6 +1316,7 @@ namespace RogueBasin
             //PC starts at start location
             dungeon.Player.LocationLevel = 0;
             dungeon.Player.LocationMap = asciiTown.GetPCStartLocation();
+            dungeon.AddTrigger(0, asciiTown.GetPCStartLocation(), new Triggers.SchoolEntryTrigger());
 
             //level 1 - wilderness
 
@@ -1539,7 +1540,8 @@ namespace RogueBasin
             //level 18
             //top level has special up staircase leading to wilderness
 
-           ruinedGen.SetWallType(MapTerrain.SkeletonWall);
+           ruinedGen.AddWallType(MapTerrain.SkeletonWall);
+           ruinedGen.AddWallType(MapTerrain.SkeletonWallWhite);
            ruinedGen.RubbleChance = 5;
            ruinedGen.AddRubbleType(MapTerrain.Gravestone);
 

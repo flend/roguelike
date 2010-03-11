@@ -207,6 +207,7 @@
     </Compile>
     <Compile Include="Triggers\HelpFriend.cs" />
     <Compile Include="Triggers\LichBattle.cs" />
+    <Compile Include="Triggers\SchoolEntryTrigger.cs" />
     <Compile Include="Triggers\SeeCorpses.cs" />
     <Compile Include="Triggers\SpotFriend.cs" />
     <Compile Include="Triggers\TownToWilderness.cs" />
@@ -359,5 +360,11 @@
     <EmbeddedResource Include="bin\Debug\movies\trainmaplibrary0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\trainmaster0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\trainrest0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\enterschool0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\enterschool1.amf" />
   </ItemGroup>
 </Project>
