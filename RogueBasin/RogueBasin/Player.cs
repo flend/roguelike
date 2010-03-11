@@ -155,7 +155,7 @@ namespace RogueBasin
 
             //Debug
             AttackStat = 10;
-            MagicStat = 20;
+            MagicStat = 100;
         }
 
         private void SetupInitialHP()

@@ -1205,45 +1205,58 @@ namespace RogueBasin
             
             //Try to cast the spell
 
+            //Get the FOV from Dungeon (this also updates the map creature FOV state)
+            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
             //Try the last target
-
-            if (!lastSpellTarget.Alive || Game.Dungeon.Player.LocationLevel != lastSpellTarget.LocationLevel)
+            if (lastSpellTarget.Alive && Game.Dungeon.Player.LocationLevel == lastSpellTarget.LocationLevel)
             {
-                //Find the next closest creature (need to check charm / passive status)
-                
-                lastSpellTarget = Game.Dungeon.FindClosestHostileCreature(Game.Dungeon.Player);
-
-                if (lastSpellTarget == null)
-                {
-                    Game.MessageQueue.AddMessage("No target in sight.");
-                    LogFile.Log.LogEntryDebug("No new target for quick cast", LogDebugLevel.Medium);
-                    return false;
-                }
-
-                //Check they are in FOV
-
-                //Get the FOV from Dungeon (this also updates the map creature FOV state)
-                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-
+                //Are they still in sight?
                 //Is the target in FOV
-                if (!currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
+                if (currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
                 {
-                    LogFile.Log.LogEntryDebug("Nearest creature out of FOV", LogDebugLevel.Medium);
-                    Game.MessageQueue.AddMessage("No target in sight.");
-
-                    return false;
+                    //If so, attack
+                    LogFile.Log.LogEntryDebug("Recast at last target", LogDebugLevel.Medium);
+                    return RecastSpellCastAtCreature(lastSpell, lastSpellTarget);
                 }
-
-                Game.MessageQueue.AddMessage("Targetting closest creature.");
-                LogFile.Log.LogEntryDebug("New target for quick cast", LogDebugLevel.Medium);
+                
+                //If not, new target, fall through
             }
 
+            //Find the next closest creature (need to check charm / passive status)
+
+            lastSpellTarget = Game.Dungeon.FindClosestHostileCreature(Game.Dungeon.Player);
+
+            if (lastSpellTarget == null)
+            {
+                Game.MessageQueue.AddMessage("No target in sight.");
+                LogFile.Log.LogEntryDebug("No new target for quick cast", LogDebugLevel.Medium);
+                return false;
+            }
+
+            //Check they are in FOV
+            if (!currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
+            {
+                LogFile.Log.LogEntryDebug("No targets in FOV", LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("No target in sight.");
+
+                return false;
+            }
+
+            //Otherwise target the nearest creature
+
+            Game.MessageQueue.AddMessage("Targetting closest creature.");
+            LogFile.Log.LogEntryDebug("New target for quick cast", LogDebugLevel.Medium);            
+
+            return RecastSpellCastAtCreature(lastSpell, lastSpellTarget);
+        }
+
+        private bool RecastSpellCastAtCreature(Spell spell, Creature target)
+        {
             //Convert the stored Creature last target into a square
-            Point spellTargetSq = new Point(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y);
+            Point spellTargetSq = new Point(target.LocationMap.x, target.LocationMap.y);
 
-            bool success = Game.Dungeon.Player.CastSpell(lastSpell, spellTargetSq);
-
-            return success;
+            return Game.Dungeon.Player.CastSpell(spell, spellTargetSq);
         }
 
         /// <summary>

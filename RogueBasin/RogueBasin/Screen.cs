@@ -214,6 +214,7 @@ namespace RogueBasin {
 
         /// <summary>
         /// Draw a flash effect of a line
+        /// Start is the origin (line is not drawn here, but origin used to calculate shape of line)
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
@@ -230,9 +231,12 @@ namespace RogueBasin {
 
             //Cast a line between the start and end
             TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
+
             int currentX = start.x;
             int currentY = start.y;
 
+            bool finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+            
             int deltaX = end.x - start.x;
             int deltaY = end.y - start.y;
 
@@ -246,20 +250,19 @@ namespace RogueBasin {
                 drawChar = '/';
             else if(deltaX > 0 && deltaY > 0)
                 drawChar = '\\';
-            else if(deltaX == 0)
-                drawChar = '|';
             else if(deltaY == 0)
+                drawChar = '|';
+            else if(deltaX == 0)
                 drawChar = '-';
 
-            bool finishedLine;
-
             rootConsole.ForegroundColor = color;
-            do {
+
+            while(!finishedLine) {
 
                 rootConsole.PutChar(mapTopLeft.x + currentX, mapTopLeft.y + currentY, drawChar);
                 finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
 
-            } while (finishedLine == false);
+            }
 
             rootConsole.ForegroundColor = normalForeground;
 

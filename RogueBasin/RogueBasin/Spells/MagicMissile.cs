@@ -70,63 +70,16 @@ namespace RogueBasin.Spells
                 //Apply damage
                 player.ApplyDamageToMonster(squareContents.monster, damage);
                 
+
                 //Graphical effect
+                /*
+                TCODLineDrawing.InitLine(player.LocationMap.x, player.LocationMap.y, target.x, target.y);
+                int firstXStep = 0;
+                int firstYStep = 0;
 
-                int deltaX = target.x - player.LocationMap.x;
-                int deltaY = target.y - player.LocationMap.y;
+                TCODLineDrawing.StepLine(ref firstXStep, ref firstYStep);*/
 
-                int unitX = 0;
-                int unitY = 0;
-
-                if (deltaX < 0 && deltaY < 0)
-                {
-                    unitX = -1;
-                    unitY = -1;
-                }
-                else if (deltaX < 0 && deltaY > 0)
-                {
-                    unitX = -1;
-                    unitY = 1;
-                }
-                else if (deltaX > 0 && deltaY < 0)
-                {
-                    unitX = 1;
-                    unitY = -1;
-                }
-                else if (deltaX > 0 && deltaY > 0)
-                {
-                    unitX = 1;
-                    unitY = 1;
-                }
-                else if (deltaX == 0 && deltaY > 0)
-                {
-                    unitX = 0;
-                    unitY = 1;
-                }
-                else if (deltaX == 0 && deltaY < 0)
-                {
-                    unitX = 0;
-                    unitY = -1;
-                }
-                else if (deltaY == 0 && deltaX < 0)
-                {
-                    unitX = -1;
-                    unitY = 0;
-                }
-                else if (deltaY == 0 && deltaX > 0)
-                {
-                    unitX = 1;
-                    unitY = 0;
-                }
-
-                //Draw a graphical effect
-                int startX = player.LocationMap.x + unitX;
-                int startY = player.LocationMap.y + unitY;
-
-                int endY = target.y - unitY;
-                int endX = target.x - unitX;
-
-                Screen.Instance.DrawFlashLine(new Point(startX, startY), new Point(endX, endY), ColorPresets.Violet);
+                Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(target.x, target.y), ColorPresets.Violet);
 
                 return true;
             }

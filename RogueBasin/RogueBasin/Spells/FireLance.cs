@@ -36,6 +36,7 @@ namespace RogueBasin.Spells
             int deltaX = targetSquare.x - player.LocationMap.x;
             int deltaY = targetSquare.y - player.LocationMap.y;
 
+            /*
             int unitX = 0;
             int unitY = 0;
 
@@ -78,7 +79,7 @@ namespace RogueBasin.Spells
             {
                 unitX = 1;
                 unitY = 0;
-            }
+            }*/
 
             //Extend this line until it hits an edge
             int finalX = player.LocationMap.x;
@@ -90,11 +91,11 @@ namespace RogueBasin.Spells
                 finalY += deltaY;
             }
 
-            //Cast a line between the start and end
-            TCODLineDrawing.InitLine(targetSquare.x, targetSquare.y, finalX, finalY);
-            
-            int currentX = targetSquare.x;
-            int currentY = targetSquare.y;
+            //int currentX = targetSquare.x;
+           // int currentY = targetSquare.y;
+
+            int lastX = targetSquare.x;
+            int lastY = targetSquare.y;
 
             bool finishedLine = false;
 
@@ -102,21 +103,37 @@ namespace RogueBasin.Spells
 
             Game.MessageQueue.AddMessage("Fire Lance!");
 
-            do {
+            //Cast in 2 stages. The first stage from us to target 1. The next stage from target 1 to the end of the map
+
+            TCODLineDrawing.InitLine(player.LocationMap.x, player.LocationMap.y, finalX, finalY);
+            int firstXStep = 0;
+            int firstYStep = 0;
+
+            TCODLineDrawing.StepLine(ref firstXStep, ref firstYStep);
+
+            int currentX = firstXStep;
+            int currentY = firstYStep;
+
+            //Cast a line between the start and end
+            TCODLineDrawing.InitLine(currentX, currentY, targetSquare.x, targetSquare.y);
+
+            do
+            {
 
                 LogFile.Log.LogEntryDebug("FireLance: Attacking square: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
 
                 //Finish conditions - run out of line or hit wall (should always happen)
 
-                if(!dungeon.MapSquareIsWalkable(player.LocationLevel, new Point(currentX, currentY))) {
+                if (!dungeon.MapSquareIsWalkable(player.LocationLevel, new Point(currentX, currentY)))
+                {
 
                     //Finish
-                    LogFile.Log.LogEntryDebug("Finished line at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
                     break;
                 }
 
                 //Is there a monster here? If so, then attack it
-                
+
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(currentX, currentY));
 
                 if (squareContents.monster != null)
@@ -124,21 +141,64 @@ namespace RogueBasin.Spells
                     HitMonster(player, squareContents.monster);
                 }
 
+                lastX = currentX; lastY = currentY;
+
                 finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
 
-                if(finishedLine) {
-                    LogFile.Log.LogEntryDebug("Finished line at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+                if (finishedLine)
+                {
+                    LogFile.Log.LogEntryDebug("Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
                 }
-            } while(finishedLine == false);
+            } while (finishedLine == false);
 
-            //Draw a graphical effect
-            int startX = player.LocationMap.x + unitX;
-            int startY = player.LocationMap.y + unitY;
 
-            int endY = currentY - unitY;
-            int endX = currentX - unitX;
+            //The second stage from one square away from target 1 to the end
 
-            Screen.Instance.DrawFlashLine(new Point(startX, startY), new Point(endX, endY), ColorPresets.Yellow);
+            TCODLineDrawing.InitLine(targetSquare.x, targetSquare.y, finalX, finalY);
+            TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+            //Cast a line between the start and end
+            TCODLineDrawing.InitLine(currentX, currentY, finalX, finalY);
+
+            do
+            {
+
+                LogFile.Log.LogEntryDebug("FireLance: Attacking square: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+
+                //Finish conditions - run out of line or hit wall (should always happen)
+
+                if (!dungeon.MapSquareIsWalkable(player.LocationLevel, new Point(currentX, currentY)))
+                {
+
+                    //Finish
+                    LogFile.Log.LogEntryDebug("Finished line 2 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+                    break;
+                }
+
+                //Is there a monster here? If so, then attack it
+
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(currentX, currentY));
+
+                if (squareContents.monster != null)
+                {
+                    HitMonster(player, squareContents.monster);
+                }
+
+                lastX = currentX; lastY = currentY;
+
+                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+                if (finishedLine)
+                {
+                    LogFile.Log.LogEntryDebug("Finished line 2 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+                }
+            } while (finishedLine == false);
+
+            //Find the first square away from us
+            //Cast the ray from here
+
+
+            Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(lastX, lastY), ColorPresets.Yellow);
 
             return true;
             
