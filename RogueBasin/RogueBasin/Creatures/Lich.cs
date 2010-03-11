@@ -139,5 +139,15 @@ namespace RogueBasin.Creatures
         {
             return ColorPresets.Yellow;
         }
+
+        /// <summary>
+        /// A creature has attacked us (possibly from out of our view range). Don't just sit there passively
+        /// </summary>
+        public override void NotifyAttackByCreature(Creature creature)
+        {
+            AIState = SimpleAIStates.Pursuit;
+            currentTarget = creature;
+
+        }
     }
 }

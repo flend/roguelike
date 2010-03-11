@@ -79,5 +79,13 @@ namespace RogueBasin.Creatures
         {
             return 1;
         }
+
+        /// <summary>
+        /// A creature has attacked us (possibly from out of our view range). Don't just sit there passively
+        /// </summary>
+        public override void NotifyAttackByCreature(Creature creature)
+        {
+          //Do nothing
+        }
     }
 }

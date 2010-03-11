@@ -34,8 +34,42 @@ namespace RogueBasin.Spells
             {
                 LogFile.Log.LogEntryDebug("Firing magic missile", LogDebugLevel.Medium);
                 Game.MessageQueue.AddMessage("Magic Missile!");
-                player.AttackMonster(squareContents.monster);
+                
+                //Attack the monster
 
+                //Magic missile always hits
+
+                //Damage is based on Magic Stat (and creature's magic resistance)
+
+                //Damage base
+                
+                int damageBase;
+
+                if (player.MagicStat > 100)
+                {
+                    damageBase = 6;
+                }
+                else if (player.MagicStat > 60)
+                {
+                    damageBase = 5;
+                }
+                else if (player.MagicStat > 30)
+                {
+                    damageBase = 4;
+                }
+                else
+                    damageBase = 3;
+
+                //Damage done is just the base
+
+                int damage = Utility.DamageRoll(damageBase);
+
+                string combatResultsMsg = "PvM Magic Missile: Dam: 1d" + damageBase + " -> " + damage;
+                LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                //Apply damage
+                player.ApplyDamageToMonster(squareContents.monster, damage);
+                
                 //Subtract MP
 
                 return true;
@@ -48,7 +82,7 @@ namespace RogueBasin.Spells
 
         public override int MPCost()
         {
-            return 2;
+            return 1;
         }
 
         public override bool NeedsTarget()

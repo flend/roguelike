@@ -2997,6 +2997,10 @@ namespace RogueBasin
             player.Hitpoints = player.HitpointsStat;
             player.MaxHitpoints = player.HitpointsStat;
 
+            //Magic points
+            player.MaxMagicPoints = player.MagicStat * 2;
+            player.MagicPoints = player.MagicStat * 2;
+
             //Set all the stats that can be set at any time
             player.CalculateCombatStats();
 

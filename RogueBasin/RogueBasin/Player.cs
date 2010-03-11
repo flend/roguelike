@@ -66,6 +66,16 @@ namespace RogueBasin
         int hitModifier;
 
         /// <summary>
+        /// Magic casting points
+        /// </summary>
+        int magicPoints;
+
+        /// <summary>
+        /// Maximum magic points
+        /// </summary>
+        int maxMagicPoints;
+
+        /// <summary>
         /// Number of times we get knocked out
         /// </summary>
         public int NumDeaths { get; set; }
@@ -136,13 +146,16 @@ namespace RogueBasin
         {
             MaxHitpointsStat = 50;
             HitpointsStat = 50;
+            MagicPoints = 10;
+            MaxMagicPoints = 10;
             SpeedStat = 10;
             AttackStat = 10;
             CharmStat = 2;
             MagicStat = 2;
 
             //Debug
-            AttackStat = 1000;
+            AttackStat = 10;
+            MagicStat = 20;
         }
 
         private void SetupInitialHP()
@@ -159,6 +172,30 @@ namespace RogueBasin
         {
             Inventory.RemoveAllItems();
             CurrentEquippedItems = 0;
+        }
+
+        public int MagicPoints
+        {
+            get
+            {
+                return magicPoints;
+            }
+            set
+            {
+                magicPoints = value;
+            }
+        }
+
+        public int MaxMagicPoints
+        {
+            get
+            {
+                return maxMagicPoints;
+            }
+            set
+            {
+                maxMagicPoints = value;
+            }
         }
 
         /// <summary>
@@ -592,7 +629,7 @@ namespace RogueBasin
         /// <returns></returns>
 
 
-        int toHitRoll; //just so we can use it in debug
+        //int toHitRoll; //just so we can use it in debug
 
         private int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
         {
@@ -607,7 +644,7 @@ namespace RogueBasin
                 attackDamageBase = damageBase;
 
             int monsterAC = monster.ArmourClass() + ACmod;
-            toHitRoll = Utility.d20() + attackToHit;
+            int toHitRoll = Utility.d20() + attackToHit;
 
             if (toHitRoll >= monsterAC)
             {
@@ -616,6 +653,10 @@ namespace RogueBasin
 
                 return totalDamage;
             }
+            string combatResultsMsg = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier;
+
+//            string combatResultsMsg = "PvM Attack ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
+            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Miss
             return 0;
@@ -624,11 +665,24 @@ namespace RogueBasin
         public bool CastSpell(Spell toCast, Point target)
         {
             //Check MP
+            if (toCast.MPCost() > MagicPoints)
+            {
+                Game.MessageQueue.AddMessage("Not enough MP! " + toCast.MPCost().ToString() + " required.");
+                LogFile.Log.LogEntryDebug("Not enough MP to cast " + toCast.SpellName(), LogDebugLevel.Medium);
+
+                return false;
+            }
 
             //Actually cast the spell
             bool success = toCast.DoSpell(target);
 
             //Remove MP if successful
+            if (success)
+            {
+                MagicPoints -= toCast.MPCost();
+                if (MagicPoints < 0)
+                    MagicPoints = 0;
+            }
 
             return success;
         }
@@ -657,15 +711,30 @@ namespace RogueBasin
             if (monster.RecalculateCombatStatsRequired)
                 monster.CalculateCombatStats();
 
+            //Calculate damage from a normal attack
+
+            int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
+
+            return ApplyDamageToMonster(monster, damage);
+        }
+
+        /// <summary>
+        /// Apply damage to monster and deal with death
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="damage"></param>
+        /// <returns></returns>
+        public CombatResults ApplyDamageToMonster(Monster monster, int damage)
+        {
             //Set the attacked by marker
             monster.LastAttackedBy = this;
 
             //Was this a passive creature? It loses that flag
-            if(monster.Passive)
+            if (monster.Passive)
                 monster.UnpassifyCreature();
 
-            //Calculate damage from a normal attack
-            int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
+            //Notify the creature that it has been hit
+            monster.NotifyAttackByCreature(this);
 
             //Do we hit the monster?
             if (damage > 0)
@@ -695,28 +764,30 @@ namespace RogueBasin
                     Kills.Add(monster);
 
                     //Debug string
-                    string combatResultsMsg = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     string playerMsg = "You knocked out the " + monster.SingleDescription + ".";
                     Game.MessageQueue.AddMessage(playerMsg);
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
+                    LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
 
                     return CombatResults.DefenderDied;
                 }
 
                 //Debug string
-                string combatResultsMsg3 = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
                 string playerMsg2 = "You hit the " + monster.SingleDescription + ".";
                 Game.MessageQueue.AddMessage(playerMsg2);
-                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+                string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
+                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
 
                 return CombatResults.NeitherDied;
             }
 
             //Miss
-            string combatResultsMsg2 = "PvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
+
             string playerMsg3 = "You missed the " + monster.SingleDescription + ".";
             Game.MessageQueue.AddMessage(playerMsg3);
-            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+            string debugMsg3 = "MHP: " + monster.Hitpoints + "->" + monster.Hitpoints + " missed";
+            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
         }

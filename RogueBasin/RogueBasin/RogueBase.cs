@@ -1136,16 +1136,20 @@ namespace RogueBasin
             //Store details for a recast
             lastSpell = toCast;
 
-            //Spell target is the creature (monster or PC)
-            
-            SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
+            //If we successfully cast, store the target
+            if (success)
+            {
+                //Spell target is the creature (monster or PC)
 
-            //Is there a creature here? If so, store
-            if (squareContents.monster != null)
-                lastSpellTarget = squareContents.monster;
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
 
-            if (squareContents.player != null)
-                lastSpellTarget = squareContents.player;
+                //Is there a creature here? If so, store
+                if (squareContents.monster != null)
+                    lastSpellTarget = squareContents.monster;
+
+                if (squareContents.player != null)
+                    lastSpellTarget = squareContents.player;
+            }
 
             //Time only goes past if successfully cast
             return success;
@@ -1277,6 +1281,10 @@ namespace RogueBasin
             //Start on the nearest creature
             Creature closeCreature = Game.Dungeon.FindClosestCreature(player);
 
+            //If no nearby creatures, start on the player
+            if (closeCreature == null)
+                closeCreature = Game.Dungeon.Player;
+
             //Get the FOV from Dungeon (this also updates the map creature FOV state)
             TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
 
@@ -1364,7 +1372,7 @@ namespace RogueBasin
 
                     int level = Game.Dungeon.Player.LocationLevel;
 
-                    if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y > Game.Dungeon.Levels[level].height)
+                    if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
                         continue;
 
                     //Otherwise OK

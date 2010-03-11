@@ -66,6 +66,7 @@ namespace RogueBasin {
         Color charmBackground = ColorPresets.DarkKhaki;
         Color passiveBackground = ColorPresets.DarkMagenta;
         Color normalBackground = ColorPresets.Black;
+        Color normalForeground = ColorPresets.White;
 
         Color targetBackground = ColorPresets.White;
         Color targetForeground = ColorPresets.Black;
@@ -159,18 +160,6 @@ namespace RogueBasin {
 
             msgDisplayTopLeft = new Point(0, 1);
             msgDisplayNumLines = 3;
-
-            statsDisplayTopLeft = new Point(7, 31);
-
-            hitpointsOffset = new Point(6, 0);
-            maxHitpointsOffset = new Point(12, 0);
-            overdriveHitpointsOffset = new Point(16, 0);
-            armourOffset = new Point(22, 0);
-            damageOffset = new Point(29, 0);          
-            speedOffset = new Point(64, 0);
-            playerLevelOffset = new Point(49, 0);
-            worldTickOffset = new Point(69, 0);
-            levelOffset = new Point(56, 0);
 
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(75, 5);
@@ -590,6 +579,7 @@ namespace RogueBasin {
             rootConsole.PutChar(xLoc, yLoc, charAtPoint);
 
             rootConsole.BackgroundColor = normalBackground;
+            rootConsole.ForegroundColor = normalForeground;
 
         }
 
@@ -1280,15 +1270,36 @@ namespace RogueBasin {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
+            statsDisplayTopLeft = new Point(2, 31);
+
+            hitpointsOffset = new Point(2, 0);
+            maxHitpointsOffset = new Point(9, 0);
+            overdriveHitpointsOffset = new Point(16, 0);
+            armourOffset = new Point(27, 0);
+            damageOffset = new Point(34, 0);
+            speedOffset = new Point(71, 0);
+            playerLevelOffset = new Point(55, 0);
+            worldTickOffset = new Point(69, 0);
+            levelOffset = new Point(63, 0);
+            Point magicOffset = new Point(14, 0);
+            Point maxMagicOffset = new Point(21, 0);
+
             //Draw status line
 
             string hitpointsString = "HP: " + player.Hitpoints.ToString();
             string maxHitpointsString = "/" + player.MaxHitpoints.ToString();
-            string overdriveHitpointsString = "(" + player.OverdriveHitpoints.ToString() + ")";
+            //string overdriveHitpointsString = "(" + player.OverdriveHitpoints.ToString() + ")";
 
             rootConsole.PrintLine(hitpointsString, statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
             rootConsole.PrintLine(maxHitpointsString, statsDisplayTopLeft.x + maxHitpointsOffset.x, statsDisplayTopLeft.y + maxHitpointsOffset.y, LineAlignment.Left);
-            rootConsole.PrintLine(overdriveHitpointsString, statsDisplayTopLeft.x + overdriveHitpointsOffset.x, statsDisplayTopLeft.y + overdriveHitpointsOffset.y, LineAlignment.Left);
+            //rootConsole.PrintLine(overdriveHitpointsString, statsDisplayTopLeft.x + overdriveHitpointsOffset.x, statsDisplayTopLeft.y + overdriveHitpointsOffset.y, LineAlignment.Left);
+
+
+            string mpString = "MP: " + player.MagicPoints.ToString();
+            string maxMPString = "/" + player.MaxMagicPoints.ToString();
+
+            rootConsole.PrintLine(mpString, statsDisplayTopLeft.x + magicOffset.x, statsDisplayTopLeft.y + magicOffset.y, LineAlignment.Left);
+            rootConsole.PrintLine(maxMPString, statsDisplayTopLeft.x + maxMagicOffset.x, statsDisplayTopLeft.y + maxMagicOffset.y, LineAlignment.Left);
 
             string armourString = "AC: " + player.ArmourClass().ToString();
 
