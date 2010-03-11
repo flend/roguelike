@@ -1342,6 +1342,10 @@ namespace RogueBasin
             //level 2
             //top level has special up staircase leading to wilderness
 
+            caveGen.DoFillInPass = true;
+            caveGen.FillInChance = 15;
+            caveGen.FillInTerrain = MapTerrain.Rubble;
+
             caveGen.GenerateMap();
 
             int levelNo = dungeon.AddMap(caveGen.Map);
@@ -1387,6 +1391,8 @@ namespace RogueBasin
 
             //level 6
             //top level has special up staircase leading to wilderness
+
+            caveGen.DoFillInPass = false;
 
             caveGen.GenerateMap();
 
@@ -1533,9 +1539,9 @@ namespace RogueBasin
             //level 18
             //top level has special up staircase leading to wilderness
 
-            ruinedGen.SetWallType(MapTerrain.SkeletonWall);
-            ruinedGen.RubbleChance = 5;
-            ruinedGen.AddRubbleType(MapTerrain.Gravestone);
+           ruinedGen.SetWallType(MapTerrain.SkeletonWall);
+           ruinedGen.RubbleChance = 5;
+           ruinedGen.AddRubbleType(MapTerrain.Gravestone);
 
             Map ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
             levelNo = dungeon.AddMap(ruinedLevel);

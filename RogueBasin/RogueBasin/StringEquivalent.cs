@@ -76,7 +76,7 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.River, ColorPresets.Blue);
             TerrainColors.Add(MapTerrain.Trees, ColorPresets.DarkGreen);
             TerrainColors.Add(MapTerrain.Road, ColorPresets.DarkGoldenrod);
-            TerrainColors.Add(MapTerrain.Rubble, ColorPresets.SaddleBrown);
+            TerrainColors.Add(MapTerrain.Rubble, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.Mountains, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.Volcano, ColorPresets.Red);
             TerrainColors.Add(MapTerrain.Forest, ColorPresets.DarkSeaGreen);

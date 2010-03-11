@@ -102,7 +102,7 @@ namespace RogueBasin
                 {
                     if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Void)
                     {
-                        baseMap.mapSquares[i, j].Terrain = wallType;
+                        baseMap.mapSquares[i, j].Terrain = MapTerrain.Wall;
                     }
                 }
             }
@@ -167,10 +167,25 @@ namespace RogueBasin
                 }
             }
 
+            //Do a final pass to convert Wall into something more exciting
+            if (wallType != MapTerrain.Wall)
+            {
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Wall)
+                        {
+                            baseMap.mapSquares[i, j].Terrain = wallType;
+                        }
+                    }
+                }
+            }
+
             return baseMap;
         }
 
-        public int RubbleChance = 16;
+        public int RubbleChance = 100;
 
         /// <summary>
         /// Used by dig to open up a square
@@ -179,7 +194,7 @@ namespace RogueBasin
         /// <param name="j"></param>
         private void SetSquareOpen(int i, int j)
         {
-            if (rand.Next(100) < RubbleChance)
+            if (rubbleType.Count > 0 && rand.Next(100) < RubbleChance)
             {
                 baseMap.mapSquares[i, j].Terrain = rubbleType[rand.Next(rubbleType.Count)];
             }
@@ -255,8 +270,8 @@ namespace RogueBasin
                         {
                             //We need to check for the surrounding walls as well as the gap to avoid multi-corridors having multi-doors
                             if (baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Empty &&
-                                baseMap.mapSquares[i - 1, j].Terrain == wallType &&
-                                baseMap.mapSquares[i + 1, j].Terrain == wallType)
+                                baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
                             {
                                 if (Game.Random.Next(doorChanceMax) < closedDoorChance)
                                 {
@@ -274,8 +289,8 @@ namespace RogueBasin
                         if (j + 1 < height && i - 1 >= 0 && i + 1 < width)
                         {
                             if (baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Empty &&
-                                baseMap.mapSquares[i - 1, j].Terrain == wallType &&
-                                baseMap.mapSquares[i + 1, j].Terrain == wallType)
+                                baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Wall)
                             {
                                 if (Game.Random.Next(doorChanceMax) < closedDoorChance)
                                 {
@@ -294,8 +309,8 @@ namespace RogueBasin
                         if (i - 1 >= 0 && j - 1 >= 0 && j + 1 < height)
                         {
                             if (baseMap.mapSquares[i - 1, j].Terrain == MapTerrain.Empty &&
-                                baseMap.mapSquares[i, j + 1].Terrain == wallType &&
-                                baseMap.mapSquares[i, j - 1].Terrain == wallType)
+                                baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
                             {
                                 if (Game.Random.Next(doorChanceMax) < closedDoorChance)
                                 {
@@ -314,8 +329,8 @@ namespace RogueBasin
                         if (i + 1 < width && j - 1 >= 0 && j + 1 < height)
                         {
                             if (baseMap.mapSquares[i + 1, j].Terrain == MapTerrain.Empty &&
-                                baseMap.mapSquares[i, j + 1].Terrain == wallType &&
-                                baseMap.mapSquares[i, j - 1].Terrain == wallType)
+                                baseMap.mapSquares[i, j + 1].Terrain == MapTerrain.Wall &&
+                                baseMap.mapSquares[i, j - 1].Terrain == MapTerrain.Wall)
                             {
                                 if (Game.Random.Next(doorChanceMax) < closedDoorChance)
                                 {
@@ -355,42 +370,42 @@ namespace RogueBasin
                         if (tx >= 0 && ty >= 0 &&
                             baseMap.mapSquares[tx, ty].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[tx, ty].Terrain = wallType;
+                            baseMap.mapSquares[tx, ty].Terrain = MapTerrain.Wall;
                         }
                         if (ty >= 0 &&
                             baseMap.mapSquares[i, ty].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[i, ty].Terrain = wallType;
+                            baseMap.mapSquares[i, ty].Terrain = MapTerrain.Wall;
                         }
                         if (ty >= 0 && bx < width &&
                             baseMap.mapSquares[bx, ty].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[bx, ty].Terrain = wallType;
+                            baseMap.mapSquares[bx, ty].Terrain = MapTerrain.Wall;
                         }
                         if (tx >= 0 &&
                             baseMap.mapSquares[tx, j].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[tx, j].Terrain = wallType;
+                            baseMap.mapSquares[tx, j].Terrain = MapTerrain.Wall;
                         }
                         if (bx < width &&
                             baseMap.mapSquares[bx, j].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[bx, j].Terrain = wallType;
+                            baseMap.mapSquares[bx, j].Terrain = MapTerrain.Wall;
                         }
                         if (by < height && tx >= 0 &&
                             baseMap.mapSquares[tx, by].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[tx, by].Terrain = wallType;
+                            baseMap.mapSquares[tx, by].Terrain = MapTerrain.Wall;
                         }
                         if (by < height &&
                             baseMap.mapSquares[i, by].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[i, by].Terrain = wallType;
+                            baseMap.mapSquares[i, by].Terrain = MapTerrain.Wall;
                         }
                         if (by < height && bx < width &&
                             baseMap.mapSquares[bx, by].Terrain == MapTerrain.Void)
                         {
-                            baseMap.mapSquares[bx, by].Terrain = wallType;
+                            baseMap.mapSquares[bx, by].Terrain = MapTerrain.Wall;
                         }
                     }
                 }

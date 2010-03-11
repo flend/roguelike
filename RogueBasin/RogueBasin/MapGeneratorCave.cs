@@ -34,6 +34,10 @@ namespace RogueBasin
 
         Point pcStartLocation;
 
+        public bool DoFillInPass = false;
+        public int FillInChance = 33;
+        public MapTerrain FillInTerrain = MapTerrain.Empty;
+
         public Map Map { get {return baseMap;} }
 
 
@@ -157,6 +161,23 @@ namespace RogueBasin
 
             } while (badMap);
 
+            //If requested do a final pass and fill in with some interesting terrain
+            //Fill map with walls
+            if (DoFillInPass)
+            {
+                for (int i = 0; i < Width; i++)
+                {
+                    for (int j = 0; j < Height; j++)
+                    {
+                        if (openTerrainType.Contains(baseMap.mapSquares[i, j].Terrain))
+                        {
+                            if (Game.Random.Next(100) < FillInChance)
+                                baseMap.mapSquares[i, j].Terrain = FillInTerrain;
+                        }
+                    }
+                }
+            }
+            
             //Caves are not guaranteed connected
             baseMap.GuaranteedConnected = false;
 
