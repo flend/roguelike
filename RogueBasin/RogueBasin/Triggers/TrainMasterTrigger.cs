@@ -54,36 +54,32 @@ namespace RogueBasin.Triggers
                 //Learn combat moves
 
                 
+                List <SpecialMove> notLearntMoves = dungeon.SpecialMoves.FindAll(x => !x.Known);
 
+                //Have we learnt all the moves
+                if (notLearntMoves.Count == 0)
+                {
+                    Game.MessageQueue.AddMessage("Gumball has no more moves to teach you.");
+                    return false;
+                }
 
-                int[] moveRequiredCombat = { 20, 30, 40, 60, 80, 100 };
-                SpecialMove[] movesToLearn = { new SpecialMoves.CloseQuarters(), new SpecialMoves.ChargeAttack(), new SpecialMoves.VaultBackstab(), new SpecialMoves.OpenSpaceAttack(), new SpecialMoves.BurstOfSpeed(), new SpecialMoves.MultiAttack() };
+                //Random check sequence
+                int[] checkSequence = new int[notLearntMoves.Count];
 
-                //Try to learn all unlearn moves. Stop if we succeed
+                for (int i = 0; i < checkSequence.Length; i++)
+                {
+                    checkSequence[i] = Game.Random.Next(checkSequence.Length);
+                }
+
+                //Actually do the check
 
                 int playerCombatStat = dungeon.Player.AttackStat;
 
-                for (int i = 0; i < moveRequiredCombat.Length; i++)
+                for (int i = 0; i < checkSequence.Length; i++)
                 {
-                    bool moveKnown = false;
+                    SpecialMove thisMove = notLearntMoves[checkSequence[i]];
 
-                    //Check if we know this special move already
-                    
-                    foreach(SpecialMove move in dungeon.SpecialMoves) {
-                        //Same move
-                        if(Object.ReferenceEquals(move.GetType(), movesToLearn[i].GetType())) {
-                            if (move.Known)
-                            {
-                                moveKnown = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (moveKnown)
-                        continue;
-
-                    int combatDiff = moveRequiredCombat[i] - playerCombatStat;
+                    int combatDiff = thisMove.GetRequiredCombat() - playerCombatStat;
                     if (combatDiff < 0)
                         combatDiff = 0;
 
@@ -91,18 +87,23 @@ namespace RogueBasin.Triggers
                     
                     int roll = Game.Random.Next(20);
 
-                    LogFile.Log.LogEntryDebug("Chance to learn : " + movesToLearn[i].MoveName() + " roll: " + roll.ToString() + " " + chanceToLearn.ToString() + "/20" , LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug("Chance to learn : " + thisMove.MoveName() + " roll: " + roll.ToString() + " " + chanceToLearn.ToString() + "/20", LogDebugLevel.Medium);
 
                     if (roll < chanceToLearn)
                     {
                         //Learn move
-                        Game.Dungeon.LearnMove(movesToLearn[i]);
+                        //prob won't work cos of type checking
+                        //Game.Dungeon.LearnMove(thisMove);
+
+
+                        thisMove.Known = true;
+                        LogFile.Log.LogEntryDebug("Player learnt move: " + thisMove.MoveName(), LogDebugLevel.Medium);
 
                         //Play movie
                         Screen.Instance.PlayMovie("succeededToLearnMove", false);
-                        Screen.Instance.PlayMovie(movesToLearn[i].MovieRoot(), false);
+                        Screen.Instance.PlayMovie(thisMove.MovieRoot(), false);
 
-                        Game.MessageQueue.AddMessage("You learn a new combat move: " + movesToLearn[i].MoveName());
+                        Game.MessageQueue.AddMessage("You learn a new combat move: " + thisMove.MoveName());
                         dungeon.MoveToNextDate();
                         //Teleport the user back to the start location
                         Game.Dungeon.PlayerBackToTown();
