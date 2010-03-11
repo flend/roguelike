@@ -164,7 +164,10 @@
     <Compile Include="PlayerEffectSimpleDuration.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PlayerEffects\DamageUp.cs" />
+    <Compile Include="PlayerEffects\ArmourUp.cs" />
+    <Compile Include="PlayerEffects\DamageUp.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PlayerEffects\MultiDamage.cs" />
     <Compile Include="PlayerEffects\Healing.cs" />
     <Compile Include="Items\PotionSightUp.cs" />
@@ -196,7 +199,13 @@
     <Compile Include="SpecialMoves\WallPush.cs" />
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="Spell.cs" />
-    <Compile Include="Spells\MagicMissile.cs" />
+    <Compile Include="Spells\Blink.cs" />
+    <Compile Include="Spells\MageArmour.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Spells\MagicMissile.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="StringEquivalent.cs" />
     <Compile Include="MonsterThrowAndRunAI.cs" />
     <Compile Include="TownGeneratorFromASCIIFile.cs" />

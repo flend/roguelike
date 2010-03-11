@@ -969,6 +969,26 @@ namespace RogueBasin
             //Should be done in effect itself or optionally each time we attack
         }
 
+        /// <summary>
+        /// Is this class of effect currently active?
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <returns></returns>
+        public bool IsEffectActive(Effect lookForEffect)
+        {
+            foreach (Effect effect in effects)
+            {
+                if (Object.ReferenceEquals(effect.GetType(), lookForEffect.GetType()))
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+        }
+
+
         protected override char GetRepresentation()
         {
             return '@';

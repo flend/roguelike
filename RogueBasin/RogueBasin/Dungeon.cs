@@ -465,7 +465,8 @@ namespace RogueBasin
         private void SetupSpells()
         {
             spells.Add(new Spells.MagicMissile());
-            //specialMoves.Add(new SpecialMoves.CloseQuarters());
+            spells.Add(new Spells.MageArmour());
+            spells.Add(new Spells.Blink());
 
             foreach (Spell move in spells)
             {
@@ -1336,7 +1337,7 @@ namespace RogueBasin
         /// </summary>
         internal bool MovePCAbsoluteSameLevel(Point location)
         {
-            player.LocationMap = location;
+            MovePCAbsolute(player.LocationLevel, location.x, location.y);
 
             return true;
         }

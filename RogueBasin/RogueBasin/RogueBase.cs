@@ -1110,6 +1110,15 @@ namespace RogueBasin
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
             
+            //No casting in town or wilderness
+            if (player.LocationLevel < 2)
+            {
+                Game.MessageQueue.AddMessage("You want to save your spells for the dungeons.");
+                LogFile.Log.LogEntryDebug("Attempted to cast spell outside of dungeon", LogDebugLevel.Low);
+
+                return false;
+            }
+
             //Get the user's selection
             Spell toCast = SelectSpell();
 
@@ -1120,7 +1129,7 @@ namespace RogueBasin
             //Get a target if needed
 
             Point target = new Point();
-            bool targettingSuccess = false;
+            bool targettingSuccess = true;
 
             if (toCast.NeedsTarget())
             {
@@ -1134,11 +1143,16 @@ namespace RogueBasin
             bool success = Game.Dungeon.Player.CastSpell(toCast, target);
 
             //Store details for a recast
-            lastSpell = toCast;
-
+           
             //If we successfully cast, store the target
             if (success)
             {
+                //Only do this for certain spells
+                if (toCast.GetType() != typeof(Spells.MagicMissile))
+                    return success;
+
+                lastSpell = toCast;
+
                 //Spell target is the creature (monster or PC)
 
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
@@ -1161,6 +1175,15 @@ namespace RogueBasin
         /// <returns></returns>
         private bool RecastSpell()
         {
+            //No casting in town or wilderness
+            if (Game.Dungeon.Player.LocationLevel < 2)
+            {
+                Game.MessageQueue.AddMessage("You want to save your spells for the dungeons.");
+                LogFile.Log.LogEntryDebug("Attempted to cast spell outside of dungeon", LogDebugLevel.Low);
+
+                return false;
+            }
+
             //Do we have a valid spell?
             if (lastSpell == null)
             {

@@ -47,18 +47,18 @@ namespace RogueBasin.Spells
 
                 if (player.MagicStat > 100)
                 {
-                    damageBase = 6;
+                    damageBase = 8;
                 }
                 else if (player.MagicStat > 60)
                 {
-                    damageBase = 5;
+                    damageBase = 6;
                 }
                 else if (player.MagicStat > 30)
                 {
-                    damageBase = 4;
+                    damageBase = 5;
                 }
                 else
-                    damageBase = 3;
+                    damageBase = 4;
 
                 //Damage done is just the base
 
