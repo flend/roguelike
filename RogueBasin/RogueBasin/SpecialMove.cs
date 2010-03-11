@@ -18,7 +18,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.MultiAttack))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.BurstOfSpeed))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.CloseQuarters))]
-    public class SpecialMove
+    public abstract class SpecialMove
     {
         /// <summary>
         /// Has the player learnt this move yet?
@@ -84,5 +84,11 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         public virtual int CurrentStage() { return 0; }
+
+        /// <summary>
+        /// Current stage in move
+        /// </summary>
+        /// <returns></returns>
+        public abstract int GetRequiredCombat();
     }
 }

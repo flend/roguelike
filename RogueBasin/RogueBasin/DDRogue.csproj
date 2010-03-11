@@ -367,4 +367,11 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\enterschool1.amf" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\chargeattack4.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\failedToLearnMove0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\succeededToLearnMove0.amf" />
+  </ItemGroup>
 </Project>

@@ -241,7 +241,7 @@ namespace RogueBasin
                         if (featureChars.Contains(mapChar))
                             thisTerrain = MapTerrain.Empty;
                         else if (specialChars.Contains(mapChar))
-                            thisTerrain = MapTerrain.Empty;
+                            thisTerrain = MapTerrain.OpenDoor;
                         //OK it's not a special, it's a literal
                         else
                         {

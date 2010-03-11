@@ -51,19 +51,81 @@ namespace RogueBasin.Triggers
             }
             else if(dungeon.IsNormalWeekend()) {
 
-                //To do
+                //Learn combat moves
+
+                
+
+
+                int[] moveRequiredCombat = { 20, 30, 40, 60, 80, 100 };
+                SpecialMove[] movesToLearn = { new SpecialMoves.CloseQuarters(), new SpecialMoves.ChargeAttack(), new SpecialMoves.VaultBackstab(), new SpecialMoves.OpenSpaceAttack(), new SpecialMoves.BurstOfSpeed(), new SpecialMoves.MultiAttack() };
+
+                //Try to learn all unlearn moves. Stop if we succeed
+
+                int playerCombatStat = dungeon.Player.AttackStat;
+
+                for (int i = 0; i < moveRequiredCombat.Length; i++)
+                {
+                    bool moveKnown = false;
+
+                    //Check if we know this special move already
+                    
+                    foreach(SpecialMove move in dungeon.SpecialMoves) {
+                        //Same move
+                        if(Object.ReferenceEquals(move.GetType(), movesToLearn[i].GetType())) {
+                            if (move.Known)
+                            {
+                                moveKnown = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (moveKnown)
+                        continue;
+
+                    int combatDiff = moveRequiredCombat[i] - playerCombatStat;
+                    if (combatDiff < 0)
+                        combatDiff = 0;
+
+                    int chanceToLearn = 20 - combatDiff;
+                    
+                    int roll = Game.Random.Next(20);
+
+                    LogFile.Log.LogEntryDebug("Chance to learn : " + movesToLearn[i].MoveName() + " roll: " + roll.ToString() + " " + chanceToLearn.ToString() + "/20" , LogDebugLevel.Medium);
+
+                    if (roll < chanceToLearn)
+                    {
+                        //Learn move
+                        Game.Dungeon.LearnMove(movesToLearn[i]);
+
+                        //Play movie
+                        Screen.Instance.PlayMovie("succeededToLearnMove", false);
+                        Screen.Instance.PlayMovie(movesToLearn[i].MovieRoot(), false);
+
+                        Game.MessageQueue.AddMessage("You learn a new combat move: " + movesToLearn[i].MoveName());
+                        dungeon.MoveToNextDate();
+                        //Teleport the user back to the start location
+                        Game.Dungeon.PlayerBackToTown();
+
+                        return true;
+                    }
+
+                }
+
+                //If we get here we haven't learnt a move
+
+                Screen.Instance.PlayMovie("failedToLearnMove", false);
+                dungeon.MoveToNextDate();
+                //Teleport the user back to the start location
+                Game.Dungeon.PlayerBackToTown();
+
+                return true;
             }
             else {
 
                 //Adventure weekend
                 Game.MessageQueue.AddMessage("Surely there's something better to do this weekend!");
             }
-
-            if (doesTraining)
-            {
-                RunTrainingUI();
-            }
-
             return true;
         }
 

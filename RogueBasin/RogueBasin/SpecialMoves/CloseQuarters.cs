@@ -152,5 +152,10 @@ namespace RogueBasin.SpecialMoves
         {
             return moveCounter;
         }
+
+        public override int GetRequiredCombat()
+        {
+            return 20;
+        }
     }
 }

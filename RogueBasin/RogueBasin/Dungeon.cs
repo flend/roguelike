@@ -442,12 +442,12 @@ namespace RogueBasin
         private void SetupSpecialMoves()
         {
             specialMoves.Add(new SpecialMoves.ChargeAttack());
-            specialMoves.Add(new SpecialMoves.StunBox());
-            specialMoves.Add(new SpecialMoves.WallPush());
+            //specialMoves.Add(new SpecialMoves.StunBox());
+            //specialMoves.Add(new SpecialMoves.WallPush());
             specialMoves.Add(new SpecialMoves.WallVault());
             specialMoves.Add(new SpecialMoves.VaultBackstab());
             specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
-            specialMoves.Add(new SpecialMoves.Evade());
+            //specialMoves.Add(new SpecialMoves.Evade());
             specialMoves.Add(new SpecialMoves.MultiAttack());
             specialMoves.Add(new SpecialMoves.BurstOfSpeed());
             specialMoves.Add(new SpecialMoves.CloseQuarters());
@@ -2549,6 +2549,8 @@ namespace RogueBasin
         /// </summary>
         internal void LearnMove(SpecialMove moveToLearn)
         {
+            LogFile.Log.LogEntryDebug("Player learnt move: " + moveToLearn.MoveName(), LogDebugLevel.Medium);
+
             foreach (SpecialMove move in specialMoves)
             {
                 if (move.GetType() == moveToLearn.GetType())

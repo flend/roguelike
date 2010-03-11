@@ -206,7 +206,6 @@ namespace RogueBasin {
         //Setup the screen
         public void InitialSetup()
         {
-            //Note that 
 
             CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
             RootConsole.Width = Width;
