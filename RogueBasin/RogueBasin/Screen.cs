@@ -501,6 +501,9 @@ namespace RogueBasin {
                         rootConsole.PutChar(frameTL.x + coffset, frameTL.y + offset, c);
                         coffset++;
                     }
+
+                    //Reset flash color at the end of the line
+                    rootConsole.ForegroundColor = normalMovieColor;
                 }
                 else
                 {

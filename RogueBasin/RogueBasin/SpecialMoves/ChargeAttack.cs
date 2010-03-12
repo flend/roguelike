@@ -38,7 +38,7 @@ namespace RogueBasin.SpecialMoves
             }
 
             //First move
-
+            /*
             if (moveCounter == 0)
             {
                 //Must be no direction
@@ -52,13 +52,13 @@ namespace RogueBasin.SpecialMoves
                 LogFile.Log.LogEntryDebug("Charge started", LogDebugLevel.Medium);
 
                 return true;
-            }
+            }*/
 
             //Second move
 
             //Any direction without a monster. Subsequent moves needs to be in the same direction
 
-            if (moveCounter == 1)
+            if (moveCounter == 0)
             {
                 //Needs to be no monster in the direction of movement
 
@@ -82,7 +82,8 @@ namespace RogueBasin.SpecialMoves
                 yDelta = locationAfterMove.y - player.LocationMap.y;
 
                 moveCounter++;
-
+                
+                LogFile.Log.LogEntryDebug("Charge started", LogDebugLevel.Medium);
                 LogFile.Log.LogEntryDebug("Charge move: " + moveCounter, LogDebugLevel.Medium);
                 return true;
             }
