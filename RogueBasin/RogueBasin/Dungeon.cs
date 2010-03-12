@@ -58,6 +58,103 @@ namespace RogueBasin
         }
     }
 
+    public class DungeonProfile {
+        public int dungeonStartLevel;
+        public int dungeonEndLevel;
+
+        public bool subUniqueDefeated = false;
+        public bool masterUniqueDefeated = false;
+
+        public bool vistied = false;
+    }
+
+    /// <summary>
+    /// Information about the dungeons in princessRL
+    /// </summary>
+    public class DungeonInfo
+    {
+        List<DungeonProfile> dungeons;
+
+        public DungeonInfo()
+        {
+            dungeons = new List<DungeonProfile>();
+
+            SetupDungeonStartAndEnd();
+        }
+
+        private void SetupDungeonStartAndEnd()
+        {
+            //In Princess RL there are 7 dungeons. This probably should be done in DungeonMaker
+            for (int i = 0; i < 7; i++)
+            {
+                DungeonProfile thisDung = new DungeonProfile();
+
+                thisDung.dungeonStartLevel = 2 + i * 4;
+                thisDung.dungeonEndLevel = 5 + i * 4;
+
+                dungeons.Add(thisDung);
+            }
+        }
+
+        /// <summary>
+        /// All dungeons are 4 levels deep
+        /// </summary>
+        /// <param name="levelNo"></param>
+        public int DungeonNumberFromLevelNo(int levelNo)
+        {
+
+            if (levelNo < 2)
+            {
+                LogFile.Log.LogEntryDebug("Asked for a dungeon with a non-dungeon level", LogDebugLevel.High);
+                return -1;
+            }
+
+            int dungeonNo = (int)Math.Floor((levelNo - 2) / 4.0);
+
+            return dungeonNo;
+        }
+
+
+        public int GetDungeonStartLevel(int dungeonNo)
+        {
+            try
+            {
+                return dungeons[dungeonNo].dungeonStartLevel;
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
+                return 0;
+            }
+        }
+
+        public void VisitedDungeon(int dungeonNo)
+        {
+            try
+            {
+                dungeons[dungeonNo].vistied = true;
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
+            }
+        }
+
+
+        public int GetDungeonEndLevel(int dungeonNo)
+        {
+            try
+            {
+                return dungeons[dungeonNo].dungeonEndLevel;
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
+                return 0;
+            }
+        }
+    }
+
     /// <summary>
     /// Keeps or links to all the state in the game
     /// </summary>
@@ -86,6 +183,9 @@ namespace RogueBasin
 
         private List<Monster> summonedMonsters; //no need to serialize
 
+        DungeonInfo dungeonInfo;
+
+        /*
         public int Dungeon1StartLevel { get; set;}
         public int Dungeon1EndLevel { get; set; }
 
@@ -106,7 +206,7 @@ namespace RogueBasin
 
         public int Dungeon7StartLevel { get; set; }
         public int Dungeon7EndLevel { get; set; }
-
+        */
         long worldClock = 0;
 
         /// <summary>
@@ -140,6 +240,8 @@ namespace RogueBasin
             HiddenNameInfo = new List<HiddenNameInfo>();
             Triggers = new List<DungeonSquareTrigger>();
 
+            dungeonInfo = new DungeonInfo();
+
             PlayerImmortal = false;
 
             SetupSpecialMoves();
@@ -166,6 +268,15 @@ namespace RogueBasin
             set
             {
                 dateCounter = value;
+            }
+        }
+
+        public DungeonInfo DungeonInfo { 
+            get {
+        return dungeonInfo;
+        }
+            set{
+                dungeonInfo = value;
             }
         }
 
@@ -533,8 +644,10 @@ namespace RogueBasin
                 saveGameInfo.spells = this.spells;
                 saveGameInfo.hiddenNameInfo = this.HiddenNameInfo;
                 saveGameInfo.worldClock = this.worldClock;
+                saveGameInfo.dateCounter = this.dateCounter;
                 saveGameInfo.triggers = this.Triggers;
                 saveGameInfo.difficulty = this.Difficulty;
+                saveGameInfo.dungeonInfo = this.dungeonInfo;
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -2983,6 +3096,8 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
             Game.Dungeon.MoveToNextDate();
             Game.Dungeon.PlayerBackToTown();
+
+            Player.CurrentDungeon = -1;
         }
 
         Point storeTL = new Point(33, 2);

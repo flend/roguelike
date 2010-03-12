@@ -67,6 +67,7 @@ namespace RogueBasin
             specialChars.Add('A'); //see corpses trigger
             specialChars.Add('B'); //see corpses trigger
             specialChars.Add('C'); //see corpses trigger
+            specialChars.Add('D'); //see corpses trigger
             //specialChars.Add('%'); //a corpse
             specialChars.Add('G'); //your friend
             specialChars.Add('Y'); //the lich
@@ -320,13 +321,13 @@ namespace RogueBasin
                        switch (mapChar)
                         {
                             case '~':
-                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon1StartLevel), levelNo, new Point(i, row));
+                                //featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.DungeonInfo Dungeon1StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '/':
-                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon2StartLevel), levelNo, new Point(i, row));
+                                //featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon2StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '<':
-                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, new Point(i, row));
+                                //featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, new Point(i, row));
                                 break;
                         }
 
@@ -366,29 +367,41 @@ namespace RogueBasin
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.BackToSchool());
                                 break;
                             case '2':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon1StartLevel), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(0, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case '3':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon2StartLevel), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(1, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case '4':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon3StartLevel), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(2, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case '5':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon4StartLevel), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(3, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case '6':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon5StartLevel), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(4, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case '7':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon6StartLevel), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(5, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case '8':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon7StartLevel), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(6, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case 'A':
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Road, "river"));
                                 baseMap.mapSquares[i, row].Terrain = MapTerrain.River;
+                                break;
+                            case 'B':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Trees, "forest"));
+                                baseMap.mapSquares[i, row].Terrain = MapTerrain.Forest;
+                                break;
+                            case 'C':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Empty, "grave"));
+                                baseMap.mapSquares[i, row].Terrain = MapTerrain.Mountains;
+                                break;
+                            case 'D':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Empty, "final"));
+                                baseMap.mapSquares[i, row].Terrain = MapTerrain.Mountains;
                                 break;
 
                             //case '%':

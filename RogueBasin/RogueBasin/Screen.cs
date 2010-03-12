@@ -1458,7 +1458,7 @@ namespace RogueBasin {
 
             rootConsole.PrintLine(speedString, statsDisplayTopLeft.x + speedOffset.x, statsDisplayTopLeft.y + speedOffset.y, LineAlignment.Left);
 
-            string pLvlString = "Lvl: " + player.Level;
+            string pLvlString = "D ID: " + player.CurrentDungeon;
 
             rootConsole.PrintLine(pLvlString, statsDisplayTopLeft.x + playerLevelOffset.x, statsDisplayTopLeft.y + playerLevelOffset.y, LineAlignment.Left);
 

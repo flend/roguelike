@@ -409,6 +409,9 @@ namespace RogueBasin
 
                                 case 'K':
                                     Game.Dungeon.FlipTerrain("river");
+                                    Game.Dungeon.FlipTerrain("forest");
+                                    Game.Dungeon.FlipTerrain("grave");
+                                    Game.Dungeon.FlipTerrain("final");
                                     UpdateScreen();
                                     break;
 

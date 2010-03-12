@@ -79,13 +79,13 @@ namespace RogueBasin
         {
             terrainMapping.Add(' ', MapTerrain.Void);
             terrainMapping.Add('.', MapTerrain.Empty);
-            terrainMapping.Add(',', MapTerrain.Grass);
-            terrainMapping.Add('=', MapTerrain.River);
+            //terrainMapping.Add(',', MapTerrain.Grass);
+            //terrainMapping.Add('=', MapTerrain.River);
             terrainMapping.Add('^', MapTerrain.Mountains);
             terrainMapping.Add('*', MapTerrain.Trees);
-            terrainMapping.Add('-', MapTerrain.Road);
+            //terrainMapping.Add('-', MapTerrain.Road);
             terrainMapping.Add('#', MapTerrain.Wall);
-            terrainMapping.Add('+', MapTerrain.ClosedDoor);
+            //terrainMapping.Add('+', MapTerrain.ClosedDoor);
         }
 
         /// <summary>

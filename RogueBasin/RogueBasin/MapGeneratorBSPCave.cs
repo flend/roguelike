@@ -58,7 +58,7 @@ namespace RogueBasin
             possibleEmptyTypes.Add(terrain);
         }
 
-        public void ClearRubbleType(MapTerrain terrain)
+        public void ClearRubbleType()
         {
             rubbleType.Clear();
             possibleEmptyTypes.Clear();

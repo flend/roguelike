@@ -51,6 +51,70 @@ namespace RogueBasin.Triggers
             else if(dungeon.IsNormalWeekend()) {
 
                 //To do
+
+                /*
+                 * //To do
+
+                //Learn spells
+
+                List<Spell> notLearntSpells = dungeon.Spells.FindAll(x => !x.Known);
+
+                //Have we learnt all the moves
+                if (notLearntSpells.Count == 0)
+                {
+                    Game.MessageQueue.AddMessage("You search around the library for several hours but you realise you have learnt all you can from here.");
+                    return false;
+                }
+
+                //Random check sequence
+                int[] checkSequence = new int[notLearntSpells.Count];
+
+                for (int i = 0; i < checkSequence.Length; i++)
+                {
+                    checkSequence[i] = Game.Random.Next(checkSequence.Length);
+                }
+
+                //Actually do the check
+
+                int playerMagicStat = dungeon.Player.MagicStat;
+
+                for (int i = 0; i < checkSequence.Length; i++)
+                {
+                    Spell thisSpell = notLearntSpells[checkSequence[i]];
+
+                    int magicDiff = thisSpell.GetRequiredMagic() - playerMagicStat;
+                    if (magicDiff < 0)
+                        magicDiff = 0;
+
+                    int chanceToLearn = 20 - magicDiff;
+
+                    int roll = Game.Random.Next(20);
+
+                    LogFile.Log.LogEntryDebug("Chance to learn : " + thisSpell.SpellName() + " roll: " + roll.ToString() + " " + chanceToLearn.ToString() + "/20", LogDebugLevel.Medium);
+
+                    if (roll < chanceToLearn)
+                    {
+                        //Learn move
+                        //prob won't work cos of type checking
+                        //Game.Dungeon.LearnMove(thisMove);
+
+
+                        thisSpell.Known = true;
+                        LogFile.Log.LogEntryDebug("Player learnt move: " + thisSpell.SpellName(), LogDebugLevel.Medium);
+
+                        //Play movie
+                        Screen.Instance.PlayMovie("succeededToLearnSpell", false);
+                        Screen.Instance.PlayMovie(thisSpell.MovieRoot(), false);
+
+                        Game.MessageQueue.AddMessage("You learn a new spell: " + thisSpell.SpellName() + "!");
+                        dungeon.MoveToNextDate();
+                        //Teleport the user back to the start location
+                        Game.Dungeon.PlayerBackToTown();
+
+                        return true;
+                    }
+                 */
+
             }
             else {
 

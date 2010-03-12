@@ -213,9 +213,13 @@ namespace RogueBasin
 
             List<int> levelMonsterAmounts = new List<int>();
 
-            for (int i = dungeon.Dungeon1StartLevel; i <= dungeon.Dungeon1EndLevel; i++)
+            int Dungeon1StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0);
+            int Dungeon1EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(0);
+
+
+            for (int i = Dungeon1StartLevel; i <= Dungeon1EndLevel; i++)
             {
-                int num = 200 + 80 * (i - dungeon.Dungeon1StartLevel);
+                int num = 200 + 80 * (i - Dungeon1StartLevel);
                 levelMonsterAmounts.Add(num);
             }
 
@@ -306,7 +310,7 @@ namespace RogueBasin
             //Dungeon 1 - caves
             //levels 2 - 5
 
-            for (int i = dungeon.Dungeon1StartLevel; i <= dungeon.Dungeon1EndLevel; i++)
+            for (int i = Dungeon1StartLevel; i <= Dungeon1EndLevel; i++)
             {
                 int randomNum;
 
@@ -320,7 +324,7 @@ namespace RogueBasin
                     case 5:
 
                         int costSpent = 0;
-                        int indexIntoMonsterAmounts = i - dungeon.Dungeon1StartLevel;
+                        int indexIntoMonsterAmounts = i -Dungeon1StartLevel;
 
                         do
                         {
@@ -1253,26 +1257,27 @@ namespace RogueBasin
             //Dungeon 3: level 10-13: Halls
 
             //Set up the levels. Needs to be done here so the wilderness is initialized properly.
-            Game.Dungeon.Dungeon1StartLevel = 2;
-            Game.Dungeon.Dungeon1EndLevel = 5;
+            int Dungeon1StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0);
+            int Dungeon1EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(0);
 
-            Game.Dungeon.Dungeon2StartLevel = 6;
-            Game.Dungeon.Dungeon2EndLevel = 9;
+            int Dungeon2StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1);
+            int Dungeon2EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(1);
 
-            Game.Dungeon.Dungeon3StartLevel = 10;
-            Game.Dungeon.Dungeon3EndLevel = 13;
+            int Dungeon3StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2);
+            int Dungeon3EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(2);
 
-            Game.Dungeon.Dungeon4StartLevel = 14;
-            Game.Dungeon.Dungeon4EndLevel = 17;
+            int Dungeon4StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3);
+            int Dungeon4EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(3);
 
-            Game.Dungeon.Dungeon5StartLevel = 18;
-            Game.Dungeon.Dungeon5EndLevel = 21;
+            int Dungeon5StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4);
+            int Dungeon5EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(4);
 
-            Game.Dungeon.Dungeon6StartLevel = 22;
-            Game.Dungeon.Dungeon6EndLevel = 25;
+            int Dungeon6StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5);
+            int Dungeon6EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(5);
 
-            Game.Dungeon.Dungeon7StartLevel = 26;
-            Game.Dungeon.Dungeon7EndLevel = 29;
+            int Dungeon7StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(6);
+            int Dungeon7EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(6);
+
 
             //Make the generators
 
@@ -1356,7 +1361,7 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
             
             //level 3-4
 
@@ -1405,7 +1410,7 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 7-8
 
@@ -1456,7 +1461,7 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 11-12
 
@@ -1502,7 +1507,7 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(0, hallsGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
+            dungeon.AddTrigger(levelNo, hallsGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 15-16
 
@@ -1554,11 +1559,11 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(0, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
+            dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 19-20
 
-            for (int i = dungeon.Dungeon2StartLevel + 1; i < dungeon.Dungeon2EndLevel; i++)
+            for (int i = 0; i < middleLevelsInDungeon; i++)
             {
                 ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
                 levelNo = dungeon.AddMap(ruinedLevel);
@@ -1584,6 +1589,15 @@ namespace RogueBasin
 
             //Ancient passage
 
+            ruinedGen.ClearRubbleType();
+            ruinedGen.AddRubbleType(MapTerrain.Rubble);
+
+            ruinedGen.ClearWallType();
+            ruinedGen.AddWallType(MapTerrain.Wall);
+            ruinedGen.AddWallType(MapTerrain.Wall);
+            ruinedGen.RubbleChance = 5;
+
+
             //Generate and add cave levels
 
             //level 22
@@ -1598,11 +1612,11 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(0, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
+            dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 23-24
 
-            for (int i = dungeon.Dungeon2StartLevel + 1; i < dungeon.Dungeon2EndLevel; i++)
+            for (int i = 0; i < middleLevelsInDungeon; i++)
             {
                 ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
                 levelNo = dungeon.AddMap(ruinedLevel);
@@ -1645,7 +1659,7 @@ namespace RogueBasin
             Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(0, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 26-27
 

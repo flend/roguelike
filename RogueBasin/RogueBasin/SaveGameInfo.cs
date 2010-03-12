@@ -86,10 +86,13 @@ namespace RogueBasin
         public GameDifficulty difficulty;
 
         public long worldClock = 0;
+        public int dateCounter = 0;
 
         /// <summary>
         /// List of global events
         /// </summary>
         public List<DungeonEffect> effects;
+
+        public DungeonInfo dungeonInfo;
     }
 }

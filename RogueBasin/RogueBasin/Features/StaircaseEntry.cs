@@ -11,14 +11,16 @@ namespace RogueBasin.Features
     /// <returns></returns>
     public class StaircaseEntry : UseableFeature
     {
+        int dungeonID;
         int dungeonStartLevel;
 
         /// <summary>
         /// Construct with the level of the dungeon to transition to
         /// </summary>
         /// <param name="dungeonStartLevel"></param>
-        public StaircaseEntry(int dungeonStartLevel)
+        public StaircaseEntry(int dungeonID, int dungeonStartLevel)
         {
+            this.dungeonID = dungeonID;
             this.dungeonStartLevel = dungeonStartLevel;
         }
 
@@ -31,6 +33,12 @@ namespace RogueBasin.Features
 
             //Set vision
             player.SightRadius = (int)Math.Ceiling(player.NormalSightRadius * Game.Dungeon.Levels[player.LocationLevel].LightLevel);
+
+            //Set the current dungeon in Player
+            player.CurrentDungeon = dungeonID;
+
+            //Set the current dungeon as visited
+            dungeon.DungeonInfo.VisitedDungeon(dungeonID);
 
             //debug
             player.SightRadius = 20;

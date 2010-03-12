@@ -46,6 +46,11 @@ namespace RogueBasin
         public int Level { get; set; }
 
         /// <summary>
+        /// Which princess RL dungeon are we in?
+        /// </summary>
+        public int CurrentDungeon { get; set; }
+
+        /// <summary>
         /// Player armour class. Auto-calculated so not serialized
         /// </summary>
         int armourClass;
@@ -125,6 +130,8 @@ namespace RogueBasin
             MaximumEquippedItems = 2;
 
             NumDeaths = 0;
+
+            CurrentDungeon = -1;
 
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
