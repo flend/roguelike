@@ -40,6 +40,12 @@ namespace RogueBasin.Spells
                     continue;
                 }
 
+                //Not too near - better just to run from the outside in but live with this for now
+                if (!(Math.Pow(x - player.LocationMap.x, 2) + Math.Pow(y - player.LocationMap.y, 2) > 3))
+                {
+                    continue;
+                }
+
                 //Walkable
                 if(!dungeon.MapSquareIsWalkable(player.LocationLevel, new Point(x,y)))
                     continue;

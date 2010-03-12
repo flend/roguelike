@@ -360,7 +360,13 @@ namespace RogueBasin {
                 RootConsole rootConsole = RootConsole.GetInstance();
 
                 //Load whole movie
-                LoadMovie(filenameRoot);
+                bool loadSuccess = LoadMovie(filenameRoot);
+
+                if (!loadSuccess)
+                {
+                    LogFile.Log.LogEntryDebug("Failed to load movie file: " + filenameRoot, LogDebugLevel.High);
+                    return;
+                }
 
                 //Use the width and height of the first frame to centre the movie
                 //Unlikely to be any control codes on the first line
@@ -516,7 +522,7 @@ namespace RogueBasin {
             return flashingChars;
         }
 
-        private void LoadMovie(string filenameRoot)
+        private bool LoadMovie(string filenameRoot)
         {
             try
             {
@@ -589,10 +595,12 @@ namespace RogueBasin {
                     }
                 } while (true);
 
+                return true;
             }
             catch (Exception e)
             {
                 LogFile.Log.LogEntry("Failed to load movie: " + e.Message);
+                return false;
             }
         }
 

@@ -199,7 +199,9 @@
     <Compile Include="SpecialMoves\WallPush.cs" />
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="Spell.cs" />
-    <Compile Include="Spells\Blink.cs" />
+    <Compile Include="Spells\Blink.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Spells\EnergyBlast.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -208,6 +210,7 @@
     <Compile Include="Spells\FireLance.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Spells\Light.cs" />
     <Compile Include="Spells\MageArmour.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -455,5 +458,8 @@
     <EmbeddedResource Include="bin\Debug\movies\spellmagearmour0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\spellmagicmissile0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\spellslowmonster0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\spelllight0.amf" />
   </ItemGroup>
 </Project>

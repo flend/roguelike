@@ -24,6 +24,7 @@ namespace RogueBasin.PlayerEffects
         public override void OnStart()
         {
             LogFile.Log.LogEntry("SightUp start");
+            player.SightRadius += sightUpAmount;
             Game.MessageQueue.AddMessage("The darkness falls away in a glance.");
         }
 
@@ -33,6 +34,7 @@ namespace RogueBasin.PlayerEffects
         public override void OnEnd()
         {
             LogFile.Log.LogEntry("SightUp ended");
+            player.SightRadius -= sightUpAmount;
             Game.MessageQueue.AddMessage("The shadows grow longer.");
         }
 

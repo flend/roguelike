@@ -472,6 +472,7 @@ namespace RogueBasin
             spells.Add(new Spells.FireBall());
             spells.Add(new Spells.EnergyBlast());
             spells.Add(new Spells.Exit());
+            spells.Add(new Spells.Light());
 
             foreach (Spell move in spells)
             {
