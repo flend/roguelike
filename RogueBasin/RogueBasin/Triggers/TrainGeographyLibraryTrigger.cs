@@ -50,71 +50,57 @@ namespace RogueBasin.Triggers
             }
             else if(dungeon.IsNormalWeekend()) {
 
-                //To do
+                //Open up new dungeons
 
-                /*
-                 * //To do
+                //Have we opened all the dungeons?
 
-                //Learn spells
+                List<DungeonProfile> notOpen = Game.Dungeon.DungeonInfo.Dungeons.FindAll(y => !y.open);
 
-                List<Spell> notLearntSpells = dungeon.Spells.FindAll(x => !x.Known);
-
-                //Have we learnt all the moves
-                if (notLearntSpells.Count == 0)
+                //Only last story level left
+                if (notOpen.Count == 1)
                 {
-                    Game.MessageQueue.AddMessage("You search around the library for several hours but you realise you have learnt all you can from here.");
+                    Game.MessageQueue.AddMessage("You search around the old maps for an hour or so but you reckon you've found all can here.");
                     return false;
                 }
+                
+                //Check if we have visited enough dungeons
 
-                //Random check sequence
-                int[] checkSequence = new int[notLearntSpells.Count];
-
-                for (int i = 0; i < checkSequence.Length; i++)
+                if (!dungeon.DungeonInfo.IsDungeonVisited(0) || !dungeon.DungeonInfo.IsDungeonVisited(1))
                 {
-                    checkSequence[i] = Game.Random.Next(checkSequence.Length);
+                    //Not visited any
+                    FailedToFindMap();
+                    return true;
                 }
 
-                //Actually do the check
-
-                int playerMagicStat = dungeon.Player.MagicStat;
-
-                for (int i = 0; i < checkSequence.Length; i++)
+                if (!dungeon.DungeonInfo.IsDungeonOpen(2))
                 {
-                    Spell thisSpell = notLearntSpells[checkSequence[i]];
+                    OpenDungeon(2);
+                    return true;
+                }
 
-                    int magicDiff = thisSpell.GetRequiredMagic() - playerMagicStat;
-                    if (magicDiff < 0)
-                        magicDiff = 0;
+                if (!dungeon.DungeonInfo.IsDungeonVisited(2))
+                {
+                    FailedToFindMap();
+                    return true;
+                }
 
-                    int chanceToLearn = 20 - magicDiff;
+                if (!dungeon.DungeonInfo.IsDungeonOpen(3))
+                {
+                    OpenDungeon(3);
+                    return true;
+                }
 
-                    int roll = Game.Random.Next(20);
+                if (!dungeon.DungeonInfo.IsDungeonVisited(3))
+                {
+                    FailedToFindMap();
+                    return true;
+                }
 
-                    LogFile.Log.LogEntryDebug("Chance to learn : " + thisSpell.SpellName() + " roll: " + roll.ToString() + " " + chanceToLearn.ToString() + "/20", LogDebugLevel.Medium);
+                OpenDungeon(4);
+                return true;
 
-                    if (roll < chanceToLearn)
-                    {
-                        //Learn move
-                        //prob won't work cos of type checking
-                        //Game.Dungeon.LearnMove(thisMove);
-
-
-                        thisSpell.Known = true;
-                        LogFile.Log.LogEntryDebug("Player learnt move: " + thisSpell.SpellName(), LogDebugLevel.Medium);
-
-                        //Play movie
-                        Screen.Instance.PlayMovie("succeededToLearnSpell", false);
-                        Screen.Instance.PlayMovie(thisSpell.MovieRoot(), false);
-
-                        Game.MessageQueue.AddMessage("You learn a new spell: " + thisSpell.SpellName() + "!");
-                        dungeon.MoveToNextDate();
-                        //Teleport the user back to the start location
-                        Game.Dungeon.PlayerBackToTown();
-
-                        return true;
-                    }
-                 */
-
+                //LogFile.Log.LogEntryDebug("Trying to open a non-existant dungeon", LogDebugLevel.High);
+                //return false;
             }
             else {
 
@@ -129,6 +115,52 @@ namespace RogueBasin.Triggers
 
             return true;
         }
+
+        private void FailedToFindMap()
+        {
+
+            LogFile.Log.LogEntryDebug("Failed to open dungeon", LogDebugLevel.Medium);
+
+            Screen.Instance.PlayMovie("failedToFindMap", false);
+            Game.Dungeon.MoveToNextDate();
+            //Teleport the user back to the start location
+            Game.Dungeon.PlayerBackToTown();
+
+
+        }
+
+        private void OpenDungeon(int dungeonNumber)
+        {
+
+            Screen.Instance.PlayMovie("succeededToFindMap", false);
+            
+            //Open the dungeon
+            switch (dungeonNumber)
+            {
+                case 2:
+                    Game.Dungeon.FlipTerrain("forest");
+                    Game.Dungeon.DungeonInfo.OpenDungeon(2);
+                    break;
+                case 3:
+                    Game.Dungeon.FlipTerrain("river");
+                    Game.Dungeon.DungeonInfo.OpenDungeon(3);
+                    Game.Dungeon.DungeonInfo.OpenDungeon(5);
+                    break;
+                case 4:
+                    Game.Dungeon.FlipTerrain("grave");
+                    Game.Dungeon.DungeonInfo.OpenDungeon(4);
+                    break;
+            }
+
+            LogFile.Log.LogEntryDebug("Opening dungeon " + dungeonNumber, LogDebugLevel.Medium);
+
+            Game.Dungeon.MoveToNextDate();
+            //Teleport the user back to the start location
+            Game.Dungeon.PlayerBackToTown();
+
+
+        }
+
 
         protected void RunTrainingUI()
         {

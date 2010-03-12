@@ -65,7 +65,8 @@ namespace RogueBasin
         public bool subUniqueDefeated = false;
         public bool masterUniqueDefeated = false;
 
-        public bool vistied = false;
+        public bool visited = false;
+        public bool open = false;
     }
 
     /// <summary>
@@ -93,6 +94,18 @@ namespace RogueBasin
                 thisDung.dungeonEndLevel = 5 + i * 4;
 
                 dungeons.Add(thisDung);
+            }
+
+            //Setup the original open dungeons
+            dungeons[0].open = true;
+            dungeons[1].open = true;
+        }
+
+        public List<DungeonProfile> Dungeons
+        {
+            get
+            {
+                return dungeons;
             }
         }
 
@@ -132,11 +145,49 @@ namespace RogueBasin
         {
             try
             {
-                dungeons[dungeonNo].vistied = true;
+                dungeons[dungeonNo].visited = true;
             }
             catch (Exception)
             {
                 LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
+            }
+        }
+
+        public void OpenDungeon(int dungeonNo)
+        {
+            try
+            {
+                dungeons[dungeonNo].open = true;
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
+            }
+        }
+
+        public bool IsDungeonVisited(int dungeonNo)
+        {
+            try
+            {
+                return dungeons[dungeonNo].visited;
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
+                return false;
+            }
+        }
+
+        public bool IsDungeonOpen(int dungeonNo)
+        {
+            try
+            {
+                return dungeons[dungeonNo].open;
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
+                return false;
             }
         }
 

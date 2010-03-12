@@ -462,4 +462,8 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\spelllight0.amf" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\failedToFindMap0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\succeededToFindMap0.amf" />
+  </ItemGroup>
 </Project>

@@ -370,22 +370,22 @@ namespace RogueBasin
                                 addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(0, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
                                 break;
                             case '3':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(1, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(1, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1)), levelNo, new Point(i, row));
                                 break;
                             case '4':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(2, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(2, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2)), levelNo, new Point(i, row));
                                 break;
                             case '5':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(3, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(3, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3)), levelNo, new Point(i, row));
                                 break;
                             case '6':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(4, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(4, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4)), levelNo, new Point(i, row));
                                 break;
                             case '7':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(5, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(5, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5)), levelNo, new Point(i, row));
                                 break;
                             case '8':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(6, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
+                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(6, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(6)), levelNo, new Point(i, row));
                                 break;
                             case 'A':
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Road, "river"));
