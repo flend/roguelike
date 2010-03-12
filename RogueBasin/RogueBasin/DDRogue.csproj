@@ -222,8 +222,11 @@
     <Compile Include="Triggers\HelpFriend.cs" />
     <Compile Include="Triggers\LichBattle.cs" />
     <Compile Include="Triggers\SchoolEntryTrigger.cs" />
-    <Compile Include="Triggers\SeeCorpses.cs" />
+    <Compile Include="Triggers\SeeCorpses.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\SpotFriend.cs" />
+    <Compile Include="Triggers\TerrainFlipTrigger.cs" />
     <Compile Include="Triggers\TownToWilderness.cs" />
     <Compile Include="Triggers\TrainAthleticsTrigger.cs">
       <SubType>Code</SubType>

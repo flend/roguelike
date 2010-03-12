@@ -478,6 +478,33 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Triggers which flip terrain into different type
+        /// Yeah, ok, I was tired when I wrote this. I think it has no redeeming features!
+        /// </summary>
+        /// <param name="triggerIDToFlip"></param>
+        public void FlipTerrain(string triggerIDToFlip)
+        {
+            foreach (DungeonSquareTrigger trigger in Triggers)
+            {
+                if (trigger.GetType() == typeof(Triggers.TerrainFlipTrigger))
+                {
+                    Triggers.TerrainFlipTrigger flipTrig = trigger as Triggers.TerrainFlipTrigger;
+
+                    if(trigger == null) {
+                        LogFile.Log.LogEntryDebug("Trigger is not terrain flip - problem", LogDebugLevel.High);
+                        continue;
+                    }
+
+                    if (triggerIDToFlip == flipTrig.triggerID)
+                    {
+                        flipTrig.FlipTerrain();
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
         /// Save the game to disk. Throws exceptions
         /// </summary>
         /// <param name="saveGameName"></param>

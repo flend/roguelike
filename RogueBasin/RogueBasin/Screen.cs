@@ -304,6 +304,9 @@ namespace RogueBasin {
             //Wait
             TCODSystem.Sleep(200);
 
+            //For screenshots only
+            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
             //Redraw
             Draw();
             FlushConsole();

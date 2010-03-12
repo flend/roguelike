@@ -64,6 +64,9 @@ namespace RogueBasin
             specialChars.Add('7'); //see corpses trigger
             specialChars.Add('8'); //see corpses trigger
             specialChars.Add('9'); //see corpses trigger
+            specialChars.Add('A'); //see corpses trigger
+            specialChars.Add('B'); //see corpses trigger
+            specialChars.Add('C'); //see corpses trigger
             //specialChars.Add('%'); //a corpse
             specialChars.Add('G'); //your friend
             specialChars.Add('Y'); //the lich
@@ -383,6 +386,11 @@ namespace RogueBasin
                             case '8':
                                 addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon7StartLevel), levelNo, new Point(i, row));
                                 break;
+                            case 'A':
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Road, "river"));
+                                baseMap.mapSquares[i, row].Terrain = MapTerrain.River;
+                                break;
+
                             //case '%':
                               //  Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
                                 //break;

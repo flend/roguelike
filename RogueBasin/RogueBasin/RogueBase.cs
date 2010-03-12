@@ -407,6 +407,11 @@ namespace RogueBasin
                                     */
                                     //Debug events
 
+                                case 'K':
+                                    Game.Dungeon.FlipTerrain("river");
+                                    UpdateScreen();
+                                    break;
+
                                 case 'c':
                                     //Level up
                                     Game.Dungeon.Player.LevelUp();
