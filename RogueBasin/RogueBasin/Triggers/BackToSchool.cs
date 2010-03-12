@@ -28,6 +28,15 @@ namespace RogueBasin.Triggers
                 return false;
             }
 
+            //Last mission?
+            if (Game.Dungeon.DungeonInfo.LastMission)
+            {
+                //Can't enter normal dungeons in the last mission
+                Game.MessageQueue.AddMessage("You don't want to go back to school now - there's more important things to do!");
+             
+                return false;
+            }
+
             //The player shouldn't want to go back, but let them if they must
 
             //Check they really do want to leave

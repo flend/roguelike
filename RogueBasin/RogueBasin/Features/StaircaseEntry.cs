@@ -28,6 +28,13 @@ namespace RogueBasin.Features
         {
             Dungeon dungeon = Game.Dungeon;
 
+            //Can't enter normal dungeons in the last mission
+            if (Game.Dungeon.DungeonInfo.LastMission && dungeonID != 6)
+            {
+                Game.MessageQueue.AddMessage("You don't want to go here - there's more important things to do!");
+                return false;
+            }
+
             //Enter dungeon
             player.LocationLevel = dungeonStartLevel;
 

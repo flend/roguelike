@@ -76,9 +76,12 @@ namespace RogueBasin
     {
         List<DungeonProfile> dungeons;
 
+        public bool LastMission { get; set; }
+
         public DungeonInfo()
         {
             dungeons = new List<DungeonProfile>();
+            LastMission = false;
 
             SetupDungeonStartAndEnd();
         }
@@ -403,22 +406,54 @@ namespace RogueBasin
             //22-26 Weekday
             //27-28 Special Weekend
 
+            if (Game.Dungeon.DungeonInfo.LastMission)
+            {
+                LogFile.Log.LogEntryDebug("Tried to advance time beyond end", LogDebugLevel.High);
+                return;
+            }
+
             if (dateCounter % 7 == 0)
             {
                 dateCounter += 5;
-                return;
             }
 
-            if (dateCounter % 7 == 5)
+            else if (dateCounter % 7 == 5)
             {
                 dateCounter += 2;
-                return;
+            }
+            else
+            {
+                //Shouldn't get here
+                LogFile.Log.LogEntryDebug("Impossible date reached: " + dateCounter.ToString(), LogDebugLevel.High);
             }
 
-            //Shouldn't get here
-            LogFile.Log.LogEntryDebug("Impossible date reached: " + dateCounter.ToString(), LogDebugLevel.High);
+            //Check for special dates
+            if (dateCounter == 28 * 11 + 26)
+            {
+                //Graduation day
+
+                RunGraduationStory();
+            }
 
             return;
+        }
+
+        /// <summary>
+        /// Run the final graduation story
+        /// </summary>
+        private void RunGraduationStory()
+        {
+            //Set the last mission flag (closes off other dungeons)
+            DungeonInfo.LastMission = true;
+
+            //Open up the way (doesn't matter if these have been done before)
+            FlipTerrain("river");
+            FlipTerrain("final");
+
+            //Play the final mission movie
+            Screen.Instance.PlayMovie("princekidnapped", false);
+
+            //Return to the game. Triggers now respond to the last mission conditions
         }
 
         /// <summary>
@@ -2660,7 +2695,45 @@ namespace RogueBasin
             deathPreamble.Add("He found " + Game.Dungeon.Player.PlotItemsFound + " of " + Game.Dungeon.Player.TotalPlotItems + " plot items.");
 
             //Total kills
+            KillRecord killRecord = GetKillRecord();
+
+
+            deathPreamble.Add("");
+            deathPreamble.Add("He killed " + killRecord.killCount + " creatures.");
+
+            //Load up screen and display
+            Screen.Instance.TotalKills = killRecord.killStrings;
+            Screen.Instance.DeathPreamble = deathPreamble;
+
+            Screen.Instance.DrawDeathScreen();
+            Screen.Instance.FlushConsole();
+
+            SaveObituary(deathPreamble, killRecord.killStrings);
+
+            if (!Game.Dungeon.SaveScumming)
+            {
+                DeleteSaveFile();
+            }
+
+            //Wait for a keypress
+            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+            //Stop the main loop
+            RunMainLoop = false;
             
+        }
+
+        public struct KillRecord
+        {
+            public int killCount;
+            public List<string> killStrings;
+        }
+        /// <summary>
+        /// Generate the grouped kill record for the player
+        /// </summary>
+        /// <returns></returns>
+        public KillRecord GetKillRecord()
+        {
             //Make killCount list
 
             List<Monster> kills = player.Kills;
@@ -2687,7 +2760,7 @@ namespace RogueBasin
 
                 }
                 //Look only at the first item in the group (stored by index). All the items in this group must have the same type
-                
+
 
                 //If there is no group, create a new one
                 if (!foundGroup)
@@ -2704,7 +2777,7 @@ namespace RogueBasin
             //Turn list into strings to be displayed
             foreach (KillCount record in killCount)
             {
-                
+
                 string killStr = "";
 
                 if (record.count == 1)
@@ -2720,29 +2793,10 @@ namespace RogueBasin
                 killRecord.Add(killStr);
             }
 
-            deathPreamble.Add("");
-            deathPreamble.Add("He killed " + totalKills + " creatures.");
-
-            //Load up screen and display
-            Screen.Instance.TotalKills = killRecord;
-            Screen.Instance.DeathPreamble = deathPreamble;
-
-            Screen.Instance.DrawDeathScreen();
-            Screen.Instance.FlushConsole();
-
-            SaveObituary(deathPreamble, killRecord);
-
-            if (!Game.Dungeon.SaveScumming)
-            {
-                DeleteSaveFile();
-            }
-
-            //Wait for a keypress
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-            //Stop the main loop
-            RunMainLoop = false;
-            
+            KillRecord recordS = new KillRecord();
+            recordS.killStrings = killRecord;
+            recordS.killCount = totalKills;
+            return recordS;
         }
 
         /// <summary>
@@ -3144,11 +3198,64 @@ namespace RogueBasin
 
         public void PlayerLeavesDungeon()
         {
-            LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
-            Game.Dungeon.MoveToNextDate();
-            Game.Dungeon.PlayerBackToTown();
+            //Check if this is the end of the game
+            if (!DungeonInfo.LastMission)
+            {
 
-            Player.CurrentDungeon = -1;
+                LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
+                Game.Dungeon.MoveToNextDate();
+                Game.Dungeon.PlayerBackToTown();
+
+                Player.CurrentDungeon = -1;
+            }
+            else
+            {
+                //OK, it's the end, they're back from the prince mission one way or the other
+                EndOfGame();
+            }
+        }
+
+        /// <summary>
+        /// Run the end of game. Produce and save the obituary.
+        /// </summary>
+        private void EndOfGame()
+        {
+            //Death preamble
+
+            List<string> deathPreamble = new List<string>();
+
+            deathPreamble.Add(Game.Dungeon.player.Name + " the assassin " + "bizarrely dropped into this universe from DDRogue" + " on level " + (player.LocationLevel + 1).ToString() + " of the dungeon.");
+            deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
+            deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
+            deathPreamble.Add("");
+            deathPreamble.Add("He found " + Game.Dungeon.Player.PlotItemsFound + " of " + Game.Dungeon.Player.TotalPlotItems + " plot items.");
+
+            //Total kills
+            KillRecord killRecord = GetKillRecord();
+
+
+            deathPreamble.Add("");
+            deathPreamble.Add("He killed " + killRecord.killCount + " creatures.");
+
+            //Load up screen and display
+            Screen.Instance.TotalKills = killRecord.killStrings;
+            Screen.Instance.DeathPreamble = deathPreamble;
+
+            Screen.Instance.DrawDeathScreen();
+            Screen.Instance.FlushConsole();
+
+            SaveObituary(deathPreamble, killRecord.killStrings);
+
+            if (!Game.Dungeon.SaveScumming)
+            {
+                DeleteSaveFile();
+            }
+
+            //Wait for a keypress
+            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+            //Stop the main loop
+            RunMainLoop = false;
         }
 
         Point storeTL = new Point(33, 2);
