@@ -274,5 +274,10 @@ namespace RogueBasin.Spells
         {
             return 30;
         }
+
+        internal override string MovieRoot()
+        {
+            return "spellfirelance";
+        }
     }
 }

@@ -1044,10 +1044,10 @@ namespace RogueBasin {
             rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
 
             //Draw title
-            rootConsole.PrintLineRect("Special moves known", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("Special moves and spells known", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
 
             //Draw instructions
-            rootConsole.PrintLineRect("Select move to replay move pattern or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("Select move to replay movie or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
 
             //List the special moves known
 
@@ -1074,6 +1074,30 @@ namespace RogueBasin {
 
                 char selectionChar = (char)((int)'a' + moveIndex);
                 string entryString = "(" + selectionChar.ToString() + ") " + move.MoveName(); //+" (equipped)";
+
+                //Print entry
+                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + moveIndex, inventoryListW, 1, LineAlignment.Left);
+
+                moveIndex++;
+            }
+
+            List<Spell> knownSpells = new List<Spell>();
+
+            foreach (Spell move in Game.Dungeon.Spells)
+            {
+
+                //Run out of room - won't happen as written
+                if (moveIndex == inventoryListH)
+                    break;
+
+                //Don't list unknown moves
+                if (!move.Known)
+                    continue;
+
+                knownSpells.Add(move);
+
+                char selectionChar = (char)((int)'a' + moveIndex);
+                string entryString = "(" + selectionChar.ToString() + ") " + move.SpellName(); //+" (equipped)";
 
                 //Print entry
                 rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + moveIndex, inventoryListW, 1, LineAlignment.Left);

@@ -34,8 +34,7 @@ namespace RogueBasin.Features
 
             Game.MessageQueue.AddMessage("You make it safely back to school without being discovered!");
 
-            Game.Dungeon.MoveToNextDate();
-            Game.Dungeon.PlayerBackToTown();
+            Game.Dungeon.PlayerLeavesDungeon();
 
             return true;
         }

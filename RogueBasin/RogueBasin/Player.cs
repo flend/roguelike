@@ -719,6 +719,56 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Only here and the Monster equivalent are places where the player can get damaged. Should unify them.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public CombatResults ApplyDamageToPlayer(int damage)
+        {
+                //Do we hit the player?
+            if (damage > 0)
+            {
+                Hitpoints -= damage;
+
+                //Is the player dead, if so kill it?
+                if (Hitpoints <= 0)
+                {
+                    Game.Dungeon.PlayerDeath("was knocked out by a themselves");
+
+                    //Message queue string
+                    string combatResultsMsg = "PvP Damage " + damage;
+
+
+                    //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
+                    string playerMsg = "You knocked yourself out.";
+                    Game.MessageQueue.AddMessage(playerMsg);
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Debug string
+                //string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
+                //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
+                string combatResultsMsg2 = "PvP Damage " + damage;
+                Game.MessageQueue.AddMessage("Ouch, you hurt yourself");
+                LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+            //string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
+            //string playerMsg2 = "The " + this.SingleDescription + " misses you.";
+            string combatResultsMsg3 = "PvP Damage " + damage;
+            string playerMsg2 = "You avoid damaging yourself";
+            Game.MessageQueue.AddMessage(playerMsg2);
+            LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+        }
+
+        /// <summary>
         /// Apply damage to monster and deal with death
         /// </summary>
         /// <param name="monster"></param>

@@ -73,5 +73,10 @@ namespace RogueBasin.Spells
         {
             return 60;
         }
+
+        internal override string MovieRoot()
+        {
+            return "spellslowmonster";
+        }
     }
 }

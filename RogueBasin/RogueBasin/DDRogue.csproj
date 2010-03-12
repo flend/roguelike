@@ -200,6 +200,10 @@
     <Compile Include="SpecialMoves\WallVault.cs" />
     <Compile Include="Spell.cs" />
     <Compile Include="Spells\Blink.cs" />
+    <Compile Include="Spells\EnergyBlast.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Spells\Exit.cs" />
     <Compile Include="Spells\FireBall.cs" />
     <Compile Include="Spells\FireLance.cs">
       <SubType>Code</SubType>
@@ -394,5 +398,62 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\failedToLearnSpell0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\succeededToLearnSpell0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\endarchmage0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endarchmage_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endarchmage_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endbard0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endbard_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endbard_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endbattlemage0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endbattlemage_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endbattlemage_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endfathersgirl0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endfathersgirl_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endfathersgirl_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endgreatgeneral0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endgreatgeneral_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endgreatgeneral_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endgreatheroine0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintradventurer0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrcharmless0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrgreatheroine0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrhandsoff0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrheroine0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrmagicphobic0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrsurvivor0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrtimid0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endmagediplomat0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endmagediplomat_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endmagediplomat_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endperfectmodernprincess0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endperfectmodernprincess_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endperfectmodernprincess_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsocialgoddess0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsocialgoddess_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsocialgoddess_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsocialite0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsocialite_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsocialite_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsorcerer0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsorcerer_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endsorcerer_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endwarrior0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endwarrior_other0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endwarrior_prince0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helpcharming0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helpdungeons0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helpitems0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helpspellcasting0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helpwilderness0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellblink0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellenergyblast0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellexit0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellfireball0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellfirelance0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellmagearmour0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellmagicmissile0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\spellslowmonster0.amf" />
   </ItemGroup>
 </Project>

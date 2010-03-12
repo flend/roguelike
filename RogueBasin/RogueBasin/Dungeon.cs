@@ -470,6 +470,8 @@ namespace RogueBasin
             spells.Add(new Spells.SlowMonster());
             spells.Add(new Spells.FireLance());
             spells.Add(new Spells.FireBall());
+            spells.Add(new Spells.EnergyBlast());
+            spells.Add(new Spells.Exit());
 
             foreach (Spell move in spells)
             {
@@ -2463,14 +2465,17 @@ namespace RogueBasin
             //Knocked out, go back to school
             if(!verb.Contains("quit")) {
 
+                LogFile.Log.LogEntryDebug("Player knocked out", LogDebugLevel.Medium);
+
                 Screen.Instance.PlayMovie("knockedout", false);
 
                 //Up date counter
                 player.NumDeaths++;
 
                 //Game.MessageQueue.ClearList(); //If want to lose the last message, fit it in calling function
-                MoveToNextDate();
-                PlayerBackToTown();
+                Game.MessageQueue.AddMessage("You get taken back to school by the guards.");
+
+                PlayerLeavesDungeon();
 
                 return;
             }
@@ -2968,6 +2973,16 @@ namespace RogueBasin
             PutItemsInStore();
         }
 
+        /// <summary>
+        /// Exit a dungeon and go back to town
+        /// </summary>
+
+        public void PlayerLeavesDungeon()
+        {
+            LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
+            Game.Dungeon.MoveToNextDate();
+            Game.Dungeon.PlayerBackToTown();
+        }
 
         Point storeTL = new Point(33, 2);
         Point storeBR = new Point(39, 3);

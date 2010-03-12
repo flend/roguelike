@@ -401,6 +401,9 @@ namespace RogueBasin
             return CombatResults.NeitherDied;
         }
 
+       
+
+
         public virtual CombatResults AttackMonster(Monster monster)
         {
             //Recalculate combat stats if required

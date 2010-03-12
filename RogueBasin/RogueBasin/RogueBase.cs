@@ -1153,7 +1153,7 @@ namespace RogueBasin
             if (success)
             {
                 //Only do this for certain spells
-                if (toCast.GetType() != typeof(Spells.MagicMissile) && toCast.GetType() != typeof(Spells.FireLance))
+                if (toCast.GetType() != typeof(Spells.MagicMissile) && toCast.GetType() != typeof(Spells.FireLance) && toCast.GetType() != typeof(Spells.FireBall) && toCast.GetType() != typeof(Spells.EnergyBlast))
                     return success;
 
                 lastSpell = toCast;
@@ -1636,6 +1636,7 @@ namespace RogueBasin
 
             //Build a list of the moves (in the same order as displayed)
             List<SpecialMove> knownMoves = Game.Dungeon.SpecialMoves.FindAll(x => x.Known);
+            List<Spell> knownSpells = Game.Dungeon.Spells.FindAll(x => x.Known);
 
             do
             {
@@ -1659,9 +1660,17 @@ namespace RogueBasin
                         if (charIndex < 0)
                             continue;
 
-                        if (charIndex < knownMoves.Count && charIndex < 24)
+                        if (charIndex < (knownMoves.Count + knownSpells.Count) && charIndex < 24)
                         {
-                            Screen.Instance.PlayMovie(knownMoves[charIndex].MovieRoot(), false);
+                            if (charIndex < knownMoves.Count)
+                            {
+                                Screen.Instance.PlayMovie(knownMoves[charIndex].MovieRoot(), false);
+                            }
+                            else
+                            {
+                                charIndex = charIndex - knownMoves.Count;
+                                Screen.Instance.PlayMovie(knownSpells[charIndex].MovieRoot(), false);
+                            }
                         }
                     }
                 }

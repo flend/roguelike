@@ -111,7 +111,7 @@ namespace RogueBasin.SpecialMoves
                     FailBlocked();
                     return false;
                 }
-
+                 
                 //Monster - move is on
                 if (squareContents.monster != null)
                 {

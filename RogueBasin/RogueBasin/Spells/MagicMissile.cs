@@ -111,7 +111,12 @@ namespace RogueBasin.Spells
 
         internal override int GetRequiredMagic()
         {
-            return 15;
+            return 20;
+        }
+
+        internal override string MovieRoot()
+        {
+            return "spellmagicmissile";
         }
     }
 }

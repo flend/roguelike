@@ -65,6 +65,11 @@ namespace RogueBasin.Spells
                 {
                     HitMonster(player, squareContents.monster);
                 }
+
+                if (squareContents.player != null)
+                {
+                    HitPlayer();
+                }
             }
 
             Screen.Instance.DrawFlashSquares(splashSquares, ColorPresets.Red);
@@ -117,7 +122,52 @@ namespace RogueBasin.Spells
             //Apply damage
             player.ApplyDamageToMonster(monster, damage);
         }
-        
+
+        private void HitPlayer()
+        {
+            Player player = Game.Dungeon.Player;
+            //Attack the monster
+
+            //Magic missile always hits
+
+            //Damage is based on Magic Stat (and creature's magic resistance)
+
+            //Damage base
+
+            int damageBase;
+            int damageMod;
+
+            if (player.MagicStat > 100)
+            {
+                damageBase = 12;
+                damageMod = 2;
+            }
+            else if (player.MagicStat > 60)
+            {
+                damageBase = 8;
+                damageMod = 2;
+            }
+            else if (player.MagicStat > 30)
+            {
+                damageBase = 8;
+                damageMod = 1;
+            }
+            else
+            {
+                damageBase = 6;
+                damageMod = 1;
+            }
+
+            //Damage done is just the base
+
+            int damage = Utility.DamageRoll(damageBase) + damageMod;
+
+            string combatResultsMsg = "PvP Fire Ball: Dam: 1d" + damageBase + " mod " + damageMod + " -> " + damage;
+            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+            //Apply damage
+            player.ApplyDamageToPlayer(damage);
+        }
         override public int MPCost()
         {
             return 5;
@@ -141,6 +191,11 @@ namespace RogueBasin.Spells
         internal override int GetRequiredMagic()
         {
             return 40;
+        }
+
+        internal override string MovieRoot()
+        {
+            return "spellfireball";
         }
     }
 }

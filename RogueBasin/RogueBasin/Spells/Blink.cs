@@ -94,5 +94,10 @@ namespace RogueBasin.Spells
         {
             return 50;
         }
+
+        internal override string MovieRoot()
+        {
+            return "spellblink";
+        }
     }
 }
