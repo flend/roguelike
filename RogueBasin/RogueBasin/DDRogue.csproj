@@ -388,4 +388,8 @@
     <EmbeddedResource Include="bin\Debug\movies\failedToLearnMove0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\succeededToLearnMove0.amf" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\failedToLearnSpell0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\succeededToLearnSpell0.amf" />
+  </ItemGroup>
 </Project>

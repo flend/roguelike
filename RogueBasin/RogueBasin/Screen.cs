@@ -341,6 +341,12 @@ namespace RogueBasin {
 
         public void PlayMovie(string filenameRoot, bool keypressBetweenFrames)
         {
+            if (filenameRoot == "" || filenameRoot.Length == 0)
+            {
+                LogFile.Log.LogEntryDebug("Not playing movie with no name", LogDebugLevel.Medium);
+                return;
+            }
+
             try
             {
 

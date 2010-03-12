@@ -21,7 +21,11 @@ namespace RogueBasin
     //[System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.MultiAttack))]
     //[System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.BurstOfSpeed))]
     [System.Xml.Serialization.XmlInclude(typeof(Spells.MagicMissile))]
-    public class Spell
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.FireLance))]
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.SlowMonster))]
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.Blink))]
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.FireBall))]
+    public abstract class Spell
     {
         /// <summary>
         /// Has the player learnt this spell yet?
@@ -61,5 +65,20 @@ namespace RogueBasin
         /// </summary>
         public virtual string SpellName() { return ""; }
 
+        /// <summary>
+        /// Name of the movie associated
+        /// </summary>
+        /// <returns></returns>
+        internal virtual string MovieRoot()
+        {
+            return "";
+        }
+
+        /// <summary>
+        /// Magic required for this spell
+        /// </summary>
+        /// <returns></returns>
+        internal abstract int GetRequiredMagic();
+        
     }
 }

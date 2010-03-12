@@ -42,8 +42,6 @@ namespace RogueBasin.Triggers
 
             Dungeon dungeon = Game.Dungeon;
 
-            bool doesTraining = false;
-
             if(dungeon.IsWeekday()) {
 
                 //Adventure weekend
@@ -53,7 +51,6 @@ namespace RogueBasin.Triggers
 
                 //Learn combat moves
 
-                
                 List <SpecialMove> notLearntMoves = dungeon.SpecialMoves.FindAll(x => !x.Known);
 
                 //Have we learnt all the moves
@@ -103,7 +100,7 @@ namespace RogueBasin.Triggers
                         Screen.Instance.PlayMovie("succeededToLearnMove", false);
                         Screen.Instance.PlayMovie(thisMove.MovieRoot(), false);
 
-                        Game.MessageQueue.AddMessage("You learn a new combat move: " + thisMove.MoveName());
+                        Game.MessageQueue.AddMessage("You learn a new combat move: " + thisMove.MoveName() + "!");
                         dungeon.MoveToNextDate();
                         //Teleport the user back to the start location
                         Game.Dungeon.PlayerBackToTown();

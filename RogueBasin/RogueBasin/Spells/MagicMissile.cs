@@ -108,5 +108,10 @@ namespace RogueBasin.Spells
         {
             return "MM";
         }
+
+        internal override int GetRequiredMagic()
+        {
+            return 15;
+        }
     }
 }

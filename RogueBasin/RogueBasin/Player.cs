@@ -650,7 +650,7 @@ namespace RogueBasin
             {
                 //Hit - calculate damage
                 int totalDamage = Utility.DamageRoll(attackDamageBase) + attackDamageMod;
-                string combatResultsMsg = "PvM ToHit: " + toHitRoll + "[+ " + hitModifier + "+ " + hitMod + " ] AC: " + monsterAC + "(" + monster.ArmourClass() + "+" + ACmod + ") " + " Dam: 1d" + attackDamageBase + "+" + damageModifier + "+" + damMod;
+                string combatResultsMsg = "PvM ToHit: " + toHitRoll + "[+" + hitModifier + "+" + hitMod + "] AC: " + monsterAC + "(" + monster.ArmourClass() + "+" + ACmod + ") " + " Dam: 1d" + attackDamageBase + "+" + damageModifier + "+" + damMod + " = " + totalDamage;
 
                 //            string combatResultsMsg = "PvM Attack ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
