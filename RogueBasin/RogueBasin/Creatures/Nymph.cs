@@ -20,6 +20,11 @@ namespace RogueBasin.Creatures
             Speed = 80;
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Nymph();
+        }
+
         public override void InventoryDrop()
         {
             //Nothing to drop

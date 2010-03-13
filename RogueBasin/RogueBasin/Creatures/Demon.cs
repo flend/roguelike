@@ -101,7 +101,7 @@ namespace RogueBasin.Creatures
             return 5;
         }
 
-        public Demon NewCreatureOfThisType()
+        public override Monster NewCreatureOfThisType()
         {
             return new Demon();
         }

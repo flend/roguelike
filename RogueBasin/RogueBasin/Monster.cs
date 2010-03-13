@@ -58,6 +58,14 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Used for spawning
+        /// </summary>
+        /// <returns></returns>
+        public abstract Monster NewCreatureOfThisType();
+
+
+
+        /// <summary>
         /// Current hitpoints
         /// </summary>
         int hitpoints;

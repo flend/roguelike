@@ -33,6 +33,8 @@ namespace RogueBasin
 
         public Creature LastAttackedBy { get; set; }
 
+
+
         /// <summary>
         /// Sight radius
         /// </summary>

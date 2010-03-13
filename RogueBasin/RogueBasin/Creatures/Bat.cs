@@ -102,7 +102,7 @@ namespace RogueBasin.Creatures
             return 2;
         }
 
-        public Bat NewCreatureOfThisType()
+        public override Monster NewCreatureOfThisType()
         {
             return new Bat();
         }

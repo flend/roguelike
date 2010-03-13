@@ -32,6 +32,11 @@ namespace RogueBasin.Creatures
             Speed = 150;
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Lich();
+        }
+
         public override void InventoryDrop()
         {
             //Nothing to drop

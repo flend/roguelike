@@ -27,6 +27,11 @@ namespace RogueBasin.Creatures
             //Hmm, could use this corpses
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Necromancer();
+        }
+
         protected override int ClassMaxHitpoints()
         {
             return classMinHitpoints + Game.Random.Next(classDeltaHitpoints) + 1;

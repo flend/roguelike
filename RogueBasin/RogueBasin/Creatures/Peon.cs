@@ -101,7 +101,7 @@ namespace RogueBasin.Creatures
             return 3;
         }
 
-        public Peon NewCreatureOfThisType()
+        public override Monster NewCreatureOfThisType()
         {
             return new Peon();
         }

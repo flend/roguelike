@@ -101,7 +101,7 @@ namespace RogueBasin.Creatures
             return 4;
         }
 
-        public BlackUnicorn NewCreatureOfThisType()
+        public override Monster NewCreatureOfThisType()
         {
             return new BlackUnicorn();
         }

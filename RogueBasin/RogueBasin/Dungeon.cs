@@ -521,6 +521,17 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Return the distance between an objects and a point on the same level
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        public double GetDistanceBetween(Point p1, Point p2)
+        {
+            double distance = Math.Sqrt(Math.Pow(p1.x - p2.x, 2.0) + Math.Pow(p2.y - p2.y, 2.0));
+            return distance;
+        }
+
+        /// <summary>
         /// Find the closest creature to the map object
         /// </summary>
         /// <param name="originCreature"></param>

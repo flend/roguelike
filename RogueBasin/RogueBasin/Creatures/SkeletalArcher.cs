@@ -15,6 +15,10 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
             Speed = 100;
         }
+        public override Monster NewCreatureOfThisType()
+        {
+            return new SkeletalArcher();
+        }
 
         protected override double GetMissileRange()
         {

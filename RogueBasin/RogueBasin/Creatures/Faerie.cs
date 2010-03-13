@@ -20,6 +20,11 @@ namespace RogueBasin.Creatures
             Speed = 150;
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Faerie();
+        }
+
         public override void InventoryDrop()
         {
             //Nothing to drop

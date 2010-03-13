@@ -193,14 +193,132 @@ namespace RogueBasin
 
         }
 
-         private void SpawnInitialCreatures()
+        struct MonsterCommon
         {
-            LogFile.Log.LogEntry("Generating creatures...");
+            public MonsterCommon(Monster mon, int common)
+            {
+                monster = mon;
+                commonness = common;
+            }
 
-            Dungeon dungeon = Game.Dungeon;
+            public int commonness;
+            public Monster monster;
+        }
+
+        private Monster GetMonsterFromCommonList(List<MonsterCommon> list)
+        {
+            //Find total prob
+            int totalProb = 0;
+            
+            foreach (MonsterCommon com in list)
+            {
+                totalProb += com.commonness;
+            }
+
+            int toChoose = Game.Random.Next(totalProb);
+
+            int thisProb = 0;
+
+            foreach (MonsterCommon com in list)
+            {
+                if (thisProb + com.commonness >= toChoose)
+                {
+                    return com.monster.NewCreatureOfThisType();
+                }
+                thisProb += com.commonness;
+            }
+
+            LogFile.Log.LogEntryDebug("GetMonsterFromCommonness: Should never get here", LogDebugLevel.High);
+            return null;
+        }
+
+        private Point PlaceMonster(int level, Monster monster)
+        {
+            Point location = new Point();
+            do
+            {
+                location = dungeon.RandomWalkablePointInLevel(level);
+            } while (!dungeon.AddMonster(monster, level, location));
+
+            CheckSpecialMonsterGroups(monster, level);
+
+            return location;
+        }
+
+         private void SpawnInitialCreatures() {
+             LogFile.Log.LogEntry("Generating creatures...");
+
+             Dungeon dungeon = Game.Dungeon;
 
             //Add monsters to levels
 
+              
+             //First dungeon
+
+             //4 levels
+
+             //Set budgets
+
+             List<int> monsterBudgets = new List<int>();
+
+             //town and wilderness
+             monsterBudgets.Add(0);
+             monsterBudgets.Add(0);
+
+             //cave 2-5
+             monsterBudgets.Add(300);
+             monsterBudgets.Add(350);
+             monsterBudgets.Add(400);
+             monsterBudgets.Add(450);
+
+             //build commonness list for caves
+             List<MonsterCommon> caveList = new List<MonsterCommon>();
+             caveList.Add(new MonsterCommon(new Creatures.Ferret(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.Rat(), 50));
+
+             int looseGroupDist = 10;
+             int lonerChance = 50;
+             int maxGroupSize = 6;
+             int minGroupSize = 3;
+             
+             for (int levelNo = 2; levelNo < 6; levelNo++)
+             {
+                 int budgetSpent = 0;
+
+                 while (budgetSpent < monsterBudgets[levelNo])
+                 {
+                     Monster monsterToPlace = null;
+
+                     //Monster by itself
+                     if (Game.Random.Next(100) < lonerChance)
+                     {
+                         monsterToPlace = GetMonsterFromCommonList(caveList);
+                         PlaceMonster(levelNo, monsterToPlace);
+                         budgetSpent += monsterToPlace.CreatureCost();
+                     }
+                     else
+                     {
+                         //Loose group
+                         int monsInGroup = minGroupSize + Game.Random.Next(maxGroupSize - minGroupSize);
+
+                         //First monster is centre
+
+                         monsterToPlace = GetMonsterFromCommonList(caveList);
+                         Point centerLoc = PlaceMonster(levelNo, monsterToPlace);
+
+                         //Other monsters surround
+
+                         for (int i = 0; i < monsInGroup - 1; i++)
+                         {
+                             monsterToPlace = GetMonsterFromCommonList(caveList);
+                             PlaceMonsterCloseToLocation(levelNo, monsterToPlace, centerLoc, looseGroupDist);
+                             //If this takes us a bit over budget, don't worry
+                             budgetSpent += monsterToPlace.CreatureCost();
+                         }
+                     }
+                 }
+             }
+             
             //The levels divide into 3 groups: cave, cave/halls and halls
             //The difficulty in each set is roughly the same
 
@@ -210,7 +328,7 @@ namespace RogueBasin
             //11-15: Halls
 
             //Could take into account depth and difficulty level
-
+             /*
             List<int> levelMonsterAmounts = new List<int>();
 
             int Dungeon1StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0);
@@ -222,7 +340,7 @@ namespace RogueBasin
                 int num = 200 + 80 * (i - Dungeon1StartLevel);
                 levelMonsterAmounts.Add(num);
             }
-
+             */
             //levelMonsterAmounts[0] = 500;
             /*{
 
@@ -242,7 +360,7 @@ namespace RogueBasin
                 500, //14
                 550 //15
             };*/
-
+             /*
             //Monster Types
             Creatures.Ferret ferret = new RogueBasin.Creatures.Ferret();
             Creatures.Goblin goblin = new RogueBasin.Creatures.Goblin();
@@ -362,7 +480,7 @@ namespace RogueBasin
                 }
             }
 
-            List<Monster> monstersToAdd = new List<Monster>();
+            List<Monster> monstersToAdd = new List<Monster>();*/
             /*
             monstersToAdd.Add(new Creatures.Bat());
             monstersToAdd.Add(new Creatures.BlackUnicorn());
@@ -387,7 +505,9 @@ namespace RogueBasin
             monstersToAdd.Add(new Creatures.Nymph());
             monstersToAdd.Add(new Creatures.Nymph());
             monstersToAdd.Add(new Creatures.Nymph());*/
-
+            
+             /*
+            List<Monster> monstersToAdd = new List<Monster>();
             monstersToAdd.Add(new Creatures.Faerie());
             monstersToAdd.Add(new Creatures.Faerie());
             monstersToAdd.Add(new Creatures.Faerie());
@@ -400,301 +520,303 @@ namespace RogueBasin
                 {
                     location = dungeon.RandomWalkablePointInLevel(2);
                 } while (!dungeon.AddMonster(monster, 2, location));
-            }
-            /*
-            //Don't auto spawn for the last 2 levels
-            for (int i = 0; i < dungeon.NoLevels - 2; i++)
-            {
-                int randomNum;
+            }*/
 
-                //Switch on dungeon level
-                switch (i)
-                {
-                        //Early caves
-                    case 0:
 
-                        //0 is the town
+             /*
+             //Don't auto spawn for the last 2 levels
+             for (int i = 0; i < dungeon.NoLevels - 2; i++)
+             {
+                 int randomNum;
 
-                        int costSpent = 0;
+                 //Switch on dungeon level
+                 switch (i)
+                 {
+                         //Early caves
+                     case 0:
+
+                         //0 is the town
+
+                         int costSpent = 0;
 
                        
-                        int costSpent = 0;
+                         int costSpent = 0;
 
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
+                         do
+                         {
+                             randomNum = Game.Random.Next(100);
 
-                            Monster monsterToAdd = null;
+                             Monster monsterToAdd = null;
 
-                            if (randomNum < 50)
-                            {
-                                monsterToAdd = new Creatures.Orc();
-                                //monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else
-                            {
-                                monsterToAdd = new Creatures.Bugbear();
-                                //monsterToAdd = levelList[1].GetRandomMonster();
-                                //monsterToAdd = levelList[0].GetRandomMonster();
-                            }
+                             if (randomNum < 50)
+                             {
+                                 monsterToAdd = new Creatures.Orc();
+                                 //monsterToAdd = levelList[0].GetRandomMonster();
+                             }
+                             else
+                             {
+                                 monsterToAdd = new Creatures.Bugbear();
+                                 //monsterToAdd = levelList[1].GetRandomMonster();
+                                 //monsterToAdd = levelList[0].GetRandomMonster();
+                             }
 
-                            Point location;
+                             Point location;
 
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+                             do
+                             {
+                                 location = dungeon.RandomWalkablePointInLevel(i);
+                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
 
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
+                             CheckSpecialMonsterGroups(monsterToAdd, i);
 
-                            costSpent += monsterToAdd.CreatureCost();
+                             costSpent += monsterToAdd.CreatureCost();
 
-                        } while (costSpent < levelMonsterAmounts[i]);
+                         } while (costSpent < levelMonsterAmounts[i]);
                         
-                        break;
+                         break;
 
-                    case 1:
-                    case 2:
+                     case 1:
+                     case 2:
 
-                        costSpent = 0;
+                         costSpent = 0;
 
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
+                         do
+                         {
+                             randomNum = Game.Random.Next(100);
 
-                            Monster monsterToAdd = null;
+                             Monster monsterToAdd = null;
 
-                            if (randomNum < 75)
-                            {
-                                monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else if (randomNum < 98)
-                            {
-                                monsterToAdd = levelList[1].GetRandomMonster();
-                            }
-                            else
-                                monsterToAdd = levelList[2].GetRandomMonster();
+                             if (randomNum < 75)
+                             {
+                                 monsterToAdd = levelList[0].GetRandomMonster();
+                             }
+                             else if (randomNum < 98)
+                             {
+                                 monsterToAdd = levelList[1].GetRandomMonster();
+                             }
+                             else
+                                 monsterToAdd = levelList[2].GetRandomMonster();
 
-                            Point location;
+                             Point location;
 
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+                             do
+                             {
+                                 location = dungeon.RandomWalkablePointInLevel(i);
+                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
 
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
+                             CheckSpecialMonsterGroups(monsterToAdd, i);
 
-                            costSpent += monsterToAdd.CreatureCost();
+                             costSpent += monsterToAdd.CreatureCost();
 
-                        } while (costSpent < levelMonsterAmounts[i]);
+                         } while (costSpent < levelMonsterAmounts[i]);
 
-                        break;
-                    //Late caves
-                    case 3:
-                    case 4:
-                    case 5:
+                         break;
+                     //Late caves
+                     case 3:
+                     case 4:
+                     case 5:
 
-                        costSpent = 0;
+                         costSpent = 0;
 
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
+                         do
+                         {
+                             randomNum = Game.Random.Next(100);
 
-                            Monster monsterToAdd = null;
+                             Monster monsterToAdd = null;
 
-                            if (randomNum < 50)
-                            {
-                                monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else if (randomNum < 75)
-                            {
-                                monsterToAdd = levelList[1].GetRandomMonster();
-                            }
-                            else if(randomNum < 98)
-                                monsterToAdd = levelList[2].GetRandomMonster();
-                            else
-                                monsterToAdd = levelList[3].GetRandomMonster();
+                             if (randomNum < 50)
+                             {
+                                 monsterToAdd = levelList[0].GetRandomMonster();
+                             }
+                             else if (randomNum < 75)
+                             {
+                                 monsterToAdd = levelList[1].GetRandomMonster();
+                             }
+                             else if(randomNum < 98)
+                                 monsterToAdd = levelList[2].GetRandomMonster();
+                             else
+                                 monsterToAdd = levelList[3].GetRandomMonster();
 
-                            Point location;
+                             Point location;
 
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+                             do
+                             {
+                                 location = dungeon.RandomWalkablePointInLevel(i);
+                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
 
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
+                             CheckSpecialMonsterGroups(monsterToAdd, i);
 
-                            costSpent += monsterToAdd.CreatureCost();
+                             costSpent += monsterToAdd.CreatureCost();
 
-                        } while (costSpent < levelMonsterAmounts[i]);
+                         } while (costSpent < levelMonsterAmounts[i]);
 
-                        break;
-                    //Early cave/hall
-                    case 6:
-                    case 7:
-                    case 8:
+                         break;
+                     //Early cave/hall
+                     case 6:
+                     case 7:
+                     case 8:
 
-                        costSpent = 0;
+                         costSpent = 0;
 
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
+                         do
+                         {
+                             randomNum = Game.Random.Next(100);
 
-                            Monster monsterToAdd = null;
+                             Monster monsterToAdd = null;
 
-                            if (randomNum < 25)
-                            {
-                                monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else if (randomNum < 40)
-                            {
-                                monsterToAdd = levelList[1].GetRandomMonster();
-                            }
-                            else if (randomNum < 90)
-                                monsterToAdd = levelList[2].GetRandomMonster();
-                            else
-                                monsterToAdd = levelList[3].GetRandomMonster();
+                             if (randomNum < 25)
+                             {
+                                 monsterToAdd = levelList[0].GetRandomMonster();
+                             }
+                             else if (randomNum < 40)
+                             {
+                                 monsterToAdd = levelList[1].GetRandomMonster();
+                             }
+                             else if (randomNum < 90)
+                                 monsterToAdd = levelList[2].GetRandomMonster();
+                             else
+                                 monsterToAdd = levelList[3].GetRandomMonster();
 
-                            Point location;
+                             Point location;
 
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+                             do
+                             {
+                                 location = dungeon.RandomWalkablePointInLevel(i);
+                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
 
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
+                             CheckSpecialMonsterGroups(monsterToAdd, i);
 
-                            costSpent += monsterToAdd.CreatureCost();
+                             costSpent += monsterToAdd.CreatureCost();
 
-                        } while (costSpent < levelMonsterAmounts[i]);
+                         } while (costSpent < levelMonsterAmounts[i]);
 
-                        break;
+                         break;
 
-                    //Late cave/hall
-                    case 9:
-                    case 10:
+                     //Late cave/hall
+                     case 9:
+                     case 10:
 
-                        costSpent = 0;
+                         costSpent = 0;
 
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
+                         do
+                         {
+                             randomNum = Game.Random.Next(100);
 
-                            Monster monsterToAdd = null;
+                             Monster monsterToAdd = null;
 
-                            if (randomNum < 10)
-                            {
-                                monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else if (randomNum < 30)
-                            {
-                                monsterToAdd = levelList[1].GetRandomMonster();
-                            }
-                            else if (randomNum < 60)
-                                monsterToAdd = levelList[2].GetRandomMonster();
-                            else if(randomNum < 90)
-                                monsterToAdd = levelList[3].GetRandomMonster();
-                            else
-                                monsterToAdd = levelList[4].GetRandomMonster();
+                             if (randomNum < 10)
+                             {
+                                 monsterToAdd = levelList[0].GetRandomMonster();
+                             }
+                             else if (randomNum < 30)
+                             {
+                                 monsterToAdd = levelList[1].GetRandomMonster();
+                             }
+                             else if (randomNum < 60)
+                                 monsterToAdd = levelList[2].GetRandomMonster();
+                             else if(randomNum < 90)
+                                 monsterToAdd = levelList[3].GetRandomMonster();
+                             else
+                                 monsterToAdd = levelList[4].GetRandomMonster();
 
-                            Point location;
+                             Point location;
 
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+                             do
+                             {
+                                 location = dungeon.RandomWalkablePointInLevel(i);
+                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
 
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
+                             CheckSpecialMonsterGroups(monsterToAdd, i);
 
-                            costSpent += monsterToAdd.CreatureCost();
+                             costSpent += monsterToAdd.CreatureCost();
 
-                        } while (costSpent < levelMonsterAmounts[i]);
-                        break;
-                        //Early halls
-                    case 11:
-                    case 12:
-                        case 13:
+                         } while (costSpent < levelMonsterAmounts[i]);
+                         break;
+                         //Early halls
+                     case 11:
+                     case 12:
+                         case 13:
 
-                        costSpent = 0;
+                         costSpent = 0;
 
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
+                         do
+                         {
+                             randomNum = Game.Random.Next(100);
 
-                            Monster monsterToAdd = null;
+                             Monster monsterToAdd = null;
 
-                            if (randomNum < 15)
-                            {
-                                monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else if (randomNum < 25)
-                            {
-                                monsterToAdd = levelList[1].GetRandomMonster();
-                            }
-                            else if (randomNum < 35)
-                                monsterToAdd = levelList[2].GetRandomMonster();
-                            else if(randomNum < 80)
-                                monsterToAdd = levelList[3].GetRandomMonster();
-                            else
-                                monsterToAdd = levelList[4].GetRandomMonster();
+                             if (randomNum < 15)
+                             {
+                                 monsterToAdd = levelList[0].GetRandomMonster();
+                             }
+                             else if (randomNum < 25)
+                             {
+                                 monsterToAdd = levelList[1].GetRandomMonster();
+                             }
+                             else if (randomNum < 35)
+                                 monsterToAdd = levelList[2].GetRandomMonster();
+                             else if(randomNum < 80)
+                                 monsterToAdd = levelList[3].GetRandomMonster();
+                             else
+                                 monsterToAdd = levelList[4].GetRandomMonster();
 
-                            Point location;
+                             Point location;
 
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+                             do
+                             {
+                                 location = dungeon.RandomWalkablePointInLevel(i);
+                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
 
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
+                             CheckSpecialMonsterGroups(monsterToAdd, i);
 
-                            costSpent += monsterToAdd.CreatureCost();
+                             costSpent += monsterToAdd.CreatureCost();
 
-                        } while (costSpent < levelMonsterAmounts[i]);
-                        break;
-                             //Late halls
-                    case 14:
-                    case 15:
+                         } while (costSpent < levelMonsterAmounts[i]);
+                         break;
+                              //Late halls
+                     case 14:
+                     case 15:
 
-                        costSpent = 0;
+                         costSpent = 0;
 
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
+                         do
+                         {
+                             randomNum = Game.Random.Next(100);
 
-                            Monster monsterToAdd = null;
+                             Monster monsterToAdd = null;
 
-                            if (randomNum < 10)
-                            {
-                                monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else if (randomNum < 20)
-                            {
-                                monsterToAdd = levelList[1].GetRandomMonster();
-                            }
-                            else if (randomNum < 30)
-                                monsterToAdd = levelList[2].GetRandomMonster();
-                            else if(randomNum < 70)
-                                monsterToAdd = levelList[3].GetRandomMonster();
-                            else
-                                monsterToAdd = levelList[4].GetRandomMonster();
+                             if (randomNum < 10)
+                             {
+                                 monsterToAdd = levelList[0].GetRandomMonster();
+                             }
+                             else if (randomNum < 20)
+                             {
+                                 monsterToAdd = levelList[1].GetRandomMonster();
+                             }
+                             else if (randomNum < 30)
+                                 monsterToAdd = levelList[2].GetRandomMonster();
+                             else if(randomNum < 70)
+                                 monsterToAdd = levelList[3].GetRandomMonster();
+                             else
+                                 monsterToAdd = levelList[4].GetRandomMonster();
 
-                            Point location;
+                             Point location;
 
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
+                             do
+                             {
+                                 location = dungeon.RandomWalkablePointInLevel(i);
+                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
 
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
+                             CheckSpecialMonsterGroups(monsterToAdd, i);
 
-                            costSpent += monsterToAdd.CreatureCost();
+                             costSpent += monsterToAdd.CreatureCost();
 
-                        } while (costSpent < levelMonsterAmounts[i]);
-                        break;
-                }
+                         } while (costSpent < levelMonsterAmounts[i]);
+                         break;
+                 }
 
-            }
-            */
+             }
+             */
             /*
                             int noCreatures = 25 + Game.Random.Next(5);
 
@@ -719,6 +841,23 @@ namespace RogueBasin
 
         }
 
+         private Point PlaceMonsterCloseToLocation(int levelNo, Monster monsterToPlace, Point centerLoc, int looseGroupDist)
+         {
+             Point location = new Point();
+             do
+             {
+                 location = dungeon.RandomWalkablePointInLevel(levelNo);
+
+                 if (Game.Dungeon.GetDistanceBetween(centerLoc, location) > looseGroupDist)
+                     continue;
+
+             } while (!dungeon.AddMonster(monsterToPlace, levelNo, location));
+
+             CheckSpecialMonsterGroups(monsterToPlace, levelNo);
+
+             return location;
+         }
+
         /// <summary>
         /// Slightly unsafe due to infinite loop but not a big deal if it fails
         /// </summary>
@@ -726,7 +865,7 @@ namespace RogueBasin
         /// <param name="levelToPlace"></param>
         private void CheckSpecialMonsterGroups(Monster monster, int levelToPlace)
         {
-            int minDistance = 8;
+            int minDistance = 6;
             int loopCount = 0;
 
             Point location = new Point();

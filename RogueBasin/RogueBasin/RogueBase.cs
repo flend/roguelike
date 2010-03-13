@@ -461,7 +461,7 @@ namespace RogueBasin
 
                                 case 'Y':
                                     //Take me to first dungeon
-                                    Game.Dungeon.Player.LocationLevel = 26;
+                                    Game.Dungeon.Player.LocationLevel = 2;
                                     TeleportToDownStairs();
                                     UpdateScreen();
                                     break;

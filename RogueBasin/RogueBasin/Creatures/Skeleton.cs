@@ -19,6 +19,11 @@ namespace RogueBasin.Creatures
             Speed = 110;
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Skeleton();
+        }
+
         public override void InventoryDrop()
         {
             //Nothing to drop

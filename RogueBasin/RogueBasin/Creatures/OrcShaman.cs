@@ -19,6 +19,11 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new OrcShaman();
+        }
+
         public override void InventoryDrop()
         {
             //Nothing to drop

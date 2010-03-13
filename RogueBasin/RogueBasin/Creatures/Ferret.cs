@@ -102,7 +102,7 @@ namespace RogueBasin.Creatures
             return 1;
         }
 
-        public Ferret NewCreatureOfThisType()
+        public override Monster NewCreatureOfThisType()
         {
             return new Ferret();
         }

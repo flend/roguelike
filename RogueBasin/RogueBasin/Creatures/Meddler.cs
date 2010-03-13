@@ -20,6 +20,10 @@ namespace RogueBasin.Creatures
             Speed = 110;
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Meddler();
+        }
         public override void InventoryDrop()
         {
             //Nothing to drop

@@ -102,7 +102,7 @@ namespace RogueBasin.Creatures
             return 3;
         }
 
-        public Ogre NewCreatureOfThisType()
+        public  override  Monster NewCreatureOfThisType()
         {
             return new Ogre();
         }

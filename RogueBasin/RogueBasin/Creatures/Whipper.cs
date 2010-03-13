@@ -16,6 +16,11 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
         }
 
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Whipper();
+        }
+
         public override void InventoryDrop()
         {
             //Nothing to drop
