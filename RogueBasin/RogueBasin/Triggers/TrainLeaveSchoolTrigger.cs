@@ -40,8 +40,6 @@ namespace RogueBasin.Triggers
 
             Dungeon dungeon = Game.Dungeon;
 
-            bool doesTraining = false;
-
             if(dungeon.IsWeekday()) {
 
                 //Normal weekday

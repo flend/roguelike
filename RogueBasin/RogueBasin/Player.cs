@@ -242,10 +242,6 @@ namespace RogueBasin
             //Charm points
             CharmPoints = CharmStat;
 
-            if(inv.ContainsItem(new Items.StaffPower())) {
-                MaxMagicPoints = (int)Math.Ceiling(MagicStat * 2.5);
-                MagicPoints = (int)Math.Ceiling(MagicStat * 2.5);
-            }
             //Max charmed creatures
             if (inv.ContainsItem(new Items.SparklingEarrings()))
             {

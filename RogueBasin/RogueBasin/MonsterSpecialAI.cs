@@ -12,7 +12,8 @@ namespace RogueBasin
         Summoner,
         PlayerEffecter,
         MonsterEffecter,
-        PlayerCaster
+        PlayerCaster,
+        Dragon
     };
 
     /// <summary>
@@ -233,6 +234,11 @@ namespace RogueBasin
         protected virtual int RelaxDirectionAt() { return 0; }
         */
 
+        protected virtual bool CreatureWillBackAway()
+        {
+            return true;
+        }
+
         /// <summary>
         /// Override the following code from the hand to hand AI to give us some range and to use special abilities.
         /// </summary>
@@ -242,7 +248,7 @@ namespace RogueBasin
             //If we are in range, fire
             double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
 
-            if (range < GetMissileRange() / 2.0)
+            if (range < GetMissileRange() / 2.0 && CreatureWillBackAway())
             {
                 //Too close creature will try to back away
                 int deltaX = newTarget.LocationMap.x - this.LocationMap.x;
@@ -818,7 +824,7 @@ namespace RogueBasin
 
                 //Shouldn't happen if charmed
 
-                LogFile.Log.LogEntryDebug(this.SingleDescription + " attempting player effect attack", LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug(this.SingleDescription + " attempting player spell attack", LogDebugLevel.Medium);
 
                 //Player already has this effect
                 Player player = Game.Dungeon.Player;
@@ -846,6 +852,142 @@ namespace RogueBasin
 
                 //If failed, we add our effect
                 effectToUse.DoSpell(player.LocationMap);
+
+                return true;
+
+            }
+            
+
+            //Dragon can do a variety of things
+            else if (GetSpecialAIType() == SpecialAIType.Dragon)
+            {
+                Player player = Game.Dungeon.Player;
+
+                //Are we injured? If so, try to heal ourselves
+
+                if (this.Hitpoints < (int)Math.Floor(this.MaxHitpoints / 2.0))
+                {
+                    int oldHP = this.Hitpoints;
+                    this.Hitpoints += (int)(Game.Random.Next(this.MaxHitpoints - this.Hitpoints) / 5.0);
+
+                    //Update msg
+                    Game.MessageQueue.AddMessage("The Dragon heals itself!");
+                    LogFile.Log.LogEntryDebug(this.SingleDescription + " hp: " + oldHP + " -> " + this.Hitpoints, LogDebugLevel.Medium);
+
+                    return true;
+                }
+
+                //If not, screw around with the player a bit
+
+                //50% chance we will just attack
+
+                if (Game.Random.Next(100) < 50)
+                {
+                    return false;
+                }
+
+               //Otherwise decide what we're going to do
+
+                int taskNo = Game.Random.Next(3);
+
+                if (taskNo == 0)
+                {
+                    //Player already has this effect
+                    /*
+                    Spell effectToUse = new Spells.Blink();
+
+                    if (effectToUse == null)
+                    {
+                        LogFile.Log.LogEntryDebug(this.SingleDescription + " error getting spell", LogDebugLevel.High);
+                        return false;
+                    }
+
+                    Game.MessageQueue.AddMessage("The Dragon tries to teleport you!");
+
+                    //Player resistance
+                    bool playerResistance = DoPlayerResistance();
+
+                    if (playerResistance == true)
+                    {
+                        Game.MessageQueue.AddMessage("You resist the attack.");
+                        return true;
+                    }
+
+                    //If failed, we add our effect
+                    effectToUse.DoSpell(player.LocationMap);
+
+                    return true;*/
+
+                    return false;
+
+                }
+                else if (taskNo == 1)
+                {
+                    int duration = 250 + Game.Random.Next(500);
+
+                    PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(Game.Dungeon.Player, duration, 30);
+
+                    if (speedDownEff == null)
+                    {
+                        LogFile.Log.LogEntryDebug(this.SingleDescription + " error getting effect", LogDebugLevel.High);
+                        return false;
+                    }
+
+                    //Don't do it twice
+                    if (player.IsEffectActive(speedDownEff))
+                    {
+                        return false;
+                    }
+                    Game.MessageQueue.AddMessage("The Dragon tries to slow you!");
+
+                    //Player resistance
+                    bool playerResistance = DoPlayerResistance();
+
+                    if (playerResistance == true)
+                    {
+                        Game.MessageQueue.AddMessage("You resist the attack.");
+                        return true;
+                    }
+
+                    //If failed, we add our effect
+                    player.AddEffect(speedDownEff);
+
+                }
+                else
+                {
+                    int duration = 250 + Game.Random.Next(500);
+                    int playerSight = Game.Dungeon.Player.SightRadius;
+                    int sightDown = playerSight - 1;
+
+                    PlayerEffects.SightRadiusDown sightDownEff = new RogueBasin.PlayerEffects.SightRadiusDown(Game.Dungeon.Player, duration, sightDown);
+
+                    if (sightDownEff == null)
+                    {
+                        LogFile.Log.LogEntryDebug(this.SingleDescription + " error getting effect", LogDebugLevel.High);
+                        return false;
+                    }
+
+                    //Don't do it twice
+                    if (player.IsEffectActive(sightDownEff))
+                    {
+                        return false;
+                    }
+
+                    Game.MessageQueue.AddMessage("The Dragon tries to blind you!");
+
+                    //Player resistance
+                    bool playerResistance = DoPlayerResistance();
+
+                    if (playerResistance == true)
+                    {
+                        Game.MessageQueue.AddMessage("You resist the attack.");
+                        return true;
+                    }
+
+                    //If failed, we add our effect
+                    player.AddEffect(sightDownEff);
+
+                }
 
                 return true;
 

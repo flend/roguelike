@@ -80,7 +80,7 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "orc shaman"; } }
+        public override string SingleDescription { get { return UniqueName; } }
 
         /// <summary>
         /// Rats

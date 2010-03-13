@@ -10,7 +10,7 @@ namespace RogueBasin
     /// <summary>
     /// Loads a txt file made in ascii paint or similar
     /// </summary>
-    class MapGeneratorFromASCIIFile
+    class LastMapGeneratorFromASCIIFile
     {
         bool fileLoaded = false;
 
@@ -39,7 +39,7 @@ namespace RogueBasin
         int width;
         int height;
 
-        public MapGeneratorFromASCIIFile()
+        public LastMapGeneratorFromASCIIFile()
         {
             terrainMapping = new Dictionary<char, MapTerrain>();
             featureChars = new List<char>();
@@ -69,8 +69,8 @@ namespace RogueBasin
             specialChars.Add('C'); //see corpses trigger
             specialChars.Add('D'); //see corpses trigger
             //specialChars.Add('%'); //a corpse
-            specialChars.Add('G'); //your friend
-            specialChars.Add('Y'); //the lich
+            specialChars.Add('F'); //your friend
+            specialChars.Add('D'); //the lich
 
 
         }
@@ -87,14 +87,13 @@ namespace RogueBasin
             terrainMapping.Add(' ', MapTerrain.Void);
             terrainMapping.Add('.', MapTerrain.Empty);
             terrainMapping.Add(',', MapTerrain.Grass);
-            terrainMapping.Add('=', MapTerrain.River);
+            terrainMapping.Add('#', MapTerrain.Volcano);
             terrainMapping.Add('^', MapTerrain.Mountains);
-            terrainMapping.Add('*', MapTerrain.Trees);
+            //terrainMapping.Add('*', MapTerrain.Trees);
             terrainMapping.Add('-', MapTerrain.Road);
-            terrainMapping.Add('#', MapTerrain.Wall);
-            terrainMapping.Add('+', MapTerrain.Gravestone);
-            terrainMapping.Add('%', MapTerrain.Forest);
+            terrainMapping.Add('*', MapTerrain.Wall);
             terrainMapping.Add('|', MapTerrain.BarDoor);
+            terrainMapping.Add('%', MapTerrain.Forest);
         }
 
         /// <summary>
@@ -297,6 +296,10 @@ namespace RogueBasin
                             thisSquare.Walkable = false;
                             thisSquare.BlocksLight = true;
                             break;
+                        case MapTerrain.BarDoor:
+                            thisSquare.Walkable = false;
+                            thisSquare.BlocksLight = false;
+                            break;
                     }
                 }
                 
@@ -322,13 +325,13 @@ namespace RogueBasin
                        switch (mapChar)
                         {
                             case '~':
-                                //featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.DungeonInfo Dungeon1StartLevel), levelNo, new Point(i, row));
+                                //featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseE(Game.Dungeon.DungeonInfo Dungeon1StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '/':
                                 //featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(Game.Dungeon.Dungeon2StartLevel), levelNo, new Point(i, row));
                                 break;
                             case '<':
-                                //featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, new Point(i, row));
+                                featureAddSuccess = Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, new Point(i, row));
                                 break;
                         }
 
@@ -365,17 +368,12 @@ namespace RogueBasin
                                 baseMap.PCStartLocation = new Point(i, row);
                                 break;
                             case '1':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.BackToSchool());
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.PrinceInABox());
                                 break;
                             case '2':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(0, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0)), levelNo, new Point(i, row));
+                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.ApproachingTheDragon());
                                 break;
-                            case '3':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(1, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1)), levelNo, new Point(i, row));
-                                break;
-                            case '4':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(2, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2)), levelNo, new Point(i, row));
-                                break;
+                           
                             case '5':
                                 addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(3, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3)), levelNo, new Point(i, row));
                                 break;
@@ -400,19 +398,16 @@ namespace RogueBasin
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Empty, "grave"));
                                 baseMap.mapSquares[i, row].Terrain = MapTerrain.Mountains;
                                 break;
-                            case 'D':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Empty, "final"));
-                                baseMap.mapSquares[i, row].Terrain = MapTerrain.Mountains;
-                                break;
+
 
                             //case '%':
                               //  Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
                                 //break;
-                            case 'Y':
-                                Game.Dungeon.AddMonster(new Creatures.Lich(), levelNo, new Point(i, row));
+                            case 'D':
+                                Game.Dungeon.AddMonsterNoConnectivityCheck(new Creatures.DragonUnique(), levelNo, new Point(i, row));
                                 break;
-                            case 'G':
-                                Game.Dungeon.AddMonster(new Creatures.Friend(), levelNo, new Point(i, row));
+                            case 'F':
+                                Game.Dungeon.AddMonsterNoConnectivityCheck(new Creatures.Friend(), levelNo, new Point(i, row));
                                 break;
                         }
 

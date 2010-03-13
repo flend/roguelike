@@ -1964,6 +1964,25 @@ namespace RogueBasin {
             }
 
         }
+        public void SaveCurrentLevelToDisk()
+        {
+            Map map = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel];
+
+            StreamWriter outFile = new StreamWriter("outfile.txt");
+
+            for (int i = 0; i < map.height; i++)
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j < map.width; j++)
+                {
+                    sb.Append(StringEquivalent.TerrainChars[map.mapSquares[j, i].Terrain]);
+
+                }
+                outFile.WriteLine(sb.ToString());
+            }
+
+        }
+
 
         //Draw a map only (useful for debugging)
         public void DrawMapDebug(Map map)

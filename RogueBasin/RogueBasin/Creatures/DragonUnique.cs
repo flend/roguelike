@@ -6,23 +6,27 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Slower. Quite clever missile troop
+    /// Medium threat. Fast but weak missile.
     /// </summary>
-    public class Nymph : MonsterSpecialAI
+    public class DragonUnique : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 5;
-        const int classMinHitpoints = 10;
+        const int classDeltaHitpoints = 10;
+        const int classMinHitpoints = 60;
 
-        public Nymph()
+        public string UniqueName;
+
+        public DragonUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 80;
+            Speed = 120;
+            Unique = true;
+            UniqueName = "Fafir the Fiery";
         }
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Nymph();
+            return new DragonUnique();
         }
 
         public override void InventoryDrop()
@@ -42,7 +46,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 12;
+            return 16;
         }
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 4;
+            return 10;
         }
 
         /// <summary>
@@ -58,38 +62,38 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 3;
+            return 10;
         }
 
-        protected override int GetUseSpecialChance()
+        protected override double GetMissileRange()
         {
-            return 95;
+            return 4.5;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "breathes fire";
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "nymph"; } }
+        public override string SingleDescription { get { return UniqueName; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "nymphs"; } }
+        public override string GroupDescription { get { return UniqueName; } }
 
         protected override char GetRepresentation()
         {
-            return 'N';
-        }
-
-        protected override SpecialAIType GetSpecialAIType()
-        {
-            return SpecialAIType.PlayerEffecter;
+            return 'D';
         }
 
         protected override int RelaxDirectionAt()
@@ -97,49 +101,53 @@ namespace RogueBasin.Creatures
             return 5;
         }
 
+        protected override int GetChanceToRecover()
+        {
+            return 10;
+        }
+
+        protected override int GetChanceToFlee()
+        {
+            return 0;
+        }
+
+        protected override int GetMaxHPWillFlee()
+        {
+            return Hitpoints;
+        }
+
         protected override int GetTotalFleeLoops()
         {
-            return 50;
+            return 20;
         }
-
-        protected override double GetMissileRange()
-        {
-            return 4;
-        }
-
-        protected override string GetWeaponName()
-        {
-            return "throws a stick";
-        }
-
         public override int CreatureCost()
         {
-            return 50;
+            return 40;
         }
 
         public override int CreatureLevel()
         {
-            return 4;
+            return 3;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.CornflowerBlue;
+            return ColorPresets.Red;
         }
 
         public override int GetMagicXP()
         {
-            return 60;
+            return 230;
         }
 
         public override int GetCombatXP()
         {
-            return 30;
+            return 235;
         }
 
         public override int GetMagicRes()
         {
-            return 50;
+            return 20;
         }
 
         public override int GetCharmRes()
@@ -149,12 +157,39 @@ namespace RogueBasin.Creatures
 
         public override bool CanBeCharmed()
         {
-            return true;
+            return false;
         }
+
+        int nextMove = -1;
 
         protected override string EffectAttackString()
         {
-            return "slow";
+            //Set nextMove
+
+            nextMove = Game.Random.Next(4);
+
+            switch (nextMove)
+            {
+                case 0:
+                    return "blink";
+                    
+                case 1:
+                    return "slow";
+                   
+                case 2:
+                    return "blind";
+                   
+                case 3:
+                    return "ignores";
+                   
+            }
+
+            return "";
+        }
+
+        protected override bool CreatureWillBackAway()
+        {
+            return false;
         }
 
         protected override bool DoPlayerResistance()
@@ -169,7 +204,7 @@ namespace RogueBasin.Creatures
                 highestSkill = player.MagicStat;
 
 
-            
+            highestSkill = highestSkill / 2;
             if (highestSkill > 75)
                 highestSkill = 75;
 
@@ -182,13 +217,21 @@ namespace RogueBasin.Creatures
             return false;
         }
 
-        protected override PlayerEffect GetSpecialAIEffect()
+        protected override Spell GetSpecialAISpell()
         {
-            int duration = 250 + Game.Random.Next(500);
-
-            PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(Game.Dungeon.Player, duration, 30);
-
-            return speedDownEff;
+            return new Spells.Blink();
         }
+
+        protected override SpecialAIType GetSpecialAIType()
+        {
+            return SpecialAIType.Dragon;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 80;
+        }
+        
+
     }
 }

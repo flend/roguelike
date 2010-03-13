@@ -78,14 +78,34 @@ namespace RogueBasin
 
         public bool LastMission { get; set; }
 
+        public bool DragonDead { get; set; }
+
+        List<bool> level3UniqueStatus;
+        List<bool> level4UniqueStatus;
+
         //public int CurrentDungeon { get; set; }
+
+        public void SetL3UniqueDead(int dungeonID)
+        {
+            dungeons[dungeonID].subUniqueDefeated = true;
+        }
+
+        public void SetL4UniqueDead(int dungeonID)
+        {
+            dungeons[dungeonID].masterUniqueDefeated = true;
+        }
 
         public DungeonInfo()
         {
             dungeons = new List<DungeonProfile>();
+            //false = unique alive
+            level3UniqueStatus = new List<bool>();
+            //false = unique alive
+            level4UniqueStatus = new List<bool>();
+
             LastMission = false;
             //CurrentDungeon = -1;
-
+            DragonDead = false;
             SetupDungeonStartAndEnd();
         }
 
@@ -100,6 +120,12 @@ namespace RogueBasin
                 thisDung.dungeonEndLevel = 5 + i * 4;
 
                 dungeons.Add(thisDung);
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                level3UniqueStatus.Add(false);
+                level4UniqueStatus.Add(false);
             }
 
             //Setup the original open dungeons
@@ -890,6 +916,61 @@ namespace RogueBasin
                 //Check connectivity if required
                 if(!CheckInConnectedPartOfMap(level, location)) {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Position not connected to stairs", LogDebugLevel.Medium);
+                    return false;
+                }
+
+                //Otherwise OK
+                creature.LocationLevel = level;
+                creature.LocationMap = location;
+
+                creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
+
+                monsters.Add(creature);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry(String.Format("AddCreature: ") + ex.Message);
+                return false;
+            }
+
+        }
+
+        /// <summary>
+        /// Add monster. In addition to normal checks, check connectivity between monster and down stairs. This will ensure the monster is not placed in an unaccessible place
+        /// </summary>
+        /// <param name="creature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+
+        public bool AddMonsterNoConnectivityCheck(Monster creature, int level, Point location)
+        {
+            //Try to add a creature at the requested location
+            //This may fail due to something else being there or being non-walkable
+            try
+            {
+                Map creatureLevel = levels[level];
+
+                //Check square is accessable
+                if (!MapSquareIsWalkable(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
+                    return false;
+                }
+
+                //Check square has nothing else on it
+                SquareContents contents = MapSquareContents(level, location);
+
+                if (contents.monster != null)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    return false;
+                }
+
+                if (contents.player != null)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
                     return false;
                 }
 
@@ -1801,34 +1882,44 @@ namespace RogueBasin
                  AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
 
             //Deal with special monsters (bit rubbish programming)
-            Creatures.Lich lich = monster as Creatures.Lich;
 
-
-            if (lich != null)
+            if (!dungeonInfo.LastMission && monster.Unique)
             {
+                //We killed a unique. Add it to the list
+                
+                //What level are we on
+                int levelType = player.LocationLevel - 2;
+                int levelMod = levelType % 4;
 
-                //Kill all other monsters on the level
+                if (levelMod == 3)
+                {
+                    dungeonInfo.SetL3UniqueDead(player.CurrentDungeon);
+                }
+                else if(levelMod == 4) {
+                    dungeonInfo.SetL4UniqueDead(player.CurrentDungeon);
+                }
+                else {
+                    //Problem
+                    LogFile.Log.LogEntryDebug("Error setting unique dead", LogDebugLevel.High);
+                }
+            }
 
+            if(dungeonInfo.LastMission && monster.Unique) {
+
+                //OK we killed the dragon!
+
+                //Kill all the monsters on this level
                 foreach (Monster m in monsters)
                 {
-                    if (m.LocationLevel == lich.LocationLevel && m != lich)
-                        KillMonster(m, true);
+                    if (m.LocationLevel == player.LocationLevel)
+                        KillMonster(m, false);
                 }
 
-                //OK, we've killed the end baddy have a moral decision
-                Screen.Instance.PlayMovie("lichGem", true);
+                //Creatures.Lich lich = monster as Creatures.Lich;
 
-                bool takeGem = Screen.Instance.YesNoQuestion("Take the gem?");
-
-                if (takeGem)
-                {
-                    Screen.Instance.PlayMovie("becomeLich", true);
-                    EndGame("became a powerful lich and begun his reign of terror.");
-                }
-                else
-                {
-                    Screen.Instance.PlayMovie("crushLichGem", true);
-                }
+                Screen.Instance.PlayMovie("dragondead", true);
+                
+                dungeonInfo.DragonDead = true;
             }
         }
 
@@ -2757,6 +2848,8 @@ namespace RogueBasin
             Screen.Instance.DrawDeathScreen();
             Screen.Instance.FlushConsole();
 
+            List<string> killRecordText = new List<string>();
+
             SaveObituary(deathPreamble, killRecord.killStrings);
 
             if (!Game.Dungeon.SaveScumming)
@@ -3279,6 +3372,7 @@ namespace RogueBasin
             Player.LocationMap = levels[0].PCStartLocation;
 
             //Drop all the player's equipped items
+            //If we want to keep them I have to figure out where they get recharged
             PutItemsInStore();
         }
 
@@ -3364,7 +3458,7 @@ namespace RogueBasin
             int dungeonsExplored = GetTotalDungeonsExplored();
 
             //Did we get the prince
-            bool princeGet = true;
+            bool princeGet = Game.Dungeon.dungeonInfo.DragonDead;
 
             //The last screen to display
             List<string> finalScreen = new List<string>();
@@ -3476,9 +3570,9 @@ namespace RogueBasin
             finalScreen.Add(careerStr);
 
             if(princeGet)
-                careerStr = " and to marry her Prince and to live happily ever after.";
+                careerStr = "and to marry her Prince and to live happily ever after.";
             else
-                careerStr = " and to live happily ever after.";
+                careerStr = "and to live happily ever after.";
 
             finalScreen.Add(careerStr);
 
@@ -3512,6 +3606,9 @@ namespace RogueBasin
             obString.Add("");
             obString.Add("Intrinsics:");
             obString.AddRange(instricsList);
+            obString.Add("She defeated " + killRecord.killCount + " creatures.");
+            obString.Add("");
+            obString.Add("Creature list:");
 
             SaveObituary(obString, killRecord.killStrings);
 
@@ -3658,6 +3755,12 @@ namespace RogueBasin
             //Magic points
             player.MaxMagicPoints = player.MagicStat * 2;
             player.MagicPoints = player.MagicStat * 2;
+
+            if (inv.ContainsItem(new Items.StaffPower()))
+            {
+                player.MaxMagicPoints = (int)Math.Ceiling(player.MagicStat * 2.5);
+                player.MagicPoints = (int)Math.Ceiling(player.MagicStat * 2.5);
+            }
 
             //Set all the stats that can be set at any time
             player.CalculateCombatStats();

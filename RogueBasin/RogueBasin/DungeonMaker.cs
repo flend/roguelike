@@ -640,19 +640,28 @@ namespace RogueBasin
                  SpawnDungeon(i);
              }
 
+             
+
              //First dungeon
 
              //4 levels
 
              //Set budgets
 
-             
-             
+                          
+                         List<Monster> monstersToAdd = new List<Monster>();
+            
+            monstersToAdd.Add(new Creatures.DragonUnique());
 
-             
+            foreach (Monster monster in monstersToAdd)
+            {
+                Point location = new Point();
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(2);
+                } while (!dungeon.AddMonster(monster, 2, location));
 
-             
-             
+            }
 
              
 
@@ -2691,7 +2700,7 @@ namespace RogueBasin
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
@@ -2707,7 +2716,7 @@ namespace RogueBasin
                 caveGen.AddStaircases(levelNo);
 
                 //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 5
@@ -2720,7 +2729,7 @@ namespace RogueBasin
             caveGen.AddUpStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
             //DUNGEON 2 - levels 6-9
@@ -2740,7 +2749,7 @@ namespace RogueBasin
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
@@ -2757,7 +2766,7 @@ namespace RogueBasin
                 caveGen.AddStaircases(levelNo);
 
                 //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 9
@@ -2770,7 +2779,7 @@ namespace RogueBasin
             caveGen.AddUpStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
             //DUNGEON 3 - levels 10-13
@@ -2791,7 +2800,7 @@ namespace RogueBasin
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
@@ -2808,7 +2817,7 @@ namespace RogueBasin
                 caveGen.AddStaircases(levelNo);
 
                 //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 13
@@ -2820,7 +2829,7 @@ namespace RogueBasin
             caveGen.AddUpStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
             //DUNGEON 4 - levels 14-17
@@ -2837,7 +2846,7 @@ namespace RogueBasin
             hallsGen.AddExitStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, hallsGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
@@ -2853,7 +2862,7 @@ namespace RogueBasin
                 hallsGen.AddStaircases(levelNo);
 
                 //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+               // Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 17
@@ -2865,7 +2874,7 @@ namespace RogueBasin
             caveGen.AddUpStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
 
@@ -2889,7 +2898,7 @@ namespace RogueBasin
             ruinedGen.AddExitStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
@@ -2903,7 +2912,7 @@ namespace RogueBasin
                 ruinedGen.AddStaircases(levelNo);
 
                 //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 21
@@ -2915,7 +2924,7 @@ namespace RogueBasin
             ruinedGen.AddUpStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
             //DUNGEON 6 - levels 22-24
@@ -2942,7 +2951,7 @@ namespace RogueBasin
             ruinedGen.AddExitStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
@@ -2956,7 +2965,7 @@ namespace RogueBasin
                 ruinedGen.AddStaircases(levelNo);
 
                 //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 25
@@ -2968,7 +2977,7 @@ namespace RogueBasin
             ruinedGen.AddUpStaircaseOnly(levelNo);
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
             //DUNGEON 7 - levels 25-28
@@ -2989,7 +2998,7 @@ namespace RogueBasin
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
@@ -2999,7 +3008,7 @@ namespace RogueBasin
             for (int i = 0; i < middleLevelsInDungeon; i++)
             {
                 caveGen.GenerateMap();
-                caveGen.AddWaterToCave(15, 4);
+                //caveGen.AddWaterToCave(15, 4);
 
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(caveGen.Map);
@@ -3012,13 +3021,21 @@ namespace RogueBasin
             //level 28
 
             //Lowest level doens't have a downstaircase
-            caveGen.GenerateMap();
+            LastMapGeneratorFromASCIIFile lastGen = new LastMapGeneratorFromASCIIFile();
 
-            levelNo = dungeon.AddMap(caveGen.Map);
-            caveGen.AddUpStaircaseOnly(levelNo);
+            try
+            {
+                lastGen.LoadASCIIFile("dragonlevel.txt");
+                lastGen.AddMapToDungeon();
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Failed to load last level!: " + ex.Message);
+                throw new ApplicationException("Failed to load last level! Is the game installed correctly?");
+            }
 
             //Set light
-            Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
+            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
 
 

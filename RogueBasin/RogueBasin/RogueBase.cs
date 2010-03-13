@@ -465,9 +465,14 @@ namespace RogueBasin
 
                                 case 'Y':
                                     //Take me to first dungeon
+                                    Game.Dungeon.DungeonInfo.LastMission = true;
                                     Game.Dungeon.Player.LocationLevel = 26;
                                     TeleportToDownStairs();
                                     UpdateScreen();
+                                    break;
+
+                                case 'B':
+                                    Screen.Instance.SaveCurrentLevelToDisk();
                                     break;
 
                                 case 'z':
@@ -1236,6 +1241,9 @@ namespace RogueBasin
             }
 
             //Find the next closest creature (need to check charm / passive status)
+
+            //Need to replace this one with find closest hostile creature in FOV.
+            //The nearest creature might not be in FOV but a further away one might be
 
             lastSpellTarget = Game.Dungeon.FindClosestHostileCreature(Game.Dungeon.Player);
 

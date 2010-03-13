@@ -58,9 +58,10 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Rubble, '*');
             TerrainChars.Add(MapTerrain.Road, '-');
             TerrainChars.Add(MapTerrain.Mountains, '^');
-            TerrainChars.Add(MapTerrain.Volcano, '^');
+            TerrainChars.Add(MapTerrain.Volcano, '(');
             TerrainChars.Add(MapTerrain.Forest, '%');
             TerrainChars.Add(MapTerrain.Gravestone, '+');
+            TerrainChars.Add(MapTerrain.BarDoor, '|');
         }
 
         private static void SetupTerrainColors()
@@ -83,6 +84,7 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.Volcano, ColorPresets.Red);
             TerrainColors.Add(MapTerrain.Forest, ColorPresets.DarkSeaGreen);
             TerrainColors.Add(MapTerrain.Gravestone, ColorPresets.Gray);
+            TerrainColors.Add(MapTerrain.BarDoor, ColorPresets.Gray);
         }
 
         private static void SetupEquipmentSlots()
