@@ -958,40 +958,55 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Checks if location is in the connected part of the dungeon. Checked by routing a path from the down stairs
+        /// Checks if location is in the connected part of the dungeon. Checked by routing a path from the up or entry stairs
         /// </summary>
         /// <param name="level"></param>
         /// <param name="location"></param>
         /// <returns></returns>
-        private bool CheckInConnectedPartOfMap(int level, Point location)
+        public bool CheckInConnectedPartOfMap(int level, Point location)
         {
             //Level nature
             if (levels[level].GuaranteedConnected)
                 return true;
 
             //Find downstairs
-            Features.StaircaseDown downStairs = null;
-            Point stairlocation = new Point(0, 0);
+            Features.StaircaseUp upStairs = null;
+            Features.StaircaseExit entryStairs = null;
+            Point upStairlocation = new Point(0, 0);
+            Point entryStairlocation = new Point(0, 0);
+
 
             foreach (Feature feature in features)
             {
                 if (feature.LocationLevel == level &&
-                    feature is Features.StaircaseDown)
+                    feature is Features.StaircaseUp)
                 {
-                    downStairs = feature as Features.StaircaseDown;
-                    stairlocation = feature.LocationMap;
-                    break;
+                    upStairs = feature as Features.StaircaseUp;
+                    upStairlocation = feature.LocationMap;
+                }
+
+                if (feature.LocationLevel == level &&
+                    feature is Features.StaircaseExit)
+                {
+                    entryStairs = feature as Features.StaircaseExit;
+                    entryStairlocation = feature.LocationMap;
                 }
             }
 
             //We don't have downstairs, warn but return true
-            if (downStairs == null)
+            if (upStairs == null && entryStairs == null)
             {
                 LogFile.Log.LogEntryDebug("CheckInConnectedPartOfMap called on level with no downstairs", LogDebugLevel.Medium);
                 return true;
             }
 
-            return ArePointsConnected(level, location, stairlocation);
+            bool toUp = ArePointsConnected(level, location, upStairlocation);
+            bool toEntry = ArePointsConnected(level, location, entryStairlocation);
+
+            if (toUp || toEntry)
+                return true;
+
+            return false;
         }
 
         public bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)

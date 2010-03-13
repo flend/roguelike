@@ -193,7 +193,7 @@ namespace RogueBasin
 
         }
 
-        private void SpawnInitialCreatures()
+         private void SpawnInitialCreatures()
         {
             LogFile.Log.LogEntry("Generating creatures...");
 
@@ -345,6 +345,8 @@ namespace RogueBasin
 
                             Point location;
 
+
+
                             do
                             {
                                 location = dungeon.RandomWalkablePointInLevel(i);
@@ -390,8 +392,6 @@ namespace RogueBasin
             monstersToAdd.Add(new Creatures.Faerie());
             monstersToAdd.Add(new Creatures.Faerie());
             monstersToAdd.Add(new Creatures.Faerie());
-
-
 
             foreach (Monster monster in monstersToAdd)
             {
