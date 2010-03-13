@@ -2684,6 +2684,19 @@ namespace RogueBasin
             }
         }
 
+        public String PlayerDeathString { get; set; }
+        public bool PlayerDeathOccured { get; set; }
+
+        /// <summary>
+        /// Can't kill the player immediately now have to wait until end of monster loop
+        /// </summary>
+        /// <param name="deathString"></param>
+        internal void SetPlayerDeath(string deathString)
+        {
+            PlayerDeathOccured = true;
+            PlayerDeathString = deathString;
+        }
+
         /// <summary>
         /// It's all gone wrong!
         /// </summary>
@@ -2696,6 +2709,10 @@ namespace RogueBasin
 
             //Knocked out, go back to school
             if(!verb.Contains("quit")) {
+
+                //Reset vars
+                PlayerDeathString = "";
+                PlayerDeathOccured = false;
 
                 LogFile.Log.LogEntryDebug("Player knocked out", LogDebugLevel.Medium);
 

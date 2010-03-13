@@ -139,6 +139,10 @@ namespace RogueBasin
                     {
                         LogFile.Log.LogEntry("Exception thrown" + e.Message);
                     }
+                    //Remove dead players!
+                    if (Game.Dungeon.PlayerDeathOccured)
+                        Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
+                    
                     try
                     {
 

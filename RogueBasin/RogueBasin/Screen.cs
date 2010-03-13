@@ -65,6 +65,7 @@ namespace RogueBasin {
 
         Color charmBackground = ColorPresets.DarkKhaki;
         Color passiveBackground = ColorPresets.DarkMagenta;
+        Color uniqueBackground = ColorPresets.DarkCyan;
         Color normalBackground = ColorPresets.Black;
         Color normalForeground = ColorPresets.White;
 
@@ -1906,6 +1907,8 @@ namespace RogueBasin {
                         rootConsole.BackgroundColor = charmBackground;
                     else if (creature.Passive)
                         rootConsole.BackgroundColor = passiveBackground;
+                    else if (creature.Unique)
+                        rootConsole.BackgroundColor = uniqueBackground;
                     else
                         rootConsole.BackgroundColor = normalBackground;
 

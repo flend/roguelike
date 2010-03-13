@@ -393,7 +393,7 @@ namespace RogueBasin
                     Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
-                    Game.Dungeon.PlayerDeath("was knocked out by a " + this.SingleDescription);
+                    Game.Dungeon.SetPlayerDeath("was knocked out by a " + this.SingleDescription);
 
                     return CombatResults.DefenderDied;
                 }

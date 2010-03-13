@@ -315,15 +315,21 @@ namespace RogueBasin
             }
 
             //Consider equipped weapons (only 1 will work)
+            DamageModifierAccess = 0;
+
             if (inv.ContainsItem(new Items.GodSword()))
             {
-                DamageModifierAccess += 4;
+                DamageModifierAccess += 8;
             }
             else if (inv.ContainsItem(new Items.LongSword()))
             {
-                DamageModifierAccess += 2;
+                DamageModifierAccess += 4;
             }
             else if (inv.ContainsItem(new Items.ShortSword()))
+            {
+                DamageModifierAccess += 2;
+            }
+            else if (inv.ContainsItem(new Items.Dagger()))
             {
                 DamageModifierAccess += 1;
             }
@@ -770,7 +776,7 @@ namespace RogueBasin
                 //Is the player dead, if so kill it?
                 if (Hitpoints <= 0)
                 {
-                    Game.Dungeon.PlayerDeath("was knocked out by a themselves");
+                    Game.Dungeon.SetPlayerDeath("was knocked out by a themselves");
 
                     //Message queue string
                     string combatResultsMsg = "PvP Damage " + damage;

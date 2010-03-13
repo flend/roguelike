@@ -67,7 +67,10 @@
     <Compile Include="Creatures\Goblin.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\GoblinWitchdoctor.cs" />
+    <Compile Include="Creatures\GoblinWitchdoctor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\GoblinWitchdoctorUnique.cs" />
     <Compile Include="Creatures\Imp.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -83,6 +86,7 @@
     <Compile Include="Creatures\Ogre.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\OgreUnique.cs" />
     <Compile Include="Creatures\Orc.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -94,10 +98,16 @@
     <Compile Include="Creatures\Pixie.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\Rat.cs" />
+    <Compile Include="Creatures\Rat.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\RatUnique.cs" />
     <Compile Include="Creatures\SkeletalArcher.cs" />
     <Compile Include="Creatures\Skeleton.cs" />
-    <Compile Include="Creatures\Spider.cs" />
+    <Compile Include="Creatures\Spider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\SpiderUnique.cs" />
     <Compile Include="Creatures\Uruk.cs" />
     <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
@@ -134,9 +144,12 @@
     <Compile Include="Items\Bracelet.cs" />
     <Compile Include="Items\Bracer.cs" />
     <Compile Include="Items\Band.cs" />
+    <Compile Include="Items\Dagger.cs" />
     <Compile Include="Items\Flint.cs" />
     <Compile Include="Items\GlassGem.cs" />
-    <Compile Include="Items\Glove.cs" />
+    <Compile Include="Items\Glove.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Items\GodSword.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -149,6 +162,7 @@
     <Compile Include="Items\LongSword.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Items\MapGem.cs" />
     <Compile Include="Items\Medal.cs" />
     <Compile Include="Items\MetalArmour.cs" />
     <Compile Include="Items\Potion.cs" />
