@@ -335,6 +335,36 @@ namespace RogueBasin {
         }
 
         /// <summary>
+        /// Get the text from a movie
+        /// </summary>
+        /// <param name="movieRoot"></param>
+        /// <returns></returns>
+        public List<string> GetMovieText(string movieRoot)
+        {
+            bool loadSuccess = Screen.Instance.LoadMovie(movieRoot);
+
+            if (!loadSuccess)
+            {
+                LogFile.Log.LogEntryDebug("Failed to load movie file: " + movieRoot, LogDebugLevel.High);
+                return new List<string>();
+            }
+
+            List<string> outputText = new List<string>();
+
+            //Concatenate the movie into a string list
+            foreach (MovieFrame frame in movieFrames)
+            {
+                if (outputText.Count > 0)
+                    outputText.Add("\n");
+
+                outputText.AddRange(frame.scanLines);
+            }
+
+            return outputText;
+
+        }
+
+        /// <summary>
         /// Play the movie indicated by the filename root.
         /// </summary>
         /// <param name="root"></param>
@@ -522,7 +552,7 @@ namespace RogueBasin {
             return flashingChars;
         }
 
-        private bool LoadMovie(string filenameRoot)
+        public bool LoadMovie(string filenameRoot)
         {
             try
             {
@@ -699,6 +729,41 @@ namespace RogueBasin {
             rootConsole.ForegroundColor = normalForeground;
 
         }
+
+
+        /// <summary>
+        /// Screen for end of game info
+        /// </summary>
+        public void DrawEndOfGameInfo(List<string> stuffToDisplay)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Clear screen
+            rootConsole.Clear();
+
+            //Draw frame
+            rootConsole.DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("End of game summary...", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+
+            //Draw preamble
+            int count = 0;
+            foreach (string s in stuffToDisplay)
+            {
+                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
+                count++;
+            }
+
+            //Draw instructions
+
+            rootConsole.PrintLineRect("Press ENTER to continue...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
+            Screen.Instance.FlushConsole();
+
+            WaitForEnterKey();
+        }
+
 
         /// <summary>
         /// Screen for player death

@@ -469,4 +469,11 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\princekidnapped0.amf" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\endactions0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endgraduation0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrinsics0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrprincenotrescued0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\endintrprincerescued0.amf" />
+  </ItemGroup>
 </Project>

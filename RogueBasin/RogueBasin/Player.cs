@@ -89,6 +89,10 @@ namespace RogueBasin
 
         public int CurrentCharmedCreatures { get; set; }
 
+        public bool CombatUse { get; set; }
+        public bool MagicUse { get; set; }
+        public bool CharmUse { get; set; }
+
         /// <summary>
         /// Combat stat calculated from training stat and items
         /// </summary>
@@ -130,6 +134,9 @@ namespace RogueBasin
             MaximumEquippedItems = 2;
 
             NumDeaths = 0;
+            CombatUse = false;
+            MagicUse = false;
+            CharmUse = false;
 
             CurrentDungeon = -1;
 
@@ -689,6 +696,9 @@ namespace RogueBasin
                 MagicPoints -= toCast.MPCost();
                 if (MagicPoints < 0)
                     MagicPoints = 0;
+
+                //Using magic is an instrinsic
+                MagicUse = true;
             }
 
             return success;
@@ -717,6 +727,9 @@ namespace RogueBasin
 
             if (monster.RecalculateCombatStatsRequired)
                 monster.CalculateCombatStats();
+
+            //Attacking a monster with hand to hand give an instrinsic
+            CombatUse = true;
 
             //Calculate damage from a normal attack
 

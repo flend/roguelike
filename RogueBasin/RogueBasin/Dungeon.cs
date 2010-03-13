@@ -3094,6 +3094,9 @@ namespace RogueBasin
                         Game.MessageQueue.AddMessage(msg);
                         contents.monster.CharmCreature();
 
+                        //Set intrinsic on the player
+                        player.CharmUse = true;
+
                         return true;
                     }
 
@@ -3215,36 +3218,179 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
+                /// <summary>
         /// Run the end of game. Produce and save the obituary.
         /// </summary>
         private void EndOfGame()
         {
-            //Death preamble
+            //Work out which ending the player gets
 
-            List<string> deathPreamble = new List<string>();
+            //Check intrinsics
 
-            deathPreamble.Add(Game.Dungeon.player.Name + " the assassin " + "bizarrely dropped into this universe from DDRogue" + " on level " + (player.LocationLevel + 1).ToString() + " of the dungeon.");
-            deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
-            deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
-            deathPreamble.Add("");
-            deathPreamble.Add("He found " + Game.Dungeon.Player.PlotItemsFound + " of " + Game.Dungeon.Player.TotalPlotItems + " plot items.");
+            Player player = Game.Dungeon.Player;
+
+            bool combatUse = player.CombatUse;
+            bool magicUse = player.MagicUse;
+            bool charmUse = player.CharmUse;
+
+            int noDeaths = player.NumDeaths;
+
+            //How many dungeons cleared out
+            int dungeonsCleared = GetTotalDungeonsCleared();
+
+            int dungeonsExplored = GetTotalDungeonsExplored();
+
+            //Did we get the prince
+            bool princeGet = true;
+
+            //The last screen to display
+            List<string> finalScreen = new List<string>();
+            
+            //A long list of stuff to put in the obituary
+            List<string> fullObit = new List<string>();
+
+            //Show movies as we go along
+
+            //CLEARANCES
+
+            Screen.Instance.PlayMovie("endactions", false);
+
+            List<string> clearList = new List<string>();
+
+            if (dungeonsCleared == 6)
+            {
+                Screen.Instance.PlayMovie("endintrgreatheroine", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("endintrgreatheroine"));
+            }
+            else if (dungeonsCleared > 4)
+            {
+                Screen.Instance.PlayMovie("endintrheroine", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("endintrheroine"));
+            }
+            else if (dungeonsCleared > 2)
+            {
+                Screen.Instance.PlayMovie("endintradventurer", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("endintradventurer"));
+            }
+
+            //Prince
+
+            if (princeGet)
+            {
+                Screen.Instance.PlayMovie("endintrprincerescued", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("endintradventurer"));
+            }
+            else
+            {
+                Screen.Instance.PlayMovie("endintrprincenotrescued", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("endintradventurer"));
+            }
+            
+
+            //CAREER
+
+            Screen.Instance.PlayMovie("endgraduation", false);
+
+            string careerName;
+
+            string careerMovie = GetCareerMovie(out careerName);
+            string romanceMovie = GetRomanceMovie();
+
+            List<string> careerList = new List<string>();
+
+            Screen.Instance.PlayMovie(careerMovie, false);
+            careerList.AddRange(Screen.Instance.GetMovieText(careerMovie));
+
+            Screen.Instance.PlayMovie(romanceMovie, false);
+            careerList.AddRange(Screen.Instance.GetMovieText(romanceMovie));
+
+            //INSTRINICS
+
+            List<string> instricsList = new List<string>();
+
+            Screen.Instance.PlayMovie("endintrinsics", false);
+
+            if (noDeaths == 0)
+            {
+                Screen.Instance.PlayMovie("endintrsurvivor", false);
+                instricsList.AddRange(Screen.Instance.GetMovieText("endintrsurvivor"));
+            }
+
+            if (!combatUse)
+            {
+                Screen.Instance.PlayMovie("endintrtimid", false);
+                instricsList.AddRange(Screen.Instance.GetMovieText("endintrtimid"));
+            }
+
+            if (!magicUse)
+            {
+                Screen.Instance.PlayMovie("endintrmagicphobic", false);
+                instricsList.AddRange(Screen.Instance.GetMovieText("endintrmagicphobic"));
+            }
+
+            if (!charmUse)
+            {
+                Screen.Instance.PlayMovie("endintrcharmless", false);
+                instricsList.AddRange(Screen.Instance.GetMovieText("endintrcharmless"));
+            }
+
+            if (charmUse && magicUse && combatUse)
+            {
+                Screen.Instance.PlayMovie("endintrflexible", false);
+                instricsList.AddRange(Screen.Instance.GetMovieText("endintrflexible"));
+            }
+
+            //Final stats
+
+            List<string> finalStats = new List<string>();
+
+
+
+            finalScreen.Add("Princess " + Game.Dungeon.player.Name + " graduated from Princess School with high honours!");
+            finalScreen.Add("");
+
+            string careerStr = "She went on to become a " + careerName;
+            finalScreen.Add(careerStr);
+
+            if(princeGet)
+                careerStr = " and to marry her Prince and to live happily ever after.";
+            else
+                careerStr = " and to live happily ever after.";
+
+            finalScreen.Add(careerStr);
 
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
+            finalScreen.Add("She explored " + dungeonsExplored + " out of 6 dungeons.");
+            finalScreen.Add("She cleared " + dungeonsCleared + " out of 6 dungeons.");
 
-            deathPreamble.Add("");
-            deathPreamble.Add("He killed " + killRecord.killCount + " creatures.");
+            finalScreen.Add("");
+            finalScreen.Add("She knocked out " + killRecord.killCount + " creatures.");
 
-            //Load up screen and display
-            Screen.Instance.TotalKills = killRecord.killStrings;
-            Screen.Instance.DeathPreamble = deathPreamble;
+            finalScreen.Add("");
+            finalScreen.Add("Thanks for playing! -flend");
 
-            Screen.Instance.DrawDeathScreen();
-            Screen.Instance.FlushConsole();
+            Screen.Instance.DrawEndOfGameInfo(finalScreen);
 
-            SaveObituary(deathPreamble, killRecord.killStrings);
+            //Compose the obituary
+
+            List<string> obString = new List<string>();
+
+            obString.AddRange(finalScreen);
+            obString.Add("");
+            obString.Add("Adventures:");
+            obString.Add("");
+            obString.AddRange(clearList);
+            obString.Add("");
+            obString.Add("Her future life:");
+            obString.Add("");
+            obString.AddRange(careerList);
+            obString.Add("");
+            obString.Add("Intrinsics:");
+            obString.AddRange(instricsList);
+
+            SaveObituary(obString, killRecord.killStrings);
 
             if (!Game.Dungeon.SaveScumming)
             {
@@ -3252,10 +3398,44 @@ namespace RogueBasin
             }
 
             //Wait for a keypress
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
             //Stop the main loop
             RunMainLoop = false;
+        }
+
+        private string GetRomanceMovie()
+        {
+            return "";
+        }
+
+        private string GetCareerMovie(out string careerName)
+        {
+            careerName = "none";
+
+            return "";
+        }
+
+        /// <summary>
+        /// Total number of dungeons where we killed both uniques
+        /// </summary>
+        /// <returns></returns>
+        private int GetTotalDungeonsCleared()
+        {
+            List<DungeonProfile> Cleared = DungeonInfo.Dungeons.FindAll(x => x.masterUniqueDefeated && x.subUniqueDefeated);
+
+            return Cleared.Count;
+        }
+
+        /// <summary>
+        /// Total number of dungeons known
+        /// </summary>
+        /// <returns></returns>
+        private int GetTotalDungeonsExplored()
+        {
+            List<DungeonProfile> Cleared = DungeonInfo.Dungeons.FindAll(x => x.visited);
+
+            return Cleared.Count;
         }
 
         Point storeTL = new Point(33, 2);
