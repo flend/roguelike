@@ -6,17 +6,18 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Moderate tough
+    /// Healer. Quite clever missile troop
     /// </summary>
-    public class BlackUnicorn : MonsterFightAndRunAI
+    public class Meddler : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 10;
+        const int classDeltaHitpoints = 15;
         const int classMinHitpoints = 10;
 
-        public BlackUnicorn()
+        public Meddler()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            Speed = 110;
         }
 
         public override void InventoryDrop()
@@ -57,63 +58,68 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 3;
+            return 4;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 35;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "black unicorn"; } }
+        public override string SingleDescription { get { return "meddler"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "black unicorn"; } }
+        public override string GroupDescription { get { return "meddlers"; } }
 
         protected override char GetRepresentation()
         {
-            return 'U';
+            return 'M';
         }
 
-        protected override int GetChanceToRecover()
+        protected override SpecialAIType GetSpecialAIType()
         {
-            return 10;
+            return SpecialAIType.Healer;
         }
 
-        protected override int GetChanceToFlee()
+        protected override int RelaxDirectionAt()
         {
-            return 0;
+            return 5;
         }
 
-        protected override int GetMaxHPWillFlee()
+        protected override int GetTotalFleeLoops()
         {
-            return Hitpoints;
+            return 50;
         }
 
-        public override int CreatureCost()
-        {
-            return 40;
-        }
-
-        public override int CreatureLevel()
+        protected override double GetMissileRange()
         {
             return 4;
         }
 
-        public BlackUnicorn NewCreatureOfThisType()
+        protected override string GetWeaponName()
         {
-            return new BlackUnicorn();
+            return "fires a glob of acid";
+        }
+
+        public override int CreatureCost()
+        {
+            return 140;
+        }
+
+        public override int CreatureLevel()
+        {
+            return 5;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.DarkGray;
-        }
-
-        public override int GetCombatXP()
-        {
-            return 50;
+            return ColorPresets.Orange;
         }
 
         public override int GetMagicXP()
@@ -121,19 +127,24 @@ namespace RogueBasin.Creatures
             return 70;
         }
 
+        public override int GetCombatXP()
+        {
+            return 70;
+        }
+
         public override int GetMagicRes()
         {
-            return 20;
+            return 60;
         }
 
         public override int GetCharmRes()
         {
-            return 30;
+            return 0;
         }
 
         public override bool CanBeCharmed()
         {
-            return true;
+            return false;
         }
     }
 }

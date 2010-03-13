@@ -123,7 +123,7 @@ namespace RogueBasin.Creatures
 
         public override int GetMagicRes()
         {
-            return 40;
+            return 20;
         }
 
         public override int GetCharmRes()

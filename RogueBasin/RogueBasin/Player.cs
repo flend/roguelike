@@ -169,7 +169,7 @@ namespace RogueBasin
             MaxMagicPoints = 10;
             SpeedStat = 10;
             AttackStat = 10;
-            CharmStat = 30;
+            CharmStat = 100;
             MagicStat = 2;
 
             //Debug
@@ -776,7 +776,7 @@ namespace RogueBasin
                 //string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
                 //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
                 string combatResultsMsg2 = "PvP Damage " + damage;
-                Game.MessageQueue.AddMessage("Ouch, you hurt yourself");
+                Game.MessageQueue.AddMessage("Ouch, you hurt yourself.");
                 LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
                 return CombatResults.NeitherDied;

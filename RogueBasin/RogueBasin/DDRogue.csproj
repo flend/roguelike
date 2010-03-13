@@ -55,6 +55,10 @@
     <Compile Include="Creatures\Demon.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\Drainer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\Faerie.cs" />
     <Compile Include="Creatures\Ferret.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -64,21 +68,32 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\GoblinWitchdoctor.cs" />
+    <Compile Include="Creatures\Imp.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Lich.cs" />
     <Compile Include="Creatures\Maleficarum.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\Meddler.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Necromancer.cs" />
+    <Compile Include="Creatures\Nymph.cs" />
     <Compile Include="Creatures\Ogre.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\Orc.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\OrcShaman.cs" />
+    <Compile Include="Creatures\OrcShaman.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Overlord.cs" />
     <Compile Include="Creatures\Peon.cs" />
-    <Compile Include="Creatures\Pixie.cs" />
+    <Compile Include="Creatures\Pixie.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Rat.cs" />
     <Compile Include="Creatures\SkeletalArcher.cs" />
     <Compile Include="Creatures\Skeleton.cs" />
@@ -197,8 +212,14 @@
     <Compile Include="PlayerEffects\MultiDamage.cs" />
     <Compile Include="PlayerEffects\Healing.cs" />
     <Compile Include="Items\PotionSightUp.cs" />
-    <Compile Include="PlayerEffects\SightRadiusUp.cs" />
-    <Compile Include="PlayerEffects\SpeedUp.cs" />
+    <Compile Include="PlayerEffects\SightRadiusDown.cs" />
+    <Compile Include="PlayerEffects\SightRadiusUp.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PlayerEffects\SpeedDown.cs" />
+    <Compile Include="PlayerEffects\SpeedUp.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PlayerEffects\ToHitUp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

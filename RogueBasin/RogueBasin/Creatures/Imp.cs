@@ -5,12 +5,15 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    public class Whipper : MonsterThrowAndRunAI
+    /// <summary>
+    /// Blinder. Quite clever missile troop
+    /// </summary>
+    public class Imp : MonsterSpecialAI
     {
         const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 10;
+        const int classMinHitpoints = 5;
 
-        public Whipper()
+        public Imp()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
@@ -41,7 +44,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 8;
+            return 6;
         }
 
         /// <summary>
@@ -54,7 +57,43 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
+            return 4;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 85;
+        }
+
+        /// <summary>
+        /// Rat
+        /// </summary>
+        /// <returns></returns>
+        public override string SingleDescription { get { return "imp"; } }
+
+        /// <summary>
+        /// Rats
+        /// </summary>
+        public override string GroupDescription { get { return "imps"; } }
+
+        protected override char GetRepresentation()
+        {
+            return 'I';
+        }
+
+        protected override SpecialAIType GetSpecialAIType()
+        {
+            return SpecialAIType.PlayerEffecter;
+        }
+
+        protected override int RelaxDirectionAt()
+        {
             return 5;
+        }
+
+        protected override int GetTotalFleeLoops()
+        {
+            return 50;
         }
 
         protected override double GetMissileRange()
@@ -64,47 +103,22 @@ namespace RogueBasin.Creatures
 
         protected override string GetWeaponName()
         {
-            return "lashes out with a tentacle";
+            return "fires a sphere of fire";
         }
 
-        /// <summary>
-        /// Rat
-        /// </summary>
-        /// <returns></returns>
-        public override string SingleDescription { get { return "whipper"; } }
-
-        /// <summary>
-        /// Rats
-        /// </summary>
-        public override string GroupDescription { get { return "whippers"; } }
-
-        protected override char GetRepresentation()
-        {
-            return 'W';
-        }
-
-        protected override int RelaxDirectionAt()
-        {
-            return 0;
-        }
-
-        protected override int GetTotalFleeLoops()
-        {
-            return 10;
-        }
         public override int CreatureCost()
         {
-            return 70;
+            return 50;
         }
 
         public override int CreatureLevel()
         {
-            return 5;
+            return 4;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.YellowGreen;
+            return ColorPresets.OrangeRed;
         }
 
         public override int GetMagicXP()
@@ -124,12 +138,53 @@ namespace RogueBasin.Creatures
 
         public override int GetCharmRes()
         {
-            return 80;
+            return 60;
         }
 
         public override bool CanBeCharmed()
         {
             return true;
+        }
+
+        protected override string EffectAttackString()
+        {
+            return "blind";
+        }
+
+        protected override bool DoPlayerResistance()
+        {
+            Player player = Game.Dungeon.Player;
+
+            //Chance to resist the blinding attack
+            int highestSkill = player.AttackStat;
+            if (player.CharmStat > highestSkill)
+                highestSkill = player.CharmStat;
+            if (player.MagicStat > highestSkill)
+                highestSkill = player.MagicStat;
+
+
+            highestSkill = highestSkill / 2;
+            if (highestSkill > 50)
+                highestSkill = 50;
+
+            int roll = Game.Random.Next(100);
+
+            LogFile.Log.LogEntryDebug("Player resistance: " + roll + " below " + highestSkill, LogDebugLevel.Medium);
+
+            if (roll < highestSkill)
+                return true;
+            return false;
+        }
+
+        protected override PlayerEffect GetSpecialAIEffect()
+        {
+            int duration = 250 + Game.Random.Next(500);
+            int playerSight = Game.Dungeon.Player.SightRadius;
+            int sightDown = playerSight - 1;
+
+            PlayerEffects.SightRadiusDown sightDownEff = new RogueBasin.PlayerEffects.SightRadiusDown(Game.Dungeon.Player, duration, sightDown);
+
+            return sightDownEff;
         }
     }
 }

@@ -1431,7 +1431,7 @@ namespace RogueBasin {
             trainingYTemp = trainingTL.y + 6 + lineCount;
 
             trainingYTemp = trainingTL.y + 4 + lineCount;
-            
+            trainingXTemp = statsModOffset.x;
             rootConsole.ForegroundColor = ColorPresets.White;
             rootConsole.PrintLine("These stats increased:", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
 
@@ -1599,12 +1599,12 @@ namespace RogueBasin {
             string damageString = "Hit: +" + player.HitModifier() + " Dam: 1d" + player.DamageBase() + "+" + player.DamageModifier();
 
             rootConsole.PrintLine(damageString, statsDisplayTopLeft.x + damageOffset.x, statsDisplayTopLeft.y + damageOffset.y, LineAlignment.Left);
-            string speedString = "Normal";
+            string speedString = "Normal " + player.Speed;
             
             if (player.Speed > 100)
-                speedString = "Fast";
+                speedString = "Fast " + player.Speed;
             if (player.Speed > 200)
-                speedString = "Very Fast";
+                speedString = "Very Fast " + player.Speed;
 
             rootConsole.PrintLine(speedString, statsDisplayTopLeft.x + speedOffset.x, statsDisplayTopLeft.y + speedOffset.y, LineAlignment.Left);
 

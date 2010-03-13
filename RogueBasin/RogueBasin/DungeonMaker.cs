@@ -361,7 +361,7 @@ namespace RogueBasin
             }
 
             List<Monster> monstersToAdd = new List<Monster>();
-
+            /*
             monstersToAdd.Add(new Creatures.Bat());
             monstersToAdd.Add(new Creatures.BlackUnicorn());
             monstersToAdd.Add(new Creatures.Demon());
@@ -373,6 +373,25 @@ namespace RogueBasin
             monstersToAdd.Add(new Creatures.Pixie());
             monstersToAdd.Add(new Creatures.Uruk());
             monstersToAdd.Add(new Creatures.Whipper());
+            */
+
+            /*
+            monstersToAdd.Add(new Creatures.Imp());
+            monstersToAdd.Add(new Creatures.Imp());
+            monstersToAdd.Add(new Creatures.Imp());
+            monstersToAdd.Add(new Creatures.Drainer());
+            monstersToAdd.Add(new Creatures.Drainer());
+            monstersToAdd.Add(new Creatures.Drainer());
+            monstersToAdd.Add(new Creatures.Nymph());
+            monstersToAdd.Add(new Creatures.Nymph());
+            monstersToAdd.Add(new Creatures.Nymph());*/
+
+            monstersToAdd.Add(new Creatures.Faerie());
+            monstersToAdd.Add(new Creatures.Faerie());
+            monstersToAdd.Add(new Creatures.Faerie());
+            monstersToAdd.Add(new Creatures.Faerie());
+
+
 
             foreach (Monster monster in monstersToAdd)
             {

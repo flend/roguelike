@@ -8,12 +8,12 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Medium threat. Fast but weak missile.
     /// </summary>
-    public class Pixie : MonsterThrowAndRunAI
+    public class Faerie : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 2;
+        const int classDeltaHitpoints = 6;
         const int classMinHitpoints = 6;
 
-        public Pixie()
+        public Faerie()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
@@ -53,12 +53,12 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 3;
+            return 4;
         }
 
         protected override double GetMissileRange()
@@ -68,28 +68,43 @@ namespace RogueBasin.Creatures
 
         protected override string GetWeaponName()
         {
-            return "throws a dart";
+            return "sprinkles caustic dust";
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "pixie"; } }
+        public override string SingleDescription { get { return "faerie"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription  { get { return "pixies"; } }
+        public override string GroupDescription  { get { return "faeries"; } }
 
         protected override char GetRepresentation()
         {
-            return 'p';
+            return 'f';
         }
 
         protected override int RelaxDirectionAt()
         {
             return 5;
+        }
+
+        protected override int GetChanceToRecover()
+        {
+            return 10;
+        }
+
+        protected override int GetChanceToFlee()
+        {
+            return 75;
+        }
+
+        protected override int GetMaxHPWillFlee()
+        {
+            return Hitpoints;
         }
 
         protected override int GetTotalFleeLoops()
@@ -98,27 +113,27 @@ namespace RogueBasin.Creatures
         }
         public override int CreatureCost()
         {
-            return 35;
+            return 40;
         }
 
         public override int CreatureLevel()
         {
-            return 2;
+            return 3;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.HotPink;
+            return ColorPresets.Cyan;
         }
 
         public override int GetMagicXP()
         {
-            return 60;
+            return 30;
         }
 
         public override int GetCombatXP()
         {
-            return 40;
+            return 35;
         }
 
         public override int GetMagicRes()
@@ -133,7 +148,54 @@ namespace RogueBasin.Creatures
 
         public override bool CanBeCharmed()
         {
-            return true;
+            return false;
         }
+
+        protected override string EffectAttackString()
+        {
+            return "blink";
+        }
+
+        protected override bool DoPlayerResistance()
+        {
+            Player player = Game.Dungeon.Player;
+
+            //Chance to resist the blinding attack
+            int highestSkill = player.AttackStat;
+            if (player.CharmStat > highestSkill)
+                highestSkill = player.CharmStat;
+            if (player.MagicStat > highestSkill)
+                highestSkill = player.MagicStat;
+
+
+            highestSkill = highestSkill / 2;
+            if (highestSkill > 75)
+                highestSkill = 75;
+
+            int roll = Game.Random.Next(100);
+
+            LogFile.Log.LogEntryDebug("Player resistance: " + roll + " below " + highestSkill, LogDebugLevel.Medium);
+
+            if (roll < highestSkill)
+                return true;
+            return false;
+        }
+
+        protected override Spell GetSpecialAISpell()
+        {
+            return new Spells.Blink();
+        }
+
+        protected override SpecialAIType GetSpecialAIType()
+        {
+            return SpecialAIType.PlayerCaster;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 80;
+        }
+        
+
     }
 }

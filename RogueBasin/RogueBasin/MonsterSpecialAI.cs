@@ -9,7 +9,10 @@ namespace RogueBasin
     {
         Healer,
         Raiser,
-        Summoner
+        Summoner,
+        PlayerEffecter,
+        MonsterEffecter,
+        PlayerCaster
     };
 
     /// <summary>
@@ -28,6 +31,23 @@ namespace RogueBasin
         }
 
         protected abstract SpecialAIType GetSpecialAIType();
+
+        /// <summary>
+        /// Only used for the effector AI
+        /// </summary>
+        /// <returns></returns>
+        protected virtual PlayerEffect GetSpecialAIEffect() { return null; }
+
+
+        protected virtual Spell GetSpecialAISpell() { return null; }
+
+        /// <summary>
+        /// Does the player resist the attack?
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool DoPlayerResistance() { return false;  }
+
+        protected virtual string EffectAttackString() { return ""; }
 
         protected abstract double GetMissileRange();
 
@@ -748,6 +768,84 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug(this.SingleDescription + " raises corpse", LogDebugLevel.Medium);
                 }
                 return raisedSuccess;
+
+            }
+            //Effect on player. Know we are in range if this was called
+            else if (GetSpecialAIType() == SpecialAIType.PlayerEffecter) {
+
+                //Shouldn't happen if charmed
+
+                LogFile.Log.LogEntryDebug(this.SingleDescription + " attempting player effect attack", LogDebugLevel.Medium);
+
+                //Player already has this effect
+                Player player = Game.Dungeon.Player;
+
+                PlayerEffect effectToUse = GetSpecialAIEffect();
+
+                if(effectToUse == null) {
+                    LogFile.Log.LogEntryDebug(this.SingleDescription + " error getting effect", LogDebugLevel.High);
+                    return false;
+                }
+
+                //Don't do it twice
+                if(player.IsEffectActive(effectToUse)) {
+                    return false;
+                }
+
+                string attackStr = EffectAttackString();
+
+                Game.MessageQueue.AddMessage("The " + this.SingleDescription + " tries to " + attackStr + " you!");
+
+                //Player resistance
+                bool playerResistance = DoPlayerResistance();
+
+                if(playerResistance == true) {
+                    Game.MessageQueue.AddMessage("You resist the attack.");
+                    return true;
+                }
+
+                //If failed, we add our effect
+                player.AddEffect(effectToUse);
+
+                return true;
+
+            }
+            //Spellkon player. Know we are in range if this was called
+            else if (GetSpecialAIType() == SpecialAIType.PlayerCaster)
+            {
+
+                //Shouldn't happen if charmed
+
+                LogFile.Log.LogEntryDebug(this.SingleDescription + " attempting player effect attack", LogDebugLevel.Medium);
+
+                //Player already has this effect
+                Player player = Game.Dungeon.Player;
+
+                Spell effectToUse = GetSpecialAISpell();
+
+                if (effectToUse == null)
+                {
+                    LogFile.Log.LogEntryDebug(this.SingleDescription + " error getting spell", LogDebugLevel.High);
+                    return false;
+                }
+
+                string attackStr = EffectAttackString();
+
+                Game.MessageQueue.AddMessage("The " + this.SingleDescription + " tries to " + attackStr + " you!");
+
+                //Player resistance
+                bool playerResistance = DoPlayerResistance();
+
+                if (playerResistance == true)
+                {
+                    Game.MessageQueue.AddMessage("You resist the attack.");
+                    return true;
+                }
+
+                //If failed, we add our effect
+                effectToUse.DoSpell(player.LocationMap);
+
+                return true;
 
             }
             else
