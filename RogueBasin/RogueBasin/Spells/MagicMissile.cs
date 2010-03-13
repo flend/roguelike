@@ -34,7 +34,11 @@ namespace RogueBasin.Spells
             {
                 LogFile.Log.LogEntryDebug("Firing magic missile", LogDebugLevel.Medium);
                 Game.MessageQueue.AddMessage("Magic Missile!");
-                
+
+                Monster monster = squareContents.monster;
+
+                //No magic resistance for magic missile
+
                 //Attack the monster
 
                 //Magic missile always hits

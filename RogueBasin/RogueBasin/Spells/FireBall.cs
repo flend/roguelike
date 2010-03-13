@@ -82,7 +82,10 @@ namespace RogueBasin.Spells
 
             //Attack the monster
 
-            //Magic missile always hits
+            //Check magic resistance
+            bool monsterResisted = CheckMagicResistance(monster);
+            if (monsterResisted)
+                return;
 
             //Damage is based on Magic Stat (and creature's magic resistance)
 

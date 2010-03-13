@@ -34,9 +34,15 @@ namespace RogueBasin.Spells
             {
                 Monster targetM = squareContents.monster;
 
+
                 LogFile.Log.LogEntryDebug("Slowing " + targetM.SingleDescription, LogDebugLevel.Medium);
                 Game.MessageQueue.AddMessage("Slow Monster!");
-                
+
+                //Check magic resistance
+                bool monsterResisted = CheckMagicResistance(targetM);
+                if (monsterResisted)
+                    return true;
+
                 //Add the slow monster effect
                 int duration = 250 + Game.Random.Next(500);
                 targetM.AddEffect(new MonsterEffects.SlowDown(targetM, duration, targetM.Speed / 2));

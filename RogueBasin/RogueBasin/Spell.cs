@@ -79,6 +79,33 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         internal abstract int GetRequiredMagic();
-        
+
+        /// <summary>
+        /// Returns true if the monster resisted
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <returns></returns>
+        protected bool CheckMagicResistance(Monster monster)
+        {
+
+            Player player = Game.Dungeon.Player;
+
+            int monsterRes = monster.GetMagicRes();
+            int magicRoll = Game.Random.Next(player.MagicStat);
+
+            LogFile.Log.LogEntryDebug("Magic resistance attempt. Res: " + monsterRes + " Roll: " + magicRoll, LogDebugLevel.Medium);
+
+            if (magicRoll < monsterRes)
+            {
+                //Charm not successful
+                string msg = "The spell energy dissipates around the " + monster.SingleDescription + ".";
+                LogFile.Log.LogEntryDebug("Magic resistance - creature resisted", LogDebugLevel.Medium);
+
+                Game.MessageQueue.AddMessage(msg);
+                return true;
+            }
+
+            return false;
+        }
     }
 }

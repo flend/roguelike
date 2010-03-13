@@ -45,20 +45,46 @@
   <ItemGroup>
     <Compile Include="Creature.cs" />
     <Compile Include="CreatureEffect.cs" />
-    <Compile Include="Creatures\Bugbear.cs" />
-    <Compile Include="Creatures\Ferret.cs" />
+    <Compile Include="Creatures\Bat.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\BlackUnicorn.cs" />
+    <Compile Include="Creatures\Bugbear.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\Demon.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\Ferret.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Friend.cs" />
     <Compile Include="Creatures\Ghoul.cs" />
-    <Compile Include="Creatures\Goblin.cs" />
+    <Compile Include="Creatures\Goblin.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\GoblinWitchdoctor.cs" />
     <Compile Include="Creatures\Lich.cs" />
+    <Compile Include="Creatures\Maleficarum.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Necromancer.cs" />
-    <Compile Include="Creatures\Orc.cs" />
+    <Compile Include="Creatures\Ogre.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\Orc.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\OrcShaman.cs" />
+    <Compile Include="Creatures\Overlord.cs" />
+    <Compile Include="Creatures\Peon.cs" />
+    <Compile Include="Creatures\Pixie.cs" />
     <Compile Include="Creatures\Rat.cs" />
     <Compile Include="Creatures\SkeletalArcher.cs" />
     <Compile Include="Creatures\Skeleton.cs" />
     <Compile Include="Creatures\Spider.cs" />
+    <Compile Include="Creatures\Uruk.cs" />
+    <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
     <Compile Include="Dungeon.cs" />

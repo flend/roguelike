@@ -360,6 +360,28 @@ namespace RogueBasin
                 }
             }
 
+            List<Monster> monstersToAdd = new List<Monster>();
+
+            monstersToAdd.Add(new Creatures.Bat());
+            monstersToAdd.Add(new Creatures.BlackUnicorn());
+            monstersToAdd.Add(new Creatures.Demon());
+            monstersToAdd.Add(new Creatures.Ghoul());
+            monstersToAdd.Add(new Creatures.Maleficarum());
+            monstersToAdd.Add(new Creatures.Ogre());
+            monstersToAdd.Add(new Creatures.Overlord());
+            monstersToAdd.Add(new Creatures.Peon());
+            monstersToAdd.Add(new Creatures.Pixie());
+            monstersToAdd.Add(new Creatures.Uruk());
+            monstersToAdd.Add(new Creatures.Whipper());
+
+            foreach (Monster monster in monstersToAdd)
+            {
+                Point location = new Point();
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(2);
+                } while (!dungeon.AddMonster(monster, 2, location));
+            }
             /*
             //Don't auto spawn for the last 2 levels
             for (int i = 0; i < dungeon.NoLevels - 2; i++)
