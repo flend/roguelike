@@ -373,8 +373,7 @@ namespace RogueBasin
                 //Is the player dead, if so kill it?
                 if (player.Hitpoints <= 0)
                 {
-                    Game.Dungeon.PlayerDeath("was knocked out by a " + this.SingleDescription);
-
+                    
                     //Message queue string
                     string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
                     
@@ -383,6 +382,8 @@ namespace RogueBasin
                     string playerMsg = HitsPlayerCombatString() + " You are knocked out.";
                     Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    Game.Dungeon.PlayerDeath("was knocked out by a " + this.SingleDescription);
 
                     return CombatResults.DefenderDied;
                 }
@@ -440,18 +441,17 @@ namespace RogueBasin
                 //Is the player dead, if so kill it?
                 if (monster.Hitpoints <= 0)
                 {
-
                     Game.Dungeon.KillMonster(monster);
-
-                    //Add charm XP if appropriate
-                    Game.Dungeon.Player.AddXPMonsterAttack(this, monster);
-
+                    
                     //Debug string
                     string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     playerMsg = HitsMonsterCombatString(monster) + " It's knocked out.";
                     Game.MessageQueue.AddMessage(playerMsg);
                     //Game.MessageQueue.AddMessage(combatResultsMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Add charm XP if appropriate
+                    Game.Dungeon.Player.AddXPMonsterAttack(this, monster);
 
                     return CombatResults.DefenderDied;
                 }

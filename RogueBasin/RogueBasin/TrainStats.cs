@@ -111,7 +111,7 @@ namespace RogueBasin
             TrainMaxHitpointStat(0, 0);
             TrainSpeedStat(5, -1);
             TrainAttackStat(5, -1);
-            TrainCharmStat(5, -1);
+            TrainCharmStat(5, 1);
             TrainMagicStat(5, -1);
         }
 
@@ -128,7 +128,7 @@ namespace RogueBasin
             TrainSpeedStat(5, 1);
             TrainAttackStat(10, 1);
             TrainCharmStat(5, -1);
-            TrainMagicStat(10, -1);
+            TrainMagicStat(5, -1);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace RogueBasin
             TrainSpeedStat(5, 1);
             TrainAttackStat(50, 1);
             TrainCharmStat(5, -1);
-            TrainMagicStat(10, -1);
+            TrainMagicStat(5, -1);
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace RogueBasin
             TrainSpeedStat(0, 0);
             TrainAttackStat(10, -1);
             TrainCharmStat(50, 1);
-            TrainMagicStat(10, -1);
+            TrainMagicStat(5, -1);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace RogueBasin
             TrainMaxHitpointStat(5, -1);
             TrainSpeedStat(0, 0);
             TrainAttackStat(5, -1);
-            TrainCharmStat(10, -1);
+            TrainCharmStat(5, -1);
             TrainMagicStat(50, 1);
         }
 
@@ -192,7 +192,7 @@ namespace RogueBasin
             TrainMaxHitpointStat(0, 0);
             TrainSpeedStat(5, -1);
             TrainAttackStat(5, -1);
-            TrainCharmStat(5, -1);
+            TrainCharmStat(5, 1);
             TrainMagicStat(5, -1);
         }
 
@@ -205,11 +205,11 @@ namespace RogueBasin
             this.player = player;
 
             TrainHitpointStat(50, -1);
-            TrainMaxHitpointStat(50, 2);
-            TrainSpeedStat(5, 2);
-            TrainAttackStat(10, 2);
+            TrainMaxHitpointStat(50, 1);
+            TrainSpeedStat(5, 1);
+            TrainAttackStat(10, 1);
             TrainCharmStat(5, -1);
-            TrainMagicStat(10, -1);
+            TrainMagicStat(5, -1);
         }
 
         /// <summary>
@@ -221,11 +221,11 @@ namespace RogueBasin
             this.player = player;
 
             TrainHitpointStat(40, -1);
-            TrainMaxHitpointStat(10, 2);
-            TrainSpeedStat(5, 2);
-            TrainAttackStat(50, 2);
+            TrainMaxHitpointStat(10, 1);
+            TrainSpeedStat(5, 1);
+            TrainAttackStat(50, 1);
             TrainCharmStat(5, -1);
-            TrainMagicStat(10, -1);
+            TrainMagicStat(5, -1);
         }
 
         /// <summary>
@@ -239,9 +239,9 @@ namespace RogueBasin
             TrainHitpointStat(20, -1);
             TrainMaxHitpointStat(5, -1);
             TrainSpeedStat(0, 0);
-            TrainAttackStat(10, -1);
-            TrainCharmStat(50, 2);
-            TrainMagicStat(10, -1);
+            TrainAttackStat(5, -1);
+            TrainCharmStat(50, 1);
+            TrainMagicStat(5, -1);
         }
 
         /// <summary>
@@ -256,8 +256,8 @@ namespace RogueBasin
             TrainMaxHitpointStat(5, -1);
             TrainSpeedStat(0, 0);
             TrainAttackStat(5, -1);
-            TrainCharmStat(10, -1);
-            TrainMagicStat(50, 2);
+            TrainCharmStat(5, -1);
+            TrainMagicStat(50, 1);
         }
     }
 }

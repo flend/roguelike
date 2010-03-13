@@ -3070,12 +3070,13 @@ namespace RogueBasin
                     }*/
 
                     //Try to charm, may fail if the player has no more charms
-                    
+
+
                     bool playerOK = false;
                   //  if (canCharm)
                   //  {
                         //Check if the player has any more charms
-                        playerOK = player.AddCharmCreatureIfPossible();
+                    playerOK = player.MoreCharmedCreaturesPossible();
 //}
 
                     if (!playerOK)
@@ -3086,23 +3087,28 @@ namespace RogueBasin
                         //return true;
                     }
 
+
+                    //Test against statistic here
+                    int monsterRes = monster.GetCharmRes();
+                    int charmRoll = Game.Random.Next(player.CharmStat);
+
+                    LogFile.Log.LogEntryDebug("Charm attempt. Res: " + monsterRes + " Roll: " + charmRoll, LogDebugLevel.Medium);
+
+                    if (charmRoll < monsterRes)
+                    {
+                        //Charm not successful
+                        string msg = "The " + monster.SingleDescription + " does not look convinced by your overtures.";
+
+                        Game.MessageQueue.AddMessage(msg);
+                        return true;
+                    }
+
+
                     //All OK do the charm
                  //   if (canCharm)
                 //    {
-                        //Test against statistic here
-                        int monsterRes = monster.GetCharmRes();
-                        int charmRoll = Game.Random.Next(player.CharmStat);
-
-                        LogFile.Log.LogEntryDebug("Charm attempt. Res: " + monsterRes + " Roll: " + charmRoll, LogDebugLevel.Medium);
-
-                        if (charmRoll < monsterRes)
-                        {
-                            //Charm not successful
-                            string msg = "The " + monster.SingleDescription + " does not look convinced by your overtures.";
-
-                            Game.MessageQueue.AddMessage(msg);
-                            return true;
-                        }
+                    //Should be possible at this point
+                    player.AddCharmCreatureIfPossible();    
 
                         string msg2 = "The " + monster.SingleDescription + " looks at you lovingly.";
 
@@ -3110,19 +3116,20 @@ namespace RogueBasin
                         contents.monster.CharmCreature();
 
                         //Add XP
-                        double diffDelta = (player.CharmStat - monsterRes) / player.CharmStat;
+                        double diffDelta = (player.CharmStat - monsterRes) / (double)player.CharmStat;
                         if (diffDelta < 0)
                             diffDelta = 0;
 
                         double xpUpChance = 1 - diffDelta;
                         int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
                         int xpUpRollActual = Game.Random.Next(100);
-                        LogFile.Log.LogEntryDebug("CharmXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+                        LogFile.Log.LogEntryDebug("CharmXP up. Chance: " + xpUpRoll + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
 
-                        if (xpUpRollActual < xpUpChance)
+                        if (xpUpRollActual < xpUpRoll)
                         {
                             player.CharmXP++;
                             Game.MessageQueue.AddMessage("You feel more charming.");
+                            LogFile.Log.LogEntryDebug("CharmXP up!", LogDebugLevel.Medium);
                         }
 
                         //Set intrinsic on the player
@@ -3267,6 +3274,8 @@ namespace RogueBasin
                 //Increase player's stats
                 ProcessPlayerXP();
 
+                //Cancel any effect
+                player.RemoveAllEffects();
 
                 LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
                 Game.Dungeon.MoveToNextDate();
@@ -3589,6 +3598,8 @@ namespace RogueBasin
 
             //Set all the stats which can only be set when leaving the town
 
+            player.ResetTemporaryPlayerStats();
+
             //Hitpoints
             player.Hitpoints = player.HitpointsStat;
             player.MaxHitpoints = player.HitpointsStat;
@@ -3690,5 +3701,6 @@ namespace RogueBasin
             
             //etc
         }
+
     }
 }

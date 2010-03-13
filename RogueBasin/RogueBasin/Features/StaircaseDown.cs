@@ -36,7 +36,7 @@ namespace RogueBasin.Features
                 if (monster.Charmed)
                 {
                     monster.UncharmCreature();
-                    monster.PassifyCreature();
+                    //monster.PassifyCreature();
 
                     Game.Dungeon.Player.RemoveCharmedCreature();
                 }

@@ -169,7 +169,7 @@ namespace RogueBasin
             MaxMagicPoints = 10;
             SpeedStat = 10;
             AttackStat = 10;
-            CharmStat = 2;
+            CharmStat = 30;
             MagicStat = 2;
 
             //Debug
@@ -833,11 +833,7 @@ namespace RogueBasin
                 //Is the monster dead, if so kill it?
                 if (monsterDead)
                 {
-                    Game.Dungeon.KillMonster(monster);
-
-                    //Add XP
-                    AddXPPlayerAttack(monster, magicUse);
-
+                    Game.Dungeon.KillMonster(monster);                    
 
                     //Add it to our list of kills (simply adding the whole object here)
                     Kills.Add(monster);
@@ -848,6 +844,9 @@ namespace RogueBasin
 
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
+
+                    //Add XP
+                    AddXPPlayerAttack(monster, magicUse);
 
                     return CombatResults.DefenderDied;
                 }
@@ -888,18 +887,19 @@ namespace RogueBasin
             if (magicUse)
             {
                 int monsterXP = monster.GetMagicXP();
-                double diffDelta = (MagicStat - monsterXP) / MagicStat;
+                double diffDelta = (MagicStat - monsterXP) / (double)MagicStat;
                 if (diffDelta < 0)
                     diffDelta = 0;
 
                 double xpUpChance = 1 - diffDelta;
                 int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
                 int xpUpRollActual = Game.Random.Next(100);
-                LogFile.Log.LogEntryDebug("MagicXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("MagicXP up. Chance: " + xpUpRoll + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
 
-                if (xpUpRollActual < xpUpChance)
+                if (xpUpRollActual < xpUpRoll)
                 {
                     MagicXP++;
+                    LogFile.Log.LogEntryDebug("MagicXP up!", LogDebugLevel.Medium);
                     Game.MessageQueue.AddMessage("You feel your magic grow stronger.");
                 }
             }
@@ -907,18 +907,19 @@ namespace RogueBasin
             else
             {
                 int monsterXP = monster.GetCombatXP();
-                double diffDelta = (AttackStat - monsterXP) / AttackStat;
+                double diffDelta = (AttackStat - monsterXP) / (double)AttackStat;
                 if (diffDelta < 0)
                     diffDelta = 0;
 
                 double xpUpChance = 1 - diffDelta;
                 int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
                 int xpUpRollActual = Game.Random.Next(100);
-                LogFile.Log.LogEntryDebug("CombatXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("CombatXP up roll. Chance: " + xpUpRoll + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
 
-                if (xpUpRollActual < xpUpChance)
+                if (xpUpRollActual < xpUpRoll)
                 {
                     CombatXP++;
+                    LogFile.Log.LogEntryDebug("CombatXP up!", LogDebugLevel.Medium);
                     Game.MessageQueue.AddMessage("You feel your combat skill increase.");
                 }
             }
@@ -1034,6 +1035,28 @@ namespace RogueBasin
                 {
                     finishedEffects.Add(effect);
                 }
+            }
+
+            //Remove finished effects
+            foreach (PlayerEffect effect in finishedEffects)
+            {
+                effects.Remove(effect);
+            }
+        }
+
+        /// <summary>
+        /// Remove all effects on player
+        /// </summary>
+        internal void RemoveAllEffects()
+        {
+            //Increment time on events and remove finished ones
+            List<PlayerEffect> finishedEffects = new List<PlayerEffect>();
+
+            //Remove finished effects
+            foreach (PlayerEffect effect in effects)
+            {
+                effect.OnEnd();
+                finishedEffects.Add(effect);
             }
 
             //Remove finished effects
@@ -1371,6 +1394,13 @@ namespace RogueBasin
             return false;
         }
 
+        internal bool MoreCharmedCreaturesPossible()
+        {
+            if (CurrentCharmedCreatures < MaxCharmedCreatures)
+                return true;
+            return false;
+        }
+
         internal void RemoveCharmedCreature()
         {
             CurrentCharmedCreatures--;
@@ -1383,7 +1413,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// This happens when a charmed creature attacks another
+        /// This happens when a charmed creature attacks another or a non-charmed creature fights back
         /// </summary>
         /// <param name="attackingMonster"></param>
         /// <param name="targetMonster"></param>
@@ -1392,27 +1422,34 @@ namespace RogueBasin
             //Check this monster was charmed
             if (!attackingMonster.Charmed)
             {
-                LogFile.Log.LogEntryDebug("Attacking monster was not charmed, no XP. How did this happen?", LogDebugLevel.High);
+                LogFile.Log.LogEntryDebug("Attacking monster was not charmed, no XP.", LogDebugLevel.Medium);
                 return;
             }
 
           //Add charm XP. Use the target's combat XP against the player's charm stat
+            //This also has the advantage that every creature in the game has a combat XP
             int monsterXP = targetMonster.GetCombatXP();
-            double diffDelta = (CharmStat - monsterXP) / CharmStat;
+            double diffDelta = (CharmStat - monsterXP) / (double)CharmStat;
             if (diffDelta < 0)
                  diffDelta = 0;
 
                 double xpUpChance = 1 - diffDelta;
                 int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
                 int xpUpRollActual = Game.Random.Next(100);
-                LogFile.Log.LogEntryDebug("CharmXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("CharmXP up. Chance: " + xpUpRoll + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
 
-                if (xpUpRollActual < xpUpChance)
+                if (xpUpRollActual < xpUpRoll)
                 {
                     CharmXP++;
+                    LogFile.Log.LogEntryDebug("CharmXP up!", LogDebugLevel.Medium);
                     Game.MessageQueue.AddMessage("You feel more charming.");
                 }
             
+        }
+
+        internal void ResetTemporaryPlayerStats()
+        {
+            CurrentCharmedCreatures = 0;
         }
     }
 }

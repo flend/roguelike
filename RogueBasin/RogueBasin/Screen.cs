@@ -1430,15 +1430,21 @@ namespace RogueBasin {
 
             trainingYTemp = trainingTL.y + 6 + lineCount;
 
+            trainingYTemp = trainingTL.y + 4 + lineCount;
+            
+            rootConsole.ForegroundColor = ColorPresets.White;
+            rootConsole.PrintLine("These stats increased:", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
+
+            trainingYTemp = trainingTL.y + 6 + lineCount;
+
             //Concatenate display string
             trainingXTemp = statsModOffset.x;
 
-            rootConsole.ForegroundColor = ColorPresets.White;
-
             ProcessDelta("Combat", CombatInc);
-
+            trainingXTemp = statsModOffset.x;
             trainingYTemp++;
-            ProcessDelta("Charm", MagicInc);
+            ProcessDelta("Charm", CharmInc);
+            trainingXTemp = statsModOffset.x;
             trainingYTemp++;
             ProcessDelta("Magic", MagicInc);
 
