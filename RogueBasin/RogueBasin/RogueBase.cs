@@ -363,6 +363,17 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
                                 
+                                case 'E':
+                                    Game.Dungeon.Player.AttackStat = 10;
+                                    Game.Dungeon.Player.CharmStat = 10;
+                                    Game.Dungeon.Player.MagicStat = 10;
+
+                                    Game.Dungeon.DungeonInfo.DragonDead = false;
+
+                                    Game.Dungeon.EndOfGame();
+                                    
+                                    break;
+
                                 case 'e':
                                     //Display currently equipped items
                                     SetPlayerEquippedItemsScreen();

@@ -2861,35 +2861,40 @@ namespace RogueBasin
 
             //Right now, only seen on a quit (will be changed too)
 
+            //PrincessRL quit screen
+
             //Set up the death screen
 
             //Death preamble
+            List<string> finalScreen = new List<string>();
 
-            List<string> deathPreamble = new List<string>();
+            //How many dungeons cleared out
+            int dungeonsCleared = GetTotalDungeonsCleared();
 
-            deathPreamble.Add(Game.Dungeon.player.Name + " the assassin " + verb + " on level " + (player.LocationLevel + 1).ToString() + " of the dungeon.");
-            deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
-            deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
-            deathPreamble.Add("");
-            deathPreamble.Add("He found " + Game.Dungeon.Player.PlotItemsFound + " of " + Game.Dungeon.Player.TotalPlotItems + " plot items.");
+            int dungeonsExplored = GetTotalDungeonsExplored();
+
+
+            finalScreen.Add("Princess " + Game.Dungeon.player.Name + " dropped out of Princess School before graduating.");
+            finalScreen.Add("");
+
+            string careerStr = "Who knows what became of her after that?";
+            finalScreen.Add(careerStr);
 
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
+            finalScreen.Add("She explored " + dungeonsExplored + " out of 6 dungeons.");
+            finalScreen.Add("She cleared " + dungeonsCleared + " out of 6 dungeons.");
 
-            deathPreamble.Add("");
-            deathPreamble.Add("He killed " + killRecord.killCount + " creatures.");
+            finalScreen.Add("");
+            finalScreen.Add("She knocked out " + killRecord.killCount + " creatures.");
 
-            //Load up screen and display
-            Screen.Instance.TotalKills = killRecord.killStrings;
-            Screen.Instance.DeathPreamble = deathPreamble;
+            finalScreen.Add("");
+            finalScreen.Add("Thanks for playing! -flend");
 
-            Screen.Instance.DrawDeathScreen();
-            Screen.Instance.FlushConsole();
+            Screen.Instance.DrawEndOfGameInfo(finalScreen);
 
-            List<string> killRecordText = new List<string>();
-
-            SaveObituary(deathPreamble, killRecord.killStrings);
+            SaveObituary(finalScreen, killRecord.killStrings);
 
             if (!Game.Dungeon.SaveScumming)
             {
@@ -3028,7 +3033,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Victory!
+        /// Victory! - THIS DOESN@T HAPPEN IN PRINCESSRL
         /// </summary>
         /// <param name="p"></param>
         internal void EndGame(string endPhrase)
@@ -3477,7 +3482,7 @@ namespace RogueBasin
                 /// <summary>
         /// Run the end of game. Produce and save the obituary.
         /// </summary>
-        private void EndOfGame()
+        public void EndOfGame()
         {
             //Work out which ending the player gets
 
@@ -3548,9 +3553,10 @@ namespace RogueBasin
             Screen.Instance.PlayMovie("endgraduation", false);
 
             string careerName;
+            string careerMovie;
+            string romanceMovie;
 
-            string careerMovie = GetCareerMovie(out careerName);
-            string romanceMovie = GetRomanceMovie();
+            GetCareerMovie(out careerName, out careerMovie, out romanceMovie);
 
             List<string> careerList = new List<string>();
 
@@ -3608,8 +3614,12 @@ namespace RogueBasin
             string careerStr = "She went on to become a " + careerName;
             finalScreen.Add(careerStr);
 
-            if(princeGet)
+            if(princeGet && careerName != "Great General" && careerName != "Archmage")
                 careerStr = "and to marry her Prince and to live happily ever after.";
+            else if (princeGet)
+            {
+                careerStr = "and to love and lose but to live happily ever after.";
+            }
             else
                 careerStr = "and to live happily ever after.";
 
@@ -3618,6 +3628,7 @@ namespace RogueBasin
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
+            finalScreen.Add("");
             finalScreen.Add("She explored " + dungeonsExplored + " out of 6 dungeons.");
             finalScreen.Add("She cleared " + dungeonsCleared + " out of 6 dungeons.");
 
@@ -3663,16 +3674,166 @@ namespace RogueBasin
             RunMainLoop = false;
         }
 
-        private string GetRomanceMovie()
-        {
-            return "";
-        }
 
-        private string GetCareerMovie(out string careerName)
+        /// <summary>
+        /// Determine the final career from the princess' statistics
+        /// </summary>
+        /// <param name="careerName"></param>
+        /// <returns></returns>
+        private void GetCareerMovie(out string careerName, out string careerMovie, out string romanceMovie)
         {
-            careerName = "none";
+            Player player = Game.Dungeon.Player;
 
-            return "";
+            //PMP
+            if (player.AttackStat > 50 && player.CharmStat > 50 && player.MagicStat > 50)
+            {
+                careerName = "Perfect Modern Princess";
+                careerMovie = "endperfectmodernprincess";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endperfectmodernprincess_prince";
+                else
+                    romanceMovie = "endperfectmodernprincess_other";
+
+                return;
+            }
+
+            //Bard
+            if (player.AttackStat > 50 && player.CharmStat > 50)
+            {
+                careerName = "Bard";
+                careerMovie = "endbard";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endbard_prince";
+                else
+                    romanceMovie = "endbard_other";
+
+                return;
+            }
+
+            //Mage Diplomat
+            if (player.MagicStat > 50 && player.CharmStat > 50)
+            {
+                careerName = "Mage Diplomat";
+                careerMovie = "endmagediplomat";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endmagediplomat_prince";
+                else
+                    romanceMovie = "endmagediplomat_other";
+
+                return;
+            }
+
+            //Battle Mage
+            if (player.MagicStat > 50 && player.AttackStat > 50)
+            {
+                careerName = "Battle Mage";
+                careerMovie = "endbattlemage";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endbattlemage_prince";
+                else
+                    romanceMovie = "endbattlemage_other";
+
+                return;
+            }
+
+            //Arch Mage
+            if (player.MagicStat > 120)
+            {
+                careerName = "Archmage";
+                careerMovie = "endarchmage";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endarchmage_prince";
+                else
+                    romanceMovie = "endarchmage_other";
+
+                return;
+            }
+
+            //Sorcerer
+            if (player.MagicStat > 75)
+            {
+                careerName = "Sorcerer";
+                careerMovie = "endsorcerer";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endsorcerer_prince";
+                else
+                    romanceMovie = "endsorcerer_other";
+
+                return;
+            }
+
+            //Great General
+            if (player.AttackStat > 120)
+            {
+                careerName = "Great General";
+                careerMovie = "endgreatgeneral";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endgreatgeneral_prince";
+                else
+                    romanceMovie = "endgreatgeneral_other";
+
+                return;
+            }
+
+            //Warrior
+            if (player.AttackStat > 75)
+            {
+                careerName = "Warrior";
+                careerMovie = "endwarrior";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endwarrior_prince";
+                else
+                    romanceMovie = "endwarrior_other";
+
+                return;
+            }
+
+            //Social Goddess
+            if (player.CharmStat > 120)
+            {
+                careerName = "Social Goddess";
+                careerMovie = "endsocialgoddess";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endsocialgoddess_prince";
+                else
+                    romanceMovie = "endsocialgoddess_other";
+
+                return;
+            }
+
+            //Social Goddess
+            if (player.CharmStat > 75)
+            {
+                careerName = "Social Goddess";
+                careerMovie = "endsocialite";
+
+                if (Game.Dungeon.DungeonInfo.DragonDead)
+                    romanceMovie = "endsocialite_prince";
+                else
+                    romanceMovie = "endsocialite_other";
+
+                return;
+            }
+
+            //Father's girl
+            careerName = "Father's Girl";
+            careerMovie = "endfathersgirl";
+
+            if (Game.Dungeon.DungeonInfo.DragonDead)
+                romanceMovie = "endfathersgirl_prince";
+            else
+                romanceMovie = "endfathersgirl_other";
+
+            return;
         }
 
         /// <summary>
