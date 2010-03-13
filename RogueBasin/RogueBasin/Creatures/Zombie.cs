@@ -53,7 +53,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 3;
+            return 1;
         }
 
         public override int HitModifier()
@@ -105,6 +105,31 @@ namespace RogueBasin.Creatures
         public override Color CreatureColor()
         {
             return ColorPresets.Cornsilk;
+        }
+
+        public override int GetMagicXP()
+        {
+            return 50;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 50;
+        }
+
+        public override int GetMagicRes()
+        {
+            return 0;
+        }
+
+        public override int GetCharmRes()
+        {
+            return 0;
+        }
+
+        public override bool CanBeCharmed()
+        {
+            return false;
         }
     }
 }

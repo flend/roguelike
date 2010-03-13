@@ -136,5 +136,30 @@ namespace RogueBasin.Creatures
         {
             return ColorPresets.Gray;
         }
+
+        public override int GetMagicXP()
+        {
+            return 80;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 60;
+        }
+
+        public override int GetMagicRes()
+        {
+            return 40;
+        }
+
+        public override int GetCharmRes()
+        {
+            return 0;
+        }
+
+        public override bool CanBeCharmed()
+        {
+            return false;
+        }
     }
 }

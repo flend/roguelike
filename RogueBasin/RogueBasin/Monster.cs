@@ -49,6 +49,7 @@ namespace RogueBasin
 
             hitpoints = maxHitpoints;
 
+            WasSummoned = false;
             //Calculate our combat stats
             CalculateCombatStats();
 
@@ -131,6 +132,11 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         abstract public void InventoryDrop();
+
+        /// <summary>
+        /// Was the creature summoned or raised?
+        /// </summary>
+        public bool WasSummoned { get; set; }
 
         /// <summary>
         /// Run the creature's action AI
@@ -434,7 +440,11 @@ namespace RogueBasin
                 //Is the player dead, if so kill it?
                 if (monster.Hitpoints <= 0)
                 {
+
                     Game.Dungeon.KillMonster(monster);
+
+                    //Add charm XP if appropriate
+                    Game.Dungeon.Player.AddXPMonsterAttack(this, monster);
 
                     //Debug string
                     string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
@@ -483,6 +493,30 @@ namespace RogueBasin
         abstract public int CreatureLevel();
 
         abstract public void NotifyAttackByCreature(Creature creature);
+
+        /// <summary>
+        /// The monster's combat challenge rating
+        /// </summary>
+        /// <returns></returns>
+        abstract public int GetCombatXP();
+
+        /// <summary>
+        /// The monster's magic challenge rating
+        /// </summary>
+        /// <returns></returns>
+        abstract public int GetMagicXP();
+
+        /// <summary>
+        /// The monster's magic resistance
+        /// </summary>
+        /// <returns></returns>
+        virtual public int GetMagicRes() { return 0; }
         
+        /// <summary>
+        /// The monster's charm resistance
+        /// </summary>
+        /// <returns></returns>
+        virtual public int GetCharmRes() { return 0; }
+
     }
 }

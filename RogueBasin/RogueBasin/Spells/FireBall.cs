@@ -120,7 +120,7 @@ namespace RogueBasin.Spells
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Apply damage
-            player.ApplyDamageToMonster(monster, damage);
+            player.ApplyDamageToMonster(monster, damage, true);
         }
 
         private void HitPlayer()

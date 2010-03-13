@@ -105,6 +105,11 @@ namespace RogueBasin
 
         public int CurrentEquippedItems { get; set; }
 
+        //XP in dungeons
+        public int CombatXP { get; set; }
+        public int MagicXP { get; set; }
+        public int CharmXP { get; set; }
+
         //Training stats
 
         public int MaxHitpointsStat { get; set; }
@@ -735,7 +740,7 @@ namespace RogueBasin
 
             int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
 
-            return ApplyDamageToMonster(monster, damage);
+            return ApplyDamageToMonster(monster, damage, false);
         }
 
         /// <summary>
@@ -789,12 +794,12 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Apply damage to monster and deal with death
+        /// Apply damage to monster and deal with death. All player attacks are routed through here.
         /// </summary>
         /// <param name="monster"></param>
         /// <param name="damage"></param>
         /// <returns></returns>
-        public CombatResults ApplyDamageToMonster(Monster monster, int damage)
+        public CombatResults ApplyDamageToMonster(Monster monster, int damage, bool magicUse)
         {
             //Set the attacked by marker
             monster.LastAttackedBy = this;
@@ -830,6 +835,10 @@ namespace RogueBasin
                 {
                     Game.Dungeon.KillMonster(monster);
 
+                    //Add XP
+                    AddXPPlayerAttack(monster, magicUse);
+
+
                     //Add it to our list of kills (simply adding the whole object here)
                     Kills.Add(monster);
 
@@ -860,6 +869,59 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
+        }
+
+        /// <summary>
+        /// A monster has been killed by magic or combat. Add XP
+        /// </summary>
+        /// <param name="magicUse"></param>
+        private void AddXPPlayerAttack(Monster monster, bool magicUse)
+        {
+            //No XP for summonded creatures
+            if (monster.WasSummoned)
+            {
+                LogFile.Log.LogEntryDebug("No XP for summounded creatures.", LogDebugLevel.Medium);
+                return;
+            }
+
+            //Magic case
+            if (magicUse)
+            {
+                int monsterXP = monster.GetMagicXP();
+                double diffDelta = (MagicStat - monsterXP) / MagicStat;
+                if (diffDelta < 0)
+                    diffDelta = 0;
+
+                double xpUpChance = 1 - diffDelta;
+                int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
+                int xpUpRollActual = Game.Random.Next(100);
+                LogFile.Log.LogEntryDebug("MagicXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+
+                if (xpUpRollActual < xpUpChance)
+                {
+                    MagicXP++;
+                    Game.MessageQueue.AddMessage("You feel your magic grow stronger.");
+                }
+            }
+            //Combat use
+            else
+            {
+                int monsterXP = monster.GetCombatXP();
+                double diffDelta = (AttackStat - monsterXP) / AttackStat;
+                if (diffDelta < 0)
+                    diffDelta = 0;
+
+                double xpUpChance = 1 - diffDelta;
+                int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
+                int xpUpRollActual = Game.Random.Next(100);
+                LogFile.Log.LogEntryDebug("CombatXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+
+                if (xpUpRollActual < xpUpChance)
+                {
+                    CombatXP++;
+                    Game.MessageQueue.AddMessage("You feel your combat skill increase.");
+                }
+            }
         }
 
         /// <summary>
@@ -1318,6 +1380,39 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("tried to remove a charmed creature when there were 0", LogDebugLevel.High);
                 CurrentCharmedCreatures = 0;
             }
+        }
+
+        /// <summary>
+        /// This happens when a charmed creature attacks another
+        /// </summary>
+        /// <param name="attackingMonster"></param>
+        /// <param name="targetMonster"></param>
+        internal void AddXPMonsterAttack(Monster attackingMonster, Monster targetMonster)
+        {
+            //Check this monster was charmed
+            if (!attackingMonster.Charmed)
+            {
+                LogFile.Log.LogEntryDebug("Attacking monster was not charmed, no XP. How did this happen?", LogDebugLevel.High);
+                return;
+            }
+
+          //Add charm XP. Use the target's combat XP against the player's charm stat
+            int monsterXP = targetMonster.GetCombatXP();
+            double diffDelta = (CharmStat - monsterXP) / CharmStat;
+            if (diffDelta < 0)
+                 diffDelta = 0;
+
+                double xpUpChance = 1 - diffDelta;
+                int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
+                int xpUpRollActual = Game.Random.Next(100);
+                LogFile.Log.LogEntryDebug("CharmXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+
+                if (xpUpRollActual < xpUpChance)
+                {
+                    CharmXP++;
+                    Game.MessageQueue.AddMessage("You feel more charming.");
+                }
+            
         }
     }
 }

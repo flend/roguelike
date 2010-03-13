@@ -87,5 +87,15 @@ namespace RogueBasin.Creatures
         {
           //Do nothing
         }
+
+        public override int GetMagicXP()
+        {
+            return 0;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 0;
+        }
     }
 }

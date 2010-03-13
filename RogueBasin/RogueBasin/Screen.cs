@@ -704,6 +704,8 @@ namespace RogueBasin {
                 DrawSpellOverlay();
             else if (displayTrainingUI)
                 DrawTrainingOverlay();
+            else if (ShowXPScreen)
+                DrawXPOverlay();
 
         }
 
@@ -1366,8 +1368,85 @@ namespace RogueBasin {
                 
             }
 
+
             rootConsole.ForegroundColor = ColorPresets.White;
            
+        }
+
+
+        public int MagicInc { get; set; }
+        public int CombatInc { get; set; }
+        public int CharmInc { get; set; }
+
+        public bool ShowXPScreen { get; set; }
+
+        /// <summary>
+        /// Display XP boost overlay
+        /// </summary>
+        private void DrawXPOverlay()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            Point statsHeaderOffset = new Point(10, 0);
+            Point statsModOffset = new Point(15, 0);
+            Point statsDayOffset = new Point(2, 0);
+
+            Point fitnessOffset = new Point(0, 0);
+            Point healthOffset = new Point(8, 0);
+            Point speedOffset = new Point(16, 0);
+            Point combatOffset = new Point(23, 0);
+            Point charmOffset = new Point(30, 0);
+            Point magicOffset = new Point(36, 0);
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(trainingTL.x, trainingTL.y, trainingTR.x - trainingTL.x + 1, trainingBL.y - trainingTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("Your adventuring paid off!", (trainingTL.x + trainingTR.x) / 2, trainingTL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect("Press (ENTER) to exit", (trainingTL.x + trainingTR.x) / 2, trainingBL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw headings
+            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+
+            //Draw stats
+            /*
+            int headerY = trainingTL.y + 4;
+
+            rootConsole.PrintLine("Stamina", trainingTL.x + statsHeaderOffset.x + fitnessOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Health", trainingTL.x + statsHeaderOffset.x + healthOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Speed", trainingTL.x + statsHeaderOffset.x + speedOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Combat", trainingTL.x + statsHeaderOffset.x + combatOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Charm", trainingTL.x + statsHeaderOffset.x + charmOffset.x, headerY, LineAlignment.Left);
+            rootConsole.PrintLine("Magic", trainingTL.x + statsHeaderOffset.x + magicOffset.x, headerY, LineAlignment.Left);
+            */
+
+
+
+            //Draw all updates
+            int lineCount = 0;
+
+            trainingYTemp = trainingTL.y + 6 + lineCount;
+
+            //Concatenate display string
+            trainingXTemp = statsModOffset.x;
+
+            rootConsole.ForegroundColor = ColorPresets.White;
+
+            ProcessDelta("Combat", CombatInc);
+
+            trainingYTemp++;
+            ProcessDelta("Charm", MagicInc);
+            trainingYTemp++;
+            ProcessDelta("Magic", MagicInc);
+
+            FlushConsole();
+            WaitForEnterKey();
+
+            rootConsole.ForegroundColor = ColorPresets.White;
+
         }
 
         private void ProcessDelta(string statName, int delta)

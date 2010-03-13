@@ -35,24 +35,7 @@ namespace RogueBasin.Triggers
                 //                Screen.Instance.PlayMovie("treasureRoom", true);
                 Triggered = true;
             }
-
-            //Update the player's stats for the adventure
-            Game.Dungeon.SyncStatsWithTraining();
-
-            //Teleport the player to the start location in the wilderness
-
-            //Increment player level
-            Player player = Game.Dungeon.Player;
-
-            player.LocationLevel = 1;
-            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
-
-            //Set vision
-            player.SightRadius = 10;
-
-            //This runs any triggers
-            Game.Dungeon.MovePCAbsolute(player.LocationLevel, player.LocationMap.x, player.LocationMap.y);
-
+            Game.Dungeon.PlayerEnterWilderness();
 
             return true;
         }

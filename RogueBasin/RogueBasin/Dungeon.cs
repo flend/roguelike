@@ -896,7 +896,8 @@ namespace RogueBasin
 
         }
         /// <summary>
-        /// A creature does something that creates a new creature, e.g. raising summoning
+        /// A creature does something that creates a new creature, e.g. raising summoning.
+        /// Adds to the summoning queue which is processed at the end
         /// </summary>
         /// <param name="creature"></param>
         /// <param name="level"></param>
@@ -3054,64 +3055,95 @@ namespace RogueBasin
                     }
 
                     //Check if this class of creature can be charmed or passified
-                    if (!monster.CanBeCharmed() && !monster.CanBePassified())
+                    if (!monster.CanBeCharmed())// && !monster.CanBePassified())
                     {
                         Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " laughs at your feeble attempt.");
                         return true;
                     }
 
-                    bool canCharm = true;
-
+                 //   bool canCharm = true;
+                    /*
                     if (!monster.CanBeCharmed())
                     {
                         //On for passify only
                         canCharm = false;
-                    }
+                    }*/
 
                     //Try to charm, may fail if the player has no more charms
                     
                     bool playerOK = false;
-                    if (canCharm)
-                    {
+                  //  if (canCharm)
+                  //  {
                         //Check if the player has any more charms
                         playerOK = player.AddCharmCreatureIfPossible();
-                    }
+//}
 
                     if (!playerOK)
                     {
-                        canCharm = false;
-                        //Game.MessageQueue.AddMessage("Too many charmed creatures.");
+                        //canCharm = false;
+                        Game.MessageQueue.AddMessage("Too many charmed creatures.");
+                        return true;
                         //return true;
                     }
 
                     //All OK do the charm
-                    if (canCharm)
-                    {
+                 //   if (canCharm)
+                //    {
                         //Test against statistic here
+                        int monsterRes = monster.GetCharmRes();
+                        int charmRoll = Game.Random.Next(player.CharmStat);
 
-                        string msg = "The " + monster.SingleDescription + " looks at you lovingly.";
+                        LogFile.Log.LogEntryDebug("Charm attempt. Res: " + monsterRes + " Roll: " + charmRoll, LogDebugLevel.Medium);
 
-                        Game.MessageQueue.AddMessage(msg);
+                        if (charmRoll < monsterRes)
+                        {
+                            //Charm not successful
+                            string msg = "The " + monster.SingleDescription + " does not look convinced by your overtures.";
+
+                            Game.MessageQueue.AddMessage(msg);
+                            return true;
+                        }
+
+                        string msg2 = "The " + monster.SingleDescription + " looks at you lovingly.";
+
+                        Game.MessageQueue.AddMessage(msg2);
                         contents.monster.CharmCreature();
+
+                        //Add XP
+                        double diffDelta = (player.CharmStat - monsterRes) / player.CharmStat;
+                        if (diffDelta < 0)
+                            diffDelta = 0;
+
+                        double xpUpChance = 1 - diffDelta;
+                        int xpUpRoll = (int)Math.Floor(xpUpChance * 100.0);
+                        int xpUpRollActual = Game.Random.Next(100);
+                        LogFile.Log.LogEntryDebug("CharmXP up. Chance: " + xpUpChance + " roll: " + xpUpRollActual, LogDebugLevel.Medium);
+
+                        if (xpUpRollActual < xpUpChance)
+                        {
+                            player.CharmXP++;
+                            Game.MessageQueue.AddMessage("You feel more charming.");
+                        }
 
                         //Set intrinsic on the player
                         player.CharmUse = true;
 
                         return true;
-                    }
+                //    }
 
+                        /*
                     //Only a passify
                     else
                     {
                         //Test against statistic here
-
+                        
                         string msg = "The " + monster.SingleDescription + " sighs and turns away.";
 
                         Game.MessageQueue.AddMessage(msg);
                         contents.monster.PassifyCreature();
 
                         return true;
-                    }
+                    }*/
 
                 }
                 else
@@ -3121,7 +3153,7 @@ namespace RogueBasin
                     return false;
                 }
             }
-
+            //return false;
         }
             /// <summary>
         /// Attempt to uncharm a monster in a target direction.
@@ -3196,6 +3228,34 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Turn the player's XP counters into stats
+        /// </summary>
+        void ProcessPlayerXP()
+        {
+            //Could cheat and put some limiting in here
+            int magicInc = (int)Math.Ceiling(player.MagicXP / 5.0);
+            int combatInc = (int)Math.Ceiling(player.CombatXP / 5.0);
+            int charmInc = (int)Math.Ceiling(player.CharmXP / 5.0);
+
+            player.MagicStat += magicInc;
+            player.CharmStat += charmInc;
+            player.AttackStat += combatInc;
+
+            //Show player the increases
+
+            Screen.Instance.ShowXPScreen = true;
+            Screen.Instance.MagicInc = magicInc;
+            Screen.Instance.CombatInc = combatInc;
+            Screen.Instance.CharmInc = charmInc;
+
+            Screen.Instance.DrawAndFlush();
+            Screen.Instance.ShowXPScreen = false;
+
+            ResetPlayerXPCounters();
+
+        }
+
+        /// <summary>
         /// Exit a dungeon and go back to town
         /// </summary>
 
@@ -3204,6 +3264,9 @@ namespace RogueBasin
             //Check if this is the end of the game
             if (!DungeonInfo.LastMission)
             {
+                //Increase player's stats
+                ProcessPlayerXP();
+
 
                 LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
                 Game.Dungeon.MoveToNextDate();
@@ -3480,6 +3543,39 @@ namespace RogueBasin
                     }
                 }
             }
+        }
+
+        void ResetPlayerXPCounters()
+        {
+            player.CombatXP = 0;
+            player.MagicXP = 0;
+            player.CharmXP = 0;
+        }
+
+        /// <summary>
+        /// Player leaves school and enters wilderness
+        /// </summary>
+        public void PlayerEnterWilderness()
+        {
+            //Update the player's stats for the adventure
+            Game.Dungeon.SyncStatsWithTraining();
+
+            //Reset the XP counters
+            ResetPlayerXPCounters();
+
+            //Teleport the player to the start location in the wilderness
+
+            Player player = Game.Dungeon.Player;
+
+            player.LocationLevel = 1;
+            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
+
+            //Set vision
+            player.SightRadius = 10;
+
+            //This runs any triggers
+            Game.Dungeon.MovePCAbsolute(player.LocationLevel, player.LocationMap.x, player.LocationMap.y);
+
         }
 
         /// <summary>

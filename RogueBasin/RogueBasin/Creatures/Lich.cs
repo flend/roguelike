@@ -149,5 +149,29 @@ namespace RogueBasin.Creatures
             currentTarget = creature;
 
         }
+        public override int GetMagicXP()
+        {
+            return 50;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 50;
+        }
+
+        public override int GetMagicRes()
+        {
+            return 0;
+        }
+
+        public override int GetCharmRes()
+        {
+            return 0;
+        }
+
+        public override bool CanBeCharmed()
+        {
+            return false;
+        }
     }
 }
