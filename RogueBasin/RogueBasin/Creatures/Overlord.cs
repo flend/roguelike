@@ -94,7 +94,7 @@ namespace RogueBasin.Creatures
 
         public override int CreatureCost()
         {
-            return 200;
+            return 250;
         }
 
         public override int CreatureLevel()

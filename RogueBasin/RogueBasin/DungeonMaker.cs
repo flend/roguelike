@@ -245,6 +245,12 @@ namespace RogueBasin
             return location;
         }
 
+        //Spawning shared variables
+        int looseGroupDist;
+        int lonerChance;
+        int maxGroupSize;
+        int minGroupSize;
+
          private void SpawnInitialCreatures() {
              LogFile.Log.LogEntry("Generating creatures...");
 
@@ -252,6 +258,8 @@ namespace RogueBasin
 
             //Add monsters to levels
 
+             //Quick up down compensate globally
+             int budgetScale = 1;
               
              //First dungeon
 
@@ -265,60 +273,277 @@ namespace RogueBasin
              monsterBudgets.Add(0);
              monsterBudgets.Add(0);
 
-             //cave 2-5
-             monsterBudgets.Add(300);
-             monsterBudgets.Add(350);
-             monsterBudgets.Add(400);
-             monsterBudgets.Add(450);
+             //Dungeon 0: CAVE
+
+             List<int> monsterBudgets = new List<int>();
+
+             int dungeonID = 0;
+
+             monsterBudgets.Add(budgetScale * 100);
+             monsterBudgets.Add(budgetScale * 150);
+             monsterBudgets.Add(budgetScale * 250);
+             monsterBudgets.Add(budgetScale * 300);
 
              //build commonness list for caves
+
+             //Gives about 50 monsters
              List<MonsterCommon> caveList = new List<MonsterCommon>();
              caveList.Add(new MonsterCommon(new Creatures.Ferret(), 50));
              caveList.Add(new MonsterCommon(new Creatures.Rat(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.Spider(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Goblin(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.GoblinWitchdoctor(), 10));
 
-             int looseGroupDist = 10;
-             int lonerChance = 50;
-             int maxGroupSize = 6;
-             int minGroupSize = 3;
-             
-             for (int levelNo = 2; levelNo < 6; levelNo++)
+             looseGroupDist = 10;
+             lonerChance = 50;
+             maxGroupSize = 6;
+             minGroupSize = 3;
+
+             int dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+             int dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+             for (int levelNo = dungeonStartLevel; levelNo <= dungeonEndLevel; levelNo++)
              {
-                 int budgetSpent = 0;
-
-                 while (budgetSpent < monsterBudgets[levelNo])
-                 {
-                     Monster monsterToPlace = null;
-
-                     //Monster by itself
-                     if (Game.Random.Next(100) < lonerChance)
-                     {
-                         monsterToPlace = GetMonsterFromCommonList(caveList);
-                         PlaceMonster(levelNo, monsterToPlace);
-                         budgetSpent += monsterToPlace.CreatureCost();
-                     }
-                     else
-                     {
-                         //Loose group
-                         int monsInGroup = minGroupSize + Game.Random.Next(maxGroupSize - minGroupSize);
-
-                         //First monster is centre
-
-                         monsterToPlace = GetMonsterFromCommonList(caveList);
-                         Point centerLoc = PlaceMonster(levelNo, monsterToPlace);
-
-                         //Other monsters surround
-
-                         for (int i = 0; i < monsInGroup - 1; i++)
-                         {
-                             monsterToPlace = GetMonsterFromCommonList(caveList);
-                             PlaceMonsterCloseToLocation(levelNo, monsterToPlace, centerLoc, looseGroupDist);
-                             //If this takes us a bit over budget, don't worry
-                             budgetSpent += monsterToPlace.CreatureCost();
-                         }
-                     }
-                 }
+                 GroupAndDisperseMonsters(levelNo, monsterBudgets[levelNo - dungeonStartLevel], caveList);
              }
-             
+
+             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 8);
+
+             //Dungeon 1: CAVE WATER
+
+             dungeonID = 1;
+
+             monsterBudgets = new List<int>();
+
+             monsterBudgets.Add(budgetScale * 250);
+             monsterBudgets.Add(budgetScale * 300);
+             monsterBudgets.Add(budgetScale * 300);
+             monsterBudgets.Add(budgetScale * 400);
+
+             //build commonness list for caves
+
+             //Gives about 50 monsters
+             caveList = new List<MonsterCommon>();
+             caveList.Add(new MonsterCommon(new Creatures.Ferret(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.Rat(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.Bat(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.Spider(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Ogre(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Bugbear(), 40));
+             caveList.Add(new MonsterCommon(new Creatures.Pixie(), 20));
+
+             looseGroupDist = 8;
+             lonerChance = 50;
+             maxGroupSize = 6;
+             minGroupSize = 3;
+
+             dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+             dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+             for (int levelNo = dungeonStartLevel; levelNo <= dungeonEndLevel; levelNo++)
+             {
+                 GroupAndDisperseMonsters(levelNo, monsterBudgets[levelNo - dungeonStartLevel], caveList);
+             }
+
+             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 5);
+
+             //Dungeon 2: FOREST
+
+             dungeonID = 2;
+
+             monsterBudgets = new List<int>();
+
+             monsterBudgets.Add(budgetScale * 250);
+             monsterBudgets.Add(budgetScale * 300);
+             monsterBudgets.Add(budgetScale * 350);
+             monsterBudgets.Add(budgetScale * 400);
+
+             //build commonness list for caves
+
+             //Gives about 50 monsters
+             caveList = new List<MonsterCommon>();
+             caveList.Add(new MonsterCommon(new Creatures.Pixie(), 15));
+             caveList.Add(new MonsterCommon(new Creatures.Ferret(), 60));
+             caveList.Add(new MonsterCommon(new Creatures.Bat(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.BlackUnicorn(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Faerie(), 15));
+             caveList.Add(new MonsterCommon(new Creatures.Nymph(), 15));
+             caveList.Add(new MonsterCommon(new Creatures.Peon(), 10));
+
+             looseGroupDist = 6;
+             lonerChance = 30;
+             maxGroupSize = 6;
+             minGroupSize = 3;
+
+             dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+             dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+             for (int levelNo = dungeonStartLevel; levelNo <= dungeonEndLevel; levelNo++)
+             {
+                 GroupAndDisperseMonsters(levelNo, monsterBudgets[levelNo - dungeonStartLevel], caveList);
+             }
+
+             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 10);
+
+             //Dungeon 3: ORC HUT
+
+             dungeonID = 3;
+
+             monsterBudgets = new List<int>();
+
+             monsterBudgets.Add(budgetScale * 250);
+             monsterBudgets.Add(budgetScale * 300);
+             monsterBudgets.Add(budgetScale * 350);
+             monsterBudgets.Add(budgetScale * 400);
+
+             //build commonness list for caves
+
+             //Gives about 50 monsters
+             caveList = new List<MonsterCommon>();
+             caveList.Add(new MonsterCommon(new Creatures.Orc(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.OrcShaman(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.GoblinWitchdoctor(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Ogre(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Bugbear(), 35));
+             caveList.Add(new MonsterCommon(new Creatures.Ferret(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Uruk(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Spider(), 20));
+
+             looseGroupDist = 6;
+             lonerChance = 30;
+             maxGroupSize = 6;
+             minGroupSize = 3;
+
+             dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+             dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+             for (int levelNo = dungeonStartLevel; levelNo <= dungeonEndLevel; levelNo++)
+             {
+                 GroupAndDisperseMonsters(levelNo, monsterBudgets[levelNo - dungeonStartLevel], caveList);
+             }
+
+             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 0);
+
+             //Dungeon 4: CRYPT
+
+             dungeonID = 4;
+
+             monsterBudgets = new List<int>();
+
+             monsterBudgets.Add(budgetScale * 250);
+             monsterBudgets.Add(budgetScale * 350);
+             monsterBudgets.Add(budgetScale * 450);
+             monsterBudgets.Add(budgetScale * 500);
+
+             //build commonness list for caves
+
+             //Gives about 50 monsters
+             caveList = new List<MonsterCommon>();
+             caveList.Add(new MonsterCommon(new Creatures.Ghoul(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Skeleton(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.SkeletalArcher(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Zombie(), 50));
+             caveList.Add(new MonsterCommon(new Creatures.Necromancer(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Peon(), 10));
+
+             looseGroupDist = 6;
+             lonerChance = 30;
+             maxGroupSize = 6;
+             minGroupSize = 3;
+
+             dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+             dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+             for (int levelNo = dungeonStartLevel; levelNo <= dungeonEndLevel; levelNo++)
+             {
+                 GroupAndDisperseMonsters(levelNo, monsterBudgets[levelNo - dungeonStartLevel], caveList);
+             }
+
+             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 15);
+
+             //Dungeon 5: DEMON LAYER
+
+             dungeonID = 5;
+
+             monsterBudgets = new List<int>();
+
+             monsterBudgets.Add(budgetScale * 450);
+             monsterBudgets.Add(budgetScale * 550);
+             monsterBudgets.Add(budgetScale * 650);
+             monsterBudgets.Add(budgetScale * 750);
+
+             //build commonness list for caves
+
+             //Gives about 50 monsters
+             caveList = new List<MonsterCommon>();
+             caveList.Add(new MonsterCommon(new Creatures.Imp(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Demon(), 60));
+             caveList.Add(new MonsterCommon(new Creatures.Maleficarum(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Whipper(), 40));
+             caveList.Add(new MonsterCommon(new Creatures.Meddler(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Drainer(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Peon(), 60));
+             caveList.Add(new MonsterCommon(new Creatures.Overlord(), 10));
+
+
+             looseGroupDist = 6;
+             lonerChance = 30;
+             maxGroupSize = 6;
+             minGroupSize = 3;
+
+             dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+             dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+             for (int levelNo = dungeonStartLevel; levelNo <= dungeonEndLevel; levelNo++)
+             {
+                 GroupAndDisperseMonsters(levelNo, monsterBudgets[levelNo - dungeonStartLevel], caveList);
+             }
+
+             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 10);
+
+             //Dungeon 6: PRINCE
+
+             dungeonID = 6;
+
+             monsterBudgets = new List<int>();
+
+             monsterBudgets.Add(budgetScale * 300);
+             monsterBudgets.Add(budgetScale * 300);
+             monsterBudgets.Add(budgetScale * 350);
+             monsterBudgets.Add(budgetScale * 400);
+
+             //build commonness list for caves
+
+             //Gives about 50 monsters
+             caveList = new List<MonsterCommon>();
+             caveList.Add(new MonsterCommon(new Creatures.Imp(), 10));
+             caveList.Add(new MonsterCommon(new Creatures.Demon(), 10));
+             caveList.Add(new MonsterCommon(new Creatures.Skeleton(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.SkeletalArcher(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Necromancer(), 10));
+             caveList.Add(new MonsterCommon(new Creatures.Pixie(), 10));
+             caveList.Add(new MonsterCommon(new Creatures.Ferret(), 30));
+             caveList.Add(new MonsterCommon(new Creatures.Faerie(), 10));
+             caveList.Add(new MonsterCommon(new Creatures.Ogre(), 20));
+             caveList.Add(new MonsterCommon(new Creatures.Ghoul(), 10));
+             caveList.Add(new MonsterCommon(new Creatures.Rat(), 10));
+             caveList.Add(new MonsterCommon(new Creatures.OrcShaman(), 10));
+
+             looseGroupDist = 6;
+             lonerChance = 30;
+             maxGroupSize = 6;
+             minGroupSize = 3;
+
+             dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+             dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+             for (int levelNo = dungeonStartLevel; levelNo <= dungeonEndLevel; levelNo++)
+             {
+                 GroupAndDisperseMonsters(levelNo, monsterBudgets[levelNo - dungeonStartLevel], caveList);
+             }
+
+             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 0);
+
             //The levels divide into 3 groups: cave, cave/halls and halls
             //The difficulty in each set is roughly the same
 
@@ -841,6 +1066,72 @@ namespace RogueBasin
 
         }
 
+        /// <summary>
+        /// Set the light level for all creatures between the levels specified (inclusive).
+        /// All sets it on the dungeon levels themselves
+        /// </summary>
+        /// <param name="dungeonStartLevel"></param>
+        /// <param name="dungeonEndLevel"></param>
+        /// <param name="p"></param>
+         private void SetLightLevelUniversal(int dungeonStartLevel, int dungeonEndLevel, int sightRadius)
+         {
+             List<Monster> monsters = Game.Dungeon.Monsters;
+
+             for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
+             {
+                 Game.Dungeon.Levels[i].LightLevel = sightRadius;
+             }
+
+             foreach (Monster monster in monsters)
+             {
+                 if (monster.LocationLevel >= dungeonStartLevel && monster.LocationLevel <= dungeonEndLevel)
+                 {
+                     //Get the monster's sight radius. 5 is normal, so use this as a ratio
+                     double sightUpRatio = monster.SightRadius / 5.0;
+
+                     monster.SightRadius = (int)Math.Floor(sightRadius * sightUpRatio);
+                 }
+             }
+         }
+
+         private void GroupAndDisperseMonsters(int levelNo, int monsterBudget, List<MonsterCommon> caveList)
+         {
+             int budgetSpent = 0;
+
+             while (budgetSpent < monsterBudget)
+             {
+                 Monster monsterToPlace = null;
+
+                 //Monster by itself
+                 if (Game.Random.Next(100) < lonerChance)
+                 {
+                     monsterToPlace = GetMonsterFromCommonList(caveList);
+                     PlaceMonster(levelNo, monsterToPlace);
+                     budgetSpent += monsterToPlace.CreatureCost();
+                 }
+                 else
+                 {
+                     //Loose group
+                     int monsInGroup = minGroupSize + Game.Random.Next(maxGroupSize - minGroupSize);
+
+                     //First monster is centre
+
+                     monsterToPlace = GetMonsterFromCommonList(caveList);
+                     Point centerLoc = PlaceMonster(levelNo, monsterToPlace);
+
+                     //Other monsters surround
+
+                     for (int i = 0; i < monsInGroup - 1; i++)
+                     {
+                         monsterToPlace = GetMonsterFromCommonList(caveList);
+                         PlaceMonsterCloseToLocation(levelNo, monsterToPlace, centerLoc, looseGroupDist);
+                         //If this takes us a bit over budget, don't worry
+                         budgetSpent += monsterToPlace.CreatureCost();
+                     }
+                 }
+             }
+         }
+
          private Point PlaceMonsterCloseToLocation(int levelNo, Monster monsterToPlace, Point centerLoc, int looseGroupDist)
          {
              Point location = new Point();
@@ -865,7 +1156,7 @@ namespace RogueBasin
         /// <param name="levelToPlace"></param>
         private void CheckSpecialMonsterGroups(Monster monster, int levelToPlace)
         {
-            int minDistance = 6;
+            int minDistance = 4;
             int loopCount = 0;
 
             Point location = new Point();
@@ -874,8 +1165,8 @@ namespace RogueBasin
             if (monster is Creatures.GoblinWitchdoctor)
             {
                 //Spawn in with a random number of ferrets & goblins
-                int noFerrets = 1 + Game.Random.Next(4);
-                int noGoblins = 0 + Game.Random.Next(3);
+                int noFerrets = 2 + Game.Random.Next(4);
+                int noGoblins = 1 + Game.Random.Next(3);
 
                 for (int i = 0; i < noFerrets; i++)
                 {
@@ -905,8 +1196,8 @@ namespace RogueBasin
             else if (monster is Creatures.OrcShaman)
             {
                 //Spawn in with a random number of orcs & spiders
-                int noOrcs = 1 + Game.Random.Next(3);
-                int noSpiders = 0 + Game.Random.Next(2);
+                int noOrcs = 2 + Game.Random.Next(3);
+                int noSpiders = 1 + Game.Random.Next(2);
 
                 for (int i = 0; i < noOrcs; i++)
                 {
@@ -939,7 +1230,7 @@ namespace RogueBasin
             {
                 //Spawn in with a random number of skels & zombs
                 int noSkel = 1 + Game.Random.Next(3);
-                int noZomb = 0 + Game.Random.Next(2);
+                int noZomb = 1 + Game.Random.Next(2);
 
                 for (int i = 0; i < noSkel; i++)
                 {
@@ -967,6 +1258,119 @@ namespace RogueBasin
                     } while (!dungeon.AddMonster(new Creatures.Zombie(), levelToPlace, location));
                 }
             }
+            else if (monster is Creatures.Meddler)
+            {
+                //Spawn in with a random number of demons & peons
+                int noDem = 1 + Game.Random.Next(2);
+                int noPeon = 1 + Game.Random.Next(3);
+
+                for (int i = 0; i < noDem; i++)
+                {
+                    do
+                    {
+                        loopCount = 0;
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                    } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location));
+                }
+
+                for (int i = 0; i < noPeon; i++)
+                {
+                    do
+                    {
+                        loopCount = 0;
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                    } while (!dungeon.AddMonster(new Creatures.Peon(), levelToPlace, location));
+                }
+            }
+
+            else if (monster is Creatures.Maleficarum)
+            {
+                //Spawn in with a random number of demons & whippers
+                int noDem = 1 + Game.Random.Next(2);
+                int noPeon = 1 + Game.Random.Next(2);
+
+                for (int i = 0; i < noDem; i++)
+                {
+                    do
+                    {
+                        loopCount = 0;
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                    } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location));
+                }
+
+                for (int i = 0; i < noPeon; i++)
+                {
+                    do
+                    {
+                        loopCount = 0;
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                    } while (!dungeon.AddMonster(new Creatures.Whipper(), levelToPlace, location));
+                }
+            }
+            else if (monster is Creatures.Overlord)
+            {
+                //Spawn in with a random number of demons & whippers
+                int noDem = 1 + Game.Random.Next(3);
+                int noImp = 1;
+                int noDrainer = 1;
+
+                for (int i = 0; i < noImp; i++)
+                {
+                    do
+                    {
+                        loopCount = 0;
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                    } while (!dungeon.AddMonster(new Creatures.Imp(), levelToPlace, location));
+                }
+
+
+                for (int i = 0; i < noDem; i++)
+                {
+                    do
+                    {
+                        loopCount = 0;
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                    } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location));
+                }
+
+                for (int i = 0; i < noDrainer; i++)
+                {
+                    do
+                    {
+                        loopCount = 0;
+                        do
+                        {
+                            location = dungeon.RandomWalkablePointInLevel(i);
+                            loopCount++;
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                    } while (!dungeon.AddMonster(new Creatures.Drainer(), levelToPlace, location));
+                }
+            }
+
         }
         private void SpawnItems()
         {

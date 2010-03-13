@@ -11,8 +11,12 @@ namespace RogueBasin.Features
     /// <returns></returns>
     public class StaircaseExit : UseableFeature
     {
-        public StaircaseExit()
+
+        int dungeonID;
+
+        public StaircaseExit(int dungeonID)
         {
+            this.dungeonID = dungeonID;
         }
 
         public override bool PlayerInteraction(Player player)
@@ -33,6 +37,8 @@ namespace RogueBasin.Features
             LogFile.Log.LogEntryDebug("Player leaving dungeon at level " + Game.Dungeon.Player.LocationLevel, LogDebugLevel.Medium);
 
             Game.MessageQueue.AddMessage("You make it safely back to school without being discovered!");
+
+            Game.Dungeon.RespawnDungeon(dungeonID);
 
             Game.Dungeon.PlayerLeavesDungeon();
 

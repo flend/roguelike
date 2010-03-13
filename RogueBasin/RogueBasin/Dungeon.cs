@@ -3728,5 +3728,13 @@ namespace RogueBasin
             //etc
         }
 
+        /// <summary>
+        /// Respawn a particular dungeon after the player leaves
+        /// </summary>
+        /// <param name="dungeonID"></param>
+        internal void RespawnDungeon(int dungeonID)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

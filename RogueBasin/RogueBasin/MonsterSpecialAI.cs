@@ -691,7 +691,9 @@ namespace RogueBasin
                     if (monster == this)
                         continue;
 
-                    if (Game.Dungeon.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005)
+                    //Don't healed charmed monsters either
+                    if (Game.Dungeon.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005
+                        && !monster.Charmed)
                     {
                         targetsInRange.Add(monster);
                     }
