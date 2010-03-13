@@ -46,7 +46,9 @@ namespace RogueBasin.Features
             player.LocationLevel++;
 
             //Set vision
-            player.SightRadius = (int)Math.Ceiling(player.NormalSightRadius * Game.Dungeon.Levels[player.LocationLevel].LightLevel);
+            double sightRatio = Game.Dungeon.Player.NormalSightRadius / 5.0;
+            player.SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[player.LocationLevel].LightLevel * sightRatio);
+            //player.SightRadius = (int)Math.Ceiling(player.NormalSightRadius * Game.Dungeon.Levels[player.LocationLevel].LightLevel);
 
             PlacePlayerOnUpstairs();
 

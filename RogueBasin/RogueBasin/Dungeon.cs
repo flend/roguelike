@@ -628,6 +628,45 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Find the hostile creature to the map object
+        /// </summary>
+        /// <param name="originCreature"></param>
+        /// <returns></returns>
+        public Creature FindClosestHostileCreatureInFOV(MapObject origin)
+        {
+            //Find the closest creature
+            Creature closestCreature = null;
+            double closestDistance = Double.MaxValue; //a long way
+
+            double distance;
+
+            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+            foreach (Monster creature in monsters)
+            {
+                if (creature.Charmed || creature.Passive)
+                    continue;
+
+                distance = GetDistanceBetween(origin, creature);
+
+                if (distance > 0 && distance < closestDistance && origin != creature)
+                {
+                    //Check in FOV
+
+                    if (currentFOV.CheckTileFOV(creature.LocationMap.x, creature.LocationMap.y))
+                    {
+
+                        closestDistance = distance;
+                        closestCreature = creature;
+                    }
+                }
+            }
+
+            return closestCreature;
+        }
+
+
+        /// <summary>
         /// Link a potion with a user-provided string
         /// </summary>
         /// <param name="item"></param>

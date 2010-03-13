@@ -651,7 +651,7 @@ namespace RogueBasin
                           
                          List<Monster> monstersToAdd = new List<Monster>();
             
-            monstersToAdd.Add(new Creatures.DragonUnique());
+           // monstersToAdd.Add(new Creatures.DragonUnique());
 
             foreach (Monster monster in monstersToAdd)
             {
@@ -2703,7 +2703,7 @@ namespace RogueBasin
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            //dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
             
             //level 3-4
 
@@ -2752,7 +2752,7 @@ namespace RogueBasin
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            //dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 7-8
 
@@ -2803,7 +2803,7 @@ namespace RogueBasin
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            //dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 11-12
 
@@ -2849,7 +2849,7 @@ namespace RogueBasin
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(levelNo, hallsGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
+            //dungeon.AddTrigger(levelNo, hallsGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 15-16
 
@@ -2901,7 +2901,7 @@ namespace RogueBasin
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
+            //dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 19-20
 
@@ -2954,7 +2954,7 @@ namespace RogueBasin
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
+            //dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 23-24
 
@@ -3001,7 +3001,7 @@ namespace RogueBasin
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
-            dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
+            //dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 26-27
 

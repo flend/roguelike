@@ -718,6 +718,16 @@ namespace RogueBasin
                 return false;
             }
 
+            //Check we are in target
+            if (toCast.NeedsTarget() && Game.Dungeon.GetDistanceBetween(LocationMap, target) > toCast.GetRange())
+            {
+                Game.MessageQueue.AddMessage("Out of range!");
+                LogFile.Log.LogEntryDebug("Out of range for " + toCast.SpellName(), LogDebugLevel.Medium);
+
+                return false;
+            }
+
+
             //Actually cast the spell
             bool success = toCast.DoSpell(target);
 

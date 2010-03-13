@@ -1210,6 +1210,7 @@ namespace RogueBasin
             }
 
             //Do we need a target?
+            /*
             if (lastSpell.NeedsTarget())
             {
                 if (lastSpellTarget == null)
@@ -1218,7 +1219,7 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug("Tried to recast spell with no valid spell target selected", LogDebugLevel.High);
                     return false;
                 }
-            }
+            }*/
             
             //Try to cast the spell
 
@@ -1226,26 +1227,28 @@ namespace RogueBasin
             TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             //Try the last target
-            if (lastSpellTarget.Alive && Game.Dungeon.Player.LocationLevel == lastSpellTarget.LocationLevel)
+            if (lastSpellTarget != null)
             {
-                //Are they still in sight?
-                //Is the target in FOV
-                if (currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
+                if (lastSpellTarget.Alive && Game.Dungeon.Player.LocationLevel == lastSpellTarget.LocationLevel)
                 {
-                    //If so, attack
-                    LogFile.Log.LogEntryDebug("Recast at last target", LogDebugLevel.Medium);
-                    return RecastSpellCastAtCreature(lastSpell, lastSpellTarget);
-                }
-                
-                //If not, new target, fall through
-            }
+                    //Are they still in sight?
+                    //Is the target in FOV
+                    if (currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
+                    {
+                        //If so, attack
+                        LogFile.Log.LogEntryDebug("Recast at last target", LogDebugLevel.Medium);
+                        return RecastSpellCastAtCreature(lastSpell, lastSpellTarget);
+                    }
 
+                    //If not, new target, fall through
+                }
+            }
             //Find the next closest creature (need to check charm / passive status)
 
             //Need to replace this one with find closest hostile creature in FOV.
             //The nearest creature might not be in FOV but a further away one might be
 
-            lastSpellTarget = Game.Dungeon.FindClosestHostileCreature(Game.Dungeon.Player);
+            lastSpellTarget = Game.Dungeon.FindClosestHostileCreatureInFOV(Game.Dungeon.Player);
 
             if (lastSpellTarget == null)
             {
@@ -1253,7 +1256,7 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("No new target for quick cast", LogDebugLevel.Medium);
                 return false;
             }
-
+            /*
             //Check they are in FOV
             if (!currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
             {
@@ -1261,7 +1264,7 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage("No target in sight.");
 
                 return false;
-            }
+            }*/
 
             //Otherwise target the nearest creature
 

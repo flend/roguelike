@@ -66,6 +66,12 @@ namespace RogueBasin
         public virtual string SpellName() { return ""; }
 
         /// <summary>
+        /// For spells that require ranges
+        /// </summary>
+        /// <returns></returns>
+        public virtual int GetRange() { return 0; }
+
+        /// <summary>
         /// Name of the movie associated
         /// </summary>
         /// <returns></returns>

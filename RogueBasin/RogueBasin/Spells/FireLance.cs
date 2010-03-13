@@ -10,10 +10,15 @@ namespace RogueBasin.Spells
     /// </summary>
     public class FireLance : Spell
     {
+
+
+        int fireRange = 6;
+
         public override bool DoSpell(Point target)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
+
 
             //Check the target is within FOV
 
@@ -120,7 +125,7 @@ namespace RogueBasin.Spells
             do
             {
 
-                LogFile.Log.LogEntryDebug("FireLance: Attacking square: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+                LogFile.Log.LogEntryDebug("FireLance: Attacking square: x: " + currentX + " y:" + currentY, LogDebugLevel.Medium);
 
                 //Finish conditions - run out of line or hit wall (should always happen)
 
@@ -128,7 +133,14 @@ namespace RogueBasin.Spells
                 {
 
                     //Finish
-                    LogFile.Log.LogEntryDebug("Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("hit wall Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Medium);
+                    break;
+                }
+
+                if (dungeon.GetDistanceBetween(player.LocationMap, new Point(currentX, currentY)) > fireRange)
+                {
+                    //Finish - range
+                    LogFile.Log.LogEntryDebug("(range) Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Medium);
                     break;
                 }
 
@@ -171,7 +183,14 @@ namespace RogueBasin.Spells
                 {
 
                     //Finish
-                    LogFile.Log.LogEntryDebug("Finished line 2 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("Finished line 2 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Medium);
+                    break;
+                }
+
+                if (dungeon.GetDistanceBetween(player.LocationMap, new Point(currentX, currentY)) > fireRange)
+                {
+                    //Finish - range
+                    LogFile.Log.LogEntryDebug("(range) Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Medium);
                     break;
                 }
 
@@ -202,7 +221,8 @@ namespace RogueBasin.Spells
 
             return true;
             
-        }
+            }
+        
 
         private void HitMonster(Player player, Monster monster)
         {
@@ -252,7 +272,12 @@ namespace RogueBasin.Spells
             //Apply damage
             player.ApplyDamageToMonster(monster, damage, true);
         }
-        
+
+        public override int GetRange()
+        {
+            return fireRange;
+        }
+
         override public int MPCost()
         {
             return 3;

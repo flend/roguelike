@@ -101,6 +101,11 @@ namespace RogueBasin.Spells
             return 6;
         }
 
+        public override int GetRange()
+        {
+            return 4;
+        }
+
         public override bool NeedsTarget()
         {
             return true;
