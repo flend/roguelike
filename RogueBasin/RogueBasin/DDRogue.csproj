@@ -48,7 +48,10 @@
     <Compile Include="Creatures\Bat.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\BlackUnicorn.cs" />
+    <Compile Include="Creatures\BlackUnicorn.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\BlackUnicornUnique.cs" />
     <Compile Include="Creatures\Bugbear.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -63,7 +66,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\Friend.cs" />
-    <Compile Include="Creatures\Ghoul.cs" />
+    <Compile Include="Creatures\Ghoul.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\GhoulUnique.cs" />
     <Compile Include="Creatures\Goblin.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -78,10 +84,14 @@
     <Compile Include="Creatures\Maleficarum.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\MaleficarumUnique.cs" />
     <Compile Include="Creatures\Meddler.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\Necromancer.cs" />
+    <Compile Include="Creatures\Necromancer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\NecromancerUnique.cs" />
     <Compile Include="Creatures\Nymph.cs" />
     <Compile Include="Creatures\Ogre.cs">
       <SubType>Code</SubType>
@@ -93,11 +103,16 @@
     <Compile Include="Creatures\OrcShaman.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\Overlord.cs" />
+    <Compile Include="Creatures\OrcShamanUnique.cs" />
+    <Compile Include="Creatures\Overlord.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\OverlordUnique.cs" />
     <Compile Include="Creatures\Peon.cs" />
     <Compile Include="Creatures\Pixie.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\PixieUnique.cs" />
     <Compile Include="Creatures\Rat.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -108,7 +123,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\SpiderUnique.cs" />
-    <Compile Include="Creatures\Uruk.cs" />
+    <Compile Include="Creatures\Uruk.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\UrukUnique.cs" />
     <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
@@ -154,6 +172,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Items\Greaves.cs" />
+    <Compile Include="Items\HealingPotion.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Items\Lantern.cs" />
     <Compile Include="Items\LeadRing.cs" />
     <Compile Include="Items\LeatherArmour.cs">
       <SubType>Code</SubType>
@@ -179,11 +201,15 @@
     <Compile Include="Items\PotionToHitUp.cs" />
     <Compile Include="Items\PotionSpeedUp.cs" />
     <Compile Include="Items\PrettyDress.cs" />
+    <Compile Include="Items\RestoreOrb.cs" />
     <Compile Include="Items\Sash.cs" />
     <Compile Include="Items\ShortSword.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Items\SparklingEarrings.cs" />
+    <Compile Include="Items\SparklingEarrings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Items\StaffPower.cs" />
     <Compile Include="Items\Stone.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />

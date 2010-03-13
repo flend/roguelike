@@ -80,6 +80,7 @@ namespace RogueBasin
         /// </summary>
         int maxMagicPoints;
 
+
         /// <summary>
         /// Number of times we get knocked out
         /// </summary>
@@ -136,7 +137,7 @@ namespace RogueBasin
 
             MaxCharmedCreatures = 0;
             CurrentCharmedCreatures = 0;
-            MaximumEquippedItems = 2;
+            MaximumEquippedItems = 3;
 
             NumDeaths = 0;
             CombatUse = false;
@@ -241,6 +242,10 @@ namespace RogueBasin
             //Charm points
             CharmPoints = CharmStat;
 
+            if(inv.ContainsItem(new Items.StaffPower())) {
+                MaxMagicPoints = (int)Math.Ceiling(MagicStat * 2.5);
+                MagicPoints = (int)Math.Ceiling(MagicStat * 2.5);
+            }
             //Max charmed creatures
             if (inv.ContainsItem(new Items.SparklingEarrings()))
             {
@@ -248,6 +253,13 @@ namespace RogueBasin
             }
             else
                 MaxCharmedCreatures = 1;
+
+            //Sight
+
+            NormalSightRadius = 5;
+
+            if(inv.ContainsItem(new Items.Lantern()))
+                NormalSightRadius = 7;
 
             //Speed
 
@@ -1348,7 +1360,7 @@ namespace RogueBasin
             else if (LocationLevel == 0)
             {
                 //If not, and we're in town, don't pick it up
-                Game.MessageQueue.AddMessage("You can't carry anymore items. Press 'd' to drop your current items.");
+                Game.MessageQueue.AddMessage("You can't carry any more items. Press 'd' to drop your current items.");
                 LogFile.Log.LogEntryDebug("Max number of items reached", LogDebugLevel.Medium);
 
                 return false;

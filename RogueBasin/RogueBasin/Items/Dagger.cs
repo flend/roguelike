@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class LeatherArmour : Item, IEquippableItem
+    public class Dagger : Item, IEquippableItem
     {
         /// <summary>
         /// not used in this game
@@ -35,7 +35,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Leather armour equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Wielding Dagger", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -46,7 +46,7 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Leather Armour - and in your size!");
+            Game.MessageQueue.AddMessage("This dagger is easily concealed and as sharp as hell.");
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 
@@ -83,7 +83,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "leather armour"; }
+            get { return "dagger"; }
         }
 
         /// <summary>
@@ -91,17 +91,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "leather armour"; }
+            get { return "dagger"; }
         }
 
         protected override char GetRepresentation()
         {
-            return '[';
+            return '|';
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.BurlyWood;
+            return ColorPresets.Silver;
         }
 
         public int ArmourClassModifier()

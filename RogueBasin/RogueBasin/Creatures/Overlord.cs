@@ -10,14 +10,17 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class Overlord : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 25;
-        const int classMinHitpoints = 15;
+        const int classDeltaHitpoints = 15;
+        const int classMinHitpoints = 35;
+
+        public string UniqueName { get; set; }
 
         public Overlord()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
             Speed = 90;
+
         }
 
         public override void InventoryDrop()

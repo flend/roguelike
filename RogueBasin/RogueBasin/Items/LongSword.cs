@@ -46,7 +46,7 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Wielding Long Sword");
+            Game.MessageQueue.AddMessage("Five feet long and made of tempered steel this long sword is a weapon worthy of a Princess!");
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 

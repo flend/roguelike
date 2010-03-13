@@ -6,17 +6,22 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Tough mid range demon
+    /// Moderate tough
     /// </summary>
-    public class Maleficarum : MonsterFightAndRunAI
+    public class BlackUnicornUnique : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 15;
+        const int classDeltaHitpoints = 20;
         const int classMinHitpoints = 25;
 
-        public Maleficarum()
+        public string UniqueName { get; set; }
+
+        public BlackUnicornUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+
+            Unique = true;
+            UniqueName = "Illustrous the Black Unicorn";
         }
 
         public override void InventoryDrop()
@@ -36,7 +41,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 14;
         }
 
         /// <summary>
@@ -44,7 +49,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 6;
         }
 
         /// <summary>
@@ -52,28 +57,28 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 2;
         }
 
         public override int HitModifier()
         {
-            return 7;
+            return 5;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "maleficarum"; } }
+        public override string SingleDescription { get { return "black unicorn"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "maleficarum"; } }
+        public override string GroupDescription { get { return "black unicorn"; } }
 
         protected override char GetRepresentation()
         {
-            return 'M';
+            return 'U';
         }
 
         protected override int GetChanceToRecover()
@@ -93,42 +98,42 @@ namespace RogueBasin.Creatures
 
         public override int CreatureCost()
         {
-            return 200;
+            return 40;
         }
 
         public override int CreatureLevel()
         {
-            return 5;
+            return 4;
         }
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Creatures.Maleficarum();
+            return new BlackUnicorn();
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Crimson;
+            return ColorPresets.DarkGray;
         }
 
         public override int GetCombatXP()
         {
-            return 100;
+            return 70;
         }
 
         public override int GetMagicXP()
         {
-            return 100;
+            return 70;
         }
 
         public override int GetMagicRes()
         {
-            return 40;
+            return 20;
         }
 
         public override int GetCharmRes()
         {
-            return 90;
+            return 30;
         }
 
         public override bool CanBeCharmed()

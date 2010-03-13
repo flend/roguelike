@@ -13,7 +13,6 @@ namespace RogueBasin.Creatures
         const int classDeltaHitpoints = 10;
         const int classMinHitpoints = 5;
 
-
         public GoblinWitchdoctor()
         {
             //Add a default right hand slot

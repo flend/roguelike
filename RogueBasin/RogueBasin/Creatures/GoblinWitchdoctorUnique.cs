@@ -6,17 +6,26 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Tough mid range demon
+    /// Raiser. Stupid.
     /// </summary>
-    public class Maleficarum : MonsterFightAndRunAI
+    public class GoblinWitchdoctorUnique : MonsterSpecialAI
     {
         const int classDeltaHitpoints = 15;
         const int classMinHitpoints = 25;
 
-        public Maleficarum()
+        public string UniqueName { get; set; }
+
+        public GoblinWitchdoctorUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            Unique = true;
+            UniqueName = "Damastrals the Goblin Witchdoctor";
+        }
+
+        public override Monster NewCreatureOfThisType()
+        {
+            return new GoblinWitchdoctorUnique();
         }
 
         public override void InventoryDrop()
@@ -36,7 +45,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 8;
         }
 
         /// <summary>
@@ -44,7 +53,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 6;
         }
 
         /// <summary>
@@ -52,83 +61,107 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 7;
+            return 1;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 100;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "maleficarum"; } }
+        public override string SingleDescription { get { return UniqueName; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "maleficarum"; } }
+        public override string GroupDescription { get { return "goblin witch"; } }
 
         protected override char GetRepresentation()
         {
-            return 'M';
+            return 'G';
         }
 
-        protected override int GetChanceToRecover()
+        protected override SpecialAIType GetSpecialAIType()
         {
-            return 10;
+            return SpecialAIType.Raiser;
         }
 
-        protected override int GetChanceToFlee()
+        protected override int RelaxDirectionAt()
         {
             return 0;
         }
 
-        protected override int GetMaxHPWillFlee()
+        protected override int GetTotalFleeLoops()
         {
-            return Hitpoints;
+            return 10;
         }
 
+        protected override double GetMissileRange()
+        {
+            return 3.5;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "fires a crackling bolt of energy";
+        }
+
+        protected override bool RaiseCorpse(int level, Point locationMap)
+        {
+            bool raisedSuccess;
+
+            if (Game.Random.Next(10) < 6)
+            {
+                raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Ferret(), level, locationMap);
+            }
+            else
+                raisedSuccess = Game.Dungeon.AddMonsterDynamic(new Creatures.Goblin(), level, locationMap);
+
+            return raisedSuccess;
+        }
+        
         public override int CreatureCost()
         {
-            return 200;
+            return 70;
         }
 
         public override int CreatureLevel()
         {
-            return 5;
-        }
-
-        public override Monster NewCreatureOfThisType()
-        {
-            return new Creatures.Maleficarum();
+            return 3;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Crimson;
+            return ColorPresets.Green;
         }
-
+        
         public override int GetCombatXP()
         {
-            return 100;
+            return 60;
         }
 
         public override int GetMagicXP()
         {
-            return 100;
+            return 60;
         }
 
         public override int GetMagicRes()
         {
-            return 40;
+            return 10;
         }
 
         public override int GetCharmRes()
         {
-            return 90;
+            return 0;
         }
 
         public override bool CanBeCharmed()

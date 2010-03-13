@@ -5,18 +5,25 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Tough mid range demon
-    /// </summary>
-    public class Maleficarum : MonsterFightAndRunAI
+    public class GhoulUnique : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 25;
+        const int classDeltaHitpoints = 50;
+        const int classMinHitpoints = 50;
 
-        public Maleficarum()
+        public string UniqueName { get; set; }
+
+        public GhoulUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            Speed = 40;
+            Unique = true;
+            UniqueName = "Terrance the Brick";
+        }
+
+        public override Monster NewCreatureOfThisType()
+        {
+            return new Ghoul();
         }
 
         public override void InventoryDrop()
@@ -36,7 +43,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 14;
         }
 
         /// <summary>
@@ -44,7 +51,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 8;
         }
 
         /// <summary>
@@ -52,33 +59,33 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 7;
+            return 4;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "maleficarum"; } }
+        public override string SingleDescription { get { return "ghoul"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "maleficarum"; } }
+        public override string GroupDescription { get { return "ghouls"; } }
 
         protected override char GetRepresentation()
         {
-            return 'M';
+            return 'G';
         }
 
         protected override int GetChanceToRecover()
         {
-            return 10;
+            return 0;
         }
 
         protected override int GetChanceToFlee()
@@ -88,12 +95,12 @@ namespace RogueBasin.Creatures
 
         protected override int GetMaxHPWillFlee()
         {
-            return Hitpoints;
+            return 0;
         }
 
         public override int CreatureCost()
         {
-            return 200;
+            return 60;
         }
 
         public override int CreatureLevel()
@@ -101,19 +108,9 @@ namespace RogueBasin.Creatures
             return 5;
         }
 
-        public override Monster NewCreatureOfThisType()
-        {
-            return new Creatures.Maleficarum();
-        }
-
         public override Color CreatureColor()
         {
-            return ColorPresets.Crimson;
-        }
-
-        public override int GetCombatXP()
-        {
-            return 100;
+            return ColorPresets.YellowGreen;
         }
 
         public override int GetMagicXP()
@@ -121,14 +118,19 @@ namespace RogueBasin.Creatures
             return 100;
         }
 
+        public override int GetCombatXP()
+        {
+            return 100;
+        }
+
         public override int GetMagicRes()
         {
-            return 40;
+            return 0;
         }
 
         public override int GetCharmRes()
         {
-            return 90;
+            return 0;
         }
 
         public override bool CanBeCharmed()

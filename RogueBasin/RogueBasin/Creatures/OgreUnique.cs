@@ -6,17 +6,24 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Tough mid range demon
+    /// Slow but tough
     /// </summary>
-    public class Maleficarum : MonsterFightAndRunAI
+    public class OgreUnique : MonsterFightAndRunAI
     {
         const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 25;
+        const int classMinHitpoints = 35;
 
-        public Maleficarum()
+        public string UniqueName { get; set; }
+
+        public OgreUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            Speed = 80;
+            Unique = true;
+
+            UniqueName = "Grug the ogre";
+
         }
 
         public override void InventoryDrop()
@@ -36,7 +43,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 8;
         }
 
         /// <summary>
@@ -44,7 +51,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 6;
         }
 
         /// <summary>
@@ -52,28 +59,28 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 7;
+            return 3;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "maleficarum"; } }
+        public override string SingleDescription { get { return "ogre"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "maleficarum"; } }
+        public override string GroupDescription { get { return "ogres"; } }
 
         protected override char GetRepresentation()
         {
-            return 'M';
+            return 'G';
         }
 
         protected override int GetChanceToRecover()
@@ -93,42 +100,42 @@ namespace RogueBasin.Creatures
 
         public override int CreatureCost()
         {
-            return 200;
+            return 40;
         }
 
         public override int CreatureLevel()
         {
-            return 5;
+            return 3;
         }
 
-        public override Monster NewCreatureOfThisType()
+        public  override  Monster NewCreatureOfThisType()
         {
-            return new Creatures.Maleficarum();
+            return new Ogre();
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Crimson;
+            return ColorPresets.Brown;
         }
 
         public override int GetCombatXP()
         {
-            return 100;
+            return 60;
         }
 
         public override int GetMagicXP()
         {
-            return 100;
+            return 60;
         }
 
         public override int GetMagicRes()
         {
-            return 40;
+            return 0;
         }
 
         public override int GetCharmRes()
         {
-            return 90;
+            return 30;
         }
 
         public override bool CanBeCharmed()

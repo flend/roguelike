@@ -6,17 +6,28 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Tough mid range demon
+    /// Medium threat. Fast but weak missile.
     /// </summary>
-    public class Maleficarum : MonsterFightAndRunAI
+    public class PixieUnique : MonsterThrowAndRunAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 25;
+        const int classDeltaHitpoints = 10;
+        const int classMinHitpoints = 30;
 
-        public Maleficarum()
+        public string UniqueName { get; set; }
+
+        public PixieUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            Speed = 200;
+
+            Unique = true;
+            UniqueName = "Nixie the Pixie";
+        }
+
+        public override Monster NewCreatureOfThisType()
+        {
+            return new PixieUnique();
         }
 
         public override void InventoryDrop()
@@ -36,7 +47,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 14;
         }
 
         /// <summary>
@@ -44,7 +55,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 4;
         }
 
         /// <summary>
@@ -57,78 +68,77 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 7;
+            return 3;
+        }
+
+        protected override double GetMissileRange()
+        {
+            return 5.5;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "throws a dart";
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "maleficarum"; } }
+        public override string SingleDescription { get { return "pixie"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "maleficarum"; } }
+        public override string GroupDescription  { get { return "pixies"; } }
 
         protected override char GetRepresentation()
         {
-            return 'M';
+            return 'p';
         }
 
-        protected override int GetChanceToRecover()
-        {
-            return 10;
-        }
-
-        protected override int GetChanceToFlee()
-        {
-            return 0;
-        }
-
-        protected override int GetMaxHPWillFlee()
-        {
-            return Hitpoints;
-        }
-
-        public override int CreatureCost()
-        {
-            return 200;
-        }
-
-        public override int CreatureLevel()
+        protected override int RelaxDirectionAt()
         {
             return 5;
         }
 
-        public override Monster NewCreatureOfThisType()
+        protected override int GetTotalFleeLoops()
         {
-            return new Creatures.Maleficarum();
+            return 20;
+        }
+        public override int CreatureCost()
+        {
+            return 35;
+        }
+
+        public override int CreatureLevel()
+        {
+            return 2;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Crimson;
-        }
-
-        public override int GetCombatXP()
-        {
-            return 100;
+            return ColorPresets.HotPink;
         }
 
         public override int GetMagicXP()
         {
-            return 100;
+            return 80;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 80;
         }
 
         public override int GetMagicRes()
         {
-            return 40;
+            return 30;
         }
 
         public override int GetCharmRes()
         {
-            return 90;
+            return 50;
         }
 
         public override bool CanBeCharmed()

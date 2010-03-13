@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class LeatherArmour : Item, IEquippableItem
+    public class StaffPower : Item, IEquippableItem
     {
         /// <summary>
         /// not used in this game
@@ -35,7 +35,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Leather armour equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Wielding Staff of power", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -46,7 +46,7 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Leather Armour - and in your size!");
+            Game.MessageQueue.AddMessage("An old knarled staff. You can feel the magic power radiation from it.");
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 
@@ -83,7 +83,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "leather armour"; }
+            get { return "knarly staff"; }
         }
 
         /// <summary>
@@ -91,17 +91,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "leather armour"; }
+            get { return "knarly staff"; }
         }
 
         protected override char GetRepresentation()
         {
-            return '[';
+            return 'I';
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.BurlyWood;
+            return ColorPresets.SaddleBrown;
         }
 
         public int ArmourClassModifier()

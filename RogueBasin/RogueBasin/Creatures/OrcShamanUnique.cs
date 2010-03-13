@@ -6,17 +6,28 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Tough mid range demon
+    /// Healer. Quite clever missile troop
     /// </summary>
-    public class Maleficarum : MonsterFightAndRunAI
+    public class OrcShamanUnique : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 25;
+        const int classDeltaHitpoints = 12;
+        const int classMinHitpoints = 30;
 
-        public Maleficarum()
+        public string UniqueName { get; set; }
+
+        public OrcShamanUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+
+            Unique = true;
+
+            UniqueName = "Davos the Orc Shaman King";
+        }
+
+        public override Monster NewCreatureOfThisType()
+        {
+            return new OrcShaman();
         }
 
         public override void InventoryDrop()
@@ -36,7 +47,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 14;
         }
 
         /// <summary>
@@ -44,7 +55,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 4;
         }
 
         /// <summary>
@@ -52,83 +63,93 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 7;
+            return 5;
+        }
+
+        protected override int GetUseSpecialChance()
+        {
+            return 90;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "maleficarum"; } }
+        public override string SingleDescription { get { return "orc shaman"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "maleficarum"; } }
+        public override string GroupDescription { get { return "orc shamen"; } }
 
         protected override char GetRepresentation()
         {
-            return 'M';
+            return 'O';
         }
 
-        protected override int GetChanceToRecover()
+        protected override SpecialAIType GetSpecialAIType()
         {
-            return 10;
+            return SpecialAIType.Healer;
         }
 
-        protected override int GetChanceToFlee()
-        {
-            return 0;
-        }
-
-        protected override int GetMaxHPWillFlee()
-        {
-            return Hitpoints;
-        }
-
-        public override int CreatureCost()
-        {
-            return 200;
-        }
-
-        public override int CreatureLevel()
+        protected override int RelaxDirectionAt()
         {
             return 5;
         }
 
-        public override Monster NewCreatureOfThisType()
+        protected override int GetTotalFleeLoops()
         {
-            return new Creatures.Maleficarum();
+            return 50;
+        }
+
+        protected override double GetMissileRange()
+        {
+            return 3.5;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "fires a bolt of flame";
+        }
+
+        public override int CreatureCost()
+        {
+            return 120;
+        }
+
+        public override int CreatureLevel()
+        {
+            return 3;
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Crimson;
-        }
-
-        public override int GetCombatXP()
-        {
-            return 100;
+            return ColorPresets.LimeGreen;
         }
 
         public override int GetMagicXP()
         {
-            return 100;
+            return 85;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 85;
         }
 
         public override int GetMagicRes()
         {
-            return 40;
+            return 0;
         }
 
         public override int GetCharmRes()
         {
-            return 90;
+            return 0;
         }
 
         public override bool CanBeCharmed()

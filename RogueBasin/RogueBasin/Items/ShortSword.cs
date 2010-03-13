@@ -46,7 +46,7 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Wielding Short Sword");
+            Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 

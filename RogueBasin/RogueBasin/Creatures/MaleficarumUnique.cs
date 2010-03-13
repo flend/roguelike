@@ -8,15 +8,19 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Tough mid range demon
     /// </summary>
-    public class Maleficarum : MonsterFightAndRunAI
+    public class MaleficarumUnique : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 25;
+        const int classDeltaHitpoints = 50;
+        const int classMinHitpoints = 50;
 
-        public Maleficarum()
+        public string UniqueName { get; set; }
+
+        public MaleficarumUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            Unique = true;
+            UniqueName = "Alcelchior the Thrice Damned";
         }
 
         public override void InventoryDrop()
@@ -36,7 +40,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 18;
         }
 
         /// <summary>
@@ -44,7 +48,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 12;
         }
 
         /// <summary>
@@ -57,7 +61,7 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 7;
+            return 10;
         }
 
         /// <summary>
@@ -113,12 +117,12 @@ namespace RogueBasin.Creatures
 
         public override int GetCombatXP()
         {
-            return 100;
+            return 150;
         }
 
         public override int GetMagicXP()
         {
-            return 100;
+            return 150;
         }
 
         public override int GetMagicRes()
@@ -133,7 +137,7 @@ namespace RogueBasin.Creatures
 
         public override bool CanBeCharmed()
         {
-            return false;
+            return true;
         }
     }
 }

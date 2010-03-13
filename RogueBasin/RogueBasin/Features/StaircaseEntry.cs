@@ -39,8 +39,8 @@ namespace RogueBasin.Features
             player.LocationLevel = dungeonStartLevel;
 
             //Set vision
-            //player.NormalSightRadius * 
-            player.SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[player.LocationLevel].LightLevel);
+            double sightRatio = Game.Dungeon.Player.NormalSightRadius / 5.0;
+            player.SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[player.LocationLevel].LightLevel * sightRatio);
 
             //Set the current dungeon in Player
             player.CurrentDungeon = dungeonID;
