@@ -249,6 +249,14 @@ namespace RogueBasin
             else
                 MaxCharmedCreatures = 1;
 
+            //Speed
+
+            int speedDelta = SpeedStat - 10;
+
+            speedDelta = speedDelta * 6;
+
+            Speed = 100 + speedDelta;
+
             //To Hit
 
             int toHit;
@@ -267,6 +275,10 @@ namespace RogueBasin
             //Damage base
 
             int damageBase;
+            if (AttackStat > 140)
+            {
+                damageBase = 12;
+            }
             if (AttackStat > 100)
             {
                 damageBase = 10;
@@ -288,12 +300,12 @@ namespace RogueBasin
             //Consider equipped clothing items (only 1 will work)
             if (inv.ContainsItem(new Items.MetalArmour()))
             {
-                ArmourClassAccess += 4;
+                ArmourClassAccess += 6;
                 Screen.Instance.PCColor = ColorPresets.SteelBlue;
             }
             else if (inv.ContainsItem(new Items.LeatherArmour()))
             {
-                ArmourClassAccess += 2;
+                ArmourClassAccess += 3;
                 Screen.Instance.PCColor = ColorPresets.BurlyWood;
             }
             else if (inv.ContainsItem(new Items.PrettyDress()))
@@ -833,7 +845,7 @@ namespace RogueBasin
                 //Is the monster dead, if so kill it?
                 if (monsterDead)
                 {
-                    Game.Dungeon.KillMonster(monster);                    
+                    Game.Dungeon.KillMonster(monster, false);                    
 
                     //Add it to our list of kills (simply adding the whole object here)
                     Kills.Add(monster);

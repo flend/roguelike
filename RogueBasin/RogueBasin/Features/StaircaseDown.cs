@@ -91,7 +91,7 @@ namespace RogueBasin.Features
             {
                 if (monster.InSameSpace(foundStaircase))
                 {
-                    dungeon.KillMonster(monster);
+                    dungeon.KillMonster(monster, false);
                 }
             }
         }

@@ -78,10 +78,13 @@ namespace RogueBasin
 
         public bool LastMission { get; set; }
 
+        //public int CurrentDungeon { get; set; }
+
         public DungeonInfo()
         {
             dungeons = new List<DungeonProfile>();
             LastMission = false;
+            //CurrentDungeon = -1;
 
             SetupDungeonStartAndEnd();
         }
@@ -1776,7 +1779,7 @@ namespace RogueBasin
         /// Kill a monster. This monster won't get any further turns.
         /// </summary>
         /// <param name="monster"></param>
-        public void KillMonster(Monster monster)
+        public void KillMonster(Monster monster, bool noCorpses)
         {
             //We can't take the monster out of the collection directly since we might still be iterating through them
             //Instead set a flag on the monster and remove it after all turns are complete
@@ -1786,14 +1789,16 @@ namespace RogueBasin
             monster.DropAllItems();
 
             //Drop any insta-create treasure
-            monster.InventoryDrop();
+            if(!noCorpses)
+                monster.InventoryDrop();
 
             //If the creature was charmed, delete 1 charmed creature from the player total
             if(monster.Charmed)
                 Game.Dungeon.Player.RemoveCharmedCreature();
 
             //Leave a corpse
-            AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
+            if (!noCorpses)
+                 AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
 
             //Deal with special monsters (bit rubbish programming)
             Creatures.Lich lich = monster as Creatures.Lich;
@@ -1807,7 +1812,7 @@ namespace RogueBasin
                 foreach (Monster m in monsters)
                 {
                     if (m.LocationLevel == lich.LocationLevel && m != lich)
-                        KillMonster(m);
+                        KillMonster(m, true);
                 }
 
                 //OK, we've killed the end baddy have a moral decision
@@ -3297,6 +3302,9 @@ namespace RogueBasin
             //Check if this is the end of the game
             if (!DungeonInfo.LastMission)
             {
+                //Respawn the last dungeon the player was in
+                Game.Dungeon.RespawnDungeon(Player.CurrentDungeon);
+
                 //Increase player's stats
                 ProcessPlayerXP();
 
@@ -3734,7 +3742,12 @@ namespace RogueBasin
         /// <param name="dungeonID"></param>
         internal void RespawnDungeon(int dungeonID)
         {
-            throw new NotImplementedException();
+            //A bit wasteful
+            DungeonMaker maker = new DungeonMaker(Difficulty);
+            maker.dungeon = this; //hack
+            maker.ReSpawnDungeon(dungeonID);
+
+            LogFile.Log.LogEntryDebug("Respawning dungeon level " + dungeonID, LogDebugLevel.Medium);
         }
     }
 }

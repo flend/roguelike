@@ -39,7 +39,8 @@ namespace RogueBasin.Features
             player.LocationLevel = dungeonStartLevel;
 
             //Set vision
-            player.SightRadius = (int)Math.Ceiling(player.NormalSightRadius * Game.Dungeon.Levels[player.LocationLevel].LightLevel);
+            //player.NormalSightRadius * 
+            player.SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[player.LocationLevel].LightLevel);
 
             //Set the current dungeon in Player
             player.CurrentDungeon = dungeonID;
@@ -48,7 +49,7 @@ namespace RogueBasin.Features
             dungeon.DungeonInfo.VisitedDungeon(dungeonID);
 
             //debug
-            player.SightRadius = 20;
+            //player.SightRadius = 20;
 
             PlacePlayerOnUpstairs();
             
@@ -84,6 +85,8 @@ namespace RogueBasin.Features
                 return;
             }
 
+
+
             //Check there is no monster on the stairs
             //If there is, kill it (for now)
             //(again consider helper function for this)
@@ -94,7 +97,7 @@ namespace RogueBasin.Features
             {
                 if (monster.InSameSpace(foundStaircase))
                 {
-                    dungeon.KillMonster(monster);
+                    dungeon.KillMonster(monster, true);
                 }
             }
         }

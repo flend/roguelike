@@ -554,7 +554,7 @@ namespace RogueBasin
         /// </summary>
         internal void AddExitStaircaseOnly(int levelNo)
         {
-            Game.Dungeon.AddFeature(new Features.StaircaseExit(), levelNo, upStaircase);
+            Game.Dungeon.AddFeature(new Features.StaircaseExit(levelNo), levelNo, upStaircase);
         }
 
         /// <summary>

@@ -707,7 +707,7 @@ namespace RogueBasin
 
             if (m != null)
             {
-                Game.Dungeon.KillMonster(m);
+                Game.Dungeon.KillMonster(m, false);
             }
 
             //Move the player
@@ -757,7 +757,7 @@ namespace RogueBasin
 
             if (m != null)
             {
-                Game.Dungeon.KillMonster(m);
+                Game.Dungeon.KillMonster(m, false);
             }
 
             //Move the player

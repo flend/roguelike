@@ -38,8 +38,6 @@ namespace RogueBasin.Features
 
             Game.MessageQueue.AddMessage("You make it safely back to school without being discovered!");
 
-            Game.Dungeon.RespawnDungeon(dungeonID);
-
             Game.Dungeon.PlayerLeavesDungeon();
 
             return true;

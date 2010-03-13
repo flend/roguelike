@@ -55,6 +55,8 @@ namespace RogueBasin
 
             Charmed = false;
             Passive = false;
+
+            Unique = false;
         }
 
         /// <summary>
@@ -63,7 +65,7 @@ namespace RogueBasin
         /// <returns></returns>
         public abstract Monster NewCreatureOfThisType();
 
-
+        public bool Unique { get; set; }
 
         /// <summary>
         /// Current hitpoints
@@ -449,7 +451,7 @@ namespace RogueBasin
                 //Is the player dead, if so kill it?
                 if (monster.Hitpoints <= 0)
                 {
-                    Game.Dungeon.KillMonster(monster);
+                    Game.Dungeon.KillMonster(monster, false);
                     
                     //Debug string
                     string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
