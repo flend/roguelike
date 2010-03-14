@@ -174,7 +174,7 @@ namespace RogueBasin
             MagicStat = 10;
 
             //Debug
-            //AttackStat = 10;
+            AttackStat = 100;
            // MagicStat = 100;
         }
 

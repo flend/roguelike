@@ -9,7 +9,6 @@ namespace RogueBasin.Items
     /// </summary>
     public class Glove : Item, IEquippableItem
     {
-        bool usedUp;
 
         /// <summary>
         /// not used in this game

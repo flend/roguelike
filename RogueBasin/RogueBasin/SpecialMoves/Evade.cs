@@ -45,9 +45,6 @@ namespace RogueBasin.SpecialMoves
                 }
 
                 //Must be next to a monster
-                int deltaX = -1;
-                int deltaY = -1;
-
                 int isMonster = 0;
 
                 if(IsMonster(-1, -1))

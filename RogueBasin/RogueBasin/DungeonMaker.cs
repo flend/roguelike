@@ -770,7 +770,6 @@ namespace RogueBasin
             //Add monsters to levels
 
              //Quick up down compensate globally
-             int budgetScale = 1;
 
              for (int i = 0; i < 7; i++)
              {
@@ -779,14 +778,10 @@ namespace RogueBasin
 
              
 
-             //First dungeon
-
-             //4 levels
-
-             //Set budgets
+            //Debug monsters
 
                           
-                         List<Monster> monstersToAdd = new List<Monster>();
+            List<Monster> monstersToAdd = new List<Monster>();
             
            // monstersToAdd.Add(new Creatures.DragonUnique());
 
