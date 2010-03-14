@@ -170,12 +170,12 @@ namespace RogueBasin
             MaxMagicPoints = 10;
             SpeedStat = 10;
             AttackStat = 10;
-            CharmStat = 100;
-            MagicStat = 2;
+            CharmStat = 10;
+            MagicStat = 10;
 
             //Debug
-            AttackStat = 10;
-            MagicStat = 100;
+            //AttackStat = 10;
+           // MagicStat = 100;
         }
 
         private void SetupInitialHP()

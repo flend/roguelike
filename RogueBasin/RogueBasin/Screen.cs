@@ -18,7 +18,7 @@ namespace RogueBasin {
         public int Width { get; set; }
         public int Height { get; set; }
 
-        bool debugMode = true;
+        bool debugMode = false;
 
         //Top left coord to start drawing the map at
         Point mapTopLeft;
@@ -72,7 +72,9 @@ namespace RogueBasin {
         Color targetBackground = ColorPresets.White;
         Color targetForeground = ColorPresets.Black;
 
-        Color literalColor = ColorPresets.White;
+        Color literalColor = ColorPresets.BurlyWood;
+        Color literalTextColor = ColorPresets.White;
+
 
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
@@ -2090,7 +2092,12 @@ namespace RogueBasin {
                     if (map.mapSquares[i, j].Terrain == MapTerrain.Literal)
                     {
                         screenChar = map.mapSquares[i, j].terrainLiteral;
-                        drawColor = literalColor;
+                        if (screenChar >= 'A' && screenChar <= 'Z')
+                            drawColor = literalTextColor;
+                        else if (screenChar >= 'a' && screenChar <= 'z')
+                            drawColor = literalTextColor;
+                        else
+                            drawColor = literalColor;
                     }
                     else
                     {

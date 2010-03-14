@@ -71,8 +71,8 @@ namespace RogueBasin
 
         private void SetupFeatureMapping()
         {
-            featureChars.Add('>');
-            featureChars.Add('<');
+            //featureChars.Add('>');
+            //featureChars.Add('<');
         }
 
         private void SetupTerrainMapping()
@@ -83,8 +83,10 @@ namespace RogueBasin
             //terrainMapping.Add('=', MapTerrain.River);
             terrainMapping.Add('^', MapTerrain.Mountains);
             terrainMapping.Add('*', MapTerrain.Trees);
-            //terrainMapping.Add('-', MapTerrain.Road);
+            terrainMapping.Add(':', MapTerrain.River);
+            terrainMapping.Add('-', MapTerrain.Road);
             terrainMapping.Add('#', MapTerrain.Wall);
+            //terrainMapping.Add('#', MapTerrain.Wall);
             //terrainMapping.Add('+', MapTerrain.ClosedDoor);
         }
 
