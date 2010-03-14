@@ -88,11 +88,23 @@ namespace RogueBasin
         public void SetL3UniqueDead(int dungeonID)
         {
             dungeons[dungeonID].subUniqueDefeated = true;
+
+            if (dungeons[dungeonID].masterUniqueDefeated)
+            {
+                Game.MessageQueue.AddMessage("The two toughest creatures have been defeated! Well done!");
+                LogFile.Log.LogEntryDebug("Master and sub unique defeated, dungeon " + dungeonID, LogDebugLevel.Medium);
+            }
         }
 
         public void SetL4UniqueDead(int dungeonID)
         {
             dungeons[dungeonID].masterUniqueDefeated = true;
+
+            if (dungeons[dungeonID].subUniqueDefeated)
+            {
+                Game.MessageQueue.AddMessage("The two toughest creatures have been defeated! Well done!");
+                LogFile.Log.LogEntryDebug("Master and sub unique defeated, dungeon " + dungeonID, LogDebugLevel.Medium);
+            }
         }
 
         public DungeonInfo()
@@ -1962,8 +1974,16 @@ namespace RogueBasin
                 //Kill all the monsters on this level
                 foreach (Monster m in monsters)
                 {
+                    //But not itself
+                   
+                    //Creatures.DragonUnique drag = m as Creatures.DragonUnique;
+
                     if (m.LocationLevel == player.LocationLevel)
-                        KillMonster(m, false);
+                    {
+                        Creatures.DragonUnique drag = m as Creatures.DragonUnique;
+                        if(m != drag)
+                            KillMonster(m, true);
+                    }
                 }
 
                 //Creatures.Lich lich = monster as Creatures.Lich;
@@ -3623,12 +3643,12 @@ namespace RogueBasin
             if (princeGet)
             {
                 Screen.Instance.PlayMovie("endintrprincerescued", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("endintradventurer"));
+                clearList.AddRange(Screen.Instance.GetMovieText("endintrprincerescued"));
             }
             else
             {
                 Screen.Instance.PlayMovie("endintrprincenotrescued", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("endintradventurer"));
+                clearList.AddRange(Screen.Instance.GetMovieText("endintrprincenotrescued"));
             }
             
 
@@ -3660,30 +3680,35 @@ namespace RogueBasin
             {
                 Screen.Instance.PlayMovie("endintrsurvivor", false);
                 instricsList.AddRange(Screen.Instance.GetMovieText("endintrsurvivor"));
+                instricsList.Add("");
             }
 
             if (!combatUse)
             {
                 Screen.Instance.PlayMovie("endintrtimid", false);
                 instricsList.AddRange(Screen.Instance.GetMovieText("endintrtimid"));
+                instricsList.Add("");
             }
 
             if (!magicUse)
             {
                 Screen.Instance.PlayMovie("endintrmagicphobic", false);
                 instricsList.AddRange(Screen.Instance.GetMovieText("endintrmagicphobic"));
+                instricsList.Add("");
             }
 
             if (!charmUse)
             {
                 Screen.Instance.PlayMovie("endintrcharmless", false);
                 instricsList.AddRange(Screen.Instance.GetMovieText("endintrcharmless"));
+                instricsList.Add("");
             }
 
             if (charmUse && magicUse && combatUse)
             {
                 Screen.Instance.PlayMovie("endintrflexible", false);
                 instricsList.AddRange(Screen.Instance.GetMovieText("endintrflexible"));
+                instricsList.Add("");
             }
 
             //Final stats
@@ -3718,6 +3743,16 @@ namespace RogueBasin
 
             finalScreen.Add("");
             finalScreen.Add("She knocked out " + killRecord.killCount + " creatures.");
+
+            finalScreen.Add("");
+            finalScreen.Add("Final stats...");
+
+            finalScreen.Add("");
+            finalScreen.Add("Health : " + player.HitpointsStat);
+            finalScreen.Add("Combat Skill : " + player.AttackStat);
+            finalScreen.Add("Speed : " + player.SpeedStat);
+            finalScreen.Add("Charm : " + player.CharmStat);
+            finalScreen.Add("Magic Skill: " + player.MagicStat);
 
             finalScreen.Add("");
             finalScreen.Add("Thanks for playing! -flend");
@@ -3783,7 +3818,7 @@ namespace RogueBasin
             }
 
             //Bard
-            if (player.AttackStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 3)
+            if (player.AttackStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 2)
             {
                 careerName = "Bard";
                 careerMovie = "endbard";
@@ -3797,7 +3832,7 @@ namespace RogueBasin
             }
 
             //Mage Diplomat
-            if (player.MagicStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 3)
+            if (player.MagicStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 2)
             {
                 careerName = "Mage Diplomat";
                 careerMovie = "endmagediplomat";
@@ -3811,7 +3846,7 @@ namespace RogueBasin
             }
 
             //Battle Mage
-            if (player.MagicStat > 50 && player.AttackStat > 50 && noDungeonsCleared > 3)
+            if (player.MagicStat > 50 && player.AttackStat > 50 && noDungeonsCleared > 2)
             {
                 careerName = "Battle Mage";
                 careerMovie = "endbattlemage";
@@ -3839,7 +3874,7 @@ namespace RogueBasin
             }
 
             //Sorcerer
-            if (player.MagicStat > 75 && noDungeonsCleared > 2)
+            if (player.MagicStat > 75 && noDungeonsCleared > 1)
             {
                 careerName = "Sorcerer";
                 careerMovie = "endsorcerer";
@@ -3867,7 +3902,7 @@ namespace RogueBasin
             }
 
             //Warrior
-            if (player.AttackStat > 75 && noDungeonsCleared > 2)
+            if (player.AttackStat > 75 && noDungeonsCleared > 1)
             {
                 careerName = "Warrior";
                 careerMovie = "endwarrior";
@@ -3895,7 +3930,7 @@ namespace RogueBasin
             }
 
             //Social Goddess
-            if (player.CharmStat > 75 && noDungeonsCleared > 2)
+            if (player.CharmStat > 75 && noDungeonsCleared > 1)
             {
                 careerName = "Social Goddess";
                 careerMovie = "endsocialite";

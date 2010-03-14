@@ -18,7 +18,7 @@ namespace RogueBasin {
         public int Width { get; set; }
         public int Height { get; set; }
 
-        bool debugMode = true;
+        bool debugMode = false;
 
         //Top left coord to start drawing the map at
         Point mapTopLeft;
@@ -982,9 +982,9 @@ namespace RogueBasin {
             rootConsole.PrintLine("Stamina:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 0, LineAlignment.Left);
             rootConsole.PrintLine("Health:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 1, LineAlignment.Left);
             rootConsole.PrintLine("Combat Skill:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 2, LineAlignment.Left);
-            rootConsole.PrintLine("Dexterity:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 3, LineAlignment.Left);
+            rootConsole.PrintLine("Speed:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 3, LineAlignment.Left);
             rootConsole.PrintLine("Charm:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 4, LineAlignment.Left);
-            rootConsole.PrintLine("Magic skill:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 5, LineAlignment.Left);
+            rootConsole.PrintLine("Magic Skill:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 5, LineAlignment.Left);
 
             rootConsole.ForegroundColor = statNumberColor;
 
@@ -1412,7 +1412,7 @@ namespace RogueBasin {
             rootConsole.PrintLineRect("Press (ENTER) to exit", (trainingTL.x + trainingTR.x) / 2, trainingBL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
 
             //Draw headings
-            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
+            //rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
 
             //Draw stats
             /*

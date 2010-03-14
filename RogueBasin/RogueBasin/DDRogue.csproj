@@ -564,8 +564,6 @@
     <EmbeddedResource Include="bin\Debug\movies\endwarrior_prince0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\helpcharming0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\helpdungeons0.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\helpitems0.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\helpspellcasting0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\helpwilderness0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\spellblink0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\spellenergyblast0.amf" />
@@ -605,5 +603,16 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\wallleap0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\wallleap1.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\helpitems0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helptempitems0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\helpspecialmoves0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\helpspellcasting0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\endintrflexible0.amf" />
   </ItemGroup>
 </Project>

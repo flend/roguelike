@@ -15,6 +15,8 @@ namespace RogueBasin.Triggers
         /// </summary>
         public static bool Triggered { get; set; }
 
+        public bool ShownMovie = false;
+
         public TrainMasterTrigger()
         {
             Triggered = false;
@@ -61,13 +63,32 @@ namespace RogueBasin.Triggers
                 }
 
                 //Random check sequence
+                
                 int[] checkSequence = new int[notLearntMoves.Count];
-
+                /* //doesn't work too late to fix
                 for (int i = 0; i < checkSequence.Length; i++)
                 {
-                    checkSequence[i] = Game.Random.Next(checkSequence.Length);
-                }
+                    do {
+                        int rand = Game.Random.Next(checkSequence.Length);
 
+                        for (int j = 0; j < i; j++)
+                        {
+                            if (checkSequence[j] == rand)
+                                continue;
+                        }
+
+                        checkSequence[i] = rand;
+                        break;
+                     }  while(true);
+                }*/
+
+                
+
+                
+                for (int i = 0; i < checkSequence.Length; i++)
+                {
+                    checkSequence[i] = i;
+                }
                 //Actually do the check
 
                 int playerCombatStat = dungeon.Player.AttackStat;
@@ -107,6 +128,12 @@ namespace RogueBasin.Triggers
                         if (backStab != null)
                         {
                             dungeon.LearnMove(new SpecialMoves.WallVault());
+                        }
+
+                        if (!ShownMovie && dungeon.Player.PlayItemMovies)
+                        {
+                            ShownMovie = true;
+                            Screen.Instance.PlayMovie("helpspecialmoves", false);
                         }
 
                         dungeon.MoveToNextDate();

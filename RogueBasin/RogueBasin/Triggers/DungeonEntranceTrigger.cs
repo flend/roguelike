@@ -31,16 +31,15 @@ namespace RogueBasin.Triggers
             if (!Triggered)
             {
                 //Set vision
-                Game.Dungeon.Player.SightRadius = (int)Math.Ceiling(Game.Dungeon.Player.NormalSightRadius * Game.Dungeon.Levels[0].LightLevel);
+                //Game.Dungeon.Player.SightRadius = (int)Math.Ceiling(Game.Dungeon.Player.NormalSightRadius * Game.Dungeon.Levels[0].LightLevel);
 
-                Screen.Instance.PlayMovie("enterDungeon", true);
+                if (Game.Dungeon.Player.PlayItemMovies)
+                {
+                    Screen.Instance.PlayMovie("helpdungeons", true);
+                }
                 Triggered = true;
             }
-            else
-            {
-                Screen.Instance.PlayMovie("enterDungeonAgain", true);
-            }
-
+            
             return true;
         }
     }

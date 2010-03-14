@@ -10,6 +10,8 @@ namespace RogueBasin.Triggers
     /// </summary>
     public class TrainCharmTrigger : TrainTrigger
     {
+        public bool ShownMovie = false;
+
         protected override string GetIntroMovieName()
         {
             return "traincharm";
@@ -24,6 +26,13 @@ namespace RogueBasin.Triggers
         {
             TrainStats train = new TrainStats();
             train.WeekdayTrainCharm(Game.Dungeon.Player);
+
+            if (!ShownMovie && Game.Dungeon.Player.PlayItemMovies)
+            {
+                ShownMovie = true;
+                Screen.Instance.PlayMovie("helpcharming", false);
+            }
+
             return train;
         }
 
@@ -31,6 +40,13 @@ namespace RogueBasin.Triggers
         {
             TrainStats train = new TrainStats();
             train.WeekendTrainCharm(Game.Dungeon.Player);
+
+            if (!ShownMovie && Game.Dungeon.Player.PlayItemMovies)
+            {
+                ShownMovie = true;
+                Screen.Instance.PlayMovie("helpcharming", false);
+            }
+
             return train;
         }
     }

@@ -123,6 +123,13 @@ namespace RogueBasin
         {
             this.player = player;
 
+
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
+
             TrainHitpointStat(50, -1);
             TrainMaxHitpointStat(50, 1);
             TrainSpeedStat(5, 1);
@@ -138,6 +145,12 @@ namespace RogueBasin
         public void WeekdayTrainCombat(Player player)
         {
             this.player = player;
+
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
 
             TrainHitpointStat(40, -1);
             TrainMaxHitpointStat(10, 1);
@@ -155,6 +168,12 @@ namespace RogueBasin
         {
             this.player = player;
 
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
+
             TrainHitpointStat(20, -1);
             TrainMaxHitpointStat(5, -1);
             TrainSpeedStat(0, 0);
@@ -170,6 +189,12 @@ namespace RogueBasin
         public void WeekdayTrainMagic(Player player)
         {
             this.player = player;
+
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
 
             TrainHitpointStat(20, -1);
             TrainMaxHitpointStat(5, -1);
@@ -204,6 +229,12 @@ namespace RogueBasin
         {
             this.player = player;
 
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
+
             TrainHitpointStat(50, -1);
             TrainMaxHitpointStat(50, 1);
             TrainSpeedStat(5, 1);
@@ -219,6 +250,12 @@ namespace RogueBasin
         public void WeekendTrainCombat(Player player)
         {
             this.player = player;
+
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
 
             TrainHitpointStat(40, -1);
             TrainMaxHitpointStat(10, 1);
@@ -236,6 +273,12 @@ namespace RogueBasin
         {
             this.player = player;
 
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
+
             TrainHitpointStat(20, -1);
             TrainMaxHitpointStat(5, -1);
             TrainSpeedStat(0, 0);
@@ -251,6 +294,12 @@ namespace RogueBasin
         public void WeekendTrainMagic(Player player)
         {
             this.player = player;
+
+            if (player.HitpointsStat == 0)
+            {
+                Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
+                return;
+            }
 
             TrainHitpointStat(20, -1);
             TrainMaxHitpointStat(5, -1);

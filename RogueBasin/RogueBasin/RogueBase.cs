@@ -1588,7 +1588,14 @@ namespace RogueBasin
                 //Add item to PC inventory
                 //Better on player
                 player.PickUpItem(itemToPickUp);
-                
+
+                //Play help movie
+                if (Game.Dungeon.Player.PlayItemMovies && Game.Dungeon.Player.TempItemHelpMovieSeen == false)
+                {
+                    Screen.Instance.PlayMovie("helptempitems", true);
+                    Game.Dungeon.Player.TempItemHelpMovieSeen = true;
+                }
+
 
                 //Message
 
@@ -1963,7 +1970,7 @@ namespace RogueBasin
             */
 
             string playerName = "Dave";
-            bool showMovies = false;
+            bool showMovies = true;
             GameDifficulty diff = GameDifficulty.Easy;
 
 

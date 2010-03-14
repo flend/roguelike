@@ -10,6 +10,7 @@ namespace RogueBasin.Triggers
     /// </summary>
     public class TrainMagicLibraryTrigger : DungeonSquareTrigger
     {
+        public bool ShownMovie = false;
        
         /// <summary>
         /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
@@ -98,14 +99,22 @@ namespace RogueBasin.Triggers
                         //Game.Dungeon.LearnMove(thisMove);
 
 
+
                         thisSpell.Known = true;
-                        LogFile.Log.LogEntryDebug("Player learnt move: " + thisSpell.SpellName(), LogDebugLevel.Medium);
+                        LogFile.Log.LogEntryDebug("Player learnt spell: " + thisSpell.SpellName(), LogDebugLevel.Medium);
 
                         //Play movie
                         Screen.Instance.PlayMovie("succeededToLearnSpell", false);
                         Screen.Instance.PlayMovie(thisSpell.MovieRoot(), false);
 
                         Game.MessageQueue.AddMessage("You learn a new spell: " + thisSpell.SpellName() + "!");
+
+                        if (!ShownMovie && dungeon.Player.PlayItemMovies)
+                        {
+                            ShownMovie = true;
+                            Screen.Instance.PlayMovie("helpspellcasting", false);
+                        }
+                        
                         dungeon.MoveToNextDate();
                         //Teleport the user back to the start location
                         Game.Dungeon.PlayerBackToTown();

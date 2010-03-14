@@ -10,6 +10,8 @@ namespace RogueBasin.Triggers
     public class TownToWilderness : DungeonSquareTrigger
     {
 
+        public bool ShownMovie = false;
+
         /// <summary>
         /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
         /// </summary>
@@ -32,7 +34,11 @@ namespace RogueBasin.Triggers
             //Play intro movie first time
             if (!Triggered)
             {
-                //                Screen.Instance.PlayMovie("treasureRoom", true);
+                if (!ShownMovie && Game.Dungeon.Player.PlayItemMovies)
+                {
+                    ShownMovie = true;
+                    Screen.Instance.PlayMovie("helpwilderness", false);
+                }
                 Triggered = true;
             }
             Game.Dungeon.PlayerEnterWilderness();

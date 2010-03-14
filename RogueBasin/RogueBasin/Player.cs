@@ -16,6 +16,9 @@ namespace RogueBasin
 
         public string Name { get; set; }
 
+        public bool ItemHelpMovieSeen = false;
+        public bool TempItemHelpMovieSeen = false;
+
         /// <summary>
         /// How many worldClock ticks do we have to rescue our friend?
         /// </summary>
@@ -172,14 +175,15 @@ namespace RogueBasin
             AttackStat = 10;
             CharmStat = 10;
             MagicStat = 10;
-
+            
             //Debug
             
-            AttackStat = 40;
+            AttackStat = 100;
             MagicStat = 100;
             HitpointsStat = 60;
             MaxHitpointsStat = 60;
             CharmStat = 120;
+             
         }
 
         private void SetupInitialHP()
@@ -1389,6 +1393,13 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Problem with item equip");
                 Game.MessageQueue.AddMessage("You can't equip this item (bug)");
                 return false;
+            }
+
+            //Play help movie
+            if (Game.Dungeon.Player.PlayItemMovies && ItemHelpMovieSeen == false)
+            {
+                Screen.Instance.PlayMovie("helpitems", true);
+                ItemHelpMovieSeen = true;
             }
 
             //Set the item as found
