@@ -70,6 +70,8 @@ namespace RogueBasin
 
         public GameDifficulty difficulty { get; set; }
 
+        int maxLoopCount = 500;
+
        // int caveDungeonNoLevels = 4;
 
         //int noCaveLevels = 10;
@@ -649,7 +651,7 @@ namespace RogueBasin
 
             List<int> monsterBudgets = new List<int>();
 
-            monsterBudgets.Add(budgetScale * 250);
+            monsterBudgets.Add(budgetScale * 300);
             monsterBudgets.Add(budgetScale * 350);
             monsterBudgets.Add(budgetScale * 450);
             monsterBudgets.Add(budgetScale * 500);
@@ -1480,7 +1482,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Ferret(), levelToPlace, location));
                 }
 
@@ -1493,7 +1495,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Goblin(), levelToPlace, location));
                 }
             }
@@ -1512,7 +1514,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Orc(), levelToPlace, location));
                 }
 
@@ -1525,7 +1527,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Spider(), levelToPlace, location));
                 }
             }
@@ -1545,7 +1547,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Skeleton(), levelToPlace, location));
                 }
 
@@ -1558,7 +1560,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Zombie(), levelToPlace, location));
                 }
             }
@@ -1577,7 +1579,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location));
                 }
 
@@ -1590,7 +1592,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Peon(), levelToPlace, location));
                 }
             }
@@ -1610,7 +1612,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location));
                 }
 
@@ -1623,7 +1625,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Whipper(), levelToPlace, location));
                 }
             }
@@ -1643,7 +1645,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Imp(), levelToPlace, location));
                 }
 
@@ -1657,7 +1659,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location));
                 }
 
@@ -1670,7 +1672,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Drainer(), levelToPlace, location));
                 }
             }
@@ -1716,7 +1718,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Rat(), uniqueLevel, location));
             }
 
@@ -1745,7 +1747,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Ferret(), uniqueLevel, location));
             }
 
@@ -1758,7 +1760,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Goblin(), uniqueLevel, location));
             }
 
@@ -1798,7 +1800,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Spider(), uniqueLevel, location));
             }
 
@@ -1811,7 +1813,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.GoblinWitchdoctor(), uniqueLevel, location));
             }
 
@@ -1840,7 +1842,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Pixie(), uniqueLevel, location));
             }
 
@@ -1853,7 +1855,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location));
             }
 
@@ -1893,7 +1895,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.BlackUnicorn(), uniqueLevel, location));
             }
 
@@ -1906,7 +1908,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Nymph(), uniqueLevel, location));
             }
 
@@ -1936,7 +1938,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Pixie(), uniqueLevel, location));
             }
 
@@ -1949,7 +1951,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Faerie(), uniqueLevel, location));
             }
 
@@ -1962,7 +1964,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Nymph(), uniqueLevel, location));
             }
 
@@ -1976,7 +1978,7 @@ namespace RogueBasin
 
         private void SpawnDemonUniques()
         {
-            int minDistance = 4;
+            int minDistance = 5;
             int loopCount = 0;
 
             Point location = new Point();
@@ -1992,7 +1994,7 @@ namespace RogueBasin
             //Spawn in with a random number of rats
             int noDran = 2 + Game.Random.Next(2);
             int noImp = 2 + Game.Random.Next(2);
-            int noDemon =  3+ Game.Random.Next(4);
+            int noDemon =  3 + Game.Random.Next(4);
 
             for (int i = 0; i < noDran; i++)
             {
@@ -2003,7 +2005,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Drainer(), uniqueLevel, location));
             }
 
@@ -2016,7 +2018,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Imp(), uniqueLevel, location));
             }
 
@@ -2029,7 +2031,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Demon(), uniqueLevel, location));
             }
 
@@ -2060,7 +2062,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Drainer(), uniqueLevel, location));
             }
 
@@ -2073,7 +2075,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Imp(), uniqueLevel, location));
             }
 
@@ -2086,7 +2088,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Demon(), uniqueLevel, location));
             }
 
@@ -2099,7 +2101,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Meddler(), uniqueLevel, location));
             }
 
@@ -2141,7 +2143,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Skeleton(), uniqueLevel, location));
                 }
 
@@ -2154,7 +2156,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.SkeletalArcher(), uniqueLevel, location));
                 }
 
@@ -2167,7 +2169,7 @@ namespace RogueBasin
                         {
                             location = dungeon.RandomWalkablePointInLevel(i);
                             loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                     } while (!dungeon.AddMonster(new Creatures.Zombie(), uniqueLevel, location));
                 }
         
@@ -2198,7 +2200,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.SkeletalArcher(), uniqueLevel, location));
             }
 
@@ -2240,7 +2242,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location));
             }
 
@@ -2253,7 +2255,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Uruk(), uniqueLevel, location));
             }
             for (int i = 0; i < noOrcShaman; i++)
@@ -2265,7 +2267,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.OrcShaman(), uniqueLevel, location));
             }
 
@@ -2295,7 +2297,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location));
             }
 
@@ -2308,7 +2310,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.Orc(), uniqueLevel, location));
             }
 
@@ -2321,7 +2323,7 @@ namespace RogueBasin
                     {
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < 50);
+                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
                 } while (!dungeon.AddMonster(new Creatures.OrcShaman(), uniqueLevel, location));
             }
 
