@@ -10,7 +10,7 @@ namespace RogueBasin.Triggers
     public class TerrainFlipTrigger : DungeonSquareTrigger
     {
 
-        MapTerrain flipToTerrain;
+        public MapTerrain flipToTerrain;
 
         public string triggerID;
 
@@ -18,6 +18,8 @@ namespace RogueBasin.Triggers
         /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
         /// </summary>
         public static bool Triggered { get; set; }
+
+        public TerrainFlipTrigger() { }
 
         public TerrainFlipTrigger(MapTerrain terrainToFlipTo, string triggerID)
         {

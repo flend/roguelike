@@ -12,7 +12,9 @@ namespace RogueBasin.Features
     public class StaircaseExit : UseableFeature
     {
 
-        int dungeonID;
+        public int dungeonID;
+
+        public StaircaseExit() { }
 
         public StaircaseExit(int dungeonID)
         {

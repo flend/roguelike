@@ -73,7 +73,8 @@ namespace RogueBasin
         Gravestone, //walkable
         Rubble, //walkable
         Forest, //not walkable
-        BarDoor//not walkable
+        BarDoor,//not walkable
+        HellWall//not walkable
      }
 
     public class MapSquare

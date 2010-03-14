@@ -80,8 +80,8 @@ namespace RogueBasin
 
         public bool DragonDead { get; set; }
 
-        List<bool> level3UniqueStatus;
-        List<bool> level4UniqueStatus;
+        public List<bool> level3UniqueStatus;
+        public List<bool> level4UniqueStatus;
 
         //public int CurrentDungeon { get; set; }
 

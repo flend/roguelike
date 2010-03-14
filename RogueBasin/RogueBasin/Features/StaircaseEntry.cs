@@ -11,8 +11,10 @@ namespace RogueBasin.Features
     /// <returns></returns>
     public class StaircaseEntry : UseableFeature
     {
-        int dungeonID;
-        int dungeonStartLevel;
+        public int dungeonID;
+        public int dungeonStartLevel;
+
+        public StaircaseEntry() { }
 
         /// <summary>
         /// Construct with the level of the dungeon to transition to

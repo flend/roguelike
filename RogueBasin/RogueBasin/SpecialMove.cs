@@ -18,6 +18,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.MultiAttack))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.BurstOfSpeed))]
     [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.CloseQuarters))]
+    [System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.WallLeap))]
     public abstract class SpecialMove
     {
         /// <summary>

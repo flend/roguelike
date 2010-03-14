@@ -25,6 +25,10 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Spells.SlowMonster))]
     [System.Xml.Serialization.XmlInclude(typeof(Spells.Blink))]
     [System.Xml.Serialization.XmlInclude(typeof(Spells.FireBall))]
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.EnergyBlast))]
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.Light))]
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.MageArmour))]
+    [System.Xml.Serialization.XmlInclude(typeof(Spells.Exit))]
     public abstract class Spell
     {
         /// <summary>

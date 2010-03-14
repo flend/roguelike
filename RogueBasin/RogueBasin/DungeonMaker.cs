@@ -3524,8 +3524,8 @@ namespace RogueBasin
             ruinedGen.AddRubbleType(MapTerrain.Rubble);
 
             ruinedGen.ClearWallType();
-            ruinedGen.AddWallType(MapTerrain.Wall);
-            ruinedGen.AddWallType(MapTerrain.Wall);
+            ruinedGen.AddWallType(MapTerrain.Volcano);
+            ruinedGen.AddWallType(MapTerrain.HellWall);
             ruinedGen.RubbleChance = 5;
 
 

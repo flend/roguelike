@@ -14,6 +14,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.SpotFriend))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TreasureRoom))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainAthleticsTrigger))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TerrainFlipTrigger))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainCharmTrigger))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainCombatTrigger))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainRestTrigger))]
@@ -23,6 +24,10 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainGeographyLibraryTrigger))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TrainMasterTrigger))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TownToWilderness))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.ApproachingTheDragon))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.BackToSchool))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.PrinceInABox))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.SchoolEntryTrigger))]
     public abstract class DungeonSquareTrigger
     {
         public int Level { get; set; }
