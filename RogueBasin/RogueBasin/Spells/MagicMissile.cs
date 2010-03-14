@@ -37,7 +37,16 @@ namespace RogueBasin.Spells
 
                 Monster monster = squareContents.monster;
 
-                //No magic resistance for magic missile
+                //No magic resistance for magic missile - changed
+
+
+                Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(target.x, target.y), ColorPresets.Violet);
+
+
+                //Check magic resistance
+                bool monsterResisted = CheckMagicResistance(monster);
+                if (monsterResisted)
+                    return true;
 
                 //Attack the monster
 
@@ -49,7 +58,7 @@ namespace RogueBasin.Spells
                 
                 int damageBase;
 
-                if (player.MagicStat > 100)
+                if (player.MagicStat > 120)
                 {
                     damageBase = 8;
                 }
@@ -82,8 +91,6 @@ namespace RogueBasin.Spells
                 int firstYStep = 0;
 
                 TCODLineDrawing.StepLine(ref firstXStep, ref firstYStep);*/
-
-                Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(target.x, target.y), ColorPresets.Violet);
 
                 return true;
             }

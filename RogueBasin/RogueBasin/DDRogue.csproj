@@ -180,6 +180,7 @@
     <Compile Include="Items\HealingPotion.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Items\KnockoutDress.cs" />
     <Compile Include="Items\Lantern.cs" />
     <Compile Include="Items\LeadRing.cs" />
     <Compile Include="Items\LeatherArmour.cs">
@@ -208,7 +209,9 @@
     <Compile Include="Items\PotionSuperSpeedUp.cs" />
     <Compile Include="Items\PotionToHitUp.cs" />
     <Compile Include="Items\PotionSpeedUp.cs" />
-    <Compile Include="Items\PrettyDress.cs" />
+    <Compile Include="Items\PrettyDress.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Items\RestoreOrb.cs" />
     <Compile Include="Items\Sash.cs" />
     <Compile Include="Items\ShortSword.cs">

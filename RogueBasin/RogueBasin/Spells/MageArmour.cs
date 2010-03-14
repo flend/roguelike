@@ -27,8 +27,8 @@ namespace RogueBasin.Spells
 
             //Apply the armour effect to the player
             //Duration note 100 is normally 1 turn for a non-sped up player
-            int duration = 4000 + Game.Random.Next(3000);
-            int toArmour = (int)Math.Floor(player.MagicStat / 20.0) + 1;
+            int duration = 4000 + Game.Random.Next(5000);
+            int toArmour = (int)Math.Ceiling(player.MagicStat / 30.0);
 
             //Add a message
             Game.MessageQueue.AddMessage("You cast Mage Armour.");
@@ -61,7 +61,7 @@ namespace RogueBasin.Spells
 
         internal override int GetRequiredMagic()
         {
-            return 45;
+            return 90;
         }
 
         internal override string MovieRoot()

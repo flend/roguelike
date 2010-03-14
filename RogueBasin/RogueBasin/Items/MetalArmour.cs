@@ -46,7 +46,15 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Wearing Metal Armour");
+            //Messages
+            if (Game.Dungeon.Player.AttackStat > 50)
+            {
+                Game.MessageQueue.AddMessage("Leather Armour - and in your size!");
+            }
+            else
+            {
+                Game.MessageQueue.AddMessage("A collection of rusty old iron plates instead of clothes? No way.");
+            }
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 

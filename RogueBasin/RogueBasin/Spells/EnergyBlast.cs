@@ -37,6 +37,10 @@ namespace RogueBasin.Spells
                 
                 //Attack the monster
 
+
+                Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(target.x, target.y), ColorPresets.Crimson);
+
+
                 //Check magic resistance
                 bool monsterResisted = CheckMagicResistance(squareContents.monster);
                 if (monsterResisted)
@@ -69,9 +73,9 @@ namespace RogueBasin.Spells
 
                 //Damage done is just the base
 
-                int damage = Utility.DamageRoll(damageBase) + Utility.DamageRoll(damageBase) + Utility.DamageRoll(damageBase) + damageBase / 2;
+                int damage = Utility.DamageRoll(damageBase) + Utility.DamageRoll(damageBase) + Utility.DamageRoll(damageBase);// +damageBase / 2;
 
-                string combatResultsMsg = "PvM Energy Blast: Dam: 3d" + damageBase + " -> " + (damageBase / 2);
+                string combatResultsMsg = "PvM Energy Blast: Dam: 3d" + damageBase + " -> " + (damage);
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                 //Apply damage
@@ -85,8 +89,6 @@ namespace RogueBasin.Spells
                 int firstYStep = 0;
 
                 TCODLineDrawing.StepLine(ref firstXStep, ref firstYStep);*/
-
-                Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(target.x, target.y), ColorPresets.Crimson);
 
                 return true;
             }
@@ -123,7 +125,7 @@ namespace RogueBasin.Spells
 
         internal override int GetRequiredMagic()
         {
-            return 70;
+            return 100;
         }
 
         internal override string MovieRoot()

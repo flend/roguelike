@@ -1207,6 +1207,11 @@ namespace RogueBasin
                 if (squareContents.player != null)
                     lastSpellTarget = squareContents.player;
             }
+            else
+            {
+                //Failure store the spell anyway
+                lastSpell = toCast;
+            }
 
             //Time only goes past if successfully cast
             return success;

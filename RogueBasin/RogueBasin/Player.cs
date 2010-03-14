@@ -175,10 +175,10 @@ namespace RogueBasin
 
             //Debug
             
-            AttackStat = 70;
-            HitpointsStat = 70;
-            MaxHitpointsStat = 70;
-           // MagicStat = 100;
+            //AttackStat = 70;
+            HitpointsStat = 60;
+            MaxHitpointsStat = 60;
+            MagicStat = 100;
         }
 
         private void SetupInitialHP()
@@ -309,12 +309,12 @@ namespace RogueBasin
             Screen.Instance.PCColor = ColorPresets.White;
 
             //Consider equipped clothing items (only 1 will work)
-            if (inv.ContainsItem(new Items.MetalArmour()))
+            if (inv.ContainsItem(new Items.MetalArmour()) && AttackStat > 50)
             {
                 ArmourClassAccess += 6;
                 Screen.Instance.PCColor = ColorPresets.SteelBlue;
             }
-            else if (inv.ContainsItem(new Items.LeatherArmour()))
+            else if (inv.ContainsItem(new Items.LeatherArmour()) && AttackStat > 25)
             {
                 ArmourClassAccess += 3;
                 Screen.Instance.PCColor = ColorPresets.BurlyWood;
@@ -322,7 +322,14 @@ namespace RogueBasin
             else if (inv.ContainsItem(new Items.PrettyDress()))
             {
                 CharmPoints += 20;
+                ArmourClassAccess += 1;
                 Screen.Instance.PCColor = ColorPresets.BlueViolet;
+            }
+            else if (inv.ContainsItem(new Items.KnockoutDress()))
+            {
+                CharmPoints += 40;
+                ArmourClassAccess += 3;
+                Screen.Instance.PCColor = ColorPresets.Yellow;
             }
 
             //Consider equipped weapons (only 1 will work)

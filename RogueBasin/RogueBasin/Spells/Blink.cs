@@ -105,7 +105,7 @@ namespace RogueBasin.Spells
 
         internal override int GetRequiredMagic()
         {
-            return 50;
+            return 40;
         }
 
         internal override string MovieRoot()

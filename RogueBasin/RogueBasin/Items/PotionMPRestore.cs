@@ -27,8 +27,14 @@ namespace RogueBasin.Items
             
             Game.MessageQueue.AddMessage("You eat the berry.");
 
+            int delta = (int)Math.Floor(Game.Dungeon.Player.MagicStat / 3.0);
+
+            if (delta < 10)
+                delta = 10;
+
             //Apply the healing effect to the player
-            int healing = 10 + Game.Random.Next(10);
+            int healing = delta + Game.Random.Next(delta);
+
             player.AddEffect(new PlayerEffects.MPRestore(player, healing));
 
             //Add a message

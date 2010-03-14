@@ -28,7 +28,7 @@ namespace RogueBasin.Spells
 
             //Apply the armour effect to the player
             //Duration note 100 is normally 1 turn for a non-sped up player
-            int duration = 4000 + Game.Random.Next(3000);
+            int duration = 4000 + Game.Random.Next(6000);
             int toLight = (int)Math.Floor(player.MagicStat / 50.0) + 1;
 
             //Add a message
@@ -41,7 +41,7 @@ namespace RogueBasin.Spells
 
         public override int MPCost()
         {
-            return 10;
+            return 5;
         }
 
         public override bool NeedsTarget()
@@ -61,7 +61,7 @@ namespace RogueBasin.Spells
 
         internal override int GetRequiredMagic()
         {
-            return 70;
+            return 30;
         }
 
         internal override string MovieRoot()

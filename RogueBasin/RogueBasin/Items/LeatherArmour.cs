@@ -46,7 +46,14 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Leather Armour - and in your size!");
+            if (Game.Dungeon.Player.AttackStat > 25)
+            {
+                Game.MessageQueue.AddMessage("Leather Armour - and in your size!");
+            }
+            else
+            {
+                Game.MessageQueue.AddMessage("What's this, hardened leather? Definitely not your thing.");
+            }
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 

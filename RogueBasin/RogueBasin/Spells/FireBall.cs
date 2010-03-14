@@ -94,6 +94,12 @@ namespace RogueBasin.Spells
             int damageBase;
             int damageMod;
 
+            if (player.MagicStat > 130)
+            {
+                damageBase = 12;
+                damageMod = 2;
+            }
+
             if (player.MagicStat > 100)
             {
                 damageBase = 12;
@@ -198,7 +204,7 @@ namespace RogueBasin.Spells
 
         internal override int GetRequiredMagic()
         {
-            return 40;
+            return 70;
         }
 
         internal override string MovieRoot()

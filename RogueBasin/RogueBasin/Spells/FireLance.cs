@@ -41,6 +41,14 @@ namespace RogueBasin.Spells
             int deltaX = targetSquare.x - player.LocationMap.x;
             int deltaY = targetSquare.y - player.LocationMap.y;
 
+            if (deltaX == 0 && deltaY == 0)
+            {
+                LogFile.Log.LogEntryDebug("No target for fireland", LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("No target for Fire Lance.");
+
+                return false;
+            }
+
             /*
             int unitX = 0;
             int unitY = 0;
@@ -241,10 +249,16 @@ namespace RogueBasin.Spells
             int damageBase;
             int damageMod;
 
+            if (player.MagicStat > 130)
+            {
+                damageBase = 12;
+                damageMod = 1;
+            }
+
             if (player.MagicStat > 100)
             {
                 damageBase = 10;
-                damageMod = 2;
+                damageMod = 1;
             }
             else if (player.MagicStat > 60)
             {
@@ -300,7 +314,7 @@ namespace RogueBasin.Spells
 
         internal override int GetRequiredMagic()
         {
-            return 30;
+            return 50;
         }
 
         internal override string MovieRoot()
