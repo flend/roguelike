@@ -2016,19 +2016,19 @@ namespace RogueBasin
 
             //Intro screen pre-game (must come after screen)
             
-            /*
+            
             GameIntro intro = new GameIntro();
             intro.ShowIntroScreen();
 
             string playerName = intro.PlayerName;
             bool showMovies = intro.ShowMovies;
             GameDifficulty diff = intro.Difficulty;
-            */
+            /*
 
             string playerName = "Dave";
             bool showMovies = true;
             GameDifficulty diff = GameDifficulty.Easy;
-
+            */
 
             //Setup dungeon
 

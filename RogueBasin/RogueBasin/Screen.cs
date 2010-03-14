@@ -2561,7 +2561,7 @@ namespace RogueBasin {
 
             ClearMessageLine();
 
-            PrintMessage(introMessage + ": ", topLeft, introMessage.Length + 2 + maxChars);
+            PrintMessage(introMessage + "", topLeft, introMessage.Length + 2 + maxChars);
             FlushConsole();
 
             bool continueInput = true;
@@ -2671,7 +2671,7 @@ namespace RogueBasin {
                     }
                 }
 
-                PrintMessage(introMessage + ": " + userString + "_", topLeft, introMessage.Length + 2 + maxChars);
+                PrintMessage(introMessage + "" + userString + "_", topLeft, introMessage.Length + 2 + maxChars);
                 FlushConsole();
 
             } while (continueInput);

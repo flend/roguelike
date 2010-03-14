@@ -1,9 +1,8 @@
-Welcome to DDRogue!
-
-A 7DRL by flend.
+Welcome to PrincessRL! A 7DRL by flend.
 
 
-What is your name?
+Please enter a name for your character below.
 
 (This will load a saved game of that name.)
 (No unusual characters please!)
+

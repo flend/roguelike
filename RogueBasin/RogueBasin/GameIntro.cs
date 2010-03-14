@@ -57,7 +57,7 @@ namespace RogueBasin
             int nameYCoord = 5 + preamble.Count + 2;
             Point nameIntro = new Point(5, nameYCoord);
             do {
-                PlayerName = Screen.Instance.GetUserString("Rogue name", nameIntro, 20);
+                PlayerName = Screen.Instance.GetUserString("Name: Princess ", nameIntro, 20);
                 LogFile.Log.LogEntry("Player name: " + PlayerName);
             } while(PlayerName.Contains(" ") || PlayerName == "");
 
@@ -79,10 +79,15 @@ namespace RogueBasin
             }
 
             //Ask settings questions
-            ShowMovies = Screen.Instance.YesNoQuestion("Show plot text and movies?", new Point(settingsTL.x, settingsTL.y + height + 1));
+            ShowMovies = Screen.Instance.YesNoQuestion("Show help? (recommended):", new Point(settingsTL.x, settingsTL.y + height + 1));
+
+            rootConsole.PrintLineRect("Generating dungeons...", settingsTL.x, settingsTL.y + settingsText.Count + 5, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
+
+            rootConsole.Flush();
 
             //Ask settings questions
-            Difficulty = Screen.Instance.DifficultyQuestion("Game difficulty: Easy / Medium / Hard?", new Point(settingsTL.x, settingsTL.y + height + 3));
+            //Difficulty = Screen.Instance.DifficultyQuestion("Game difficulty: Easy / Medium / Hard?", new Point(settingsTL.x, settingsTL.y + height + 3));
+            Difficulty = GameDifficulty.Easy;
 
         }
 
@@ -104,7 +109,7 @@ namespace RogueBasin
             //Draw title
 
             titleCentre = new Point(screen.Width / 2, screen.Height / 2);
-            rootConsole.PrintLineRect("Welcome to DDRogue", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("Welcome to PrincessRL! A 7DRL by flend.", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
 
             //Any key to continue
 
