@@ -20,6 +20,8 @@ namespace RogueBasin {
 
         bool debugMode = false;
 
+        public bool SetTargetInRange = false;
+
         //Top left coord to start drawing the map at
         Point mapTopLeft;
 
@@ -168,9 +170,9 @@ namespace RogueBasin {
             inventoryTR = new Point(75, 5);
             inventoryBL = new Point(5, 30);
 
-            trainingTL = new Point(10, 10);
-            trainingTR = new Point(70, 10);
-            trainingBL = new Point(25, 25);
+            trainingTL = new Point(15, 10);
+            trainingTR = new Point(75, 10);
+            trainingBL = new Point(15, 25);
 
             princessStatsTopLeft = new Point(7, 32);
 
@@ -725,8 +727,16 @@ namespace RogueBasin {
 
             //Replace with the same but with targetting background
 
-            rootConsole.BackgroundColor = targetBackground;
-            rootConsole.ForegroundColor = targetForeground;
+            if (SetTargetInRange)
+            {
+                rootConsole.BackgroundColor = ColorPresets.Yellow;
+                rootConsole.ForegroundColor = targetForeground;
+            }
+            else
+            {
+                rootConsole.BackgroundColor = targetBackground;
+                rootConsole.ForegroundColor = targetForeground;
+            }
 
             rootConsole.PutChar(xLoc, yLoc, charAtPoint);
 

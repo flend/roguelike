@@ -176,6 +176,7 @@ namespace RogueBasin
             CharmStat = 10;
             MagicStat = 10;
             
+            
             //Debug
             
             AttackStat = 100;

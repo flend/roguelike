@@ -229,6 +229,7 @@ namespace RogueBasin
                                     }
                                     UpdateScreen();
                                     break;
+
                                 case 'S':
                                     //Save the game
                                     timeAdvances = true;
@@ -241,6 +242,7 @@ namespace RogueBasin
                                     Game.Dungeon.RunMainLoop = false;
                                     
                                     break;
+                                
                                 case 'F':
                                     //Full screen switch
                                     timeAdvances = false;
@@ -248,7 +250,6 @@ namespace RogueBasin
                                     rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
                                     rootConsole.Flush();
                                     break;
-
 
                                 case 'o':
                                     //Open door
@@ -259,7 +260,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'Z':
+                                case 'z':
                                     //Cast spell (just target for now)
                                     timeAdvances = SelectAndCastSpell();
                                     if (!timeAdvances)
@@ -268,7 +269,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'X':
+                                case 'x':
                                     //Recast last spells
                                     timeAdvances = RecastSpell();
                                     if (!timeAdvances)
@@ -277,7 +278,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'C':
+                                case 'c':
                                     //Charm creature
                                     timeAdvances = PlayerCharmCreature();
                                     if (!timeAdvances)
@@ -286,25 +287,6 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'U':
-                                    //Uncharm creature
-                                    timeAdvances = PlayerUnCharmCreature();
-                                    if (!timeAdvances)
-                                        UpdateScreen();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-
-                                case 'r':
-                                    //Name object
-                                    SetPlayerInventorySelectScreen();
-                                    UpdateScreen();
-                                    //This uses the generic 'select from inventory' input loop
-                                    NameObject();
-                                    DisablePlayerInventoryScreen();
-
-                                    UpdateScreen();
-                                    break;
 
                                 case ',':
                                     //Pick up item
@@ -333,13 +315,6 @@ namespace RogueBasin
 
                                     break;
 
-                                case 'i':
-                                    //Display the inventory
-                                    inputState = InputState.InventoryShow;
-                                    SetPlayerInventoryScreen();
-                                    UpdateScreen();
-                                    timeAdvances = false;
-                                    break;
                                 case 'd':
                                     //Drop items if in town
                                     DropItems();
@@ -347,7 +322,7 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-                                case 'k':
+                                case 'i':
                                     //Use an inventory item
                                     SetPlayerInventorySelectScreen();
                                     UpdateScreen();
@@ -363,16 +338,6 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
                                 
-                                case 'E':
-                                    Game.Dungeon.Player.AttackStat = 10;
-                                    Game.Dungeon.Player.CharmStat = 10;
-                                    Game.Dungeon.Player.MagicStat = 10;
-
-                                    Game.Dungeon.DungeonInfo.DragonDead = false;
-
-                                    Game.Dungeon.EndOfGame();
-                                    
-                                    break;
 
                                 case 'e':
                                     //Display currently equipped items
@@ -387,6 +352,22 @@ namespace RogueBasin
 
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
+                                    break;
+
+
+                                case 's':
+                                    //Show movies
+                                    SetSpecialMoveMovieScreen();
+                                    UpdateScreen();
+                                    MovieScreenInteraction();
+                                    DisableSpecialMoveMovieScreen();
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+
+                                case '?':
+                                    Screen.Instance.PlayMovie("helpkeys", true);
+                                    timeAdvances = false;
                                     break;
 
                                     //Vi keys
@@ -422,6 +403,26 @@ namespace RogueBasin
                                     */
                                     //Debug events
 
+
+                                case 'k':
+                                    //Display the inventory
+                                    inputState = InputState.InventoryShow;
+                                    SetPlayerInventoryScreen();
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+                                
+                                case 'E':
+                                    Game.Dungeon.Player.AttackStat = 10;
+                                    Game.Dungeon.Player.CharmStat = 10;
+                                    Game.Dungeon.Player.MagicStat = 10;
+
+                                    Game.Dungeon.DungeonInfo.DragonDead = false;
+
+                                    Game.Dungeon.EndOfGame();
+
+                                    break;
+
                                 case 'K':
                                     Game.Dungeon.FlipTerrain("river");
                                     Game.Dungeon.FlipTerrain("forest");
@@ -430,11 +431,11 @@ namespace RogueBasin
                                     UpdateScreen();
                                     break;
 
-                                case 'c':
-                                    //Level up
-                                    Game.Dungeon.Player.LevelUp();
-                                    UpdateScreen();
-                                    break;
+                                //case 'c':
+                                //    //Level up
+                                //    Game.Dungeon.Player.LevelUp();
+                                //    UpdateScreen();
+                                //    break;
 
                                 case 'm':
                                     //Learn all moves
@@ -460,16 +461,6 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-
-                                case 's':
-                                    //Show movies
-                                    SetSpecialMoveMovieScreen();
-                                    UpdateScreen();
-                                    MovieScreenInteraction();
-                                    DisableSpecialMoveMovieScreen();
-                                    UpdateScreen();
-                                    timeAdvances = false;
-                                    break;
 
                                 case 'T':
                                     Game.Dungeon.MoveToNextDate();
@@ -501,7 +492,28 @@ namespace RogueBasin
                                     Screen.Instance.SaveCurrentLevelToDisk();
                                     break;
 
-                                case 'z':
+                                                                        
+                                case 'U':
+                                    //Uncharm creature
+                                    timeAdvances = PlayerUnCharmCreature();
+                                    if (!timeAdvances)
+                                        UpdateScreen();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
+                                case 'r':
+                                    //Name object
+                                    SetPlayerInventorySelectScreen();
+                                    UpdateScreen();
+                                    //This uses the generic 'select from inventory' input loop
+                                    NameObject();
+                                    DisablePlayerInventoryScreen();
+
+                                    UpdateScreen();
+                                    break;
+                                    
+                                case 'v':
                                     //Add a healing event on the player
                                     PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
                                     Game.Dungeon.Player.AddEffect(healing);
@@ -1176,7 +1188,14 @@ namespace RogueBasin
 
             if (toCast.NeedsTarget())
             {
-                targettingSuccess = TargetSpell(out target);
+                //Find spell range
+                int range = toCast.GetRange();
+                if (player.Inventory.ContainsItem(new Items.ExtendOrb()))
+                {
+                    range += 1;
+                }
+
+                targettingSuccess = TargetSpell(out target, range);
             }
 
             //User exited
@@ -1262,9 +1281,20 @@ namespace RogueBasin
             {
                 if (lastSpellTarget.Alive && Game.Dungeon.Player.LocationLevel == lastSpellTarget.LocationLevel)
                 {
+                    //Check they are not charmed
+                    bool charmed = false;
+                    Monster mon = lastSpellTarget as Monster;
+                    if (mon != null)
+                    {
+                        if (mon.Charmed)
+                        {
+                            charmed = true;
+                        }
+                    }
+
                     //Are they still in sight?
                     //Is the target in FOV
-                    if (currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
+                    if (currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y) && !charmed)
                     {
                         //If so, attack
                         LogFile.Log.LogEntryDebug("Recast at last target", LogDebugLevel.Medium);
@@ -1377,17 +1407,28 @@ namespace RogueBasin
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private bool TargetSpell(out Point target)
+        private bool TargetSpell(out Point target, int range)
         {
             Player player = Game.Dungeon.Player;
 
             //Start on the nearest creature
-            Creature closeCreature = Game.Dungeon.FindClosestCreature(player);
+            Creature closeCreature = Game.Dungeon.FindClosestHostileCreatureInFOV(player);
 
             //If no nearby creatures, start on the player
             if (closeCreature == null)
                 closeCreature = Game.Dungeon.Player;
 
+            Point startPoint;
+
+            if (Game.Dungeon.GetDistanceBetween(player, closeCreature) < range)
+            {
+                startPoint = new Point(closeCreature.LocationMap.x, closeCreature.LocationMap.y);
+            }
+            else
+            {
+                startPoint = new Point(player.LocationMap.x, player.LocationMap.y);
+            }
+            /*
             //Get the FOV from Dungeon (this also updates the map creature FOV state)
             TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
 
@@ -1404,10 +1445,10 @@ namespace RogueBasin
                 //If not, target the PC
                 startPoint = new Point(player.LocationMap.x, player.LocationMap.y);
             }
-
+            */
             //Get the desired target from the player
 
-            return GetTargetFromPlayer(startPoint, out target);
+            return GetTargetFromPlayer(startPoint, out target, range);
         }
 
         /// <summary>
@@ -1415,13 +1456,21 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        private bool GetTargetFromPlayer(Point start, out Point target)
+        private bool GetTargetFromPlayer(Point start, out Point target, int range)
         {
 
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
             Screen.Instance.Target = start;
-            Game.MessageQueue.AddMessage("Find a target. Z to fire. ESC to exit.");
+
+            if (Game.Dungeon.GetDistanceBetween(start, Game.Dungeon.Player.LocationMap) > range)
+            {
+                Screen.Instance.SetTargetInRange = false;
+            }
+            else
+                Screen.Instance.SetTargetInRange = true;
+
+            Game.MessageQueue.AddMessage("Find a target. z to fire. ESC to exit.");
             UpdateScreen();
 
             bool keepLooping = true;
@@ -1431,7 +1480,7 @@ namespace RogueBasin
 
             do
             {
-                //Get direction from the user or 'Z' to fire
+                //Get direction from the user or 'z' to fire
                 KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
                 Point direction = new Point();
@@ -1453,7 +1502,7 @@ namespace RogueBasin
                         switch (keyCode)
                         {
 
-                            case 'Z':
+                            case 'z':
 
                                 validFire = true;
                                 keepLooping = false;
@@ -1481,9 +1530,16 @@ namespace RogueBasin
                     //Otherwise OK
                     target = newPoint;
 
+                    if (Game.Dungeon.GetDistanceBetween(newPoint, Game.Dungeon.Player.LocationMap) > range)
+                    {
+                        Screen.Instance.SetTargetInRange = false;
+                    }
+                    else
+                        Screen.Instance.SetTargetInRange = true;
+
                     //Update screen
                     Screen.Instance.Target = newPoint;
-                    Game.MessageQueue.AddMessage("Find a target. Z to fire. ESC to exit.");
+                    Game.MessageQueue.AddMessage("Find a target. z to fire. ESC to exit.");
                     UpdateScreen();
 
                 }
