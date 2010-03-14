@@ -89,6 +89,12 @@ namespace RogueBasin.Items
                 return false;
             }
 
+            if (usedUp)
+            {
+                Game.MessageQueue.AddMessage("You've already used the orb this adventure.");
+                return false;
+            }
+
             Game.MessageQueue.AddMessage("You open yourself to the orb and let its power flow into you.");
 
             //Apply the healing effect to the player

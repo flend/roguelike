@@ -75,7 +75,7 @@ namespace RogueBasin.Spells
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                 //Apply damage
-                player.ApplyDamageToMonster(squareContents.monster, damage, true);
+                player.ApplyDamageToMonster(squareContents.monster, damage, true, false);
                 
 
                 //Graphical effect

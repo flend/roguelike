@@ -202,7 +202,7 @@ namespace RogueBasin.SpecialMoves
         {
             //Attack the monster with bonuses
             Game.MessageQueue.AddMessage("Wall Backstab!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 5, 0, 5, -2);
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 5, 0, 5, -2, true);
             
             //Move into their square if the monster dies as normal
             bool okToMoveIntoSquare = false;

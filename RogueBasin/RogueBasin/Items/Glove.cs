@@ -7,7 +7,7 @@ namespace RogueBasin.Items
     /// <summary>
     /// Plot item
     /// </summary>
-    public class Glove : Item, IEquippableItem, IUseableItem
+    public class Glove : Item, IEquippableItem
     {
         bool usedUp;
 
@@ -39,13 +39,13 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            //LogFile.Log.LogEntryDebug("Glove equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Glove equipped", LogDebugLevel.Medium);
 
             //This is plot equipment
-            Game.Dungeon.Player.PlotItemsFound++;
+            //Game.Dungeon.Player.PlotItemsFound++;
 
             //Level up?
-            Game.Dungeon.Player.LevelUp();
+            //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
@@ -53,17 +53,18 @@ namespace RogueBasin.Items
             //Play movies if set
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                Screen.Instance.PlayMovie("plotglove", true);
+                //Screen.Instance.PlayMovie("plotglove", true);
                 //Screen.Instance.PlayMovie("vaultbackstab", false);
             }
 
             //Messages
-            Game.MessageQueue.AddMessage("Levelled up!");
+            Game.MessageQueue.AddMessage("This glove fits neatly on to your hand. The glove seems to respond to your moves - you feel a warm energy charging.");
             //Game.MessageQueue.AddMessage("Learnt Vault Backstab!");
 
             return true;
         }
 
+        /*
         /// <summary>
         /// For a test let the glove me useable
         /// </summary>
@@ -99,7 +100,7 @@ namespace RogueBasin.Items
         {
             set { usedUp = value; }
             get { return usedUp; }
-        }
+        }*/
 
         /// <summary>
         /// not used in this game

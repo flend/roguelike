@@ -270,7 +270,7 @@ namespace RogueBasin.Spells
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Apply damage
-            player.ApplyDamageToMonster(monster, damage, true);
+            player.ApplyDamageToMonster(monster, damage, true, false);
         }
 
         public override int GetRange()

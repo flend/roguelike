@@ -33,5 +33,78 @@ namespace RogueBasin.Triggers
             train.WeekendTrainRest(Game.Dungeon.Player);
             return train;
         }
+
+        //Override again for the store message
+        public override bool CheckTrigger(int level, Point mapLocation)
+        {
+            //Check we are in the right place
+            if (CheckLocation(level, mapLocation) == false)
+            {
+                return false;
+            }
+
+            //Otherwise in the right place
+
+            //If this is the first time, give some flavour text
+            if (Triggered == false)
+            {
+                string movieName = GetIntroMovieName();
+
+                if (movieName != "")
+                    Screen.Instance.PlayMovie(movieName, false);
+            }
+
+            Triggered = true;
+
+            //We run the training regime depending on the inherited class
+
+            Dungeon dungeon = Game.Dungeon;
+
+            bool doesTraining = false;
+
+
+            if (dungeon.IsWeekday())
+            {
+
+                //Carry out training and load up the UI
+
+                Screen.Instance.TrainingTypeString = GetTrainingTypeString();
+                Screen.Instance.ClearTrainingStatsRecord();
+
+                for (int i = 0; i < 5; i++)
+                {
+                    TrainStats train = DoWeekdayTraining();
+                    Screen.Instance.AddTrainingStatsRecord(train);
+                }
+                doesTraining = true;
+            }
+            else if (dungeon.IsNormalWeekend())
+            {
+
+                Screen.Instance.TrainingTypeString = GetTrainingTypeString();
+                Screen.Instance.ClearTrainingStatsRecord();
+
+                for (int i = 0; i < 2; i++)
+                {
+                    TrainStats train = DoWeekendTraining();
+                    Screen.Instance.AddTrainingStatsRecord(train);
+                }
+                doesTraining = true;
+            }
+            else
+            {
+
+                //Adventure weekend
+                Game.MessageQueue.AddMessage("You can go to get your stuff from the store.");
+            }
+
+            if (doesTraining)
+            {
+                RunTrainingUI();
+            }
+
+            return true;
+        }
+
     }
 }

@@ -1851,7 +1851,7 @@ namespace RogueBasin
                         CombatResults results = player.AttackMonster(contents.monster);
                         if (results == CombatResults.DefenderDied)
                         {
-                            okToMoveIntoSquare = true;
+                            okToMoveIntoSquare = false;
                         }
 
                     }
@@ -1862,7 +1862,7 @@ namespace RogueBasin
                         CombatResults results = player.AttackMonster(contents.monster);
                         if (results == CombatResults.DefenderDied)
                         {
-                            okToMoveIntoSquare = true;
+                            okToMoveIntoSquare = false;
                         }
                     }
                 }
@@ -1876,6 +1876,13 @@ namespace RogueBasin
 
             //Run any entering square messages
             //Happens for both normal and special moves
+
+            //Tell the player if there are items here
+            Item itemAtSpace = ItemAtSpace(player.LocationLevel, player.LocationMap);
+            if (itemAtSpace != null)
+            {
+                Game.MessageQueue.AddMessage("There is an " + itemAtSpace.SingleItemDescription + " here");
+            }
 
             //Tell the player if there are multiple items in the square
             if (MultipleItemAtSpace(player.LocationLevel, player.LocationMap))
@@ -3417,7 +3424,7 @@ namespace RogueBasin
 
             //Drop all the player's equipped items
             //If we want to keep them I have to figure out where they get recharged
-            PutItemsInStore();
+            //PutItemsInStore();
         }
 
         /// <summary>
@@ -3466,6 +3473,9 @@ namespace RogueBasin
                 //Cancel any effect
                 player.RemoveAllEffects();
 
+                //Recharge all items
+                RechargeEquippableItems();
+
                 LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
                 Game.Dungeon.MoveToNextDate();
                 Game.Dungeon.PlayerBackToTown();
@@ -3476,6 +3486,21 @@ namespace RogueBasin
             {
                 //OK, it's the end, they're back from the prince mission one way or the other
                 EndOfGame();
+            }
+        }
+
+        /// <summary>
+        /// Recharge all items in the game
+        /// </summary>
+        private void RechargeEquippableItems()
+        {
+            Inventory inv = player.Inventory;
+
+            foreach (Item item in inv.Items)
+            {
+                IUseableItem itemU = item as IUseableItem;
+                if(itemU != null)
+                    itemU.UsedUp = false;
             }
         }
 
@@ -3523,12 +3548,12 @@ namespace RogueBasin
                 Screen.Instance.PlayMovie("endintrgreatheroine", false);
                 clearList.AddRange(Screen.Instance.GetMovieText("endintrgreatheroine"));
             }
-            else if (dungeonsCleared > 4)
+            else if (dungeonsCleared > 3)
             {
                 Screen.Instance.PlayMovie("endintrheroine", false);
                 clearList.AddRange(Screen.Instance.GetMovieText("endintrheroine"));
             }
-            else if (dungeonsCleared > 2)
+            else if (dungeonsCleared > 1)
             {
                 Screen.Instance.PlayMovie("endintradventurer", false);
                 clearList.AddRange(Screen.Instance.GetMovieText("endintradventurer"));
@@ -3556,7 +3581,7 @@ namespace RogueBasin
             string careerMovie;
             string romanceMovie;
 
-            GetCareerMovie(out careerName, out careerMovie, out romanceMovie);
+            GetCareerMovie(out careerName, out careerMovie, out romanceMovie, dungeonsCleared);
 
             List<string> careerList = new List<string>();
 
@@ -3680,12 +3705,12 @@ namespace RogueBasin
         /// </summary>
         /// <param name="careerName"></param>
         /// <returns></returns>
-        private void GetCareerMovie(out string careerName, out string careerMovie, out string romanceMovie)
+        private void GetCareerMovie(out string careerName, out string careerMovie, out string romanceMovie, int noDungeonsCleared)
         {
             Player player = Game.Dungeon.Player;
 
             //PMP
-            if (player.AttackStat > 50 && player.CharmStat > 50 && player.MagicStat > 50)
+            if (player.AttackStat > 50 && player.CharmStat > 50 && player.MagicStat > 50 && noDungeonsCleared > 3)
             {
                 careerName = "Perfect Modern Princess";
                 careerMovie = "endperfectmodernprincess";
@@ -3699,7 +3724,7 @@ namespace RogueBasin
             }
 
             //Bard
-            if (player.AttackStat > 50 && player.CharmStat > 50)
+            if (player.AttackStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 3)
             {
                 careerName = "Bard";
                 careerMovie = "endbard";
@@ -3713,7 +3738,7 @@ namespace RogueBasin
             }
 
             //Mage Diplomat
-            if (player.MagicStat > 50 && player.CharmStat > 50)
+            if (player.MagicStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 3)
             {
                 careerName = "Mage Diplomat";
                 careerMovie = "endmagediplomat";
@@ -3727,7 +3752,7 @@ namespace RogueBasin
             }
 
             //Battle Mage
-            if (player.MagicStat > 50 && player.AttackStat > 50)
+            if (player.MagicStat > 50 && player.AttackStat > 50 && noDungeonsCleared > 3)
             {
                 careerName = "Battle Mage";
                 careerMovie = "endbattlemage";
@@ -3741,7 +3766,7 @@ namespace RogueBasin
             }
 
             //Arch Mage
-            if (player.MagicStat > 120)
+            if (player.MagicStat > 120 && noDungeonsCleared > 3)
             {
                 careerName = "Archmage";
                 careerMovie = "endarchmage";
@@ -3755,7 +3780,7 @@ namespace RogueBasin
             }
 
             //Sorcerer
-            if (player.MagicStat > 75)
+            if (player.MagicStat > 75 && noDungeonsCleared > 2)
             {
                 careerName = "Sorcerer";
                 careerMovie = "endsorcerer";
@@ -3769,7 +3794,7 @@ namespace RogueBasin
             }
 
             //Great General
-            if (player.AttackStat > 120)
+            if (player.AttackStat > 120 && noDungeonsCleared > 3)
             {
                 careerName = "Great General";
                 careerMovie = "endgreatgeneral";
@@ -3783,7 +3808,7 @@ namespace RogueBasin
             }
 
             //Warrior
-            if (player.AttackStat > 75)
+            if (player.AttackStat > 75 && noDungeonsCleared > 2)
             {
                 careerName = "Warrior";
                 careerMovie = "endwarrior";
@@ -3797,7 +3822,7 @@ namespace RogueBasin
             }
 
             //Social Goddess
-            if (player.CharmStat > 120)
+            if (player.CharmStat > 120 && noDungeonsCleared > 3)
             {
                 careerName = "Social Goddess";
                 careerMovie = "endsocialgoddess";
@@ -3811,7 +3836,7 @@ namespace RogueBasin
             }
 
             //Social Goddess
-            if (player.CharmStat > 75)
+            if (player.CharmStat > 75 && noDungeonsCleared > 2)
             {
                 careerName = "Social Goddess";
                 careerMovie = "endsocialite";
@@ -3879,7 +3904,10 @@ namespace RogueBasin
             
             foreach (Item item in items)
             {
-                if (item.IsFound)
+                //Only return equippable items
+                IEquippableItem itemE = item as IEquippableItem;
+
+                if (item.IsFound && itemE != null)
                 {
                     item.InInventory = false;
                     item.LocationLevel = 0;

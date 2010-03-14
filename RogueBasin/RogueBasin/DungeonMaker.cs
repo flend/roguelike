@@ -1539,7 +1539,7 @@ namespace RogueBasin
 
             //Add his items
 
-            Items.Dagger dag = new RogueBasin.Items.Dagger();
+            Items.Glove dag = new RogueBasin.Items.Glove();
 
             rat.PickUpItem(dag);
 
@@ -2131,7 +2131,7 @@ namespace RogueBasin
 
             //Spawn a test item at level 0
 
-            //dungeon.AddItemNoChecks(new Items.Glove(), 0, dungeon.Player.LocationMap);
+            dungeon.AddItemNoChecks(new Items.Glove(), 0, dungeon.Player.LocationMap);
             dungeon.AddItemNoChecks(new Items.LeatherArmour(), 0, new Point(dungeon.Player.LocationMap.x + 1, dungeon.Player.LocationMap.y));
             dungeon.AddItemNoChecks(new Items.MetalArmour(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
             dungeon.AddItemNoChecks(new Items.GodSword(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y + 1));

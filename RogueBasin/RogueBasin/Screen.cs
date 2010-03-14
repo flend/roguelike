@@ -202,7 +202,7 @@ namespace RogueBasin {
             CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
             RootConsole.Width = Width;
             RootConsole.Height = Height;
-            RootConsole.WindowTitle = "DDRogue";
+            RootConsole.WindowTitle = "PrincessRL";
             RootConsole.Fullscreen = false;
             RootConsole.Font = fontReq;
             /*
@@ -1781,7 +1781,7 @@ namespace RogueBasin {
 
                 //Color itemColorToUse = itemColor;
 
-                if (itemSquare.InPlayerFOV)
+                if (itemSquare.InPlayerFOV || Game.Dungeon.Player.LocationLevel == 0)
                 {
                     //In FOV
                     //rootConsole.ForegroundColor = inFOVTerrainColor;

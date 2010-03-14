@@ -283,19 +283,19 @@ namespace RogueBasin
             //Damage base
 
             int damageBase;
-            if (AttackStat > 140)
+            if (AttackStat > 120)
             {
                 damageBase = 12;
             }
-            if (AttackStat > 100)
+            if (AttackStat > 80)
             {
                 damageBase = 10;
             }
-            else if (AttackStat > 60)
+            else if (AttackStat > 50)
             {
                 damageBase = 8;
             }
-            else if (AttackStat > 30)
+            else if (AttackStat > 20)
             {
                 damageBase = 6;
             }
@@ -752,7 +752,7 @@ namespace RogueBasin
         /// <returns></returns>
         public CombatResults AttackMonster(Monster monster)
         {
-            return AttackMonsterWithModifiers(monster, 0, 0, 0, 0);
+            return AttackMonsterWithModifiers(monster, 0, 0, 0, 0, false);
         }
 
         /// <summary>
@@ -760,7 +760,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="monster"></param>
         /// <returns></returns>
-        public CombatResults AttackMonsterWithModifiers(Monster monster, int hitModifierMod, int damageBaseMod, int damageModifierMod, int enemyACMod)
+        public CombatResults AttackMonsterWithModifiers(Monster monster, int hitModifierMod, int damageBaseMod, int damageModifierMod, int enemyACMod, bool specialMoveUsed)
         {
             //Do we need to recalculate combat stats?
             if (this.RecalculateCombatStatsRequired)
@@ -776,7 +776,7 @@ namespace RogueBasin
 
             int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
 
-            return ApplyDamageToMonster(monster, damage, false);
+            return ApplyDamageToMonster(monster, damage, false, specialMoveUsed);
         }
 
         /// <summary>
@@ -835,7 +835,7 @@ namespace RogueBasin
         /// <param name="monster"></param>
         /// <param name="damage"></param>
         /// <returns></returns>
-        public CombatResults ApplyDamageToMonster(Monster monster, int damage, bool magicUse)
+        public CombatResults ApplyDamageToMonster(Monster monster, int damage, bool magicUse, bool specialMove)
         {
             //Set the attacked by marker
             monster.LastAttackedBy = this;
@@ -856,7 +856,9 @@ namespace RogueBasin
 
                 //Fairly evil switch case for special attack types. Sorry, no time to do it well
                 bool monsterDead = monster.Hitpoints <= 0;
-                SpecialCombatEffectsOnMonster(monster, damage, monsterDead);
+
+                //Add HP from the glove if wielded
+                SpecialCombatEffectsOnMonster(monster, damage, monsterDead, specialMove);
 
                 //Evil: check to see if the monster is fleeing and if so, give it a chance not to
                 MonsterFightAndRunAI aiMonster = monster as MonsterFightAndRunAI;
@@ -880,6 +882,9 @@ namespace RogueBasin
 
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
+
+                    //Add HP from the glove if wieldied
+                    
 
                     //Add XP
                     AddXPPlayerAttack(monster, magicUse);
@@ -965,7 +970,7 @@ namespace RogueBasin
         /// List of special combat effects that might happen to a HIT monster
         /// </summary>
         /// <param name="monster"></param>
-        private void SpecialCombatEffectsOnMonster(Monster monster, int damage, bool isDead)
+        private void SpecialCombatEffectsOnMonster(Monster monster, int damage, bool isDead, bool specialMove)
         {
             //If short sword is equipped, do a slow down effect (EXAMPLE)
             /*
@@ -999,8 +1004,22 @@ namespace RogueBasin
                 }
             }
 
-            if (glove != null)
+            if (glove != null && specialMove)
             {
+                //The glove in PrincessRL only works on special moves
+
+                double hpGain;
+
+                if (player.AttackStat < 50)
+                    hpGain = damage / 10.0;
+                else
+                    hpGain = damage / 5.0;
+
+                GainHPFromLeech((int)Math.Ceiling(hpGain));
+                
+
+
+                /*
                 //If the monster isn't dead we get 1/5th of the HP done
                 if (!isDead)
                 {
@@ -1037,7 +1056,7 @@ namespace RogueBasin
                         if (Game.Random.Next(100) < hpChance)
                             GainHPFromLeech(1);
                     }
-                }
+                }*/
             }
         }
 
@@ -1049,8 +1068,8 @@ namespace RogueBasin
         {
             hitpoints += numHP;
 
-            if (hitpoints > OverdriveHitpoints)
-                hitpoints = OverdriveHitpoints;
+            if (hitpoints > maxHitpoints)
+                hitpoints = maxHitpoints;
 
             LogFile.Log.LogEntryDebug("Gain " + numHP + " hp from leech.", LogDebugLevel.Medium);
         }
@@ -1303,13 +1322,24 @@ namespace RogueBasin
             if (useableItem.UsedUp)
             {
                 //Remove item from inventory and don't drop on floor
-                Inventory.RemoveItem(itemToUse);
+                //Goes back into the global list and will be respawned at town
+                //Inventory.RemoveItem(itemToUse);
                 
                 //This permanently deletes it from the game
                 //Game.Dungeon.RemoveItem(itemToUse);
 
                 //If the line above is commented, the item will be returned to town. Will want to un-use it in this case
-                useableItem.UsedUp = false;
+                
+                //Only ditch the non-equippable items
+                IEquippableItem equipItem = useableItem as IEquippableItem;
+                if (equipItem == null)
+                {
+                    Inventory.RemoveItem(itemToUse);
+                }
+
+                
+
+                //useableItem.UsedUp = false;
                 
             }
 

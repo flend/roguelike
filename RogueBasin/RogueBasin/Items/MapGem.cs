@@ -88,6 +88,12 @@ namespace RogueBasin.Items
                 return false;
             }
 
+            if (usedUp)
+            {
+                Game.MessageQueue.AddMessage("You've already used the gem this adventure.");
+                return false;
+            }
+
             Game.MessageQueue.AddMessage("You rub the map gem...");
 
             //This maps the level

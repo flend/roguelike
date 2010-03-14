@@ -162,7 +162,7 @@ namespace RogueBasin.SpecialMoves
             if (moveCounter > 5)
                 bonus = 5;
 
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0);
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
 
             moveCounter = 0;
             moveReady = false;

@@ -85,10 +85,15 @@ namespace RogueBasin.Items
             //Not in a dungeon
             if (player.LocationLevel < 2)
             {
-                Game.MessageQueue.AddMessage("You want to save your items for the dungeon");
+                Game.MessageQueue.AddMessage("You want to save your items for the dungeon.");
                 return false;
             }
 
+            if (usedUp)
+            {
+                Game.MessageQueue.AddMessage("You've already used the potion this adventure.");
+                return false;
+            }
             Game.MessageQueue.AddMessage("You drink the healing potion and the warming liquid sloshes down your throat.");
 
             //Apply the healing effect to the player
@@ -117,7 +122,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Glove unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Healing potion unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>

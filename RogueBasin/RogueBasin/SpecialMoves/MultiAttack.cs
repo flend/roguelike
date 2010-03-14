@@ -220,7 +220,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("Multi Attack!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0);
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
              
             //Give the player a small speed boost
             if (bonus <= 5)

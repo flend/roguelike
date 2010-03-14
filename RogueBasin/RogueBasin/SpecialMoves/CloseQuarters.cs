@@ -109,7 +109,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("CloseQuarters!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, noCardinals, 0, noCardinals, 0);
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, noCardinals, 0, noCardinals, 0, true);
 
             moveCounter = 0;
 
