@@ -101,6 +101,14 @@ namespace RogueBasin.Triggers
                         Screen.Instance.PlayMovie(thisMove.MovieRoot(), false);
 
                         Game.MessageQueue.AddMessage("You learn a new combat move: " + thisMove.MoveName() + "!");
+
+                        //Hack for wallvalt
+                        SpecialMoves.VaultBackstab backStab = thisMove as SpecialMoves.VaultBackstab;
+                        if (backStab != null)
+                        {
+                            dungeon.LearnMove(new SpecialMoves.WallVault());
+                        }
+
                         dungeon.MoveToNextDate();
                         //Teleport the user back to the start location
                         Game.Dungeon.PlayerBackToTown();

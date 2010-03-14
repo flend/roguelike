@@ -7,7 +7,7 @@ namespace RogueBasin.SpecialMoves
     /// <summary>
     /// This move is learnt with VaultBackstab and provides the initial move before the backstab
     /// </summary>
-    public class WallVault : SpecialMove
+    public class WallLeap : SpecialMove
     {
         //Really private, accessors for serialization only
 
@@ -18,7 +18,10 @@ namespace RogueBasin.SpecialMoves
 
         Point squareToMoveTo;
 
-        public WallVault()
+        Monster target = null; //doesn't need to be serialized
+        int leapDistance = 0;
+
+        public WallLeap()
         {
             squareToMoveTo = new Point(0, 0);
         }
@@ -48,47 +51,22 @@ namespace RogueBasin.SpecialMoves
                 if (pushTerrain != MapTerrain.Wall && pushTerrain != MapTerrain.ClosedDoor)
                 {
                     moveCounter = 0;
+                    LogFile.Log.LogEntryDebug("Wall leap: No wall to push off", LogDebugLevel.Medium);
                     return false;
                 }
 
                 //Is wall
-                
-                //Success
-                moveCounter = 1;
 
-                //Need to remember the direction of the first push, since we can only vault opposite this
                 xDelta = locationAfterMove.x - player.LocationMap.x;
                 yDelta = locationAfterMove.y - player.LocationMap.y;
 
-                LogFile.Log.LogEntryDebug("Wall vault stage 1", LogDebugLevel.Medium);
-
-                return true;                   
-            }
-
-            //Second move
-
-            if (moveCounter == 1)
-            {
-                //Only implementing this for player for now!
-
-                //Check that this direction opposes the initial push
-
-                int secondXDelta = locationAfterMove.x - player.LocationMap.x;
-                int secondYDelta = locationAfterMove.y - player.LocationMap.y;
-
-                if (secondXDelta != -xDelta || secondYDelta != -yDelta)
-                {
-                    //Reset
-
-                    moveCounter = 0;
-                    return false;
-                }
-
-                //OK, going in right direction
+                int xReverseDelta = -xDelta;
+                int yReverseDelta = -yDelta;
 
                 //Need to check what's ahead of the player
 
-                //Empty squares, can jump 2
+                //Monster 1 square away is no good, monster several squares away is good
+
                 Map thisMap = dungeon.Levels[player.LocationLevel];
 
                 //We run forward until we find a square to jump to
@@ -99,8 +77,8 @@ namespace RogueBasin.SpecialMoves
 
                 do
                 {
-                    int squareX = player.LocationMap.x + secondXDelta * loopCounter;
-                    int squareY = player.LocationMap.y + secondYDelta * loopCounter;
+                    int squareX = player.LocationMap.x + xReverseDelta * loopCounter;
+                    int squareY = player.LocationMap.y + yReverseDelta * loopCounter;
 
                     //Off the map
                     if (squareX < 0 || squareX > thisMap.width)
@@ -114,7 +92,6 @@ namespace RogueBasin.SpecialMoves
                         return false;
                     }
 
-                    
                     MapTerrain squareTerrain = thisMap.mapSquares[squareX, squareY].Terrain;
                     SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(squareX, squareY));
 
@@ -125,18 +102,48 @@ namespace RogueBasin.SpecialMoves
                         return false;
                     }
 
-                    //Is there no monster here? If so, this is our destination
-                    if (squareContents.monster == null)
+                    //Too far
+                    if (loopCounter == 6)
                     {
-                        squareToMoveTo = new Point(squareX, squareY);
-                        moveCounter = 2;
-                        break;
+                        LogFile.Log.LogEntryDebug("Wall leap: too far to monster - fail", LogDebugLevel.Medium);
+                        return false;
+
                     }
 
-                    //Monster here? Keep looping until we hit an empty or something bad
+                    //First loop, a monster is a problem
+
+                    if (loopCounter == 1 && squareContents.monster != null)
+                    {
+                        LogFile.Log.LogEntryDebug("Wall leap: Monster in first position - fail", LogDebugLevel.Medium);
+                        return false;
+                    }
+
+                    if (loopCounter > 1)
+                    {
+                        //Find monster to attack
+                        if (squareContents.monster != null)
+                        {
+                            target = squareContents.monster;
+
+                            //Distance jumped is the bonus
+                            leapDistance = loopCounter - 1;
+
+                            //Square to move to is the penultimate square
+                            squareToMoveTo = new Point(player.LocationMap.x + xReverseDelta * (loopCounter - 1), player.LocationMap.y + yReverseDelta * (loopCounter - 1));
+                            break;
+                        }
+                    }
+                    //No monster? Keep looping until we find one
 
                     loopCounter++;
                 } while (true);
+
+                //Success
+                moveCounter = 1;
+
+                LogFile.Log.LogEntryDebug("Wall leap: stage 1 complete", LogDebugLevel.Medium);
+
+                return true;                   
             }
 
             return true;
@@ -145,28 +152,42 @@ namespace RogueBasin.SpecialMoves
         private void NoWhereToJumpFail()
         {
             moveCounter = 0;
-            LogFile.Log.LogEntry("WallVault failed due to nowhere to jump to");
+            LogFile.Log.LogEntry("Wall Leap: failed due to nowhere to jump to");
         }
 
         public override bool MoveComplete()
         {
-            if (moveCounter == 2)
+            if (moveCounter == 1)
                 return true;
             return false;
         }
 
         public override void DoMove(Point locationAfterMove)
         {
+            //Attack the monster with bonuses
+            Game.MessageQueue.AddMessage("Wall Leap!");
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, leapDistance + 1, 0, leapDistance + 1, 0, true);
+
             //Move the PC to the new location
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
+            /*
+            //Move into their square if the monster dies as normal
+            
+            bool okToMoveIntoSquare = false;
+            if (results == CombatResults.DefenderDied)
+            {
+                okToMoveIntoSquare = true;
+            }
+
+
+            if (okToMoveIntoSquare)
+            {
+                Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
+            }*/
+            
             moveCounter = 0;
 
-            //Give the player a small speed up
-            //Seems to mean you get a free attack about 1 time in 2
-            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 50, 150));
-
-            LogFile.Log.LogEntry("Wall vault complete");
-            Game.MessageQueue.AddMessage("Wall Vault!");
+            LogFile.Log.LogEntry("Wall leap complete");
         }
 
         public override void ClearMove()
@@ -176,22 +197,22 @@ namespace RogueBasin.SpecialMoves
 
         public override string MovieRoot()
         {
-            return "wallvault";
+            return "wallleap";
         }
 
         public override string MoveName()
         {
-            return "Wall Vault";
+            return "Wall Leap";
         }
 
         public override string Abbreviation()
         {
-            return "WlVt";
+            return "WlLp";
         }
 
         public override int TotalStages()
         {
-            return 2;
+            return 1;
         }
 
         public override int CurrentStage()
@@ -201,7 +222,7 @@ namespace RogueBasin.SpecialMoves
 
         public override int GetRequiredCombat()
         {
-            return 9999;
+            return 60;
         }
     }
 }

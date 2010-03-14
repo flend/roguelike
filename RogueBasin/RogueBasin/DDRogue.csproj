@@ -295,8 +295,11 @@
     <Compile Include="SpecialMoves\OpenSpaceAttack.cs" />
     <Compile Include="SpecialMoves\StunBox.cs" />
     <Compile Include="SpecialMoves\VaultBackstab.cs" />
+    <Compile Include="SpecialMoves\WallLeap.cs" />
     <Compile Include="SpecialMoves\WallPush.cs" />
-    <Compile Include="SpecialMoves\WallVault.cs" />
+    <Compile Include="SpecialMoves\WallVault.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Spell.cs" />
     <Compile Include="Spells\Blink.cs">
       <SubType>Code</SubType>
@@ -587,5 +590,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\dragonlevel.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\wallleap0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\wallleap1.amf" />
   </ItemGroup>
 </Project>

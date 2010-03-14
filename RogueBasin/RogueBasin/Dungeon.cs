@@ -720,6 +720,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.ChargeAttack());
             //specialMoves.Add(new SpecialMoves.StunBox());
             //specialMoves.Add(new SpecialMoves.WallPush());
+            specialMoves.Add(new SpecialMoves.WallLeap());
             specialMoves.Add(new SpecialMoves.WallVault());
             specialMoves.Add(new SpecialMoves.VaultBackstab());
             specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
@@ -4133,5 +4134,6 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Respawning dungeon level " + dungeonID, LogDebugLevel.Medium);
         }
+
     }
 }

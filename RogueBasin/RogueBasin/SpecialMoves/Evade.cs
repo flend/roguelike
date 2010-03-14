@@ -44,6 +44,36 @@ namespace RogueBasin.SpecialMoves
                     return false;
                 }
 
+                //Must be next to a monster
+                int deltaX = -1;
+                int deltaY = -1;
+
+                int isMonster = 0;
+
+                if(IsMonster(-1, -1))
+                    isMonster++;
+
+                if (IsMonster(-1, 0))
+                    isMonster++;
+                if (IsMonster(-1, 1))
+                    isMonster++;
+                if (IsMonster(0, -1))
+                    isMonster++;
+                if (IsMonster(0, 1))
+                    isMonster++;
+                if (IsMonster(1, -1))
+                    isMonster++;
+                if (IsMonster(1, 0))
+                    isMonster++;
+                if (IsMonster(1, 1))
+                    isMonster++;
+
+                if (isMonster == 0)
+                {
+                    LogFile.Log.LogEntryDebug("Evade not started - no monster", LogDebugLevel.Medium);
+                    return false;
+                }
+
                 //Otherwise we're on
                 moveCounter = 1;
                 LogFile.Log.LogEntryDebug("Evade started", LogDebugLevel.Medium);
@@ -143,6 +173,33 @@ namespace RogueBasin.SpecialMoves
             return true;
         }
 
+        /// <summary>
+        /// Return 1 if next to a monster
+        /// </summary>
+        /// <returns></returns>
+        private bool IsMonster(int directionX, int directionY)
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            int squareX = player.LocationMap.x + directionX;
+            int squareY = player.LocationMap.y + directionY;
+
+            Map thisMap = dungeon.Levels[player.LocationLevel];
+
+            if (squareX < 0 || squareX >= thisMap.width || squareY < 0 || squareY >= thisMap.height)
+            {
+                return false;
+            }
+
+            SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(squareX, squareY));
+
+            if (squareContents.monster != null)
+                return true;
+            else
+                return false;
+        }
+
         private void FailBlocked()
         {
             moveCounter = 0;
@@ -164,6 +221,7 @@ namespace RogueBasin.SpecialMoves
 
         public override void DoMove(Point locationAfterMove)
         {
+
             //Move the PC to the new location
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
             moveCounter = 0;
