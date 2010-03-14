@@ -1937,7 +1937,11 @@ namespace RogueBasin
                 //What level are we on
                 int levelType = player.LocationLevel - 2;
                 int levelMod = levelType % 4;
-
+                
+                if (levelMod == 1)
+                {
+                    //Don't do anything
+                }
                 if (levelMod == 2)
                 {
                     dungeonInfo.SetL3UniqueDead(player.CurrentDungeon);
@@ -3248,7 +3252,7 @@ namespace RogueBasin
                     }
 
                     //Check if this class of creature can be charmed or passified
-                    if (!monster.CanBeCharmed())// && !monster.CanBePassified())
+                    if (!monster.CanBeCharmed() || monster.GetCharmRes() >= player.CharmPoints)// && !monster.CanBePassified())
                     {
                         Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " laughs at your feeble attempt.");
                         return true;
@@ -3283,14 +3287,21 @@ namespace RogueBasin
 
                     //Test against statistic here
                     int monsterRes = monster.GetCharmRes();
-                    int charmRoll = Game.Random.Next(player.CharmStat);
+                    int charmRoll = Game.Random.Next(player.CharmPoints);
 
                     LogFile.Log.LogEntryDebug("Charm attempt. Res: " + monsterRes + " Roll: " + charmRoll, LogDebugLevel.Medium);
 
                     if (charmRoll < monsterRes)
                     {
                         //Charm not successful
-                        string msg = "The " + monster.SingleDescription + " does not look convinced by your overtures.";
+                        string msg;
+                        
+                        int chance = Game.Random.Next(100);
+
+                        if(chance < 50)
+                            msg  = "The " + monster.SingleDescription + " does not look convinced by your overtures.";
+                        else
+                            msg = "The " + monster.SingleDescription + " ignores you and attacks.";
 
                         Game.MessageQueue.AddMessage(msg);
                         return true;
@@ -3301,10 +3312,17 @@ namespace RogueBasin
                  //   if (canCharm)
                 //    {
                     //Should be possible at this point
-                    player.AddCharmCreatureIfPossible();    
-
-                        string msg2 = "The " + monster.SingleDescription + " looks at you lovingly.";
-
+                    player.AddCharmCreatureIfPossible();
+                    
+                        int chance2 = Game.Random.Next(100);
+                    
+                        string msg2;
+                        if(chance2 < 30)
+                            msg2 = "The " + monster.SingleDescription + " looks at you lovingly.";
+                        else if (chance2 < 65)
+                            msg2 = "The " + monster.SingleDescription + " can't resist your charms.";
+                        else
+                            msg2 = "The " + monster.SingleDescription + " is all over you.";
                         Game.MessageQueue.AddMessage(msg2);
                         contents.monster.CharmCreature();
 
@@ -3486,6 +3504,7 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
                 Game.Dungeon.MoveToNextDate();
                 Game.Dungeon.PlayerBackToTown();
+                SyncStatsWithTraining();
 
                 Player.CurrentDungeon = -1;
             }
@@ -3924,7 +3943,7 @@ namespace RogueBasin
         }
 
         Point storeTL = new Point(33, 2);
-        Point storeBR = new Point(39, 3);
+        Point storeBR = new Point(40, 3);
 
         /// <summary>
         /// Put all the user's items in the store
@@ -3958,6 +3977,7 @@ namespace RogueBasin
                     if (xLoc > storeBR.x)
                     {
                         yLoc++;
+                        xLoc = storeTL.x;
                     }
 
                     if (yLoc > storeBR.y)

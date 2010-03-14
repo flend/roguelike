@@ -1,26 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Tough high end demon
+    /// Medium threat, faster than normal
     /// </summary>
-    public class Overlord : MonsterFightAndRunAI
+    public class SkeletonUnique : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 35;
+        const int classDeltaHitpoints = 20;
+        const int classMinHitpoints = 25;
 
         public string UniqueName { get; set; }
 
-        public Overlord()
+        public SkeletonUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 90;
+            Speed = 110;
 
+            Unique = true;
+            UniqueName = "Daphill the Dry";
+        }
+
+        public override Monster NewCreatureOfThisType()
+        {
+            return new SkeletonUnique();
         }
 
         public override void InventoryDrop()
@@ -40,7 +46,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 18;
+            return 14;
         }
 
         /// <summary>
@@ -48,7 +54,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 8;
         }
 
         /// <summary>
@@ -56,88 +62,77 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 2;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 10;
+            return 5;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "overlord"; } }
+        public override string SingleDescription { get { return UniqueName; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "overlords"; } }
+        public override string GroupDescription { get { return "skeleton"; } }
 
         protected override char GetRepresentation()
         {
-            return 'O';
+            return 'S';
         }
 
         protected override int GetChanceToRecover()
         {
-            return 10;
+            return 20;
         }
 
         protected override int GetChanceToFlee()
         {
-            return 0;
+            return 50;
         }
 
         protected override int GetMaxHPWillFlee()
         {
-            return Hitpoints;
+            return MaxHitpoints / 2;
         }
-
         public override int CreatureCost()
         {
-            return 250;
+            return 35;
         }
 
         public override int CreatureLevel()
         {
-            return 6;
-        }
-
-        public override Monster NewCreatureOfThisType()
-        {
-            return new Creatures.Overlord();
-        }
-
-        public override Color CreatureColor()
-        {
-            return ColorPresets.Yellow;
-        }
-
-        public override int GetCombatXP()
-        {
-            return 120;
+            return 4;
         }
 
         public override int GetMagicXP()
         {
-            return 120;
+            return 50;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 50;
         }
 
         public override int GetMagicRes()
         {
-            return 60;
+            return 50;
         }
 
         public override int GetCharmRes()
         {
-            return 120;
+            return 0;
         }
 
         public override bool CanBeCharmed()
         {
-            return true;
+            return false;
         }
     }
 }

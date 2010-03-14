@@ -96,6 +96,7 @@ namespace RogueBasin
 
             if (AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit)
             {
+                Monster targetMonster = currentTarget as Monster;
 
                 //Fleeing
                 //Check we have a valid target (may not after reload)
@@ -107,6 +108,13 @@ namespace RogueBasin
                 //Is target yet living?
                 else if (currentTarget.Alive == false)
                 {
+                    //If not, go to non-chase state
+                    AIState = SimpleAIStates.RandomWalk;
+                }
+                                        //Charmed creatures should stop attacking other charmed creatures
+                else if (Charmed && targetMonster != null && targetMonster.Charmed)
+                {
+
                     //If not, go to non-chase state
                     AIState = SimpleAIStates.RandomWalk;
                 }
@@ -137,7 +145,6 @@ namespace RogueBasin
                     ChaseCreature(currentTarget);
                     return;
                 }
-
             }
             
             //Check: now no drop through from chasecreature() call above

@@ -175,10 +175,11 @@ namespace RogueBasin
 
             //Debug
             
-            //AttackStat = 70;
+            AttackStat = 40;
+            MagicStat = 100;
             HitpointsStat = 60;
             MaxHitpointsStat = 60;
-            MagicStat = 100;
+            CharmStat = 120;
         }
 
         private void SetupInitialHP()
@@ -319,17 +320,17 @@ namespace RogueBasin
                 ArmourClassAccess += 3;
                 Screen.Instance.PCColor = ColorPresets.BurlyWood;
             }
-            else if (inv.ContainsItem(new Items.PrettyDress()))
-            {
-                CharmPoints += 20;
-                ArmourClassAccess += 1;
-                Screen.Instance.PCColor = ColorPresets.BlueViolet;
-            }
             else if (inv.ContainsItem(new Items.KnockoutDress()))
             {
                 CharmPoints += 40;
                 ArmourClassAccess += 3;
                 Screen.Instance.PCColor = ColorPresets.Yellow;
+            }
+            else if (inv.ContainsItem(new Items.PrettyDress()))
+            {
+                CharmPoints += 20;
+                ArmourClassAccess += 1;
+                Screen.Instance.PCColor = ColorPresets.BlueViolet;
             }
 
             //Consider equipped weapons (only 1 will work)
@@ -734,7 +735,13 @@ namespace RogueBasin
             }
 
             //Check we are in target
-            if (toCast.NeedsTarget() && Game.Dungeon.GetDistanceBetween(LocationMap, target) > toCast.GetRange())
+            int range = toCast.GetRange();
+            if (Inventory.ContainsItem(new Items.ExtendOrb()))
+            {
+                range += 1;
+            }
+
+            if (toCast.NeedsTarget() && Game.Dungeon.GetDistanceBetween(LocationMap, target) > range)
             {
                 Game.MessageQueue.AddMessage("Out of range!");
                 LogFile.Log.LogEntryDebug("Out of range for " + toCast.SpellName(), LogDebugLevel.Medium);

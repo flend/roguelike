@@ -6,20 +6,24 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Tough high end demon
+    /// Low threat, runs away easily. Poor eyesight.
     /// </summary>
-    public class Overlord : MonsterFightAndRunAI
+    public class FerretUnique : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 15;
-        const int classMinHitpoints = 35;
+        const int classDeltaHitpoints = 12;
+        const int classMinHitpoints = 5;
 
         public string UniqueName { get; set; }
 
-        public Overlord()
+        public FerretUnique()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 90;
+            NormalSightRadius = 4;
+            Speed = 200;
+            
+            Unique = true;
+            UniqueName = "Cyril the Ferret";
 
         }
 
@@ -40,7 +44,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 18;
+            return 5;
         }
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 2;
         }
 
         /// <summary>
@@ -56,28 +60,28 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageModifier()
         {
-            return 2;
+            return 0;
         }
 
         public override int HitModifier()
         {
-            return 10;
+            return 0;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "overlord"; } }
+        public override string SingleDescription { get { return UniqueName; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "overlords"; } }
+        public override string GroupDescription { get { return "ferrets"; } }
 
         protected override char GetRepresentation()
         {
-            return 'O';
+            return 'f';
         }
 
         protected override int GetChanceToRecover()
@@ -87,7 +91,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetChanceToFlee()
         {
-            return 0;
+            return 75;
         }
 
         protected override int GetMaxHPWillFlee()
@@ -97,47 +101,47 @@ namespace RogueBasin.Creatures
 
         public override int CreatureCost()
         {
-            return 250;
+            return 10;
         }
 
         public override int CreatureLevel()
         {
-            return 6;
+            return 1;
         }
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Creatures.Overlord();
+            return new Ferret();
         }
 
         public override Color CreatureColor()
         {
-            return ColorPresets.Yellow;
+            return ColorPresets.WhiteSmoke;
         }
 
         public override int GetCombatXP()
         {
-            return 120;
+            return 10;
         }
 
         public override int GetMagicXP()
         {
-            return 120;
+            return 10;
         }
 
         public override int GetMagicRes()
         {
-            return 60;
+            return 0;
         }
 
         public override int GetCharmRes()
         {
-            return 120;
+            return 5;
         }
 
         public override bool CanBeCharmed()
         {
-            return true;
+            return false;
         }
     }
 }

@@ -56,6 +56,7 @@ namespace RogueBasin.Triggers
 
             Game.Dungeon.MoveToNextDate();
             Game.Dungeon.PlayerBackToTown();
+            Game.Dungeon.SyncStatsWithTraining();
 
             return true;
         }

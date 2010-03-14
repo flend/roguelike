@@ -146,13 +146,13 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Gold;
+            return ColorPresets.Magenta;
         }
 
 
         protected override char GetRepresentation()
         {
-            return '8';
+            return (char)233;
         }
 
         public int ArmourClassModifier()

@@ -65,9 +65,11 @@
     <Compile Include="Creatures\Faerie.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\FaerieUnique.cs" />
     <Compile Include="Creatures\Ferret.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\FerretUnique.cs" />
     <Compile Include="Creatures\Friend.cs" />
     <Compile Include="Creatures\Ghoul.cs">
       <SubType>Code</SubType>
@@ -123,7 +125,10 @@
     </Compile>
     <Compile Include="Creatures\RatUnique.cs" />
     <Compile Include="Creatures\SkeletalArcher.cs" />
-    <Compile Include="Creatures\Skeleton.cs" />
+    <Compile Include="Creatures\Skeleton.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\SkeletonUnique.cs" />
     <Compile Include="Creatures\Spider.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -168,6 +173,7 @@
     <Compile Include="Items\Bracer.cs" />
     <Compile Include="Items\Band.cs" />
     <Compile Include="Items\Dagger.cs" />
+    <Compile Include="Items\ExtendOrb.cs" />
     <Compile Include="Items\Flint.cs" />
     <Compile Include="Items\GlassGem.cs" />
     <Compile Include="Items\Glove.cs">
@@ -212,7 +218,9 @@
     <Compile Include="Items\PrettyDress.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Items\RestoreOrb.cs" />
+    <Compile Include="Items\RestoreOrb.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Items\Sash.cs" />
     <Compile Include="Items\ShortSword.cs">
       <SubType>Code</SubType>
