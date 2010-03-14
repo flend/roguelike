@@ -148,9 +148,6 @@
   <data name="enterDungeon0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\bin\Debug\movies\enterDungeon0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="enterDungeonAgain" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\bin\Debug\movies\enterDungeonAgain.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="enterDungeonAgain0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\bin\Debug\movies\enterDungeonAgain0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

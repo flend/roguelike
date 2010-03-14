@@ -166,13 +166,6 @@ namespace RogueBasin.Properties {
             }
         }
         
-        internal static byte[] enterDungeonAgain {
-            get {
-                object obj = ResourceManager.GetObject("enterDungeonAgain", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
         internal static byte[] enterDungeonAgain0 {
             get {
                 object obj = ResourceManager.GetObject("enterDungeonAgain0", resourceCulture);

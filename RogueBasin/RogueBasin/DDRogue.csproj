@@ -414,7 +414,6 @@
     <EmbeddedResource Include="bin\Debug\movies\crushLichGem0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\deadFriendEnding0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\enterDungeon0.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\enterDungeonAgain.amf" />
     <EmbeddedResource Include="bin\Debug\movies\enterDungeonAgain0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\evade0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\evade1.amf" />
