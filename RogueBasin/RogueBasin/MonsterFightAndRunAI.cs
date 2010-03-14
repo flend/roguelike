@@ -745,7 +745,7 @@ namespace RogueBasin
 
         protected override string MissesPlayerCombatString()
         {
-            return "The " + this.SingleDescription + " hits you.";
+            return "The " + this.SingleDescription + " misses you.";
         }
 
         protected override string HitsMonsterCombatString(Monster target)
@@ -755,7 +755,7 @@ namespace RogueBasin
 
         protected override string MissesMonsterCombatString(Monster target)
         {
-            return "The " + this.SingleDescription + " hits the " + target.SingleDescription + ".";
+            return "The " + this.SingleDescription + " misses the " + target.SingleDescription + ".";
         }
 
         public override bool CanBeCharmed()

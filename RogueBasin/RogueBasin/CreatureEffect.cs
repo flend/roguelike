@@ -23,5 +23,8 @@ namespace RogueBasin
 
         public virtual int HitModifier() { return 0; }
 
+        public virtual int SpeedModifier() { return 0; }
+
+
     }
 }

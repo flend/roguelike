@@ -45,10 +45,10 @@ namespace RogueBasin.SpecialMoves
 
             if (moveCounter == 0)
             {
-                //Must be wall
-                MapTerrain pushTerrain = dungeon.Levels[player.LocationLevel].mapSquares[locationAfterMove.x, locationAfterMove.y].Terrain;
+                //Must be non-walkable to push off
+                bool pushTerrainWalkable = dungeon.Levels[player.LocationLevel].mapSquares[locationAfterMove.x, locationAfterMove.y].Walkable;
 
-                if (pushTerrain != MapTerrain.Wall && pushTerrain != MapTerrain.ClosedDoor)
+                if (pushTerrainWalkable)
                 {
                     moveCounter = 0;
                     LogFile.Log.LogEntryDebug("Wall leap: No wall to push off", LogDebugLevel.Medium);

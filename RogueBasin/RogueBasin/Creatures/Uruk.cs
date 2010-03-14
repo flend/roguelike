@@ -41,7 +41,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 13;
+            return 15;
         }
 
         /// <summary>

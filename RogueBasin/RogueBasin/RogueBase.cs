@@ -446,6 +446,21 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
+                                case 'M':
+                                    //Learn all moves
+                                    Game.Dungeon.LearnMove(new SpecialMoves.CloseQuarters());
+                                    Game.Dungeon.LearnMove(new SpecialMoves.ChargeAttack());
+                                    Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
+                                    Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
+                                    Game.Dungeon.LearnMove(new SpecialMoves.WallLeap());
+                                    Game.MessageQueue.AddMessage("Learnt all moves.");
+                                    //Game.Dungeon.PlayerLearnsAllSpells();
+                                    //Game.MessageQueue.AddMessage("Learnt all spells.");
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+
+
                                 case 's':
                                     //Show movies
                                     SetSpecialMoveMovieScreen();

@@ -429,6 +429,9 @@ namespace RogueBasin
 
             for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
             {
+
+                //Spawn bonus potions
+
                 int totalPotions = 1 + Game.Random.Next(3);
 
                 for (int j = 0; j < totalPotions; j++)
@@ -437,15 +440,29 @@ namespace RogueBasin
 
                     Item potion;
 
-                    if (randomChance < 45)
-                        potion = new Items.Potion();
-                    else if (randomChance < 70)
-                        potion = new Items.PotionMPRestore();
-                    else if (randomChance < 85)
+                    if (randomChance < 50)
                         potion = new Items.PotionDamUp();
                     else 
                         potion = new Items.PotionToHitUp();
                  
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+
+                //Spawn restore / heal potions
+
+                totalPotions = 1 + Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 50)
+                        potion = new Items.Potion();
+                    else
+                        potion = new Items.PotionMPRestore();
+
                     PlaceItemOnLevel(potion, i, 50);
                 }
             }
@@ -461,7 +478,10 @@ namespace RogueBasin
 
             for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
             {
-                int totalPotions = 1 + Game.Random.Next(2);
+
+                //Spawn bonus potions
+
+                int totalPotions = 1 + Game.Random.Next(3);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -469,15 +489,29 @@ namespace RogueBasin
 
                     Item potion;
 
-                    if (randomChance < 35)
-                        potion = new Items.Potion();
-                    else if (randomChance < 60)
-                        potion = new Items.PotionMPRestore();
-                    else if (randomChance < 80)
+                    if (randomChance < 50)
                         potion = new Items.PotionSpeedUp();
                     else
                         potion = new Items.PotionSightUp();
-                   
+
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+
+                //Spawn restore / heal potions
+
+                totalPotions = Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 50)
+                        potion = new Items.Potion();
+                    else
+                        potion = new Items.PotionMPRestore();
+
                     PlaceItemOnLevel(potion, i, 50);
                 }
             }
@@ -493,7 +527,10 @@ namespace RogueBasin
 
             for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
             {
-                int totalPotions = Game.Random.Next(3);
+
+                //Spawn bonus potions
+
+                int totalPotions = Game.Random.Next(2);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -501,14 +538,28 @@ namespace RogueBasin
 
                     Item potion;
 
-                    if (randomChance < 15)
-                        potion = new Items.Potion();
-                    else if (randomChance < 70)
-                        potion = new Items.PotionMPRestore();
-                    else if (randomChance < 85)
+                    if (randomChance < 50)
                         potion = new Items.PotionSpeedUp();
                     else
                         potion = new Items.PotionSightUp();
+
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+
+                //Spawn restore / heal potions
+
+                totalPotions = 1 + Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 35)
+                        potion = new Items.Potion();
+                    else
+                        potion = new Items.PotionMPRestore();
 
                     PlaceItemOnLevel(potion, i, 50);
                 }
@@ -2176,10 +2227,11 @@ namespace RogueBasin
             Point uniqLoc = PlaceMonster(uniqueLevel, rat);
 
             //Spawn in with a random number of rats
-            int noOrc = 3 + Game.Random.Next(2);
-            int noUruk = 2 + Game.Random.Next(2);
+            int noBugbear = 3 + Game.Random.Next(2);
+            int noUruk = 2 + Game.Random.Next(3);
+            int noOrcShaman = 1 + Game.Random.Next(1);
 
-            for (int i = 0; i < noOrc; i++)
+            for (int i = 0; i < noBugbear; i++)
             {
                 do
                 {
@@ -2189,7 +2241,7 @@ namespace RogueBasin
                         location = dungeon.RandomWalkablePointInLevel(i);
                         loopCount++;
                     } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
-                } while (!dungeon.AddMonster(new Creatures.Orc(), uniqueLevel, location));
+                } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location));
             }
 
             for (int i = 0; i < noUruk; i++)
@@ -2203,6 +2255,18 @@ namespace RogueBasin
                         loopCount++;
                     } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
                 } while (!dungeon.AddMonster(new Creatures.Uruk(), uniqueLevel, location));
+            }
+            for (int i = 0; i < noOrcShaman; i++)
+            {
+                do
+                {
+                    loopCount = 0;
+                    do
+                    {
+                        location = dungeon.RandomWalkablePointInLevel(i);
+                        loopCount++;
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                } while (!dungeon.AddMonster(new Creatures.OrcShaman(), uniqueLevel, location));
             }
 
             //Add his items
@@ -2218,9 +2282,22 @@ namespace RogueBasin
             uniqLoc = PlaceMonster(uniqueLevel, gobbo);
 
             //Spawn in with a random number of ferrets & goblins
-            noOrc = 6 + Game.Random.Next(2);
-            int noOrcShaman = 2 + Game.Random.Next(2);
+            int noOrc = 6 + Game.Random.Next(6);
+            noBugbear = 3 + Game.Random.Next(2);
+            noOrcShaman = 2 + Game.Random.Next(2);
 
+            for (int i = 0; i < noBugbear; i++)
+            {
+                do
+                {
+                    loopCount = 0;
+                    do
+                    {
+                        location = dungeon.RandomWalkablePointInLevel(i);
+                        loopCount++;
+                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < 50);
+                } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location));
+            }
 
             for (int i = 0; i < noOrc; i++)
             {

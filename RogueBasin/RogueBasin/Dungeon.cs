@@ -1938,11 +1938,11 @@ namespace RogueBasin
                 int levelType = player.LocationLevel - 2;
                 int levelMod = levelType % 4;
 
-                if (levelMod == 3)
+                if (levelMod == 2)
                 {
                     dungeonInfo.SetL3UniqueDead(player.CurrentDungeon);
                 }
-                else if(levelMod == 4) {
+                else if(levelMod == 3) {
                     dungeonInfo.SetL4UniqueDead(player.CurrentDungeon);
                 }
                 else {
@@ -3477,6 +3477,9 @@ namespace RogueBasin
                 //Recharge all items
                 RechargeEquippableItems();
 
+                //Put found items that were too much for inventory in store
+                PutItemsNotInInventoryInStore();
+
                 //Remove all inventory items
                 RemoveInventoryItems();
 
@@ -3943,6 +3946,56 @@ namespace RogueBasin
             {
                 //Only return equippable items
                 IEquippableItem itemE = item as IEquippableItem;
+
+                if (item.IsFound && itemE != null)
+                {
+                    item.InInventory = false;
+                    item.LocationLevel = 0;
+                    item.LocationMap = new Point(xLoc, yLoc);
+
+                    xLoc++;
+
+                    if (xLoc > storeBR.x)
+                    {
+                        yLoc++;
+                    }
+
+                    if (yLoc > storeBR.y)
+                    {
+                        //Run out of room - shouldn't happen
+                        LogFile.Log.LogEntryDebug("Run out of room in store for items!", LogDebugLevel.High);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Put all the user's items in the store
+        /// </summary>
+        public void PutItemsNotInInventoryInStore()
+        {
+            //Drop all the items from the player.
+            //This returns them to the master list in Dungeon
+            //Game.Dungeon.player.RemoveAllItems();
+
+            //Reset the player's appearance
+            Screen.Instance.PCColor = defaultPCColor;
+
+            //Place all the found objects in the store room
+            int xLoc = storeTL.x;
+            int yLoc = storeTL.y;
+
+            foreach (Item item in items)
+            {
+
+
+                //Only return equippable items
+                IEquippableItem itemE = item as IEquippableItem;
+
+                //Already in inventory? Don't bother
+                if (player.Inventory.ContainsItem(item))
+                    continue;
 
                 if (item.IsFound && itemE != null)
                 {

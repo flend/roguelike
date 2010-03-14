@@ -174,7 +174,9 @@ namespace RogueBasin
             MagicStat = 10;
 
             //Debug
-            AttackStat = 100;
+            
+            AttackStat = 60;
+            HitpointsStat = 70;
            // MagicStat = 100;
         }
 
@@ -559,7 +561,7 @@ namespace RogueBasin
 
             bool toHitEffectOn = false;
             bool toDamageEffectOn = false;
-            //bool speedEffectOn = false;
+            bool speedEffectOn = false;
 
             foreach (PlayerEffect effect in effects)
             {
@@ -582,6 +584,11 @@ namespace RogueBasin
                 if (effect.DamageBase() > damageBase)
                 {
                     damageBase = effect.DamageBase();
+                }
+
+                if (effect.SpeedModifier() > 0 && !speedEffectOn)
+                {
+                    Speed += effect.SpeedModifier();
                 }
             }
         }
@@ -1010,10 +1017,10 @@ namespace RogueBasin
 
                 double hpGain;
 
-                if (player.AttackStat < 50)
+              //  if (player.AttackStat < 50)
                     hpGain = damage / 10.0;
-                else
-                    hpGain = damage / 5.0;
+              //  else
+              //      hpGain = damage / 5.0;
 
                 GainHPFromLeech((int)Math.Ceiling(hpGain));
                 
@@ -1128,6 +1135,13 @@ namespace RogueBasin
         internal override bool IncrementTurnTime()
         {
             IncrementEventTime();
+
+            //Work around for bizarre problem
+            if (speed < 30)
+            {
+                LogFile.Log.LogEntryDebug("ERROR! Player's speed reduced to <30", LogDebugLevel.High);
+                speed = 100;
+            }
 
             OverdriveHitpointDecay();
 
@@ -1409,7 +1423,7 @@ namespace RogueBasin
                 //Play the video
                 equipItem.Equip(this);
 
-                Game.MessageQueue.AddMessage("You place the" + item.SingleItemDescription + " in your backpack.");
+                Game.MessageQueue.AddMessage("You place the " + item.SingleItemDescription + " in your backpack.");
                 LogFile.Log.LogEntryDebug("Max number of items reached. Item returns to town.", LogDebugLevel.Medium);
 
                 return true;

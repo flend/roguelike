@@ -27,7 +27,7 @@ namespace RogueBasin.PlayerEffects
             LogFile.Log.LogEntry("Speed Up started");
             Game.MessageQueue.AddMessage("You speed up!");
 
-            player.Speed += speedUpAmount;
+            //player.Speed += speedUpAmount;
         }
 
         /// <summary>
@@ -38,7 +38,12 @@ namespace RogueBasin.PlayerEffects
             LogFile.Log.LogEntry("Speed Up ended");
             Game.MessageQueue.AddMessage("You slow down!");
 
-            player.Speed -= speedUpAmount;
+            //player.Speed -= speedUpAmount;
+        }
+
+        public override int SpeedModifier()
+        {
+            return speedUpAmount;
         }
 
         protected override int GetDuration()

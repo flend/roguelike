@@ -11,7 +11,7 @@ namespace RogueBasin.Creatures
     public class OrcShamanUnique : MonsterSpecialAI
     {
         const int classDeltaHitpoints = 12;
-        const int classMinHitpoints = 30;
+        const int classMinHitpoints = 25;
 
         public string UniqueName { get; set; }
 
