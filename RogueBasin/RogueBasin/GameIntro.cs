@@ -109,7 +109,9 @@ namespace RogueBasin
             //Draw title
 
             titleCentre = new Point(screen.Width / 2, screen.Height / 2);
-            rootConsole.PrintLineRect("Welcome to PrincessRL! A 7DRL by flend.", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("Welcome to PrincessRL!", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
+
+            rootConsole.PrintLineRect("A 7DRL by flend", titleCentre.x, titleCentre.y + 2, screen.Width, 1, LineAlignment.Center);
 
             //Any key to continue
 

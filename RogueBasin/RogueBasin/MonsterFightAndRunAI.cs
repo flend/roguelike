@@ -20,7 +20,7 @@ namespace RogueBasin
     public abstract class MonsterFightAndRunAI : Monster
     {
         public SimpleAIStates AIState {get; set;}
-        protected Creature currentTarget;
+        public Creature currentTarget;
         protected int lastHitpoints;
 
         /// <summary>

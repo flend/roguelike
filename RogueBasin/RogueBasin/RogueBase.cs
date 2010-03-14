@@ -403,7 +403,7 @@ namespace RogueBasin
                                     */
                                     //Debug events
 
-
+                                    /*
                                 case 'k':
                                     //Display the inventory
                                     inputState = InputState.InventoryShow;
@@ -838,13 +838,16 @@ namespace RogueBasin
                 newDungeon.Items = readData.items;
                 newDungeon.Effects = readData.effects;
                 newDungeon.Monsters = readData.monsters;
+                newDungeon.Spells = readData.spells;
                 newDungeon.Player = readData.player;
                 newDungeon.SpecialMoves = readData.specialMoves;
                 newDungeon.WorldClock = readData.worldClock;
                 newDungeon.HiddenNameInfo = readData.hiddenNameInfo;
                 newDungeon.Triggers = readData.triggers;
                 newDungeon.Difficulty = readData.difficulty;
-
+                newDungeon.DungeonInfo = readData.dungeonInfo;
+                newDungeon.dateCounter = readData.dateCounter;
+                
                 //Process the maps back into map objects
                 foreach (SerializableMap serialMap in readData.levels)
                 {

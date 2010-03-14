@@ -307,7 +307,7 @@ namespace RogueBasin
         /// <summary>
         /// Count the days in the year
         /// </summary>
-        int dateCounter = 0;
+        public int dateCounter = 0;
 
         /// <summary>
         /// Set to false to end the game
@@ -2915,6 +2915,8 @@ namespace RogueBasin
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
+            finalScreen.Add("");
+
             finalScreen.Add("She explored " + dungeonsExplored + " out of 6 dungeons.");
             finalScreen.Add("She cleared " + dungeonsCleared + " out of 6 dungeons.");
 
@@ -2952,6 +2954,13 @@ namespace RogueBasin
         /// <returns></returns>
         public KillRecord GetKillRecord()
         {
+            //fake
+            KillRecord fakeKillRec = new KillRecord();
+            fakeKillRec.killStrings = new List<string>();
+            fakeKillRec.killCount = Game.Dungeon.player.KillCount;
+
+            return fakeKillRec;
+            
             //Make killCount list
 
             List<Monster> kills = player.Kills;
@@ -3776,8 +3785,8 @@ namespace RogueBasin
             obString.Add("Intrinsics:");
             obString.AddRange(instricsList);
             obString.Add("She defeated " + killRecord.killCount + " creatures.");
-            obString.Add("");
-            obString.Add("Creature list:");
+            //obString.Add("");
+            //obString.Add("Creature list:");
 
             SaveObituary(obString, killRecord.killStrings);
 

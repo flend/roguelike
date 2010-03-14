@@ -8,7 +8,7 @@ namespace RogueBasin
     public abstract class MonsterSimpleAI : Monster
     {
         public SimpleAIStates AIState {get; set;}
-        Creature currentTarget;
+        public Creature currentTarget;
 
         public MonsterSimpleAI()
         {

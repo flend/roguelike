@@ -14,6 +14,8 @@ namespace RogueBasin
 
         public List<Monster> Kills { get; set;}
 
+        public int KillCount = 0;
+
         public string Name { get; set; }
 
         public bool ItemHelpMovieSeen = false;
@@ -178,13 +180,13 @@ namespace RogueBasin
             
             
             //Debug
-            
+            /*
             AttackStat = 100;
             MagicStat = 100;
             HitpointsStat = 60;
             MaxHitpointsStat = 60;
             CharmStat = 120;
-             
+             */
         }
 
         private void SetupInitialHP()
@@ -898,10 +900,24 @@ namespace RogueBasin
                 //Is the monster dead, if so kill it?
                 if (monsterDead)
                 {
-                    Game.Dungeon.KillMonster(monster, false);                    
+                    Game.Dungeon.KillMonster(monster, false);
+
+                    MonsterFightAndRunAI aiMon = monster as MonsterFightAndRunAI;
+
+                    //Kill circular ref
+
+                    if (aiMon != null)
+                    {
+                        aiMon.currentTarget = null;
+                    }
+                    MonsterSimpleAI aiS = monster as MonsterSimpleAI;
+                    if (aiS != null)
+                        aiS.currentTarget = null;
+
 
                     //Add it to our list of kills (simply adding the whole object here)
-                    Kills.Add(monster);
+                    KillCount++;
+                    //Kills.Add(monster);
 
                     //Debug string
                     string playerMsg = "You knocked out the " + monster.SingleDescription + ".";

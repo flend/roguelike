@@ -1866,7 +1866,7 @@ namespace RogueBasin {
                 {
                     //Not in FOV but seen
                     //Not in FOV but seen
-                    itemColorToUse = Color.Interpolate(itemColor, ColorPresets.Black, 0.5);
+                    itemColorToUse = Color.Interpolate(item.GetColour(), ColorPresets.Black, 0.5);
                     //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                 }
                 else
