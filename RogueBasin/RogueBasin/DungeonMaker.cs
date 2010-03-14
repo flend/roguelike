@@ -285,6 +285,7 @@ namespace RogueBasin
                     break;
                 case 6:
                     SpawnPrinceCreatures(budgetScale);
+                    SpawnPrinceItems(budgetScale);
                     break;
             }
         }
@@ -303,6 +304,17 @@ namespace RogueBasin
                 {
                     if(!m.Unique)
                         Game.Dungeon.KillMonster(m, true);
+                }
+            }
+
+            //Remove all items
+            List<Item> items = Game.Dungeon.Items;
+
+            foreach (Item i in items)
+            {
+                if (i.LocationLevel >= dungeonStartLevel && i.LocationLevel <= dungeonEndLevel)
+                {
+                    i.InInventory = true;
                 }
             }
 
@@ -337,6 +349,7 @@ namespace RogueBasin
                     break;
                 case 6:
                     SpawnPrinceCreatures(budgetScale);
+                    SpawnPrinceItems(budgetScale);
                     break;
             }
         }
@@ -502,6 +515,77 @@ namespace RogueBasin
                 //Spawn restore / heal potions
 
                 totalPotions = Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 50)
+                        potion = new Items.Potion();
+                    else
+                        potion = new Items.PotionMPRestore();
+
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+            }
+
+        }
+
+        private void SpawnPrinceItems(int budgetScale)
+        {
+            int dungeonID = 6;
+
+            int dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+            int dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+            int totalPotions = 1 + Game.Random.Next(3);
+
+            //bonus potions for the dragon level
+            for (int j = 0; j < totalPotions; j++)
+            {
+                int randomChance = Game.Random.Next(100);
+
+                Item potion;
+
+                if (randomChance < 50)
+                    potion = new Items.Potion();
+                else
+                    potion = new Items.PotionMPRestore();
+
+                PlaceItemOnLevel(potion, dungeonEndLevel, 0);
+            }
+
+
+            for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
+            {
+
+                //Spawn bonus potions
+
+                totalPotions = 1 + Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 25)
+                        potion = new Items.PotionSpeedUp();
+                    else if(randomChance < 50)
+                        potion = new Items.PotionSightUp();
+                    else if(randomChance < 75)
+                        potion = new Items.PotionToHitUp();
+                    else
+                        potion = new Items.PotionDamUp();
+
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+
+                //Spawn restore / heal potions
+
+                totalPotions = 4 + Game.Random.Next(4);
 
                 for (int j = 0; j < totalPotions; j++)
                 {
@@ -777,27 +861,27 @@ namespace RogueBasin
 
             List<int> monsterBudgets = new List<int>();
 
+            monsterBudgets.Add(budgetScale * 200);
+            monsterBudgets.Add(budgetScale * 250);
             monsterBudgets.Add(budgetScale * 300);
-            monsterBudgets.Add(budgetScale * 300);
-            monsterBudgets.Add(budgetScale * 350);
-            monsterBudgets.Add(budgetScale * 400);
+            monsterBudgets.Add(budgetScale * 320);
 
             //build commonness list for caves
 
             //Gives about 50 monsters
             List<MonsterCommon> caveList = new List<MonsterCommon>();
             caveList.Add(new MonsterCommon(new Creatures.Imp(), 10));
-            caveList.Add(new MonsterCommon(new Creatures.Demon(), 10));
+            caveList.Add(new MonsterCommon(new Creatures.Demon(), 2));
             caveList.Add(new MonsterCommon(new Creatures.Skeleton(), 20));
             caveList.Add(new MonsterCommon(new Creatures.SkeletalArcher(), 20));
-            caveList.Add(new MonsterCommon(new Creatures.Necromancer(), 10));
             caveList.Add(new MonsterCommon(new Creatures.Pixie(), 10));
             caveList.Add(new MonsterCommon(new Creatures.Ferret(), 30));
             caveList.Add(new MonsterCommon(new Creatures.Faerie(), 10));
             caveList.Add(new MonsterCommon(new Creatures.Ogre(), 20));
             caveList.Add(new MonsterCommon(new Creatures.Ghoul(), 10));
-            caveList.Add(new MonsterCommon(new Creatures.Rat(), 10));
-            caveList.Add(new MonsterCommon(new Creatures.OrcShaman(), 10));
+            caveList.Add(new MonsterCommon(new Creatures.Rat(), 20));
+            caveList.Add(new MonsterCommon(new Creatures.OrcShaman(), 5));
+            caveList.Add(new MonsterCommon(new Creatures.GoblinWitchdoctor(), 5));
 
             looseGroupDist = 6;
             lonerChance = 30;
@@ -1462,7 +1546,7 @@ namespace RogueBasin
         /// <param name="levelToPlace"></param>
         private void CheckSpecialMonsterGroups(Monster monster, int levelToPlace)
         {
-            int minDistance = 4;
+            int minDistance = 5;
             int loopCount = 0;
 
             Point location = new Point();
@@ -2215,14 +2299,14 @@ namespace RogueBasin
 
         private void SpawnOrcUniques()
         {
-            int minDistance = 4;
+            int minDistance = 6;
             int loopCount = 0;
 
             Point location = new Point();
 
             //Unique spider
 
-            LogFile.Log.LogEntryDebug("Adding forest uniques...", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Adding orc uniques...", LogDebugLevel.Medium);
 
             Creatures.UrukUnique rat = new RogueBasin.Creatures.UrukUnique();
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3) + 2;

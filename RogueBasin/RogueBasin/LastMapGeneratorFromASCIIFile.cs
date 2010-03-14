@@ -373,9 +373,16 @@ namespace RogueBasin
                             case '2':
                                 Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.ApproachingTheDragon());
                                 break;
-                           
+
+                            case '3':
+                                Game.Dungeon.AddItem(new Items.Potion(), levelNo, new Point(i, row));
+                                break;
+                            case '4':
+                                Game.Dungeon.AddItem(new Items.PotionMPRestore(), levelNo, new Point(i, row));
+                                break;
+
                             case '5':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(3, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3)), levelNo, new Point(i, row));
+                                Game.Dungeon.AddItem(new Items.PotionSpeedUp(), levelNo, new Point(i, row));
                                 break;
                             case '6':
                                 addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(4, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4)), levelNo, new Point(i, row));

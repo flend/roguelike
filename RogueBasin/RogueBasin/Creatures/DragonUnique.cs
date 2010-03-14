@@ -10,8 +10,8 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class DragonUnique : MonsterSpecialAI
     {
-        const int classDeltaHitpoints = 10;
-        const int classMinHitpoints = 60;
+        const int classDeltaHitpoints = 20;
+        const int classMinHitpoints = 30;
 
         public string UniqueName;
 
@@ -19,7 +19,7 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 120;
+            Speed = 100;
             Unique = true;
             UniqueName = "Fafir the Fiery";
         }
@@ -46,7 +46,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 16;
+            return 12;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int DamageBase()
         {
-            return 10;
+            return 8;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 10;
+            return 6;
         }
 
         protected override double GetMissileRange()

@@ -58,7 +58,7 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Rubble, '*');
             TerrainChars.Add(MapTerrain.Road, '-');
             TerrainChars.Add(MapTerrain.Mountains, '^');
-            TerrainChars.Add(MapTerrain.Volcano, '(');
+            TerrainChars.Add(MapTerrain.Volcano, '^');
             TerrainChars.Add(MapTerrain.Forest, '%');
             TerrainChars.Add(MapTerrain.Gravestone, '+');
             TerrainChars.Add(MapTerrain.BarDoor, '|');

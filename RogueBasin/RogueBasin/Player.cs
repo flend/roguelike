@@ -175,9 +175,9 @@ namespace RogueBasin
 
             //Debug
             
-            AttackStat = 120;
-            HitpointsStat = 100;
-            MaxHitpointsStat = 100;
+            AttackStat = 70;
+            HitpointsStat = 70;
+            MaxHitpointsStat = 70;
            // MagicStat = 100;
         }
 
