@@ -26,7 +26,7 @@ namespace RogueBasin.Items
 
 
             //Add a message
-            Game.MessageQueue.AddMessage("You drink the potion.");
+            Game.MessageQueue.AddMessage("You eat the berry.");
 
             //Apply the speed up effect to the player
             //Duration note 100 is normally 1 turn for a non-sped up player
@@ -50,12 +50,12 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "p8"; }
+            get { return "long berry"; }
         }
 
         public override string GroupItemDescription
         {
-            get { return "potions"; }
+            get { return "long berries"; }
         }
 
         public bool UsedUp
@@ -64,12 +64,17 @@ namespace RogueBasin.Items
             get { return usedUp; }
         }
 
-        protected override char GetRepresentation()
+        public override libtcodWrapper.Color GetColour()
         {
-            return '!';
+            return libtcodWrapper.ColorPresets.Purple;
         }
 
-        public override bool UseHiddenName { get { return true; } }
+        protected override char GetRepresentation()
+        {
+            return (char)236;
+        }
+
+        public override bool UseHiddenName { get { return false; } }
 
         public override string HiddenSuffix
         {

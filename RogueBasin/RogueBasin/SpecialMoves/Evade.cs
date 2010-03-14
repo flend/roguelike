@@ -204,7 +204,7 @@ namespace RogueBasin.SpecialMoves
 
         public override int GetRequiredCombat()
         {
-            return 100;
+            return 40;
         }
     }
 }

@@ -261,18 +261,22 @@ namespace RogueBasin
 
                 case 0:
                     SpawnCaveCreatures(budgetScale);
+                    SpawnCaveItems(budgetScale);
                     break;
                 case 1:
                     SpawnWaterCaveCreatures(budgetScale);
+                    SpawnWaterCaveItems(budgetScale);
                     break;
                 case 2:
                     SpawnForestCreatures(budgetScale);
+                    SpawnForestItems(budgetScale);
                     break;
                 case 3:
-                    SpawnCryptCreatures(budgetScale);
+                    SpawnOrcHutCreatures(budgetScale);
+                    SpawnOrcItems(budgetScale);
                     break;
                 case 4:
-                    SpawnOrcHutCreatures(budgetScale);
+                    SpawnCryptCreatures(budgetScale);
                     break;
                 case 5:
                     SpawnDemonCreatures(budgetScale);
@@ -309,18 +313,22 @@ namespace RogueBasin
 
                 case 0:
                     SpawnCaveCreatures(budgetScale);
+                    SpawnCaveItems(budgetScale);
                     break;
                 case 1:
                     SpawnWaterCaveCreatures(budgetScale);
+                    SpawnWaterCaveItems(budgetScale);
                     break;
                 case 2:
                     SpawnForestCreatures(budgetScale);
+                    SpawnForestItems(budgetScale);
                     break;
                 case 3:
-                    SpawnCryptCreatures(budgetScale);
+                    SpawnOrcHutCreatures(budgetScale);
+                    SpawnOrcItems(budgetScale);
                     break;
                 case 4:
-                    SpawnOrcHutCreatures(budgetScale);
+                    SpawnCryptCreatures(budgetScale);
                     break;
                 case 5:
                     SpawnDemonCreatures(budgetScale);
@@ -411,6 +419,135 @@ namespace RogueBasin
             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 8);
 
         }
+
+        private void SpawnCaveItems(int budgetScale)
+        {
+            int dungeonID = 0;
+
+            int dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+            int dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+            for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
+            {
+                int totalPotions = 1 + Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 45)
+                        potion = new Items.Potion();
+                    else if (randomChance < 70)
+                        potion = new Items.PotionMPRestore();
+                    else if (randomChance < 85)
+                        potion = new Items.PotionDamUp();
+                    else 
+                        potion = new Items.PotionToHitUp();
+                 
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+            }
+
+        }
+
+        private void SpawnWaterCaveItems(int budgetScale)
+        {
+            int dungeonID = 1;
+
+            int dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+            int dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+            for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
+            {
+                int totalPotions = 1 + Game.Random.Next(2);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 35)
+                        potion = new Items.Potion();
+                    else if (randomChance < 60)
+                        potion = new Items.PotionMPRestore();
+                    else if (randomChance < 80)
+                        potion = new Items.PotionSpeedUp();
+                    else
+                        potion = new Items.PotionSightUp();
+                   
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+            }
+
+        }
+
+        private void SpawnForestItems(int budgetScale)
+        {
+            int dungeonID = 2;
+
+            int dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+            int dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+            for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
+            {
+                int totalPotions = Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 15)
+                        potion = new Items.Potion();
+                    else if (randomChance < 70)
+                        potion = new Items.PotionMPRestore();
+                    else if (randomChance < 85)
+                        potion = new Items.PotionSpeedUp();
+                    else
+                        potion = new Items.PotionSightUp();
+
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+            }
+
+        }
+
+        private void SpawnOrcItems(int budgetScale)
+        {
+            int dungeonID = 3;
+
+            int dungeonStartLevel = dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+            int dungeonEndLevel = dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+            for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
+            {
+                int totalPotions = Game.Random.Next(3);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 10)
+                        potion = new Items.Potion();
+                    else if (randomChance < 20)
+                        potion = new Items.PotionMPRestore();
+                    else if (randomChance < 60)
+                        potion = new Items.PotionDamUp();
+                    else
+                        potion = new Items.PotionToHitUp();
+
+                    PlaceItemOnLevel(potion, i, 50);
+                }
+            }
+
+        }
+
 
         private void SpawnForestCreatures(int budgetScale)
         {
@@ -1539,7 +1676,7 @@ namespace RogueBasin
 
             //Add his items
 
-            Items.Glove dag = new RogueBasin.Items.Glove();
+            Items.Dagger dag = new RogueBasin.Items.Dagger();
 
             rat.PickUpItem(dag);
 
@@ -1581,7 +1718,7 @@ namespace RogueBasin
 
             //Add his items
 
-            Items.MapGem map = new RogueBasin.Items.MapGem();
+            Items.Glove map = new RogueBasin.Items.Glove();
 
             gobbo.PickUpItem(map);
 
@@ -2143,6 +2280,58 @@ namespace RogueBasin
             dungeon.AddItemNoChecks(new Items.HealingPotion(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y + 2));
             dungeon.AddItemNoChecks(new Items.StaffPower(), 0, new Point(dungeon.Player.LocationMap.x - 1, dungeon.Player.LocationMap.y + 2));
             dungeon.AddItemNoChecks(new Items.RestoreOrb(), 0, new Point(dungeon.Player.LocationMap.x -2, dungeon.Player.LocationMap.y + 2));
+            dungeon.AddItemNoChecks(new Items.Potion(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y + 3));
+            dungeon.AddItemNoChecks(new Items.PotionDamUp(), 0, new Point(dungeon.Player.LocationMap.x - 1, dungeon.Player.LocationMap.y + 3));
+            dungeon.AddItemNoChecks(new Items.PotionToHitUp(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y + 3));
+            dungeon.AddItemNoChecks(new Items.PotionSightUp(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y -1));
+            dungeon.AddItemNoChecks(new Items.PotionSpeedUp(), 0, new Point(dungeon.Player.LocationMap.x+1, dungeon.Player.LocationMap.y -1));
+            dungeon.AddItemNoChecks(new Items.PotionMPRestore(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y - 1));
+            
+            //Add some berries
+            
+            //Cave levels
+            /*
+            for (int i = 0; i < 1; i++)
+            {
+                int totalPotions = 3 + Game.Random.Next(5);
+
+                for (int j = 0; j < totalPotions; j++)
+                {
+                    int randomChance = Game.Random.Next(100);
+
+                    Item potion;
+
+                    if (randomChance < 45)
+                        potion = new Items.Potion();
+                    else if (randomChance < 65)
+                        potion = new Items.PotionToHitUp();
+                    else if (randomChance < 70)
+                        potion = new Items.PotionDamUp();
+                    else if (randomChance < 85)
+                        potion = new Items.PotionSpeedUp();
+                    else if (randomChance < 90)
+                        potion = new Items.PotionSightUp();
+
+                    else if (randomChance < 93)
+                        potion = new Items.PotionMajHealing();
+                    else if (randomChance < 94)
+                        potion = new Items.PotionMajDamUp();
+                    else if (randomChance < 95)
+                        potion = new Items.PotionMajSpeedUp();
+                    else if (randomChance < 96)
+                        potion = new Items.PotionMajSightUp();
+                    else if (randomChance < 97)
+                        potion = new Items.PotionSuperHealing();
+                    else if (randomChance < 98)
+                        potion = new Items.PotionSuperDamUp();
+                    else if (randomChance < 99)
+                        potion = new Items.PotionSuperToHitUp();
+                    else
+                        potion = new Items.PotionSuperSpeedUp();
+
+                    PlaceItemOnLevel(potion, 2 + i, 0);
+                }
+            }*/
 
 //            Point location = new Point(0, 0);
             

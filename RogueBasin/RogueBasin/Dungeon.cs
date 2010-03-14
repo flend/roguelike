@@ -723,7 +723,7 @@ namespace RogueBasin
             specialMoves.Add(new SpecialMoves.WallVault());
             specialMoves.Add(new SpecialMoves.VaultBackstab());
             specialMoves.Add(new SpecialMoves.OpenSpaceAttack());
-            //specialMoves.Add(new SpecialMoves.Evade());
+            specialMoves.Add(new SpecialMoves.Evade());
             specialMoves.Add(new SpecialMoves.MultiAttack());
             specialMoves.Add(new SpecialMoves.BurstOfSpeed());
             specialMoves.Add(new SpecialMoves.CloseQuarters());
@@ -1881,7 +1881,7 @@ namespace RogueBasin
             Item itemAtSpace = ItemAtSpace(player.LocationLevel, player.LocationMap);
             if (itemAtSpace != null)
             {
-                Game.MessageQueue.AddMessage("There is an " + itemAtSpace.SingleItemDescription + " here");
+                Game.MessageQueue.AddMessage("There is a " + itemAtSpace.SingleItemDescription + " here.");
             }
 
             //Tell the player if there are multiple items in the square
@@ -2909,7 +2909,7 @@ namespace RogueBasin
             }
 
             //Wait for a keypress
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
             //Stop the main loop
             RunMainLoop = false;
@@ -3476,6 +3476,9 @@ namespace RogueBasin
                 //Recharge all items
                 RechargeEquippableItems();
 
+                //Remove all inventory items
+                RemoveInventoryItems();
+
                 LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
                 Game.Dungeon.MoveToNextDate();
                 Game.Dungeon.PlayerBackToTown();
@@ -3486,6 +3489,39 @@ namespace RogueBasin
             {
                 //OK, it's the end, they're back from the prince mission one way or the other
                 EndOfGame();
+            }
+        }
+
+        /// <summary>
+        /// Remove all temporary items
+        /// </summary>
+        private void RemoveInventoryItems()
+        {
+            Inventory inv = player.Inventory;
+
+            List<Item> itemsToRemove = new List<Item>();
+
+            foreach (Item item in inv.Items)
+            {
+                IEquippableItem itemE = item as IEquippableItem;
+
+                if (itemE == null)
+                {
+                    itemsToRemove.Add(item);
+                }
+
+            }
+
+            LogFile.Log.LogEntryDebug("Removing " + itemsToRemove.Count + " items from inventory.", LogDebugLevel.Medium);
+            if (itemsToRemove.Count > 0)
+            {
+                Game.MessageQueue.AddMessage("The berries you found fade away.");
+            }
+
+
+            foreach (Item item in itemsToRemove)
+            {
+                inv.RemoveItem(item);
             }
         }
 

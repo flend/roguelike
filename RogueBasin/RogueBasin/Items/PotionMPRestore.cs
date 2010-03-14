@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class PotionSightUp : Item, IUseableItem
+    public class PotionMPRestore : Item, IUseableItem
     {
         bool usedUp;
 
-        public PotionSightUp()
+        public PotionMPRestore()
         {
             usedUp = false;
         }
@@ -23,18 +24,15 @@ namespace RogueBasin.Items
             {
                 return false;
             }
-
-            //Add a message
+            
             Game.MessageQueue.AddMessage("You eat the berry.");
 
             //Apply the healing effect to the player
-            //Duration note 100 is normally 1 turn for a non-sped up player
+            int healing = 10 + Game.Random.Next(10);
+            player.AddEffect(new PlayerEffects.MPRestore(player, healing));
 
-            int duration = 3000 + Game.Random.Next(8000);
-
-            player.AddEffect(new PlayerEffects.SightRadiusUp(player, duration, 1));
-
-
+            //Add a message
+            
 
             //This uses up the potion
             usedUp = true;
@@ -49,17 +47,17 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "puckered berry"; }
+            get { return "gold berry"; }
         }
 
         public override string GroupItemDescription
         {
-            get { return "puckered berries"; }
+            get { return "gold berries"; }
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return libtcodWrapper.ColorPresets.Plum;
+            return ColorPresets.Gold;
         }
 
         public bool UsedUp
