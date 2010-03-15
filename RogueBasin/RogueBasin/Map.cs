@@ -227,7 +227,7 @@ namespace RogueBasin
         public int height;
 
 
-        public double LightLevel { get; set; }
+        public double LightLevel;
 
         /// <summary>
         /// Are we guaranteed to be connected?
@@ -239,7 +239,7 @@ namespace RogueBasin
         /// </summary>
         Map()
         {
-            LightLevel = 1.0;
+            //LightLevel = 1.0;
         }
 
         public Map(int width, int height)
