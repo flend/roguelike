@@ -240,9 +240,9 @@ namespace RogueBasin
                                     UpdateScreen();
                                     userKey = Keyboard.WaitForKeyPress(true);
                                     Game.Dungeon.RunMainLoop = false;
-                                    
+
                                     break;
-                                
+
                                 case 'F':
                                     //Full screen switch
                                     timeAdvances = false;
@@ -302,7 +302,7 @@ namespace RogueBasin
                                     // Do nothing
                                     timeAdvances = DoNothing();
                                     break;
-                                
+
                                 case '>':
                                 case '<':
                                     //Interact with feature
@@ -337,7 +337,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-                                
+
 
                                 case 'e':
                                     //Display currently equipped items
@@ -370,275 +370,241 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-                                    //Vi keys
-                                    /*
-                                case 'b':
-                                    timeAdvances = Game.Dungeon.PCMove(-1, 1);
-                                    break;
+                                //Vi keys
+                                /*
+                            case 'b':
+                                timeAdvances = Game.Dungeon.PCMove(-1, 1);
+                                break;
 
-                                case 'n':
-                                    timeAdvances = Game.Dungeon.PCMove(1, 1);
-                                    break;
+                            case 'n':
+                                timeAdvances = Game.Dungeon.PCMove(1, 1);
+                                break;
 
-                                case 'y':
-                                    timeAdvances = Game.Dungeon.PCMove(-1, -1);
-                                    break;
+                            case 'y':
+                                timeAdvances = Game.Dungeon.PCMove(-1, -1);
+                                break;
 
-                                case 'u':
-                                    timeAdvances = Game.Dungeon.PCMove(1, -1);
-                                    break;
+                            case 'u':
+                                timeAdvances = Game.Dungeon.PCMove(1, -1);
+                                break;
 
-                                case 'h':
-                                    timeAdvances = Game.Dungeon.PCMove(-1, 0);
-                                    break;
-                                case 'l':
-                                    timeAdvances = Game.Dungeon.PCMove(1, 0);
-                                    break;
-                                case 'k':
-                                    timeAdvances = Game.Dungeon.PCMove(0, -1);
-                                    break;
-                                case 'j':
-                                    timeAdvances = Game.Dungeon.PCMove(0, 1);
-                                    break;
-                                    */
-                                    //Debug events
+                            case 'h':
+                                timeAdvances = Game.Dungeon.PCMove(-1, 0);
+                                break;
+                            case 'l':
+                                timeAdvances = Game.Dungeon.PCMove(1, 0);
+                                break;
+                            case 'k':
+                                timeAdvances = Game.Dungeon.PCMove(0, -1);
+                                break;
+                            case 'j':
+                                timeAdvances = Game.Dungeon.PCMove(0, 1);
+                                break;
+                                */
+                                //Debug events
 
-                                    /*
-                                case 'k':
-                                    //Display the inventory
-                                    inputState = InputState.InventoryShow;
-                                    SetPlayerInventoryScreen();
-                                    UpdateScreen();
-                                    timeAdvances = false;
-                                    break;
+                                /*
+                            case 'k':
+                                //Display the inventory
+                                inputState = InputState.InventoryShow;
+                                SetPlayerInventoryScreen();
+                                UpdateScreen();
+                                timeAdvances = false;
+                                break;
                                 
-                                case 'E':
-                                    Game.Dungeon.Player.AttackStat = 10;
-                                    Game.Dungeon.Player.CharmStat = 10;
-                                    Game.Dungeon.Player.MagicStat = 10;
+                            case 'E':
+                                Game.Dungeon.Player.AttackStat = 10;
+                                Game.Dungeon.Player.CharmStat = 10;
+                                Game.Dungeon.Player.MagicStat = 10;
 
-                                    Game.Dungeon.DungeonInfo.DragonDead = false;
+                                Game.Dungeon.DungeonInfo.DragonDead = false;
 
-                                    Game.Dungeon.EndOfGame();
+                                Game.Dungeon.EndOfGame();
 
-                                    break;
+                                break;
 
-                                case 'K':
-                                    Game.Dungeon.FlipTerrain("river");
-                                    Game.Dungeon.FlipTerrain("forest");
-                                    Game.Dungeon.FlipTerrain("grave");
-                                    Game.Dungeon.FlipTerrain("final");
-                                    UpdateScreen();
-                                    break;
+                            case 'K':
+                                Game.Dungeon.FlipTerrain("river");
+                                Game.Dungeon.FlipTerrain("forest");
+                                Game.Dungeon.FlipTerrain("grave");
+                                Game.Dungeon.FlipTerrain("final");
+                                UpdateScreen();
+                                break;
 
-                                //case 'c':
-                                //    //Level up
-                                //    Game.Dungeon.Player.LevelUp();
-                                //    UpdateScreen();
-                                //    break;
+                            //case 'c':
+                            //    //Level up
+                            //    Game.Dungeon.Player.LevelUp();
+                            //    UpdateScreen();
+                            //    break;
 
-                                case 'm':
-                                    //Learn all moves
-                                    Game.Dungeon.PlayerLearnsAllMoves();
-                                    Game.MessageQueue.AddMessage("Learnt all moves.");
-                                    Game.Dungeon.PlayerLearnsAllSpells();
-                                    Game.MessageQueue.AddMessage("Learnt all spells.");
-                                    UpdateScreen();
-                                    timeAdvances = false;
-                                    break;
+                            case 'm':
+                                //Learn all moves
+                                Game.Dungeon.PlayerLearnsAllMoves();
+                                Game.MessageQueue.AddMessage("Learnt all moves.");
+                                Game.Dungeon.PlayerLearnsAllSpells();
+                                Game.MessageQueue.AddMessage("Learnt all spells.");
+                                UpdateScreen();
+                                timeAdvances = false;
+                                break;
 
-                                case 'M':
-                                    //Learn all moves
-                                    Game.Dungeon.LearnMove(new SpecialMoves.CloseQuarters());
-                                    Game.Dungeon.LearnMove(new SpecialMoves.ChargeAttack());
-                                    Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
-                                    Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-                                    Game.Dungeon.LearnMove(new SpecialMoves.WallLeap());
-                                    Game.MessageQueue.AddMessage("Learnt all moves.");
-                                    //Game.Dungeon.PlayerLearnsAllSpells();
-                                    //Game.MessageQueue.AddMessage("Learnt all spells.");
-                                    UpdateScreen();
-                                    timeAdvances = false;
-                                    break;
-
-
-                                case 'T':
-                                    Game.Dungeon.MoveToNextDate();
-                                    timeAdvances = true;
-                                    break;
+                            case 'M':
+                                //Learn all moves
+                                Game.Dungeon.LearnMove(new SpecialMoves.CloseQuarters());
+                                Game.Dungeon.LearnMove(new SpecialMoves.ChargeAttack());
+                                Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
+                                Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
+                                Game.Dungeon.LearnMove(new SpecialMoves.WallLeap());
+                                Game.MessageQueue.AddMessage("Learnt all moves.");
+                                //Game.Dungeon.PlayerLearnsAllSpells();
+                                //Game.MessageQueue.AddMessage("Learnt all spells.");
+                                UpdateScreen();
+                                timeAdvances = false;
+                                break;
 
 
-                                case 't':
-                                    //teleport to stairs
-                                    TeleportToDownStairs();
-                                    UpdateScreen();
-                                    break;
+                            case 'T':
+                                Game.Dungeon.MoveToNextDate();
+                                timeAdvances = true;
+                                break;
 
-                                case 'y':
-                                    //teleport to stairs
-                                    TeleportToUpStairs();
-                                    UpdateScreen();
-                                    break;
 
-                                case 'Y':
-                                    //Take me to first dungeon
-                                    Game.Dungeon.DungeonInfo.LastMission = true;
-                                    Game.Dungeon.Player.LocationLevel = 26;
-                                    TeleportToDownStairs();
-                                    UpdateScreen();
-                                    break;
+                            case 't':
+                                //teleport to stairs
+                                TeleportToDownStairs();
+                                UpdateScreen();
+                                break;
 
-                                case 'B':
-                                    Screen.Instance.SaveCurrentLevelToDisk();
-                                    break;
+                            case 'y':
+                                //teleport to stairs
+                                TeleportToUpStairs();
+                                UpdateScreen();
+                                break;
+
+                            case 'Y':
+                                //Take me to first dungeon
+                                Game.Dungeon.DungeonInfo.LastMission = true;
+                                Game.Dungeon.Player.LocationLevel = 26;
+                                TeleportToDownStairs();
+                                UpdateScreen();
+                                break;
+
+                            case 'B':
+                                Screen.Instance.SaveCurrentLevelToDisk();
+                                break;
 
                                                                         
-                                case 'U':
-                                    //Uncharm creature
-                                    timeAdvances = PlayerUnCharmCreature();
-                                    if (!timeAdvances)
-                                        UpdateScreen();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-
-                                case 'r':
-                                    //Name object
-                                    SetPlayerInventorySelectScreen();
+                            case 'U':
+                                //Uncharm creature
+                                timeAdvances = PlayerUnCharmCreature();
+                                if (!timeAdvances)
                                     UpdateScreen();
-                                    //This uses the generic 'select from inventory' input loop
-                                    NameObject();
-                                    DisablePlayerInventoryScreen();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
 
-                                    UpdateScreen();
-                                    break;
+                            case 'r':
+                                //Name object
+                                SetPlayerInventorySelectScreen();
+                                UpdateScreen();
+                                //This uses the generic 'select from inventory' input loop
+                                NameObject();
+                                DisablePlayerInventoryScreen();
+
+                                UpdateScreen();
+                                break;
                                     
-                                case 'v':
-                                    //Add a healing event on the player
-                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
-                                    Game.Dungeon.Player.AddEffect(healing);
-                                    UpdateScreen();
-                                    break;
+                            case 'v':
+                                //Add a healing event on the player
+                                PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                                Game.Dungeon.Player.AddEffect(healing);
+                                UpdateScreen();
+                                break;
 
-                                    /*
-                                //Debug events
-                                case 'w':
-                                    //Select an item to equip
-                                    SetPlayerEquippedItemsSelectScreen();
+                                /*
+                            //Debug events
+                            case 'w':
+                                //Select an item to equip
+                                SetPlayerEquippedItemsSelectScreen();
+                                UpdateScreen();
+                                timeAdvances = EquipItem();
+                                DisablePlayerEquippedItemsSelectScreen();
+                                if (!timeAdvances)
                                     UpdateScreen();
-                                    timeAdvances = EquipItem();
-                                    DisablePlayerEquippedItemsSelectScreen();
-                                    if (!timeAdvances)
-                                        UpdateScreen();
 
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-                                //debug ones
-                                case 'd':
-                                    //Drop item
-                                    SetPlayerInventorySelectScreen();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+                            //debug ones
+                            case 'd':
+                                //Drop item
+                                SetPlayerInventorySelectScreen();
+                                UpdateScreen();
+                                timeAdvances = DropItem();
+                                DisablePlayerInventoryScreen();
+                                if (!timeAdvances)
                                     UpdateScreen();
-                                    timeAdvances = DropItem();
-                                    DisablePlayerInventoryScreen();
-                                    if (!timeAdvances)
-                                        UpdateScreen();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
 
                                 
-                                case 'l':
-                                    timeAdvances = false;
-                                    LoadGame(Game.Dungeon.Player.Name);
-                                    UpdateScreen();
-                                    break;
+                            case 'l':
+                                timeAdvances = false;
+                                LoadGame(Game.Dungeon.Player.Name);
+                                UpdateScreen();
+                                break;
 
 
-                                case 'y':
-                                    //Add a speed up event on the player
-                                    PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
-                                    Game.Dungeon.Player.AddEffect(speedUp);
-                                    UpdateScreen();
-                                    break;
-                                case 'v':
-                                    //Add a multi damage event on the player
-                                    PlayerEffects.MultiDamage multiD = new RogueBasin.PlayerEffects.MultiDamage(Game.Dungeon.Player, 500, 3);
-                                    Game.Dungeon.Player.AddEffect(multiD);
-                                    UpdateScreen();
-                                    break;
-                                case 'h':
-                                    //Add a healing event on the player
-                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
-                                    Game.Dungeon.Player.AddEffect(healing);
-                                    UpdateScreen();
-                                    break;
-                                case 'x':
-                                    //Add a healing event on the player
-                                    PlayerEffects.DamageUp healing3 = new RogueBasin.PlayerEffects.DamageUp(Game.Dungeon.Player, 500, 5);
-                                    Game.Dungeon.Player.AddEffect(healing3);
-                                    PlayerEffects.ToHitUp healing2 = new RogueBasin.PlayerEffects.ToHitUp(Game.Dungeon.Player, 500, 5);
-                                    Game.Dungeon.Player.AddEffect(healing2);
-                                    UpdateScreen();
-                                    break;
-                                case 'z':
-                                    //Add an anti-healing event on the player
-                                    PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
-                                    Game.Dungeon.Player.AddEffect(zhealing);
-                                    UpdateScreen();
-                                    break;
-                                case 'c':
-                                    //Level up
-                                    Game.Dungeon.Player.LevelUp();
-                                    UpdateScreen();
-                                    break;
-                                    */
+                            case 'y':
+                                //Add a speed up event on the player
+                                PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
+                                Game.Dungeon.Player.AddEffect(speedUp);
+                                UpdateScreen();
+                                break;
+                            case 'v':
+                                //Add a multi damage event on the player
+                                PlayerEffects.MultiDamage multiD = new RogueBasin.PlayerEffects.MultiDamage(Game.Dungeon.Player, 500, 3);
+                                Game.Dungeon.Player.AddEffect(multiD);
+                                UpdateScreen();
+                                break;
+                            case 'h':
+                                //Add a healing event on the player
+                                PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                                Game.Dungeon.Player.AddEffect(healing);
+                                UpdateScreen();
+                                break;
+                            case 'x':
+                                //Add a healing event on the player
+                                PlayerEffects.DamageUp healing3 = new RogueBasin.PlayerEffects.DamageUp(Game.Dungeon.Player, 500, 5);
+                                Game.Dungeon.Player.AddEffect(healing3);
+                                PlayerEffects.ToHitUp healing2 = new RogueBasin.PlayerEffects.ToHitUp(Game.Dungeon.Player, 500, 5);
+                                Game.Dungeon.Player.AddEffect(healing2);
+                                UpdateScreen();
+                                break;
+                            case 'z':
+                                //Add an anti-healing event on the player
+                                PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
+                                Game.Dungeon.Player.AddEffect(zhealing);
+                                UpdateScreen();
+                                break;
+                            case 'c':
+                                //Level up
+                                Game.Dungeon.Player.LevelUp();
+                                UpdateScreen();
+                                break;
+                                */
                             }
                         }
-                        else
+
+                        //Handle direction keys (both arrows and vi keys)
+                        Point direction = new Point(9,9);
+                        bool wasDirection = GetDirectionFromKeypress(userKey, out direction);
+
+                        if (wasDirection)
                         {
-                            //Arrow keys for directions
-                            switch (userKey.KeyCode)
-                            {
-                                case KeyCode.TCODK_KP1:
-                                    timeAdvances = Game.Dungeon.PCMove(-1, 1);
-                                    break;
-
-                                case KeyCode.TCODK_KP3:
-                                    timeAdvances = Game.Dungeon.PCMove(1, 1);
-                                    break;
-
-                                case KeyCode.TCODK_KPDEC:
-                                case KeyCode.TCODK_KP5:
-                                    //Does nothing
-                                    timeAdvances = DoNothing();
-                                    break;
-
-                                case KeyCode.TCODK_KP7:
-                                    timeAdvances = Game.Dungeon.PCMove(-1, -1);
-                                    break;
-                                case KeyCode.TCODK_KP9:
-                                    timeAdvances = Game.Dungeon.PCMove(1, -1);
-                                    break;
-
-                                case KeyCode.TCODK_LEFT:
-                                case KeyCode.TCODK_KP4:
-                                    timeAdvances = Game.Dungeon.PCMove(-1, 0);
-                                    break;
-                                case KeyCode.TCODK_RIGHT:
-                                case KeyCode.TCODK_KP6:
-                                    timeAdvances = Game.Dungeon.PCMove(1, 0);
-                                    break;
-                                case KeyCode.TCODK_UP:
-                                case KeyCode.TCODK_KP8:
-                                    timeAdvances = Game.Dungeon.PCMove(0, -1);
-                                    break;
-                                case KeyCode.TCODK_KP2:
-                                case KeyCode.TCODK_DOWN:
-                                    timeAdvances = Game.Dungeon.PCMove(0, 1);
-                                    break;
-                            }
+                            timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
                         }
+
                         break;
 
                     //Inventory is displayed
@@ -934,49 +900,92 @@ namespace RogueBasin
         private bool GetDirectionFromKeypress(KeyPress userKey, out Point direction) {
 
             direction = new Point(9, 9);
+            
+            //Vi keys for directions
 
-            //Arrow keys for directions
-            switch (userKey.KeyCode)
+            if (userKey.KeyCode == KeyCode.TCODK_CHAR)
             {
-                case KeyCode.TCODK_KP1:
-                    direction = new Point(-1, 1);
-                    break;
+                char keyCode = (char)userKey.Character;
+                switch (keyCode)
+                {
+                    case 'b':
+                        direction = new Point(-1, 1);
+                        break;
 
-                case KeyCode.TCODK_KP3:
-                    direction = new Point(1, 1);
-                    break;
+                    case 'n':
+                        direction = new Point(1, 1);
+                        break;
 
-                case KeyCode.TCODK_KPDEC:
-                case KeyCode.TCODK_KP5:
-                    //Does nothing
-                    direction = new Point(0, 0);
-                    break;
+                    case 'y':
+                        direction = new Point(-1, -1);
+                        break;
 
-                case KeyCode.TCODK_KP7:
-                    direction = new Point(-1, -1);
-                    break;
-                case KeyCode.TCODK_KP9:
-                    direction = new Point(1, -1);
-                    break;
+                    case 'u':
+                        direction = new Point(1, -1);
+                        break;
 
-                case KeyCode.TCODK_LEFT:
-                case KeyCode.TCODK_KP4:
-                    direction = new Point(-1, 0);
-                    break;
-                case KeyCode.TCODK_RIGHT:
-                case KeyCode.TCODK_KP6:
-                    direction = new Point(1, 0);
-                    break;
-                case KeyCode.TCODK_UP:
-                case KeyCode.TCODK_KP8:
-                    direction = new Point(0, -1);
-                    break;
-                case KeyCode.TCODK_KP2:
-                case KeyCode.TCODK_DOWN:
-                    direction = new Point(0, 1);
-                    break;
+                    case 'h':
+                        direction = new Point(-1, 0);
+                        break;
+
+                    case 'l':
+                        direction = new Point(1, 0);
+                        break;
+
+                    case 'k':
+                        direction = new Point(0, -1);
+                        break;
+
+                    case 'j':
+                        direction = new Point(0, 1);
+                        break;
+                }
             }
+            else
+            {
+                //Arrow keys for directions
 
+                switch (userKey.KeyCode)
+                {
+                    case KeyCode.TCODK_KP1:
+                        direction = new Point(-1, 1);
+                        break;
+
+                    case KeyCode.TCODK_KP3:
+                        direction = new Point(1, 1);
+                        break;
+
+                    case KeyCode.TCODK_KPDEC:
+                    case KeyCode.TCODK_KP5:
+                        //Does nothing
+                        direction = new Point(0, 0);
+                        break;
+
+                    case KeyCode.TCODK_KP7:
+                        direction = new Point(-1, -1);
+                        break;
+                    case KeyCode.TCODK_KP9:
+                        direction = new Point(1, -1);
+                        break;
+
+                    case KeyCode.TCODK_LEFT:
+                    case KeyCode.TCODK_KP4:
+                        direction = new Point(-1, 0);
+                        break;
+                    case KeyCode.TCODK_RIGHT:
+                    case KeyCode.TCODK_KP6:
+                        direction = new Point(1, 0);
+                        break;
+                    case KeyCode.TCODK_UP:
+                    case KeyCode.TCODK_KP8:
+                        direction = new Point(0, -1);
+                        break;
+                    case KeyCode.TCODK_KP2:
+                    case KeyCode.TCODK_DOWN:
+                        direction = new Point(0, 1);
+                        break;
+                }
+            }
             //Not valid
             if (direction == new Point(9, 9))
                 return false;
