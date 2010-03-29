@@ -101,6 +101,13 @@ namespace RogueBasin.SpecialMoves
                     return false;
                 }
 
+                //Charmed monster
+                if (squareContents.monster != null && squareContents.monster.Charmed)
+                {
+                    FailNoMonster();
+                    return false;
+                }
+
                 //OK, so we have a monster to evade
                 //Check the 2 squares behind it to find one to jump to (adapted from WallVault)
 
@@ -191,7 +198,7 @@ namespace RogueBasin.SpecialMoves
 
             SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(squareX, squareY));
 
-            if (squareContents.monster != null)
+            if (squareContents.monster != null && !squareContents.monster.Charmed)
                 return true;
             else
                 return false;

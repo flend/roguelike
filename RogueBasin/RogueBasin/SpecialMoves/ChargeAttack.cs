@@ -28,8 +28,6 @@ namespace RogueBasin.SpecialMoves
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
 
-            //First move is no direction move
-
             //Not a move or attack = reset
             if (!isMove)
             {
@@ -115,6 +113,13 @@ namespace RogueBasin.SpecialMoves
                 //Monster - move is on
                 if (squareContents.monster != null)
                 {
+                    //If it's a charmed monster don't attack
+                    if (squareContents.monster.Charmed)
+                    {
+                        FailBlockingMonster();
+                        return false;
+                    }
+
                     moveReady = true;
                     target = squareContents.monster;
                     return true;

@@ -64,6 +64,12 @@ namespace RogueBasin.SpecialMoves
             //Is there a monster here?
             if (squareContents.monster != null)
             {
+                //Check for charmed
+                if (squareContents.monster.Charmed)
+                {
+                    return false;
+                }
+
                 //Are 3 cardinal directions around the monster unwalkable?
                 Point monsterLoc = squareContents.monster.LocationMap;
 

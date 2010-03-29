@@ -482,7 +482,8 @@ namespace RogueBasin {
             {
                 KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
-                if (userKey.KeyCode == KeyCode.TCODK_ENTER)
+                if (userKey.KeyCode == KeyCode.TCODK_ENTER
+                    || userKey.KeyCode == KeyCode.TCODK_KPENTER)
                 {
                     break;
                 }

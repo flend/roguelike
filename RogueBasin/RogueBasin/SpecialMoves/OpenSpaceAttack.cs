@@ -59,7 +59,7 @@ namespace RogueBasin.SpecialMoves
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x, locationAfterMove.y));
 
                 //Is there a monster here? If so, we will attack it
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                 {
                     //Set move counter to 1 and drop back, the normal code will do the first attack
                     moveCounter = 1;

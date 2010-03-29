@@ -56,8 +56,9 @@ namespace RogueBasin.SpecialMoves
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x, locationAfterMove.y));
 
                 //Is there a monster here? If so, we will attack it
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                 {
+
                     //Set move counter to 1 and drop back, the normal code will do the first attack
                     moveCounter = 1;
                     target = squareContents.monster;
@@ -115,35 +116,35 @@ namespace RogueBasin.SpecialMoves
                 List<Monster> possibleTargets = new List<Monster>();
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x - 1, locationAfterMove.y));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x + 1, locationAfterMove.y));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x, locationAfterMove.y + 1));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x, locationAfterMove.y - 1));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x - 1, locationAfterMove.y - 1));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x + 1, locationAfterMove.y - 1));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x - 1, locationAfterMove.y + 1));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x + 1, locationAfterMove.y + 1));
-                if (squareContents.monster != null)
+                if (squareContents.monster != null && !squareContents.monster.Charmed)
                     possibleTargets.Add(squareContents.monster);
 
                 //Does our list of possible targets contain a new monster

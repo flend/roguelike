@@ -125,6 +125,11 @@ namespace RogueBasin.SpecialMoves
                         {
                             target = squareContents.monster;
 
+                            if (squareContents.monster.Charmed)
+                            {
+                                return false;
+                            }
+
                             //Distance jumped is the bonus
                             leapDistance = loopCounter - 1;
 
