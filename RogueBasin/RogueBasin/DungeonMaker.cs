@@ -3468,7 +3468,7 @@ namespace RogueBasin
             hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
 
             levelNo = dungeon.AddMap(hallMap);
-            caveGen.AddUpStaircaseOnly(levelNo);
+            hallsGen.AddUpStaircaseOnly(levelNo);
 
             //Set light
             //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
