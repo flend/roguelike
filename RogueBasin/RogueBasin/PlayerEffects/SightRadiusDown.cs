@@ -10,6 +10,9 @@ namespace RogueBasin.PlayerEffects
 
         int sightDownAmount;
 
+        int effectiveSightDownAmount;
+        bool sightZeroCase = false;
+
         public SightRadiusDown(Player player, int duration, int sightUpAmount)
             : base(player)
         {
@@ -24,7 +27,26 @@ namespace RogueBasin.PlayerEffects
         public override void OnStart()
         {
             LogFile.Log.LogEntry("SightDown start");
-            player.SightRadius -= sightDownAmount;
+
+            //Check how much we can take this down
+            if (player.SightRadius == 0)
+            {
+                sightZeroCase = true;
+                player.SightRadius = player.NormalSightRadius - sightDownAmount;
+            }
+            else
+            {
+
+                if (sightDownAmount > player.SightRadius)
+                {
+                    effectiveSightDownAmount = player.SightRadius;
+                }
+                else
+                {
+                    effectiveSightDownAmount = sightDownAmount;
+                }
+            }
+            player.SightRadius -= effectiveSightDownAmount;
             Game.MessageQueue.AddMessage("The shadows come closer.");
         }
 
@@ -34,7 +56,15 @@ namespace RogueBasin.PlayerEffects
         public override void OnEnd()
         {
             LogFile.Log.LogEntry("SightDown ended");
-            player.SightRadius += sightDownAmount;
+
+            if (sightZeroCase)
+            {
+                player.SightRadius = 0;
+            }
+            else
+            {
+                player.SightRadius += effectiveSightDownAmount;
+            }
             Game.MessageQueue.AddMessage("Everything is clear again.");
         }
 

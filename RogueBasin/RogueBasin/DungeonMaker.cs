@@ -1536,7 +1536,7 @@ namespace RogueBasin
                      //Get the monster's sight radius. 5 is normal, so use this as a ratio
                      double sightUpRatio = monster.NormalSightRadius / 5.0;
 
-                     monster.SightRadius = (int)Math.Floor(sightRadius * sightUpRatio);
+                     monster.SightRadius = (int)Math.Ceiling(sightRadius * sightUpRatio);
                  }
              }
          }

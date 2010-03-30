@@ -1004,7 +1004,8 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
-                creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
+                double sightRatio = creature.NormalSightRadius / 5.0;
+                creature.SightRadius = (int)Math.Ceiling(sightRatio * levels[level].LightLevel);
 
                 AddMonsterToList(creature);
                 return true;
@@ -1059,7 +1060,8 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
-                creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
+                double sightRatio = creature.NormalSightRadius / 5.0;
+                creature.SightRadius = (int)Math.Ceiling(sightRatio * levels[level].LightLevel);
 
                 AddMonsterToList(creature);
                 
@@ -1156,7 +1158,8 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
-                creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
+                double sightRatio = creature.NormalSightRadius / 5.0;
+                creature.SightRadius = (int)Math.Ceiling(sightRatio * levels[level].LightLevel);
 
                 summonedMonsters.Add(creature);
                 return true;
