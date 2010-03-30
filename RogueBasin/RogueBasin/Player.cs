@@ -133,6 +133,9 @@ namespace RogueBasin
 
         public Player()
         {
+            //Set unique ID to 0 (player)
+            UniqueID = 0;
+
             effects = new List<PlayerEffect>();
             Kills = new List<Monster>();
 
@@ -868,6 +871,7 @@ namespace RogueBasin
         {
             //Set the attacked by marker
             monster.LastAttackedBy = this;
+            monster.LastAttackedByID = this.UniqueID;
 
             //Was this a passive creature? It loses that flag
             if (monster.Passive)
@@ -908,11 +912,11 @@ namespace RogueBasin
 
                     if (aiMon != null)
                     {
-                        aiMon.currentTarget = null;
+                        aiMon.ClearCurrentTarget();
                     }
                     MonsterSimpleAI aiS = monster as MonsterSimpleAI;
                     if (aiS != null)
-                        aiS.currentTarget = null;
+                        aiS.ClearCurrentTarget();
 
 
                     //Add it to our list of kills (simply adding the whole object here)

@@ -370,38 +370,64 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-                                //Vi keys
-                                /*
-                            case 'b':
-                                timeAdvances = Game.Dungeon.PCMove(-1, 1);
-                                break;
-
-                            case 'n':
-                                timeAdvances = Game.Dungeon.PCMove(1, 1);
-                                break;
-
-                            case 'y':
-                                timeAdvances = Game.Dungeon.PCMove(-1, -1);
-                                break;
-
-                            case 'u':
-                                timeAdvances = Game.Dungeon.PCMove(1, -1);
-                                break;
-
-                            case 'h':
-                                timeAdvances = Game.Dungeon.PCMove(-1, 0);
-                                break;
-                            case 'l':
-                                timeAdvances = Game.Dungeon.PCMove(1, 0);
-                                break;
-                            case 'k':
-                                timeAdvances = Game.Dungeon.PCMove(0, -1);
-                                break;
-                            case 'j':
-                                timeAdvances = Game.Dungeon.PCMove(0, 1);
-                                break;
-                                */
                                 //Debug events
+
+
+                                //Stats up. Use in town
+                                case 'E':
+                                    Game.Dungeon.Player.AttackStat = 100;
+                                    Game.Dungeon.Player.CharmStat = 100;
+                                    Game.Dungeon.Player.MagicStat = 100;
+                                    Game.Dungeon.Player.HitpointsStat = 200;
+                                    Game.Dungeon.Player.MaxHitpointsStat = 200;
+
+                                    //Game.Dungeon.DungeonInfo.DragonDead = false;
+
+                                    //Game.Dungeon.EndOfGame();
+
+                                    break;
+
+                                case 'K':
+                                    Game.Dungeon.FlipTerrain("river");
+                                    Game.Dungeon.FlipTerrain("forest");
+                                    Game.Dungeon.FlipTerrain("grave");
+                                    Game.Dungeon.FlipTerrain("final");
+                                    UpdateScreen();
+                                    break;
+
+                                case 'm':
+                                    //Learn all moves
+                                    Game.Dungeon.PlayerLearnsAllMoves();
+                                    Game.MessageQueue.AddMessage("Learnt all moves.");
+                                    Game.Dungeon.PlayerLearnsAllSpells();
+                                    Game.MessageQueue.AddMessage("Learnt all spells.");
+                                    UpdateScreen();
+                                    timeAdvances = false;
+                                    break;
+
+                                case 't':
+                                    //teleport to stairs
+                                    TeleportToDownStairs();
+                                    UpdateScreen();
+                                    break;
+
+                                case 'y':
+                                    //teleport to stairs
+                                    TeleportToUpStairs();
+                                    UpdateScreen();
+                                    break;
+
+                                case 'T':
+                                    Game.Dungeon.MoveToNextDate();
+                                    timeAdvances = true;
+                                    break;
+
+                                case 'v':
+                                    //Add a healing event on the player
+                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                                    Game.Dungeon.Player.AddEffect(healing);
+                                    UpdateScreen();
+                                    break;
 
                                 /*
                             case 'k':
@@ -412,24 +438,7 @@ namespace RogueBasin
                                 timeAdvances = false;
                                 break;
                                 
-                            case 'E':
-                                Game.Dungeon.Player.AttackStat = 10;
-                                Game.Dungeon.Player.CharmStat = 10;
-                                Game.Dungeon.Player.MagicStat = 10;
-
-                                Game.Dungeon.DungeonInfo.DragonDead = false;
-
-                                Game.Dungeon.EndOfGame();
-
-                                break;
-
-                            case 'K':
-                                Game.Dungeon.FlipTerrain("river");
-                                Game.Dungeon.FlipTerrain("forest");
-                                Game.Dungeon.FlipTerrain("grave");
-                                Game.Dungeon.FlipTerrain("final");
-                                UpdateScreen();
-                                break;
+                            
 
                             //case 'c':
                             //    //Level up
@@ -437,15 +446,7 @@ namespace RogueBasin
                             //    UpdateScreen();
                             //    break;
 
-                            case 'm':
-                                //Learn all moves
-                                Game.Dungeon.PlayerLearnsAllMoves();
-                                Game.MessageQueue.AddMessage("Learnt all moves.");
-                                Game.Dungeon.PlayerLearnsAllSpells();
-                                Game.MessageQueue.AddMessage("Learnt all spells.");
-                                UpdateScreen();
-                                timeAdvances = false;
-                                break;
+                            
 
                             case 'M':
                                 //Learn all moves
@@ -462,23 +463,9 @@ namespace RogueBasin
                                 break;
 
 
-                            case 'T':
-                                Game.Dungeon.MoveToNextDate();
-                                timeAdvances = true;
-                                break;
 
 
-                            case 't':
-                                //teleport to stairs
-                                TeleportToDownStairs();
-                                UpdateScreen();
-                                break;
-
-                            case 'y':
-                                //teleport to stairs
-                                TeleportToUpStairs();
-                                UpdateScreen();
-                                break;
+                           
 
                             case 'Y':
                                 //Take me to first dungeon
@@ -513,12 +500,7 @@ namespace RogueBasin
                                 UpdateScreen();
                                 break;
                                     
-                            case 'v':
-                                //Add a healing event on the player
-                                PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
-                                Game.Dungeon.Player.AddEffect(healing);
-                                UpdateScreen();
-                                break;
+                           
 
                                 /*
                             //Debug events
@@ -794,8 +776,9 @@ namespace RogueBasin
             {
                 stream = File.OpenRead(filename);
 
-                compStream = new GZipStream(stream, CompressionMode.Decompress, true);
-                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(compStream);
+                //compStream = new GZipStream(stream, CompressionMode.Decompress, true);
+                //SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(compStream);
+                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(stream);
 
                 //Build a new dungeon object from the stored data
                 Dungeon newDungeon = new Dungeon();
@@ -813,6 +796,7 @@ namespace RogueBasin
                 newDungeon.Difficulty = readData.difficulty;
                 newDungeon.DungeonInfo = readData.dungeonInfo;
                 newDungeon.dateCounter = readData.dateCounter;
+                newDungeon.nextUniqueID = readData.nextUniqueID;
                 
                 //Process the maps back into map objects
                 foreach (SerializableMap serialMap in readData.levels)

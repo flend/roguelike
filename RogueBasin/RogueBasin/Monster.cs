@@ -464,6 +464,7 @@ namespace RogueBasin
 
             //Set the attacked by marker
             monster.LastAttackedBy = this;
+            monster.LastAttackedByID = this.UniqueID;
 
             //Notify the creature that it has been hit
             monster.NotifyAttackByCreature(this);

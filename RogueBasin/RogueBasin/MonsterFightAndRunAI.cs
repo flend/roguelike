@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
+using System.Xml.Serialization;
 
 namespace RogueBasin
 {
@@ -20,7 +21,9 @@ namespace RogueBasin
     public abstract class MonsterFightAndRunAI : Monster
     {
         public SimpleAIStates AIState {get; set;}
-        public Creature currentTarget;
+        [XmlIgnore]
+        protected Creature currentTarget;
+        public int currentTargetID = -1;
         protected int lastHitpoints;
 
         /// <summary>
@@ -51,6 +54,10 @@ namespace RogueBasin
             return distance;
         }
 
+        public void ClearCurrentTarget()
+        {
+            currentTarget = null;
+        }
 
         /// <summary>
         /// Run the Simple AI actions
@@ -65,7 +72,27 @@ namespace RogueBasin
             //If no targets, move randomly
 
             Random rand = Game.Random;
-            
+
+            //Restore currentTarget reference from ID, in case we have reloaded
+            if (currentTargetID == -1)
+            {
+                currentTarget = null;
+            }
+            else
+            {
+                currentTarget = Game.Dungeon.GetCreatureByUniqueID(currentTargetID);
+            }
+
+            //Restore lastAttackedByFromID
+            if (LastAttackedByID == -1)
+            {
+                LastAttackedBy = null;
+            }
+            else
+            {
+                LastAttackedBy = Game.Dungeon.GetCreatureByUniqueID(LastAttackedByID);
+            }
+
             //If we are returning to the PC, continue to do so unless we are attacked
             if (AIState == SimpleAIStates.Returning)
             {
@@ -453,6 +480,7 @@ namespace RogueBasin
         {
             //Confirm this as current target
             currentTarget = newTarget;
+            currentTargetID = newTarget.UniqueID;
 
             //Go into pursuit mode
             //AIState = SimpleAIStates.Pursuit;
@@ -782,6 +810,7 @@ namespace RogueBasin
         {
             AIState = SimpleAIStates.Pursuit;
             currentTarget = creature;
+            currentTargetID = creature.UniqueID;
 
         }
     }

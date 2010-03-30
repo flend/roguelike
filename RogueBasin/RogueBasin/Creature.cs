@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace RogueBasin
 {
@@ -24,15 +25,17 @@ namespace RogueBasin
         /// </summary>
         bool alive;
 
+        public int UniqueID { get; set; }
 
         public uint TurnCount { get; set; }
 
         /// <summary>
         /// The creature we were last attacked by
         /// </summary>
-
+        [XmlIgnore]
         public Creature LastAttackedBy { get; set; }
 
+        public int LastAttackedByID { get; set; }
 
 
         /// <summary>
@@ -115,6 +118,7 @@ namespace RogueBasin
             alive = true;
 
             LastAttackedBy = null;
+            LastAttackedByID = -1;
 
             NormalSightRadius = 5;
 

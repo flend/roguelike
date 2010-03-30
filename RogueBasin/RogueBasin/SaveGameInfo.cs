@@ -13,6 +13,13 @@ namespace RogueBasin
         public int width;
         public int height;
 
+        public double LightLevel;
+
+        /// <summary>
+        /// Are we guaranteed to be connected?
+        /// </summary>
+        public bool GuaranteedConnected { get; set; }
+
         /// <summary>
         /// For serialization only
         /// </summary>
@@ -29,6 +36,8 @@ namespace RogueBasin
             this.PCStartLocation = original.PCStartLocation;
             this.width = original.width;
             this.height = original.height;
+            this.LightLevel = original.LightLevel;
+            this.GuaranteedConnected = original.GuaranteedConnected;
 
             //Need to make mapSquares 1 dimensional
 
@@ -51,6 +60,8 @@ namespace RogueBasin
         {
             Map newMap = new Map(width, height);
             newMap.PCStartLocation = this.PCStartLocation;
+            newMap.LightLevel = this.LightLevel;
+            newMap.GuaranteedConnected = this.GuaranteedConnected;
 
             //Make mapSquares
             for (int j = 0; j < height; j++)
@@ -87,6 +98,8 @@ namespace RogueBasin
 
         public long worldClock = 0;
         public int dateCounter = 0;
+
+        public int nextUniqueID;
 
         /// <summary>
         /// List of global events

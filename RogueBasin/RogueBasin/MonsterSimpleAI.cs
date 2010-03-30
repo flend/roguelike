@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
+using System.Xml.Serialization;
 
 namespace RogueBasin
 {
     public abstract class MonsterSimpleAI : Monster
     {
         public SimpleAIStates AIState {get; set;}
-        public Creature currentTarget;
+        [XmlIgnore]
+        protected Creature currentTarget;
+        public int currentTargetID = -1;
 
         public MonsterSimpleAI()
         {
@@ -29,6 +32,15 @@ namespace RogueBasin
 
             Random rand = Game.Random;
 
+            //Restore currentTarget reference from ID, in case we have reloaded
+            if (currentTargetID == -1)
+            {
+                currentTarget = null;
+            }
+            else
+            {
+                currentTarget = Game.Dungeon.GetCreatureByUniqueID(currentTargetID);
+            }
 
             if (AIState == SimpleAIStates.Pursuit)
             {
@@ -242,6 +254,7 @@ namespace RogueBasin
         {
             //Confirm this as current target
             currentTarget = newTarget;
+            currentTargetID = newTarget.UniqueID;
 
             //Go into pursuit mode
             AIState = SimpleAIStates.Pursuit;
@@ -283,5 +296,9 @@ namespace RogueBasin
             }
         }
 
+        public void ClearCurrentTarget()
+        {
+            currentTarget = null;
+        }
     }
 }

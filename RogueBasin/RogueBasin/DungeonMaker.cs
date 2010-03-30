@@ -3189,6 +3189,8 @@ namespace RogueBasin
             //Dungeon 3: level 10-13: Halls
 
             //Set up the levels. Needs to be done here so the wilderness is initialized properly.
+
+            /*
             int Dungeon1StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0);
             int Dungeon1EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(0);
 
@@ -3209,7 +3211,9 @@ namespace RogueBasin
 
             int Dungeon7StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(6);
             int Dungeon7EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(6);
+            */
 
+            Game.Dungeon.DungeonInfo.SetupDungeonStartAndEnd();
 
             //Make the generators
 

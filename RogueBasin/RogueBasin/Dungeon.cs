@@ -80,8 +80,8 @@ namespace RogueBasin
 
         public bool DragonDead { get; set; }
 
-        public List<bool> level3UniqueStatus;
-        public List<bool> level4UniqueStatus;
+        //public List<bool> level3UniqueStatus;
+        //public List<bool> level4UniqueStatus;
 
         //public int CurrentDungeon { get; set; }
 
@@ -111,17 +111,20 @@ namespace RogueBasin
         {
             dungeons = new List<DungeonProfile>();
             //false = unique alive
-            level3UniqueStatus = new List<bool>();
+            //level3UniqueStatus = new List<bool>();
             //false = unique alive
-            level4UniqueStatus = new List<bool>();
+            //level4UniqueStatus = new List<bool>();
 
             LastMission = false;
             //CurrentDungeon = -1;
             DragonDead = false;
-            SetupDungeonStartAndEnd();
+            
         }
 
-        private void SetupDungeonStartAndEnd()
+        /// <summary>
+        /// Setup the dungeon level starts and unique status
+        /// </summary>
+        public void SetupDungeonStartAndEnd()
         {
             //In Princess RL there are 7 dungeons. This probably should be done in DungeonMaker
             for (int i = 0; i < 7; i++)
@@ -134,11 +137,12 @@ namespace RogueBasin
                 dungeons.Add(thisDung);
             }
 
+            /*
             for (int i = 0; i < 6; i++)
             {
                 level3UniqueStatus.Add(false);
                 level4UniqueStatus.Add(false);
-            }
+            }*/
 
             //Setup the original open dungeons
             dungeons[0].open = true;
@@ -308,6 +312,11 @@ namespace RogueBasin
         /// Count the days in the year
         /// </summary>
         public int dateCounter = 0;
+
+        /// <summary>
+        /// Monster have a unique ID. This stores the next free ID. The player is 0.
+        /// </summary>
+        public int nextUniqueID = 1;
 
         /// <summary>
         /// Set to false to end the game
@@ -807,6 +816,24 @@ namespace RogueBasin
             
             try
             {
+                /*
+                //Nuke all creature's targets to try to avoid circular references
+                foreach (Monster m in monsters)
+                {
+                    MonsterSimpleAI si = m as MonsterSimpleAI;
+                    if (si != null)
+                    {
+                        si.ClearCurrentTarget();
+                    }
+
+                    MonsterFightAndRunAI fi = m as MonsterFightAndRunAI;
+                    if (fi != null)
+                    {
+                        fi.ClearCurrentTarget();
+                    }
+
+                }*/
+
                 //Copy across the data we need to save from dungeon
 
                 SaveGameInfo saveGameInfo = new SaveGameInfo();
@@ -826,6 +853,7 @@ namespace RogueBasin
                 saveGameInfo.triggers = this.Triggers;
                 saveGameInfo.difficulty = this.Difficulty;
                 saveGameInfo.dungeonInfo = this.dungeonInfo;
+                saveGameInfo.nextUniqueID = this.nextUniqueID;
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -841,9 +869,10 @@ namespace RogueBasin
 
                 XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
                 stream = File.Open(filename, FileMode.Create);
-                compStream = new GZipStream(stream, CompressionMode.Compress, true);
+                //compStream = new GZipStream(stream, CompressionMode.Compress, true);
 
-                XmlTextWriter writer = new XmlTextWriter(compStream, System.Text.Encoding.UTF8);
+                //XmlTextWriter writer = new XmlTextWriter(compStream, System.Text.Encoding.UTF8);
+                XmlTextWriter writer = new XmlTextWriter(stream, System.Text.Encoding.UTF8);
                 writer.Formatting = Formatting.Indented;
                 serializer.Serialize(writer, saveGameInfo);
 
@@ -977,7 +1006,7 @@ namespace RogueBasin
 
                 creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
 
-                monsters.Add(creature);
+                AddMonsterToList(creature);
                 return true;
             }
             catch (Exception ex)
@@ -1032,7 +1061,8 @@ namespace RogueBasin
 
                 creature.SightRadius = (int)Math.Ceiling(creature.NormalSightRadius * levels[level].LightLevel);
 
-                monsters.Add(creature);
+                AddMonsterToList(creature);
+                
                 return true;
             }
             catch (Exception ex)
@@ -1042,6 +1072,41 @@ namespace RogueBasin
             }
 
         }
+
+        /// <summary>
+        /// Adds a monster to the monsters list. It gets a unique ID. This is used when saving targets
+        /// </summary>
+        /// <param name="creature"></param>
+        private void AddMonsterToList(Monster monster) {
+
+            monster.UniqueID = nextUniqueID;
+            nextUniqueID++;
+
+            monsters.Add(monster);
+        }
+
+        /// <summary>
+        /// Return a creature (player or monster) reference from a unique ID. Used to check targets are valid after reload
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Creature GetCreatureByUniqueID(int id)
+        {
+            if (id == 0)
+            {
+                return player;
+            }
+
+            Creature foundCreature = monsters.Find(x => x.UniqueID == id);
+
+            if (foundCreature == null)
+            {
+                LogFile.Log.LogEntryDebug("Error: Couldn't find monster from ID " + id, LogDebugLevel.High);
+            }
+
+            return foundCreature;
+        }
+
         /// <summary>
         /// A creature does something that creates a new creature, e.g. raising summoning.
         /// Adds to the summoning queue which is processed at the end
