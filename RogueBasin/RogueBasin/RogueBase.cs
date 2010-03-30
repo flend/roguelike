@@ -39,9 +39,9 @@ namespace RogueBasin
 
         public int Run(string[] args)
         {
-            SetupGame();
+            bool loadedGame = SetupGame();
 
-            MainLoop();
+            MainLoop(loadedGame);
 
             //test code
             /*
@@ -64,8 +64,10 @@ namespace RogueBasin
             return 1;
         }
 
-        private void MainLoop()
+        private void MainLoop(bool loadedGame)
         {
+            bool firstIteration = true;
+
             //Time
 
 
@@ -83,71 +85,75 @@ namespace RogueBasin
             {
                 try
                 {
-                    //Increment world clock
-                    Game.Dungeon.IncrementWorldClock();
-
-                    //Increment time on all global (dungeon) events
-                    Game.Dungeon.IncrementEventTime();
-
-                    //All creatures get IncrementTurnTime() called on them each worldClock tick
-                    //They internally keep track of when they should take another turn
-
-                    //IncrementTurnTime() also increments time for all events on that creature
-
-                    foreach (Monster creature in Game.Dungeon.Monsters)
+                    //This check stops monsters having an extra go when we load
+                    if (!(firstIteration && loadedGame))
                     {
-                        try
-                        {
-                            if (creature.IncrementTurnTime())
-                            {
-                                //dungeon.ShowCreatureFOVOnMap(creature);
 
-                                //Creatures may be killed by other creatures so check they are alive before processing
-                                if (creature.Alive)
+                        //Increment world clock
+                        Game.Dungeon.IncrementWorldClock();
+
+                        //Increment time on all global (dungeon) events
+                        Game.Dungeon.IncrementEventTime();
+
+                        //All creatures get IncrementTurnTime() called on them each worldClock tick
+                        //They internally keep track of when they should take another turn
+
+                        //IncrementTurnTime() also increments time for all events on that creature
+
+                        foreach (Monster creature in Game.Dungeon.Monsters)
+                        {
+                            try
+                            {
+                                if (creature.IncrementTurnTime())
                                 {
-                                    //Only process creatures on the same level as the player
-                                    if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                                    //dungeon.ShowCreatureFOVOnMap(creature);
+
+                                    //Creatures may be killed by other creatures so check they are alive before processing
+                                    if (creature.Alive)
                                     {
-                                        creature.ProcessTurn();
+                                        //Only process creatures on the same level as the player
+                                        if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                                        {
+                                            creature.ProcessTurn();
+                                        }
                                     }
                                 }
                             }
+                            catch (Exception e)
+                            {
+                                LogFile.Log.LogEntry("Exception thrown" + e.Message);
+                            }
+                        }
+
+                        try
+                        {
+                            //Add summoned monsters
+                            Game.Dungeon.AddDynamicMonsters();
                         }
                         catch (Exception e)
                         {
                             LogFile.Log.LogEntry("Exception thrown" + e.Message);
                         }
-                    }
 
-                    try
-                    {
-                        //Add summoned monsters
-                        Game.Dungeon.AddDynamicMonsters();
+                        //Remove dead monsters
+                        //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
+                        try
+                        {
+                            Game.Dungeon.RemoveDeadMonsters();
+                        }
+                        catch (Exception e)
+                        {
+                            LogFile.Log.LogEntry("Exception thrown" + e.Message);
+                        }
+                        //Remove dead players!
+                        if (Game.Dungeon.PlayerDeathOccured)
+                            Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
                     }
-                    catch (Exception e)
-                    {
-                        LogFile.Log.LogEntry("Exception thrown" + e.Message);
-                    }
-
-                    //Remove dead monsters
-                    //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
-                    try
-                    {
-                        Game.Dungeon.RemoveDeadMonsters();
-                    }
-                    catch (Exception e)
-                    {
-                        LogFile.Log.LogEntry("Exception thrown" + e.Message);
-                    }
-                    //Remove dead players!
-                    if (Game.Dungeon.PlayerDeathOccured)
-                        Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
-                    
                     try
                     {
 
                         //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
-                        if (Game.Dungeon.Player.IncrementTurnTime())
+                        if (Game.Dungeon.Player.IncrementTurnTime() || (firstIteration && loadedGame))
                         {
                             //Calculate the player's FOV
                             RecalculatePlayerFOV();
@@ -177,6 +183,8 @@ namespace RogueBasin
 
                             //Game.MessageQueue.AddMessage("Finished PC move");
                         }
+
+                        firstIteration = false;
                     }
                     catch (Exception ex)
                     {
@@ -1985,7 +1993,11 @@ namespace RogueBasin
 
         }
 
-        private void SetupGame()
+        /// <summary>
+        /// Returns true if we loaded a save game
+        /// </summary>
+        /// <returns></returns>
+        private bool SetupGame()
         {
             //Initial setup
 
@@ -2033,6 +2045,7 @@ namespace RogueBasin
             if (Utility.DoesSaveGameExist(playerName))
             {
                 LoadGame(playerName);
+                return true;
             }
             else {
 
@@ -2048,6 +2061,8 @@ namespace RogueBasin
 
                 //Move the player to the start location, triggering any triggers
                 Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
+
+                return false;
             }
 
             //Fall into the main loop
