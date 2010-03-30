@@ -921,7 +921,7 @@ namespace RogueBasin
 
                     //Add it to our list of kills (simply adding the whole object here)
                     KillCount++;
-                    //Kills.Add(monster);
+                    Kills.Add(monster);
 
                     //Debug string
                     string playerMsg = "You knocked out the " + monster.SingleDescription + ".";

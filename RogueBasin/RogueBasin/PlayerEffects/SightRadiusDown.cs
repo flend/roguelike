@@ -28,11 +28,11 @@ namespace RogueBasin.PlayerEffects
         {
             LogFile.Log.LogEntry("SightDown start");
 
-            //Check how much we can take this down
+            //Bit of a hack, but for 0 sight dungeons, restrict to 1 square. This is what the blinding effects normally do
             if (player.SightRadius == 0)
             {
                 sightZeroCase = true;
-                player.SightRadius = player.NormalSightRadius - sightDownAmount;
+                player.SightRadius = 1;
             }
             else
             {

@@ -2996,6 +2996,10 @@ namespace RogueBasin
 
             Screen.Instance.DrawEndOfGameInfo(finalScreen);
 
+            finalScreen.Add("");
+            finalScreen.Add("Creatures defeated:");
+            finalScreen.Add("");
+
             SaveObituary(finalScreen, killRecord.killStrings);
 
             if (!Game.Dungeon.SaveScumming)
@@ -3023,11 +3027,12 @@ namespace RogueBasin
         public KillRecord GetKillRecord()
         {
             //fake
+            /*
             KillRecord fakeKillRec = new KillRecord();
             fakeKillRec.killStrings = new List<string>();
             fakeKillRec.killCount = Game.Dungeon.player.KillCount;
 
-            return fakeKillRec;
+            return fakeKillRec;*/
             
             //Make killCount list
 
@@ -3853,8 +3858,9 @@ namespace RogueBasin
             obString.Add("Intrinsics:");
             obString.AddRange(instricsList);
             obString.Add("She defeated " + killRecord.killCount + " creatures.");
-            //obString.Add("");
-            //obString.Add("Creature list:");
+            obString.Add("");
+            obString.Add("Creatures defeated:");
+            obString.Add("");
 
             SaveObituary(obString, killRecord.killStrings);
 
