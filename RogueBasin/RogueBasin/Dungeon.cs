@@ -816,24 +816,7 @@ namespace RogueBasin
             
             try
             {
-                /*
-                //Nuke all creature's targets to try to avoid circular references
-                foreach (Monster m in monsters)
-                {
-                    MonsterSimpleAI si = m as MonsterSimpleAI;
-                    if (si != null)
-                    {
-                        si.ClearCurrentTarget();
-                    }
-
-                    MonsterFightAndRunAI fi = m as MonsterFightAndRunAI;
-                    if (fi != null)
-                    {
-                        fi.ClearCurrentTarget();
-                    }
-
-                }*/
-
+               
                 //Copy across the data we need to save from dungeon
 
                 SaveGameInfo saveGameInfo = new SaveGameInfo();
@@ -869,10 +852,10 @@ namespace RogueBasin
 
                 XmlSerializer serializer = new XmlSerializer(typeof(SaveGameInfo));
                 stream = File.Open(filename, FileMode.Create);
-                //compStream = new GZipStream(stream, CompressionMode.Compress, true);
+                compStream = new GZipStream(stream, CompressionMode.Compress, true);
 
-                //XmlTextWriter writer = new XmlTextWriter(compStream, System.Text.Encoding.UTF8);
-                XmlTextWriter writer = new XmlTextWriter(stream, System.Text.Encoding.UTF8);
+                XmlTextWriter writer = new XmlTextWriter(compStream, System.Text.Encoding.UTF8);
+                //XmlTextWriter writer = new XmlTextWriter(stream, System.Text.Encoding.UTF8);
                 writer.Formatting = Formatting.Indented;
                 serializer.Serialize(writer, saveGameInfo);
 

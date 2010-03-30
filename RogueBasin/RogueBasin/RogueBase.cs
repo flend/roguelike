@@ -370,9 +370,10 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
+                                    
                                 //Debug events
 
-
+                                    /*
                                 //Stats up. Use in town
                                 case 'E':
                                     Game.Dungeon.Player.AttackStat = 100;
@@ -428,7 +429,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(healing);
                                     UpdateScreen();
                                     break;
-
+                                */
                                 /*
                             case 'k':
                                 //Display the inventory
@@ -776,9 +777,9 @@ namespace RogueBasin
             {
                 stream = File.OpenRead(filename);
 
-                //compStream = new GZipStream(stream, CompressionMode.Decompress, true);
-                //SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(compStream);
-                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(stream);
+                compStream = new GZipStream(stream, CompressionMode.Decompress, true);
+                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(compStream);
+                //SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(stream);
 
                 //Build a new dungeon object from the stored data
                 Dungeon newDungeon = new Dungeon();
@@ -2005,7 +2006,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 2;
+            LogFile.Log.DebugLevel = 1;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
