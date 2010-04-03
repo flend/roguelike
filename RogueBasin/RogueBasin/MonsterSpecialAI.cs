@@ -273,6 +273,26 @@ namespace RogueBasin
 
                 do
                 {
+                    //Get a to-flee to square adjacent to the creature
+                    //Performs very badly
+
+                    /*
+                    fleeX = this.LocationMap.x + Game.Random.Next(2) - 1;
+                    fleeY = this.LocationMap.y + Game.Random.Next(2) - 1;
+
+                    if (fleeX < 0 || fleeX >= Game.Dungeon.Levels[this.LocationLevel].width)
+                    {
+                        LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail off map", LogDebugLevel.Low);
+                        continue;
+                    }
+
+                    if (fleeY < 0 || fleeY >= Game.Dungeon.Levels[this.LocationLevel].height)
+                    {
+                        LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail off map", LogDebugLevel.Low);
+                        continue;
+                    }*/
+
+                    //This performs badly when there are few escape options and you are close to the edge of the map
                     fleeX = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].width);
                     fleeY = Game.Random.Next(Game.Dungeon.Levels[this.LocationLevel].height);
 
@@ -280,30 +300,45 @@ namespace RogueBasin
                     if (counter > relaxDirectionAt)
                         relaxDirection = true;
 
-                    //Check these are in the direction away from the attacker
-                    int deltaFleeX = fleeX - this.LocationMap.x;
-                    int deltaFleeY = fleeY - this.LocationMap.y;
+                    //Find the square to move to
+                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+
+                    //Check the square is pathable to
+                    if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
+                    {
+                        counter++;
+                        //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail unpathable", LogDebugLevel.Low);
+                        continue;
+                    }
+
+                    //Check that the next square is in a direction away from the attacker
+                    int deltaFleeX = nextStep.x - this.LocationMap.x;
+                    int deltaFleeY = nextStep.y - this.LocationMap.y;
 
                     if (!relaxDirection)
                     {
                         if (deltaFleeX > 0 && deltaX > 0)
                         {
                             counter++;
+                            //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                         if (deltaFleeX < 0 && deltaX < 0)
                         {
                             counter++;
+                            //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                         if (deltaFleeY > 0 && deltaY > 0)
                         {
                             counter++;
+                            //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                         if (deltaFleeY < 0 && deltaY < 0)
                         {
                             counter++;
+                            //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                     }
@@ -313,6 +348,7 @@ namespace RogueBasin
                     if (!isEnterable)
                     {
                         counter++;
+                        //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail enterable", LogDebugLevel.Low);
                         continue;
                     }
 
@@ -321,34 +357,29 @@ namespace RogueBasin
                     if (contents.monster != null)
                     {
                         counter++;
+                        //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail blocked", LogDebugLevel.Low);
                         continue;
                     }
 
-                    //Check the square is pathable to
-                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
 
-                    if (nextStep.x == -1 && nextStep.y == -1)
-                    {
-                        counter++;
-                        continue;
-                    }
-                    
                     //Check that the target is visible from the square we are fleeing to
                     //This may prove to be too expensive
-                    TCODFov projectedFOV = Game.Dungeon.CalculateCreatureFOV(this, new Point(fleeX, fleeY));
+
+                    TCODFov projectedFOV = Game.Dungeon.CalculateCreatureFOV(this, nextStep);
 
                     if (!projectedFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y))
                     {
                         counter++;
+                        //LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail fov", LogDebugLevel.Low);
                         continue;
                     }
 
                     //Otherwise we found it
                     goodPath = true;
                     break;
-
-
                 } while (counter < totalFleeLoops);
+
+                LogFile.Log.LogEntryDebug("Back away results. Count: " + counter + " Direction at: " + relaxDirectionAt + " Total: " + totalFleeLoops, LogDebugLevel.Low);
 
                 //If we found a good path, walk it
                 if (goodPath)
@@ -383,7 +414,6 @@ namespace RogueBasin
                     ContinueChasing(newTarget);
                     return;
                 }
-
 
                 //In preference they will use their special ability rather than fighting
 

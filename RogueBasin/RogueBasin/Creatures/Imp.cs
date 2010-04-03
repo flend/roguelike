@@ -67,7 +67,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetUseSpecialChance()
         {
-            return 85;
+            return 20;
         }
 
         /// <summary>
@@ -93,12 +93,12 @@ namespace RogueBasin.Creatures
 
         protected override int RelaxDirectionAt()
         {
-            return 5;
+            return 20;
         }
 
         protected override int GetTotalFleeLoops()
         {
-            return 50;
+            return 20;
         }
 
         protected override double GetMissileRange()
@@ -168,9 +168,9 @@ namespace RogueBasin.Creatures
                 highestSkill = player.MagicStat;
 
 
-            highestSkill = highestSkill / 2;
-            if (highestSkill > 50)
-                highestSkill = 50;
+            //highestSkill = highestSkill / 2;
+            if (highestSkill > 75)
+                highestSkill = 75;
 
             int roll = Game.Random.Next(100);
 

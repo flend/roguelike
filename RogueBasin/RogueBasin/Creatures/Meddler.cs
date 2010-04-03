@@ -93,7 +93,7 @@ namespace RogueBasin.Creatures
 
         protected override int RelaxDirectionAt()
         {
-            return 35;
+            return 50;
         }
 
         protected override int GetTotalFleeLoops()

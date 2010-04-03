@@ -98,7 +98,7 @@ namespace RogueBasin.Creatures
 
         protected override int RelaxDirectionAt()
         {
-            return 5;
+            return 100;
         }
 
         protected override int GetChanceToRecover()
@@ -118,7 +118,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetTotalFleeLoops()
         {
-            return 20;
+            return 100;
         }
         public override int CreatureCost()
         {

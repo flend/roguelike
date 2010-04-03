@@ -378,10 +378,10 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-                                    
+                                    /*
                                 //Debug events
 
-                                    /*
+                                    
                                 //Stats up. Use in town
                                 case 'E':
                                     Game.Dungeon.Player.AttackStat = 100;
@@ -420,6 +420,17 @@ namespace RogueBasin
                                     UpdateScreen();
                                     break;
 
+                                case 'D':
+                                    //screen debug mode
+                                    Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
+                                    UpdateScreen();
+                                    break;
+
+                                case 'V':
+                                    //screen debug mode
+                                    Game.Dungeon.Player.AddEffect(new PlayerEffects.SightRadiusUp(Game.Dungeon.Player, 2000, 1));
+                                    UpdateScreen();
+                                    break;
                                 case 'y':
                                     //teleport to stairs
                                     TeleportToUpStairs();

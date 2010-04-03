@@ -5,7 +5,7 @@ using System.Text;
 namespace RogueBasin.Triggers
 {
     /// <summary>
-    /// When you enter the entrance square
+    /// When you enter the entrance square.
     /// </summary>
     public class DungeonEntranceTrigger : DungeonSquareTrigger
     {
@@ -14,9 +14,12 @@ namespace RogueBasin.Triggers
         /// </summary>
         public bool Triggered { get; set; }
 
+        static bool GlobalTriggered { get; set; }
+
         public DungeonEntranceTrigger()
         {
             Triggered = false;
+            GlobalTriggered = false;
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)
@@ -28,7 +31,13 @@ namespace RogueBasin.Triggers
             }
             //Otherwise in the right place
 
-            if (!Triggered)
+            //Try to persist the global state through a save - needs more work
+            if (Triggered)
+            {
+                GlobalTriggered = true;
+            }
+
+            if (!Triggered && !GlobalTriggered)
             {
                 //Set vision
                 //Game.Dungeon.Player.SightRadius = (int)Math.Ceiling(Game.Dungeon.Player.NormalSightRadius * Game.Dungeon.Levels[0].LightLevel);
@@ -38,6 +47,7 @@ namespace RogueBasin.Triggers
                     Screen.Instance.PlayMovie("helpdungeons", true);
                 }
                 Triggered = true;
+                GlobalTriggered = true;
             }
             
             return true;

@@ -379,7 +379,7 @@ namespace RogueBasin
             caveList.Add(new MonsterCommon(new Creatures.Spider(), 30));
             caveList.Add(new MonsterCommon(new Creatures.Ogre(), 20));
             caveList.Add(new MonsterCommon(new Creatures.Bugbear(), 40));
-            caveList.Add(new MonsterCommon(new Creatures.Pixie(), 20));
+            caveList.Add(new MonsterCommon(new Creatures.Pixie(), 10));
 
             looseGroupDist = 8;
             lonerChance = 50;

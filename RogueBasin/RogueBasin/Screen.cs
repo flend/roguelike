@@ -18,7 +18,7 @@ namespace RogueBasin {
         public int Width { get; set; }
         public int Height { get; set; }
 
-        bool debugMode = false;
+        public bool DebugMode { get; set; }
 
         public bool SetTargetInRange = false;
 
@@ -160,6 +160,8 @@ namespace RogueBasin {
         {
             Width = 90;
             Height = 35;
+
+            DebugMode = false;
 
             mapTopLeft = new Point(5, 5);
 
@@ -678,8 +680,20 @@ namespace RogueBasin {
             //Draw PC
 
             Point PClocation = player.LocationMap;
+            Color PCDrawColor = PCColor;
+            
 
-            rootConsole.ForegroundColor = PCColor;
+            if (DebugMode)
+            {
+                MapSquare pcSquare = Game.Dungeon.Levels[player.LocationLevel].mapSquares[player.LocationMap.x, player.LocationMap.y];
+
+                if (pcSquare.InMonsterFOV)
+                {
+                    PCDrawColor = Color.Interpolate(PCDrawColor, ColorPresets.Red, 0.4);
+                }
+            }
+
+            rootConsole.ForegroundColor = PCDrawColor;
             rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, player.Representation);
             rootConsole.ForegroundColor = ColorPresets.White;
 
@@ -1873,7 +1887,7 @@ namespace RogueBasin {
                 else
                 {
                     //Never in FOV
-                    if (debugMode)
+                    if (DebugMode)
                         itemColorToUse = itemColor;
                     else
                         itemColorToUse = hiddenColor;
@@ -1924,7 +1938,7 @@ namespace RogueBasin {
                 else
                 {
                     //Never in FOV
-                    if(debugMode)
+                    if(DebugMode)
                         featureColor = neverSeenFOVTerrainColor;
                     else
                         featureColor = hiddenColor;
@@ -1967,17 +1981,26 @@ namespace RogueBasin {
                 else if (creatureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    if (!debugMode)
+                    if (!DebugMode)
                         drawCreature = false;
                         //creatureColor = hiddenColor;
                 }
                 else
                 {
                     //Never in FOV
-                    if(!debugMode)
+                    if(!DebugMode)
                         drawCreature = false;
                     
                 }
+
+                if (DebugMode)
+                {
+                    if (creatureSquare.InMonsterFOV)
+                    {
+                        creatureColor = Color.Interpolate(creatureColor, ColorPresets.Red, 0.4);
+                    }
+                }
+
                 if (drawCreature)
                 {
                     rootConsole.ForegroundColor = creatureColor;
@@ -2191,25 +2214,26 @@ namespace RogueBasin {
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.5);
+                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.4);
 
                         //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
-                    }
-                    else if (map.mapSquares[i, j].InMonsterFOV)
-                    {
-                        //Monster can see it
-                        if (debugMode)
-                            drawColor = inMonsterFOVTerrainColor;
-                        else
-                            drawColor = hiddenColor;
                     }
                     else
                     {
                         //Never in FOV
-                        if (debugMode)
+                        if (DebugMode)
                             drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.6);
                         else
                             drawColor = hiddenColor;
+                    }
+
+                    //Monster FOV in debug mode
+                    if (DebugMode)
+                    {
+                        if (map.mapSquares[i, j].InMonsterFOV)
+                        {
+                            drawColor = Color.Interpolate(drawColor, ColorPresets.Red, 0.6);
+                        }
                     }
                     rootConsole.ForegroundColor = drawColor;
                     rootConsole.PutChar(screenX, screenY, screenChar);

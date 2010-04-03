@@ -99,7 +99,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetTotalFleeLoops()
         {
-            return 50;
+            return 25;
         }
 
         protected override double GetMissileRange()

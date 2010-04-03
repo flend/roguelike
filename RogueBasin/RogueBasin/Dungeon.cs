@@ -2032,7 +2032,8 @@ namespace RogueBasin
                     if (m.LocationLevel == player.LocationLevel)
                     {
                         Creatures.DragonUnique drag = m as Creatures.DragonUnique;
-                        if(m != drag)
+                        Creatures.Friend friend = m as Creatures.Friend;
+                        if(m != drag && m != friend)
                             KillMonster(m, true);
                     }
                 }
@@ -2982,8 +2983,8 @@ namespace RogueBasin
 
             finalScreen.Add("");
 
-            finalScreen.Add("She explored " + dungeonsExplored + " out of 6 dungeons.");
-            finalScreen.Add("She cleared " + dungeonsCleared + " out of 6 dungeons.");
+            finalScreen.Add("She explored " + dungeonsExplored + " out of 7 dungeons.");
+            finalScreen.Add("She cleared " + dungeonsCleared + " out of 7 dungeons.");
 
             finalScreen.Add("");
             finalScreen.Add("She knocked out " + killRecord.killCount + " creatures.");
@@ -3817,8 +3818,13 @@ namespace RogueBasin
             KillRecord killRecord = GetKillRecord();
 
             finalScreen.Add("");
-            finalScreen.Add("She explored " + dungeonsExplored + " out of 6 dungeons.");
-            finalScreen.Add("She cleared " + dungeonsCleared + " out of 6 dungeons.");
+            finalScreen.Add("She explored " + dungeonsExplored + " out of 7 dungeons.");
+
+            //Add an extra dungeon clearance for the prince
+            if(princeGet)
+                dungeonsCleared++;
+
+            finalScreen.Add("She cleared " + dungeonsCleared + " out of 7 dungeons.");
 
             finalScreen.Add("");
             finalScreen.Add("She knocked out " + killRecord.killCount + " creatures.");

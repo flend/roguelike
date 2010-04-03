@@ -94,7 +94,7 @@ namespace RogueBasin.Creatures
 
         protected override int RelaxDirectionAt()
         {
-            return 10;
+            return 15;
         }
 
         protected override int GetTotalFleeLoops()
@@ -128,12 +128,12 @@ namespace RogueBasin.Creatures
 
         public override int GetMagicRes()
         {
-            return 50;
+            return 35;
         }
 
         public override int GetCharmRes()
         {
-            return 50;
+            return 40;
         }
 
         public override bool CanBeCharmed()

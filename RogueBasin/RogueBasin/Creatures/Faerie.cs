@@ -94,7 +94,7 @@ namespace RogueBasin.Creatures
 
         protected override int RelaxDirectionAt()
         {
-            return 5;
+            return 15;
         }
 
         protected override int GetChanceToRecover()
@@ -173,7 +173,7 @@ namespace RogueBasin.Creatures
                 highestSkill = player.MagicStat;
 
 
-            highestSkill = highestSkill / 2;
+            //highestSkill = highestSkill / 2;
             if (highestSkill > 75)
                 highestSkill = 75;
 
@@ -198,7 +198,7 @@ namespace RogueBasin.Creatures
 
         protected override int GetUseSpecialChance()
         {
-            return 80;
+            return 40;
         }
         
 
