@@ -79,6 +79,12 @@ namespace RogueBasin.SpecialMoves
                 xDelta = locationAfterMove.x - player.LocationMap.x;
                 yDelta = locationAfterMove.y - player.LocationMap.y;
 
+                if (xDelta == 0 && yDelta == 0)
+                {
+                    FailWrongDirection();
+                    return false;
+                }
+
                 moveCounter++;
                 
                 LogFile.Log.LogEntryDebug("Charge started", LogDebugLevel.Medium);

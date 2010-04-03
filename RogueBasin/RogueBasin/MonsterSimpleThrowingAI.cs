@@ -252,11 +252,20 @@ namespace RogueBasin
         /// <param name="newTarget"></param>
         protected override void FollowAndAttack(Creature newTarget)
         {
-            //If we are in range, fire
+            //If we are in range and can see the target, fire
             double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
 
             if (range < GetMissileRange() + 0.005)
             {
+                //Check FOV. If not in FOV, return.
+                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
+                if (!currentFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y))
+                {
+                    ContinueChasing(newTarget);
+                    return;
+                }
+                
                 //In range
 
                 //Fire at the player
@@ -277,9 +286,14 @@ namespace RogueBasin
                 //If not, move towards the player
 
                 //Find location of next step on the path towards them
-                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
-                LocationMap = nextStep;
+                ContinueChasing(newTarget);
             }
+        }
+
+        private void ContinueChasing(Creature newTarget)
+        {
+            Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+            LocationMap = nextStep;
         }
 
         /*

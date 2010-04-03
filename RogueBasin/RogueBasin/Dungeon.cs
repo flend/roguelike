@@ -2239,6 +2239,20 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Calculates the FOV for a creature if it was in the location
+        public TCODFov CalculateCreatureFOV(Creature creature, Point location)
+        {
+            Map currentMap = levels[creature.LocationLevel];
+            TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
+
+            //Update FOV
+            tcodFOV.CalculateFOV(location.x, location.y, creature.SightRadius);
+
+            return tcodFOV;
+
+        }
+
+        /// <summary>
         /// Displays the creature FOV on the map. Note that this clobbers the FOV map
         /// </summary>
         /// <param name="creature"></param>

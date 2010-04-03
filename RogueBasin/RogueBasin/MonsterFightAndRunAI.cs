@@ -188,7 +188,7 @@ namespace RogueBasin
                 //currentFOV.CalculateFOV(LocationMap.x, LocationMap.y, SightRadius);
 
                 //Check for other creatures within this creature's FOV
-
+                /*
                 int xl = LocationMap.x - SightRadius;
                 int xr = LocationMap.x + SightRadius;
 
@@ -203,7 +203,7 @@ namespace RogueBasin
                     yt = 0;
                     yb = currentMap.height;
                 }
-
+                
                 if (xl < 0)
                     xl = 0;
                 if(xr >= currentMap.width)
@@ -212,7 +212,7 @@ namespace RogueBasin
                     yt = 0;
                 if (yb >= currentMap.height)
                     yb = currentMap.height - 1;
-
+                */
                 //AI branches here depending on if we are charmed or passive
 
                 if (this.Charmed)
@@ -621,6 +621,7 @@ namespace RogueBasin
                 }
 
             }
+            //Not fleeing
             else
             {
                 //If charmed creatures get too far away chasing they will come back

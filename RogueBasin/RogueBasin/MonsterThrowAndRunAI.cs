@@ -264,10 +264,13 @@ namespace RogueBasin
         /// <param name="newTarget"></param>
         protected override void FollowAndAttack(Creature newTarget) {
             
-            //If we are in range, fire
             double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
 
-            if(range < GetMissileRange() / 2.0) {
+            //Back away if we are too close & can see the target
+            //If we can't see the target, don't back away
+            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
+            if(range < GetMissileRange() / 2.0 && currentFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y)) {
                 //Too close creature will try to back away
                 int deltaX = newTarget.LocationMap.x - this.LocationMap.x;
                 int deltaY = newTarget.LocationMap.y - this.LocationMap.y;
@@ -304,21 +307,25 @@ namespace RogueBasin
                         if (deltaFleeX > 0 && deltaX > 0)
                         {
                             counter++;
+                            LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                         if (deltaFleeX < 0 && deltaX < 0)
                         {
                             counter++;
+                            LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                         if (deltaFleeY > 0 && deltaY > 0)
                         {
                             counter++;
+                            LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                         if (deltaFleeY < 0 && deltaY < 0)
                         {
                             counter++;
+                            LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail direction", LogDebugLevel.Low);
                             continue;
                         }
                     }
@@ -328,6 +335,7 @@ namespace RogueBasin
                     if (!isEnterable)
                     {
                         counter++;
+                        LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail enterable", LogDebugLevel.Low);
                         continue;
                     }
 
@@ -336,6 +344,7 @@ namespace RogueBasin
                     if (contents.monster != null)
                     {
                         counter++;
+                        LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail blocked", LogDebugLevel.Low);
                         continue;
                     }
 
@@ -345,15 +354,28 @@ namespace RogueBasin
                     if (nextStep.x == -1 && nextStep.y == -1)
                     {
                         counter++;
+                        LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail unpathable", LogDebugLevel.Low);
+                        continue;
+                    }
+
+                    //Check that the target is visible from the square we are fleeing to
+                    //This may prove to be too expensive
+
+                    TCODFov projectedFOV = Game.Dungeon.CalculateCreatureFOV(this, nextStep);
+
+                    if (!projectedFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y))
+                    {
+                        counter++;
+                        LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Back away fail fov", LogDebugLevel.Low);
                         continue;
                     }
 
                     //Otherwise we found it
                     goodPath = true;
                     break;
-
-
                 } while (counter < totalFleeLoops);
+
+                LogFile.Log.LogEntryDebug("Back away results. Count: " + counter + " Direction at: " + relaxDirectionAt + " Total: " + totalFleeLoops, LogDebugLevel.Low);
 
                 //If we found a good path, walk it
                 if (goodPath)
@@ -378,10 +400,52 @@ namespace RogueBasin
                 }
             }
 
+            //Not so close we want to back away
             else if (range < GetMissileRange() + 0.005)
             {
                 //In range
 
+                //Check FOV. If not in FOV, chase the player.
+                if (!currentFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y))
+                {
+                    ContinueChasing(newTarget);
+                    return;
+                }
+
+                //In FOV - fire at the player
+                CombatResults result;
+
+                if (newTarget == Game.Dungeon.Player)
+                {
+                    result = AttackPlayer(newTarget as Player);
+                }
+                else
+                {
+                    //It's a normal creature
+                    result = AttackMonster(newTarget as Monster);
+                }
+            }
+
+            //Not too close, not in range, chase the target
+            else
+            {
+                ContinueChasing(newTarget);
+            }
+        }
+
+        private void ContinueChasing(Creature newTarget)
+        {
+            //If not, move towards the player
+
+            //Find location of next step on the path towards them
+            Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+
+            bool moveIntoSquare = true;
+
+            //If this is the same as the target creature's location, we are adjacent. Something is wrong, but attack anyway
+            if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+            {
+                LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Adjacent to target and still moving towards", LogDebugLevel.High);
                 //Fire at the player
                 CombatResults result;
 
@@ -395,38 +459,11 @@ namespace RogueBasin
                     result = AttackMonster(newTarget as Monster);
                 }
             }
-            else
+
+            //Otherwise (or if the creature died), move towards it (or its corpse)
+            if (moveIntoSquare)
             {
-                //If not, move towards the player
-
-                //Find location of next step on the path towards them
-                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
-
-                bool moveIntoSquare = true;
-
-                //If this is the same as the target creature's location, we are adjacent. Something is wrong, but attack anyway
-                if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
-                {
-                    LogFile.Log.LogEntryDebug("SimpleThrowingAI: Adjacent to target and still moving towards", LogDebugLevel.High);
-                    //Fire at the player
-                    CombatResults result;
-
-                    if (newTarget == Game.Dungeon.Player)
-                    {
-                        result = AttackPlayer(newTarget as Player);
-                    }
-                    else
-                    {
-                        //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
-                    }
-                }
-
-                //Otherwise (or if the creature died), move towards it (or its corpse)
-                if (moveIntoSquare)
-                {
-                    LocationMap = nextStep;
-                }
+                LocationMap = nextStep;
             }
         }
     }
