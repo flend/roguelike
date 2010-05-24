@@ -681,6 +681,12 @@ namespace RogueBasin
                 {
                     moveIntoSquare = false;
                 }
+
+                //Exception for immortal player
+                if (newTarget == Game.Dungeon.Player && Game.Dungeon.PlayerImmortal)
+                {
+                    moveIntoSquare = false;
+                }
             }
 
             //Otherwise (or if the creature died), move towards it (or its corpse)
@@ -776,22 +782,42 @@ namespace RogueBasin
 
         protected override string HitsPlayerCombatString()
         {
-            return "The " + this.SingleDescription + " hits you.";
+            string combatStr = "";
+
+            if (!Unique)
+                combatStr = "The ";
+
+            return combatStr + this.SingleDescription + " hits you.";
         }
 
         protected override string MissesPlayerCombatString()
         {
-            return "The " + this.SingleDescription + " misses you.";
+            string combatStr = "";
+
+            if (!Unique)
+                combatStr = "The ";
+
+            return combatStr + this.SingleDescription + " misses you.";
         }
 
         protected override string HitsMonsterCombatString(Monster target)
         {
-            return "The " + this.SingleDescription + " hits the " + target.SingleDescription + ".";
+            string combatStr = "";
+
+            if (!Unique)
+                combatStr = "The ";
+
+            return combatStr + this.SingleDescription + " hits the " + target.SingleDescription + ".";
         }
 
         protected override string MissesMonsterCombatString(Monster target)
         {
-            return "The " + this.SingleDescription + " misses the " + target.SingleDescription + ".";
+            string combatStr = "";
+
+            if (!Unique)
+                combatStr = "The ";
+
+            return combatStr + this.SingleDescription + " misses the " + target.SingleDescription + ".";
         }
 
         public override bool CanBeCharmed()

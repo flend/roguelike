@@ -923,25 +923,29 @@ namespace RogueBasin
                     KillCount++;
                     Kills.Add(monster);
 
-                    //Debug string
-                    string playerMsg = "You knocked out the " + monster.SingleDescription + ".";
+                    //Message string
+                    string playerMsg = "You knocked out ";
+                    if(!monster.Unique)
+                        playerMsg += "the ";
+                    playerMsg += monster.SingleDescription + ".";
                     Game.MessageQueue.AddMessage(playerMsg);
 
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
-
-                    //Add HP from the glove if wieldied
-                    
-
+   
                     //Add XP
                     AddXPPlayerAttack(monster, magicUse);
 
                     return CombatResults.DefenderDied;
                 }
 
-                //Debug string
-                string playerMsg2 = "You hit the " + monster.SingleDescription + ".";
+                //Message string
+                string playerMsg2 = "You hit ";
+                if(!monster.Unique)
+                    playerMsg2 += "the ";
+                playerMsg2 += monster.SingleDescription + ".";
                 Game.MessageQueue.AddMessage(playerMsg2);
+                
                 string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
                 LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
 

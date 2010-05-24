@@ -362,22 +362,42 @@ namespace RogueBasin
 
         protected override string HitsPlayerCombatString()
         {
-            return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It hits.";
+            string combatStr = "";
+
+            if(!Unique)
+                combatStr = "The ";
+
+             return combatStr + this.SingleDescription + " " + GetWeaponName() + " at you. It hits.";
         }
 
         protected override string MissesPlayerCombatString()
         {
-            return "The " + this.SingleDescription + " " + GetWeaponName() + " at you. It misses.";
+            string combatStr = "";
+
+            if (!Unique)
+                combatStr = "The ";
+
+            return combatStr + this.SingleDescription + " " + GetWeaponName() + " at you. It misses.";
         }
 
         protected override string HitsMonsterCombatString(Monster target)
         {
-            return "The " + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It hits.";
+            string combatStr = "";
+
+            if (!Unique)
+                combatStr = "The ";
+
+            return combatStr + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It hits.";
         }
 
         protected override string MissesMonsterCombatString(Monster target)
         {
-            return "The " + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It misses.";
+            string combatStr = "";
+
+            if (!Unique)
+                combatStr = "The ";
+
+            return combatStr + this.SingleDescription + " " + GetWeaponName() + " at the " + target.SingleDescription + ". It misses.";
         }
 
 

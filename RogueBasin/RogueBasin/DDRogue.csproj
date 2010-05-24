@@ -534,7 +534,6 @@
     <EmbeddedResource Include="bin\Debug\movies\endgreatgeneral0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\endgreatgeneral_other0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\endgreatgeneral_prince0.amf" />
-    <EmbeddedResource Include="bin\Debug\movies\endgreatheroine0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\endintradventurer0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\endintrcharmless0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\endintrgreatheroine0.amf" />

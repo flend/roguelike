@@ -229,6 +229,12 @@ namespace RogueBasin
                             //Bad news for the player here!
                             okToMoveIntoSquare = true;
                         }
+
+                        //Exception for immortal player
+                        if (Game.Dungeon.PlayerImmortal)
+                        {
+                            okToMoveIntoSquare = false;
+                        }
                     }
 
                     if (contents.monster != null)
@@ -281,6 +287,11 @@ namespace RogueBasin
                     result = AttackMonster(newTarget as Monster);
                 }
 
+                //Exception for immortal player
+                if (newTarget == Game.Dungeon.Player && Game.Dungeon.PlayerImmortal)
+                {
+                    moveIntoSquare = false;
+                }
 
                 //If we killed it, move into its square
                 if (result != CombatResults.DefenderDied)

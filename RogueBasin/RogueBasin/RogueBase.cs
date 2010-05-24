@@ -260,6 +260,7 @@ namespace RogueBasin
                                     break;
 
                                 case 'o':
+                                case 'O':
                                     //Open door
                                     timeAdvances = PlayerOpenDoor();
                                     if (!timeAdvances)
@@ -269,6 +270,7 @@ namespace RogueBasin
                                     break;
 
                                 case 'z':
+                                case 'Z':
                                     //Cast spell (just target for now)
                                     timeAdvances = SelectAndCastSpell();
                                     if (!timeAdvances)
@@ -278,6 +280,7 @@ namespace RogueBasin
                                     break;
 
                                 case 'x':
+                                case 'X':
                                     //Recast last spells
                                     timeAdvances = RecastSpell();
                                     if (!timeAdvances)
@@ -287,6 +290,7 @@ namespace RogueBasin
                                     break;
 
                                 case 'c':
+                                case 'C':
                                     //Charm creature
                                     timeAdvances = PlayerCharmCreature();
                                     if (!timeAdvances)
@@ -324,6 +328,7 @@ namespace RogueBasin
                                     break;
 
                                 case 'd':
+                                case 'D':
                                     //Drop items if in town
                                     DropItems();
                                     UpdateScreen();
@@ -331,6 +336,7 @@ namespace RogueBasin
                                     break;
 
                                 case 'i':
+                                case 'I':
                                     //Use an inventory item
                                     SetPlayerInventorySelectScreen();
                                     UpdateScreen();
@@ -348,6 +354,7 @@ namespace RogueBasin
 
 
                                 case 'e':
+                                case 'E':
                                     //Display currently equipped items
                                     SetPlayerEquippedItemsScreen();
                                     UpdateScreen();
@@ -363,7 +370,8 @@ namespace RogueBasin
                                     break;
 
 
-                                case 's':
+                                case 'm':
+                                case 'M':
                                     //Show movies
                                     SetSpecialMoveMovieScreen();
                                     UpdateScreen();
@@ -378,12 +386,12 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-                                    /*
+                                    
                                 //Debug events
 
                                     
                                 //Stats up. Use in town
-                                case 'E':
+                                case 'W':
                                     Game.Dungeon.Player.AttackStat = 100;
                                     Game.Dungeon.Player.CharmStat = 100;
                                     Game.Dungeon.Player.MagicStat = 100;
@@ -404,7 +412,7 @@ namespace RogueBasin
                                     UpdateScreen();
                                     break;
 
-                                case 'm':
+                                case 'f':
                                     //Learn all moves
                                     Game.Dungeon.PlayerLearnsAllMoves();
                                     Game.MessageQueue.AddMessage("Learnt all moves.");
@@ -420,7 +428,7 @@ namespace RogueBasin
                                     UpdateScreen();
                                     break;
 
-                                case 'D':
+                                case '!':
                                     //screen debug mode
                                     Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
                                     UpdateScreen();
@@ -448,7 +456,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(healing);
                                     UpdateScreen();
                                     break;
-                                */
+                                
                                 /*
                             case 'k':
                                 //Display the inventory
@@ -796,9 +804,9 @@ namespace RogueBasin
             {
                 stream = File.OpenRead(filename);
 
-                compStream = new GZipStream(stream, CompressionMode.Decompress, true);
-                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(compStream);
-                //SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(stream);
+                //compStream = new GZipStream(stream, CompressionMode.Decompress, true);
+                //SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(compStream);
+                SaveGameInfo readData = (SaveGameInfo)serializer.Deserialize(stream);
 
                 //Build a new dungeon object from the stored data
                 Dungeon newDungeon = new Dungeon();

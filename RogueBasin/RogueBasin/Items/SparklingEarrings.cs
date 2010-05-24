@@ -70,7 +70,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Crystal badge unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Sparkling earrings unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -83,7 +83,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "sparkling earrings"; }
+            get { return "a pair of sparkling earrings"; }
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "sparkling earrings"; }
+            get { return "a pair of sparkling earrings"; }
         }
 
         protected override char GetRepresentation()
