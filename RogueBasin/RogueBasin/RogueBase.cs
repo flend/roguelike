@@ -391,7 +391,7 @@ namespace RogueBasin
 
                                     
                                 //Stats up. Use in town
-                                case 'W':
+                                case 'w':
                                     Game.Dungeon.Player.AttackStat = 100;
                                     Game.Dungeon.Player.CharmStat = 100;
                                     Game.Dungeon.Player.MagicStat = 100;
@@ -428,7 +428,7 @@ namespace RogueBasin
                                     UpdateScreen();
                                     break;
 
-                                case '!':
+                                case 'W':
                                     //screen debug mode
                                     Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
                                     UpdateScreen();

@@ -3844,7 +3844,7 @@ namespace RogueBasin
             finalScreen.Add("Final stats...");
 
             finalScreen.Add("");
-            finalScreen.Add("Health : " + player.HitpointsStat);
+            finalScreen.Add("Health : " + player.MaxHitpointsStat);
             finalScreen.Add("Combat Skill : " + player.AttackStat);
             finalScreen.Add("Speed : " + player.SpeedStat);
             finalScreen.Add("Charm : " + player.CharmStat);

@@ -1532,6 +1532,15 @@ namespace RogueBasin
              return location;
          }
 
+        /// <summary>
+        /// Add cohort monsters close to a unique. Spawns new copies of the cohort monster type passed in (does not use the passed object)
+        /// </summary>
+        /// <param name="monsterType"></param>
+        /// <param name="noMonsters"></param>
+        /// <param name="masterMonser"></param>
+        /// <param name="minDistance"></param>
+        /// <param name="levelNo"></param>
+        /// <returns></returns>
          private bool AddMonstersCloseToMaster(Monster monsterType, int noMonsters, Creature masterMonser, int minDistance, int levelNo) 
          {
              Point location;
@@ -1923,39 +1932,34 @@ namespace RogueBasin
         {
             int minDistance = 4;
 
-            Point location = new Point();
-
-            //Unique rat
-
             LogFile.Log.LogEntryDebug("Adding cave uniques...", LogDebugLevel.Medium);
 
-            Creatures.RatUnique rat = new RogueBasin.Creatures.RatUnique();
-            int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 2;
-            Point uniqLoc = PlaceMonster(uniqueLevel, rat);
+            //Level 1: Unique ferret
+            Creatures.FerretUnique ferret = new RogueBasin.Creatures.FerretUnique();
+            int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 1;
+            PlaceMonster(uniqueLevel, ferret);
 
-            //Spawn in with a random number of rats
+            ferret.PickUpItem(new RogueBasin.Items.Dagger());
+
+            //Level 2: Unique rat
+
+            Creatures.RatUnique rat = new RogueBasin.Creatures.RatUnique();
+            uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 2;
+            PlaceMonster(uniqueLevel, rat);
+            
+            rat.PickUpItem(new RogueBasin.Items.Lantern());
+
+            //Cohort
             int noRats = 3 + Game.Random.Next(8);
             AddMonstersCloseToMaster(new Creatures.Rat(), noRats, rat, minDistance, uniqueLevel);
-            
-            //Add his items
-            Items.Lantern uniqItem1 = new RogueBasin.Items.Lantern();
-            rat.PickUpItem(uniqItem1);
-
-            //Unique ferret
-
-            Creatures.FerretUnique fer = new RogueBasin.Creatures.FerretUnique();
-            uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 1;
-            uniqLoc = PlaceMonster(uniqueLevel, fer);
-
-            Items.Dagger dag2 = new RogueBasin.Items.Dagger();
-
-            fer.PickUpItem(dag2);
-
-            //Unique rat
+ 
+            //Level 3: Unique goblin witchdoctor
 
             Creatures.GoblinWitchdoctorUnique gobbo = new RogueBasin.Creatures.GoblinWitchdoctorUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 3;
-            uniqLoc = PlaceMonster(uniqueLevel, gobbo);
+            PlaceMonster(uniqueLevel, gobbo);
+
+            gobbo.PickUpItem(new RogueBasin.Items.Glove());
 
             //Spawn in with a random number of ferrets & goblins
             int noFerrets = 4 + Game.Random.Next(2);
@@ -1963,11 +1967,6 @@ namespace RogueBasin
 
             AddMonstersCloseToMaster(new Creatures.Ferret(), noFerrets, gobbo, minDistance, uniqueLevel);
             AddMonstersCloseToMaster(new Creatures.Goblin(), noGoblins, gobbo, minDistance, uniqueLevel);
-
-            //Add his items
-            Items.Glove map = new RogueBasin.Items.Glove();
-            gobbo.PickUpItem(map);
-
         }
 
         private void SpawnWaterCaveUniques()
