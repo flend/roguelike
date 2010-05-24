@@ -523,6 +523,8 @@ namespace RogueBasin
             return ColorPresets.White;
         }
 
+
+
         /// <summary>
         /// Creature cost for level gen
         /// </summary>

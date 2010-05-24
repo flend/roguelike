@@ -80,7 +80,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "necromancer"; } }
+        public override string GroupDescription { get { return "necromancers"; } }
 
         protected override char GetRepresentation()
         {

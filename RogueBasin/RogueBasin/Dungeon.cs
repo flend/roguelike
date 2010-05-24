@@ -346,7 +346,7 @@ namespace RogueBasin
 
             dungeonInfo = new DungeonInfo();
 
-            PlayerImmortal = true;
+            PlayerImmortal = false;
 
             SetupSpecialMoves();
 
@@ -953,6 +953,19 @@ namespace RogueBasin
             //This may fail due to something else being there or being non-walkable
             try
             {
+                if (creature == null)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Tried to add null", LogDebugLevel.High);
+                    return false;
+                }
+
+                if (creature.UniqueID != 0)
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Tried to add monster which already had ID", LogDebugLevel.High);
+                    return false;
+                }
+
+
                 Map creatureLevel = levels[level];
 
                 //Check square is accessable
@@ -2037,8 +2050,6 @@ namespace RogueBasin
                             KillMonster(m, true);
                     }
                 }
-
-                //Creatures.Lich lich = monster as Creatures.Lich;
 
                 Screen.Instance.PlayMovie("dragondead", true);
                 

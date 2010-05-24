@@ -69,7 +69,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "black unicorn"; } }
+        public override string GroupDescription { get { return "black unicorns"; } }
 
         protected override char GetRepresentation()
         {

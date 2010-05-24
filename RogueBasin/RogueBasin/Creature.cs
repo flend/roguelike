@@ -126,6 +126,9 @@ namespace RogueBasin
 
             equipmentSlots = new List<EquipmentSlotInfo>();
 
+            //Used as a test for re-adding monsters
+            UniqueID = 0;
+
             RandomStartTurnClock();
         }
 

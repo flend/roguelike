@@ -41,7 +41,7 @@ namespace RogueBasin
             AIState = SimpleAIStates.RandomWalk;
             currentTarget = null;
 
-            lastHitpoints = ClassMaxHitpoints();
+            lastHitpoints = MaxHitpoints;
         }
 
         double GetDistance(Creature creature1, Creature creature2)

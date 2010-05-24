@@ -114,72 +114,21 @@ namespace RogueBasin
             
             //SpawnUniques();
 
-            switch (difficulty)
-            {
-                case GameDifficulty.Easy:
-                    Game.Dungeon.Player.TimeToRescueFriend = 800000;
-                    break;
-                case GameDifficulty.Medium:
-                    Game.Dungeon.Player.TimeToRescueFriend = 700000;
-                    break;
-                case GameDifficulty.Hard:
-                    Game.Dungeon.Player.TimeToRescueFriend = 600000;
-                    break;
-            }
+            //switch (difficulty)
+            //{
+            //    case GameDifficulty.Easy:
+            //        Game.Dungeon.Player.TimeToRescueFriend = 800000;
+            //        break;
+            //    case GameDifficulty.Medium:
+            //        Game.Dungeon.Player.TimeToRescueFriend = 700000;
+            //        break;
+            //    case GameDifficulty.Hard:
+            //        Game.Dungeon.Player.TimeToRescueFriend = 600000;
+            //        break;
+            //}
             return dungeon;
         }
 
-        private void SpawnUniques()
-        {
-            int outsideLevel = dungeon.NoLevels - 1;
-            int battleLevel = dungeon.NoLevels - 2;
-
-            //Find lich
-            Creatures.Lich lich = null;
-
-            foreach (Monster m in dungeon.Monsters)
-            {
-                if(m is Creatures.Lich)
-                lich = m as Creatures.Lich;
-            }
-
-            if (lich != null)
-            {
-                //Set some difficulty specific params
-
-                if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
-                {
-                    lich.MaxSummons = 3;
-                }
-                else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
-                {
-                    lich.MaxSummons = 6;
-                }
-                else
-                {
-                    lich.MaxSummons = 8;
-                }
-
-
-                if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
-                {
-                    lich.MaxHitpoints = 40;
-                    lich.Hitpoints = 40;
-                }
-                else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
-                {
-                    lich.MaxHitpoints = 60;
-                    lich.Hitpoints = 60;
-                }
-                else
-                {
-                    lich.MaxHitpoints = 75;
-                    lich.Hitpoints = 75;
-                }
-            }
-
-
-        }
 
         private void SetupPlayer()
         {
@@ -255,6 +204,11 @@ namespace RogueBasin
         int maxGroupSize;
         int minGroupSize;
 
+        /// <summary>
+        /// Spawn a dungeon for the first time - creatures and items.
+        /// Also used by the respawner for a second visit.
+        /// </summary>
+        /// <param name="dungeonID"></param>
         private void SpawnDungeon(int dungeonID) {
 
             int budgetScale = 1;
@@ -291,6 +245,11 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Respawn a dungeon for a second visit. Keep uniques. Kill other monsters and items.
+        /// Respawn items and monsters
+        /// </summary>
+        /// <param name="dungeonID"></param>
         public void ReSpawnDungeon(int dungeonID)
         {
             //Kill all the creatures currently in there, except for the uniques
@@ -321,39 +280,7 @@ namespace RogueBasin
 
             //Respawn the creatures
 
-            int budgetScale = 1;
-
-            switch (dungeonID)
-            {
-
-                case 0:
-                    SpawnCaveCreatures(budgetScale);
-                    SpawnCaveItems(budgetScale);
-                    break;
-                case 1:
-                    SpawnWaterCaveCreatures(budgetScale);
-                    SpawnWaterCaveItems(budgetScale);
-                    break;
-                case 2:
-                    SpawnForestCreatures(budgetScale);
-                    SpawnForestItems(budgetScale);
-                    break;
-                case 3:
-                    SpawnOrcHutCreatures(budgetScale);
-                    SpawnOrcItems(budgetScale);
-                    break;
-                case 4:
-                    SpawnCryptCreatures(budgetScale);
-                    break;
-                case 5:
-                    SpawnDemonCreatures(budgetScale);
-                    SpawnDemonItems(budgetScale);
-                    break;
-                case 6:
-                    SpawnPrinceCreatures(budgetScale);
-                    SpawnPrinceItems(budgetScale);
-                    break;
-            }
+            SpawnDungeon(dungeonID);
         }
 
         private void SpawnWaterCaveCreatures(int budgetScale)
@@ -401,6 +328,7 @@ namespace RogueBasin
         {
             //Dungeon 0: CAVE
 
+            //Monster budget per level for the 4 levels
             List<int> monsterBudgets = new List<int>();
 
             int dungeonID = 0;
@@ -975,21 +903,21 @@ namespace RogueBasin
             //Debug monsters
 
                           
-            List<Monster> monstersToAdd = new List<Monster>();
+           // List<Monster> monstersToAdd = new List<Monster>();
             
-           // monstersToAdd.Add(new Creatures.DragonUnique());
+           //// monstersToAdd.Add(new Creatures.DragonUnique());
 
-            foreach (Monster monster in monstersToAdd)
-            {
-                Point location = new Point();
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(2);
-                } while (!dungeon.AddMonster(monster, 2, location));
+           // foreach (Monster monster in monstersToAdd)
+           // {
+           //     Point location = new Point();
+           //     do
+           //     {
+           //         location = dungeon.RandomWalkablePointInLevel(2);
+           //     } while (!dungeon.AddMonster(monster, 2, location));
 
-            }
+           // }
 
-             
+             //Old DDRogue code
 
             //The levels divide into 3 groups: cave, cave/halls and halls
             //The difficulty in each set is roughly the same
@@ -1582,18 +1510,148 @@ namespace RogueBasin
          private Point PlaceMonsterCloseToLocation(int levelNo, Monster monsterToPlace, Point centerLoc, int looseGroupDist)
          {
              Point location = new Point();
+
+             int innerLoopCount = 0;
+             int outerLoopCount = 0;
              do
              {
                  location = dungeon.RandomWalkablePointInLevel(levelNo);
 
-                 if (Game.Dungeon.GetDistanceBetween(centerLoc, location) > looseGroupDist)
+                 innerLoopCount++;
+
+                 if (Game.Dungeon.GetDistanceBetween(centerLoc, location) > looseGroupDist && innerLoopCount < 50)
                      continue;
 
-             } while (!dungeon.AddMonster(monsterToPlace, levelNo, location));
+                 outerLoopCount++;
 
-             CheckSpecialMonsterGroups(monsterToPlace, levelNo);
+             } while (!dungeon.AddMonster(monsterToPlace, levelNo, location) && outerLoopCount < 50);
+
+             if(outerLoopCount != 50)
+                CheckSpecialMonsterGroups(monsterToPlace, levelNo);
 
              return location;
+         }
+
+         private bool AddMonstersCloseToMaster(Monster monsterType, int noMonsters, Creature masterMonser, int minDistance, int levelNo) 
+         {
+             Point location;
+
+             int outerLoopCount = 0;
+
+             for (int i = 0; i < noMonsters; i++)
+             {
+                 do
+                 {
+                     int loopCount = 0;
+                     do
+                     {
+                         location = dungeon.RandomWalkablePointInLevel(i);
+                         loopCount++;
+                     } while (Game.Dungeon.GetDistanceBetween(masterMonser, location) > minDistance && loopCount < maxLoopCount);
+                     outerLoopCount++;
+                 } while (!dungeon.AddMonster(NewMonsterOfType(monsterType), levelNo, location) && outerLoopCount < 50);
+             }
+
+             //Failed to add monster
+             if (outerLoopCount == 50)
+                 return false;
+
+             return true;
+         }
+
+        /// <summary>
+        /// Returns a new monster of this type
+        /// </summary>
+        /// <param name="monsterType"></param>
+        /// <returns></returns>
+         private Monster NewMonsterOfType(Monster monsterType)
+         {
+             if (monsterType is Creatures.Bat)
+                 return new Creatures.Bat();
+
+             if (monsterType is Creatures.BlackUnicorn)
+                 return new Creatures.BlackUnicorn();
+
+             if (monsterType is Creatures.Bugbear)
+                 return new Creatures.Bugbear();
+
+             if (monsterType is Creatures.Demon)
+                 return new Creatures.Demon();
+
+             if (monsterType is Creatures.Drainer)
+                 return new Creatures.Drainer();
+
+             if (monsterType is Creatures.Faerie)
+                 return new Creatures.Faerie();
+
+             if (monsterType is Creatures.Ferret)
+                 return new Creatures.Ferret();
+
+             if (monsterType is Creatures.Ghoul)
+                 return new Creatures.Ghoul();
+
+             if (monsterType is Creatures.Goblin)
+                 return new Creatures.Goblin();
+
+             if (monsterType is Creatures.GoblinWitchdoctor)
+                return new Creatures.GoblinWitchdoctor();
+
+             if (monsterType is Creatures.Imp)
+                 return new Creatures.Imp();
+
+             if (monsterType is Creatures.Maleficarum)
+                 return new Creatures.Maleficarum();
+
+             if (monsterType is Creatures.Meddler)
+                 return new Creatures.Meddler();
+
+             if (monsterType is Creatures.Necromancer)
+                 return new Creatures.Necromancer();
+
+             if (monsterType is Creatures.Nymph)
+                 return new Creatures.Nymph();
+
+             if (monsterType is Creatures.Ogre)
+                 return new Creatures.Ogre();
+
+             if (monsterType is Creatures.Orc)
+                 return new Creatures.Orc();
+
+             if (monsterType is Creatures.OrcShaman)
+                 return new Creatures.OrcShaman();
+
+             if (monsterType is Creatures.Overlord)
+                 return new Creatures.Overlord();
+
+             if (monsterType is Creatures.Peon)
+                 return new Creatures.Peon();
+
+             if (monsterType is Creatures.Pixie)
+                 return new Creatures.Pixie();
+
+             if (monsterType is Creatures.Rat)
+                 return new Creatures.Rat();
+
+             if (monsterType is Creatures.SkeletalArcher)
+                 return new Creatures.SkeletalArcher();
+
+             if (monsterType is Creatures.Skeleton)
+                 return new Creatures.Skeleton();
+
+             if (monsterType is Creatures.Spider)
+                 return new Creatures.Spider();
+
+             if (monsterType is Creatures.Uruk)
+                 return new Creatures.Uruk();
+
+             if (monsterType is Creatures.Whipper)
+                 return new Creatures.Whipper();
+
+             if (monsterType is Creatures.Zombie)
+                 return new Creatures.Zombie();
+
+            LogFile.Log.LogEntryDebug("Failed to add a creature of type: " + monsterType.SingleDescription, LogDebugLevel.High);
+            return null;
          }
 
         /// <summary>
@@ -1864,7 +1922,6 @@ namespace RogueBasin
         private void SpawnCaveUniques()
         {
             int minDistance = 4;
-            int loopCount = 0;
 
             Point location = new Point();
 
@@ -1878,28 +1935,11 @@ namespace RogueBasin
 
             //Spawn in with a random number of rats
             int noRats = 3 + Game.Random.Next(8);
-            int outerloopCount;
+            AddMonstersCloseToMaster(new Creatures.Rat(), noRats, rat, minDistance, uniqueLevel);
             
-            for (int i = 0; i < noRats; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Rat(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
             //Add his items
-
-            Items.Lantern dag = new RogueBasin.Items.Lantern();
-
-            rat.PickUpItem(dag);
+            Items.Lantern uniqItem1 = new RogueBasin.Items.Lantern();
+            rat.PickUpItem(uniqItem1);
 
             //Unique ferret
 
@@ -1921,40 +1961,11 @@ namespace RogueBasin
             int noFerrets = 4 + Game.Random.Next(2);
             int noGoblins = 3 + Game.Random.Next(2);
 
-            for (int i = 0; i < noFerrets; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Ferret(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            for (int i = 0; i < noGoblins; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Goblin(), uniqueLevel, location) && outerloopCount < 20);
-            }
+            AddMonstersCloseToMaster(new Creatures.Ferret(), noFerrets, gobbo, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Goblin(), noGoblins, gobbo, minDistance, uniqueLevel);
 
             //Add his items
-
             Items.Glove map = new RogueBasin.Items.Glove();
-
             gobbo.PickUpItem(map);
 
         }
@@ -3183,38 +3194,7 @@ namespace RogueBasin
 
             //Levels
 
-            //1: town
-            //2: wilderness
-
-            //Dungeon 1: levels 3-5: Caves
-            //
-            //Dungeon 2: levels 6-9: Ruined Halls
-            //Dungeon 3: level 10-13: Halls
-
             //Set up the levels. Needs to be done here so the wilderness is initialized properly.
-
-            /*
-            int Dungeon1StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0);
-            int Dungeon1EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(0);
-
-            int Dungeon2StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1);
-            int Dungeon2EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(1);
-
-            int Dungeon3StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2);
-            int Dungeon3EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(2);
-
-            int Dungeon4StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3);
-            int Dungeon4EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(3);
-
-            int Dungeon5StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4);
-            int Dungeon5EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(4);
-
-            int Dungeon6StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5);
-            int Dungeon6EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(5);
-
-            int Dungeon7StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(6);
-            int Dungeon7EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(6);
-            */
 
             Game.Dungeon.DungeonInfo.SetupDungeonStartAndEnd();
 
@@ -3224,13 +3204,6 @@ namespace RogueBasin
             
             MapGeneratorBSPCave ruinedGen = new MapGeneratorBSPCave();
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
-
-            //caveGen.ResetClosedSquareTerrainType();
-            //caveGen.ResetOpenSquareTerrainType();
-            //caveGen.SetClosedSquareTerrainType(MapTerrain.Mountains);
-            //caveGen.SetClosedSquareTerrainType(MapTerrain.Volcano);
-            //caveGen.SetOpenSquareTerrainType(MapTerrain.Empty);
-
 
             //Set width height of all maps to 80 / 25
             caveGen.Width = 80;
@@ -3296,8 +3269,6 @@ namespace RogueBasin
             int levelNo = dungeon.AddMap(caveGen.Map);
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
@@ -3311,23 +3282,15 @@ namespace RogueBasin
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(caveGen.Map);
                 caveGen.AddStaircases(levelNo);
-
-                //Set light
-                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 5
 
             //Lowest level doens't have a downstaircase
             caveGen.GenerateMap();
-            //caveGen.AddWaterToCave(15, 4);
 
             levelNo = dungeon.AddMap(caveGen.Map);
             caveGen.AddUpStaircaseOnly(levelNo);
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
 
             //DUNGEON 2 - levels 6-9
 
@@ -3630,62 +3593,6 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Failed to load last level!: " + ex.Message);
                 throw new ApplicationException("Failed to load last level! Is the game installed correctly?");
             }
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
-
-
-            /*
-            //Ruined halls levels
-            for (int i = 0; i < noRuinedLevels; i++)
-            {
-                Map ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
-                levelNo = dungeon.AddMap(ruinedLevel);
-                ruinedGen.AddStaircases(levelNo);
-
-                //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-            }
-
-            //Halls
-            for (int i = 0; i < noHallLevels; i++)
-            {
-                Map hallsLevel = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
-                levelNo = dungeon.AddMap(hallsLevel);
-                hallsGen.AddStaircases(levelNo);
-
-                //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-            }
-            
-            //Final battle level
-
-            try
-            {
-                asciiGen.LoadASCIIFile("battle.txt");
-                asciiGen.AddMapToDungeon();
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntry("Failed to load battle level!: " + ex.Message);
-                throw new ApplicationException("Failed to load battle level! Is the game installed correctly?");
-            }
-
-            //Outdoors level
-
-            try
-            {
-                asciiGen.LoadASCIIFile("last.txt");
-                asciiGen.AddMapToDungeon();
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntry("Failed to load last level!: " + ex.Message);
-                throw new ApplicationException("Failed to load last level! Is the game installed correctly?");
-            }
-            */
-
 
             //Build TCOD maps
             //Necessary so connectivity checks on items and monsters can work
