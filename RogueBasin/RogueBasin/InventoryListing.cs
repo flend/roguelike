@@ -8,7 +8,7 @@ namespace RogueBasin
     /// Description of a group of objects, suitable for display to the user and selection
     /// Presumably all these objects will be more or less to the same to be in the same group
     /// </summary>
-    public class InventoryListing
+    public class InventoryListing : IComparable
     {
         /// <summary>
         /// Parent inventory
@@ -25,6 +25,23 @@ namespace RogueBasin
         public InventoryListing()
         {
 
+        }
+
+        public int CompareTo(object obj)
+        {
+            InventoryListing otherListing = obj as InventoryListing;
+
+            if(otherListing != null && itemIndex.Count > 0 && otherListing.itemIndex.Count > 0) {
+
+                //Find name of this type of object
+                string name = inventory.Items[itemIndex[0]].SingleItemDescription;
+                //And for the other group
+                string otherName = inventory.Items[otherListing.itemIndex[0]].SingleItemDescription;
+
+                return name.CompareTo(otherName);
+            }
+            else
+                throw new ArgumentException("Object is not an InventoryListing");
         }
 
         public InventoryListing(Inventory myInventory)

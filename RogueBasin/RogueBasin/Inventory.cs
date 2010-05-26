@@ -156,6 +156,10 @@ namespace RogueBasin
                 }
             }
 
+            //Sort the inventory listing alphabetically. This keeps the list roughly in the same order for the player
+
+            inventoryListing.Sort();
+
             //EQUIPPABLE (non-removable)
 
             equipmentListing.Clear();
