@@ -41,9 +41,10 @@ namespace RogueBasin
 
             SetupMaps();
 
-            SpawnUniquesAndItems();
+            //Uniques must be spawned before creatures (and followers)
+            SpawnUniques();
 
-            SpawnInitialCreatures();
+            SpawnCreaturesAndItems();
 
             //Debug only
             //SpawnItems();
@@ -148,25 +149,31 @@ namespace RogueBasin
 
                 case 0:
                     SpawnCaveCreatures(budgetScale);
+                    SpawnCaveUniqueFollowers();
                     SpawnCaveItems(budgetScale);
                     break;
                 case 1:
                     SpawnWaterCaveCreatures(budgetScale);
+                    SpawnWaterCaveUniqueFollowers();
                     SpawnWaterCaveItems(budgetScale);
                     break;
                 case 2:
                     SpawnForestCreatures(budgetScale);
+                    SpawnForestUniqueFollowers();
                     SpawnForestItems(budgetScale);
                     break;
                 case 3:
                     SpawnOrcHutCreatures(budgetScale);
+                    SpawnOrcUniqueFollowers();
                     SpawnOrcItems(budgetScale);
                     break;
                 case 4:
                     SpawnCryptCreatures(budgetScale);
+                    SpawnCryptUniqueFollowers();
                     break;
                 case 5:
                     SpawnDemonCreatures(budgetScale);
+                    SpawnDemonUniqueFollowers();
                     SpawnDemonItems(budgetScale);
                     break;
                 case 6:
@@ -178,7 +185,7 @@ namespace RogueBasin
 
         /// <summary>
         /// Respawn a dungeon for a second visit. Keep uniques. Kill other monsters and items.
-        /// Respawn items and monsters
+        /// Respawn items, monsters and unique followers
         /// </summary>
         /// <param name="dungeonID"></param>
         public void ReSpawnDungeon(int dungeonID)
@@ -209,8 +216,7 @@ namespace RogueBasin
                 }
             }
 
-            //Respawn the creatures
-
+            //Respawn the creatures, items and unique followers
             SpawnDungeon(dungeonID);
         }
 
@@ -820,12 +826,13 @@ namespace RogueBasin
             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 0);
         }
 
-         private void SpawnInitialCreatures() {
+         private void SpawnCreaturesAndItems() {
+
              LogFile.Log.LogEntry("Generating creatures...");
 
              Dungeon dungeon = Game.Dungeon;
 
-            //Add monsters to levels
+             //Add monsters to levels
 
              //Quick up down compensate globally
 
@@ -1147,7 +1154,7 @@ namespace RogueBasin
             }
         }
 
-        private void SpawnUniquesAndItems()
+        private void SpawnUniques()
         {
             //Add a pregenerated list of uniques 
             SpawnCaveUniques();
@@ -1160,8 +1167,6 @@ namespace RogueBasin
 
         private void SpawnCaveUniques()
         {
-            int minDistance = 4;
-
             LogFile.Log.LogEntry("Adding cave uniques...");
 
             //Level 1: Unique ferret
@@ -1179,10 +1184,6 @@ namespace RogueBasin
             PlaceMonster(uniqueLevel, rat);
             
             rat.PickUpItem(new RogueBasin.Items.Lantern());
-
-            //Cohort
-            int noRats = 3 + Game.Random.Next(8);
-            AddMonstersCloseToMaster(new Creatures.Rat(), noRats, rat, minDistance, uniqueLevel);
  
             //Level 3: Unique goblin witchdoctor
 
@@ -1192,17 +1193,47 @@ namespace RogueBasin
 
             gobbo.PickUpItem(new RogueBasin.Items.Glove());
 
-            //Spawn in with a random number of ferrets & goblins
-            int noFerrets = 4 + Game.Random.Next(2);
-            int noGoblins = 3 + Game.Random.Next(2);
+            //Followers get spawned in SpawnCaveUniqueFollowers() called by SpawnDungeon()
+        }
 
-            AddMonstersCloseToMaster(new Creatures.Ferret(), noFerrets, gobbo, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Goblin(), noGoblins, gobbo, minDistance, uniqueLevel);
+        /// <summary>
+        /// Spawn in followers. This is called whenever the dungeon is regened. Don't spawn followers if the uniques are dead.
+        /// </summary>
+        private void SpawnCaveUniqueFollowers()
+        {
+            int minDistance = 4;
+
+            Monster ferretUnique = Game.Dungeon.FindMonsterByType(typeof(Creatures.FerretUnique));
+            Monster ratUnique = Game.Dungeon.FindMonsterByType(typeof(Creatures.RatUnique));
+            Monster goblinUnique = Game.Dungeon.FindMonsterByType(typeof(Creatures.GoblinWitchdoctorUnique));
+
+            //Level 1: Unique ferret
+
+            //Level 2: Unique rat
+
+            if (ratUnique != null)
+            {
+                //Cohort
+                int noRats = 3 + Game.Random.Next(8);
+
+                AddMonstersCloseToMaster(new Creatures.Rat(), noRats, ratUnique, minDistance, ratUnique.LocationLevel);
+            }
+
+            //Level 3: Unique goblin witchdoctor
+
+            if (goblinUnique != null)
+            {
+                //Spawn in with a random number of ferrets & goblins
+                int noFerrets = 4 + Game.Random.Next(2);
+                int noGoblins = 3 + Game.Random.Next(2);
+
+                AddMonstersCloseToMaster(new Creatures.Ferret(), noFerrets, goblinUnique, minDistance, goblinUnique.LocationLevel);
+                AddMonstersCloseToMaster(new Creatures.Goblin(), noGoblins, goblinUnique, minDistance, goblinUnique.LocationLevel);
+            }
         }
 
         private void SpawnWaterCaveUniques()
         {
-            int minDistance = 4;
             Point location = new Point();
 
             LogFile.Log.LogEntry("Adding water cave uniques...");
@@ -1214,14 +1245,7 @@ namespace RogueBasin
 
             Items.ShortSword sword = new RogueBasin.Items.ShortSword();
             spider.PickUpItem(sword);
-
-            //Spawn in with a random number of spiders & goblins
-            int noSpiders = 3 + Game.Random.Next(2);
-            int noGobbos = 2 + Game.Random.Next(2);
-
-            AddMonstersCloseToMaster(new Creatures.Spider(), noSpiders, spider, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Goblin(), noGobbos, spider, minDistance, uniqueLevel);
-
+            
             //Level 4 : Unique ogre
 
             Creatures.OgreUnique ogre = new RogueBasin.Creatures.OgreUnique();
@@ -1229,20 +1253,37 @@ namespace RogueBasin
             uniqLoc = PlaceMonster(uniqueLevel, ogre);
 
             Items.PrettyDress dress = new RogueBasin.Items.PrettyDress();
-            ogre.PickUpItem(dress);
+            ogre.PickUpItem(dress);           
+        }
+
+        private void SpawnWaterCaveUniqueFollowers()
+        {
+            int minDistance = 4;
+
+            Monster spiderUnique = Game.Dungeon.FindMonsterByType(typeof(Creatures.SpiderUnique));
+            Monster ogreUnique = Game.Dungeon.FindMonsterByType(typeof(Creatures.OgreUnique));
+
+            //Level 3 : Unique spider
+
+            //Spawn in with a random number of spiders & goblins
+            int noSpiders = 3 + Game.Random.Next(2);
+            int noGobbos = 2 + Game.Random.Next(2);
+
+            AddMonstersCloseToMaster(new Creatures.Spider(), noSpiders, spiderUnique, minDistance, spiderUnique.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Goblin(), noGobbos, spiderUnique, minDistance, spiderUnique.LocationLevel);
+
+            //Level 4 : Unique ogre
 
             //Spawn in with a random number of ferrets & goblins
             int noPixie = 2 + Game.Random.Next(2);
             int noBugbear = 2 + Game.Random.Next(2);
 
-            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, ogre, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, ogre, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, ogreUnique, minDistance, ogreUnique.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, ogreUnique, minDistance, ogreUnique.LocationLevel);
         }
 
         private void SpawnForestUniques()
         {
-            int minDistance = 4;
-
             Point location = new Point();
 
             LogFile.Log.LogEntry("Adding forest uniques...");
@@ -1256,13 +1297,6 @@ namespace RogueBasin
             Items.SparklingEarrings earring = new RogueBasin.Items.SparklingEarrings();
             faerie.PickUpItem(earring);
 
-            //Spawn in with a random number of rats
-            int noNymph = 2 + Game.Random.Next(2);
-            int noPixie = 2 + Game.Random.Next(2);
-
-            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, faerie, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, faerie, minDistance, uniqueLevel);
-            
             //Level 3 : Unique black unicorn
 
             Creatures.BlackUnicornUnique unicorn = new RogueBasin.Creatures.BlackUnicornUnique();
@@ -1272,35 +1306,55 @@ namespace RogueBasin
             Items.LeatherArmour leather = new RogueBasin.Items.LeatherArmour();
             unicorn.PickUpItem(leather);
 
-            //Spawn in with a random number of unicorns and nymphs
-            int noUni = 2 + Game.Random.Next(2);
-            noNymph = 1 + Game.Random.Next(2);
-
-            AddMonstersCloseToMaster(new Creatures.BlackUnicorn(), noUni, unicorn, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, unicorn, minDistance, uniqueLevel);
-
             //Level 4 : Unique pixie
 
             Creatures.PixieUnique pixie = new RogueBasin.Creatures.PixieUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 3;
             uniqLoc = PlaceMonster(uniqueLevel, pixie);
 
+            Items.StaffPower staff = new RogueBasin.Items.StaffPower();
+            pixie.PickUpItem(staff);  
+        }
+
+        private void SpawnForestUniqueFollowers()
+        {
+            int minDistance = 4;
+
+            Monster faerie = Game.Dungeon.FindMonsterByType(typeof(Creatures.FaerieUnique));
+            Monster unicorn = Game.Dungeon.FindMonsterByType(typeof(Creatures.BlackUnicornUnique));
+            Monster pixie = Game.Dungeon.FindMonsterByType(typeof(Creatures.PixieUnique));
+
+            //Level 2 : Unique faerie
+
+            int noNymph = 2 + Game.Random.Next(2);
+            int noPixie = 2 + Game.Random.Next(2);
+
+            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, faerie, minDistance, faerie.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, faerie, minDistance, faerie.LocationLevel);
+
+            //Level 3 : Unique black unicorn
+
+            //Spawn in with a random number of unicorns and nymphs
+            int noUni = 2 + Game.Random.Next(2);
+            noNymph = 1 + Game.Random.Next(2);
+
+            AddMonstersCloseToMaster(new Creatures.BlackUnicorn(), noUni, unicorn, minDistance, unicorn.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, unicorn, minDistance, unicorn.LocationLevel);
+
+            //Level 4 : Unique pixie
+
             //Spawn in with a random number of ferrets & goblins
             noPixie = 2 + Game.Random.Next(2);
             int noFairie = 2 + Game.Random.Next(2);
             noNymph = 2 + Game.Random.Next(2);
 
-            Items.StaffPower staff = new RogueBasin.Items.StaffPower();
-            pixie.PickUpItem(staff);
-
-            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, pixie, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Faerie(), noFairie, pixie, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, pixie, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, pixie, minDistance, pixie.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Faerie(), noFairie, pixie, minDistance, pixie.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, pixie, minDistance, pixie.LocationLevel);
         }
 
         private void SpawnDemonUniques()
         {
-            int minDistance = 5;
 
             //Level 3 : Unique Maleficarum
 
@@ -1313,15 +1367,6 @@ namespace RogueBasin
             Items.RestoreOrb orb = new RogueBasin.Items.RestoreOrb();
             mal.PickUpItem(orb);
 
-            //Spawn in with a random number of followers
-            int noDran = 2 + Game.Random.Next(2);
-            int noImp = 2 + Game.Random.Next(2);
-            int noDemon =  3 + Game.Random.Next(4);
-
-            AddMonstersCloseToMaster(new Creatures.Drainer(), noDran, mal, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Imp(), noImp, mal, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Demon(), noDemon, mal, minDistance, uniqueLevel);
-
             //Level 4 : Unique Overlord
 
             Creatures.OverlordUnique overlord = new RogueBasin.Creatures.OverlordUnique();
@@ -1331,23 +1376,43 @@ namespace RogueBasin
             Items.GodSword sword = new RogueBasin.Items.GodSword();
             overlord.PickUpItem(sword);
 
+            
+        }
+
+        private void SpawnDemonUniqueFollowers()
+        {
+            int minDistance = 5;
+
+            Monster mal = Game.Dungeon.FindMonsterByType(typeof(Creatures.MaleficarumUnique));
+            Monster overlord = Game.Dungeon.FindMonsterByType(typeof(Creatures.OverlordUnique));
+
+            //Level 3 : Unique Maleficarum
+
+            //Spawn in with a random number of followers
+            int noDran = 2 + Game.Random.Next(2);
+            int noImp = 2 + Game.Random.Next(2);
+            int noDemon = 3 + Game.Random.Next(4);
+
+            AddMonstersCloseToMaster(new Creatures.Drainer(), noDran, mal, minDistance, mal.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Imp(), noImp, mal, minDistance, mal.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Demon(), noDemon, mal, minDistance, mal.LocationLevel);
+
+            //Level 4 : Unique Overlord
+            
             //Spawn in with a random number of followers
             noDran = 2 + Game.Random.Next(2);
             noImp = 2 + Game.Random.Next(2);
             noDemon = 3 + Game.Random.Next(4);
             int noMed = 2;
 
-            AddMonstersCloseToMaster(new Creatures.Drainer(), noDran, overlord, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Imp(), noImp, overlord, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Demon(), noDemon, overlord, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Meddler(), noMed, overlord, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Drainer(), noDran, overlord, minDistance, overlord.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Imp(), noImp, overlord, minDistance, overlord.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Demon(), noDemon, overlord, minDistance, overlord.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Meddler(), noMed, overlord, minDistance, overlord.LocationLevel);
         }
-
 
         private void SpawnCryptUniques()
         {
-            int minDistance = 4;
-
             //Level 4 : Unique Necromancer
 
             LogFile.Log.LogEntry("Adding crypt uniques...");
@@ -1359,15 +1424,6 @@ namespace RogueBasin
             Items.MetalArmour armour = new RogueBasin.Items.MetalArmour();
             necro.PickUpItem(armour);
 
-            //Spawn in with a random number of skels & zombs
-            int noSkelArch = 2 + Game.Random.Next(3);
-            int noSkel = 2 + Game.Random.Next(2);
-            int noZomb = 2 + Game.Random.Next(2);
-
-            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, necro, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Skeleton(), noSkel, necro, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Zombie(), noZomb, necro, minDistance, uniqueLevel);
-
             // Level 3 : Unique Skeleton
             
             Creatures.SkeletonUnique skel = new RogueBasin.Creatures.SkeletonUnique();
@@ -1377,14 +1433,7 @@ namespace RogueBasin
             Items.ExtendOrb orb = new RogueBasin.Items.ExtendOrb();
             skel.PickUpItem(orb);
 
-            //Spawn in with a random number of skel archers
-            noSkelArch = 3 + Game.Random.Next(4);
-
-            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, skel, minDistance, uniqueLevel);
-
             // Level 2 : Unique Ghoul
-
-            //Unique rat
 
             Creatures.GhoulUnique ghoul = new RogueBasin.Creatures.GhoulUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4) + 1;
@@ -1392,18 +1441,44 @@ namespace RogueBasin
 
             Items.LongSword sword = new RogueBasin.Items.LongSword();
             ghoul.PickUpItem(sword);
+        }
+
+        private void SpawnCryptUniqueFollowers()
+        {
+            int minDistance = 4;
+
+            Monster necro = Game.Dungeon.FindMonsterByType(typeof(Creatures.NecromancerUnique));
+            Monster skel = Game.Dungeon.FindMonsterByType(typeof(Creatures.SkeletonUnique));
+            Monster ghoul = Game.Dungeon.FindMonsterByType(typeof(Creatures.GhoulUnique));
+
+            //Level 4 : Unique Necromancer
+
+            //Spawn in with a random number of skels & zombs
+            int noSkelArch = 2 + Game.Random.Next(3);
+            int noSkel = 2 + Game.Random.Next(2);
+            int noZomb = 2 + Game.Random.Next(2);
+
+            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, necro, minDistance, necro.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Skeleton(), noSkel, necro, minDistance, necro.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Zombie(), noZomb, necro, minDistance, necro.LocationLevel);
+
+            // Level 3 : Unique Skeleton
+
+            //Spawn in with a random number of skel archers
+            noSkelArch = 3 + Game.Random.Next(4);
+
+            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, skel, minDistance, skel.LocationLevel);
+
+            // Level 2 : Unique Ghoul
 
             //Spawn in with a random number of skel archers
             noSkelArch = 4 + Game.Random.Next(5);
 
-            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, ghoul, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, ghoul, minDistance, ghoul.LocationLevel);
         }
-
 
         private void SpawnOrcUniques()
         {
-            int minDistance = 6;
-
             LogFile.Log.LogEntry("Adding orc uniques...");
 
             //Level 3 : Unique Uruk
@@ -1416,15 +1491,6 @@ namespace RogueBasin
             Items.HealingPotion dag = new RogueBasin.Items.HealingPotion();
             uruk.PickUpItem(dag);
 
-            //Spawn in with a random number of rats
-            int noBugbear = 3 + Game.Random.Next(2);
-            int noUruk = 2 + Game.Random.Next(3);
-            int noOrcShaman = 1 + Game.Random.Next(1);
-
-            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, uruk, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Uruk(), noUruk, uruk, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.OrcShaman(), noOrcShaman, uruk, minDistance, uniqueLevel);
-
             //Level 4 : Unique Orc Shaman
 
             Creatures.OrcShamanUnique shaman = new RogueBasin.Creatures.OrcShamanUnique();
@@ -1434,16 +1500,37 @@ namespace RogueBasin
             //Add his items
 
             Items.KnockoutDress dress = new RogueBasin.Items.KnockoutDress();
-            shaman.PickUpItem(dress);
+            shaman.PickUpItem(dress);            
+        }
+
+        private void SpawnOrcUniqueFollowers()
+        {
+            int minDistance = 6;
+
+            Monster uruk = Game.Dungeon.FindMonsterByType(typeof(Creatures.UrukUnique));
+            Monster shaman = Game.Dungeon.FindMonsterByType(typeof(Creatures.OrcShamanUnique));
+
+            //Level 3 : Unique Uruk
+
+            //Spawn in with a random number of rats
+            int noBugbear = 3 + Game.Random.Next(2);
+            int noUruk = 2 + Game.Random.Next(3);
+            int noOrcShaman = 1 + Game.Random.Next(1);
+
+            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, uruk, minDistance, uruk.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Uruk(), noUruk, uruk, minDistance, uruk.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.OrcShaman(), noOrcShaman, uruk, minDistance, uruk.LocationLevel);
+
+            //Level 4 : Unique Orc Shaman
 
             //Spawn in with a random number of ferrets & goblins
             int noOrc = 6 + Game.Random.Next(6);
             noBugbear = 3 + Game.Random.Next(2);
             noOrcShaman = 2 + Game.Random.Next(2);
 
-            AddMonstersCloseToMaster(new Creatures.Orc(), noOrc, shaman, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, shaman, minDistance, uniqueLevel);
-            AddMonstersCloseToMaster(new Creatures.OrcShaman(), noOrcShaman, shaman, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Orc(), noOrc, shaman, minDistance, shaman.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, shaman, minDistance, shaman.LocationLevel);
+            AddMonstersCloseToMaster(new Creatures.OrcShaman(), noOrcShaman, shaman, minDistance, shaman.LocationLevel);
         }
 
         private void SpawnItems()

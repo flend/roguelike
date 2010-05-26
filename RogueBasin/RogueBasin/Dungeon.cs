@@ -582,6 +582,17 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Finds a currently alive monster by type. Returns first creature found, or null if none.
+        /// </summary>
+        /// <param name="monsterType"></param>
+        /// <returns></returns>
+        public Monster FindMonsterByType(Type monsterType)
+        {
+            Monster foundMonster = monsters.Find(m => m.GetType() == monsterType);
+            return foundMonster;
+        }
+
+        /// <summary>
         /// Find the closest creature to the map object
         /// </summary>
         /// <param name="originCreature"></param>
