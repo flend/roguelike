@@ -4,61 +4,6 @@ using System.Text;
 
 namespace RogueBasin
 {
-    class LevelOfMonsters
-    {
-        public List<Monster> monsterList;
-
-        public LevelOfMonsters()
-        {
-            monsterList = new List<Monster>();
-        }
-
-        public Monster GetRandomMonster()
-        {
-            Monster randomMonster = monsterList[Game.Random.Next(monsterList.Count)];
-
-            string randomMonsterName = randomMonster.SingleDescription;
-
-            switch (randomMonsterName)
-            {
-                case "ferret":
-                    return new Creatures.Ferret();
-                case "goblin":
-                    return new Creatures.Goblin();
-                case "bugbear":
-                    return new Creatures.Bugbear();
-                case "goblin witch":
-                    return new Creatures.GoblinWitchdoctor();
-                case "necromancer":
-                    return new Creatures.Necromancer();
-                case "orc":
-                    return new Creatures.Orc();
-                case "orc shaman":
-                    return new Creatures.OrcShaman();
-                case "rat":
-                    return new Creatures.Rat();
-                case "skeleton":
-                    return new Creatures.Skeleton();
-                case "spider":
-                    return new Creatures.Spider();
-                case "zombie":
-                    return new Creatures.Zombie();
-                case "ghoul":
-                    return new Creatures.Zombie();
-                case "skeletal archer":
-                    return new Creatures.SkeletalArcher();
-            }
-
-            LogFile.Log.LogEntryDebug("Can't find monster type: " + randomMonster, LogDebugLevel.High);
-            return null;
-        }
-
-        internal void Add(Monster monster)
-        {
-            monsterList.Add(monster);
-        }
-    }
-
     public enum GameDifficulty
     {
         Easy, Medium, Hard
@@ -72,20 +17,11 @@ namespace RogueBasin
 
         int maxLoopCount = 500;
 
-       // int caveDungeonNoLevels = 4;
-
-        //int noCaveLevels = 10;
-       // int noCaveWaterLevels = 5;
-
-        //int noRuinedLevels = 3;
         int ruinedExtraCorridorDefinite = 5;
         int ruinedExtraCorridorRandom = 10;
 
-        //int noHallLevels = 2;
         int hallsExtraCorridorDefinite = 0;
         int hallsExtraCorridorRandom = 8;
-
-        //int potionOnMonsterChance = 60;
 
         public DungeonMaker(GameDifficulty diff) {
             difficulty = diff;
@@ -105,27 +41,13 @@ namespace RogueBasin
 
             SetupMaps();
 
-            SpawnInitialCreatures();
-
             SpawnUniquesAndItems();
 
-            SpawnItems();
+            SpawnInitialCreatures();
 
-            
-            //SpawnUniques();
+            //Debug only
+            //SpawnItems();
 
-            //switch (difficulty)
-            //{
-            //    case GameDifficulty.Easy:
-            //        Game.Dungeon.Player.TimeToRescueFriend = 800000;
-            //        break;
-            //    case GameDifficulty.Medium:
-            //        Game.Dungeon.Player.TimeToRescueFriend = 700000;
-            //        break;
-            //    case GameDifficulty.Hard:
-            //        Game.Dungeon.Player.TimeToRescueFriend = 600000;
-            //        break;
-            //}
             return dungeon;
         }
 
@@ -138,10 +60,6 @@ namespace RogueBasin
 
             player.CalculateCombatStats();
             player.Hitpoints = player.MaxHitpoints;
-
-            //player.Hitpoints = 100;
-            //player.MaxHitpoints = 100;
-
         }
 
         struct MonsterCommon
@@ -156,6 +74,11 @@ namespace RogueBasin
             public Monster monster;
         }
 
+        /// <summary>
+        /// Select a monster based on the probabilities in the list
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
         private Monster GetMonsterFromCommonList(List<MonsterCommon> list)
         {
             //Find total prob
@@ -183,26 +106,34 @@ namespace RogueBasin
             return null;
         }
 
+        /// <summary>
+        /// Place a monster on level
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="monster"></param>
+        /// <returns></returns>
         private Point PlaceMonster(int level, Monster monster)
         {
             Point location = new Point();
+            int loopCount = 0;
             do
             {
                 location = dungeon.RandomWalkablePointInLevel(level);
-            } while (!dungeon.AddMonster(monster, level, location));
+                loopCount++;
+            } while (!dungeon.AddMonster(monster, level, location) && loopCount < 1000);
 
-            CheckSpecialMonsterGroups(monster, level);
+            if (loopCount < 1000)
+            {
+                CheckSpecialMonsterGroups(monster, level);
+            }
+            else
+            {
+                LogFile.Log.LogEntryDebug("Error: Couldn't place monster", LogDebugLevel.High);
+            }
 
             return location;
         }
 
-
-
-        //Spawning shared variables
-        int looseGroupDist;
-        int lonerChance;
-        int maxGroupSize;
-        int minGroupSize;
 
         /// <summary>
         /// Spawn a dungeon for the first time - creatures and items.
@@ -282,6 +213,12 @@ namespace RogueBasin
 
             SpawnDungeon(dungeonID);
         }
+
+        //Spawning shared variables
+        int looseGroupDist;
+        int lonerChance;
+        int maxGroupSize;
+        int minGroupSize;
 
         private void SpawnWaterCaveCreatures(int budgetScale)
         {
@@ -374,7 +311,6 @@ namespace RogueBasin
 
             for (int i = dungeonStartLevel; i <= dungeonEndLevel; i++)
             {
-
                 //Spawn bonus potions
 
                 int totalPotions = 1 + Game.Random.Next(3);
@@ -898,8 +834,6 @@ namespace RogueBasin
                  SpawnDungeon(i);
              }
 
-             
-
             //Debug monsters
 
                           
@@ -916,529 +850,6 @@ namespace RogueBasin
            //     } while (!dungeon.AddMonster(monster, 2, location));
 
            // }
-
-             //Old DDRogue code
-
-            //The levels divide into 3 groups: cave, cave/halls and halls
-            //The difficulty in each set is roughly the same
-
-            //1-3: with water
-            //1-5: Cave
-            //5-10: Ruined Halls
-            //11-15: Halls
-
-            //Could take into account depth and difficulty level
-             /*
-            List<int> levelMonsterAmounts = new List<int>();
-
-            int Dungeon1StartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0);
-            int Dungeon1EndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(0);
-
-
-            for (int i = Dungeon1StartLevel; i <= Dungeon1EndLevel; i++)
-            {
-                int num = 200 + 80 * (i - Dungeon1StartLevel);
-                levelMonsterAmounts.Add(num);
-            }
-             */
-            //levelMonsterAmounts[0] = 500;
-            /*{
-
-                150, //1
-                120, //2
-                140, //3
-                160, //4
-                200, //5
-                220, //6
-                240, //7
-                260, //8
-                300, //9
-                340, //10
-                380, //11
-                420, //12
-                460, //13
-                500, //14
-                550 //15
-            };*/
-             /*
-            //Monster Types
-            Creatures.Ferret ferret = new RogueBasin.Creatures.Ferret();
-            Creatures.Goblin goblin = new RogueBasin.Creatures.Goblin();
-            Creatures.GoblinWitchdoctor goblinWitch = new RogueBasin.Creatures.GoblinWitchdoctor();
-            Creatures.Necromancer necromancer = new RogueBasin.Creatures.Necromancer();
-            Creatures.Orc orc = new RogueBasin.Creatures.Orc();
-            Creatures.OrcShaman orcShaman = new RogueBasin.Creatures.OrcShaman();
-            Creatures.Rat rat = new RogueBasin.Creatures.Rat();
-            Creatures.Skeleton skeleton = new RogueBasin.Creatures.Skeleton();
-            Creatures.Spider spider = new RogueBasin.Creatures.Spider();
-            Creatures.Zombie zombie = new RogueBasin.Creatures.Zombie();
-
-            List<Monster> allMonsters = new List<Monster>() {
-                new RogueBasin.Creatures.Ferret(),
-                new RogueBasin.Creatures.Goblin(),
-                new RogueBasin.Creatures.GoblinWitchdoctor(),
-                new RogueBasin.Creatures.Necromancer(),
-                new RogueBasin.Creatures.Orc(),
-                new RogueBasin.Creatures.OrcShaman(),
-                new RogueBasin.Creatures.Rat(),
-                new RogueBasin.Creatures.Skeleton(),
-                new RogueBasin.Creatures.Spider(),
-                new RogueBasin.Creatures.Zombie(),
-                new RogueBasin.Creatures.Bugbear(),
-                new RogueBasin.Creatures.Ghoul(),
-                new RogueBasin.Creatures.SkeletalArcher()
-            };
-
-            List<LevelOfMonsters> levelList = new List<LevelOfMonsters>();
-            for (int i = 0; i < 5; i++)
-            {
-                levelList.Add(new LevelOfMonsters());
-            }
-
-            //Arrange the monsters into levels of difficulty
-            foreach (Monster monster in allMonsters)
-            {
-                levelList[monster.CreatureLevel() - 1].Add(monster);
-            }
-
-            if (difficulty == GameDifficulty.Easy)
-            {
-                for (int i = 0; i < levelMonsterAmounts.Count; i++)
-                {
-                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 0.5);
-                }
-            }
-
-            if (difficulty == GameDifficulty.Medium)
-            {
-                for (int i = 0; i < levelMonsterAmounts.Count; i++)
-                {
-                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 0.7);
-                }
-            }
-
-            if (difficulty == GameDifficulty.Hard)
-            {
-                for (int i = 0; i < levelMonsterAmounts.Count; i++)
-                {
-                    levelMonsterAmounts[i] = (int)(levelMonsterAmounts[i] * 1);
-                }
-            }
-
-            //Dungeon 1 - caves
-            //levels 2 - 5
-
-            for (int i = Dungeon1StartLevel; i <= Dungeon1EndLevel; i++)
-            {
-                int randomNum;
-
-                //Switch on dungeon level
-                switch (i)
-                {
-                    //Early caves
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-
-                        int costSpent = 0;
-                        int indexIntoMonsterAmounts = i -Dungeon1StartLevel;
-
-                        do
-                        {
-                            randomNum = Game.Random.Next(100);
-
-                            Monster monsterToAdd = null;
-
-                            if (randomNum < 75)
-                            {
-                                monsterToAdd = levelList[0].GetRandomMonster();
-                            }
-                            else if (randomNum < 98)
-                            {
-                                monsterToAdd = levelList[1].GetRandomMonster();
-                            }
-                            else
-                                monsterToAdd = levelList[2].GetRandomMonster();
-
-                            Point location;
-
-
-
-                            do
-                            {
-                                location = dungeon.RandomWalkablePointInLevel(i);
-                            } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                            CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                            costSpent += monsterToAdd.CreatureCost();
-
-                        } while (costSpent < levelMonsterAmounts[indexIntoMonsterAmounts]);
-
-                        break;
-                }
-            }
-
-            List<Monster> monstersToAdd = new List<Monster>();*/
-            /*
-            monstersToAdd.Add(new Creatures.Bat());
-            monstersToAdd.Add(new Creatures.BlackUnicorn());
-            monstersToAdd.Add(new Creatures.Demon());
-            monstersToAdd.Add(new Creatures.Ghoul());
-            monstersToAdd.Add(new Creatures.Maleficarum());
-            monstersToAdd.Add(new Creatures.Ogre());
-            monstersToAdd.Add(new Creatures.Overlord());
-            monstersToAdd.Add(new Creatures.Peon());
-            monstersToAdd.Add(new Creatures.Pixie());
-            monstersToAdd.Add(new Creatures.Uruk());
-            monstersToAdd.Add(new Creatures.Whipper());
-            */
-
-            /*
-            monstersToAdd.Add(new Creatures.Imp());
-            monstersToAdd.Add(new Creatures.Imp());
-            monstersToAdd.Add(new Creatures.Imp());
-            monstersToAdd.Add(new Creatures.Drainer());
-            monstersToAdd.Add(new Creatures.Drainer());
-            monstersToAdd.Add(new Creatures.Drainer());
-            monstersToAdd.Add(new Creatures.Nymph());
-            monstersToAdd.Add(new Creatures.Nymph());
-            monstersToAdd.Add(new Creatures.Nymph());*/
-            
-             /*
-            List<Monster> monstersToAdd = new List<Monster>();
-            monstersToAdd.Add(new Creatures.Faerie());
-            monstersToAdd.Add(new Creatures.Faerie());
-            monstersToAdd.Add(new Creatures.Faerie());
-            monstersToAdd.Add(new Creatures.Faerie());
-
-            foreach (Monster monster in monstersToAdd)
-            {
-                Point location = new Point();
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(2);
-                } while (!dungeon.AddMonster(monster, 2, location));
-            }*/
-
-
-             /*
-             //Don't auto spawn for the last 2 levels
-             for (int i = 0; i < dungeon.NoLevels - 2; i++)
-             {
-                 int randomNum;
-
-                 //Switch on dungeon level
-                 switch (i)
-                 {
-                         //Early caves
-                     case 0:
-
-                         //0 is the town
-
-                         int costSpent = 0;
-
-                       
-                         int costSpent = 0;
-
-                         do
-                         {
-                             randomNum = Game.Random.Next(100);
-
-                             Monster monsterToAdd = null;
-
-                             if (randomNum < 50)
-                             {
-                                 monsterToAdd = new Creatures.Orc();
-                                 //monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-                             else
-                             {
-                                 monsterToAdd = new Creatures.Bugbear();
-                                 //monsterToAdd = levelList[1].GetRandomMonster();
-                                 //monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-
-                             Point location;
-
-                             do
-                             {
-                                 location = dungeon.RandomWalkablePointInLevel(i);
-                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                             CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                             costSpent += monsterToAdd.CreatureCost();
-
-                         } while (costSpent < levelMonsterAmounts[i]);
-                        
-                         break;
-
-                     case 1:
-                     case 2:
-
-                         costSpent = 0;
-
-                         do
-                         {
-                             randomNum = Game.Random.Next(100);
-
-                             Monster monsterToAdd = null;
-
-                             if (randomNum < 75)
-                             {
-                                 monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-                             else if (randomNum < 98)
-                             {
-                                 monsterToAdd = levelList[1].GetRandomMonster();
-                             }
-                             else
-                                 monsterToAdd = levelList[2].GetRandomMonster();
-
-                             Point location;
-
-                             do
-                             {
-                                 location = dungeon.RandomWalkablePointInLevel(i);
-                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                             CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                             costSpent += monsterToAdd.CreatureCost();
-
-                         } while (costSpent < levelMonsterAmounts[i]);
-
-                         break;
-                     //Late caves
-                     case 3:
-                     case 4:
-                     case 5:
-
-                         costSpent = 0;
-
-                         do
-                         {
-                             randomNum = Game.Random.Next(100);
-
-                             Monster monsterToAdd = null;
-
-                             if (randomNum < 50)
-                             {
-                                 monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-                             else if (randomNum < 75)
-                             {
-                                 monsterToAdd = levelList[1].GetRandomMonster();
-                             }
-                             else if(randomNum < 98)
-                                 monsterToAdd = levelList[2].GetRandomMonster();
-                             else
-                                 monsterToAdd = levelList[3].GetRandomMonster();
-
-                             Point location;
-
-                             do
-                             {
-                                 location = dungeon.RandomWalkablePointInLevel(i);
-                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                             CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                             costSpent += monsterToAdd.CreatureCost();
-
-                         } while (costSpent < levelMonsterAmounts[i]);
-
-                         break;
-                     //Early cave/hall
-                     case 6:
-                     case 7:
-                     case 8:
-
-                         costSpent = 0;
-
-                         do
-                         {
-                             randomNum = Game.Random.Next(100);
-
-                             Monster monsterToAdd = null;
-
-                             if (randomNum < 25)
-                             {
-                                 monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-                             else if (randomNum < 40)
-                             {
-                                 monsterToAdd = levelList[1].GetRandomMonster();
-                             }
-                             else if (randomNum < 90)
-                                 monsterToAdd = levelList[2].GetRandomMonster();
-                             else
-                                 monsterToAdd = levelList[3].GetRandomMonster();
-
-                             Point location;
-
-                             do
-                             {
-                                 location = dungeon.RandomWalkablePointInLevel(i);
-                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                             CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                             costSpent += monsterToAdd.CreatureCost();
-
-                         } while (costSpent < levelMonsterAmounts[i]);
-
-                         break;
-
-                     //Late cave/hall
-                     case 9:
-                     case 10:
-
-                         costSpent = 0;
-
-                         do
-                         {
-                             randomNum = Game.Random.Next(100);
-
-                             Monster monsterToAdd = null;
-
-                             if (randomNum < 10)
-                             {
-                                 monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-                             else if (randomNum < 30)
-                             {
-                                 monsterToAdd = levelList[1].GetRandomMonster();
-                             }
-                             else if (randomNum < 60)
-                                 monsterToAdd = levelList[2].GetRandomMonster();
-                             else if(randomNum < 90)
-                                 monsterToAdd = levelList[3].GetRandomMonster();
-                             else
-                                 monsterToAdd = levelList[4].GetRandomMonster();
-
-                             Point location;
-
-                             do
-                             {
-                                 location = dungeon.RandomWalkablePointInLevel(i);
-                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                             CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                             costSpent += monsterToAdd.CreatureCost();
-
-                         } while (costSpent < levelMonsterAmounts[i]);
-                         break;
-                         //Early halls
-                     case 11:
-                     case 12:
-                         case 13:
-
-                         costSpent = 0;
-
-                         do
-                         {
-                             randomNum = Game.Random.Next(100);
-
-                             Monster monsterToAdd = null;
-
-                             if (randomNum < 15)
-                             {
-                                 monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-                             else if (randomNum < 25)
-                             {
-                                 monsterToAdd = levelList[1].GetRandomMonster();
-                             }
-                             else if (randomNum < 35)
-                                 monsterToAdd = levelList[2].GetRandomMonster();
-                             else if(randomNum < 80)
-                                 monsterToAdd = levelList[3].GetRandomMonster();
-                             else
-                                 monsterToAdd = levelList[4].GetRandomMonster();
-
-                             Point location;
-
-                             do
-                             {
-                                 location = dungeon.RandomWalkablePointInLevel(i);
-                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                             CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                             costSpent += monsterToAdd.CreatureCost();
-
-                         } while (costSpent < levelMonsterAmounts[i]);
-                         break;
-                              //Late halls
-                     case 14:
-                     case 15:
-
-                         costSpent = 0;
-
-                         do
-                         {
-                             randomNum = Game.Random.Next(100);
-
-                             Monster monsterToAdd = null;
-
-                             if (randomNum < 10)
-                             {
-                                 monsterToAdd = levelList[0].GetRandomMonster();
-                             }
-                             else if (randomNum < 20)
-                             {
-                                 monsterToAdd = levelList[1].GetRandomMonster();
-                             }
-                             else if (randomNum < 30)
-                                 monsterToAdd = levelList[2].GetRandomMonster();
-                             else if(randomNum < 70)
-                                 monsterToAdd = levelList[3].GetRandomMonster();
-                             else
-                                 monsterToAdd = levelList[4].GetRandomMonster();
-
-                             Point location;
-
-                             do
-                             {
-                                 location = dungeon.RandomWalkablePointInLevel(i);
-                             } while (!dungeon.AddMonster(monsterToAdd, i, location));
-
-                             CheckSpecialMonsterGroups(monsterToAdd, i);
-
-                             costSpent += monsterToAdd.CreatureCost();
-
-                         } while (costSpent < levelMonsterAmounts[i]);
-                         break;
-                 }
-
-             }
-             */
-            /*
-                            int noCreatures = 25 + Game.Random.Next(5);
-
-                            for (int j = 0; j < noCreatures; j++)
-                            {
-                                Monster monster;
-                                if (Game.Random.Next(8) < 6)
-                                    monster = new Creatures.Rat();
-                                else
-                                    monster = new Creatures.GoblinWitchdoctor();
-
-                                Point location = new Point(0, 0);
-
-                                //Find an acceptable location (walkable and with no other creatures in it)
-                                //Note that there is no guarantee of connectivity on cave squares
-                                do
-                                {
-                                    location = dungeon.RandomWalkablePointInLevel(i);
-                                } while (!dungeon.AddMonster(monster, i, location));
-                            }
-                        }*/
-
         }
 
          /// <summary>
@@ -1563,8 +974,10 @@ namespace RogueBasin
 
              //Failed to add monster
              if (outerLoopCount == 50)
+             {
+                 LogFile.Log.LogEntryDebug("Failed to place a monster near master", LogDebugLevel.Medium);
                  return false;
-
+             }
              return true;
          }
 
@@ -1664,18 +1077,13 @@ namespace RogueBasin
          }
 
         /// <summary>
-        /// Slightly unsafe due to infinite loop but not a big deal if it fails
+        /// If we have generated a group-bearing monster, add its group
         /// </summary>
         /// <param name="monster"></param>
         /// <param name="levelToPlace"></param>
         private void CheckSpecialMonsterGroups(Monster monster, int levelToPlace)
         {
             int minDistance = 5;
-            int loopCount = 0;
-
-            Point location = new Point();
-
-            int outerLoopCount = 0;
 
             //Certain monsters spawn in with groups of their friends
             if (monster is Creatures.GoblinWitchdoctor)
@@ -1684,34 +1092,8 @@ namespace RogueBasin
                 int noFerrets = 2 + Game.Random.Next(4);
                 int noGoblins = 1 + Game.Random.Next(3);
 
-                for (int i = 0; i < noFerrets; i++)
-                {
-                    outerLoopCount = 0;
-                    do {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Ferret(), levelToPlace, location) && outerLoopCount < 50);
-                }
-
-                for (int i = 0; i < noGoblins; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Goblin(), levelToPlace, location) && outerLoopCount < 50);
-                }
+                AddMonstersCloseToMaster(new Creatures.Ferret(), noFerrets, monster, minDistance, levelToPlace);
+                AddMonstersCloseToMaster(new Creatures.Goblin(), noGoblins, monster, minDistance, levelToPlace);
             }
             else if (monster is Creatures.OrcShaman)
             {
@@ -1719,35 +1101,8 @@ namespace RogueBasin
                 int noOrcs = 2 + Game.Random.Next(3);
                 int noSpiders = 1 + Game.Random.Next(2);
 
-                for (int i = 0; i < noOrcs; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Orc(), levelToPlace, location) && outerLoopCount < 50);
-                }
-
-                for (int i = 0; i < noSpiders; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Spider(), levelToPlace, location) && outerLoopCount < 50);
-                }
+                AddMonstersCloseToMaster(new Creatures.Orc(), noOrcs, monster, minDistance, levelToPlace);
+                AddMonstersCloseToMaster(new Creatures.Spider(), noSpiders, monster, minDistance, levelToPlace);
             }
 
             else if (monster is Creatures.Necromancer)
@@ -1756,163 +1111,40 @@ namespace RogueBasin
                 int noSkel = 1 + Game.Random.Next(3);
                 int noZomb = 1 + Game.Random.Next(2);
 
-                for (int i = 0; i < noSkel; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Skeleton(), levelToPlace, location) && outerLoopCount < 50);
-                }
-
-                for (int i = 0; i < noZomb; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Zombie(), levelToPlace, location) && outerLoopCount < 50);
-                }
+                AddMonstersCloseToMaster(new Creatures.Skeleton(), noSkel, monster, minDistance, levelToPlace);
+                AddMonstersCloseToMaster(new Creatures.Zombie(), noZomb, monster, minDistance, levelToPlace);
             }
+
             else if (monster is Creatures.Meddler)
             {
                 //Spawn in with a random number of demons & peons
                 int noDem = 1 + Game.Random.Next(2);
                 int noPeon = 1 + Game.Random.Next(3);
 
-                for (int i = 0; i < noDem; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location) && outerLoopCount < 50);
-                }
-
-                for (int i = 0; i < noPeon; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Peon(), levelToPlace, location) && outerLoopCount < 50);
-                }
+                AddMonstersCloseToMaster(new Creatures.Demon(), noDem, monster, minDistance, levelToPlace);
+                AddMonstersCloseToMaster(new Creatures.Peon(), noPeon, monster, minDistance, levelToPlace);
             }
 
             else if (monster is Creatures.Maleficarum)
             {
                 //Spawn in with a random number of demons & whippers
                 int noDem = 1 + Game.Random.Next(2);
-                int noPeon = 1 + Game.Random.Next(2);
+                int noWhippers = 1 + Game.Random.Next(2);
 
-                for (int i = 0; i < noDem; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location) && outerLoopCount < 50);
-                }
-
-                for (int i = 0; i < noPeon; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Whipper(), levelToPlace, location) && outerLoopCount < 50);
-                }
+                AddMonstersCloseToMaster(new Creatures.Demon(), noDem, monster, minDistance, levelToPlace);
+                AddMonstersCloseToMaster(new Creatures.Whipper(), noWhippers, monster, minDistance, levelToPlace);
             }
             else if (monster is Creatures.Overlord)
             {
-                //Spawn in with a random number of demons & whippers
+                //Spawn in with a random number of demons, imps and drainers
                 int noDem = 1 + Game.Random.Next(3);
                 int noImp = 1;
                 int noDrainer = 1;
 
-                for (int i = 0; i < noImp; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Imp(), levelToPlace, location) && outerLoopCount < 50);
-                }
-
-
-                for (int i = 0; i < noDem; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Demon(), levelToPlace, location) && outerLoopCount < 50);
-                }
-
-                for (int i = 0; i < noDrainer; i++)
-                {
-                    outerLoopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(monster, location) > minDistance && loopCount < maxLoopCount);
-                        outerLoopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Drainer(), levelToPlace, location) && outerLoopCount < 50);
-                }
+                AddMonstersCloseToMaster(new Creatures.Demon(), noDem, monster, minDistance, levelToPlace);
+                AddMonstersCloseToMaster(new Creatures.Imp(), noImp, monster, minDistance, levelToPlace);
+                AddMonstersCloseToMaster(new Creatures.Drainer(), noDrainer, monster, minDistance, levelToPlace);
             }
-
         }
 
         private void SpawnUniquesAndItems()
@@ -1923,18 +1155,17 @@ namespace RogueBasin
             SpawnForestUniques();
             SpawnCryptUniques();
             SpawnOrcUniques();
-            
             SpawnDemonUniques();
-            
         }
 
         private void SpawnCaveUniques()
         {
             int minDistance = 4;
 
-            LogFile.Log.LogEntryDebug("Adding cave uniques...", LogDebugLevel.Medium);
+            LogFile.Log.LogEntry("Adding cave uniques...");
 
             //Level 1: Unique ferret
+
             Creatures.FerretUnique ferret = new RogueBasin.Creatures.FerretUnique();
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 1;
             PlaceMonster(uniqueLevel, ferret);
@@ -1972,705 +1203,253 @@ namespace RogueBasin
         private void SpawnWaterCaveUniques()
         {
             int minDistance = 4;
-            int loopCount = 0;
-
             Point location = new Point();
 
-            //Unique spider
+            LogFile.Log.LogEntry("Adding water cave uniques...");
 
-            LogFile.Log.LogEntryDebug("Adding water cave uniques...", LogDebugLevel.Medium);
-
-            Creatures.SpiderUnique rat = new RogueBasin.Creatures.SpiderUnique();
+            //Level 3 : Unique spider
+            Creatures.SpiderUnique spider = new RogueBasin.Creatures.SpiderUnique();
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1) + 2;
-            Point uniqLoc = PlaceMonster(uniqueLevel, rat);
+            Point uniqLoc = PlaceMonster(uniqueLevel, spider);
 
-            //Spawn in with a random number of rats
+            Items.ShortSword sword = new RogueBasin.Items.ShortSword();
+            spider.PickUpItem(sword);
+
+            //Spawn in with a random number of spiders & goblins
             int noSpiders = 3 + Game.Random.Next(2);
             int noGobbos = 2 + Game.Random.Next(2);
 
-            int outerloopCount;
-            for (int i = 0; i < noSpiders; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                } while (!dungeon.AddMonster(new Creatures.Spider(), uniqueLevel, location) && outerloopCount < 20);
-            }
+            AddMonstersCloseToMaster(new Creatures.Spider(), noSpiders, spider, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Goblin(), noGobbos, spider, minDistance, uniqueLevel);
 
-            for (int i = 0; i < noGobbos; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.GoblinWitchdoctor(), uniqueLevel, location) && outerloopCount < 20);
-            }
+            //Level 4 : Unique ogre
 
-            //Add his items
-
-            Items.ShortSword dag = new RogueBasin.Items.ShortSword();
-
-            rat.PickUpItem(dag);
-
-            //Unique rat
-
-            Creatures.OgreUnique gobbo = new RogueBasin.Creatures.OgreUnique();
+            Creatures.OgreUnique ogre = new RogueBasin.Creatures.OgreUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1) + 3;
-            uniqLoc = PlaceMonster(uniqueLevel, gobbo);
+            uniqLoc = PlaceMonster(uniqueLevel, ogre);
+
+            Items.PrettyDress dress = new RogueBasin.Items.PrettyDress();
+            ogre.PickUpItem(dress);
 
             //Spawn in with a random number of ferrets & goblins
             int noPixie = 2 + Game.Random.Next(2);
             int noBugbear = 2 + Game.Random.Next(2);
 
-            for (int i = 0; i < noPixie; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Pixie(), uniqueLevel, location) && outerloopCount < 20);
-            }
-
-            for (int i = 0; i < noBugbear; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location) && outerloopCount < 20);
-            }
-
-            //Add his items
-
-            Items.PrettyDress map = new RogueBasin.Items.PrettyDress();
-
-            gobbo.PickUpItem(map);
-
+            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, ogre, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, ogre, minDistance, uniqueLevel);
         }
 
         private void SpawnForestUniques()
         {
             int minDistance = 4;
-            int loopCount = 0;
 
             Point location = new Point();
 
-            //Unique spider
+            LogFile.Log.LogEntry("Adding forest uniques...");
 
-            LogFile.Log.LogEntryDebug("Adding forest uniques...", LogDebugLevel.Medium);
+            //Level 2 : Unique faerie
 
-            Creatures.BlackUnicornUnique rat = new RogueBasin.Creatures.BlackUnicornUnique();
-            int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 2;
-            Point uniqLoc = PlaceMonster(uniqueLevel, rat);
+            Creatures.FaerieUnique faerie = new RogueBasin.Creatures.FaerieUnique();
+            int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 1;
+            Point uniqLoc = PlaceMonster(uniqueLevel, faerie);
 
-            //Spawn in with a random number of rats
-            int noUni = 2 + Game.Random.Next(2);
-            int noNymph = 1 + Game.Random.Next(2);
-
-            int outerloopCount;
-
-            for (int i = 0; i < noUni; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.BlackUnicorn(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            for (int i = 0; i < noNymph; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Nymph(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            //Add his items
-
-            Items.LeatherArmour dag = new RogueBasin.Items.LeatherArmour();
-
-            rat.PickUpItem(dag);
-
-            //Unique spider
-
-            LogFile.Log.LogEntryDebug("Adding forest uniques...", LogDebugLevel.Medium);
-
-            Creatures.FaerieUnique far = new RogueBasin.Creatures.FaerieUnique();
-            uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 1;
-            uniqLoc = PlaceMonster(uniqueLevel, far);
+            Items.SparklingEarrings earring = new RogueBasin.Items.SparklingEarrings();
+            faerie.PickUpItem(earring);
 
             //Spawn in with a random number of rats
-            noNymph = 2 + Game.Random.Next(2);
+            int noNymph = 2 + Game.Random.Next(2);
             int noPixie = 2 + Game.Random.Next(2);
 
-            for (int i = 0; i < noNymph; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(far, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Nymph(), uniqueLevel, location) && outerloopCount < 50);
-            }
+            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, faerie, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, faerie, minDistance, uniqueLevel);
+            
+            //Level 3 : Unique black unicorn
 
-            for (int i = 0; i < noPixie; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(far, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Pixie(), uniqueLevel, location) && outerloopCount < 50);
-            }
+            Creatures.BlackUnicornUnique unicorn = new RogueBasin.Creatures.BlackUnicornUnique();
+            uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 2;
+            uniqLoc = PlaceMonster(uniqueLevel, unicorn);
 
-            //Add his items
+            Items.LeatherArmour leather = new RogueBasin.Items.LeatherArmour();
+            unicorn.PickUpItem(leather);
 
-            Items.SparklingEarrings dag2 = new RogueBasin.Items.SparklingEarrings();
+            //Spawn in with a random number of unicorns and nymphs
+            int noUni = 2 + Game.Random.Next(2);
+            noNymph = 1 + Game.Random.Next(2);
 
-            far.PickUpItem(dag2);
+            AddMonstersCloseToMaster(new Creatures.BlackUnicorn(), noUni, unicorn, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, unicorn, minDistance, uniqueLevel);
 
-            //Unique rat
+            //Level 4 : Unique pixie
 
-            Creatures.PixieUnique gobbo = new RogueBasin.Creatures.PixieUnique();
+            Creatures.PixieUnique pixie = new RogueBasin.Creatures.PixieUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 3;
-            uniqLoc = PlaceMonster(uniqueLevel, gobbo);
+            uniqLoc = PlaceMonster(uniqueLevel, pixie);
 
             //Spawn in with a random number of ferrets & goblins
             noPixie = 2 + Game.Random.Next(2);
             int noFairie = 2 + Game.Random.Next(2);
             noNymph = 2 + Game.Random.Next(2);
 
-            for (int i = 0; i < noPixie; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Pixie(), uniqueLevel, location) && outerloopCount < 50);
-            }
+            Items.StaffPower staff = new RogueBasin.Items.StaffPower();
+            pixie.PickUpItem(staff);
 
-            for (int i = 0; i < noFairie; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Faerie(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            for (int i = 0; i < noNymph; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Nymph(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            //Add his items
-
-            Items.StaffPower map = new RogueBasin.Items.StaffPower();
-
-            gobbo.PickUpItem(map);
-
+            AddMonstersCloseToMaster(new Creatures.Pixie(), noPixie, pixie, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Faerie(), noFairie, pixie, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Nymph(), noNymph, pixie, minDistance, uniqueLevel);
         }
 
         private void SpawnDemonUniques()
         {
             int minDistance = 5;
-            int loopCount = 0;
 
-            Point location = new Point();
+            //Level 3 : Unique Maleficarum
 
-            //Unique spider
+            LogFile.Log.LogEntry("Adding demon uniques...");
 
-            LogFile.Log.LogEntryDebug("Adding demon uniques...", LogDebugLevel.Medium);
-
-            Creatures.MaleficarumUnique rat = new RogueBasin.Creatures.MaleficarumUnique();
+            Creatures.MaleficarumUnique mal = new RogueBasin.Creatures.MaleficarumUnique();
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5) + 2;
-            Point uniqLoc = PlaceMonster(uniqueLevel, rat);
+            Point uniqLoc = PlaceMonster(uniqueLevel, mal);
 
-            //Spawn in with a random number of rats
+            Items.RestoreOrb orb = new RogueBasin.Items.RestoreOrb();
+            mal.PickUpItem(orb);
+
+            //Spawn in with a random number of followers
             int noDran = 2 + Game.Random.Next(2);
             int noImp = 2 + Game.Random.Next(2);
             int noDemon =  3 + Game.Random.Next(4);
 
-            int outerloopCount;
-            for (int i = 0; i < noDran; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Drainer(), uniqueLevel, location) && outerloopCount < 50);
-            }
+            AddMonstersCloseToMaster(new Creatures.Drainer(), noDran, mal, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Imp(), noImp, mal, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Demon(), noDemon, mal, minDistance, uniqueLevel);
 
-            for (int i = 0; i < noImp; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Imp(), uniqueLevel, location) && outerloopCount < 50);
-            }
+            //Level 4 : Unique Overlord
 
-            for (int i = 0; i < noDemon; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Demon(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            //Add his items
-
-            Items.RestoreOrb dag = new RogueBasin.Items.RestoreOrb();
-
-            rat.PickUpItem(dag);
-
-            //Unique rat
-
-            Creatures.OverlordUnique gobbo = new RogueBasin.Creatures.OverlordUnique();
+            Creatures.OverlordUnique overlord = new RogueBasin.Creatures.OverlordUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5) + 3;
-            uniqLoc = PlaceMonster(uniqueLevel, gobbo);
+            uniqLoc = PlaceMonster(uniqueLevel, overlord);
 
-            //Spawn in with a random number of ferrets & goblins
+            Items.GodSword sword = new RogueBasin.Items.GodSword();
+            overlord.PickUpItem(sword);
+
+            //Spawn in with a random number of followers
             noDran = 2 + Game.Random.Next(2);
             noImp = 2 + Game.Random.Next(2);
-             noDemon = 3 + Game.Random.Next(4);
+            noDemon = 3 + Game.Random.Next(4);
             int noMed = 2;
 
-            for (int i = 0; i < noDran; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Drainer(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            for (int i = 0; i < noImp; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Imp(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            for (int i = 0; i < noDemon; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Demon(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            for (int i = 0; i < noMed; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Meddler(), uniqueLevel, location) && outerloopCount < 50);
-            }
-
-            //Add his items
-
-            Items.GodSword map = new RogueBasin.Items.GodSword();
-
-            gobbo.PickUpItem(map);
-
+            AddMonstersCloseToMaster(new Creatures.Drainer(), noDran, overlord, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Imp(), noImp, overlord, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Demon(), noDemon, overlord, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Meddler(), noMed, overlord, minDistance, uniqueLevel);
         }
 
 
         private void SpawnCryptUniques()
         {
             int minDistance = 4;
-            int loopCount = 0;
 
-            Point location = new Point();
+            //Level 4 : Unique Necromancer
 
-            //Unique spider
+            LogFile.Log.LogEntry("Adding crypt uniques...");
 
-            LogFile.Log.LogEntryDebug("Adding crypt uniques...", LogDebugLevel.Medium);
-
-            Creatures.NecromancerUnique rat = new RogueBasin.Creatures.NecromancerUnique();
+            Creatures.NecromancerUnique necro = new RogueBasin.Creatures.NecromancerUnique();
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4) + 3;
-            Point uniqLoc = PlaceMonster(uniqueLevel, rat);
+            Point uniqLoc = PlaceMonster(uniqueLevel, necro);
+
+            Items.MetalArmour armour = new RogueBasin.Items.MetalArmour();
+            necro.PickUpItem(armour);
 
             //Spawn in with a random number of skels & zombs
-                int noSkelArch = 2 + Game.Random.Next(3);
-                int noSkel = 2 + Game.Random.Next(2);
-                int noZomb = 2 + Game.Random.Next(2);
+            int noSkelArch = 2 + Game.Random.Next(3);
+            int noSkel = 2 + Game.Random.Next(2);
+            int noZomb = 2 + Game.Random.Next(2);
 
-                int outerloopCount;
-                for (int i = 0; i < noSkel; i++)
-                {
-                    outerloopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                        outerloopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Skeleton(), uniqueLevel, location) && outerloopCount < 20);
-                }
+            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, necro, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Skeleton(), noSkel, necro, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Zombie(), noZomb, necro, minDistance, uniqueLevel);
 
-            for (int i = 0; i < noSkelArch; i++)
-                {
-                    outerloopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                        outerloopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.SkeletalArcher(), uniqueLevel, location) && outerloopCount < 20);
-                }
-
-                for (int i = 0; i < noZomb; i++)
-                {
-                    outerloopCount = 0;
-                    do
-                    {
-                        loopCount = 0;
-                        do
-                        {
-                            location = dungeon.RandomWalkablePointInLevel(i);
-                            loopCount++;
-                        } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                        outerloopCount++;
-                    } while (!dungeon.AddMonster(new Creatures.Zombie(), uniqueLevel, location) && outerloopCount < 20);
-                }
-        
-
-
-            //Add his items
-
-                Items.MetalArmour dag = new RogueBasin.Items.MetalArmour();
-
-            rat.PickUpItem(dag);
-
+            // Level 3 : Unique Skeleton
+            
             Creatures.SkeletonUnique skel = new RogueBasin.Creatures.SkeletonUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4) + 2;
             uniqLoc = PlaceMonster(uniqueLevel, skel);
 
-            //Spawn in with a random number of skels & zombs
+            Items.ExtendOrb orb = new RogueBasin.Items.ExtendOrb();
+            skel.PickUpItem(orb);
+
+            //Spawn in with a random number of skel archers
             noSkelArch = 3 + Game.Random.Next(4);
-          
 
-            for (int i = 0; i < noSkelArch; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(skel, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.SkeletalArcher(), uniqueLevel, location) && outerloopCount < 20);
-            }
+            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, skel, minDistance, uniqueLevel);
 
-            //Add his items
-
-            Items.ExtendOrb dag2 = new RogueBasin.Items.ExtendOrb();
-
-            skel.PickUpItem(dag2);
-
+            // Level 2 : Unique Ghoul
 
             //Unique rat
 
-            Creatures.GhoulUnique gobbo = new RogueBasin.Creatures.GhoulUnique();
+            Creatures.GhoulUnique ghoul = new RogueBasin.Creatures.GhoulUnique();
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4) + 1;
-            uniqLoc = PlaceMonster(uniqueLevel, gobbo);
+            uniqLoc = PlaceMonster(uniqueLevel, ghoul);
 
-            //Spawn in with a random number of ferrets & goblins
+            Items.LongSword sword = new RogueBasin.Items.LongSword();
+            ghoul.PickUpItem(sword);
 
+            //Spawn in with a random number of skel archers
             noSkelArch = 4 + Game.Random.Next(5);
-            
-            for (int i = 0; i < noSkelArch; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.SkeletalArcher(), uniqueLevel, location) && outerloopCount < 20);
-            }
 
-            //Add his items
-
-            Items.LongSword map = new RogueBasin.Items.LongSword();
-
-            gobbo.PickUpItem(map);
-
+            AddMonstersCloseToMaster(new Creatures.SkeletalArcher(), noSkelArch, ghoul, minDistance, uniqueLevel);
         }
 
 
         private void SpawnOrcUniques()
         {
             int minDistance = 6;
-            int loopCount = 0;
 
-            int outerloopCount = 0;
+            LogFile.Log.LogEntry("Adding orc uniques...");
 
-            Point location = new Point();
+            //Level 3 : Unique Uruk
 
-            //Unique spider
-
-            LogFile.Log.LogEntryDebug("Adding orc uniques...", LogDebugLevel.Medium);
-
-            Creatures.UrukUnique rat = new RogueBasin.Creatures.UrukUnique();
+            Creatures.UrukUnique uruk = new RogueBasin.Creatures.UrukUnique();
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3) + 2;
-            Point uniqLoc = PlaceMonster(uniqueLevel, rat);
+            Point uniqLoc = PlaceMonster(uniqueLevel, uruk);
+
+            //Add his items
+            Items.HealingPotion dag = new RogueBasin.Items.HealingPotion();
+            uruk.PickUpItem(dag);
 
             //Spawn in with a random number of rats
             int noBugbear = 3 + Game.Random.Next(2);
             int noUruk = 2 + Game.Random.Next(3);
             int noOrcShaman = 1 + Game.Random.Next(1);
 
-            for (int i = 0; i < noBugbear; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location) && outerloopCount < 20);
-            }
+            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, uruk, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Uruk(), noUruk, uruk, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.OrcShaman(), noOrcShaman, uruk, minDistance, uniqueLevel);
 
-            for (int i = 0; i < noUruk; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Uruk(), uniqueLevel, location) && outerloopCount < 20);
-            }
-            for (int i = 0; i < noOrcShaman; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(rat, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.OrcShaman(), uniqueLevel, location) && outerloopCount < 20);
-            }
+            //Level 4 : Unique Orc Shaman
+
+            Creatures.OrcShamanUnique shaman = new RogueBasin.Creatures.OrcShamanUnique();
+            uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3) + 3;
+            uniqLoc = PlaceMonster(uniqueLevel, shaman);
 
             //Add his items
 
-            Items.HealingPotion dag = new RogueBasin.Items.HealingPotion();
-
-            rat.PickUpItem(dag);
-
-            //Unique rat
-
-            Creatures.OrcShamanUnique gobbo = new RogueBasin.Creatures.OrcShamanUnique();
-            uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(3) + 3;
-            uniqLoc = PlaceMonster(uniqueLevel, gobbo);
+            Items.KnockoutDress dress = new RogueBasin.Items.KnockoutDress();
+            shaman.PickUpItem(dress);
 
             //Spawn in with a random number of ferrets & goblins
             int noOrc = 6 + Game.Random.Next(6);
             noBugbear = 3 + Game.Random.Next(2);
             noOrcShaman = 2 + Game.Random.Next(2);
 
-            for (int i = 0; i < noBugbear; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Bugbear(), uniqueLevel, location) && outerloopCount < 20);
-            }
-            
-            for (int i = 0; i < noOrc; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.Orc(), uniqueLevel, location) && outerloopCount < 20);
-            }
-
-            for (int i = 0; i < noOrcShaman; i++)
-            {
-                outerloopCount = 0;
-                do
-                {
-                    loopCount = 0;
-                    do
-                    {
-                        location = dungeon.RandomWalkablePointInLevel(i);
-                        loopCount++;
-                    } while (Game.Dungeon.GetDistanceBetween(gobbo, location) > minDistance && loopCount < maxLoopCount);
-                    outerloopCount++;
-                } while (!dungeon.AddMonster(new Creatures.OrcShaman(), uniqueLevel, location) && outerloopCount < 20);
-            }
-
-
-            //Add his items
-
-            Items.KnockoutDress map = new RogueBasin.Items.KnockoutDress();
-
-            gobbo.PickUpItem(map);
-
+            AddMonstersCloseToMaster(new Creatures.Orc(), noOrc, shaman, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.Bugbear(), noBugbear, shaman, minDistance, uniqueLevel);
+            AddMonstersCloseToMaster(new Creatures.OrcShaman(), noOrcShaman, shaman, minDistance, uniqueLevel);
         }
 
         private void SpawnItems()
         {
+            //Debug items
+
             /*
             LogFile.Log.LogEntry("Generating items...");
 
@@ -2700,448 +1479,6 @@ namespace RogueBasin
             */
 
             //dungeon.AddItemNoChecks(new Items.PotionSightUp(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 1));
-
-            //Add some berries
-            
-            //Cave levels
-            /*
-            for (int i = 0; i < 1; i++)
-            {
-                int totalPotions = 3 + Game.Random.Next(5);
-
-                for (int j = 0; j < totalPotions; j++)
-                {
-                    int randomChance = Game.Random.Next(100);
-
-                    Item potion;
-
-                    if (randomChance < 45)
-                        potion = new Items.Potion();
-                    else if (randomChance < 65)
-                        potion = new Items.PotionToHitUp();
-                    else if (randomChance < 70)
-                        potion = new Items.PotionDamUp();
-                    else if (randomChance < 85)
-                        potion = new Items.PotionSpeedUp();
-                    else if (randomChance < 90)
-                        potion = new Items.PotionSightUp();
-
-                    else if (randomChance < 93)
-                        potion = new Items.PotionMajHealing();
-                    else if (randomChance < 94)
-                        potion = new Items.PotionMajDamUp();
-                    else if (randomChance < 95)
-                        potion = new Items.PotionMajSpeedUp();
-                    else if (randomChance < 96)
-                        potion = new Items.PotionMajSightUp();
-                    else if (randomChance < 97)
-                        potion = new Items.PotionSuperHealing();
-                    else if (randomChance < 98)
-                        potion = new Items.PotionSuperDamUp();
-                    else if (randomChance < 99)
-                        potion = new Items.PotionSuperToHitUp();
-                    else
-                        potion = new Items.PotionSuperSpeedUp();
-
-                    PlaceItemOnLevel(potion, 2 + i, 0);
-                }
-            }*/
-
-//            Point location = new Point(0, 0);
-            
-//            //Plot items
-
-//            //These are max 1 per level
-//            //Not all of them necessarily appear in all games
-//            //They may be on the ground or carried by a creature
-
-//            //Guarantee the glove (vamparic regeneration) on level 1 or 2
-            
-//            //dungeon.AddItem(new Items.Glove(), 0, dungeon.Player.LocationMap);
-//            //The rest of the plot items are split between the remaining cave and ruined levels
-
-//            List<Item> plotItems = new List<Item> { 
-//                //special mode items (9)
-//                new Items.Badge(), new Items.Boots(), new Items.Bracer(), new Items.GlassGem(),
-//            new Items.LeadRing(), new Items.Lockpicks(), new Items.Sash() };
-
-//            List<Item> plotLevelItems = new List<Item> {
-//            //levelling items 
-//            new Items.Backpack(), new Items.Book(), new Items.Medal(), new Items.Stone(), new Items.Flint() };
-//            //glove is separate
-
-//            Game.Dungeon.Player.TotalPlotItems = 15;
-//            Game.Dungeon.Player.PlotItemsFound = 0;
-
-//            /*
-//            int level = 0;
-//            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
-
-//            foreach (Item plotItem in plotItems)
-//            {
-//                do
-//                {
-//                    location = dungeon.RandomWalkablePointInLevel(level);
-
-//                    //May want to specify a minimum distance from staircases??? TODO
-//                } while (!dungeon.AddItem(plotItem, 0, location));
-//            }
-//            */
-
-//            /*
-//            //debug
-//            //Give them all to me!
-
-//            foreach (Item item in plotItems)
-//            {
-//                dungeon.Player.PickUpItem(item);
-//            }
-//            */
-//            //Stick them all on the first level
-
-
-//            int totalNormalLevels = noCaveLevels + noHallLevels + noRuinedLevels;
-
-//            int level = 0;
-//            int loopCount = 0;
-
-//            int gloveLevel = 0;
-
-//            do
-//            {
-//                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
-//            } while (!dungeon.AddItem(new Items.Glove(), gloveLevel, location));
-            
-//            //Include glove on level 1
-//            List<int> levelsWithPlotItems = new List<int> { gloveLevel };
-
-//            List<Item> itemsPlaced = new List<Item>();
-
-//            //Guarantee Greaves or band on level 1
-//            //Add the one we don't place to the array of spare items
-//            Item firstItem;
-
-//            if (Game.Random.Next(2) < 1)
-//            {
-//                firstItem = new Items.Greaves();
-//                plotItems.Add(new Items.Band());
-//            }
-//            else
-//            {
-//                firstItem = new Items.Band();
-//                plotItems.Add(new Items.Greaves());
-//            }
-//            do
-//            {
-//                location = dungeon.RandomWalkablePointInLevel(gloveLevel);
-//            } while (!dungeon.AddItem(firstItem, gloveLevel, location));
-
-//            itemsPlaced.Add(firstItem);
-
-//            //Levelling items are distributed through the first 12 levels
-
-//            for (int i = 0; i < plotLevelItems.Count; i++)
-//            {
-
-//                Item plotItem;
-//                do
-//                {
-//                    plotItem = plotLevelItems[Game.Random.Next(plotLevelItems.Count)];
-//                } while (itemsPlaced.Contains(plotItem));
-                
-//                loopCount = 0;
-
-//                do
-//                {
-//                    level = 2 * i + 1;
-
-//                    /*if (Game.Random.Next(10) < 2)
-//                    {
-//                        level--;
-//                    }
-//                    else*/
-                    
-//                    if (Game.Random.Next(10) < 5)
-//                    {
-//                        level++;
-//                    }
-
-//                    level = Game.Random.Next(noCaveLevels + noRuinedLevels);
-//                    loopCount++;
-
-//                } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
-
-
-
-//                //Put on the floor
-//                do
-//                {
-//                    location = dungeon.RandomWalkablePointInLevel(level);
-
-//                    //May want to specify a minimum distance from staircases??? TODO
-//                } while (!dungeon.AddItem(plotItem, level, location));
-
-//                levelsWithPlotItems.Add(level);
-//                itemsPlaced.Add(plotItem);
-//            }
-
-//            //Distribute the move items randomly on other levels
-
-//            //Guarantee a few special move items early on
-
-//            for (int i = 0; i < plotItems.Count; i++)
-//            {
-//                //Find random level w/o plotItem
-//                loopCount = 0;
-//                Item plotItem;
-               
-//                do
-//                {
-//                    plotItem = plotItems[Game.Random.Next(plotItems.Count)];
-//                } while (itemsPlaced.Contains(plotItem));
-
-//                //guarantee some items early on
-//              //  if (i < 2)
-//               // {
-//              //      level = Game.Random.Next(2);
-//              //  }
-//             //   else
-////{
-//                    do
-//                    {
-//                        level = Game.Random.Next(totalNormalLevels - 2);
-//                        loopCount++;
-//                    } while (levelsWithPlotItems.Contains(level) && loopCount < 100);
-//               // }
-//                levelsWithPlotItems.Add(level);
-//                itemsPlaced.Add(plotItem);
-
-//                //On the floor
-//                //Find position in level and place item
-//                do
-//                {
-//                    location = dungeon.RandomWalkablePointInLevel(level);
-
-//                    //May want to specify a minimum distance from staircases??? TODO
-//                } while (!dungeon.AddItem(plotItem, level, location));
-
-
-//                /*
-//                //50% chance they will be generated on a monster
-//                bool putOnMonster = false;
-
-//                if(Game.Random.Next(100) < plotItemOnMonsterChance)
-//                    putOnMonster = true;
-
-//                if (putOnMonster)
-//                {
-//                    //On a monster
-
-//                    //Find a random monster on this level
-//                    Monster monster = dungeon.RandomMonsterOnLevel(level);
-
-//                    //If no monster, it'll go on the floor
-//                    if (monster == null)
-//                    {
-//                        putOnMonster = false;
-//                    }
-
-//                    //Give it to him!
-//                    monster.PickUpItem(plotItem);
-//                }
-
-//                if(!putOnMonster)
-//                {
-//                }
-//                 * */
-//            }
-            
-//            //Potions
-
-//            //Cave levels
-
-//            for (int i = 0; i < 1; i++)
-//            {
-//                int totalPotions = 3 + Game.Random.Next(5);
-
-//                for (int j = 0; j < totalPotions; j++)
-//                {
-//                    int randomChance = Game.Random.Next(100);
-
-//                    Item potion;
-
-//                    if (randomChance < 45)
-//                        potion = new Items.Potion();
-//                    else if (randomChance < 65)
-//                        potion = new Items.PotionToHitUp();
-//                    else if (randomChance < 70)
-//                        potion = new Items.PotionDamUp();
-//                    else if (randomChance < 85)
-//                        potion = new Items.PotionSpeedUp();
-//                    else if (randomChance < 90)
-//                        potion = new Items.PotionSightUp();
-
-//                    else if (randomChance < 93)
-//                        potion = new Items.PotionMajHealing();
-//                    else if (randomChance < 94)
-//                        potion = new Items.PotionMajDamUp();
-//                    else if (randomChance < 95)
-//                        potion = new Items.PotionMajSpeedUp();
-//                    else if (randomChance < 96)
-//                        potion = new Items.PotionMajSightUp();
-//                    else if (randomChance < 97)
-//                        potion = new Items.PotionSuperHealing();
-//                    else if (randomChance < 98)
-//                        potion = new Items.PotionSuperDamUp();
-//                    else if (randomChance < 99)
-//                        potion = new Items.PotionSuperToHitUp();
-//                    else
-//                        potion = new Items.PotionSuperSpeedUp();
-
-//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-//                }
-//            }
-
-//            for (int i = 1; i < noCaveLevels; i++)
-//            {
-//                int totalPotions = 3 + Game.Random.Next(5);
-
-//                for (int j = 0; j < totalPotions; j++)
-//                {
-//                    int randomChance = Game.Random.Next(100);
-
-//                    Item potion;
-
-//                    if (randomChance < 45)
-//                        potion = new Items.Potion();
-//                    else if (randomChance < 65)
-//                        potion = new Items.PotionToHitUp();
-//                    else if (randomChance < 70)
-//                        potion = new Items.PotionDamUp();
-//                    else if (randomChance < 85)
-//                        potion = new Items.PotionSpeedUp();
-//                    else if (randomChance < 90)
-//                        potion = new Items.PotionSightUp();
-
-//                    else if (randomChance < 93)
-//                        potion = new Items.PotionMajHealing();
-//                    else if (randomChance < 94)
-//                        potion = new Items.PotionMajDamUp();
-//                    else if (randomChance < 95)
-//                        potion = new Items.PotionMajSpeedUp();
-//                    else if (randomChance < 96)
-//                        potion = new Items.PotionMajSightUp();
-//                    else if (randomChance < 97)
-//                        potion = new Items.PotionSuperHealing();
-//                    else if (randomChance < 98)
-//                        potion = new Items.PotionSuperDamUp();
-//                    else if (randomChance < 99)
-//                        potion = new Items.PotionSuperToHitUp();
-//                    else
-//                        potion = new Items.PotionSuperSpeedUp();
-
-//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-//                }
-//            }
-
-//            for (int i = noRuinedLevels; i < noRuinedLevels + noCaveLevels - 2; i++)
-//            {
-//                int totalPotions = 3 + Game.Random.Next(5);
-
-//                for (int j = 0; j < totalPotions; j++)
-//                {
-//                    int randomChance = Game.Random.Next(100);
-
-//                    Item potion;
-
-//                    if (randomChance < 5)
-//                        potion = new Items.Potion();
-//                    else if (randomChance < 10)
-//                        potion = new Items.PotionToHitUp();
-//                    else if (randomChance < 15)
-//                        potion = new Items.PotionDamUp();
-//                    else if (randomChance < 20)
-//                        potion = new Items.PotionSpeedUp();
-//                    else if (randomChance < 25)
-//                        potion = new Items.PotionSightUp();
-
-//                    else if (randomChance < 55)
-//                        potion = new Items.PotionMajHealing();
-//                    else if (randomChance < 65)
-//                        potion = new Items.PotionMajDamUp();
-//                    else if (randomChance < 75)
-//                        potion = new Items.PotionMajSpeedUp();
-//                    else if (randomChance < 85)
-//                        potion = new Items.PotionMajSightUp();
-//                    else if (randomChance < 93)
-//                        potion = new Items.PotionSuperHealing();
-//                    else if (randomChance < 95)
-//                        potion = new Items.PotionSuperDamUp();
-//                    else if (randomChance < 98)
-//                        potion = new Items.PotionSuperToHitUp();
-//                    else
-//                        potion = new Items.PotionSuperSpeedUp();
-
-//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-//                }
-//            }
-
-//            for (int i = noRuinedLevels + noCaveLevels - 2; i < noRuinedLevels + noCaveLevels + noHallLevels; i++)
-//            {
-//                int totalPotions = 1 + Game.Random.Next(5);
-
-//                for (int j = 0; j < totalPotions; j++)
-//                {
-//                    int randomChance = Game.Random.Next(100);
-
-//                    Item potion;
-
-//                    if (randomChance < 5)
-//                        potion = new Items.Potion();
-//                    else if (randomChance < 7)
-//                        potion = new Items.PotionToHitUp();
-//                    else if (randomChance < 9)
-//                        potion = new Items.PotionDamUp();
-//                    else if (randomChance < 11)
-//                        potion = new Items.PotionSpeedUp();
-//                    else if (randomChance < 14)
-//                        potion = new Items.PotionSightUp();
-
-//                    else if (randomChance < 35)
-//                        potion = new Items.PotionMajHealing();
-//                    else if (randomChance < 40)
-//                        potion = new Items.PotionMajDamUp();
-//                    else if (randomChance < 45)
-//                        potion = new Items.PotionMajSpeedUp();
-//                    else if (randomChance < 50)
-//                        potion = new Items.PotionMajSightUp();
-//                    else if (randomChance < 70)
-//                        potion = new Items.PotionSuperHealing();
-//                    else if (randomChance < 80)
-//                        potion = new Items.PotionSuperDamUp();
-//                    else if (randomChance < 90)
-//                        potion = new Items.PotionSuperToHitUp();
-//                    else
-//                        potion = new Items.PotionSuperSpeedUp();
-
-//                    PlaceItemOnLevel(potion, i, potionOnMonsterChance);
-//                }
-//            }
-
-//            /*
-//            //Add a few healing potions
-
-//            for (int i = 0; i < 10; i++)
-//            {
-//                do
-//                {
-//                    location = dungeon.RandomWalkablePointInLevel(level);
-
-//                    //May want to specify a minimum distance from staircases??? TODO
-//                } while (!dungeon.AddItem(new Items.Potion(), 0, location));
-
-                
-//            }*/
         }
 
         private void PlaceItemOnLevel(Item item, int level, int onMonsterChance)
@@ -3193,6 +1530,8 @@ namespace RogueBasin
 
             //Levels
 
+            //Set up the maps here. Light levels are set up in SpawnXXXXCreatures methods. These set the dungeons light and the creature sight. Perhaps set light here - TODO
+
             //Set up the levels. Needs to be done here so the wilderness is initialized properly.
 
             Game.Dungeon.DungeonInfo.SetupDungeonStartAndEnd();
@@ -3200,7 +1539,6 @@ namespace RogueBasin
             //Make the generators
 
             MapGeneratorCave caveGen = new MapGeneratorCave();
-            
             MapGeneratorBSPCave ruinedGen = new MapGeneratorBSPCave();
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
@@ -3256,12 +1594,12 @@ namespace RogueBasin
             //Generate and add cave levels
             //Just a cave
 
-            //level 2
-            //top level has special up staircase leading to wilderness
-
             caveGen.DoFillInPass = true;
             caveGen.FillInChance = 15;
             caveGen.FillInTerrain = MapTerrain.Rubble;
+
+            //level 2
+            //top level has special up staircase leading to wilderness
 
             caveGen.GenerateMap();
 
@@ -3307,9 +1645,7 @@ namespace RogueBasin
             caveGen.AddWaterToCave(15, 4);
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
+           
             //Add a trigger here
             dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
@@ -3323,9 +1659,6 @@ namespace RogueBasin
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(caveGen.Map);
                 caveGen.AddStaircases(levelNo);
-
-                //Set light
-                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 9
@@ -3336,10 +1669,6 @@ namespace RogueBasin
 
             levelNo = dungeon.AddMap(caveGen.Map);
             caveGen.AddUpStaircaseOnly(levelNo);
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
 
             //DUNGEON 3 - levels 10-13
 
@@ -3358,9 +1687,7 @@ namespace RogueBasin
             levelNo = dungeon.AddMap(caveGen.Map);
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
+            
             //Add a trigger here
             dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
@@ -3374,9 +1701,6 @@ namespace RogueBasin
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(caveGen.Map);
                 caveGen.AddStaircases(levelNo);
-
-                //Set light
-                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 13
@@ -3386,10 +1710,6 @@ namespace RogueBasin
 
             levelNo = dungeon.AddMap(caveGen.Map);
             caveGen.AddUpStaircaseOnly(levelNo);
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
 
             //DUNGEON 4 - levels 14-17
 
@@ -3404,9 +1724,6 @@ namespace RogueBasin
             hallsGen.AddDownStaircaseOnly(levelNo);
             hallsGen.AddExitStaircaseOnly(levelNo);
 
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
             //Add a trigger here
             dungeon.AddTrigger(levelNo, hallsGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
 
@@ -3419,9 +1736,6 @@ namespace RogueBasin
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(hallMap);
                 hallsGen.AddStaircases(levelNo);
-
-                //Set light
-               // Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 17
@@ -3432,11 +1746,6 @@ namespace RogueBasin
             levelNo = dungeon.AddMap(hallMap);
             hallsGen.AddUpStaircaseOnly(levelNo);
 
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
-
-
             //DUNGEON 5 - levels 18-21
 
             //Graveyard
@@ -3446,18 +1755,15 @@ namespace RogueBasin
             //level 18
             //top level has special up staircase leading to wilderness
 
-           ruinedGen.AddWallType(MapTerrain.SkeletonWall);
-           ruinedGen.AddWallType(MapTerrain.SkeletonWallWhite);
-           ruinedGen.RubbleChance = 5;
-           ruinedGen.AddRubbleType(MapTerrain.Gravestone);
+            ruinedGen.AddWallType(MapTerrain.SkeletonWall);
+            ruinedGen.AddWallType(MapTerrain.SkeletonWallWhite);
+            ruinedGen.RubbleChance = 5;
+            ruinedGen.AddRubbleType(MapTerrain.Gravestone);
 
             Map ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
             levelNo = dungeon.AddMap(ruinedLevel);
             ruinedGen.AddDownStaircaseOnly(levelNo);
             ruinedGen.AddExitStaircaseOnly(levelNo);
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
@@ -3470,8 +1776,6 @@ namespace RogueBasin
                 levelNo = dungeon.AddMap(ruinedLevel);
                 ruinedGen.AddStaircases(levelNo);
 
-                //Set light
-                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 21
@@ -3481,10 +1785,6 @@ namespace RogueBasin
             levelNo = dungeon.AddMap(ruinedLevel);
 
             ruinedGen.AddUpStaircaseOnly(levelNo);
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
 
             //DUNGEON 6 - levels 22-24
 
@@ -3498,19 +1798,10 @@ namespace RogueBasin
             ruinedGen.AddWallType(MapTerrain.HellWall);
             ruinedGen.RubbleChance = 5;
 
-
-            //Generate and add cave levels
-
-            //level 22
-            //top level has special up staircase leading to wilderness
-
             ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
             levelNo = dungeon.AddMap(ruinedLevel);
             ruinedGen.AddDownStaircaseOnly(levelNo);
             ruinedGen.AddExitStaircaseOnly(levelNo);
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
 
             //Add a trigger here
             dungeon.AddTrigger(levelNo, ruinedGen.GetUpStaircaseLocation(), new Triggers.DungeonEntranceTrigger());
@@ -3522,9 +1813,6 @@ namespace RogueBasin
                 ruinedLevel = ruinedGen.GenerateMap(ruinedExtraCorridorDefinite + Game.Random.Next(ruinedExtraCorridorRandom));
                 levelNo = dungeon.AddMap(ruinedLevel);
                 ruinedGen.AddStaircases(levelNo);
-
-                //Set light
-                //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 25
@@ -3534,10 +1822,6 @@ namespace RogueBasin
             levelNo = dungeon.AddMap(ruinedLevel);
 
             ruinedGen.AddUpStaircaseOnly(levelNo);
-
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
 
             //DUNGEON 7 - levels 25-28
 
@@ -3556,11 +1840,6 @@ namespace RogueBasin
             levelNo = dungeon.AddMap(caveGen.Map);
             caveGen.AddDownStaircaseOnly(levelNo);
             caveGen.AddExitStaircaseOnly(levelNo);
-            //Set light
-            //Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
-
-            //Add a trigger here
-            //dungeon.AddTrigger(levelNo, caveGen.GetPCStartLocation(), new Triggers.DungeonEntranceTrigger());
 
             //level 26-27
 
@@ -3572,9 +1851,6 @@ namespace RogueBasin
                 //AddStaircases needs to know the level number
                 levelNo = dungeon.AddMap(caveGen.Map);
                 caveGen.AddStaircases(levelNo);
-
-                //Set light
-                Game.Dungeon.Levels[levelNo].LightLevel = GetLightLevel(levelNo);
             }
 
             //level 28
@@ -3606,23 +1882,6 @@ namespace RogueBasin
 
             //TCOD routine uses Walkable flag set above
             dungeon.RefreshTCODMaps();
-        }
-
-        private double GetLightLevel(int levelNo)
-        {
-            int lightDelta = 5 + Game.Random.Next(15);
-            lightDelta -= levelNo;
-
-            double lightLevel = lightDelta / 10.0;
-
-            if (lightLevel < 0.8)
-                lightLevel = 0.8;
-
-            if (lightLevel > 2.0)
-            {
-                lightLevel = 2.0;
-            }
-            return lightLevel;
         }
     }
 }
