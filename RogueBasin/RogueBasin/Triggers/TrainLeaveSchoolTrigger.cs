@@ -10,11 +10,10 @@ namespace RogueBasin.Triggers
     /// </summary>
     public class TrainLeaveSchoolTrigger : DungeonSquareTrigger
     {
-        public bool Triggered { get; set; }
 
         public TrainLeaveSchoolTrigger()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

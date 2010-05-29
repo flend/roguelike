@@ -10,14 +10,9 @@ namespace RogueBasin.Triggers
     /// </summary>
     public abstract class TrainTrigger : DungeonSquareTrigger
     {
-        /// <summary>
-        /// Have we been seen before?
-        /// </summary>
-        public bool Triggered { get; set; }
-
         public TrainTrigger()
         {
-            Triggered = false;
+
         }
 
         /// <summary>

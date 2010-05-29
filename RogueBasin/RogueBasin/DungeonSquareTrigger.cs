@@ -33,10 +33,15 @@ namespace RogueBasin
         public int Level { get; set; }
         public Point mapPosition { get; set; }
 
+        /// <summary>
+        /// Has the trigger been activated?
+        /// Don't access this directly. Only public for serializing
+        /// </summary>
+        public bool triggered;
         
         public DungeonSquareTrigger()
         {
-
+            triggered = false;
         }
 
         /// <summary>
@@ -55,6 +60,31 @@ namespace RogueBasin
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Get: Check if this trigger or ANY OTHER TRIGGER OF THE SAME TYPE has been triggered
+        /// Set: Set THIS TRIGGER triggered
+        /// </summary>
+        /// <returns></returns>
+        protected bool Triggered {
+            get
+            {
+                return Game.Dungeon.CheckGlobalTrigger(this.GetType());
+            }
+            set
+            {
+                triggered = value;
+            }
+        }
+
+        /// <summary>
+        /// Has THIS trigger been activated. Can be overridden.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool IsTriggered()
+        {
+            return triggered;
         }
     }
 }

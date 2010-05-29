@@ -10,11 +10,10 @@ namespace RogueBasin.Triggers
     /// </summary>
     public class TrainGeographyLibraryTrigger : DungeonSquareTrigger
     {
-        public bool Triggered { get; set; }
 
         public TrainGeographyLibraryTrigger()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

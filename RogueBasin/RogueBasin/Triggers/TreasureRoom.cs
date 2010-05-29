@@ -10,11 +10,9 @@ namespace RogueBasin.Triggers
     public class TreasureRoom : DungeonSquareTrigger
     {
 
-        public bool Triggered { get; set; }
-
         public TreasureRoom()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

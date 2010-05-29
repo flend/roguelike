@@ -10,11 +10,9 @@ namespace RogueBasin.Triggers
     public class LichBattle : DungeonSquareTrigger
     {
 
-        public bool Triggered { get; set; }
-
         public LichBattle()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

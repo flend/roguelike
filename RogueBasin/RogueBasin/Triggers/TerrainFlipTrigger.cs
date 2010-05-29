@@ -14,11 +14,6 @@ namespace RogueBasin.Triggers
 
         public string triggerID;
 
-        /// <summary>
-        /// Not that Triggered is static so triggering one type of event triggers them all. This allows the same event to be put in multiple places and only triggered once
-        /// </summary>
-        public bool Triggered { get; set; }
-
         public TerrainFlipTrigger() { }
 
         public TerrainFlipTrigger(MapTerrain terrainToFlipTo, string triggerID)

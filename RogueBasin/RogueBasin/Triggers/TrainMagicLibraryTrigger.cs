@@ -11,12 +11,10 @@ namespace RogueBasin.Triggers
     public class TrainMagicLibraryTrigger : DungeonSquareTrigger
     {
         public bool ShownMovie = false;
-       
-        public bool Triggered { get; set; }
 
         public TrainMagicLibraryTrigger()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

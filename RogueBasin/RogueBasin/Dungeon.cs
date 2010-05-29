@@ -3670,6 +3670,20 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Because we can't serialize statics, this function will check all the instances of a particular trigger type
+        /// and return true if any one of them has been triggered
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckGlobalTrigger(Type triggerType)
+        {
+            List<DungeonSquareTrigger> triggersOfType = Triggers.FindAll(t => t.GetType() == triggerType);
+            if(triggersOfType.Exists(t => t.IsTriggered()))
+                return true;
+            else
+                return false;
+        }
+
+        /// <summary>
         /// Remove all temporary items
         /// </summary>
         private void RemoveInventoryItems()

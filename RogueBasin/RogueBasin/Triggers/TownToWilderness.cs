@@ -12,11 +12,9 @@ namespace RogueBasin.Triggers
 
         public bool ShownMovie = false;
 
-        public bool Triggered { get; set; }
-
         public TownToWilderness()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

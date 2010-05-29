@@ -10,11 +10,9 @@ namespace RogueBasin.Triggers
     public class SeeCorpses : DungeonSquareTrigger
     {
 
-        public bool Triggered { get; set; }
-
         public SeeCorpses()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

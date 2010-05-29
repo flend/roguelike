@@ -10,11 +10,9 @@ namespace RogueBasin.Triggers
     public class ApproachingTheDragon : DungeonSquareTrigger
     {
 
-        public bool Triggered { get; set; }
-
         public ApproachingTheDragon()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

@@ -11,11 +11,9 @@ namespace RogueBasin.Triggers
     public class BackToSchool : DungeonSquareTrigger
     {
 
-        public bool Triggered { get; set; }
-
         public BackToSchool()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

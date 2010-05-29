@@ -10,11 +10,9 @@ namespace RogueBasin.Triggers
     public class HelpFriend : DungeonSquareTrigger
     {
 
-        public bool Triggered { get; set; }
-
         public HelpFriend()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

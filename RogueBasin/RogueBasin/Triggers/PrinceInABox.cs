@@ -10,11 +10,9 @@ namespace RogueBasin.Triggers
     public class PrinceInABox : DungeonSquareTrigger
     {
 
-        public bool Triggered { get; set; }
-
         public PrinceInABox()
         {
-            Triggered = false;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)
