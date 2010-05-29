@@ -1881,30 +1881,37 @@ namespace RogueBasin {
 
                 //Color itemColorToUse = itemColor;
 
+                bool drawItem = true;
+
                 if (itemSquare.InPlayerFOV || Game.Dungeon.Player.LocationLevel == 0)
                 {
-                    //In FOV
-                    //rootConsole.ForegroundColor = inFOVTerrainColor;
+                   
                 }
-                else if (itemSquare.SeenByPlayer)
+                else if (itemSquare.SeenByPlayerThisRun)
                 {
-                    //Not in FOV but seen
-                    //Not in FOV but seen
+                    //Not in FOV now but seen this adventure
+                    //Don't draw items in squares seen in previous adventures (since the items have respawned)
                     itemColorToUse = Color.Interpolate(item.GetColour(), ColorPresets.Black, 0.5);
-                    //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                 }
                 else
                 {
                     //Never in FOV
                     if (DebugMode)
+                    {
                         itemColorToUse = itemColor;
+                    }
                     else
-                        itemColorToUse = hiddenColor;
+                    {
+                        //Can't see it, don't draw it
+                        drawItem = false;
+                    }
                 }
 
-                rootConsole.ForegroundColor = itemColorToUse;
-                rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
-
+                if (drawItem)
+                {
+                    rootConsole.ForegroundColor = itemColorToUse;
+                    rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
+                }
                 //rootConsole.Flush();
                 //KeyPress userKey = Keyboard.WaitForKeyPress(true);
             }
@@ -1932,6 +1939,8 @@ namespace RogueBasin {
 
                 Color featureColor = ColorPresets.White;
 
+                bool drawFeature = true;
+
                 if (featureSquare.InPlayerFOV)
                 {
                     //In FOV
@@ -1947,14 +1956,22 @@ namespace RogueBasin {
                 else
                 {
                     //Never in FOV
-                    if(DebugMode)
+                    if (DebugMode)
+                    {
                         featureColor = neverSeenFOVTerrainColor;
+                    }
                     else
-                        featureColor = hiddenColor;
+                    {
+                        //Used to be draw it in black. This is no different but nicer.
+                        drawFeature = false;
+                    }
                 }
 
-                rootConsole.ForegroundColor = featureColor;
-                rootConsole.PutChar(mapTopLeft.x + feature.LocationMap.x, mapTopLeft.y + feature.LocationMap.y, feature.Representation);
+                if (drawFeature)
+                {
+                    rootConsole.ForegroundColor = featureColor;
+                    rootConsole.PutChar(mapTopLeft.x + feature.LocationMap.x, mapTopLeft.y + feature.LocationMap.y, feature.Representation);
+                }
             }
 
         }

@@ -156,7 +156,7 @@ namespace RogueBasin
                         if (Game.Dungeon.Player.IncrementTurnTime() || (firstIteration && loadedGame))
                         {
                             //Calculate the player's FOV
-                            RecalculatePlayerFOV();
+                            Game.Dungeon.CalculatePlayerFOV();
 
                             //Debug: show the FOV of all monsters
                             foreach (Monster monster in Game.Dungeon.Monsters)
@@ -198,11 +198,6 @@ namespace RogueBasin
 
                 }
             }
-        }
-
-        private void RecalculatePlayerFOV()
-        {
-            Game.Dungeon.CalculatePlayerFOV();
         }
 
         //Deal with user input

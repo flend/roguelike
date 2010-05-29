@@ -99,6 +99,11 @@ namespace RogueBasin
         bool seenByPlayer = false;
 
         /// <summary>
+        /// Has this square been seen this adventure (i.e. since left school)
+        /// </summary>
+        bool seenByPlayerThisRun = false;
+
+        /// <summary>
         /// In player's FOV - recalculated each turn
         /// </summary>
         bool inPlayerFOV = false;
@@ -156,7 +161,8 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Has this square ever been in the FOV?
+        /// Get: Has this square ever been in the FOV?
+        /// Set: Player sees this square so record as ever in FOV
         /// </summary>
         public bool SeenByPlayer
         {
@@ -167,6 +173,22 @@ namespace RogueBasin
             set
             {
                 seenByPlayer = value;
+                seenByPlayerThisRun = value;
+            }
+        }
+
+        /// <summary>
+        /// Has the square been seen by the player this adventure (since left school)?
+        /// </summary>
+        public bool SeenByPlayerThisRun
+        {
+            get
+            {
+                return seenByPlayerThisRun;
+            }
+            set
+            {
+                seenByPlayerThisRun = value;
             }
         }
 

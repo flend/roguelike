@@ -3610,7 +3610,10 @@ namespace RogueBasin
             if (!DungeonInfo.LastMission)
             {
                 //Respawn the last dungeon the player was in
-                Game.Dungeon.RespawnDungeon(Player.CurrentDungeon);
+                RespawnDungeon(Player.CurrentDungeon);
+
+                //Wipe the player's FOV of the last dungeon
+                WipeThisRunFOV(Player.CurrentDungeon);
 
                 //Increase player's stats
                 ProcessPlayerXP();
@@ -3638,6 +3641,31 @@ namespace RogueBasin
             {
                 //OK, it's the end, they're back from the prince mission one way or the other
                 EndOfGame();
+            }
+        }
+
+        /// <summary>
+        /// Wipe the this-adventure fov for the dungeon
+        /// </summary>
+        /// <param name="dungeonID"></param>
+        private void WipeThisRunFOV(int dungeonID)
+        {
+            //Kill all the creatures currently in there, except for the uniques
+            int dungeonStartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
+            int dungeonEndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
+
+            for (int i = dungeonStartLevel; i < dungeonEndLevel; i++)
+            {
+                int width = levels[i].width;
+                int height = levels[i].height;
+
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        levels[i].mapSquares[x, y].SeenByPlayerThisRun = false;
+                    }
+                }
             }
         }
 
