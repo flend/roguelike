@@ -1234,8 +1234,6 @@ namespace RogueBasin
 
         private void SpawnWaterCaveUniques()
         {
-            Point location = new Point();
-
             LogFile.Log.LogEntry("Adding water cave uniques...");
 
             //Level 3 : Unique spider
@@ -1284,8 +1282,6 @@ namespace RogueBasin
 
         private void SpawnForestUniques()
         {
-            Point location = new Point();
-
             LogFile.Log.LogEntry("Adding forest uniques...");
 
             //Level 2 : Unique faerie

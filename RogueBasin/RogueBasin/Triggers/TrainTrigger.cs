@@ -113,7 +113,7 @@ namespace RogueBasin.Triggers
         {
             //Show training UI
             Screen.Instance.DisplayTrainingUI = true;
-            Screen.Instance.DrawAndFlush();
+            Screen.Instance.UpdateNoMsgQueue();
 
             bool continueLooking = true;
 
@@ -129,7 +129,7 @@ namespace RogueBasin.Triggers
                     if (keyCode == 'x')
                     {
                         Screen.Instance.DisplayTrainingUI = false;
-                        Screen.Instance.DrawAndFlush();
+                        Screen.Instance.UpdateNoMsgQueue();
                         continueLooking = false;
                     }
                 }

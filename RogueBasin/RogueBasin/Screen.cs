@@ -467,7 +467,7 @@ namespace RogueBasin {
                 //Await keypress then redraw normal screen
                 WaitForEnterKey();
 
-                DrawAndFlush();
+                UpdateNoMsgQueue();
             }
             catch (Exception ex)
             {
@@ -643,16 +643,16 @@ namespace RogueBasin {
         }
 
         /// <summary>
-        /// Draws and updates the screen. Doesn't run message queue, since that's in RogueBase and not accessible
+        /// Draws and updates the screen. Doesn't run message queue. Is this function really used? I think all the calls don't
         /// </summary>
-        public void DrawAndFlush()
+        public void UpdateNoMsgQueue()
         {
             Screen.Instance.Draw();
             Screen.Instance.FlushConsole();
         }
 
         //Draw the current dungeon map and objects
-        public void Draw()
+        private void Draw()
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
@@ -1460,8 +1460,17 @@ namespace RogueBasin {
 
             trainingYTemp = trainingTL.y + 4 + lineCount;
             trainingXTemp = statsModOffset.x;
+
             rootConsole.ForegroundColor = ColorPresets.White;
-            rootConsole.PrintLine("These stats increased:", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
+
+            if (CombatInc > 0 || CharmInc > 0 || MagicInc > 0)
+            {
+                rootConsole.PrintLine("These stats increased:", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
+            }
+            else
+            {
+                rootConsole.PrintLine("No stats increased this adventure!", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
+            }
 
             trainingYTemp = trainingTL.y + 6 + lineCount;
 
@@ -2814,6 +2823,139 @@ namespace RogueBasin {
                    }
                 }
             } while(true);
+        }
+
+        /// <summary>
+        /// Draw the screen and run the message queue
+        /// </summary>
+        public void Update()
+        {
+            //Draw screen 
+            Draw();
+
+            //Message queue - requires keyboard to advance messages - not sure about this yet
+            RunMessageQueue();
+        }
+
+
+        /// <summary>
+        /// Run through the messages for the user and require a key press after each one
+        /// </summary>
+        private void RunMessageQueue()
+        {
+            List<string> messages = Game.MessageQueue.GetMessages();
+
+            Screen.Instance.ClearMessageLine();
+
+            if (messages.Count == 0)
+            {
+                Screen.Instance.FlushConsole();
+                return;
+            }
+
+            if (messages.Count == 1)
+            {
+                //Single message just print it
+                Screen.Instance.PrintMessage(messages[0]);
+
+                Game.MessageQueue.ClearList();
+
+                Screen.Instance.FlushConsole();
+                return;
+            }
+
+            //Otherwise require a space bar press between each
+            //TODO: Wrap messages
+
+            //Make a list of the wrapped strings
+            //List<string> wrappedMsg = new List<string>();
+
+            //Stick all the messages together in one long string
+            string allMsgs = "";
+            foreach (string message in messages)
+            {
+                allMsgs += message + " ";
+            }
+
+            //Strip off the last piece of white space
+            allMsgs = allMsgs.Trim();
+
+            //Now make a list of trimmed msgs with <more> appended
+            List<string> wrappedMsgs = new List<string>();
+            do
+            {
+                //put function in utility
+                string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", 83);
+                wrappedMsgs.Add(trimmedMsg);
+                //make our allMsgs smaller
+                allMsgs = allMsgs.Substring(trimmedMsg.Length);
+            } while (allMsgs.Length > 0);
+
+            int noLines = Screen.Instance.msgDisplayNumLines;
+
+            int i = 0;
+            do
+            {
+                //Require moreing
+                if (i < wrappedMsgs.Count - noLines)
+                {
+                    //Add the messages together for PrintMessage
+                    string outputMsg = "";
+
+                    for (int j = 0; j < noLines; j++)
+                    {
+                        outputMsg += wrappedMsgs[i + j].Trim();
+
+                        if (j != noLines - 1)
+                            outputMsg += "\n";
+                    }
+
+                    //Update line counter
+                    i += noLines;
+
+                    outputMsg.Trim();
+
+                    Screen.Instance.PrintMessage(outputMsg + " <more>");
+                    Screen.Instance.FlushConsole();
+
+                    //Block for this keypress - may want to listen for exit too
+                    KeyPress userKey;
+                    userKey = Keyboard.WaitForKeyPress(true);
+                }
+                else
+                {
+                    //Add the messages together for PrintMessage
+                    string outputMsg = "";
+
+                    for (int j = 0; j < noLines; j++)
+                    {
+                        if (i + j >= wrappedMsgs.Count)
+                            break;
+
+                        outputMsg += wrappedMsgs[i + j].Trim();
+
+                        if (j != noLines - 1)
+                            outputMsg += "\n";
+                    }
+
+                    outputMsg.Trim();
+
+                    //Update line counter
+                    i += noLines;
+
+                    Screen.Instance.PrintMessage(outputMsg);
+                    Screen.Instance.FlushConsole();
+                }
+            } while (i < wrappedMsgs.Count);
+
+            //Require a keypress if requested
+            if (Game.MessageQueue.RequireKeypress)
+            {
+                Keyboard.WaitForKeyPress(true);
+            }
+
+            Game.MessageQueue.ClearList();
+
         }
     }
 }

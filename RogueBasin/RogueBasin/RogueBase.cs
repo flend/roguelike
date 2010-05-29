@@ -169,7 +169,7 @@ namespace RogueBasin
                                 Game.Dungeon.Player.CalculateCombatStats();
 
                             //Update screen just before PC's turn
-                            UpdateScreen();
+                            Screen.Instance.Update();
 
                             //Deal with PCs turn as appropriate
                             bool timeAdvances = false;
@@ -235,17 +235,17 @@ namespace RogueBasin
                                         Game.Dungeon.PlayerDeath("quit");
                                         timeAdvances = true;
                                     }
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     break;
 
                                 case 'S':
                                     //Save the game
                                     timeAdvances = true;
                                     Game.MessageQueue.AddMessage("Saving game...");
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     Game.Dungeon.SaveGame();
                                     Game.MessageQueue.AddMessage("Press any key to exit the game.");
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     userKey = Keyboard.WaitForKeyPress(true);
                                     Game.Dungeon.RunMainLoop = false;
 
@@ -264,7 +264,7 @@ namespace RogueBasin
                                     //Open door
                                     timeAdvances = PlayerOpenDoor();
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
@@ -274,7 +274,7 @@ namespace RogueBasin
                                     //Cast spell (just target for now)
                                     timeAdvances = SelectAndCastSpell();
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
@@ -284,7 +284,7 @@ namespace RogueBasin
                                     //Recast last spells
                                     timeAdvances = RecastSpell();
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
@@ -294,7 +294,7 @@ namespace RogueBasin
                                     //Charm creature
                                     timeAdvances = PlayerCharmCreature();
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
@@ -305,7 +305,7 @@ namespace RogueBasin
                                     timeAdvances = PickUpItem();
                                     //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
@@ -320,7 +320,7 @@ namespace RogueBasin
                                     //Interact with feature
                                     timeAdvances = InteractWithFeature();
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
 
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
@@ -331,7 +331,7 @@ namespace RogueBasin
                                 case 'D':
                                     //Drop items if in town
                                     DropItems();
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     timeAdvances = false;
                                     break;
 
@@ -339,14 +339,14 @@ namespace RogueBasin
                                 case 'I':
                                     //Use an inventory item
                                     SetPlayerInventorySelectScreen();
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     //This uses the generic 'select from inventory' input loop
                                     //Time advances if the item was used successfully
                                     timeAdvances = UseItem();
                                     DisablePlayerInventoryScreen();
                                     //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
 
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
@@ -357,13 +357,13 @@ namespace RogueBasin
                                 case 'E':
                                     //Display currently equipped items
                                     SetPlayerEquippedItemsScreen();
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     timeAdvances = DisplayEquipment();
                                     DisablePlayerEquippedItemsScreen();
 
                                     //Using an item can break a special move sequence
                                     if (!timeAdvances)
-                                        UpdateScreen();
+                                        Screen.Instance.Update();
 
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
@@ -374,10 +374,10 @@ namespace RogueBasin
                                 case 'M':
                                     //Show movies
                                     SetSpecialMoveMovieScreen();
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     MovieScreenInteraction();
                                     DisableSpecialMoveMovieScreen();
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     timeAdvances = false;
                                     break;
 
@@ -409,7 +409,7 @@ namespace RogueBasin
                                     Game.Dungeon.FlipTerrain("forest");
                                     Game.Dungeon.FlipTerrain("grave");
                                     Game.Dungeon.FlipTerrain("final");
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     break;
 
                                 case 'f':
@@ -418,31 +418,31 @@ namespace RogueBasin
                                     Game.MessageQueue.AddMessage("Learnt all moves.");
                                     Game.Dungeon.PlayerLearnsAllSpells();
                                     Game.MessageQueue.AddMessage("Learnt all spells.");
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     timeAdvances = false;
                                     break;
 
                                 case 't':
                                     //teleport to stairs
                                     TeleportToDownStairs();
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     break;
 
                                 case 'W':
                                     //screen debug mode
                                     Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     break;
 
                                 case 'V':
                                     //screen debug mode
                                     Game.Dungeon.Player.AddEffect(new PlayerEffects.SightRadiusUp(Game.Dungeon.Player, 2000, 1));
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     break;
                                 case 'y':
                                     //teleport to stairs
                                     TeleportToUpStairs();
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     break;
 
                                 case 'T':
@@ -454,7 +454,7 @@ namespace RogueBasin
                                     //Add a healing event on the player
                                     PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
                                     Game.Dungeon.Player.AddEffect(healing);
-                                    UpdateScreen();
+                                    Screen.Instance.Update();
                                     break;
                                 
                                 /*
@@ -629,7 +629,7 @@ namespace RogueBasin
                             {
                                 inputState = InputState.MapMovement;
                                 DisablePlayerInventoryScreen();
-                                UpdateScreen();
+                                Screen.Instance.Update();
                                 timeAdvances = false;
                             }
                         }
@@ -1009,7 +1009,7 @@ namespace RogueBasin
         {
             //Ask user for a direction
             Game.MessageQueue.AddMessage("Select a direction:");
-            UpdateScreen();
+            Screen.Instance.Update();
 
             //Get direction
             Point direction = new Point(0, 0);
@@ -1039,7 +1039,7 @@ namespace RogueBasin
         {
             //Ask user for a direction
             Game.MessageQueue.AddMessage("Select a direction:");
-            UpdateScreen();
+            Screen.Instance.Update();
 
             //Get direction
             Point direction = new Point(0, 0);
@@ -1062,7 +1062,7 @@ namespace RogueBasin
         {
             //Ask user for a direction
             Game.MessageQueue.AddMessage("Select a direction:");
-            UpdateScreen();
+            Screen.Instance.Update();
 
             //Get direction
             Point direction = new Point(0, 0);
@@ -1376,7 +1376,7 @@ namespace RogueBasin
             //Select a spell to cast
 
             Screen.Instance.DisplaySpells = true;
-            UpdateScreen();
+            Screen.Instance.Update();
 
             //Player presses a key from a-w to select a spell
 
@@ -1419,7 +1419,7 @@ namespace RogueBasin
             //Select a spell to cast
 
             Screen.Instance.DisplaySpells = false;
-            UpdateScreen();
+            Screen.Instance.Update();
 
             if (selectedSpell == -1)
                 return null;
@@ -1495,7 +1495,7 @@ namespace RogueBasin
                 Screen.Instance.SetTargetInRange = true;
 
             Game.MessageQueue.AddMessage("Find a target. z to fire. ESC to exit.");
-            UpdateScreen();
+            Screen.Instance.Update();
 
             bool keepLooping = true;
             bool validFire = false;
@@ -1564,14 +1564,14 @@ namespace RogueBasin
                     //Update screen
                     Screen.Instance.Target = newPoint;
                     Game.MessageQueue.AddMessage("Find a target. z to fire. ESC to exit.");
-                    UpdateScreen();
+                    Screen.Instance.Update();
 
                 }
             } while (keepLooping);
 
             //Turn targetting mode off
             Screen.Instance.TargettingModeOff();
-            UpdateScreen();
+            Screen.Instance.Update();
 
             return validFire;
 
@@ -1888,129 +1888,7 @@ namespace RogueBasin
         }
 
 
-        private void UpdateScreen()
-        {
-            //Draw screen 
-            Screen.Instance.Draw();
 
-            //Message queue - requires keyboard to advance messages - not sure about this yet
-            RunMessageQueue();
-
-        }
-
-        /// <summary>
-        /// Run through the messages for the user and require a key press after each one
-        /// </summary>
-        private void RunMessageQueue()
-        {
-            List<string> messages = Game.MessageQueue.GetMessages();
-
-            Screen.Instance.ClearMessageLine();
-
-            if (messages.Count == 0)
-            {
-                Screen.Instance.FlushConsole();
-                return;
-            }
-
-            if (messages.Count == 1)
-            {
-                //Single message just print it
-                Screen.Instance.PrintMessage(messages[0]);
-
-                Game.MessageQueue.ClearList();
-
-                Screen.Instance.FlushConsole();
-                return;
-            }
-
-            //Otherwise require a space bar press between each
-            //TODO: Wrap messages
-
-            //Make a list of the wrapped strings
-            //List<string> wrappedMsg = new List<string>();
-
-            //Stick all the messages together in one long string
-            string allMsgs = "";
-            foreach (string message in messages)
-            {
-                allMsgs += message + " ";
-            }
-
-            //Strip off the last piece of white space
-            allMsgs = allMsgs.Trim();
-
-            //Now make a list of trimmed msgs with <more> appended
-            List<string> wrappedMsgs = new List<string>();
-            do
-            {
-                //put function in utility
-                string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", 83);
-                wrappedMsgs.Add(trimmedMsg);
-                //make our allMsgs smaller
-                allMsgs = allMsgs.Substring(trimmedMsg.Length);
-            } while (allMsgs.Length > 0);
-
-            int noLines = Screen.Instance.msgDisplayNumLines;
-
-            int i = 0;
-            do
-            {
-                //Require moreing
-                if (i < wrappedMsgs.Count - noLines)
-                {
-                    //Add the messages together for PrintMessage
-                    string outputMsg = "";
-
-                    for (int j = 0; j < noLines; j++)
-                    {
-                        outputMsg += wrappedMsgs[i + j].Trim();
-
-                        if (j != noLines - 1)
-                            outputMsg += "\n";
-                    }
-
-                    //Update line counter
-                    i += noLines;
-
-                    outputMsg.Trim();
-
-                    Screen.Instance.PrintMessage(outputMsg + " <more>");
-                    Screen.Instance.FlushConsole();
-
-                    //Block for this keypress - may want to listen for exit too
-                    KeyPress userKey;
-                    userKey = Keyboard.WaitForKeyPress(true);
-                }
-                else
-                {
-                    //Add the messages together for PrintMessage
-                    string outputMsg = "";
-
-                    for (int j = 0; j < noLines; j++)
-                    {
-                        if (i + j >= wrappedMsgs.Count)
-                            break;
-
-                        outputMsg += wrappedMsgs[i + j].Trim();
-
-                        if (j != noLines - 1)
-                            outputMsg += "\n";
-                    }
-
-                    outputMsg.Trim();
-
-                    //Update line counter
-                    i += noLines;
-
-                    Screen.Instance.PrintMessage(outputMsg);
-                    Screen.Instance.FlushConsole();
-                }
-            } while (i < wrappedMsgs.Count);
-            
-            Game.MessageQueue.ClearList();
-
-        }
 
         /// <summary>
         /// Returns true if we loaded a save game

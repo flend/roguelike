@@ -2966,14 +2966,18 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntryDebug("Player knocked out", LogDebugLevel.Medium);
 
+                Game.MessageQueue.AddMessage("You get taken back to school by the guards.");
+                Game.MessageQueue.RequireKeypress = true;
+
+                Screen.Instance.Update();
+
                 Screen.Instance.PlayMovie("knockedout", false);
 
                 //Up date counter
                 player.NumDeaths++;
 
                 //Game.MessageQueue.ClearList(); //If want to lose the last message, fit it in calling function
-                Game.MessageQueue.AddMessage("You get taken back to school by the guards.");
-
+                
                 PlayerLeavesDungeon();
 
                 return;
@@ -3589,7 +3593,7 @@ namespace RogueBasin
             Screen.Instance.CombatInc = combatInc;
             Screen.Instance.CharmInc = charmInc;
 
-            Screen.Instance.DrawAndFlush();
+            Screen.Instance.UpdateNoMsgQueue();
             Screen.Instance.ShowXPScreen = false;
 
             ResetPlayerXPCounters();
