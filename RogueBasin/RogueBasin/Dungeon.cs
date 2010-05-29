@@ -324,6 +324,16 @@ namespace RogueBasin
         public bool RunMainLoop { get; set;}
 
         /// <summary>
+        /// Give the player a bonus turn on next loop
+        /// </summary>
+        bool playerBonusTurn;
+
+        /// <summary>
+        /// Set after bonus turn complete
+        /// </summary>
+        public bool PlayerHadBonusTurn { get; set; }
+
+        /// <summary>
         /// List of global events
         /// </summary>
         List<DungeonEffect> effects;
@@ -348,6 +358,9 @@ namespace RogueBasin
 
             PlayerImmortal = false;
 
+            playerBonusTurn = false;
+            PlayerHadBonusTurn = false;
+
             SetupSpecialMoves();
 
             SetupSpells();
@@ -361,6 +374,22 @@ namespace RogueBasin
             summonedMonsters = new List<Monster>();
 
             SaveScumming = true;
+        }
+
+        /// <summary>
+        /// Give the player a bonus turn before the monsters
+        /// </summary>
+        public bool PlayerBonusTurn
+        {
+            get
+            {
+                return playerBonusTurn;
+            }
+            set
+            {
+                PlayerHadBonusTurn = false;
+                playerBonusTurn = true;
+            }
         }
 
         public int DateCounter
@@ -4396,6 +4425,5 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Respawning dungeon level " + dungeonID, LogDebugLevel.Medium);
         }
-
     }
 }

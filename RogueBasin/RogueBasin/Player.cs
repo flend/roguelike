@@ -1180,7 +1180,7 @@ namespace RogueBasin
         {
             IncrementEventTime();
 
-            //Work around for bizarre problem
+            //Work around for bizarre problem - shouldn't happen any more
             if (speed < 30)
             {
                 LogFile.Log.LogEntryDebug("ERROR! Player's speed reduced to <30", LogDebugLevel.High);

@@ -51,6 +51,9 @@ namespace RogueBasin.Features
             //Set the current dungeon as visited
             dungeon.DungeonInfo.VisitedDungeon(dungeonID);
 
+            //Give the player an extra turn in case they spawn next to a monster
+            dungeon.PlayerBonusTurn = true;
+
             //debug
             //player.SightRadius = 20;
 

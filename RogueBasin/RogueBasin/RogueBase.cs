@@ -66,11 +66,6 @@ namespace RogueBasin
 
         private void MainLoop(bool loadedGame)
         {
-            bool firstIteration = true;
-
-            //Time
-
-
             //Game time
             //Normal creatures have a speed of 100
             //This means it takes 100 ticks for them to take a turn (10,000 is the cut off)
@@ -85,10 +80,19 @@ namespace RogueBasin
             {
                 try
                 {
-                    //This check stops monsters having an extra go when we load
-                    if (!(firstIteration && loadedGame))
-                    {
+                    //If we want to give the PC an extra go for any reason before the creatures
+                    //(e.g. has just loaded, has just entered dungeon)
+                    //test here
 
+                    bool pcFreeTurn = false;
+
+                    if (!Game.Dungeon.PlayerHadBonusTurn && Game.Dungeon.PlayerBonusTurn)
+                        pcFreeTurn = true;
+
+                    //Monsters turn
+
+                    if (!pcFreeTurn)
+                    {
                         //Increment world clock
                         Game.Dungeon.IncrementWorldClock();
 
@@ -149,11 +153,13 @@ namespace RogueBasin
                         if (Game.Dungeon.PlayerDeathOccured)
                             Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
                     }
+                    
+                    //PC turn
                     try
                     {
 
                         //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
-                        if (Game.Dungeon.Player.IncrementTurnTime() || (firstIteration && loadedGame))
+                        if (Game.Dungeon.Player.IncrementTurnTime())
                         {
                             //Calculate the player's FOV
                             Game.Dungeon.CalculatePlayerFOV();
@@ -182,9 +188,10 @@ namespace RogueBasin
                             Game.Dungeon.ResetCreatureFOVOnMap();
 
                             //Game.MessageQueue.AddMessage("Finished PC move");
+                            Game.Dungeon.PlayerHadBonusTurn = true;
                         }
 
-                        firstIteration = false;
+                        
                     }
                     catch (Exception ex)
                     {
@@ -850,7 +857,8 @@ namespace RogueBasin
 
                 newDungeon.Player.CalculateCombatStats();
 
- 
+                //Give player free turn (save was on player's turn so don't give the monsters a free go cos they saved)
+                Game.Dungeon.PlayerBonusTurn = true;
 
                 Game.MessageQueue.AddMessage("Game : " + playerName + " loaded successfully.");
                 LogFile.Log.LogEntry("Game : " + playerName + " loaded successfully");
