@@ -47,7 +47,7 @@ namespace RogueBasin
             SpawnCreaturesAndItems();
 
             //Debug only
-            //SpawnItems();
+            SpawnItems();
 
             return dungeon;
         }
@@ -1533,10 +1533,13 @@ namespace RogueBasin
         {
             //Debug items
 
-            /*
+            
             LogFile.Log.LogEntry("Generating items...");
 
-            //Spawn a test item at level 0
+
+            /*
+             * 
+            //Spawn all the collect items
 
             dungeon.AddItemNoChecks(new Items.Glove(), 0, dungeon.Player.LocationMap);
             dungeon.AddItemNoChecks(new Items.LeatherArmour(), 0, new Point(dungeon.Player.LocationMap.x + 1, dungeon.Player.LocationMap.y));
@@ -1550,18 +1553,19 @@ namespace RogueBasin
             dungeon.AddItemNoChecks(new Items.HealingPotion(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y + 2));
             dungeon.AddItemNoChecks(new Items.StaffPower(), 0, new Point(dungeon.Player.LocationMap.x - 1, dungeon.Player.LocationMap.y + 2));
             dungeon.AddItemNoChecks(new Items.RestoreOrb(), 0, new Point(dungeon.Player.LocationMap.x -2, dungeon.Player.LocationMap.y + 2));
+            dungeon.AddItemNoChecks(new Items.KnockoutDress(), 0, new Point(dungeon.Player.LocationMap.x - 3, dungeon.Player.LocationMap.y - 1));
+            dungeon.AddItemNoChecks(new Items.ExtendOrb(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 2));
+            dungeon.AddItemNoChecks(new Items.SparklingEarrings(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 1));
+
+            //Spawn all the potions / berries
+             
             dungeon.AddItemNoChecks(new Items.Potion(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y + 3));
             dungeon.AddItemNoChecks(new Items.PotionDamUp(), 0, new Point(dungeon.Player.LocationMap.x - 1, dungeon.Player.LocationMap.y + 3));
             dungeon.AddItemNoChecks(new Items.PotionToHitUp(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y + 3));
             dungeon.AddItemNoChecks(new Items.PotionSightUp(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y -1));
             dungeon.AddItemNoChecks(new Items.PotionSpeedUp(), 0, new Point(dungeon.Player.LocationMap.x+1, dungeon.Player.LocationMap.y -1));
             dungeon.AddItemNoChecks(new Items.PotionMPRestore(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y - 1));
-            dungeon.AddItemNoChecks(new Items.KnockoutDress(), 0, new Point(dungeon.Player.LocationMap.x - 3, dungeon.Player.LocationMap.y - 1));
-            dungeon.AddItemNoChecks(new Items.ExtendOrb(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 2));
-            dungeon.AddItemNoChecks(new Items.SparklingEarrings(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 1));
             */
-
-            //dungeon.AddItemNoChecks(new Items.PotionSightUp(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 1));
         }
 
         private void PlaceItemOnLevel(Item item, int level, int onMonsterChance)

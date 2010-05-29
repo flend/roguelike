@@ -157,7 +157,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return '*';
+            return (char)232;
         }
 
         public int ArmourClassModifier()
