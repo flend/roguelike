@@ -20,7 +20,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -39,7 +39,7 @@ namespace RogueBasin.SpecialMoves
             if (moveCounter == 0)
             {
                 //Must be no direction
-                if (Game.Dungeon.Player.LocationMap != locationAfterMove)
+                if (deltaMove != new Point(0,0))
                 {
                     return false;
                 }
@@ -84,8 +84,10 @@ namespace RogueBasin.SpecialMoves
 
             if (moveCounter == 1)
             {
+
                 //Needs to be a monster in the direction of movement
-                
+
+                Point locationAfterMove = player.LocationMap + deltaMove;
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, locationAfterMove);
 
                 //Bad terrain
@@ -223,7 +225,7 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
 
             //Move the PC to the new location

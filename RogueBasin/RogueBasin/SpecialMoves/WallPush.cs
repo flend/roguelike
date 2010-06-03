@@ -27,10 +27,12 @@ namespace RogueBasin.SpecialMoves
             yDelta = 0;
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
+
+            Point locationAfterMove = player.LocationMap + deltaMove;
 
             //First move is pushing off against a wall
             //Second move is jumping over 0 or more creatures
@@ -206,8 +208,10 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
+            Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+
             //Move the creature to the new location if required
             if (squareToMoveMonsterTo.x != locationAfterMove.x || squareToMoveMonsterTo.y != locationAfterMove.y)
             {

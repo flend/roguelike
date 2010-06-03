@@ -23,10 +23,12 @@ namespace RogueBasin.SpecialMoves
         {
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
+
+            Point locationAfterMove = player.LocationMap + deltaMove;
 
             //No interruptions
             if (!isMove)
@@ -153,8 +155,11 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
+
+            Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+
             ClearMove();
             
             //Move into the destination square like normal

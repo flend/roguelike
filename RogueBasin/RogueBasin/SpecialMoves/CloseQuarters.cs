@@ -32,7 +32,7 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -48,8 +48,10 @@ namespace RogueBasin.SpecialMoves
             //and attack is in cardinal direction
 
 
-            firstDeltaX = locationAfterMove.x - player.LocationMap.x;
-            firstDeltaY = locationAfterMove.y - player.LocationMap.y;
+            firstDeltaX = deltaMove.x;
+            firstDeltaY = deltaMove.y;
+
+            Point locationAfterMove = player.LocationMap + deltaMove;
 
             //Any non-diagonal move
             //if (firstDeltaX != 0 && firstDeltaY != 0)
@@ -109,8 +111,10 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
+            Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+
             //Attack the monster in its square with bonuses
 
             //Bonus to hit and damage

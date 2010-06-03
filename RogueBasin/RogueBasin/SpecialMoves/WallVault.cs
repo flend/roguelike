@@ -23,13 +23,15 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
 
             //First move is pushing off against a wall
             //Second move is jumping over 0 or more creatures
+
+            Point locationAfterMove = player.LocationMap + deltaMove;
 
             //Not a move or attack = reset
             if (!isMove)
@@ -66,6 +68,8 @@ namespace RogueBasin.SpecialMoves
             }
 
             //Second move
+            //Now require a monster to be adjacent to us in order to leap over
+            //This means you can't just leap 1 space off the wall but makes it more sensible for following up a WallLeap
 
             if (moveCounter == 1)
             {
@@ -125,6 +129,13 @@ namespace RogueBasin.SpecialMoves
                         return false;
                     }
 
+                    //Adjacent square, must be a monster
+                    if (loopCounter == 1 && squareContents.monster == null)
+                    {
+                        NoMonsterToVaultFail();
+                        return false;
+                    }
+
                     //Is there no monster here? If so, this is our destination
                     if (squareContents.monster == null)
                     {
@@ -145,7 +156,13 @@ namespace RogueBasin.SpecialMoves
         private void NoWhereToJumpFail()
         {
             moveCounter = 0;
-            LogFile.Log.LogEntry("WallVault failed due to nowhere to jump to");
+            LogFile.Log.LogEntryDebug("WallVault failed due to nowhere to jump to", LogDebugLevel.Low);
+        }
+
+        private void NoMonsterToVaultFail()
+        {
+            moveCounter = 0;
+            LogFile.Log.LogEntryDebug("WallVault failed due to no monster to leap", LogDebugLevel.Low);
         }
 
         public override bool MoveComplete()
@@ -155,8 +172,10 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
+            Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+
             //Move the PC to the new location
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
             moveCounter = 0;
@@ -198,6 +217,19 @@ namespace RogueBasin.SpecialMoves
         {
             return moveCounter;
         }
+
+
+        public override bool CausesMovement()
+        {
+            return true;
+        }
+
+        public override Point RelativeMoveAfterMovement()
+        {
+            //Effective move is in the opposite direction to the push off
+            return new Point(-xDelta, -yDelta);
+        }
+
 
         public override int GetRequiredCombat()
         {

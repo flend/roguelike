@@ -6,6 +6,7 @@ namespace RogueBasin.SpecialMoves
 {
     /// <summary>
     /// This is a follow-up move to a vault involving an attack as the last move. It therefore replicates wall vault and adds a new last move (may be a nicer way to do this)
+    /// Note that it is not a special-movement move since the attack is in the direction of the keypress
     /// </summary>
     public class VaultBackstab : SpecialMove
     {
@@ -25,13 +26,15 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
 
             //First move is pushing off against a wall
             //Second move is jumping over 0 or more creatures
+
+            Point locationAfterMove = player.LocationMap + deltaMove;
 
             //Not a move or attack = reset
             if (!isMove)
@@ -127,6 +130,13 @@ namespace RogueBasin.SpecialMoves
                         return false;
                     }
 
+                    //Adjacent square, must be a monster
+                    if (loopCounter == 1 && squareContents.monster == null)
+                    {
+                        NoMonsterToVaultFail();
+                        return false;
+                    }
+
                     //Is there no monster here? If so, this is our destination
                     if (squareContents.monster == null)
                     {
@@ -184,6 +194,12 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
+        private void NoMonsterToVaultFail()
+        {
+            moveCounter = 0;
+            //LogFile.Log.LogEntryDebug("WallVault failed due to no monster to leap", LogDebugLevel.Low);
+        }
+
         private void NoWhereToJumpFail()
         {
             moveCounter = 0;
@@ -198,8 +214,10 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
+            Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+
             //Attack the monster with bonuses
             Game.MessageQueue.AddMessage("Wall Backstab!");
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 5, 0, 5, -2, true);
@@ -240,6 +258,17 @@ namespace RogueBasin.SpecialMoves
         public override string Abbreviation()
         {
             return "VtBS";
+        }
+
+        public override bool CausesMovement()
+        {
+            return true;
+        }
+
+        public override Point RelativeMoveAfterMovement()
+        {
+            //Effective move is in the opposite direction to the push off
+            return new Point(-xDelta, -yDelta);
         }
 
         public override int TotalStages()

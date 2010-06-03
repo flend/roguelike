@@ -23,7 +23,7 @@ namespace RogueBasin.SpecialMoves
             moveReady = false;
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -56,10 +56,12 @@ namespace RogueBasin.SpecialMoves
 
             //Any direction without a monster. Subsequent moves needs to be in the same direction
 
+            Point locationAfterMove = player.LocationMap + deltaMove;
+
             if (moveCounter == 0)
             {
                 //Needs to be no monster in the direction of movement
-
+                
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, locationAfterMove);
 
                 //Bad terrain
@@ -164,8 +166,10 @@ namespace RogueBasin.SpecialMoves
             return moveReady;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
+            Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+            
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("Charge attack!");
             int bonus = moveCounter;
@@ -186,7 +190,6 @@ namespace RogueBasin.SpecialMoves
             {
                 okToMoveIntoSquare = true;
             }
-
 
             if (okToMoveIntoSquare)
             {

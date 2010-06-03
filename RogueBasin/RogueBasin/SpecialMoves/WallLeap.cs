@@ -26,7 +26,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -40,6 +40,8 @@ namespace RogueBasin.SpecialMoves
                 moveCounter = 0;
                 return false;
             }
+
+            Point locationAfterMove = player.LocationMap + deltaMove;
 
             //First move
 
@@ -167,7 +169,7 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
             //Attack the monster with bonuses
             Game.MessageQueue.AddMessage("Wall Leap!");
@@ -223,6 +225,17 @@ namespace RogueBasin.SpecialMoves
         public override int CurrentStage()
         {
             return moveCounter;
+        }
+
+        public override bool CausesMovement()
+        {
+            return true;
+        }
+
+        public override Point RelativeMoveAfterMovement()
+        {
+            //Effective move is in the opposite direction to the push off, towards the monster
+            return new Point(-xDelta, -yDelta);
         }
 
         public override int GetRequiredCombat()

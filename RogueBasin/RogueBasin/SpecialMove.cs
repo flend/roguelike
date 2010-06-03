@@ -87,6 +87,32 @@ namespace RogueBasin
         public virtual int CurrentStage() { return 0; }
 
         /// <summary>
+        /// Special moves that cause movement different to just the direction pressed, e.g. WallLeap
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool CausesMovement() { return false; }
+
+        /// <summary>
+        /// For moves that cause movement, return the effective player move
+        /// e.g. for WallLeap the effective move is an attack from the direction of the player to the monster
+        /// Could potentially make this a return value of DoMove
+        /// </summary>
+        /// <returns></returns>
+        public virtual Point RelativeMoveAfterMovement()
+        {
+            LogFile.Log.LogEntryDebug("RelativeMoveAfterMovement() called on a non-movement special move", LogDebugLevel.High);
+            return new Point(0,0);
+        }
+
+        /// <summary>
+        /// Checks if the move gets cancelled by the death of the creature
+        /// </summary>
+        public virtual void CheckForMonsterDeath()
+        {
+
+        }
+
+        /// <summary>
         /// Current stage in move
         /// </summary>
         /// <returns></returns>

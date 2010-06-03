@@ -1897,39 +1897,86 @@ namespace RogueBasin
 
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
 
+            //New version
+
+            //First check moves that have integrated movement
+            
+            Point deltaMove = newPCLocation - Player.LocationMap;
+
+            SpecialMove moveDone = null;
+            Point overrideRelativeMove = null;
+
             foreach (SpecialMove move in specialMoves)
             {
-                if (move.Known)
+                if (move.CausesMovement() && move.Known)
+                {
+                    bool moveSuccess = move.CheckAction(true, deltaMove);
+
+                    if(!moveSuccess)
+                    {
+                        //Test the move twice on first failure
+                        //The first check may cause a long chain to fail but the move could be a valid new start move
+                        //The second check picks this up
+                        move.CheckAction(true, deltaMove);
+                    }
+                }
+            }
+
+            //Carry out movement special moves. Only 1 can trigger at a time (because their completions are orthogonal)
+
+            foreach (SpecialMove move in specialMoves)
+            {
+                if (move.CausesMovement() && move.Known && move.MoveComplete())
+                {
+                    //Carry out the move. This will update the player's position so the new relative move makes sense
+                    move.DoMove(deltaMove);
+                    moveDone = move;
+
+                    //On success store the relativised move
+                    //e.g. for WallLeap, the real move was a move into the wall but the relativised move is an attack in the opposite direction on the monster leaped to
+                    overrideRelativeMove = move.RelativeMoveAfterMovement();
+                }
+            }
+
+            //If we had a success for one of the special movement moves, adopt the new relative move
+            if (overrideRelativeMove != null)
+                deltaMove = overrideRelativeMove;
+            
+            //Now check all moves that don't do unusual movement
+
+            foreach (SpecialMove move in specialMoves)
+            {
+                if (!move.CausesMovement() && move.Known)
                 {
                     //Test the move twice
                     //The first check may cause a long chain to fail but the move could be a valid new start move
                     //The second check picks this up
 
-                    bool moveSuccess = move.CheckAction(true, newPCLocation);
+                    bool moveSuccess = move.CheckAction(true, deltaMove);
 
                     if (!moveSuccess)
                     {
-                        move.CheckAction(true, newPCLocation);
+                        move.CheckAction(true, deltaMove);
                     }
                 }
             }
 
-            //Are any moves ready, if so carry the first one out.
-            //Try allow multiple moves on one turn. Have to be careful to make sure there 
+            //Carry out any non-movement causing moves
 
-            SpecialMove moveToDo = null;
+            //The only cases at the mo where 2 moves can happen together are close quarters + something
+            //multi + open space is also vaguely possible
 
             foreach (SpecialMove move in specialMoves)
             {
-                if (move.Known && move.MoveComplete())
+                if (!move.CausesMovement() && move.Known && move.MoveComplete())
                 {
-                    moveToDo = move;
-                    move.DoMove(newPCLocation);
+                    moveDone = move;
+                    move.DoMove(deltaMove);
                 }
             }
 
             //If there's no special move, do a conventional move
-            if (moveToDo == null)
+            if (moveDone == null)
             {
                 //Moving into void not allowed (but should never happen)
                 if (!MapSquareIsWalkable(player.LocationLevel, newPCLocation))
@@ -4424,6 +4471,15 @@ namespace RogueBasin
             maker.ReSpawnDungeon(dungeonID);
 
             LogFile.Log.LogEntryDebug("Respawning dungeon level " + dungeonID, LogDebugLevel.Medium);
+        }
+
+        /// <summary>
+        /// Check to see if any special moves which were previously on are now not due to the death or movement of a monster
+        /// Not implemented yet
+        /// </summary>
+        internal void CheckSpecialMoveValidity()
+        {
+            return;
         }
     }
 }

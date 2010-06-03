@@ -5,10 +5,15 @@ using libtcodWrapper;
 namespace RogueBasin
 {
     //Represents a level map
-    public struct Point {
+    public class Point {
         public int x;
         public int y;
 
+        public Point()
+        {
+            x = 0;
+            y = 0;
+        }
 
         public Point(int x, int y) {
             this.x = x;
@@ -49,6 +54,16 @@ namespace RogueBasin
         public override int GetHashCode()
         {
             return x ^ y;
+        }
+
+        public static Point operator-(Point i, Point j)
+        {
+            return new Point(i.x - j.x, i.y - j.y);
+        }
+
+        public static Point operator +(Point i, Point j)
+        {
+            return new Point(i.x + j.x, i.y + j.y);
         }
     }
     

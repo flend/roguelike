@@ -26,10 +26,11 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
+            Point locationAfterMove = player.LocationMap + deltaMove;
 
             //No interruptions or standing still
             if (!isMove || locationAfterMove == player.LocationMap)
@@ -210,8 +211,10 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
+            Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+
             //Attack the monster in its square with bonuses
             //Bonus depends on moveNumber
             int bonus = moveCounter - 1;

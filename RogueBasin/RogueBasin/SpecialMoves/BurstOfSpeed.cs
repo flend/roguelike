@@ -17,7 +17,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override bool CheckAction(bool isMove, Point locationAfterMove)
+        public override bool CheckAction(bool isMove, Point deltaMove)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -36,7 +36,7 @@ namespace RogueBasin.SpecialMoves
             if (moveCounter == 0)
             {
                 //Must be no direction
-                if (Game.Dungeon.Player.LocationMap != locationAfterMove)
+                if (deltaMove != new Point(0, 0))
                 {
                     return false;
                 }
@@ -53,7 +53,7 @@ namespace RogueBasin.SpecialMoves
             if (moveCounter == 1)
             {
                 //Must be no direction
-                if (Game.Dungeon.Player.LocationMap != locationAfterMove)
+                if (deltaMove != new Point(0, 0))
                 {
                     moveCounter = 0;
                     LogFile.Log.LogEntryDebug("Burst of Speed failed, move on 2", LogDebugLevel.Medium);
@@ -74,8 +74,8 @@ namespace RogueBasin.SpecialMoves
 
             if (moveCounter == 2)
             {
-                int secondXDelta = locationAfterMove.x - player.LocationMap.x;
-                int secondYDelta = locationAfterMove.y - player.LocationMap.y;
+                int secondXDelta = deltaMove.x;
+                int secondYDelta = deltaMove.y;
 
                 Map thisMap = dungeon.Levels[player.LocationLevel];
 
@@ -153,7 +153,7 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point locationAfterMove)
+        public override void DoMove(Point deltaMove)
         {
             //Move the PC to the new location
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
