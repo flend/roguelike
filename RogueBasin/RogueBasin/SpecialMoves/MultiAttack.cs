@@ -16,7 +16,9 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaX { get; set; }
         public int lastDeltaY { get; set; }
 
-        Monster target = null; //doesn't need to be serialized
+        Creature target = null; //doesn't need to be serialized
+        public int currentTargetID = -1;
+
         public int lastSpeedInc { get; set; }
         public int speedInc { get; set; }
         //Point monsterSquare = new Point(-1, -1);
@@ -31,6 +33,16 @@ namespace RogueBasin.SpecialMoves
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
             Point locationAfterMove = player.LocationMap + deltaMove;
+
+            //Restore currentTarget reference from ID, in case we have reloaded
+            if (currentTargetID == -1)
+            {
+                target = null;
+            }
+            else
+            {
+                target = Game.Dungeon.GetCreatureByUniqueID(currentTargetID);
+            }
 
             //No interruptions or standing still
             if (!isMove || locationAfterMove == player.LocationMap)
@@ -63,6 +75,7 @@ namespace RogueBasin.SpecialMoves
                     //Set move counter to 1 and drop back, the normal code will do the first attack
                     moveCounter = 1;
                     target = squareContents.monster;
+                    currentTargetID = squareContents.monster.UniqueID;
 
                     LogFile.Log.LogEntryDebug("MultiAttack Begins", LogDebugLevel.Medium);
                     return true;
@@ -163,6 +176,7 @@ namespace RogueBasin.SpecialMoves
 
                 //Otherwise, pick a random monster to attack this turn
                 target = newMonsters[Game.Random.Next(newMonsters.Count)];
+                currentTargetID = target.UniqueID;
 
                 moveCounter++;
 
@@ -224,7 +238,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("Multi Attack!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
              
             //Give the player a small speed boost
             if (bonus <= 5)

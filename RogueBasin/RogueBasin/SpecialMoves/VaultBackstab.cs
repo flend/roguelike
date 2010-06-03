@@ -19,7 +19,7 @@ namespace RogueBasin.SpecialMoves
 
         Point squareToMoveTo;
 
-        Monster target = null; //doesn't need to be serialized
+        Monster target = null; //doesn't need to be serialized - careful here - I don't think the player can save between this being set and used
 
         public VaultBackstab()
         {

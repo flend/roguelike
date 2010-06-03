@@ -22,7 +22,10 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaX { get; set; }
         public int lastDeltaY { get; set; }
 
-        Monster target = null; //doesn't need to be serialized
+        Creature target = null; //can't be serialized
+
+        public int currentTargetID = -1;
+
         Point monsterSquare = new Point(-1, -1);
 
         public OpenSpaceAttack()
@@ -34,6 +37,17 @@ namespace RogueBasin.SpecialMoves
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
+
+            //Restore currentTarget reference from ID, in case we have reloaded
+            if (currentTargetID == -1)
+            {
+                target = null;
+            }
+            else
+            {
+                target = Game.Dungeon.GetCreatureByUniqueID(currentTargetID);
+            }
+
 
             //No interruptions
             if (!isMove)
@@ -66,6 +80,7 @@ namespace RogueBasin.SpecialMoves
                     //Set move counter to 1 and drop back, the normal code will do the first attack
                     moveCounter = 1;
                     target = squareContents.monster;
+                    currentTargetID = squareContents.monster.UniqueID;
                     monsterSquare = target.LocationMap;
 
                     LogFile.Log.LogEntryDebug("OpenSpaceAttack Stage: " + moveCounter, LogDebugLevel.Medium);
@@ -200,6 +215,14 @@ namespace RogueBasin.SpecialMoves
                 lastDeltaY = thisDeltaY;
 
                 //Check there the monster is still in its square and hasn't died
+                
+                //If reaped, we get null from it's id
+                if (target == null)
+                {
+                    FailTarget();
+                    return false;
+                }
+
                 if(!target.Alive) {
                     FailTarget();
                     return false;
@@ -294,6 +317,14 @@ namespace RogueBasin.SpecialMoves
                 lastDeltaY = thisDeltaY;
 
                 //Check there the monster is still in its square and hasn't died
+
+                //If reaped, we get null from it's id
+                if (target == null)
+                {
+                    FailTarget();
+                    return false;
+                }
+
                 if (!target.Alive)
                 {
                     FailTarget();
@@ -367,7 +398,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("Open Ground Attack!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
              
             //Move into destination square (already check this was OK)
             Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);

@@ -174,6 +174,9 @@ namespace RogueBasin
                             if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
                                 Game.Dungeon.Player.CalculateCombatStats();
 
+                            //Check the 'on' status of special moves
+                            Game.Dungeon.CheckSpecialMoveValidity();
+
                             //Update screen just before PC's turn
                             Screen.Instance.Update();
 
