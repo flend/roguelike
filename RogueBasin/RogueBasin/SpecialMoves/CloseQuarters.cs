@@ -19,7 +19,7 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaX { get; set; }
         public int lastDeltaY { get; set; }
 
-        Monster target = null; //doesn't need to be serialized
+        Monster target = null; //Doesn't last long enough to need serialization
 
         /// <summary>
         /// No squares we are next to, use for damage and hit bonus

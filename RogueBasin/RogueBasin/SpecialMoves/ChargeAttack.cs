@@ -13,7 +13,7 @@ namespace RogueBasin.SpecialMoves
         public int xDelta { get; set; }
         public int yDelta { get; set; }
 
-        Monster target;
+        Monster target; //Doesn't last long enough to need serialization
         Point squareToMoveTo;
         bool moveReady;
 

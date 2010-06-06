@@ -18,7 +18,7 @@ namespace RogueBasin.SpecialMoves
 
         Point squareToMoveTo;
 
-        Monster target = null; //doesn't need to be serialized
+        Monster target = null; //Doesn't last long enough to need serialization
         int leapDistance = 0;
 
         public WallLeap()

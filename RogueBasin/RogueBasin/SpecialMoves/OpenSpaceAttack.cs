@@ -409,7 +409,7 @@ namespace RogueBasin.SpecialMoves
 
             //ResetStatus();
 
-            LogFile.Log.LogEntry("OpenSpaceAttack free attack: " + bonus);
+            LogFile.Log.LogEntryDebug("OpenSpaceAttack attack: " + bonus, LogDebugLevel.Low);
             
 
             //Fifth move is end and requires another attack to restart
