@@ -26,7 +26,7 @@ namespace RogueBasin.SpecialMoves
 
         public int currentTargetID = -1;
 
-        Point monsterSquare = new Point(-1, -1);
+        public Point monsterSquare = new Point(-1, -1);
 
         public OpenSpaceAttack()
         {
@@ -396,6 +396,10 @@ namespace RogueBasin.SpecialMoves
             //Bonus depends on moveNumber
             int bonus = moveCounter - 1;
 
+            //After 5 the bonus doesn't get any higher
+            if (bonus > 4)
+                bonus = 4;
+
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("Open Ground Attack!");
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
@@ -409,11 +413,13 @@ namespace RogueBasin.SpecialMoves
             
 
             //Fifth move is end and requires another attack to restart
-            if (moveCounter == 5)
-            {
-                LogFile.Log.LogEntry("OpenSpaceAttack finished ");
-                ResetStatus();
-            }
+            //Don't like this
+
+            //if (moveCounter == 5)
+            //{
+            //    LogFile.Log.LogEntry("OpenSpaceAttack finished ");
+            //    ResetStatus();
+            //}
         }
 
         public override void ClearMove()

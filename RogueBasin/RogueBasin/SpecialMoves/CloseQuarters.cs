@@ -20,7 +20,6 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaY { get; set; }
 
         Monster target = null; //doesn't need to be serialized
-        Point monsterSquare = new Point(-1, -1);
 
         /// <summary>
         /// No squares we are next to, use for damage and hit bonus
