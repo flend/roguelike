@@ -114,6 +114,10 @@ namespace RogueBasin
             {
                 debugLevel = value;
             }
+            get
+            {
+                return debugLevel;
+            }
         }
     }
 }

@@ -186,7 +186,7 @@ namespace RogueBasin.SpecialMoves
                 target.AddEffect(new MonsterEffects.SlowDown(target, duration, target.Speed / 2));
             }
 
-            LogFile.Log.LogEntry("StunBox!");
+            LogFile.Log.LogEntryDebug("StunBox!", LogDebugLevel.Medium);
             Game.MessageQueue.AddMessage("Stunning Sphere!");
         }
 

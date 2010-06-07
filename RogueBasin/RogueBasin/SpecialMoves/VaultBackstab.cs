@@ -183,7 +183,7 @@ namespace RogueBasin.SpecialMoves
                 else
                 {
                     //This implies the monster is really fast and going elsewhere which I guess is possible
-                    LogFile.Log.LogEntry("VaultBackstab failed due to no-one to stab!");
+                    LogFile.Log.LogEntryDebug("VaultBackstab failed due to no-one to stab!", LogDebugLevel.Medium);
                     moveCounter = 0;
 
                     return false;
@@ -246,7 +246,7 @@ namespace RogueBasin.SpecialMoves
             
             moveCounter = 0;
 
-            LogFile.Log.LogEntry("Wall backstab complete");
+            LogFile.Log.LogEntryDebug("Wall backstab complete", LogDebugLevel.Medium);
         }
 
         public override void ClearMove()

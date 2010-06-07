@@ -159,7 +159,7 @@ namespace RogueBasin.SpecialMoves
         private void NoWhereToJumpFail()
         {
             moveCounter = 0;
-            LogFile.Log.LogEntry("Wall Leap: failed due to nowhere to jump to");
+            LogFile.Log.LogEntryDebug("Wall Leap: failed due to nowhere to jump to", LogDebugLevel.Medium);
         }
 
         public override bool MoveComplete()
@@ -205,7 +205,7 @@ namespace RogueBasin.SpecialMoves
             
             moveCounter = 0;
 
-            LogFile.Log.LogEntry("Wall leap complete");
+            LogFile.Log.LogEntryDebug("Wall leap complete", LogDebugLevel.Medium);
         }
 
         public override void ClearMove()

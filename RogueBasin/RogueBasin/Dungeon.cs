@@ -1139,7 +1139,7 @@ namespace RogueBasin
 
             if (foundCreature == null)
             {
-                LogFile.Log.LogEntryDebug("Error: Couldn't find monster from ID " + id, LogDebugLevel.High);
+                LogFile.Log.LogEntryDebug("Couldn't find monster from ID " + id + " (may have been reaped)", LogDebugLevel.Medium);
             }
 
             return foundCreature;

@@ -220,7 +220,7 @@ namespace RogueBasin.SpecialMoves
 
             moveCounter = 0;
 
-            LogFile.Log.LogEntry("Wall push complete");
+            LogFile.Log.LogEntryDebug("Wall push complete", LogDebugLevel.Medium);
             Game.MessageQueue.AddMessage("Wall Push!");
         }
 

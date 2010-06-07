@@ -450,6 +450,16 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     break;
 
+                                case 'J':
+                                    //teleport to stairs
+                                    LogFile.Log.DebugLevel += 1;
+                                    if (LogFile.Log.DebugLevel > 3)
+                                        LogFile.Log.DebugLevel = 1;
+
+                                    LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
+
+                                    break;
+
                                 case 'T':
                                     Game.Dungeon.MoveToNextDate();
                                     timeAdvances = true;

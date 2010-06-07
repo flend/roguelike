@@ -209,7 +209,7 @@ namespace RogueBasin.SpecialMoves
             //Seems to mean you get a free attack about 1 time in 2
             //Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 50, 100));
             
-            LogFile.Log.LogEntry("Charge complete");
+            LogFile.Log.LogEntryDebug("Charge complete", LogDebugLevel.Medium);
             //Game.MessageQueue.AddMessage("Wall Vault!");
         }
 

@@ -232,7 +232,7 @@ namespace RogueBasin.SpecialMoves
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
             moveCounter = 0;
 
-            LogFile.Log.LogEntry("Evade complete");
+            LogFile.Log.LogEntryDebug("Evade complete", LogDebugLevel.Medium);
             Game.MessageQueue.AddMessage("Evade!");
         }
 

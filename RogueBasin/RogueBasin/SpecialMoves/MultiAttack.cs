@@ -24,8 +24,8 @@ namespace RogueBasin.SpecialMoves
         Creature target = null; //doesn't need to be serialized
         public int currentTargetID = -1;
 
-        public int lastSpeedInc { get; set; }
-        public int speedInc { get; set; }
+        //public int lastSpeedInc { get; set; }
+        //public int speedInc { get; set; }
         //Point monsterSquare = new Point(-1, -1);
 
         public MultiAttack()
@@ -71,7 +71,7 @@ namespace RogueBasin.SpecialMoves
                 lastDeltaY = -50;
 
                 //Reset speed counter
-                speedInc = 0;
+                //speedInc = 0;
 
                 //Check it is an attack
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, new Point(locationAfterMove.x, locationAfterMove.y));
@@ -92,6 +92,7 @@ namespace RogueBasin.SpecialMoves
                 {
                     //Not an attack
                     moveCounter = 0;
+                    FailNotAnAttack();
                     return false;
                 }
             }
@@ -201,10 +202,11 @@ namespace RogueBasin.SpecialMoves
 
         private void ResetMove() {
             moveCounter = 0;
+            currentTargetID = -1;
 
             //Remove any speed up effects given to the player
-            Game.Dungeon.Player.Speed -= speedInc;
-            speedInc = 0;
+            //Game.Dungeon.Player.Speed -= speedInc;
+            //speedInc = 0;
         }
 
         private void FailNoNewMonsters()
@@ -214,6 +216,12 @@ namespace RogueBasin.SpecialMoves
         }
 
         private void FailRepetition()
+        {
+            ResetMove();
+            LogFile.Log.LogEntryDebug("MultiAttack repetition fail", LogDebugLevel.Medium);
+        }
+
+        private void FailNotAnAttack()
         {
             ResetMove();
             LogFile.Log.LogEntryDebug("MultiAttack repetition fail", LogDebugLevel.Medium);
@@ -262,19 +270,15 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
-             
-            //Give the player a small speed boost
-            if (bonus <= 5)
-            {
-                speedInc += 25;
-                Game.Dungeon.Player.Speed += 25;
-            }
-           
+
+            //Stop any complaints about the ID not being valid
+            if (!target.Alive)
+                currentTargetID = -1;
 
             //Move into destination square (already checked this was OK)
             Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
 
-            LogFile.Log.LogEntry("MultiAttack free attack: " + bonus);
+            LogFile.Log.LogEntryDebug("MultiAttack free attack: " + bonus, LogDebugLevel.Medium);
             
         }
 

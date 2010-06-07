@@ -97,6 +97,7 @@ namespace RogueBasin.SpecialMoves
                 {
                     //Not an attack
                     moveCounter = 0;
+                    FailNotAnAttack();
                     return false;
                 }
             }
@@ -364,7 +365,7 @@ namespace RogueBasin.SpecialMoves
                 return true;
             }
 
-            LogFile.Log.LogEntry("OpenSpaceAttack: moveCounter wrong");
+            LogFile.Log.LogEntryDebug("OpenSpaceAttack: moveCounter wrong", LogDebugLevel.Medium);
             return false;
         }
 
@@ -377,12 +378,19 @@ namespace RogueBasin.SpecialMoves
         private void ResetStatus()
         {
             moveCounter = 0;
+            currentTargetID = -1;
 
         }
 
         private void FailBlocked()
         {
             LogFile.Log.LogEntryDebug("OpenSpaceAttack failed - blocked", LogDebugLevel.Medium);
+            ResetStatus();
+        }
+
+        private void FailNotAnAttack()
+        {
+            LogFile.Log.LogEntryDebug("OpenSpaceAttack failed - not an attack", LogDebugLevel.Medium);
             ResetStatus();
         }
 
@@ -434,6 +442,10 @@ namespace RogueBasin.SpecialMoves
             //Move into destination square (already check this was OK)
             if(!noMove)
                 Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
+
+            //Stop any complaints about the ID not being valid
+            if (!target.Alive)
+                currentTargetID = -1;
 
             //ResetStatus();
 

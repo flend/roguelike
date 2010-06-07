@@ -165,7 +165,7 @@ namespace RogueBasin.SpecialMoves
             Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 150, 150));
             Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
 
-            LogFile.Log.LogEntry("Burst of Speed complete");
+            LogFile.Log.LogEntryDebug("Burst of Speed complete", LogDebugLevel.Medium);
             Game.MessageQueue.AddMessage("Burst of Speed!");
         }
 
