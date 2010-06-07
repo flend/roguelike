@@ -22,6 +22,11 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaX { get; set; }
         public int lastDeltaY { get; set; }
 
+        public int attackDeltaX { get; set; }
+        public int attackDeltaY { get; set; }
+
+        public bool extraAttackThisTurn = false;
+
         Creature target = null; //can't be serialized
 
         public int currentTargetID = -1;
@@ -33,7 +38,7 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override bool CheckAction(bool isMove, Point deltaMove)
+        public override bool CheckAction(bool isMove, Point deltaMove, bool otherMoveSuccess)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -48,13 +53,14 @@ namespace RogueBasin.SpecialMoves
                 target = Game.Dungeon.GetCreatureByUniqueID(currentTargetID);
             }
 
-
             //No interruptions
             if (!isMove)
             {
                 FailInterrupted();
                 return false;
             }
+
+            extraAttackThisTurn = false;
 
             Point locationAfterMove = player.LocationMap + deltaMove;
 
@@ -234,8 +240,14 @@ namespace RogueBasin.SpecialMoves
                     return false;
                 }
 
-                //Monster is still alive and in right square
+                //Monster is still alive and in right square - we will attack
                 moveCounter = 2;
+
+                //Store the delta between the player and the monster
+                attackDeltaX = monsterSquare.x - player.LocationMap.x;
+                attackDeltaY = monsterSquare.y - player.LocationMap.y;
+
+                extraAttackThisTurn = false;
 
                 LogFile.Log.LogEntryDebug("OpenSpaceAttack Stage: " + moveCounter, LogDebugLevel.Medium);
 
@@ -340,6 +352,12 @@ namespace RogueBasin.SpecialMoves
                 //Monster is still alive and in right square
                 moveCounter++;
 
+                //Store the delta between the player and the monster
+                attackDeltaX = monsterSquare.x - player.LocationMap.x;
+                attackDeltaY = monsterSquare.y - player.LocationMap.y;
+
+                extraAttackThisTurn = false;
+
                 LogFile.Log.LogEntryDebug("OpenSpaceAttack Stage: " + moveCounter, LogDebugLevel.Medium);
 
                 //Will attack it during DoMove, and move into its square
@@ -388,7 +406,7 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point deltaMove)
+        public override void DoMove(Point deltaMove, bool noMove)
         {
             Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
 
@@ -400,12 +418,22 @@ namespace RogueBasin.SpecialMoves
             if (bonus > 4)
                 bonus = 4;
 
-            //Bonus to hit and damage
             Game.MessageQueue.AddMessage("Open Ground Attack!");
+
+            int noCardinals = FindNumberOfCardinals(target);
+            if (noCardinals > 1)
+            {
+                bonus += noCardinals;
+                Game.MessageQueue.AddMessage("Close Quarters!");
+            }
+
+            //Bonus to hit and damage
+            
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
              
             //Move into destination square (already check this was OK)
-            Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
+            if(!noMove)
+                Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
 
             //ResetStatus();
 
@@ -455,6 +483,26 @@ namespace RogueBasin.SpecialMoves
         public override int GetRequiredCombat()
         {
             return 70;
+        }
+
+        public override bool AddsAttack()
+        {
+            return true;
+        }
+
+        public override Point RelativeAttackVector()
+        {
+            return new Point(attackDeltaX, attackDeltaY);
+        }
+
+        public override bool AttackIsOn()
+        {
+            return extraAttackThisTurn;
+        }
+
+        public override bool StartsWithAttack()
+        {
+            return true;
         }
     }
 }

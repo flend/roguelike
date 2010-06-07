@@ -23,7 +23,7 @@ namespace RogueBasin.SpecialMoves
             moveReady = false;
         }
 
-        public override bool CheckAction(bool isMove, Point deltaMove)
+        public override bool CheckAction(bool isMove, Point deltaMove, bool otherMoveSuccess)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -35,6 +35,7 @@ namespace RogueBasin.SpecialMoves
                 return false;
             }
 
+            
             //First move
             /*
             if (moveCounter == 0)
@@ -166,7 +167,7 @@ namespace RogueBasin.SpecialMoves
             return moveReady;
         }
 
-        public override void DoMove(Point deltaMove)
+        public override void DoMove(Point deltaMove, bool noMove)
         {
             Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
             
@@ -176,6 +177,14 @@ namespace RogueBasin.SpecialMoves
 
             if (moveCounter > 5)
                 bonus = 5;
+
+            //Add a bonus for close quarters if applicable
+            int noCardinals = FindNumberOfCardinals(target);
+            if (noCardinals > 1)
+            {
+                bonus += noCardinals;
+                Game.MessageQueue.AddMessage("Close Quarters!");
+            }
 
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
 

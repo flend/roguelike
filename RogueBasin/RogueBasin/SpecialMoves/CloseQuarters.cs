@@ -31,7 +31,7 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override bool CheckAction(bool isMove, Point deltaMove)
+        public override bool CheckAction(bool isMove, Point deltaMove, bool otherMoveSuccess)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -42,6 +42,13 @@ namespace RogueBasin.SpecialMoves
                 //FailInterrupted();
                 return false;
             }
+
+            //Close quarters as part of other attacks are taken care of in their functions, only process if this is not a special move
+            if (otherMoveSuccess)
+            {
+                return false;
+            }
+
 
             //1 step attack, when single enemy in contact and 3 cardinal directions of target are walls or other unwalkable things
             //and attack is in cardinal direction
@@ -67,6 +74,12 @@ namespace RogueBasin.SpecialMoves
             {
                 //Check for charmed
                 if (squareContents.monster.Charmed)
+                {
+                    return false;
+                }
+
+                //Check for already dead (maybe from a leap)
+                if (!squareContents.monster.Alive)
                 {
                     return false;
                 }
@@ -110,7 +123,7 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point deltaMove)
+        public override void DoMove(Point deltaMove, bool noMove)
         {
             Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
 
@@ -170,6 +183,11 @@ namespace RogueBasin.SpecialMoves
         public override int GetRequiredCombat()
         {
             return 20;
+        }
+
+        public override bool NotSimultaneous()
+        {
+            return true;
         }
     }
 }

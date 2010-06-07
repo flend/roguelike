@@ -38,7 +38,7 @@ namespace RogueBasin
         /// <param name="isMove"></param>
         /// <param name="isAttack"></param>
         /// <param name="locationAfterMove"></param>
-        public virtual bool CheckAction(bool isMove, Point locationAfterMove) {
+        public virtual bool CheckAction(bool isMove, Point locationAfterMove, bool otherMoveSuccessful) {
             return true;
         }
 
@@ -50,8 +50,9 @@ namespace RogueBasin
 
         /// <summary>
         /// Carry out the move (instead of normal move / attack)
+        /// If noMove is set, only attack, don't move
         /// </summary>
-        public virtual void DoMove(Point locationAfterMove) { }
+        public virtual void DoMove(Point locationAfterMove, bool noMove) { }
 
         /// <summary>
         /// Clear the counter - used when another move has triggered
@@ -87,10 +88,31 @@ namespace RogueBasin
         public virtual int CurrentStage() { return 0; }
 
         /// <summary>
+        /// Does the move give an attack on a monster which wouldn't normally be attacked by this move? e.g. Multi, Open ground
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool AddsAttack() { return false; }
+
+        /// <summary>
         /// Special moves that cause movement different to just the direction pressed, e.g. WallLeap
         /// </summary>
         /// <returns></returns>
         public virtual bool CausesMovement() { return false; }
+
+        /// <summary>
+        /// If the move gives an added attack and it happened this turn, return true.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool AttackIsOn() { return false; }
+
+        /// <summary>
+        /// Does the move start with an attack? If so, we need to check if bonus attacks start it
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool StartsWithAttack()
+        {
+            return false;
+        }
 
         /// <summary>
         /// For moves that cause movement, return the effective player move
@@ -105,11 +127,59 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// For moves that cause an additional attack, what is the relative move from the player's current position which would cause that attack normally?
+        /// Used to trigger later moves
+        /// </summary>
+        /// <returns></returns>
+        public virtual Point RelativeAttackVector()
+        {
+            LogFile.Log.LogEntryDebug("RelativeAttackVector() called on a non-attack special move", LogDebugLevel.High);
+            return new Point(0, 0);
+        }
+
+        /// <summary>
         /// Checks if the move gets cancelled by the death of the creature
         /// </summary>
         public virtual void CheckForMonsterDeath()
         {
 
+        }
+
+        /// <summary>
+        /// Moves which don't happen if another special move was successful (only CQ for now)
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool NotSimultaneous()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Helper function that determines the number of cardinal directions for a close quarters attack
+        /// </summary>
+        /// <returns></returns>
+        protected int FindNumberOfCardinals(Creature creature)
+        {
+            //Are 3 cardinal directions around the monster unwalkable?
+            Point monsterLoc = creature.LocationMap;
+
+            int noCardinals = 0;
+
+            Dungeon dungeon = Game.Dungeon;
+
+            if (!dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(monsterLoc.x - 1, monsterLoc.y)))
+                noCardinals++;
+
+            if (!dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(monsterLoc.x + 1, monsterLoc.y)))
+                noCardinals++;
+
+            if (!dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(monsterLoc.x, monsterLoc.y + 1)))
+                noCardinals++;
+
+            if (!dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(monsterLoc.x, monsterLoc.y - 1)))
+                noCardinals++;
+
+            return noCardinals;
         }
 
         /// <summary>

@@ -26,7 +26,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override bool CheckAction(bool isMove, Point deltaMove)
+        public override bool CheckAction(bool isMove, Point deltaMove, bool otherMoveSuccess)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -214,13 +214,22 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point deltaMove)
+        public override void DoMove(Point deltaMove, bool noMove)
         {
             Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
 
             //Attack the monster with bonuses
             Game.MessageQueue.AddMessage("Wall Backstab!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 5, 0, 5, -2, true);
+
+            int bonus = 0;
+            int noCardinals = FindNumberOfCardinals(target);
+            if (noCardinals > 1)
+            {
+                bonus = noCardinals;
+                Game.MessageQueue.AddMessage("Close Quarters!");
+            }
+
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 5, 0, 5 + bonus, -2 - bonus, true);
             
             //Move into their square if the monster dies as normal
             bool okToMoveIntoSquare = false;

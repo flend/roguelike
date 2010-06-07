@@ -1874,6 +1874,16 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Return the instance of the special move class
+        /// </summary>
+        /// <param name="specialMove"></param>
+        /// <returns></returns>
+        SpecialMove FindSpecialMove(Type specialMove)
+        {
+            return specialMoves.Find(x => x.GetType() == specialMove);
+        }
+
+        /// <summary>
         /// Process a relative PC move, from a keypress
         /// </summary>
         /// <param name="x"></param>
@@ -1905,19 +1915,39 @@ namespace RogueBasin
 
             SpecialMove moveDone = null;
             Point overrideRelativeMove = null;
+            bool noMoveSubsequently = false;
+            bool specialMoveSuccess = false;
+
+            //For moves that have a bonus attack, collect them in bonusAttack list
+            List<Point> bonusAttack = new List<Point>();
 
             foreach (SpecialMove move in specialMoves)
             {
                 if (move.CausesMovement() && move.Known)
                 {
-                    bool moveSuccess = move.CheckAction(true, deltaMove);
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                    if (moveSuccess && move.AddsAttack())
+                    {
+                        //Save any extra attacks
+                        if (move.AttackIsOn())
+                            bonusAttack.Add(move.RelativeAttackVector());
+                    }
 
                     if(!moveSuccess)
                     {
                         //Test the move twice on first failure
                         //The first check may cause a long chain to fail but the move could be a valid new start move
                         //The second check picks this up
-                        move.CheckAction(true, deltaMove);
+                        move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                        if (moveSuccess && move.AddsAttack())
+                        {
+                            //Save any extra attacks
+                            if (move.AttackIsOn())
+                                bonusAttack.Add(move.RelativeAttackVector());
+                        }
+
                     }
                 }
             }
@@ -1929,8 +1959,9 @@ namespace RogueBasin
                 if (move.CausesMovement() && move.Known && move.MoveComplete())
                 {
                     //Carry out the move. This will update the player's position so the new relative move makes sense
-                    move.DoMove(deltaMove);
+                    move.DoMove(deltaMove, false);
                     moveDone = move;
+                    specialMoveSuccess = true;
 
                     //On success store the relativised move
                     //e.g. for WallLeap, the real move was a move into the wall but the relativised move is an attack in the opposite direction on the monster leaped to
@@ -1940,38 +1971,146 @@ namespace RogueBasin
 
             //If we had a success for one of the special movement moves, adopt the new relative move
             if (overrideRelativeMove != null)
+            {
                 deltaMove = overrideRelativeMove;
+                //Tell subsequent moves that we have already had a special move movement. For simultaneous moves like OpenGround/Multi or OpenGround/Close
+                //don't move twice
+                noMoveSubsequently = true;
+            }
             
-            //Now check all moves that don't do unusual movement
+            //Now check any remaining moves that have bonus attacks but don't cause movement
 
             foreach (SpecialMove move in specialMoves)
             {
-                if (!move.CausesMovement() && move.Known)
+                if (move.AddsAttack() && !move.CausesMovement() && move.Known)
+                {
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                    if (moveSuccess)
+                    {
+                        //Save any extra attacks
+                        if (move.AttackIsOn())
+                            bonusAttack.Add(move.RelativeAttackVector());
+                    }
+                    else {
+                        //Test the move twice on first failure
+                        //The first check may cause a long chain to fail but the move could be a valid new start move
+                        //The second check picks this up
+                        move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                        if (moveSuccess)
+                        {
+                            //Save any extra attacks
+                            if (move.AttackIsOn())
+                                bonusAttack.Add(move.RelativeAttackVector());
+                        }
+                    }
+                }
+            }
+
+            //Now check any moves that start with an attack. If they are not already in progress, then give them a chance to start again with the bonus attacks
+            //At the mo, bonus attacks only occur on moves which aren't normal attacks, so it's OK to check bonus attacks before checking normal attacks
+
+            foreach (Point attackVector in bonusAttack)
+            {
+                foreach (SpecialMove move in specialMoves)
+                {
+                    if (move.StartsWithAttack() && move.Known && move.CurrentStage() == 0)
+                    {
+                        bool moveSuccess = move.CheckAction(true, attackVector, specialMoveSuccess);
+                    }
+                }
+            }
+
+
+            /*
+            SpecialMoves.OpenSpaceAttack openSpaceAttack = (SpecialMoves.OpenSpaceAttack)FindSpecialMove(typeof(SpecialMoves.OpenSpaceAttack));
+            SpecialMoves.MultiAttack multiAttack = (SpecialMoves.MultiAttack)FindSpecialMove(typeof(SpecialMoves.MultiAttack));
+
+            if (openSpaceAttack != null && openSpaceAttack.Known)
+            {
+                bool moveSuccess = openSpaceAttack.CheckAction(true, deltaMove);
+
+                if (!moveSuccess)
+                {
+                    openSpaceAttack.CheckAction(true, deltaMove);
+                }
+            }
+
+            if (openSpaceAttack != null && openSpaceAttack.Known)
+            {
+                bool moveSuccess = openSpaceAttack.CheckAction(true, deltaMove);
+
+                if (!moveSuccess)
+                {
+                    openSpaceAttack.CheckAction(true, deltaMove);
+                }
+            }
+            */
+
+            //Now check all remaining moves with the normal move
+
+            foreach (SpecialMove move in specialMoves)
+            {
+                if (!move.CausesMovement() && !move.StartsWithAttack() && !move.AddsAttack() && !move.NotSimultaneous() && move.Known)
                 {
                     //Test the move twice
                     //The first check may cause a long chain to fail but the move could be a valid new start move
                     //The second check picks this up
 
-                    bool moveSuccess = move.CheckAction(true, deltaMove);
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
 
-                    if (!moveSuccess)
+                    if (moveSuccess)
                     {
-                        move.CheckAction(true, deltaMove);
+                    }
+                    else
+                    {
+                        moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                        if (moveSuccess)
+                        {
+                        }
                     }
                 }
             }
 
-            //Carry out any non-movement causing moves
-
-            //The only cases at the mo where 2 moves can happen together are close quarters + something
-            //multi + open space is also vaguely possible
+            //Carry out any moves which are ready (movement causing ones have already been done)
+            //Need to exclude ones which cause movement, since they have already been carried out (e.g. multi attack which isn't cancelled by an attack, i.e. still complete)
 
             foreach (SpecialMove move in specialMoves)
             {
-                if (!move.CausesMovement() && move.Known && move.MoveComplete())
+                if (move.Known && move.MoveComplete() && !move.CausesMovement())
                 {
                     moveDone = move;
-                    move.DoMove(deltaMove);
+                    specialMoveSuccess = true;
+                    move.DoMove(deltaMove, noMoveSubsequently);
+                }
+            }
+
+            //Finally carry out the non-simultaneous ones
+            foreach (SpecialMove move in specialMoves)
+            {
+                if (move.NotSimultaneous() && move.Known)
+                {
+                    //Test the move twice
+                    //The first check may cause a long chain to fail but the move could be a valid new start move
+                    //The second check picks this up
+
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                    if(!moveSuccess)
+                    {
+                        moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+                    }
+                }
+            }
+
+            foreach (SpecialMove move in specialMoves)
+            {
+                if (move.Known && move.NotSimultaneous() && move.MoveComplete())
+                {
+                    moveDone = move;
+                    move.DoMove(deltaMove, noMoveSubsequently);
                 }
             }
 
@@ -2981,7 +3120,7 @@ namespace RogueBasin
             foreach (SpecialMove move in specialMoves)
             {
                 if(move.Known)
-                    move.CheckAction(false, new Point(0, 0));
+                    move.CheckAction(false, new Point(0, 0), false);
             }
 
             //Are any moves ready, if so carry the first one out. All other are deleted (otherwise move interactions have to be worried about)
@@ -3000,7 +3139,7 @@ namespace RogueBasin
             //Carry out move, if one is ready
             if (moveToDo != null)
             {
-                moveToDo.DoMove(new Point(-1,-1));
+                moveToDo.DoMove(new Point(-1,-1), false);
 
                 //Clear all moves
                 foreach (SpecialMove move in specialMoves)

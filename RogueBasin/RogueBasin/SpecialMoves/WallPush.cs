@@ -27,7 +27,7 @@ namespace RogueBasin.SpecialMoves
             yDelta = 0;
         }
 
-        public override bool CheckAction(bool isMove, Point deltaMove)
+        public override bool CheckAction(bool isMove, Point deltaMove, bool otherMoveSuccess)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -208,7 +208,7 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point deltaMove)
+        public override void DoMove(Point deltaMove, bool noMove)
         {
             Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
 

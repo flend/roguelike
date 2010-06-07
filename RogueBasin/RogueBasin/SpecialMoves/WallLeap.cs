@@ -26,7 +26,7 @@ namespace RogueBasin.SpecialMoves
             squareToMoveTo = new Point(0, 0);
         }
 
-        public override bool CheckAction(bool isMove, Point deltaMove)
+        public override bool CheckAction(bool isMove, Point deltaMove, bool otherMoveSuccess)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
@@ -169,11 +169,22 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point deltaMove)
+        public override void DoMove(Point deltaMove, bool noMove)
         {
             //Attack the monster with bonuses
             Game.MessageQueue.AddMessage("Wall Leap!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, leapDistance + 1, 0, leapDistance + 1, 0, true);
+
+            int noCardinals = FindNumberOfCardinals(target);
+
+            int bonus = 0;
+            if (noCardinals > 1)
+            {
+                bonus = noCardinals;
+                Game.MessageQueue.AddMessage("Close Quarters!");
+            }
+
+
+            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, leapDistance + 1 + bonus, 0, leapDistance + 1 + bonus, 0, true);
 
             //Move the PC to the new location
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);

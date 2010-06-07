@@ -16,6 +16,11 @@ namespace RogueBasin.SpecialMoves
         public int lastDeltaX { get; set; }
         public int lastDeltaY { get; set; }
 
+        public int attackDeltaX { get; set; }
+        public int attackDeltaY { get; set; }
+
+        public bool extraAttackThisTurn = false;
+
         Creature target = null; //doesn't need to be serialized
         public int currentTargetID = -1;
 
@@ -28,7 +33,7 @@ namespace RogueBasin.SpecialMoves
             moveCounter = 0;
         }
 
-        public override bool CheckAction(bool isMove, Point deltaMove)
+        public override bool CheckAction(bool isMove, Point deltaMove, bool otherMoveSuccess)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -43,6 +48,9 @@ namespace RogueBasin.SpecialMoves
             {
                 target = Game.Dungeon.GetCreatureByUniqueID(currentTargetID);
             }
+
+            //Reset the attack marker
+            extraAttackThisTurn = false;
 
             //No interruptions or standing still
             if (!isMove || locationAfterMove == player.LocationMap)
@@ -59,8 +67,8 @@ namespace RogueBasin.SpecialMoves
                 int firstDeltaY = locationAfterMove.y - player.LocationMap.y;
 
                 //Set lastDeltaX to something unreasonable so we never repetition fail on the first move
-                lastDeltaX = -5;
-                lastDeltaY = -5;
+                lastDeltaX = -50;
+                lastDeltaY = -50;
 
                 //Reset speed counter
                 speedInc = 0;
@@ -178,6 +186,12 @@ namespace RogueBasin.SpecialMoves
                 target = newMonsters[Game.Random.Next(newMonsters.Count)];
                 currentTargetID = target.UniqueID;
 
+                //The effective attack is from the square the player ends up at to the monster. This makes the next move into open square logical
+                attackDeltaX = target.LocationMap.x - (player.LocationMap.x + deltaMove.x);
+                attackDeltaY = target.LocationMap.y - (player.LocationMap.y + deltaMove.y);
+
+                extraAttackThisTurn = true;
+
                 moveCounter++;
 
                 //Will attack it during DoMove
@@ -225,9 +239,11 @@ namespace RogueBasin.SpecialMoves
             return false;
         }
 
-        public override void DoMove(Point deltaMove)
+        public override void DoMove(Point deltaMove, bool noMove)
         {
             Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
+
+            Game.MessageQueue.AddMessage("Multi Attack!");
 
             //Attack the monster in its square with bonuses
             //Bonus depends on moveNumber
@@ -236,8 +252,15 @@ namespace RogueBasin.SpecialMoves
             if (bonus > 5)
                 bonus = 5;
 
+            //Add a bonus for close quarters if applicable
+            int noCardinals = FindNumberOfCardinals(target);
+            if (noCardinals > 1)
+            {
+                bonus += noCardinals;
+                Game.MessageQueue.AddMessage("Close Quarters!");
+            }
+
             //Bonus to hit and damage
-            Game.MessageQueue.AddMessage("Multi Attack!");
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
              
             //Give the player a small speed boost
@@ -292,6 +315,40 @@ namespace RogueBasin.SpecialMoves
         public override int GetRequiredCombat()
         {
             return 100;
+        }
+
+        public override bool AddsAttack()
+        {
+            return true;
+        }
+
+        public override Point RelativeAttackVector()
+        {
+            return new Point(attackDeltaX, attackDeltaY);
+        }
+
+        public override bool AttackIsOn()
+        {
+            return extraAttackThisTurn;
+        }
+
+        public override bool StartsWithAttack()
+        {
+            return true;
+        }
+
+        public override bool CausesMovement()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Surprisingly, we need to carry out the 1 square move from the multi attack in order for the direction of the bonus attack to make sense for follow-up moves like open
+        /// </summary>
+        /// <returns></returns>
+        public override Point RelativeMoveAfterMovement()
+        {
+            return new Point(lastDeltaX, lastDeltaY);
         }
     }
 }
