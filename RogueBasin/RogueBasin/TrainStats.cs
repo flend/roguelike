@@ -21,6 +21,21 @@ namespace RogueBasin
         public int CharmStatDelta { get; set; }
         public int MagicStatDelta { get; set; }
 
+        public const int minimumHitpointStat = 1;
+
+        /// <summary>
+        /// Apply the deltas we have calculated to the player. Do this after the dialogue so the screen redraw looks reasonable
+        /// </summary>
+        public void ApplyDeltasToPlayer() {
+
+            player.HitpointsStat += HitpointsStatDelta;
+            player.MaxHitpointsStat += MaxHitpointsStatDelta;
+            player.SpeedStat += SpeedStatDelta;
+            player.AttackStat += AttackStatDelta;
+            player.CharmStat += CharmStatDelta;
+            player.MagicStat += MagicStatDelta;
+        }
+
         public void TrainHitpointStat(int chance, int amount)
         {
             if (Game.Random.Next(100) < chance)
@@ -29,10 +44,10 @@ namespace RogueBasin
                     amount = player.MaxHitpointsStat - player.HitpointsStat;
                 }
 
-                if (player.HitpointsStat + amount < 0)
-                    amount = -1 * player.HitpointsStat;
+                if (player.HitpointsStat + amount < minimumHitpointStat)
+                    amount = minimumHitpointStat + -1 * player.HitpointsStat;
 
-                player.HitpointsStat += amount;
+                //player.HitpointsStat += amount;
                 HitpointsStatDelta += amount;
             }
         }
@@ -41,11 +56,19 @@ namespace RogueBasin
         {
             if (Game.Random.Next(100) < chance)
             {
-                if (player.MaxHitpointsStat + amount < 0)
-                    amount = -1 * player.MaxHitpointsStat;
+                if (player.MaxHitpointsStat + amount < minimumHitpointStat)
+                    amount = minimumHitpointStat + -1 * player.MaxHitpointsStat;
 
-                player.MaxHitpointsStat += amount;
+                //player.MaxHitpointsStat += amount;
                 MaxHitpointsStatDelta += amount;
+
+                //Check that max hitpoints isn't now below hitpoints
+                if (player.HitpointsStat > player.MaxHitpointsStat)
+                {
+                    amount = player.HitpointsStat - player.MaxHitpointsStat;
+                }
+                //player.HitpointsStat += amount;
+                HitpointsStatDelta += amount;
             }
         }
 
@@ -56,7 +79,7 @@ namespace RogueBasin
                 if (player.AttackStat + amount < 0)
                     amount = -1 * player.AttackStat;
 
-                player.AttackStat += amount;
+                //player.AttackStat += amount;
                 AttackStatDelta += amount;
             }
         }
@@ -68,7 +91,7 @@ namespace RogueBasin
                 if (player.SpeedStat + amount < 0)
                     amount = -1 * player.SpeedStat;
 
-                player.SpeedStat += amount;
+                //player.SpeedStat += amount;
                 SpeedStatDelta += amount;
             }
         }
@@ -80,7 +103,7 @@ namespace RogueBasin
                 if (player.CharmStat + amount < 0)
                     amount = -1 * player.CharmStat;
 
-                player.CharmStat += amount;
+                //player.CharmStat += amount;
                 CharmStatDelta += amount;
             }
         }
@@ -92,7 +115,7 @@ namespace RogueBasin
                 if (player.MagicStat + amount < 0)
                     amount = -1 * player.MagicStat;
 
-                player.MagicStat += amount;
+                //player.MagicStat += amount;
                 MagicStatDelta += amount;
             }
         }
@@ -124,7 +147,7 @@ namespace RogueBasin
             this.player = player;
 
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;
@@ -146,7 +169,7 @@ namespace RogueBasin
         {
             this.player = player;
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;
@@ -168,7 +191,7 @@ namespace RogueBasin
         {
             this.player = player;
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;
@@ -190,7 +213,7 @@ namespace RogueBasin
         {
             this.player = player;
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;
@@ -229,7 +252,7 @@ namespace RogueBasin
         {
             this.player = player;
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;
@@ -251,7 +274,7 @@ namespace RogueBasin
         {
             this.player = player;
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;
@@ -273,7 +296,7 @@ namespace RogueBasin
         {
             this.player = player;
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;
@@ -295,7 +318,7 @@ namespace RogueBasin
         {
             this.player = player;
 
-            if (player.HitpointsStat == 0)
+            if (player.HitpointsStat == minimumHitpointStat)
             {
                 Game.MessageQueue.AddMessage("You are so tired you can't get anything done. Time for rest?");
                 return;

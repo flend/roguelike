@@ -61,9 +61,9 @@ namespace RogueBasin.Triggers
 
             Dungeon dungeon = Game.Dungeon;
 
+            List<TrainStats> trainingRecord = new List<TrainStats>();
             bool doesTraining = false;
             
-
             if(dungeon.IsWeekday()) {
 
                 //Carry out training and load up the UI
@@ -74,6 +74,7 @@ namespace RogueBasin.Triggers
                 for (int i = 0; i < 5; i++)
                 {
                     TrainStats train = DoWeekdayTraining();
+                    trainingRecord.Add(train);
                     Screen.Instance.AddTrainingStatsRecord(train);
                 }
                 doesTraining = true;
@@ -86,6 +87,7 @@ namespace RogueBasin.Triggers
                 for (int i = 0; i < 2; i++)
                 {
                     TrainStats train = DoWeekendTraining();
+                    trainingRecord.Add(train);
                     Screen.Instance.AddTrainingStatsRecord(train);
                 }
                 doesTraining = true;
@@ -96,9 +98,16 @@ namespace RogueBasin.Triggers
                 Game.MessageQueue.AddMessage("Surely there's something better to do this weekend!");
             }
 
+            //Run the UI then update the player's stats
+
             if (doesTraining)
             {
                 RunTrainingUI();
+
+                foreach (TrainStats stats in trainingRecord)
+                {
+                    stats.ApplyDeltasToPlayer();
+                }
             }
 
             return true;
