@@ -376,13 +376,20 @@ namespace RogueBasin
 
 
                                 case 'm':
-                                case 'M':
+                                
                                     //Show movies
                                     SetSpecialMoveMovieScreen();
                                     Screen.Instance.Update();
                                     MovieScreenInteraction();
                                     DisableSpecialMoveMovieScreen();
                                     Screen.Instance.Update();
+                                    timeAdvances = false;
+                                    break;
+
+                                case 'M':
+                                    SetMsgHistoryScreen();
+                                    Screen.Instance.Update();
+                                    DisableMsgHistoryScreen();
                                     timeAdvances = false;
                                     break;
 
@@ -1146,6 +1153,22 @@ namespace RogueBasin
         private void SetSpecialMoveMovieScreen()
         {
             Screen.Instance.DisplaySpecialMoveMovies = true;
+        }
+
+        /// <summary>
+        /// Set state as movie screen
+        /// </summary>
+        private void SetMsgHistoryScreen()
+        {
+            Screen.Instance.ShowMsgHistory = true;
+        }
+
+        /// <summary>
+        /// Disables state as movie screen
+        /// </summary>
+        private void DisableMsgHistoryScreen()
+        {
+            Screen.Instance.ShowMsgHistory = false;
         }
 
         /// <summary>

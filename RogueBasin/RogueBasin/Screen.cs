@@ -726,6 +726,8 @@ namespace RogueBasin {
                 DrawTrainingOverlay();
             else if (ShowXPScreen)
                 DrawXPOverlay();
+            else if (ShowMsgHistory)
+                DrawMsgHistory();
 
         }
 
@@ -1490,6 +1492,51 @@ namespace RogueBasin {
 
             rootConsole.ForegroundColor = ColorPresets.White;
 
+        }
+
+        public bool ShowMsgHistory { get; set; }
+
+        /// <summary>
+        /// Draw the msg history and allow the player to scroll
+        /// </summary>
+        private void DrawMsgHistory()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            rootConsole.PrintLineRect("Message History", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            rootConsole.PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Active area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            LinkedList<string> msgHistory = Game.MessageQueue.messageHistory;
+
+            //Controlled by cursor
+            LinkedListNode<string> bottomNodeDisplayed = msgHistory.Last;
+
+            int botLineY = Math.Min(msgHistory.Count, inventoryListH);
+
+            LinkedListNode<string> displayedMsg = bottomNodeDisplayed;
+
+            for(int i = botLineY; i > 0; i--) {
+                
+                rootConsole.PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i - 1, inventoryListW, 1, LineAlignment.Left);
+                displayedMsg = displayedMsg.Previous;
+            }
+
+            //Temporary
+            Screen.Instance.FlushConsole();
+            KeyPress userKey = Keyboard.WaitForKeyPress(true);
         }
 
         private void ProcessDelta(string statName, int delta)
@@ -2851,128 +2898,10 @@ namespace RogueBasin {
             Draw();
 
             //Message queue - requires keyboard to advance messages - not sure about this yet
-            RunMessageQueue();
+            Game.MessageQueue.RunMessageQueue();
         }
 
 
-        /// <summary>
-        /// Run through the messages for the user and require a key press after each one
-        /// </summary>
-        private void RunMessageQueue()
-        {
-            List<string> messages = Game.MessageQueue.GetMessages();
 
-            Screen.Instance.ClearMessageLine();
-
-            if (messages.Count == 0)
-            {
-                Screen.Instance.FlushConsole();
-                return;
-            }
-
-            if (messages.Count == 1)
-            {
-                //Single message just print it
-                Screen.Instance.PrintMessage(messages[0]);
-
-                Game.MessageQueue.ClearList();
-
-                Screen.Instance.FlushConsole();
-                return;
-            }
-
-            //Otherwise require a space bar press between each
-            //TODO: Wrap messages
-
-            //Make a list of the wrapped strings
-            //List<string> wrappedMsg = new List<string>();
-
-            //Stick all the messages together in one long string
-            string allMsgs = "";
-            foreach (string message in messages)
-            {
-                allMsgs += message + " ";
-            }
-
-            //Strip off the last piece of white space
-            allMsgs = allMsgs.Trim();
-
-            //Now make a list of trimmed msgs with <more> appended
-            List<string> wrappedMsgs = new List<string>();
-            do
-            {
-                //put function in utility
-                string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", 83);
-                wrappedMsgs.Add(trimmedMsg);
-                //make our allMsgs smaller
-                allMsgs = allMsgs.Substring(trimmedMsg.Length);
-            } while (allMsgs.Length > 0);
-
-            int noLines = Screen.Instance.msgDisplayNumLines;
-
-            int i = 0;
-            do
-            {
-                //Require moreing
-                if (i < wrappedMsgs.Count - noLines)
-                {
-                    //Add the messages together for PrintMessage
-                    string outputMsg = "";
-
-                    for (int j = 0; j < noLines; j++)
-                    {
-                        outputMsg += wrappedMsgs[i + j].Trim();
-
-                        if (j != noLines - 1)
-                            outputMsg += "\n";
-                    }
-
-                    //Update line counter
-                    i += noLines;
-
-                    outputMsg.Trim();
-
-                    Screen.Instance.PrintMessage(outputMsg + " <more>");
-                    Screen.Instance.FlushConsole();
-
-                    //Block for this keypress - may want to listen for exit too
-                    KeyPress userKey;
-                    userKey = Keyboard.WaitForKeyPress(true);
-                }
-                else
-                {
-                    //Add the messages together for PrintMessage
-                    string outputMsg = "";
-
-                    for (int j = 0; j < noLines; j++)
-                    {
-                        if (i + j >= wrappedMsgs.Count)
-                            break;
-
-                        outputMsg += wrappedMsgs[i + j].Trim();
-
-                        if (j != noLines - 1)
-                            outputMsg += "\n";
-                    }
-
-                    outputMsg.Trim();
-
-                    //Update line counter
-                    i += noLines;
-
-                    Screen.Instance.PrintMessage(outputMsg);
-                    Screen.Instance.FlushConsole();
-                }
-            } while (i < wrappedMsgs.Count);
-
-            //Require a keypress if requested
-            if (Game.MessageQueue.RequireKeypress)
-            {
-                Keyboard.WaitForKeyPress(true);
-            }
-
-            Game.MessageQueue.ClearList();
-
-        }
     }
 }
