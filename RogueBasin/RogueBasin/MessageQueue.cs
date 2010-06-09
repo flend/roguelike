@@ -13,7 +13,7 @@ namespace RogueBasin
         /// <summary>
         /// Contains a list of wrapped strings for the history. Public so serializable
         /// </summary>
-        public LinkedList<string> messageHistory;
+        public LinkedList<string> messageHistory { get; set; }
 
         const int messageHistorySize = 1000;
                 
@@ -33,6 +33,23 @@ namespace RogueBasin
 
         public void AddMessage(string newMessage) {
             messages.Add(newMessage);
+        }
+
+        public List<string> GetMessageHistoryAsList()
+        {
+            List<string> retList = new List<string>();
+            foreach (string s in messageHistory)
+                retList.Add(s);
+
+            return retList;
+        }
+
+        public void TakeMessageHistoryFromList(List<string> newMsgHistory)
+        {
+            messageHistory.Clear();
+
+            foreach (string s in newMsgHistory)
+                messageHistory.AddLast(s);
         }
 
         /// <summary>
@@ -61,15 +78,43 @@ namespace RogueBasin
         /// <param name="msgStringToStore"></param>
         private void AddToHistory(string msgStringToStore) {
 
-            //Make sure the msg is broken up into one string per line
-            string [] separateStrings = msgStringToStore.Split('\n');
+            //Need to re-wrap to message history screen width
+            int wrapToWidth = Screen.Instance.MsgLogWrapWidth;
 
-            foreach (string s in separateStrings)
+            //Wrap the lines to the console width
+            List<string> wrappedMsgs = new List<string>();
+            string workStr = msgStringToStore;
+            do
             {
-                messageHistory.AddLast(s.Trim());
+                string trimmedMsg = Utility.SubstringWordCutAndNormalise(workStr, "", (uint)wrapToWidth);
+                int charsUsed = trimmedMsg.Length;
+                wrappedMsgs.Add(trimmedMsg.Trim());
+
+                //make our allMsgs smaller
+                workStr = workStr.Substring(charsUsed);
+            } while (workStr.Length > 0);
+            
+            //Make sure the msg is broken up into one string per line
+            //string [] separateStrings = msgStringToStore.Split('\n');
+
+            //foreach (string s in separateStrings)
+            //{
+            //    if(s.Length > 0)
+            //        messageHistory.AddLast(s.Trim());
+            //}
+
+            //while(messageHistory.Count > messageHistorySize) {          
+            //    messageHistory.RemoveFirst();
+            //}
+
+            foreach (string s in wrappedMsgs)
+            {
+                if (s.Length > 0)
+                    messageHistory.AddLast(s.Trim());
             }
 
-            while(messageHistory.Count > messageHistorySize) {          
+            while (messageHistory.Count > messageHistorySize)
+            {
                 messageHistory.RemoveFirst();
             }
         }
@@ -118,10 +163,11 @@ namespace RogueBasin
             do
             {
                 string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", 83);
-                wrappedMsgs.Add(trimmedMsg);
+                int charsUsed = trimmedMsg.Length;
+                wrappedMsgs.Add(trimmedMsg.Trim());
 
                 //make our allMsgs smaller
-                allMsgs = allMsgs.Substring(trimmedMsg.Length);
+                allMsgs = allMsgs.Substring(charsUsed);
             } while (allMsgs.Length > 0);
 
             int noLines = Screen.Instance.msgDisplayNumLines;

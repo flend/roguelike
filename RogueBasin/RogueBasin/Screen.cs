@@ -109,6 +109,8 @@ namespace RogueBasin {
 
         bool displayTrainingUI;
 
+        public int MsgLogWrapWidth { get; set; }
+
         //Death members
         public List<string> TotalKills { get; set; }
         public List<string> DeathPreamble { get; set; }
@@ -169,7 +171,7 @@ namespace RogueBasin {
             msgDisplayNumLines = 3;
 
             inventoryTL = new Point(5, 5);
-            inventoryTR = new Point(75, 5);
+            inventoryTR = new Point(85, 5);
             inventoryBL = new Point(5, 30);
 
             trainingTL = new Point(15, 10);
@@ -178,6 +180,7 @@ namespace RogueBasin {
 
             princessStatsTopLeft = new Point(7, 32);
 
+            MsgLogWrapWidth = inventoryTR.x - inventoryTL.x - 4;
 
             calendarOffset = new Point(20, 0);
 
@@ -1496,6 +1499,8 @@ namespace RogueBasin {
 
         public bool ShowMsgHistory { get; set; }
 
+        enum Direction { up, down, none };
+
         /// <summary>
         /// Draw the msg history and allow the player to scroll
         /// </summary>
@@ -1521,22 +1526,109 @@ namespace RogueBasin {
 
             LinkedList<string> msgHistory = Game.MessageQueue.messageHistory;
 
-            //Controlled by cursor
-            LinkedListNode<string> bottomNodeDisplayed = msgHistory.Last;
+            //Display list
+            LinkedListNode<string> displayedMsg;
+            LinkedListNode<string> topLineDisplayed = null;
+            
+            LinkedListNode<string> bottomTopLineDisplayed = msgHistory.Last;
 
-            int botLineY = Math.Min(msgHistory.Count, inventoryListH);
+            if (msgHistory.Count > 0)
+            {
+                //Find the line at the top of the screen when the list is fully scrolled down
+                for (int i = 0; i < inventoryListH - 1; i++)
+                {
+                    if (bottomTopLineDisplayed.Previous != null)
+                        bottomTopLineDisplayed = bottomTopLineDisplayed.Previous;
+                }
+                topLineDisplayed = bottomTopLineDisplayed;
 
-            LinkedListNode<string> displayedMsg = bottomNodeDisplayed;
-
-            for(int i = botLineY; i > 0; i--) {
-                
-                rootConsole.PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i - 1, inventoryListW, 1, LineAlignment.Left);
-                displayedMsg = displayedMsg.Previous;
+                //Display the message log
+                displayedMsg = topLineDisplayed;
+                for (int i = 0; i < inventoryListH; i++)
+                {
+                    rootConsole.PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+                    displayedMsg = displayedMsg.Next;
+                    if (displayedMsg == null)
+                        break;
+                }
             }
 
-            //Temporary
             Screen.Instance.FlushConsole();
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+            bool keepLooping = true;
+
+            do
+            {
+                //Get user input
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                Direction dir = Direction.none;
+
+                //Each state has different keys
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+                    char keyCode = (char)userKey.Character;
+
+                    if (keyCode == 'x')
+                        keepLooping = false;
+
+                    if (keyCode == 'j')
+                    {
+                        dir = Direction.up;
+                    }
+
+                    if (keyCode == 'k')
+                    {
+                        dir = Direction.down;
+                    }
+                }
+
+                else
+                {
+                    //Special keys
+                    switch (userKey.KeyCode)
+                    {
+                        case KeyCode.TCODK_UP:
+                        case KeyCode.TCODK_KP8:
+                            dir = Direction.up;
+                            break;
+
+                        case KeyCode.TCODK_KP2:
+                        case KeyCode.TCODK_DOWN:
+                            dir = Direction.down;
+                            break;
+                    }
+                }
+
+                if (msgHistory.Count > 0)
+                {
+                    if (dir == Direction.up)
+                    {
+                        if (topLineDisplayed.Previous != null)
+                            topLineDisplayed = topLineDisplayed.Previous;
+                    }
+                    else if (dir == Direction.down)
+                    {
+                        if (topLineDisplayed != bottomTopLineDisplayed)
+                            topLineDisplayed = topLineDisplayed.Next;
+                    }
+
+                    //Clear the rectangle
+                    rootConsole.DrawRect(inventoryTL.x + 1, inventoryTL.y + 1, inventoryTR.x - inventoryTL.x - 1, inventoryBL.y - inventoryTL.y - 1, true);
+
+                    //Display the message log
+                    displayedMsg = topLineDisplayed;
+                    for (int i = 0; i < inventoryListH; i++)
+                    {
+                        rootConsole.PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+                        displayedMsg = displayedMsg.Next;
+                        if (displayedMsg == null)
+                            break;
+                    }
+                }
+                Screen.Instance.FlushConsole();
+
+            } while (keepLooping);
         }
 
         private void ProcessDelta(string statName, int delta)

@@ -92,6 +92,8 @@ namespace RogueBasin
         public List<HiddenNameInfo> hiddenNameInfo;
         public List<DungeonSquareTrigger> triggers;
 
+        public List<string> messageLog;
+
         public Player player;
 
         public GameDifficulty difficulty;

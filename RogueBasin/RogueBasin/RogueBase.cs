@@ -390,6 +390,7 @@ namespace RogueBasin
                                     SetMsgHistoryScreen();
                                     Screen.Instance.Update();
                                     DisableMsgHistoryScreen();
+                                    Screen.Instance.Update();
                                     timeAdvances = false;
                                     break;
 
@@ -847,6 +848,8 @@ namespace RogueBasin
                 newDungeon.DungeonInfo = readData.dungeonInfo;
                 newDungeon.dateCounter = readData.dateCounter;
                 newDungeon.nextUniqueID = readData.nextUniqueID;
+
+                Game.MessageQueue.TakeMessageHistoryFromList(readData.messageLog);
                 
                 //Process the maps back into map objects
                 foreach (SerializableMap serialMap in readData.levels)

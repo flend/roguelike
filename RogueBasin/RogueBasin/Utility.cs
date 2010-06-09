@@ -33,7 +33,35 @@ namespace RogueBasin
                 char[] cutPossible = new char[] { ' ', ',', '.', '?', '!', ':', ';', '-', '\n', '\r', '\t' };
                 int cutIndex = str.LastIndexOfAny(cutPossible);
                 if (cutIndex > 0)
-                { return str.Substring(0, cutIndex).Trim() + appendWhenCut; }
+                { return str.Substring(0, cutIndex) + appendWhenCut; }
+                else
+                { return str.Substring(0, (int)maxLength - appendWhenCut.Length) + appendWhenCut; }
+            }
+            return str;
+        }
+
+        /// <summary>
+        /// Properly cuts the string on a white space and append appendWhenCut when cutted.
+        /// Doesn't Trim so the length of returned string can be used to calculate how much has been taken off
+        /// </summary>
+        /// <param name="me"></param>
+        /// <param name="appendWhenCut"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
+        public static string SubstringWordCutAndNormalise(string str, string appendWhenCut, uint maxLength)
+        {
+            //Firstly replace any unusual white space with spaces
+            str = str.Replace("\r\n", " ");
+            str = str.Replace('\r', ' ');
+            str = str.Replace('\n', ' ');
+
+            if (str.Length > maxLength)
+            {
+                str = str.Substring(0, (int)maxLength - appendWhenCut.Length);
+                char[] cutPossible = new char[] { ' ', ',', '.', '?', '!', ':', ';', '-', '\n', '\r', '\t' };
+                int cutIndex = str.LastIndexOfAny(cutPossible);
+                if (cutIndex > 0)
+                { return str.Substring(0, cutIndex) + appendWhenCut; }
                 else
                 { return str.Substring(0, (int)maxLength - appendWhenCut.Length) + appendWhenCut; }
             }
@@ -140,9 +168,10 @@ namespace RogueBasin
                     {
                         //put function in utility
                         string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", (uint)maxWidth);
-                        wrappedMsgs.Add(trimmedMsg);
+                        int charsUsed = trimmedMsg.Length;
+                        wrappedMsgs.Add(trimmedMsg.Trim());
                         //make our allMsgs smaller
-                        allMsgs = allMsgs.Substring(trimmedMsg.Length);
+                        allMsgs = allMsgs.Substring(charsUsed);
                     } while (allMsgs.Length > 0);
 
                     //Set height

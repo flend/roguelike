@@ -877,6 +877,7 @@ namespace RogueBasin
                 saveGameInfo.difficulty = this.Difficulty;
                 saveGameInfo.dungeonInfo = this.dungeonInfo;
                 saveGameInfo.nextUniqueID = this.nextUniqueID;
+                saveGameInfo.messageLog = Game.MessageQueue.GetMessageHistoryAsList();
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -899,8 +900,8 @@ namespace RogueBasin
                 writer.Formatting = Formatting.Indented;
                 serializer.Serialize(writer, saveGameInfo);
 
-                Game.MessageQueue.AddMessage("Game saved successfully.");
-                LogFile.Log.LogEntry("Game saved successfully: " + filename);
+                Game.MessageQueue.AddMessage("Game " + player.Name + " saved successfully.");
+                LogFile.Log.LogEntry("Game " + player.Name + " saved successfully: " + filename);
             }
             catch (Exception ex)
             {
