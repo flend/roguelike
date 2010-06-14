@@ -96,6 +96,8 @@ namespace RogueBasin
                         //Increment world clock
                         Game.Dungeon.IncrementWorldClock();
 
+                        //ProfileEntry("Pre event");
+
                         //Increment time on all global (dungeon) events
                         Game.Dungeon.IncrementEventTime();
 
@@ -104,19 +106,21 @@ namespace RogueBasin
 
                         //IncrementTurnTime() also increments time for all events on that creature
 
+                        //ProfileEntry("Pre monster");
+
                         foreach (Monster creature in Game.Dungeon.Monsters)
                         {
                             try
                             {
-                                if (creature.IncrementTurnTime())
+                                //Only process creatures on the same level as the player
+                                if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
                                 {
-                                    //dungeon.ShowCreatureFOVOnMap(creature);
-
-                                    //Creatures may be killed by other creatures so check they are alive before processing
-                                    if (creature.Alive)
+                                    if (creature.IncrementTurnTime())
                                     {
-                                        //Only process creatures on the same level as the player
-                                        if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                                        //dungeon.ShowCreatureFOVOnMap(creature);
+
+                                        //Creatures may be killed by other creatures so check they are alive before processing
+                                        if (creature.Alive)
                                         {
                                             creature.ProcessTurn();
                                         }
@@ -128,6 +132,8 @@ namespace RogueBasin
                                 LogFile.Log.LogEntry("Exception thrown" + e.Message);
                             }
                         }
+
+                        //ProfileEntry("Post monster");
 
                         try
                         {
@@ -157,18 +163,25 @@ namespace RogueBasin
                     //PC turn
                     try
                     {
+                        
 
                         //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
                         if (Game.Dungeon.Player.IncrementTurnTime())
                         {
+                            ProfileEntry("Pre PC POV");
+
                             //Calculate the player's FOV
                             Game.Dungeon.CalculatePlayerFOV();
 
-                            //Debug: show the FOV of all monsters
+                            ProfileEntry("Pre Monster POV");
+
+                            //Debug: show the FOV of all monsters. Should flag or comment this for release.
                             foreach (Monster monster in Game.Dungeon.Monsters)
                             {
                                 Game.Dungeon.ShowCreatureFOVOnMap(monster);
                             }
+
+                            ProfileEntry("Post Monster POV");
 
                             //For effects that end to update the screen correctly
                             if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
@@ -177,8 +190,12 @@ namespace RogueBasin
                             //Check the 'on' status of special moves
                             Game.Dungeon.CheckSpecialMoveValidity();
 
+                            ProfileEntry("Pre Screen Update");
+
                             //Update screen just before PC's turn
                             Screen.Instance.Update();
+
+                            ProfileEntry("Post Screen Update");
 
                             //Deal with PCs turn as appropriate
                             bool timeAdvances = false;
@@ -186,6 +203,8 @@ namespace RogueBasin
                             {
                                 timeAdvances = UserInput();
                             } while (!timeAdvances);
+
+                            ProfileEntry("After user");
 
                             //Reset the creature FOV display
                             Game.Dungeon.ResetCreatureFOVOnMap();
@@ -208,6 +227,12 @@ namespace RogueBasin
 
                 }
             }
+        }
+
+        private void ProfileEntry(string p)
+        {
+            if(Game.Dungeon.Profiling)
+                LogFile.Log.LogEntryDebug(p + " " + DateTime.Now.Millisecond.ToString(), LogDebugLevel.Profiling);
         }
 
         //Deal with user input

@@ -159,10 +159,17 @@ namespace RogueBasin.SpecialMoves
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
             moveCounter = 0;
 
-            //Give the player a small speed up
-            //Seems to mean you get a free attack about 1 time in 2
-            int duration = 150 + Game.Random.Next(400);
-            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, 150, 150));
+            //Give the player a small speed up providing they are not under the influence of any other speed up effect
+            //(potentially make this speed up a different effect so it will stack with potions)
+                        
+            //List<PlayerEffect> effects = Game.Dungeon.Player.eff
+
+            //Have made the duration a proportion of current speed. An absolute duration is really good for fast characters
+
+            double baseDuration = 10000 / Game.Dungeon.Player.Speed;
+            int duration = (int)Math.Floor(baseDuration + Game.Random.Next((int)(baseDuration * 4.0)));
+            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, duration, 150));
+            
             Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
 
             LogFile.Log.LogEntryDebug("Burst of Speed complete", LogDebugLevel.Medium);

@@ -58,7 +58,7 @@ namespace RogueBasin
         /// <summary>
         /// How much the turn clock has to reach to process
         /// </summary>
-        protected const int turnClockLimit = 10000;
+        protected const int turnClockLimit = 1000;
 
         /// <summary>
         /// A list of all the equipment slots the creature has

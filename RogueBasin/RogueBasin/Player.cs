@@ -10,7 +10,7 @@ namespace RogueBasin
         /// <summary>
         /// Effects that are active on the player
         /// </summary>
-        List<PlayerEffect> effects;
+        public List<PlayerEffect> effects { get; set; }
 
         public List<Monster> Kills { get; set;}
 
@@ -363,219 +363,6 @@ namespace RogueBasin
                 DamageModifierAccess += 1;
             }
 
-
-            /*
-
-
-            //Defaults (not necessary)
-            armourClass = 10;
-            damageBase = 4;
-            damageModifier = 0;
-            hitModifier = 0;
-
-            //Check level
-            switch (Game.Dungeon.Difficulty)
-            {
-                case GameDifficulty.Easy:
-
-                    switch (Level)
-                    {
-                        case 1:
-                            armourClass = 12;
-                            damageBase = 4;
-                            damageModifier = 0;
-                            hitModifier = 0;
-                            maxHitpoints = 15;
-                            MaxCharmedCreatures = 1;
-                            break;
-                        case 2:
-                            armourClass = 13;
-                            damageBase = 4;
-                            damageModifier = 1;
-                            hitModifier = 1;
-                            maxHitpoints = 25;
-                            break;
-                        case 3:
-                            armourClass = 13;
-                            damageBase = 6;
-                            damageModifier = 0;
-                            hitModifier = 2;
-                            maxHitpoints = 35;
-                            break;
-                        case 4:
-                            armourClass = 14;
-                            damageBase = 6;
-                            damageModifier = 1;
-                            hitModifier = 3;
-                            maxHitpoints = 45;
-                            break;
-                        case 5:
-                            armourClass = 15;
-                            damageBase = 8;
-                            damageModifier = 0;
-                            hitModifier = 4;
-                            maxHitpoints = 55;
-                            break;
-                        case 6:
-                            armourClass = 16;
-                            damageBase = 8;
-                            damageModifier = 1;
-                            hitModifier = 5;
-                            maxHitpoints = 65;
-                            break;
-                        case 7:
-                        default:
-                            armourClass = 17;
-                            damageBase = 12;
-                            damageModifier = 0;
-                            hitModifier = 6;
-                            maxHitpoints = 75;
-                            break;
-                    }
-                    break;
-                case GameDifficulty.Medium:
-
-                    switch (Level)
-                    {
-                        case 1:
-                            armourClass = 12;
-                            damageBase = 4;
-                            damageModifier = 0;
-                            hitModifier = 0;
-                            maxHitpoints = 15;
-                            break;
-                        case 2:
-                            armourClass = 13;
-                            damageBase = 4;
-                            damageModifier = 1;
-                            hitModifier = 1;
-                            maxHitpoints = 25;
-                            break;
-                        case 3:
-                            armourClass = 13;
-                            damageBase = 6;
-                            damageModifier = 0;
-                            hitModifier = 2;
-                            maxHitpoints = 35;
-                            break;
-                        case 4:
-                            armourClass = 14;
-                            damageBase = 6;
-                            damageModifier = 1;
-                            hitModifier = 3;
-                            maxHitpoints = 45;
-                            break;
-                        case 5:
-                            armourClass = 15;
-                            damageBase = 8;
-                            damageModifier = 0;
-                            hitModifier = 4;
-                            maxHitpoints = 55;
-                            break;
-                        case 6:
-                            armourClass = 16;
-                            damageBase = 8;
-                            damageModifier = 1;
-                            hitModifier = 5;
-                            maxHitpoints = 65;
-                            break;
-                        case 7:
-                        default:
-                            armourClass = 17;
-                            damageBase = 12;
-                            damageModifier = 0;
-                            hitModifier = 6;
-                            maxHitpoints = 75;
-                            break;
-                    }
-                    break;
-                case GameDifficulty.Hard:
-
-                    switch (Level)
-                    {
-                        case 1:
-                            armourClass = 10;
-                            damageBase = 4;
-                            damageModifier = 0;
-                            hitModifier = 0;
-                            maxHitpoints = 10;
-                            break;
-                        case 2:
-                            armourClass = 10;
-                            damageBase = 4;
-                            damageModifier = 1;
-                            hitModifier = 1;
-                            maxHitpoints = 15;
-                            break;
-                        case 3:
-                            armourClass = 11;
-                            damageBase = 6;
-                            damageModifier = 0;
-                            hitModifier = 2;
-                            maxHitpoints = 25;
-                            break;
-                        case 4:
-                            armourClass = 11;
-                            damageBase = 6;
-                            damageModifier = 1;
-                            hitModifier = 3;
-                            maxHitpoints = 30;
-                            break;
-                        case 5:
-                            armourClass = 12;
-                            damageBase = 8;
-                            damageModifier = 0;
-                            hitModifier = 4;
-                            maxHitpoints = 35;
-                            break;
-                        case 6:
-                            armourClass = 13;
-                            damageBase = 8;
-                            damageModifier = 1;
-                            hitModifier = 5;
-                            maxHitpoints = 40;
-                            break;
-                        case 7:
-                        default:
-                            armourClass = 14;
-                            damageBase = 12;
-                            damageModifier = 0;
-                            hitModifier = 6;
-                            maxHitpoints = 50;
-                            break;
-                    }
-                    break;
-            }
-
-            //Set overdrive HP
-            OverdriveHitpoints = (int)Math.Ceiling(maxHitpoints * 1.5);
-
-            //Check equipped items
-            
-            foreach (Item item in Inventory.Items)
-            {
-                if (!item.IsEquipped)
-                    continue;
-
-                IEquippableItem equipItem = item as IEquippableItem;
-                
-                //Error if non-equippable item is equipped
-                if(equipItem == null) {
-                    LogFile.Log.LogEntry("Item " + item.SingleItemDescription + " is non-equippable but is equipped!");
-                    //Just skip
-                    continue;
-                }
-
-                armourClass += equipItem.ArmourClassModifier();
-                damageModifier += equipItem.DamageModifier();
-                hitModifier += equipItem.HitModifier();
-
-                if (equipItem.DamageBase() > damageBase)
-                {
-                    damageBase = equipItem.DamageBase();
-                }
-            }
-            */
             //Check effects
 
             bool toHitEffectOn = false;
@@ -1158,10 +945,11 @@ namespace RogueBasin
             //Increment time on events and remove finished ones
             List<PlayerEffect> finishedEffects = new List<PlayerEffect>();
 
-            //Remove finished effects
             foreach (PlayerEffect effect in effects)
             {
-                effect.OnEnd();
+                if(!effect.HasEnded())
+                    effect.OnEnd();
+
                 finishedEffects.Add(effect);
             }
 

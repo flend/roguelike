@@ -284,6 +284,8 @@ namespace RogueBasin
 
         DungeonInfo dungeonInfo;
 
+        public bool Profiling { get; set;}
+
         /*
         public int Dungeon1StartLevel { get; set;}
         public int Dungeon1EndLevel { get; set; }
@@ -374,6 +376,8 @@ namespace RogueBasin
             summonedMonsters = new List<Monster>();
 
             SaveScumming = true;
+
+            Profiling = true;
         }
 
         /// <summary>
@@ -3715,7 +3719,23 @@ namespace RogueBasin
             }
             //return false;
         }
-            /// <summary>
+
+        /// <summary>
+        /// Remove all active effects on monsters. Used when we leave a dungeon
+        /// to ensure events are cancelled before we meet the monster again
+        /// </summary>
+        void RemoveAllMonsterEffects()
+        {
+            //Increment time on events and remove finished ones
+            List<PlayerEffect> finishedEffects = new List<PlayerEffect>();
+
+            foreach (Monster monster in monsters)
+            {
+                monster.RemoveAllEffects();
+            }
+        }
+
+        /// <summary>
         /// Attempt to uncharm a monster in a target direction.
         /// Returns whether time passes (not if there is a successful charm)
         /// </summary>
@@ -3818,6 +3838,7 @@ namespace RogueBasin
 
         /// <summary>
         /// Exit a dungeon and go back to town
+        /// Do all cleanup here
         /// </summary>
 
         public void PlayerLeavesDungeon()
@@ -3827,6 +3848,9 @@ namespace RogueBasin
             {
                 //Respawn the last dungeon the player was in
                 RespawnDungeon(Player.CurrentDungeon);
+
+                //End any events on any remaining monsters
+                RemoveAllMonsterEffects();
 
                 //Wipe the player's FOV of the last dungeon
                 WipeThisRunFOV(Player.CurrentDungeon);

@@ -70,7 +70,7 @@ namespace RogueBasin
         /// <summary>
         /// Effects current active on this monster
         /// </summary>
-        List<MonsterEffect> effects;
+        public List<MonsterEffect> effects { get; set; }
 
         public Monster()
         {
@@ -282,6 +282,29 @@ namespace RogueBasin
             effects.Add(effect);
 
             effect.OnStart();
+        }
+
+        /// <summary>
+        /// Remove all existing effects
+        /// </summary>
+        public void RemoveAllEffects()
+        {
+            //Increment time on events and remove finished ones
+            List<MonsterEffect> finishedEffects = new List<MonsterEffect>();
+
+            foreach (MonsterEffect effect in effects)
+            {
+                if (!effect.HasEnded())
+                    effect.OnEnd();
+
+                finishedEffects.Add(effect);
+            }
+
+            //Remove finished effects
+            foreach (MonsterEffect effect in finishedEffects)
+            {
+                effects.Remove(effect);
+            }
         }
 
         /// <summary>
