@@ -34,7 +34,7 @@ namespace RogueBasin.Items
             int duration = 2000 + Game.Random.Next(2000);
             int speedUpAmount = 100 + Game.Random.Next(50);
 
-            player.AddEffect(new PlayerEffects.SpeedUp(player, duration, speedUpAmount));
+            player.AddEffect(new PlayerEffects.SpeedUp(duration, speedUpAmount));
 
 
             //This uses up the potion

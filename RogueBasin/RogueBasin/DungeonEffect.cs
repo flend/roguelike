@@ -7,7 +7,7 @@ namespace RogueBasin
     /// <summary>
     /// Represents a global event on the dungeon
     /// </summary>
-    public abstract class DungeonEffect : Effect
+    public abstract class DungeonEffect
     {
         Dungeon dungeon;
 
@@ -27,9 +27,19 @@ namespace RogueBasin
         protected abstract int GetDuration();
 
         /// <summary>
+        /// Carries out the start effects on the event receiver
+        /// </summary>
+        public abstract void OnStart();
+
+        /// <summary>
+        /// Carries out the end effects on the event receiver
+        /// </summary>
+        public abstract void OnEnd();
+
+        /// <summary>
         /// Increment time - if we have exceeded the duration, call OnExit() and then mark as finished
         /// </summary>
-        public override void IncrementTime()
+        public virtual void IncrementTime()
         {
             currentTicks++;
 
@@ -40,7 +50,7 @@ namespace RogueBasin
             }
         }
 
-        public override bool HasEnded()
+        public virtual bool HasEnded()
         {
             return hasEnded;
         }

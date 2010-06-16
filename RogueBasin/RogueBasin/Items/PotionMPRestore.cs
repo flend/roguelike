@@ -35,7 +35,7 @@ namespace RogueBasin.Items
             //Apply the healing effect to the player
             int healing = delta + Game.Random.Next(delta);
 
-            player.AddEffect(new PlayerEffects.MPRestore(player, healing));
+            player.AddEffect(new PlayerEffects.MPRestore(healing));
 
             //Add a message
             

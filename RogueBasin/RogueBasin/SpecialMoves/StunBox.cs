@@ -183,7 +183,7 @@ namespace RogueBasin.SpecialMoves
             foreach (Monster target in targets)
             {
                 int duration = 250 + Game.Random.Next(500);
-                target.AddEffect(new MonsterEffects.SlowDown(target, duration, target.Speed / 2));
+                target.AddEffect(new MonsterEffects.SlowDown(duration, target.Speed / 2));
             }
 
             LogFile.Log.LogEntryDebug("StunBox!", LogDebugLevel.Medium);

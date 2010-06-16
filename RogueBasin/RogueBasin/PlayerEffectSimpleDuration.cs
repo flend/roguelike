@@ -9,13 +9,14 @@ namespace RogueBasin
     /// </summary>
     public abstract class PlayerEffectSimpleDuration : PlayerEffect
     {
-        int currentTicks = 0;
+        public int currentTicks { get;  set; }
 
-        bool hasEnded = false;
+        public bool hasEnded { get; set; }
 
-        public PlayerEffectSimpleDuration(Player player) : base(player)
+        public PlayerEffectSimpleDuration()
         {
-            
+            this.currentTicks = 0;
+            this.hasEnded = false;
         }
 
         /// <summary>
@@ -27,13 +28,13 @@ namespace RogueBasin
         /// <summary>
         /// Increment time - if we have exceeded the duration, call OnExit() and then mark as finished
         /// </summary>
-        public override void IncrementTime()
+        public override void IncrementTime(Creature target)
         {
             currentTicks++;
 
             if (currentTicks > GetDuration())
             {
-                OnEnd();
+                OnEnd(target);
                 hasEnded = true;
             }
         }

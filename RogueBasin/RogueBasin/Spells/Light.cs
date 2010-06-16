@@ -17,7 +17,7 @@ namespace RogueBasin.Spells
             Dungeon dungeon = Game.Dungeon;
 
             //Do we already have the effect?
-            if (player.IsEffectActive(new PlayerEffects.SightRadiusUp(player, 0, 0)))
+            if (player.IsEffectActive(new PlayerEffects.SightRadiusUp(0, 0)))
             {
                 Game.MessageQueue.AddMessage("Spell already in effect.");
                 LogFile.Log.LogEntryDebug("Light already in effect", LogDebugLevel.Medium);
@@ -35,7 +35,7 @@ namespace RogueBasin.Spells
             Game.MessageQueue.AddMessage("You cast Light.");
             LogFile.Log.LogEntryDebug("Light Cast. Duration: " + duration + " Sight: +" + toLight, LogDebugLevel.Medium);
 
-            player.AddEffect(new PlayerEffects.SightRadiusUp(player, duration, toLight));
+            player.AddEffect(new PlayerEffects.SightRadiusUp(duration, toLight));
             return true;
         }
 

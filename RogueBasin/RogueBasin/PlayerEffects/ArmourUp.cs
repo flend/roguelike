@@ -6,12 +6,13 @@ namespace RogueBasin.PlayerEffects
 {
     public class ArmourUp  : PlayerEffectSimpleDuration
     {
-        int duration;
+        public int duration { get; set; }
 
-        int armourUpAmount;
+        public int armourUpAmount { get; set; }
 
-        public ArmourUp(Player player, int duration, int armourUpAmount)
-            : base(player)
+        public ArmourUp() { }
+
+        public ArmourUp(int duration, int armourUpAmount)
         {
 
             this.duration = duration;
@@ -21,7 +22,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
             LogFile.Log.LogEntry("ArmourUp start");
             Game.MessageQueue.AddMessage("A blue shimmer surrounds you.");
@@ -31,7 +32,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
             LogFile.Log.LogEntry("ArmourUp ended");
             Game.MessageQueue.AddMessage("The blue shimmer around you fades.");

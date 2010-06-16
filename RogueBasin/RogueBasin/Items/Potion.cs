@@ -34,7 +34,7 @@ namespace RogueBasin.Items
                 delta = 10;
 
             int healing = 10 + Game.Random.Next(delta);
-            player.AddEffect(new PlayerEffects.Healing(player, healing));
+            player.AddEffect(new PlayerEffects.Healing(healing));
 
             //Add a message
             

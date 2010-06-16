@@ -186,7 +186,7 @@ namespace RogueBasin.Creatures
         {
             int duration = 250 + Game.Random.Next(500);
 
-            PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(Game.Dungeon.Player, duration, 30);
+            PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(duration, 30);
 
             return speedDownEff;
         }

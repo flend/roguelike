@@ -6,16 +6,20 @@ namespace RogueBasin.PlayerEffects
 {
     public class MPRestore : PlayerEffectInstant
     {
-        int healingQuantity;
+        //Strictly doesn't need to be serialized, but in just in case
+        public int healingQuantity  { get; set; }
 
-        public MPRestore(Player player, int healingQuantity)
-            : base(player)
+        public MPRestore() { }
+
+        public MPRestore(int healingQuantity)
         {
             this.healingQuantity = healingQuantity;
         }
 
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
+            Player player = target as Player;
+
             Game.MessageQueue.AddMessage("You feel your magical energies return!");
             LogFile.Log.LogEntry("MPUp " + healingQuantity.ToString());
 

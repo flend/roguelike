@@ -9,12 +9,13 @@ namespace RogueBasin.PlayerEffects
     /// </summary>
     public class MultiDamage : PlayerEffectSimpleDuration
     {
-        int duration;
+        public int duration  { get; set; }
 
-        int multiplier;
+        public int multiplier  { get; set; }
 
-        public MultiDamage(Player player, int duration, int multipler)
-            : base(player)
+        public MultiDamage() { }
+
+        public MultiDamage(int duration, int multipler)
         {
             this.duration = duration;
             this.multiplier = multipler;
@@ -23,23 +24,27 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
+            Player player = target as Player;
+
             LogFile.Log.LogEntry("MultiDamage started");
             Game.MessageQueue.AddMessage("Enemies should fear you today!");
 
-            Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
+            player.RecalculateCombatStatsRequired = true;
         }
 
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
+            Player player = target as Player;
+
             LogFile.Log.LogEntry("MultiDamage ended");
             Game.MessageQueue.AddMessage("Phew!");
 
-            Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
+            player.RecalculateCombatStatsRequired = true;
         }
 
         protected override int GetDuration()

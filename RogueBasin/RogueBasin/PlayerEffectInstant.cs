@@ -9,16 +9,16 @@ namespace RogueBasin
     /// </summary>
     public abstract class PlayerEffectInstant : PlayerEffect
     {
-        public PlayerEffectInstant(Player player)
-            : base(player)
+        public PlayerEffectInstant()
         {
 
         }
 
         /// <summary>
-        /// Instant events have no OnEnd
+        /// Instant effects have an empty OnEnd
         /// </summary>
-        public override void OnEnd()
+        /// <param name="target"></param>
+        public override void OnEnd(Creature target)
         {
             
         }
@@ -35,7 +35,7 @@ namespace RogueBasin
         /// <summary>
         /// Do nothing here, HasEnded() is always set
         /// </summary>
-        public override void IncrementTime()
+        public override void IncrementTime(Creature target)
         {
             
         }

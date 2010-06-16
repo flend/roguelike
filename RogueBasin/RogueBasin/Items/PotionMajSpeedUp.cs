@@ -33,7 +33,7 @@ namespace RogueBasin.Items
             int duration = 3000 + Game.Random.Next(5000);
             int speedUpAmount = 75 + Game.Random.Next(50);
 
-            player.AddEffect(new PlayerEffects.SpeedUp(player, duration, speedUpAmount));
+            player.AddEffect(new PlayerEffects.SpeedUp(duration, speedUpAmount));
 
 
 

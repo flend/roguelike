@@ -474,7 +474,7 @@ namespace RogueBasin
 
                                 case 'V':
                                     //screen debug mode
-                                    Game.Dungeon.Player.AddEffect(new PlayerEffects.SightRadiusUp(Game.Dungeon.Player, 2000, 1));
+                                    Game.Dungeon.Player.AddEffect(new PlayerEffects.SightRadiusUp(2000, 1));
                                     Screen.Instance.Update();
                                     break;
                                 case 'y':
@@ -500,7 +500,7 @@ namespace RogueBasin
 
                                 case 'v':
                                     //Add a healing event on the player
-                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(10);
                                     Game.Dungeon.Player.AddEffect(healing);
                                     Screen.Instance.Update();
                                     break;

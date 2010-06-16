@@ -4,17 +4,18 @@ using System.Text;
 
 namespace RogueBasin.PlayerEffects
 {
-    class SightRadiusUp : PlayerEffectSimpleDuration
+    public class SightRadiusUp : PlayerEffectSimpleDuration
     {
-        int duration;
+        public int duration { get; set; }
 
-        int sightUpAmount;
-        bool sightZeroCase = false;
+        public int sightUpAmount { get; set; }
+        public bool sightZeroCase  { get; set; }
 
-        public SightRadiusUp(Player player, int duration, int sightUpAmount)
-            : base(player)
+        public SightRadiusUp() { }
+
+        public SightRadiusUp(int duration, int sightUpAmount)
         {
-
+            this.sightZeroCase = false;
             this.duration = duration;
             this.sightUpAmount = sightUpAmount;
         }
@@ -22,8 +23,10 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
+            Player player = target as Player;
+
             LogFile.Log.LogEntry("SightUp start");
 
             //Sight radius is already maximum so don't do anything
@@ -41,8 +44,10 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
+            Player player = target as Player;
+
             LogFile.Log.LogEntry("SightUp ended");
             if (!sightZeroCase)
             {

@@ -98,7 +98,7 @@ namespace RogueBasin.Items
 
             //Apply the healing effect to the player
             int healing = player.MaxHitpoints - player.Hitpoints;
-            player.AddEffect(new PlayerEffects.Healing(player, healing));
+            player.AddEffect(new PlayerEffects.Healing(healing));
 
             //Add a message
 

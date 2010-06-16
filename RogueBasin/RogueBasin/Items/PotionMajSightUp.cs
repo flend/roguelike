@@ -31,7 +31,7 @@ namespace RogueBasin.Items
 
             int duration = 5000 + Game.Random.Next(8000);
 
-            player.AddEffect(new PlayerEffects.SightRadiusUp(player, duration, 2));
+            player.AddEffect(new PlayerEffects.SightRadiusUp(duration, 2));
 
 
 

@@ -35,7 +35,7 @@ namespace RogueBasin.Items
             int duration = 1000 + Game.Random.Next(2000);
             int toHitUp = 1 + Game.Random.Next(2);
 
-            player.AddEffect(new PlayerEffects.DamageUp(player, duration, toHitUp));
+            player.AddEffect(new PlayerEffects.DamageUp(duration, toHitUp));
 
 
             //This uses up the potion

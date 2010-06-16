@@ -6,12 +6,13 @@ namespace RogueBasin.PlayerEffects
 {
     public class ToHitUp : PlayerEffectSimpleDuration
     {
-        int duration;
+        public int duration  { get; set; }
 
-        int toHitUpAmount;
+        public int toHitUpAmount  { get; set; }
 
-        public ToHitUp(Player player, int duration, int toHitUpAmount)
-            : base(player)
+        public ToHitUp() { }
+
+        public ToHitUp(int duration, int toHitUpAmount)
         {
 
             this.duration = duration;
@@ -21,7 +22,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
             LogFile.Log.LogEntry("ToHitUp start");
             Game.MessageQueue.AddMessage("Your aim feels true.");
@@ -31,7 +32,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
             LogFile.Log.LogEntry("ToHitUp ended");
             Game.MessageQueue.AddMessage("You return to normal.");

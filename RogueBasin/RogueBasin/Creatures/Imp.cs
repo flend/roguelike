@@ -187,7 +187,7 @@ namespace RogueBasin.Creatures
             int playerSight = Game.Dungeon.Player.SightRadius;
             int sightDown = playerSight - 1;
 
-            PlayerEffects.SightRadiusDown sightDownEff = new RogueBasin.PlayerEffects.SightRadiusDown(Game.Dungeon.Player, duration, sightDown);
+            PlayerEffects.SightRadiusDown sightDownEff = new RogueBasin.PlayerEffects.SightRadiusDown(duration, sightDown);
 
             return sightDownEff;
         }

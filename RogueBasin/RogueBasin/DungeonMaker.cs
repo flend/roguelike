@@ -1537,8 +1537,8 @@ namespace RogueBasin
             LogFile.Log.LogEntry("Generating items...");
 
 
-            /*
-             * 
+            
+             
             //Spawn all the collect items
 
             dungeon.AddItemNoChecks(new Items.Glove(), 0, dungeon.Player.LocationMap);
@@ -1565,7 +1565,7 @@ namespace RogueBasin
             dungeon.AddItemNoChecks(new Items.PotionSightUp(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y -1));
             dungeon.AddItemNoChecks(new Items.PotionSpeedUp(), 0, new Point(dungeon.Player.LocationMap.x+1, dungeon.Player.LocationMap.y -1));
             dungeon.AddItemNoChecks(new Items.PotionMPRestore(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y - 1));
-            */
+            
         }
 
         private void PlaceItemOnLevel(Item item, int level, int onMonsterChance)

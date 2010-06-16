@@ -281,7 +281,7 @@ namespace RogueBasin
         {
             effects.Add(effect);
 
-            effect.OnStart();
+            effect.OnStart(this);
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace RogueBasin
             foreach (MonsterEffect effect in effects)
             {
                 if (!effect.HasEnded())
-                    effect.OnEnd();
+                    effect.OnEnd(this);
 
                 finishedEffects.Add(effect);
             }
@@ -317,7 +317,7 @@ namespace RogueBasin
 
             foreach (MonsterEffect effect in effects)
             {
-                effect.IncrementTime();
+                effect.IncrementTime(this);
 
                 if (effect.HasEnded())
                 {

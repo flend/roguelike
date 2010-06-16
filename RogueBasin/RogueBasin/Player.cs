@@ -922,7 +922,7 @@ namespace RogueBasin
 
             foreach (PlayerEffect effect in effects)
             {
-                effect.IncrementTime();
+                effect.IncrementTime(this);
 
                 if (effect.HasEnded())
                 {
@@ -948,7 +948,7 @@ namespace RogueBasin
             foreach (PlayerEffect effect in effects)
             {
                 if(!effect.HasEnded())
-                    effect.OnEnd();
+                    effect.OnEnd(this);
 
                 finishedEffects.Add(effect);
             }
@@ -1018,7 +1018,7 @@ namespace RogueBasin
         {
             effects.Add(effect);
 
-            effect.OnStart();
+            effect.OnStart(this);
 
             //Check if it altered our combat stats
             //CalculateCombatStats();
@@ -1027,12 +1027,13 @@ namespace RogueBasin
 
         /// <summary>
         /// Is this class of effect currently active?
+        /// Refactor to take a Type not an object
         /// </summary>
         /// <param name="itemType"></param>
         /// <returns></returns>
-        public bool IsEffectActive(Effect lookForEffect)
+        public bool IsEffectActive(PlayerEffect lookForEffect)
         {
-            foreach (Effect effect in effects)
+            foreach (PlayerEffect effect in effects)
             {
                 if (Object.ReferenceEquals(effect.GetType(), lookForEffect.GetType()))
                 {

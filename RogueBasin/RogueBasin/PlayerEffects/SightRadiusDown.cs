@@ -4,19 +4,20 @@ using System.Text;
 
 namespace RogueBasin.PlayerEffects
 {
-    class SightRadiusDown : PlayerEffectSimpleDuration
+    public class SightRadiusDown : PlayerEffectSimpleDuration
     {
-        int duration;
+        int duration  { get; set; }
 
-        int sightDownAmount;
+        int sightDownAmount  { get; set; }
 
-        int effectiveSightDownAmount;
-        bool sightZeroCase = false;
+        int effectiveSightDownAmount  { get; set; }
+        public bool sightZeroCase { get; set; }
 
-        public SightRadiusDown(Player player, int duration, int sightUpAmount)
-            : base(player)
+        public SightRadiusDown() { }
+
+        public SightRadiusDown(int duration, int sightUpAmount)
         {
-
+            this.sightZeroCase = false;
             this.duration = duration;
             this.sightDownAmount = sightUpAmount;
         }
@@ -24,8 +25,10 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
+            Player player = target as Player;
+
             LogFile.Log.LogEntry("SightDown start");
 
             //Bit of a hack, but for 0 sight dungeons, restrict to 1 square. This is what the blinding effects normally do
@@ -36,7 +39,6 @@ namespace RogueBasin.PlayerEffects
             }
             else
             {
-
                 if (sightDownAmount > player.SightRadius)
                 {
                     effectiveSightDownAmount = player.SightRadius;
@@ -53,8 +55,10 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
+            Player player = target as Player;
+
             LogFile.Log.LogEntry("SightDown ended");
 
             if (sightZeroCase)

@@ -33,7 +33,7 @@ namespace RogueBasin.Items
             int duration = 500 + Game.Random.Next(22000);
             int toHitUp = 2 + Game.Random.Next(5);
 
-            player.AddEffect(new PlayerEffects.ToHitUp(player, duration, toHitUp));
+            player.AddEffect(new PlayerEffects.ToHitUp(duration, toHitUp));
 
 
 

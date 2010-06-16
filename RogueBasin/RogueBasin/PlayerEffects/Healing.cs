@@ -6,15 +6,19 @@ namespace RogueBasin.PlayerEffects
 {
     public class Healing : PlayerEffectInstant
     {
-        int healingQuantity;
+        public int healingQuantity { get; set; }
 
-        public Healing(Player player, int healingQuantity) : base(player)
+        public Healing() { }
+
+        public Healing(int healingQuantity)
         {
             this.healingQuantity = healingQuantity;
         }
 
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
+            Player player = target as Player;
+
             Game.MessageQueue.AddMessage("You feel better!");
             LogFile.Log.LogEntry("Healed " + healingQuantity.ToString());
 

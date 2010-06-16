@@ -9,11 +9,13 @@ namespace RogueBasin.PlayerEffects
     /// </summary>
     public class SpeedUp : PlayerEffectSimpleDuration
     {
-        int duration;
+        public int duration { get; set; }
 
-        int speedUpAmount;
+        public int speedUpAmount  { get; set; }
 
-        public SpeedUp(Player player, int duration, int speedUpAmount) : base(player) {
+        public SpeedUp() { }
+
+        public SpeedUp(int duration, int speedUpAmount) {
 
             this.duration = duration;
             this.speedUpAmount = speedUpAmount;
@@ -22,7 +24,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
             LogFile.Log.LogEntry("Speed Up started");
             Game.MessageQueue.AddMessage("You speed up!");
@@ -33,7 +35,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
             LogFile.Log.LogEntry("Speed Up ended");
             Game.MessageQueue.AddMessage("You slow down!");

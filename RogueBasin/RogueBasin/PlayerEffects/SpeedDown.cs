@@ -9,36 +9,43 @@ namespace RogueBasin.PlayerEffects
     /// </summary>
     public class SpeedDown : PlayerEffectSimpleDuration
     {
-        int duration;
+        public int duration  { get; set; }
 
-        int speedUpAmount;
+        public int speedDownAmount { get; set; }
 
-        public SpeedDown(Player player, int duration, int speedUpAmount) : base(player) {
+        public SpeedDown() { }
+
+        public SpeedDown(int duration, int speedDownAmount) {
 
             this.duration = duration;
-            this.speedUpAmount = speedUpAmount;
+            this.speedDownAmount = speedDownAmount;
         }
 
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
             LogFile.Log.LogEntry("Speed Down started");
             Game.MessageQueue.AddMessage("You slow up!");
 
-            player.Speed -= speedUpAmount;
+            //player.Speed -= speedUpAmount;
         }
 
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
             LogFile.Log.LogEntry("Speed Down ended");
             Game.MessageQueue.AddMessage("You speed up!");
 
-            player.Speed += speedUpAmount;
+            //player.Speed += speedUpAmount;
+        }
+
+        public override int SpeedModifier()
+        {
+            return -speedDownAmount;
         }
 
         protected override int GetDuration()

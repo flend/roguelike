@@ -168,7 +168,7 @@ namespace RogueBasin.SpecialMoves
 
             double baseDuration = 10000 / Game.Dungeon.Player.Speed;
             int duration = (int)Math.Floor(baseDuration + Game.Random.Next((int)(baseDuration * 4.0)));
-            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(Game.Dungeon.Player, duration, 150));
+            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(duration, 150));
             
             Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
 

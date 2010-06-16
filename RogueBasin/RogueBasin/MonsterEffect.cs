@@ -10,11 +10,9 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(MonsterEffects.SlowDown))]
     public abstract class MonsterEffect : CreatureEffect
     {
-        protected Monster monster;
-
-        public MonsterEffect(Monster eventReceiver) : base(eventReceiver)
+        
+        public MonsterEffect()
         {
-            this.monster = eventReceiver;
         }
     }
 }

@@ -1014,7 +1014,7 @@ namespace RogueBasin
                 {
                     int duration = 250 + Game.Random.Next(500);
 
-                    PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(Game.Dungeon.Player, duration, 30);
+                    PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(duration, 30);
 
                     if (speedDownEff == null)
                     {
@@ -1048,7 +1048,7 @@ namespace RogueBasin
                     int playerSight = Game.Dungeon.Player.SightRadius;
                     int sightDown = playerSight - 1;
 
-                    PlayerEffects.SightRadiusDown sightDownEff = new RogueBasin.PlayerEffects.SightRadiusDown(Game.Dungeon.Player, duration, sightDown);
+                    PlayerEffects.SightRadiusDown sightDownEff = new RogueBasin.PlayerEffects.SightRadiusDown(duration, sightDown);
 
                     if (sightDownEff == null)
                     {

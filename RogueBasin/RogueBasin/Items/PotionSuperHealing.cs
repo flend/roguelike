@@ -30,7 +30,7 @@ namespace RogueBasin.Items
 
             //Apply the healing effect to the player
             int healing = 30 + Game.Random.Next(20);
-            player.AddEffect(new PlayerEffects.Healing(player, healing));
+            player.AddEffect(new PlayerEffects.Healing(healing));
 
 
             //This uses up the potion

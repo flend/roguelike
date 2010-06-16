@@ -4,14 +4,15 @@ using System.Text;
 
 namespace RogueBasin.MonsterEffects
 {
-    class SlowDown : MonsterEffectSimpleDuration
+    public class SlowDown : MonsterEffectSimpleDuration
     {
-        int duration;
+        public int duration { get; set; }
 
-        int speedEffect;
+        public int speedEffect  { get; set; }
 
-        public SlowDown(Monster monster, int duration, int speedEffect)
-            : base(monster)
+        public SlowDown() { }
+
+        public SlowDown(int duration, int speedEffect)
         {
             this.duration = duration;
             this.speedEffect = speedEffect;
@@ -20,23 +21,27 @@ namespace RogueBasin.MonsterEffects
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnStart()
+        public override void OnStart(Creature target)
         {
+            Monster monster = target as Monster;
+
             LogFile.Log.LogEntry("SlowDown started");
             Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " slows!");
 
-            monster.Speed -= speedEffect;
+            target.Speed -= speedEffect;
         }
 
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnEnd()
+        public override void OnEnd(Creature target)
         {
+            Monster monster = target as Monster;
+
             LogFile.Log.LogEntry("SlowDown ended");
             Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " recovers.");
 
-            monster.Speed += speedEffect;
+            target.Speed += speedEffect;
         }
 
         protected override int GetDuration()

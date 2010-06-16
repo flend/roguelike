@@ -16,7 +16,7 @@ namespace RogueBasin.Spells
             Dungeon dungeon = Game.Dungeon;
 
             //Do we already have the effect?
-            if (player.IsEffectActive(new PlayerEffects.ArmourUp(player, 0, 0)))
+            if (player.IsEffectActive(new PlayerEffects.ArmourUp(0, 0)))
             {
                 Game.MessageQueue.AddMessage("Spell already in effect.");
                 LogFile.Log.LogEntryDebug("Magic armour already in effect", LogDebugLevel.Medium);
@@ -34,7 +34,7 @@ namespace RogueBasin.Spells
             Game.MessageQueue.AddMessage("You cast Mage Armour.");
             LogFile.Log.LogEntryDebug("Mage Armour Cast. Duration: " + duration + " Armour: +" + toArmour, LogDebugLevel.Medium);
 
-            player.AddEffect(new PlayerEffects.ArmourUp(player, duration, toArmour));
+            player.AddEffect(new PlayerEffects.ArmourUp(duration, toArmour));
 
             return true;
         }

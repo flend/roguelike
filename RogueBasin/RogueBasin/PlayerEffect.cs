@@ -20,11 +20,9 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.MPRestore))]
     public abstract class PlayerEffect : CreatureEffect
     {
-        protected Player player;
-
-        public PlayerEffect(Player eventReceiver) : base(eventReceiver)
+        public PlayerEffect()
         {
-            player = eventReceiver;
+            
         }
     }
 }
