@@ -1012,7 +1012,7 @@ namespace RogueBasin
                 }
                 else if (taskNo == 1)
                 {
-                    int duration = 250 + Game.Random.Next(500);
+                    int duration = 2 * Creature.turnTicks + Game.Random.Next(5 * Creature.turnTicks);
 
                     PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(duration, 30);
 
@@ -1044,7 +1044,7 @@ namespace RogueBasin
                 }
                 else
                 {
-                    int duration = 250 + Game.Random.Next(500);
+                    int duration = 3 * Creature.turnTicks + Game.Random.Next(5 * Creature.turnTicks);
                     int playerSight = Game.Dungeon.Player.SightRadius;
                     int sightDown = playerSight - 1;
 

@@ -183,7 +183,7 @@ namespace RogueBasin.Creatures
 
         protected override PlayerEffect GetSpecialAIEffect()
         {
-            int duration = 250 + Game.Random.Next(500);
+            int duration = 2 * Creature.turnTicks + Game.Random.Next(5 * Creature.turnTicks);
             int playerSight = Game.Dungeon.Player.SightRadius;
             int sightDown = playerSight - 1;
 

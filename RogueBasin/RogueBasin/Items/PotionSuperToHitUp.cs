@@ -31,7 +31,7 @@ namespace RogueBasin.Items
             //Apply the healing effect to the player
             //Duration note 100 is normally 1 turn for a non-sped up player
 
-            int duration = 500 + Game.Random.Next(1500);
+            int duration = 5 * Creature.turnTicks + Game.Random.Next(15 * Creature.turnTicks);
             int toHitUp = 10 + Game.Random.Next(10);
 
             player.AddEffect(new PlayerEffects.ToHitUp(duration, toHitUp));

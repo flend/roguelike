@@ -184,7 +184,7 @@ namespace RogueBasin.Creatures
 
         protected override PlayerEffect GetSpecialAIEffect()
         {
-            int duration = 250 + Game.Random.Next(500);
+            int duration = 2 * Creature.turnTicks + Game.Random.Next(5 * Creature.turnTicks);
 
             PlayerEffects.SpeedDown speedDownEff = new RogueBasin.PlayerEffects.SpeedDown(duration, 30);
 

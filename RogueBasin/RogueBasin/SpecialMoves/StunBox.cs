@@ -182,7 +182,7 @@ namespace RogueBasin.SpecialMoves
             //Stun these monsters
             foreach (Monster target in targets)
             {
-                int duration = 250 + Game.Random.Next(500);
+                int duration = 3 * Creature.turnTicks + Game.Random.Next(5 * Creature.turnTicks);
                 target.AddEffect(new MonsterEffects.SlowDown(duration, target.Speed / 2));
             }
 

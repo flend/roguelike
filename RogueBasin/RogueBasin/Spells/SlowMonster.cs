@@ -44,7 +44,7 @@ namespace RogueBasin.Spells
                     return true;
 
                 //Add the slow monster effect
-                int duration = 250 + Game.Random.Next(500);
+                int duration = 5 * Creature.turnTicks + Game.Random.Next(10 * Creature.turnTicks);
                 targetM.AddEffect(new MonsterEffects.SlowDown(duration, targetM.Speed / 2));
 
                 return true;

@@ -30,9 +30,9 @@ namespace RogueBasin.Items
             Game.MessageQueue.AddMessage("You eat the berry.");
 
             //Apply the healing effect to the player
-            //Duration note 100 is normally 1 turn for a non-sped up player
+            //Duration note 10 is normally 1 turn for a non-sped up player
 
-            int duration = 1000 + Game.Random.Next(2000);
+            int duration = 10 * Creature.turnTicks + Game.Random.Next(20 * Creature.turnTicks);
             int toHitUp = 1 + Game.Random.Next(2);
 
             player.AddEffect(new PlayerEffects.DamageUp(duration, toHitUp));

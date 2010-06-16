@@ -61,6 +61,11 @@ namespace RogueBasin
         protected const int turnClockLimit = 1000;
 
         /// <summary>
+        /// Number of ticks (calls to IncrementTime from the main loop) that occur between each a creature's turns. Used to calculate durations etc.
+        /// </summary>
+        public const int turnTicks = 10;
+
+        /// <summary>
         /// A list of all the equipment slots the creature has
         /// </summary>
         public List<EquipmentSlotInfo> EquipmentSlots

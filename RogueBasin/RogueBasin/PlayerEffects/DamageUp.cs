@@ -35,7 +35,7 @@ namespace RogueBasin.PlayerEffects
         public override void OnEnd(Creature target)
         {
             LogFile.Log.LogEntry("ToHitUp ended");
-            Game.MessageQueue.AddMessage("You return to normal.");
+            Game.MessageQueue.AddMessage("Your hands stop aching.");
             Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
         }
 

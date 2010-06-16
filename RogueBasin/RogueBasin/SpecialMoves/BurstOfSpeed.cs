@@ -165,8 +165,10 @@ namespace RogueBasin.SpecialMoves
             //List<PlayerEffect> effects = Game.Dungeon.Player.eff
 
             //Have made the duration a proportion of current speed. An absolute duration is really good for fast characters
+            //Typical speed = 100
 
-            double baseDuration = 10000 / Game.Dungeon.Player.Speed;
+            double speedRatio = 100.0 / (double)Game.Dungeon.Player.Speed;
+            double baseDuration = speedRatio * 2 * Creature.turnTicks;
             int duration = (int)Math.Floor(baseDuration + Game.Random.Next((int)(baseDuration * 4.0)));
             Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(duration, 150));
             

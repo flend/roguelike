@@ -28,7 +28,7 @@ namespace RogueBasin.Spells
 
             //Apply the armour effect to the player
             //Duration note 100 is normally 1 turn for a non-sped up player
-            int duration = 4000 + Game.Random.Next(6000);
+            int duration = 40 * Creature.turnTicks + Game.Random.Next(60 * Creature.turnTicks);
             int toLight = (int)Math.Floor(player.MagicStat / 50.0) + 1;
 
             //Add a message
