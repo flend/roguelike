@@ -947,6 +947,8 @@ namespace RogueBasin
             //Increment time on events and remove finished ones
             List<PlayerEffect> finishedEffects = new List<PlayerEffect>();
 
+            bool eventEnded = false;
+
             foreach (PlayerEffect effect in effects)
             {
                 effect.IncrementTime(this);
@@ -954,6 +956,7 @@ namespace RogueBasin
                 if (effect.HasEnded())
                 {
                     finishedEffects.Add(effect);
+                    eventEnded = true;
                 }
             }
 
@@ -963,7 +966,8 @@ namespace RogueBasin
                 effects.Remove(effect);
             }
 
-            CalculateCombatStats();
+            if(eventEnded)
+                CalculateCombatStats();
         }
 
         /// <summary>
