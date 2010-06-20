@@ -19,7 +19,6 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 200;
 
             Unique = true;
             UniqueName = "Aerie the Faerie";
@@ -30,6 +29,11 @@ namespace RogueBasin.Creatures
             return new Faerie();
         }
 
+        public override int BaseSpeed()
+        {
+            return 200;
+        }
+        
         public override void InventoryDrop()
         {
             //Nothing to drop

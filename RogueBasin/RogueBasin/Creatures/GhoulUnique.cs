@@ -16,7 +16,6 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 40;
             Unique = true;
             UniqueName = "Terrance the Brick";
         }
@@ -26,6 +25,11 @@ namespace RogueBasin.Creatures
             return new Ghoul();
         }
 
+        public override int BaseSpeed()
+        {
+            return 40;
+        }
+        
         public override void InventoryDrop()
         {
             //Nothing to drop

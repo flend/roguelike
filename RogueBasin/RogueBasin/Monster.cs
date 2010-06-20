@@ -169,6 +169,8 @@ namespace RogueBasin
         /// <returns></returns>
         abstract protected int ClassMaxHitpoints();
 
+
+
         /// <summary>
         /// Called when the creature is killed. Can be used to drop treasure.
         /// </summary>
@@ -230,6 +232,7 @@ namespace RogueBasin
             damageBase = DamageBase();
             damageModifier = DamageModifier();
             hitModifier = HitModifier();
+            speed = BaseSpeed();
 
             //Check equipped items - unlikely to be implemented
 
@@ -260,17 +263,66 @@ namespace RogueBasin
 
             //Check effects
 
+            ApplyEffects();
+        }
+
+        /// <summary>
+        /// As part of CalculateCombatStats, go through the current effects
+        /// find the most-good and most-bad stat modifiers and apply them (only)
+        /// </summary>
+        private void ApplyEffects()
+        {
+            int maxDamage = 0;
+            int minDamage = 0;
+
+            int maxHit = 0;
+            int minHit = 0;
+
+            int maxAC = 0;
+            int minAC = 0;
+
+            int maxSpeed = 0;
+            int minSpeed = 0;
+
+            //Only the greatest magnitude (+ or -) effects have an effect
             foreach (MonsterEffect effect in effects)
             {
-                armourClass += effect.ArmourClassModifier();
-                damageModifier += effect.DamageModifier();
-                hitModifier += effect.HitModifier();
+                if (effect.ArmourClassModifier() > maxAC)
+                    maxAC = effect.ArmourClassModifier();
 
-                if (effect.DamageBase() > damageBase)
-                {
-                    damageBase = effect.DamageBase();
-                }
+                if (effect.ArmourClassModifier() < minAC)
+                    minAC = effect.ArmourClassModifier();
+
+                if (effect.HitModifier() > maxHit)
+                    maxHit = effect.HitModifier();
+
+                if (effect.HitModifier() < minHit)
+                    minHit = effect.HitModifier();
+
+                if (effect.SpeedModifier() > maxSpeed)
+                    maxSpeed = effect.SpeedModifier();
+
+                if (effect.SpeedModifier() < minSpeed)
+                    minSpeed = effect.SpeedModifier();
+
+                if (effect.DamageModifier() > maxDamage)
+                    maxDamage = effect.DamageModifier();
+
+                if (effect.DamageModifier() < minDamage)
+                    minDamage = effect.DamageModifier();
             }
+
+            damageModifier += maxDamage;
+            damageModifier += minDamage;
+
+            Speed += maxSpeed;
+            Speed += minSpeed;
+
+            hitModifier += maxHit;
+            hitModifier += minHit;
+
+            armourClass += maxAC;
+            armourClass += minAC;
         }
 
         /// <summary>
@@ -282,6 +334,8 @@ namespace RogueBasin
             effects.Add(effect);
 
             effect.OnStart(this);
+
+            CalculateCombatStats();
         }
 
         /// <summary>
@@ -332,6 +386,8 @@ namespace RogueBasin
             {
                 effects.Remove(effect);
             }
+
+            CalculateCombatStats();
         }
 
         /// <summary>

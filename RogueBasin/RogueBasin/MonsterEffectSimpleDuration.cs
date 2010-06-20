@@ -36,7 +36,6 @@ namespace RogueBasin
             {
                 OnEnd(target);
                 hasEnded = true;
-                target.CalculateCombatStats();
             }
         }
 

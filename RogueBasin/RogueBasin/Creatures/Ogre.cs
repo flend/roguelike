@@ -17,7 +17,6 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 60;
         }
 
         public override void InventoryDrop()
@@ -27,6 +26,11 @@ namespace RogueBasin.Creatures
             //Hmm, could use this corpses
         }
 
+        public override int BaseSpeed()
+        {
+            return 60;
+        }
+        
         protected override int ClassMaxHitpoints()
         {
             return classMinHitpoints + Game.Random.Next(classDeltaHitpoints) + 1;

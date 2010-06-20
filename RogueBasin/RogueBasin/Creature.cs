@@ -232,6 +232,12 @@ namespace RogueBasin
         public abstract int DamageModifier();
 
         /// <summary>
+        /// Creature base speed
+        /// </summary>
+        /// <returns></returns>
+        public virtual int BaseSpeed() { return 100; }
+
+        /// <summary>
         /// An effect with combat stat changes has expired, so they need to be recalculated
         /// </summary>
         public bool RecalculateCombatStatsRequired { get; set; }

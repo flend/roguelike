@@ -16,7 +16,6 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 110;
         }
 
         public override Monster NewCreatureOfThisType()
@@ -24,6 +23,11 @@ namespace RogueBasin.Creatures
             return new Skeleton();
         }
 
+        public override int BaseSpeed()
+        {
+            return 110;
+        }
+        
         public override void InventoryDrop()
         {
             //Nothing to drop

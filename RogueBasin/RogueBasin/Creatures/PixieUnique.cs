@@ -30,6 +30,11 @@ namespace RogueBasin.Creatures
             return new PixieUnique();
         }
 
+        public override int BaseSpeed()
+        {
+            return 200;
+        }
+        
         public override void InventoryDrop()
         {
             //Nothing to drop

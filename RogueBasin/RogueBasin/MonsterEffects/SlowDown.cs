@@ -25,8 +25,6 @@ namespace RogueBasin.MonsterEffects
         {
             LogFile.Log.LogEntry("SlowDown started");
             Game.MessageQueue.AddMessage("The " + target.SingleDescription + " slows!");
-
-            target.Speed -= speedEffect;
         }
 
         /// <summary>
@@ -36,13 +34,16 @@ namespace RogueBasin.MonsterEffects
         {
             LogFile.Log.LogEntry("SlowDown ended");
             Game.MessageQueue.AddMessage("The " + target.SingleDescription + " recovers.");
-
-            target.Speed += speedEffect;
         }
 
         protected override int GetDuration()
         {
             return duration;
+        }
+
+        public override int SpeedModifier()
+        {
+            return -speedEffect;
         }
     }
 }

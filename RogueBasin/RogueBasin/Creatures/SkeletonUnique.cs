@@ -18,7 +18,6 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 110;
 
             Unique = true;
             UniqueName = "Daphill the Dry";
@@ -28,7 +27,12 @@ namespace RogueBasin.Creatures
         {
             return new SkeletonUnique();
         }
-
+        
+        public override int BaseSpeed()
+        {
+            return 110;
+        }
+        
         public override void InventoryDrop()
         {
             //Nothing to drop

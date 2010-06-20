@@ -404,17 +404,17 @@ namespace RogueBasin
                     minDamage = effect.DamageModifier();
             }
 
-            DamageModifierAccess += maxDamage;
-            DamageModifierAccess -= minDamage;
+            damageModifier += maxDamage;
+            damageModifier += minDamage;
 
             Speed += maxSpeed;
-            Speed -= minSpeed;
+            Speed += minSpeed;
 
-            HitModifierAccess += maxHit;
-            HitModifierAccess -= minHit;
+            hitModifier += maxHit;
+            hitModifier += minHit;
 
-            ArmourClassAccess += maxAC;
-            ArmourClassAccess -= minAC;
+            armourClass += maxAC;
+            armourClass += minAC;
         }
 
         /// <summary>
@@ -453,7 +453,16 @@ namespace RogueBasin
         public int OverdriveHitpoints { get; set; }
 
         /// <summary>
-        /// Creature AC. Set by type of creature.
+        /// Used as accessors only for Player
+        /// </summary>
+        /// <returns></returns>
+        public override int BaseSpeed()
+        {
+            return Speed;
+        }
+
+        /// <summary>
+        /// Used as accessors only for Player
         /// </summary>
         public override int ArmourClass()
         {
@@ -461,7 +470,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Creature 1dn damage.  Set by type of creature.
+        /// Used as accessors only for Player
         /// </summary>
         public override int DamageBase()
         {
@@ -469,7 +478,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Creature damage modifier.  Set by type of creature.
+        /// Used as accessors only for Player
         /// </summary>
         public override int DamageModifier()
         {
@@ -953,6 +962,8 @@ namespace RogueBasin
             {
                 effects.Remove(effect);
             }
+
+            CalculateCombatStats();
         }
 
         /// <summary>

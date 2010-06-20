@@ -22,6 +22,11 @@ namespace RogueBasin.Creatures
             return new Ghoul();
         }
 
+        public override int BaseSpeed()
+        {
+            return 90;
+        }
+        
         public override void InventoryDrop()
         {
             //Nothing to drop

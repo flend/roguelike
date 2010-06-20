@@ -1,10 +1,5 @@
 *** BUGS PRE 1.5
 
-** Monster SpeedDown effect
-REPORTED: 14/06/10
-
-Should use the new effect polling system. Need to check it works
-
 *** STUFF TO CHECK
 
 ** Staircases
@@ -29,6 +24,21 @@ already on. In that case it's possible to allow stacking by making a
 slightly different Effect - e.g. SpecialMoveSpeedUp &
 PotionSpeedUp. Or put a flag in Effects if they came from a potion, or
 special move, speed or monster effect.
+
+** StaircaseEntry
+
+Is this really the best place to have all the enterDungeon stuff?
+E.g. sight and stuff. Better in Dungeon?
+
+** Marking uniques dead
+
+Saw some stuff in the log file that makes me think this might not
+work. Might want to have a UI screen to check easily.
+
+** Pick up lantern / eat berry
+
+Are the sight effects applied immediately (i.e. with the next screen
+update)?
 
 *** ENHANCEMENTS
 
@@ -125,4 +135,9 @@ affects on. Two options here - store an ID instead or use the fact
 that every time we increment the counter on an effect we do so from
 the owner, so we can pass this in The latter is probably preferable
 since it's less accident prone
+
+** Monster SpeedDown effect
+REPORTED: 14/06/10
+FIXED: 20/06/10
+Should use the new effect polling system. Need to check it works
 

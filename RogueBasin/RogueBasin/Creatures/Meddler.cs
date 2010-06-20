@@ -17,13 +17,18 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            Speed = 110;
         }
 
         public override Monster NewCreatureOfThisType()
         {
             return new Meddler();
         }
+
+        public override int BaseSpeed()
+        {
+            return 110;
+        }
+        
         public override void InventoryDrop()
         {
             //Nothing to drop
