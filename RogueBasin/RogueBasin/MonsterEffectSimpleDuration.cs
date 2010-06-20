@@ -28,7 +28,7 @@ namespace RogueBasin
         /// <summary>
         /// Increment time - if we have exceeded the duration, call OnExit() and then mark as finished
         /// </summary>
-        public override void IncrementTime(Creature target)
+        public override void IncrementTime(Monster target)
         {
             currentTicks++;
 
@@ -36,6 +36,7 @@ namespace RogueBasin
             {
                 OnEnd(target);
                 hasEnded = true;
+                target.CalculateCombatStats();
             }
         }
 

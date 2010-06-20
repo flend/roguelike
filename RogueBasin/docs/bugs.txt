@@ -1,0 +1,106 @@
+*** BUGS PRE 1.5
+
+** Burst of speed
+REPORTED: 14/06/10
+
+Lasts too long and stacks!
+Need a current special is on check.
+
+** Monster SpeedDown effect
+REPORTED: 14/06/10
+
+Should use the new effect polling system. Need to check it works
+
+*** STUFF TO CHECK
+
+** Staircases
+
+Currently we give the player a cheat move when they enter a
+dungeon. Prob better to just make staircases take no time
+(timeAdvances = false)
+
+** Stamina can be above health
+
+Really true? Old bug report
+
+** SightRadiusUp/Down
+
+Should this use the new effect structure? Or is it OK?
+
+*** ENHANCEMENTS
+
+** Time advancing for monsters
+
+Currently it's not advancing for monsters not on the same
+level. Probably better to expand that to the same dungeon. Esp if we
+add more spells.
+
+** Creatures moving
+
+Investigate not waking up creatures until the player sees them / they
+see a monser seen by the player. Otherwise groups tend to get broken
+up before the player ever sees them.
+
+** Spell is on check
+
+Change to use types rather than objects.
+
+** Special move enhancements
+
+* End of Open Ground
+
+Not marked - harsh on the player
+
+* WallVault backstab
+
+Could trigger without the forward press
+
+* Cannon moves
+
+Killing multiple creatures would be cool
+
+** New spells
+* Show items
+* Show creatures
+** Stamina penalty for dying in combat
+* Respawn some monsters on way up to keep it interesting
+** Text splurge for items
+
+* Try not to place uniques right near the up stairs?
+** What are the point of the items at the bottom of the demon dungeon really? Where can you use them?
+* Special enemy instead?
+
+** Balancing
+
+Need more groups in orc - seems a bit dull - as does crypt. Compared
+to challenge & forest
+
+Uniques need to be more interesting
+
+Crypt Necros could be tougher, they die very easily (melee)
+
+Crypt skeletal archers could have longer range
+
+Maybe only pull back when closer than minimum range, this lets them
+get off more shots before retreating
+
+Terrance and other crypt uniques (daphill) seem too easy (melee build)
+
+Dragon + dungeon was very easy for high-level melee character
+
+Burst of speed is too short duration to be worth doing
+
+Ogres too easy?
+ 	  
+
+*** FIXED / RESOLVED
+
+** Player and monster effects aren't serialized.
+REPORTED: 14/06/10
+FIXED: 16/06/10
+The base class contains a pointer to the creature or player the effect
+affects on. Two options here - store an ID instead or use the fact
+that every time we increment the counter on an effect we do so from
+the owner, so we can pass this in The latter is probably preferable
+since it's less accident prone
+

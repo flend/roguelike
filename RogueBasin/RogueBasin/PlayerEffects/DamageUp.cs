@@ -22,7 +22,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart(Creature target)
+        public override void OnStart(Player target)
         {
             LogFile.Log.LogEntry("ToHitUp start");
             Game.MessageQueue.AddMessage("Your hands ache with pent-up power.");
@@ -32,7 +32,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd(Creature target)
+        public override void OnEnd(Player target)
         {
             LogFile.Log.LogEntry("ToHitUp ended");
             Game.MessageQueue.AddMessage("Your hands stop aching.");

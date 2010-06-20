@@ -24,10 +24,8 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnStart(Creature target)
+        public override void OnStart(Player player)
         {
-            Player player = target as Player;
-
             LogFile.Log.LogEntry("MultiDamage started");
             Game.MessageQueue.AddMessage("Enemies should fear you today!");
 
@@ -37,10 +35,8 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnEnd(Creature target)
+        public override void OnEnd(Player player)
         {
-            Player player = target as Player;
-
             LogFile.Log.LogEntry("MultiDamage ended");
             Game.MessageQueue.AddMessage("Phew!");
 

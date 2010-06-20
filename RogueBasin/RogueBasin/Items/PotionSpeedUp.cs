@@ -31,7 +31,7 @@ namespace RogueBasin.Items
             //Apply the speed up effect to the player
             //Duration note 100 is normally 1 turn for a non-sped up player
 
-            int duration = 50 * Creature.turnTicks + Game.Random.Next(5000 * Creature.turnTicks);
+            int duration = 10 * Creature.turnTicks + Game.Random.Next(10 * Creature.turnTicks);
             int speedUpAmount = 50 + Game.Random.Next(20);
 
             player.AddEffect(new PlayerEffects.SpeedUp(duration, speedUpAmount));

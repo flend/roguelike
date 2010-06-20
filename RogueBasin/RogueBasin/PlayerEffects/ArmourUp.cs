@@ -22,7 +22,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart(Creature target)
+        public override void OnStart(Player target)
         {
             LogFile.Log.LogEntry("ArmourUp start");
             Game.MessageQueue.AddMessage("A blue shimmer surrounds you.");
@@ -32,7 +32,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd(Creature target)
+        public override void OnEnd(Player target)
         {
             LogFile.Log.LogEntry("ArmourUp ended");
             Game.MessageQueue.AddMessage("The blue shimmer around you fades.");

@@ -21,12 +21,10 @@ namespace RogueBasin.MonsterEffects
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnStart(Creature target)
+        public override void OnStart(Monster target)
         {
-            Monster monster = target as Monster;
-
             LogFile.Log.LogEntry("SlowDown started");
-            Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " slows!");
+            Game.MessageQueue.AddMessage("The " + target.SingleDescription + " slows!");
 
             target.Speed -= speedEffect;
         }
@@ -34,12 +32,10 @@ namespace RogueBasin.MonsterEffects
         /// <summary>
         /// Combat power so recalculate stats
         /// </summary>
-        public override void OnEnd(Creature target)
+        public override void OnEnd(Monster target)
         {
-            Monster monster = target as Monster;
-
             LogFile.Log.LogEntry("SlowDown ended");
-            Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " recovers.");
+            Game.MessageQueue.AddMessage("The " + target.SingleDescription + " recovers.");
 
             target.Speed += speedEffect;
         }

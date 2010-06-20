@@ -1833,6 +1833,9 @@ namespace RogueBasin {
             if (player.Speed > 150)
                 speedString = "V. Fast";// +player.Speed;
 
+            //debug
+            speedString = player.Speed.ToString();
+
             rootConsole.PrintLine(speedString, statsDisplayTopLeft.x + speedOffset.x, statsDisplayTopLeft.y + speedOffset.y, LineAlignment.Left);
 
 //            string ticksString = "Tk: " + Game.Dungeon.WorldClock.ToString();

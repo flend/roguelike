@@ -25,7 +25,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart(Creature target)
+        public override void OnStart(Player target)
         {
             Player player = target as Player;
 
@@ -55,7 +55,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd(Creature target)
+        public override void OnEnd(Player target)
         {
             Player player = target as Player;
 

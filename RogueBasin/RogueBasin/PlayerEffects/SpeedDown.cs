@@ -24,7 +24,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Increase the player's speed
         /// </summary>
-        public override void OnStart(Creature target)
+        public override void OnStart(Player target)
         {
             LogFile.Log.LogEntry("Speed Down started");
             Game.MessageQueue.AddMessage("You slow up!");
@@ -35,7 +35,7 @@ namespace RogueBasin.PlayerEffects
         /// <summary>
         /// Decrease the player's speed again
         /// </summary>
-        public override void OnEnd(Creature target)
+        public override void OnEnd(Player target)
         {
             LogFile.Log.LogEntry("Speed Down ended");
             Game.MessageQueue.AddMessage("You speed up!");

@@ -305,6 +305,8 @@ namespace RogueBasin
             {
                 effects.Remove(effect);
             }
+
+            CalculateCombatStats();
         }
 
         /// <summary>

@@ -238,16 +238,6 @@ namespace RogueBasin
         public void CalculateCombatStats()
         {
 
-            
-            /*            
-                        armourClass = 12;
-                                        damageBase = 4;
-                                        damageModifier = 0;
-                                        hitModifier = 0;
-                                        maxHitpoints = 15;
-                                        MaxCharmedCreatures = 1;
-             */
-
             Inventory inv = Inventory;
 
             //Armour class
@@ -363,40 +353,68 @@ namespace RogueBasin
                 DamageModifierAccess += 1;
             }
 
-            //Check effects
+            //Check and apply effects
 
-            bool toHitEffectOn = false;
-            bool toDamageEffectOn = false;
-            bool speedEffectOn = false;
+            ApplyEffects();
+        }
 
+        /// <summary>
+        /// As part of CalculateCombatStats, go through the current effects
+        /// find the most-good and most-bad stat modifiers and apply them (only)
+        /// </summary>
+        private void ApplyEffects()
+        {
+            int maxDamage = 0;
+            int minDamage = 0;
+
+            int maxHit = 0;
+            int minHit = 0;
+
+            int maxAC = 0;
+            int minAC = 0;
+
+            int maxSpeed = 0;
+            int minSpeed = 0;
+
+            //Only the greatest magnitude (+ or -) effects have an effect
             foreach (PlayerEffect effect in effects)
             {
+                if(effect.ArmourClassModifier() > maxAC)
+                    maxAC = effect.ArmourClassModifier();
 
-                armourClass += effect.ArmourClassModifier();
+                if(effect.ArmourClassModifier() < minAC)
+                    minAC = effect.ArmourClassModifier();
 
-                if (effect.DamageModifier() > 0 && !toDamageEffectOn)
-                {
-                    damageModifier += effect.DamageModifier();
-                    toDamageEffectOn = true;
-                }
+                if(effect.HitModifier() > maxHit)
+                    maxHit = effect.HitModifier();
 
-                if (effect.HitModifier() > 0 && !toHitEffectOn)
-                {
+                if(effect.HitModifier() < minHit)
+                    minHit = effect.HitModifier();
 
-                    hitModifier += effect.HitModifier();
-                    toHitEffectOn = true;
-                }
+                if(effect.SpeedModifier() > maxSpeed)
+                    maxSpeed = effect.SpeedModifier();
 
-                if (effect.DamageBase() > damageBase)
-                {
-                    damageBase = effect.DamageBase();
-                }
+                if(effect.SpeedModifier() < minSpeed)
+                    minSpeed = effect.SpeedModifier();
 
-                if (effect.SpeedModifier() > 0 && !speedEffectOn)
-                {
-                    Speed += effect.SpeedModifier();
-                }
+                if(effect.DamageModifier() > maxDamage)
+                    maxDamage = effect.DamageModifier();
+
+                if(effect.DamageModifier() < minDamage)
+                    minDamage = effect.DamageModifier();
             }
+
+            DamageModifierAccess += maxDamage;
+            DamageModifierAccess -= minDamage;
+
+            Speed += maxSpeed;
+            Speed -= minSpeed;
+
+            HitModifierAccess += maxHit;
+            HitModifierAccess -= minHit;
+
+            ArmourClassAccess += maxAC;
+            ArmourClassAccess -= minAC;
         }
 
         /// <summary>
@@ -958,6 +976,9 @@ namespace RogueBasin
             {
                 effects.Remove(effect);
             }
+
+            //Check the effect on our stats
+            CalculateCombatStats();
         }
 
         /// <summary>
@@ -1021,8 +1042,10 @@ namespace RogueBasin
             effect.OnStart(this);
 
             //Check if it altered our combat stats
-            //CalculateCombatStats();
+            CalculateCombatStats();
+            
             //Should be done in effect itself or optionally each time we attack
+            //I prefer it done here, less to remember
         }
 
         /// <summary>

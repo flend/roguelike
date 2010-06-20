@@ -16,9 +16,8 @@ namespace RogueBasin.PlayerEffects
             this.healingQuantity = healingQuantity;
         }
 
-        public override void OnStart(Creature target)
+        public override void OnStart(Player player)
         {
-            Player player = target as Player;
 
             Game.MessageQueue.AddMessage("You feel your magical energies return!");
             LogFile.Log.LogEntry("MPUp " + healingQuantity.ToString());

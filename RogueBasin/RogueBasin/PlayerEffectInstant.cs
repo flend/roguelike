@@ -18,7 +18,7 @@ namespace RogueBasin
         /// Instant effects have an empty OnEnd
         /// </summary>
         /// <param name="target"></param>
-        public override void OnEnd(Creature target)
+        public override void OnEnd(Player target)
         {
             
         }
@@ -35,7 +35,7 @@ namespace RogueBasin
         /// <summary>
         /// Do nothing here, HasEnded() is always set
         /// </summary>
-        public override void IncrementTime(Creature target)
+        public override void IncrementTime(Player target)
         {
             
         }
