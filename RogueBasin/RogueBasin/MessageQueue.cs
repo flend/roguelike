@@ -18,6 +18,13 @@ namespace RogueBasin
         const int messageHistorySize = 1000;
                 
         List<string> messages;
+
+        const int displayCachedMsgTurns = 10;
+
+        public int CachedMsgTurnCount{ get; set; }
+        bool showCachedMsg = false;
+        string cachedMsg = "";
+        Color cachedMsgColor = ColorPresets.Gray;
         
         /// <summary>
         /// Require a keypress at the end of the message display
@@ -120,7 +127,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Run through the messages for the user and require a key press after each one
+        /// Run through the messages for the user and require a key press if long string
         /// </summary>
         public void RunMessageQueue()
         {
@@ -128,8 +135,17 @@ namespace RogueBasin
 
             Screen.Instance.ClearMessageLine();
 
+            //Increment no of turns we have shown cached msg. Turn it off if too many
+            IncrementCachedMsgCounter();
+            if (CachedMsgTurnCount > displayCachedMsgTurns)
+                showCachedMsg = false;
+
             if (messages.Count == 0)
             {
+                //If we have a cached msg, show it
+                if (showCachedMsg)
+                    Screen.Instance.PrintMessage(cachedMsg, cachedMsgColor);
+
                 Screen.Instance.FlushConsole();
                 return;
             }
@@ -141,6 +157,9 @@ namespace RogueBasin
 
                 //Add to history
                 AddToHistory(messages[0]);
+
+                //Set cache
+                SetCache(messages[0]);
 
                 Game.MessageQueue.ClearList();
 
@@ -230,6 +249,9 @@ namespace RogueBasin
                     //Add to history
                     AddToHistory(outputMsg);
 
+                    //Set cache
+                    SetCache(outputMsg);
+
                     //Show on screen
 
                     Screen.Instance.PrintMessage(outputMsg);
@@ -245,6 +267,22 @@ namespace RogueBasin
 
             Game.MessageQueue.ClearList();
 
+        }
+
+        /// <summary>
+        /// Set this msg as the last cached msg
+        /// </summary>
+        /// <param name="p"></param>
+        private void SetCache(string p)
+        {
+            cachedMsg = p;
+            CachedMsgTurnCount = 0;
+            showCachedMsg = true;
+        }
+
+
+        public void IncrementCachedMsgCounter() {
+            CachedMsgTurnCount++;
         }
     }
 }

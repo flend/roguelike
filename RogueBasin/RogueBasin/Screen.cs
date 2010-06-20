@@ -77,6 +77,8 @@ namespace RogueBasin {
         Color literalColor = ColorPresets.BurlyWood;
         Color literalTextColor = ColorPresets.White;
 
+        Color messageColor = ColorPresets.White;
+
 
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
@@ -2430,6 +2432,15 @@ namespace RogueBasin {
         /// <param name="message"></param>
         internal void PrintMessage(string message)
         {
+            PrintMessage(message, messageColor);
+        }
+
+        /// <summary>
+        /// Print message in message bar
+        /// </summary>
+        /// <param name="message"></param>
+        internal void PrintMessage(string message, Color color)
+        {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
@@ -2440,6 +2451,7 @@ namespace RogueBasin {
             ClearMessageBar();
 
             //Display new message
+            rootConsole.ForegroundColor = color;
             rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, Width - msgDisplayTopLeft.x, msgDisplayNumLines, LineAlignment.Left);
         }
 

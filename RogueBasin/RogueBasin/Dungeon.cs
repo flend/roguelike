@@ -2119,6 +2119,8 @@ namespace RogueBasin
                 }
             }
 
+            bool okToMoveIntoSquare = false;
+
             //If there's no special move, do a conventional move
             if (moveDone == null)
             {
@@ -2131,8 +2133,7 @@ namespace RogueBasin
 
                 //Check for monsters in the square
                 SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
-                bool okToMoveIntoSquare = false;
-
+                
                 //If it's empty, it's OK
                 if (contents.monster == null)
                 {
@@ -2186,6 +2187,8 @@ namespace RogueBasin
             //Happens for both normal and special moves
 
             //Tell the player if there are items here
+            //Don't tell the player again if they haven't moved
+
             Item itemAtSpace = ItemAtSpace(player.LocationLevel, player.LocationMap);
             if (itemAtSpace != null)
             {

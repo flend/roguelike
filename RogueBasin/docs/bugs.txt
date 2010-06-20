@@ -1,11 +1,5 @@
 *** BUGS PRE 1.5
 
-** Burst of speed
-REPORTED: 14/06/10
-
-Lasts too long and stacks!
-Need a current special is on check.
-
 ** Monster SpeedDown effect
 REPORTED: 14/06/10
 
@@ -27,7 +21,24 @@ Really true? Old bug report
 
 Should this use the new effect structure? Or is it OK?
 
+** Stacking effects
+Do we want effects to stack? Presumably for equipment they need to -
+but that's handled differently. Otherwise we will need independent
+checks in drinking potions / BurstOfSpeed etc. that they are not
+already on. In that case it's possible to allow stacking by making a
+slightly different Effect - e.g. SpecialMoveSpeedUp &
+PotionSpeedUp. Or put a flag in Effects if they came from a potion, or
+special move, speed or monster effect.
+
 *** ENHANCEMENTS
+
+** Item is here
+
+Only tell the user is an item is here if they are moving into the
+square. Normal moves success is marked with okToMoveIntOSquare - need
+a check for specialMove success. This is quite hard, since some moves
+have movement in DoMove (e.g. CloseQuarters) as well as the obvious
+ones (WallLeap). Could use the return value of DoMove().
 
 ** Time advancing for monsters
 
@@ -94,6 +105,17 @@ Ogres too easy?
  	  
 
 *** FIXED / RESOLVED
+
+** Burst of speed
+REPORTED: 14/06/10
+
+Lasts too long and stacks!
+Need a current special is on check.
+
+FIXED: 20/06/10
+
+Set to a better duration.  Effects now don't stack so it won't
+stack. But it also won't stack with potions.
 
 ** Player and monster effects aren't serialized.
 REPORTED: 14/06/10

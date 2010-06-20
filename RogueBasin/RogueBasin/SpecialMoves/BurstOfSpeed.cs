@@ -168,9 +168,10 @@ namespace RogueBasin.SpecialMoves
             //Typical speed = 100
 
             double speedRatio = 100.0 / (double)Game.Dungeon.Player.Speed;
-            double baseDuration = speedRatio * 2 * Creature.turnTicks;
-            int duration = (int)Math.Floor(baseDuration + Game.Random.Next((int)(baseDuration * 4.0)));
-            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(duration, 150));
+            double baseDuration = speedRatio * Creature.turnTicks;
+            int duration = (int)Math.Floor(baseDuration + Game.Random.Next((int)(baseDuration * 2.0)));
+            int speedUpAmount = (int)Math.Floor((100.0 + Game.Random.Next(50)) * speedRatio);
+            Game.Dungeon.Player.AddEffect(new PlayerEffects.SpeedUp(duration, speedUpAmount));
             
             Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
 
