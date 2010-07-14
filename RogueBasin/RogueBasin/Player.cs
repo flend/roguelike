@@ -693,7 +693,13 @@ namespace RogueBasin
 
             //Was this a sleeping creature? It loses that flag
             if (monster.Sleeping)
+            {
                 monster.WakeCreature();
+
+                //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
+                Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
+                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by player", LogDebugLevel.Low);
+            }
 
             //Notify the creature that it has been hit
             monster.NotifyAttackByCreature(this);

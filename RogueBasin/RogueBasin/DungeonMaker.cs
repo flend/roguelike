@@ -863,6 +863,8 @@ namespace RogueBasin
             monstersToAdd.Add(new Creatures.Mushroom());
             monstersToAdd.Add(new Creatures.Mushroom());
 
+            monstersToAdd.Add(new Creatures.Statue());
+            monstersToAdd.Add(new Creatures.Statue()); monstersToAdd.Add(new Creatures.Statue()); monstersToAdd.Add(new Creatures.Statue()); monstersToAdd.Add(new Creatures.Statue()); monstersToAdd.Add(new Creatures.Statue()); monstersToAdd.Add(new Creatures.Statue()); monstersToAdd.Add(new Creatures.Statue()); monstersToAdd.Add(new Creatures.Statue());
 
             foreach (Monster monster in monstersToAdd)
             {

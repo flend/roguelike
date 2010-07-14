@@ -134,6 +134,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\SpiderUnique.cs" />
+    <Compile Include="Creatures\Statue.cs" />
     <Compile Include="Creatures\Uruk.cs">
       <SubType>Code</SubType>
     </Compile>

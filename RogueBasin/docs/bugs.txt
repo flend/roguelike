@@ -48,6 +48,10 @@ update)?
 
 *** ENHANCEMENTS
 
+** Spell check
+
+Need to spell check plot docs - aspell?
+
 ** Item is here
 
 Only tell the user is an item is here if they are moving into the

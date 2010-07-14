@@ -164,5 +164,10 @@ namespace RogueBasin.Creatures
         {
             return false;
         }
+
+        protected override int GetChanceToBackAway()
+        {
+            return 50;
+        }
     }
 }

@@ -66,6 +66,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.SkeletalArcher))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.GhoulUnique))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Mushroom))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Statue))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>
@@ -576,7 +577,13 @@ namespace RogueBasin
 
             //Wake a sleeping creature
             if (Sleeping)
+            {
                 WakeCreature();
+
+                //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
+                Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
+                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by player", LogDebugLevel.Low);
+            }
 
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
