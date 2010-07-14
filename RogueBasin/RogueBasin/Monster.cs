@@ -423,8 +423,7 @@ namespace RogueBasin
 
         protected int toHitRoll;
 
-        //Could be in Monster
-        protected virtual int AttackCreatureWithModifiers(Creature player, int hitMod, int damBase, int damMod, int ACmod)
+        protected virtual int AttackCreatureWithModifiers(Creature creature, int hitMod, int damBase, int damMod, int ACmod)
         {
             int attackToHit = hitModifier + hitMod;
             int attackDamageMod = damageModifier + damMod;
@@ -436,10 +435,10 @@ namespace RogueBasin
             else
                 attackDamageBase = damageBase;
 
-            int playerAC = player.ArmourClass() + ACmod;
+            int targetAC = creature.ArmourClass() + ACmod;
             toHitRoll = Utility.d20() + attackToHit;
 
-            if (toHitRoll >= playerAC)
+            if (toHitRoll >= targetAC)
             {
                 //Hit - calculate damage
                 int totalDamage = Utility.DamageRoll(attackDamageBase) + attackDamageMod;

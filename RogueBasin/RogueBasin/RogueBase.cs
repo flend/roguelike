@@ -483,8 +483,16 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     break;
 
+                                case 'Y':
+                                    //Take me to first dungeon
+                                    //Game.Dungeon.DungeonInfo.LastMission = true;
+                                    Game.Dungeon.Player.LocationLevel = 2;
+                                    TeleportToDungeon1Entrance();
+                                    Screen.Instance.Update();
+                                    break;
+
                                 case 'J':
-                                    //teleport to stairs
+                                    //change debug level
                                     LogFile.Log.DebugLevel += 1;
                                     if (LogFile.Log.DebugLevel > 3)
                                         LogFile.Log.DebugLevel = 1;
@@ -543,13 +551,7 @@ namespace RogueBasin
 
                            
 
-                            case 'Y':
-                                //Take me to first dungeon
-                                Game.Dungeon.DungeonInfo.LastMission = true;
-                                Game.Dungeon.Player.LocationLevel = 26;
-                                TeleportToDownStairs();
-                                UpdateScreen();
-                                break;
+                           
 
                             case 'B':
                                 Screen.Instance.SaveCurrentLevelToDisk();
@@ -786,6 +788,46 @@ namespace RogueBasin
 
             //featureAtSpace.PlayerInteraction(player);
         }
+
+        /// <summary>
+        /// Debug function - teleport to 1st dungeon
+        /// </summary>
+        private void TeleportToDungeon1Entrance()
+        {
+            //Find down stairs on this level
+            List<Feature> features = Game.Dungeon.Features;
+
+            Player player = Game.Dungeon.Player;
+
+            Features.StaircaseEntry entryStairs = null;
+            Point stairlocation = new Point(0, 0);
+
+            foreach (Feature feature in features)
+            {
+
+                if (feature is Features.StaircaseEntry)
+                {
+                    entryStairs = feature as Features.StaircaseEntry;
+                    if (entryStairs.dungeonStartLevel == 2)
+                    {
+                        stairlocation = feature.LocationMap;
+                        break;
+                    }
+                }
+            }
+
+            if (entryStairs == null)
+            {
+                LogFile.Log.LogEntryDebug("Unable to teleport to stairs", LogDebugLevel.High);
+                return;
+            }
+
+            //Move the player
+            //Wilderness
+            player.LocationLevel = 1;
+            player.LocationMap = stairlocation;
+        }
+
 
         private void TeleportToUpStairs()
         {

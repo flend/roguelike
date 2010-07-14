@@ -127,6 +127,7 @@ namespace RogueBasin
 
                 //Fleeing
                 //Check we have a valid target (may not after reload)
+                //still required?
                 if (currentTarget == null)
                 {
                     AIState = SimpleAIStates.RandomWalk;
@@ -138,11 +139,10 @@ namespace RogueBasin
                     //If not, go to non-chase state
                     AIState = SimpleAIStates.RandomWalk;
                 }
-                                        //Charmed creatures should stop attacking other charmed creatures
+                //Charmed creatures should not attack other charmed creatures
                 else if (Charmed && targetMonster != null && targetMonster.Charmed)
                 {
-
-                    //If not, go to non-chase state
+                    //Go to non-chase state
                     AIState = SimpleAIStates.RandomWalk;
                 }
                 //Is target on another level (i.e. has escaped down the stairs)
@@ -174,7 +174,7 @@ namespace RogueBasin
                 }
             }
             
-            //Check: now no drop through from chasecreature() call above
+            //Initial state. Could be drop through from above
 
             if(AIState == SimpleAIStates.RandomWalk) {
                 //RandomWalk state
@@ -185,6 +185,8 @@ namespace RogueBasin
                 
                 //Get the FOV from Dungeon (this also updates the map creature FOV state)
                 TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
+
                 //currentFOV.CalculateFOV(LocationMap.x, LocationMap.y, SightRadius);
 
                 //Check for other creatures within this creature's FOV
@@ -213,6 +215,7 @@ namespace RogueBasin
                 if (yb >= currentMap.height)
                     yb = currentMap.height - 1;
                 */
+
                 //AI branches here depending on if we are charmed or passive
 
                 if (this.Charmed)
@@ -247,16 +250,16 @@ namespace RogueBasin
 
                     //Look for creatures which aren't passive or charmed
                     List<Monster> notPassiveTargets = monstersInFOV.FindAll(x => !x.Passive);
-                    List<Monster> notCharmedTargets = notPassiveTargets.FindAll(x => !x.Charmed);
+                    List<Monster> notCharmedOrPassiveTargets = notPassiveTargets.FindAll(x => !x.Charmed);
                     
-                    //Go chase a not-passive creature
-                    if (notCharmedTargets.Count > 0)
+                    //Go chase a not-passive, not-charmed creature
+                    if (notCharmedOrPassiveTargets.Count > 0)
                     {
                         //Find the closest creature
                         Monster closestCreature = null;
                         double closestDistance = Double.MaxValue; //a long way
 
-                        foreach (Monster creature in notCharmedTargets)
+                        foreach (Monster creature in notCharmedOrPassiveTargets)
                         {
                             double distanceSq = Math.Pow(creature.LocationMap.x - this.LocationMap.x, 2) +
                                 Math.Pow(creature.LocationMap.y - this.LocationMap.y, 2);
@@ -359,6 +362,7 @@ namespace RogueBasin
                     }
                     else
                     {
+                        //Otherwise just move at random
                         MoveRandomSquareNoAttack();
                     }
                 }
@@ -450,30 +454,6 @@ namespace RogueBasin
             {
                 LocationMap = newLocation;
             }
-
-            //if (contents.player != null)
-            //{
-            //    //Attack the player
-            //    CombatResults result = AttackPlayer(contents.player);
-
-            //    if (result == CombatResults.DefenderDied)
-            //    {
-            //        //Bad news for the player here!
-            //        okToMoveIntoSquare = true;
-            //    }
-            //}
-
-            //if (contents.monster != null)
-            //{
-            //Attack the monster
-            //CombatResults result = AttackMonster(contents.monster);
-
-            //if (result == CombatResults.DefenderDied)
-            //{
-            //    okToMoveIntoSquare = true;
-            //}
-            //}
-
         }
 
         private void ChaseCreature(Creature newTarget)
@@ -639,14 +619,12 @@ namespace RogueBasin
                         {
                             LogFile.Log.LogEntryDebug(this.SingleDescription + " returns to PC", LogDebugLevel.Medium);
                             AIState = SimpleAIStates.Returning;
-                            //LastAttackedBy = null; //bit of a hack
-                            //Don't do this, the charmed monster will just return to the PC and not get caught in a frozen loop
                             FollowPC();
                         }
                     }
                 }
 
-                //Persue and attack
+                //Not charmed - pursue and attack
                 FollowAndAttack(newTarget);
             }
         }
@@ -697,7 +675,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Follow the PC but don't attack him
+        /// Follow the PC but don't attack him - used for charmed creatures
         /// </summary>
         void FollowPC()
         {

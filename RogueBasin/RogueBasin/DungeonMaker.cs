@@ -844,20 +844,21 @@ namespace RogueBasin
             //Debug monsters
 
                           
-           // List<Monster> monstersToAdd = new List<Monster>();
+            List<Monster> monstersToAdd = new List<Monster>();
             
-           //// monstersToAdd.Add(new Creatures.DragonUnique());
+            monstersToAdd.Add(new Creatures.Goblin());
+            monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin());
 
-           // foreach (Monster monster in monstersToAdd)
-           // {
-           //     Point location = new Point();
-           //     do
-           //     {
-           //         location = dungeon.RandomWalkablePointInLevel(2);
-           //     } while (!dungeon.AddMonster(monster, 2, location));
+            foreach (Monster monster in monstersToAdd)
+            {
+                Point location = new Point();
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(2);
+                } while (!dungeon.AddMonster(monster, 2, location));
 
-           // }
-        }
+            }
+         }
 
          /// <summary>
          /// Set the light level for all creatures between the levels specified (inclusive).
