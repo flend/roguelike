@@ -65,6 +65,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Ghoul))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.SkeletalArcher))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.GhoulUnique))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Mushroom))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>
@@ -87,6 +88,7 @@ namespace RogueBasin
 
             Charmed = false;
             Passive = false;
+            Sleeping = true;
 
             Unique = false;
         }
@@ -144,6 +146,12 @@ namespace RogueBasin
         public bool Passive { get; set; }
 
         /// <summary>
+        /// Is the creature currently asleep. Defaults to true to avoid creatures wandering around the dungeon without a player.
+        /// </summary>
+        public bool Sleeping { get; set; }
+
+
+        /// <summary>
         /// Player armour class. Auto-calculated so not serialized
         /// </summary>
         protected int armourClass;
@@ -170,12 +178,21 @@ namespace RogueBasin
         abstract protected int ClassMaxHitpoints();
 
 
-
         /// <summary>
-        /// Called when the creature is killed. Can be used to drop treasure.
+        /// Will the creature wake on sight of the player or another wakened creature?
+        /// Override as false for classic sleep-until-attacked behaviour
         /// </summary>
         /// <returns></returns>
-        abstract public void InventoryDrop();
+        virtual protected bool WakesOnSight()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Called when the creature is killed. Can be used to drop treasure. Not used at the moment.
+        /// </summary>
+        /// <returns></returns>
+        virtual public void InventoryDrop() { }
 
         /// <summary>
         /// Was the creature summoned or raised?
@@ -396,6 +413,13 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Can this creature move?
+        /// </summary>
+        public virtual bool CanMove() {
+            return true;
+        }
+
+        /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
@@ -416,10 +440,6 @@ namespace RogueBasin
 
             return base.IncrementTurnTime();
         }
-
-
-        
-
 
         protected int toHitRoll;
 
@@ -502,7 +522,7 @@ namespace RogueBasin
                 {
                     
                     //Message queue string
-                    string combatResultsMsg = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
+                    string combatResultsMsg = "MvP " + this.Representation + " ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
                     
                     
                     //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
@@ -516,7 +536,7 @@ namespace RogueBasin
                 }
 
                 //Debug string
-                string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
+                string combatResultsMsg3 = "MvP " + this.Representation + " ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
                 //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
                 string playerMsg3 = HitsPlayerCombatString();
                 Game.MessageQueue.AddMessage(playerMsg3);
@@ -526,7 +546,7 @@ namespace RogueBasin
             }
 
             //Miss
-            string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
+            string combatResultsMsg2 = "MvP "  + this.Representation + " ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
             //string playerMsg2 = "The " + this.SingleDescription + " misses you.";
             string playerMsg2 = MissesPlayerCombatString();
             Game.MessageQueue.AddMessage(playerMsg2);
@@ -554,12 +574,16 @@ namespace RogueBasin
             //Notify the creature that it has been hit
             monster.NotifyAttackByCreature(this);
 
+            //Wake a sleeping creature
+            if (Sleeping)
+                WakeCreature();
+
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
             
-            string playerMsg;
+            string messageStr;
             
-            //Do we hit the player?
+            //Do we hit the monster?
             if (damage > 0)
             {
                 int monsterOrigHP = monster.Hitpoints;
@@ -572,9 +596,9 @@ namespace RogueBasin
                     Game.Dungeon.KillMonster(monster, false);
                     
                     //Debug string
-                    string combatResultsMsg = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    playerMsg = HitsMonsterCombatString(monster) + " It's knocked out.";
-                    Game.MessageQueue.AddMessage(playerMsg);
+                    string combatResultsMsg = "MvM " + this.Representation + " vs " + monster.Representation + " ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
+                    messageStr = HitsMonsterCombatString(monster) + " It's knocked out.";
+                    Game.MessageQueue.AddMessage(messageStr);
                     //Game.MessageQueue.AddMessage(combatResultsMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
@@ -585,19 +609,19 @@ namespace RogueBasin
                 }
 
                 //Debug string
-                string combatResultsMsg3 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
-                playerMsg = HitsMonsterCombatString(monster);
-                Game.MessageQueue.AddMessage(playerMsg);
+                string combatResultsMsg3 = "MvM " + this.Representation + " vs " + monster.Representation + " ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
+                messageStr = HitsMonsterCombatString(monster);
+                Game.MessageQueue.AddMessage(messageStr);
                 LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
                 return CombatResults.NeitherDied;
             }
 
             //Miss
-            string combatResultsMsg2 = "MvM ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
+            string combatResultsMsg2 = "MvM " + this.Representation + " vs " + monster.Representation + " ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
             //Game.MessageQueue.AddMessage(combatResultsMsg2);
-            playerMsg = MissesMonsterCombatString(monster);
-            Game.MessageQueue.AddMessage(playerMsg);
+            messageStr = MissesMonsterCombatString(monster);
+            Game.MessageQueue.AddMessage(messageStr);
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
@@ -648,5 +672,12 @@ namespace RogueBasin
         /// <returns></returns>
         virtual public int GetCharmRes() { return 0; }
 
+        /// <summary>
+        /// Wake a creature (remove sleeping flag)
+        /// </summary>
+        internal void WakeCreature()
+        {
+            Sleeping = false;
+        }
     }
 }

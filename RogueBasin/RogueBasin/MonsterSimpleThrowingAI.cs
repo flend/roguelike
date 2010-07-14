@@ -5,6 +5,9 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
+    /// <summary>
+    /// Class for a throwing creature that doesn't back away. All functionality is now in MonsterThrowAndRunAI with GetChanceBackAway = 0
+    /// </summary>
     public abstract class MonsterSimpleThrowingAI : MonsterFightAndRunAI
     {
         //public SimpleAIStates AIState { get; set; }
@@ -64,6 +67,11 @@ namespace RogueBasin
 
         private void ContinueChasing(Creature newTarget)
         {
+
+            //Return if we can't move
+            if (!CanMove())
+                return;
+
             Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
             LocationMap = nextStep;
         }

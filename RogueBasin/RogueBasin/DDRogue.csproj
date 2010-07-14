@@ -93,6 +93,7 @@
     <Compile Include="Creatures\Meddler.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\Mushroom.cs" />
     <Compile Include="Creatures\Necromancer.cs">
       <SubType>Code</SubType>
     </Compile>

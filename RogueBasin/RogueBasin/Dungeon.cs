@@ -2227,6 +2227,7 @@ namespace RogueBasin
             monster.DropAllItems();
 
             //Drop any insta-create treasure
+            //Not used at present
             if(!noCorpses)
                 monster.InventoryDrop();
 

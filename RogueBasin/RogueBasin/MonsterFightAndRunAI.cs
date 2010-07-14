@@ -93,10 +93,58 @@ namespace RogueBasin
                 LastAttackedBy = Game.Dungeon.GetCreatureByUniqueID(LastAttackedByID);
             }
 
-            //If we are returning to the PC, continue to do so unless we are attacked
+            //Sleeping creatures don't react until woken
+            if (Sleeping && WakesOnSight())
+            {
+                //Check to see if we should wake by looking for woken creatures in POV
+                //(when we drop through currentFOV may be unnecessarily recalculated)
+
+                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
+                foreach (Monster monster in Game.Dungeon.Monsters)
+                {
+                    //Same monster
+                    if (monster == this)
+                        continue;
+
+                    //Not on the same level
+                    if (monster.LocationLevel != this.LocationLevel)
+                        continue;
+
+                    //Not in FOV
+                    if (!currentFOV.CheckTileFOV(monster.LocationMap.x, monster.LocationMap.y))
+                        continue;
+
+                    //Otherwise in FOV
+                    //Check if it's awake. If so, wake up and stop
+                    if (!monster.Sleeping)
+                    {
+                        Sleeping = false;
+                        AIState = SimpleAIStates.RandomWalk;
+                        LogFile.Log.LogEntryDebug(this.Representation + " spots awake " + monster.Representation + " and wakes", LogDebugLevel.Low);
+                        break;
+                    }
+                }
+
+                //Check the player
+                if (Game.Dungeon.Player.LocationLevel == this.LocationLevel &&
+                    currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
+                {
+                    //In FOV wake
+                    Sleeping = false;
+                    AIState = SimpleAIStates.RandomWalk;
+                    LogFile.Log.LogEntryDebug(this.Representation + " spots player and wakes", LogDebugLevel.Low);
+                }
+            }
+
+            //If we're still sleeping then skip this go
+            if (Sleeping)
+                return;
+
+            //If a charmed creature is returning to the PC, continue to do
             if (AIState == SimpleAIStates.Returning)
             {
-                //Don't do this to stop charms being frozen in front of missile troops
+                //Don't stop on an attack otherwise charmed creatures will be frozen in front of missile troops
 
                 //We have been attacked by someone new
                 //if (LastAttackedBy != null && LastAttackedBy.Alive)
@@ -183,9 +231,7 @@ namespace RogueBasin
 
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
                 
-                //Get the FOV from Dungeon (this also updates the map creature FOV state)
-                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
-
+                
 
                 //currentFOV.CalculateFOV(LocationMap.x, LocationMap.y, SightRadius);
 
@@ -224,7 +270,8 @@ namespace RogueBasin
                     //Won't attack passive creatures (otherwise will de-passify them and it would be annoying)
 
                     //Look for creatures in FOV
-                    
+                    TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
                     //List will contain monsters & player
                     List<Monster> monstersInFOV = new List<Monster>();
 
@@ -295,6 +342,7 @@ namespace RogueBasin
                     //Normal fighting behaviour
 
                     //Find creatures & PC in FOV
+                    TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
                     List<Creature> monstersInFOV = new List<Creature>();
 
@@ -416,6 +464,11 @@ namespace RogueBasin
         protected void MoveRandomSquareNoAttack()
         {
             //Move randomly.
+
+            //Return if we can't move
+            if (!CanMove())
+                return;
+
             int direction = Game.Random.Next(9);
 
             int moveX = 0;
@@ -668,7 +721,7 @@ namespace RogueBasin
             }
 
             //Otherwise (or if the creature died), move towards it (or its corpse)
-            if (moveIntoSquare)
+            if (moveIntoSquare && CanMove())
             {
                 LocationMap = nextStep;
             }
@@ -680,6 +733,10 @@ namespace RogueBasin
         void FollowPC()
         {
             Player player = Game.Dungeon.Player;
+
+            //If we can't move, don't follow
+            if (!CanMove())
+                return;
 
             //Find location of next step on the path towards them
             Point nextStep = Game.Dungeon.GetPathTo(this, player);

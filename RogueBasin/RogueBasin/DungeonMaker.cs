@@ -849,6 +849,21 @@ namespace RogueBasin
             monstersToAdd.Add(new Creatures.Goblin());
             monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin()); monstersToAdd.Add(new Creatures.Goblin());
 
+
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+            monstersToAdd.Add(new Creatures.Mushroom());
+
+
             foreach (Monster monster in monstersToAdd)
             {
                 Point location = new Point();

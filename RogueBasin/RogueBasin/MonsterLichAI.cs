@@ -15,7 +15,7 @@ namespace RogueBasin
         public SimpleAIStates AIState { get; set; }
         protected Creature currentTarget;
 
-        public bool Sleeping { get; set;}
+        public new bool Sleeping { get; set;}
 
         public bool HasActivated { get; set; }
 

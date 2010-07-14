@@ -14,7 +14,6 @@ namespace RogueBasin
         protected override void FollowAndAttack(Creature newTarget) {
             
             double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
-
             
             TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
@@ -31,7 +30,7 @@ namespace RogueBasin
                  }
             }
 
-            if(backAwayFromTarget) {
+            if(backAwayFromTarget && CanMove()) {
 
                 //Target is too close, so back away before firing
 
@@ -212,6 +211,10 @@ namespace RogueBasin
         private void ContinueChasing(Creature newTarget)
         {
             //If not, move towards the player
+
+            //Return if we can't move
+            if (!CanMove())
+                return;
 
             //Find location of next step on the path towards them
             Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);

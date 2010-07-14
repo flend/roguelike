@@ -535,7 +535,7 @@ namespace RogueBasin
             {
                 //Hit - calculate damage
                 int totalDamage = Utility.DamageRoll(attackDamageBase) + attackDamageMod;
-                string combatResultsMsg = "PvM ToHit: " + toHitRoll + "[+" + hitModifier + "+" + hitMod + "] AC: " + monsterAC + "(" + monster.ArmourClass() + "+" + ACmod + ") " + " Dam: 1d" + attackDamageBase + "+" + damageModifier + "+" + damMod + " = " + totalDamage;
+                string combatResultsMsg = "PvM " + monster.Representation + " ToHit: " + toHitRoll + "[+" + hitModifier + "+" + hitMod + "] AC: " + monsterAC + "(" + monster.ArmourClass() + "+" + ACmod + ") " + " Dam: 1d" + attackDamageBase + "+" + damageModifier + "+" + damMod + " = " + totalDamage;
 
                 //            string combatResultsMsg = "PvM Attack ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
@@ -690,6 +690,10 @@ namespace RogueBasin
             //Was this a passive creature? It loses that flag
             if (monster.Passive)
                 monster.UnpassifyCreature();
+
+            //Was this a sleeping creature? It loses that flag
+            if (monster.Sleeping)
+                monster.WakeCreature();
 
             //Notify the creature that it has been hit
             monster.NotifyAttackByCreature(this);

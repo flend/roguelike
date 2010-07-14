@@ -1,5 +1,11 @@
 *** BUGS PRE 1.5
 
+** Monster special abilities
+REPORTED: 14/07/10
+
+Often don't check for player in FOV (or even range).
+
+
 *** STUFF TO CHECK
 
 ** Staircases

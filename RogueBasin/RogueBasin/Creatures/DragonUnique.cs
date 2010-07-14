@@ -186,10 +186,11 @@ namespace RogueBasin.Creatures
             return "";
         }
 
-        protected override bool CreatureWillBackAway()
+        protected override int GetChanceToBackAway()
         {
-            return false;
+            return 0;
         }
+        
 
         protected override bool DoPlayerResistance()
         {
