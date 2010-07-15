@@ -29,7 +29,6 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.FerretUnique))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.GoblinWitchdoctorUnique))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Imp))]
-    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Lich))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Maleficarum))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.MaleficarumUnique))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Meddler))]
@@ -50,8 +49,6 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.UrukUnique))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Whipper))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Rat))]
-    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Lich))]
-    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Friend))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Goblin))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.GoblinWitchdoctor))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Necromancer))]
@@ -556,9 +553,6 @@ namespace RogueBasin
             return CombatResults.NeitherDied;
         }
 
-       
-
-
         public virtual CombatResults AttackMonster(Monster monster)
         {
             //Recalculate combat stats if required
@@ -572,17 +566,17 @@ namespace RogueBasin
             monster.LastAttackedBy = this;
             monster.LastAttackedByID = this.UniqueID;
 
-            //Notify the creature that it has been hit
+            //Notify the creature that it has been attacked
             monster.NotifyAttackByCreature(this);
 
             //Wake a sleeping creature
-            if (Sleeping)
+            if (monster.Sleeping)
             {
-                WakeCreature();
+                monster.WakeCreature();
 
                 //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
                 Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
-                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by player", LogDebugLevel.Low);
+                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by monster " + this.Representation, LogDebugLevel.Low);
             }
 
             //Calculate damage from a normal attack
@@ -593,6 +587,9 @@ namespace RogueBasin
             //Do we hit the monster?
             if (damage > 0)
             {
+                //Notify the creature that it has been hit
+                monster.NotifyHitByCreature(this, damage);
+
                 int monsterOrigHP = monster.Hitpoints;
 
                 monster.Hitpoints -= damage;
@@ -653,7 +650,23 @@ namespace RogueBasin
         /// <returns></returns>
         abstract public int CreatureLevel();
 
+        /// <summary>
+        /// We have be attacked (but not necessarily damaged by) creature
+        /// </summary>
+        /// <param name="creature"></param>
         abstract public void NotifyAttackByCreature(Creature creature);
+
+        /// <summary>
+        /// We have been hit by creature
+        /// </summary>
+        /// <param name="creature"></param>
+        abstract public void NotifyHitByCreature(Creature creature, int damage);
+
+        /// <summary>
+        /// We have been killed. Do special game effects. Do some clean up of internal structure
+        /// </summary>
+        /// <param name="creature"></param>
+        abstract public void NotifyMonsterDeath();
 
         /// <summary>
         /// The monster's combat challenge rating

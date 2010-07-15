@@ -6,6 +6,9 @@ using System.Xml.Serialization;
 
 namespace RogueBasin
 {
+    /// <summary>
+    /// Simple AI. Currently no monsters implement this. So it's not fully implemented.
+    /// </summary>
     public abstract class MonsterSimpleAI : Monster
     {
         public SimpleAIStates AIState {get; set;}
@@ -18,6 +21,10 @@ namespace RogueBasin
             AIState = SimpleAIStates.RandomWalk;
             currentTarget = null;
         }
+        
+        
+
+        /*
         /// <summary>
         /// Run the Simple AI actions
         /// </summary>
@@ -144,33 +151,33 @@ namespace RogueBasin
                 //COMMENT THIS
                 //If there are possible targets, find the closest and chase it
                 //Otherwise continue to move randomly
-                /*
-                if (creaturesInFOV.Count > 0)
-                {
+                
+                //if (creaturesInFOV.Count > 0)
+                //{
                     
-                    //Find the closest creature
-                    Creature closestCreature = null;
-                    double closestDistance = Double.MaxValue; //a long way
+                //    //Find the closest creature
+                //    Creature closestCreature = null;
+                //    double closestDistance = Double.MaxValue; //a long way
 
-                    foreach (Creature creature in creaturesInFOV)
-                    {
-                        double distanceSq = Math.Pow(creature.LocationMap.x - this.LocationMap.x, 2) +
-                            Math.Pow(creature.LocationMap.y - this.LocationMap.y, 2);
+                //    foreach (Creature creature in creaturesInFOV)
+                //    {
+                //        double distanceSq = Math.Pow(creature.LocationMap.x - this.LocationMap.x, 2) +
+                //            Math.Pow(creature.LocationMap.y - this.LocationMap.y, 2);
 
-                        double distance = Math.Sqrt(distanceSq);
+                //        double distance = Math.Sqrt(distanceSq);
 
-                        if (distance < closestDistance)
-                        {
-                            closestDistance = distance;
-                            closestCreature = creature;
-                        }
-                    }
+                //        if (distance < closestDistance)
+                //        {
+                //            closestDistance = distance;
+                //            closestCreature = creature;
+                //        }
+                //    }
 
 
-                    //Start chasing this creature
-                    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
-                    ChaseCreature(closestCreature);
-                }*/
+                //    //Start chasing this creature
+                //    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
+                //    ChaseCreature(closestCreature);
+                //}
                 
                   //UNCOMMENT THIS
                 //Current behaviour: only chase the PC
@@ -305,11 +312,8 @@ namespace RogueBasin
             {
                 LocationMap = nextStep;
             }
-        }
+        }*/
 
-        public void ClearCurrentTarget()
-        {
-            currentTarget = null;
-        }
+        
     }
 }

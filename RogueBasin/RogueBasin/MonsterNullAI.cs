@@ -46,5 +46,20 @@ namespace RogueBasin
         {
             return CombatResults.NeitherDied;
         }
+
+        public override void NotifyAttackByCreature(Creature creature)
+        {
+            
+        }
+
+        public override void NotifyHitByCreature(Creature creature, int damage)
+        {
+            
+        }
+
+        public override void NotifyMonsterDeath()
+        {
+           
+        }
     }
 }

@@ -7,8 +7,7 @@ namespace RogueBasin
 {
 
     /// <summary>
-    /// There are different types of special AI but they all use the MonsterThrowAndRun AI base.
-    /// Their special action (healing, raising, summoning etc.) differs. They all have missile weapons.
+    /// LichAI is a hang over from DDRogue but I'm keeping around in case I want to do a forward port
     /// </summary>
     public abstract class MonsterLichAI  : Monster
     {
@@ -821,6 +820,19 @@ namespace RogueBasin
 
             return CombatResults.NeitherDied;
         }*/
+        /// <summary>
+        /// On death, null our currentTarget. This is a good idea anyway, but looks like it was added for an important reason 'circular references'
+        /// </summary>
+        public override void NotifyMonsterDeath()
+        {
+            currentTarget = null;
+        }
+
+        //Do nothing
+        public override void NotifyHitByCreature(Creature creature, int damage)
+        {
+            return;
+        }
 
     }
 }

@@ -2223,6 +2223,9 @@ namespace RogueBasin
             //Instead set a flag on the monster and remove it after all turns are complete
             monster.Alive = false;
 
+            //Notify the monster that it has been killed
+            monster.NotifyMonsterDeath();
+
             //Drop its inventory (including plot items we gave it)
             monster.DropAllItems();
 
@@ -2240,6 +2243,7 @@ namespace RogueBasin
                  AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
 
             //Deal with special monsters (bit rubbish programming)
+            //Move to AI classes?
 
             if (!dungeonInfo.LastMission && monster.Unique)
             {

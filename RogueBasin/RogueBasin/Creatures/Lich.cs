@@ -178,5 +178,7 @@ namespace RogueBasin.Creatures
         {
             return false;
         }
+
+
     }
 }

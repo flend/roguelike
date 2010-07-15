@@ -54,13 +54,8 @@ namespace RogueBasin
             return distance;
         }
 
-        public void ClearCurrentTarget()
-        {
-            currentTarget = null;
-        }
-
         /// <summary>
-        /// Run the Simple AI actions
+        /// Main loop called on each turn when we move
         /// </summary>
         public override void ProcessTurn()
         {
@@ -873,7 +868,25 @@ namespace RogueBasin
             AIState = SimpleAIStates.Pursuit;
             currentTarget = creature;
             currentTargetID = creature.UniqueID;
+        }
 
+        /// <summary>
+        /// We've been hit. Have a chance of recovering if we are fleeing
+        /// </summary>
+        /// <param name="creature"></param>
+        /// <param name="damage"></param>
+        public override void NotifyHitByCreature(Creature creature, int damage)
+        {
+            RecoverOnBeingHit();
+        }
+
+        /// <summary>
+        /// On death, null our currentTarget. This is a good idea anyway, but looks like it was added for an important reason 'circular references'
+        /// </summary>
+        public override void NotifyMonsterDeath()
+        {
+            currentTarget = null;
+            currentTargetID = -1;
         }
     }
 }

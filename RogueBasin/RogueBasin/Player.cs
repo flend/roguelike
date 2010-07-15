@@ -711,37 +711,19 @@ namespace RogueBasin
 
                 monster.Hitpoints -= damage;
 
-                //Fairly evil switch case for special attack types. Sorry, no time to do it well
                 bool monsterDead = monster.Hitpoints <= 0;
 
                 //Add HP from the glove if wielded
                 SpecialCombatEffectsOnMonster(monster, damage, monsterDead, specialMove);
 
-                //Evil: check to see if the monster is fleeing and if so, give it a chance not to
-                MonsterFightAndRunAI aiMonster = monster as MonsterFightAndRunAI;
-
-                if (aiMonster != null)
-                {
-                    aiMonster.RecoverOnBeingHit();
-                }
+                //Notify the creature that it has taken damage
+                //It may activate a special ability or stop running away etc.
+                monster.NotifyHitByCreature(this, damage);
 
                 //Is the monster dead, if so kill it?
                 if (monsterDead)
                 {
                     Game.Dungeon.KillMonster(monster, false);
-
-                    MonsterFightAndRunAI aiMon = monster as MonsterFightAndRunAI;
-
-                    //Kill circular ref
-
-                    if (aiMon != null)
-                    {
-                        aiMon.ClearCurrentTarget();
-                    }
-                    MonsterSimpleAI aiS = monster as MonsterSimpleAI;
-                    if (aiS != null)
-                        aiS.ClearCurrentTarget();
-
 
                     //Add it to our list of kills (simply adding the whole object here)
                     KillCount++;

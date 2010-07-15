@@ -70,7 +70,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\FerretUnique.cs" />
-    <Compile Include="Creatures\Friend.cs" />
+    <Compile Include="Creatures\Friend.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Ghoul.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -85,7 +87,9 @@
     <Compile Include="Creatures\Imp.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\Lich.cs" />
+    <Compile Include="Creatures\Lich.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Maleficarum.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -345,7 +349,9 @@
     <Compile Include="Triggers\HelpFriend.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\LichBattle.cs" />
+    <Compile Include="Triggers\LichBattle.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\PrinceInABox.cs" />
     <Compile Include="Triggers\SchoolEntryTrigger.cs" />
     <Compile Include="Triggers\SeeCorpses.cs">
