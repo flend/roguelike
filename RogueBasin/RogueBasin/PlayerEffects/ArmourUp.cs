@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin.PlayerEffects
 {
-    public class ArmourUp  : PlayerEffectSimpleDuration
+    public class ArmourUp : PlayerEffectSimpleDuration
     {
         public int duration { get; set; }
 
@@ -20,17 +20,17 @@ namespace RogueBasin.PlayerEffects
         }
 
         /// <summary>
-        /// Increase the player's speed
+        /// Just strings
         /// </summary>
         public override void OnStart(Player target)
         {
             LogFile.Log.LogEntry("ArmourUp start");
             Game.MessageQueue.AddMessage("A blue shimmer surrounds you.");
-            Game.Dungeon.Player.CalculateCombatStats();
+            Game.Dungeon.Player.RecalculateCombatStatsRequired = true;
         }
 
         /// <summary>
-        /// Decrease the player's speed again
+        /// Just strings
         /// </summary>
         public override void OnEnd(Player target)
         {

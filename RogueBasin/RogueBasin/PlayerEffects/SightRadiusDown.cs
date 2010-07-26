@@ -8,18 +8,18 @@ namespace RogueBasin.PlayerEffects
     {
         int duration  { get; set; }
 
-        int sightDownAmount  { get; set; }
+        int sightModifier  { get; set; }
 
-        int effectiveSightDownAmount  { get; set; }
-        public bool sightZeroCase { get; set; }
+        //int effectiveSightDownAmount  { get; set; }
+        //public bool sightZeroCase { get; set; }
 
         public SightRadiusDown() { }
 
-        public SightRadiusDown(int duration, int sightUpAmount)
+        public SightRadiusDown(int duration, int sightDownAmount)
         {
-            this.sightZeroCase = false;
+            //this.sightZeroCase = false;
             this.duration = duration;
-            this.sightDownAmount = sightUpAmount;
+            this.sightModifier = -1 * sightDownAmount;
         }
 
         /// <summary>
@@ -32,6 +32,7 @@ namespace RogueBasin.PlayerEffects
             LogFile.Log.LogEntry("SightDown start");
 
             //Bit of a hack, but for 0 sight dungeons, restrict to 1 square. This is what the blinding effects normally do
+            /*
             if (player.SightRadius == 0)
             {
                 sightZeroCase = true;
@@ -39,16 +40,17 @@ namespace RogueBasin.PlayerEffects
             }
             else
             {
-                if (sightDownAmount > player.SightRadius)
+                if (sightModifier > player.SightRadius)
                 {
                     effectiveSightDownAmount = player.SightRadius;
                 }
                 else
                 {
-                    effectiveSightDownAmount = sightDownAmount;
+                    effectiveSightDownAmount = sightModifier;
                 }
             }
-            player.SightRadius -= effectiveSightDownAmount;
+             * */
+            //player.SightRadius -= effectiveSightDownAmount;
             Game.MessageQueue.AddMessage("The shadows come closer.");
         }
 
@@ -61,6 +63,7 @@ namespace RogueBasin.PlayerEffects
 
             LogFile.Log.LogEntry("SightDown ended");
 
+            /*
             if (sightZeroCase)
             {
                 player.SightRadius = 0;
@@ -68,13 +71,18 @@ namespace RogueBasin.PlayerEffects
             else
             {
                 player.SightRadius += effectiveSightDownAmount;
-            }
+            }*/
             Game.MessageQueue.AddMessage("Everything is clear again.");
         }
 
         protected override int GetDuration()
         {
             return duration;
+        }
+
+        public override int SightModifier()
+        {
+            return sightModifier;
         }
     }
 }

@@ -26,12 +26,12 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Carries out the start effects on the target.
+        /// Carries out the start effects on the target. Many standard effects just use the stat modifier virtual functions.
         /// </summary>
         public abstract void OnStart(Player target);
 
         /// <summary>
-        /// Carries out the end effects on the target
+        /// Carries out the end effects on the target. Many standard effects just use the stat modifier virtual functions.
         /// </summary>
         public abstract void OnEnd(Player target);
 
@@ -56,6 +56,12 @@ namespace RogueBasin
         public virtual int HitModifier() { return 0; }
 
         public virtual int SpeedModifier() { return 0; }
+
+        /// <summary>
+        /// Modifier for normal sight radius
+        /// </summary>
+        /// <returns></returns>
+        public virtual int SightModifier() { return 0; }
 
     }
 }

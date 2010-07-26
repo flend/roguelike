@@ -5,6 +5,10 @@ REPORTED: 14/07/10
 
 Often don't check for player in FOV (or even range).
 
+** Spotting monsters
+
+If we spot a monster and it doens't see us, it will still be
+sleeping. It should probably wake up and act randomly.
 
 *** STUFF TO CHECK
 
@@ -20,7 +24,8 @@ Really true? Old bug report
 
 ** SightRadiusUp/Down
 
-Should this use the new effect structure? Or is it OK?
+Should this use the new effect structure? Or is it OK? Not really sure
+how it works.
 
 ** Stacking effects
 Do we want effects to stack? Presumably for equipment they need to -
@@ -46,11 +51,34 @@ work. Might want to have a UI screen to check easily.
 Are the sight effects applied immediately (i.e. with the next screen
 update)?
 
+REPORTED: 26/07/10 
+
+Berry effects are applied immediately, but
+equipping a lantern isn't. It probably affects NormalSightRadius which
+isn't accessed until a dungeon staircase.
+
+FIXED: 26/07/10
+
+Both are now applied immediately. Moved sight into CalculateCombatStats()
+
+
 *** ENHANCEMENTS
 
 ** Spell check
 
 Need to spell check plot docs - aspell?
+
+** Magic effects
+REPORTED: 26/07/10
+
+Need to make magic specific versions of the PlayerEffects since
+currently 2 effects of the same Type won't stack. This is probably
+more in line with the everything a type system than putting a flag in
+the class.
+
+Note that we will need to change ApplyEffect() since it current only
+uses the worse and best effects. I don't think anything uses this
+querk?
 
 ** Item is here
 
@@ -67,12 +95,14 @@ level. Probably better to expand that to the same dungeon. Esp if we
 add more spells.
 
 ** Creatures moving
+FIXED: 26/07/10
 
 Investigate not waking up creatures until the player sees them / they
 see a monser seen by the player. Otherwise groups tend to get broken
 up before the player ever sees them.
 
 ** Spell is on check
+FIXED: 26/07/10
 
 Change to use types rather than objects.
 

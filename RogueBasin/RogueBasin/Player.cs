@@ -233,7 +233,8 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Calculate the player's combat stats based on level and equipment
+        /// Function called after an effect is applied or a new item is equipped.
+        /// Calculates all derived statistics from bases with modifications from equipment and effects.
         /// </summary>
         public void CalculateCombatStats()
         {
@@ -265,7 +266,7 @@ namespace RogueBasin
 
             int speedDelta = SpeedStat - 10;
 
-            speedDelta = speedDelta * 6;
+            speedDelta = speedDelta * 2;
 
             Speed = 100 + speedDelta;
 
@@ -307,9 +308,11 @@ namespace RogueBasin
                 damageBase = 4;
 
             DamageBaseAccess = damageBase;
+
+            //Armour
+
             Screen.Instance.PCColor = ColorPresets.White;
 
-            //Consider equipped clothing items (only 1 will work)
             if (inv.ContainsItem(new Items.MetalArmour()) && AttackStat > 50)
             {
                 ArmourClassAccess += 6;
@@ -356,6 +359,21 @@ namespace RogueBasin
             //Check and apply effects
 
             ApplyEffects();
+
+            //Calculate sight radius (depends on dungeon light level)
+
+            CalculateSightRadius();
+        }
+
+        /// <summary>
+        /// Calculate the derived (used by other functions) sight radius based on the player's NormalSightRadius and the light level of the dungeon level the player is on
+        /// Note that 0 is infinite
+        /// </summary>
+        public void CalculateSightRadius()
+        {
+            //Set vision
+            double sightRatio = NormalSightRadius / 5.0;
+            SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[LocationLevel].LightLevel * sightRatio);
         }
 
         /// <summary>
@@ -375,6 +393,9 @@ namespace RogueBasin
 
             int maxSpeed = 0;
             int minSpeed = 0;
+
+            int maxSight = 0;
+            int minSight = 0;
 
             //Only the greatest magnitude (+ or -) effects have an effect
             foreach (PlayerEffect effect in effects)
@@ -402,6 +423,12 @@ namespace RogueBasin
 
                 if(effect.DamageModifier() < minDamage)
                     minDamage = effect.DamageModifier();
+
+                if (effect.SightModifier() < minSight)
+                    minSight = effect.SightModifier();
+
+                if (effect.SightModifier() > maxSight)
+                    maxSight = effect.SightModifier();
             }
 
             damageModifier += maxDamage;
@@ -415,6 +442,9 @@ namespace RogueBasin
 
             armourClass += maxAC;
             armourClass += minAC;
+
+            NormalSightRadius += maxSight;
+            NormalSightRadius += minSight;
         }
 
         /// <summary>
@@ -1396,6 +1426,14 @@ namespace RogueBasin
         internal void ResetTemporaryPlayerStats()
         {
             CurrentCharmedCreatures = 0;
+        }
+
+        /// <summary>
+        /// Do setup just before the game starts. Dungeons etc. all ready to go.
+        /// </summary>
+        internal void StartGameSetup()
+        {
+            CalculateCombatStats();
         }
     }
 }

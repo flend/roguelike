@@ -59,8 +59,8 @@ namespace RogueBasin
 
             player.Representation = '@';
 
-            player.CalculateCombatStats();
-            player.Hitpoints = player.MaxHitpoints;
+            //player.CalculateCombatStats();
+            //5player.Hitpoints = player.MaxHitpoints;
         }
 
         struct MonsterCommon
@@ -878,8 +878,8 @@ namespace RogueBasin
          }
 
          /// <summary>
-         /// Set the light level for all creatures between the levels specified (inclusive).
-         /// All sets it on the dungeon levels themselves
+         /// Sets the light level for all levels in a dungeon
+         /// Updates all monsters on the level
          /// </summary>
          /// <param name="dungeonStartLevel"></param>
          /// <param name="dungeonEndLevel"></param>
@@ -897,10 +897,7 @@ namespace RogueBasin
              {
                  if (monster.LocationLevel >= dungeonStartLevel && monster.LocationLevel <= dungeonEndLevel)
                  {
-                     //Get the monster's sight radius. 5 is normal, so use this as a ratio
-                     double sightUpRatio = monster.NormalSightRadius / 5.0;
-
-                     monster.SightRadius = (int)Math.Ceiling(sightRadius * sightUpRatio);
+                     monster.CalculateSightRadius();
                  }
              }
          }

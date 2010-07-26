@@ -1045,8 +1045,7 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
-                double sightRatio = creature.NormalSightRadius / 5.0;
-                creature.SightRadius = (int)Math.Ceiling(sightRatio * levels[level].LightLevel);
+                creature.CalculateSightRadius();
 
                 AddMonsterToList(creature);
                 return true;
@@ -1101,8 +1100,7 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
-                double sightRatio = creature.NormalSightRadius / 5.0;
-                creature.SightRadius = (int)Math.Ceiling(sightRatio * levels[level].LightLevel);
+                creature.CalculateSightRadius();
 
                 AddMonsterToList(creature);
                 
@@ -1199,8 +1197,7 @@ namespace RogueBasin
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
 
-                double sightRatio = creature.NormalSightRadius / 5.0;
-                creature.SightRadius = (int)Math.Ceiling(sightRatio * levels[level].LightLevel);
+                creature.CalculateSightRadius();
 
                 summonedMonsters.Add(creature);
                 return true;
@@ -4499,7 +4496,6 @@ namespace RogueBasin
             ResetPlayerXPCounters();
 
             //Teleport the player to the start location in the wilderness
-
             Player player = Game.Dungeon.Player;
 
             player.LocationLevel = 1;
@@ -4523,7 +4519,6 @@ namespace RogueBasin
             Inventory inv = player.Inventory;
 
             //Set all the stats which can only be set when leaving the town
-
             player.ResetTemporaryPlayerStats();
 
             //Hitpoints
@@ -4542,96 +4537,6 @@ namespace RogueBasin
 
             //Set all the stats that can be set at any time
             player.CalculateCombatStats();
-
-            /*            
-                        armourClass = 12;
-                                        damageBase = 4;
-                                        damageModifier = 0;
-                                        hitModifier = 0;
-                                        maxHitpoints = 15;
-                                        MaxCharmedCreatures = 1;
- 
-
-                        //Armour class
-                        player.ArmourClassAccess = 12;
-
-                        //Charm points
-                        player.CharmPoints = player.CharmStat;
-
-                        //Max charmed creatures
-                        if (inv.ContainsItem(new Items.SparklingEarrings()))
-                        {
-                            player.MaxCharmedCreatures = 2;
-                        }
-                        else
-                            player.MaxCharmedCreatures = 1;
-
-                        //To Hit
-
-                        int toHit;
-
-                        if(player.AttackStat > 60) {
-                            toHit = (int)Math.Round((player.AttackStat - 60)/30.0) + 3;
-                        }
-                        else {
-                            toHit = player.AttackStat / 20;
-                        }
-
-                        player.HitModifierAccess = toHit;
-
-                        //Damage base
-
-                        int damageBase;
-                        if(player.AttackStat > 100) {
-                            damageBase = 10;
-                        }
-                        else if(player.AttackStat > 60) {
-                            damageBase = 8;
-                        }
-                        else if(player.AttackStat > 30) {
-                            damageBase = 6;
-                        }
-                        else
-                            damageBase = 4;
-
-                        player.DamageBaseAccess = damageBase;
-                        Screen.Instance.PCColor = ColorPresets.White;
-
-                        //Consider equipped clothing items (only 1 will work)
-                        if (inv.ContainsItem(new Items.MetalArmour()))
-                        {
-                            player.ArmourClassAccess += 4;
-                            Screen.Instance.PCColor = ColorPresets.SteelBlue;
-                        }
-                        else if(inv.ContainsItem(new Items.LeatherArmour())) {
-                            player.ArmourClassAccess += 2;
-                            Screen.Instance.PCColor = ColorPresets.BurlyWood;
-                        }
-                        else if (inv.ContainsItem(new Items.PrettyDress()))
-                        {
-                            player.CharmPoints += 20;
-                            Screen.Instance.PCColor = ColorPresets.BlueViolet;
-                        }
-            
-                        //Consider equipped weapons (only 1 will work)
-                        if (inv.ContainsItem(new Items.GodSword()))
-                        {
-                            player.DamageModifierAccess += 4;
-                        }
-                        else if (inv.ContainsItem(new Items.LongSword()))
-                        {
-                            player.DamageModifierAccess += 2;
-                        }
-                        else if (inv.ContainsItem(new Items.ShortSword()))
-                        {
-                            player.DamageModifierAccess += 1;
-                        }
-            
-                        */
-
-
-            
-            //etc
         }
 
         /// <summary>

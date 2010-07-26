@@ -9,13 +9,13 @@ namespace RogueBasin.PlayerEffects
         public int duration { get; set; }
 
         public int sightUpAmount { get; set; }
-        public bool sightZeroCase  { get; set; }
+        //public bool sightZeroCase  { get; set; }
 
         public SightRadiusUp() { }
 
         public SightRadiusUp(int duration, int sightUpAmount)
         {
-            this.sightZeroCase = false;
+            //this.sightZeroCase = false;
             this.duration = duration;
             this.sightUpAmount = sightUpAmount;
         }
@@ -28,14 +28,14 @@ namespace RogueBasin.PlayerEffects
             LogFile.Log.LogEntry("SightUp start");
 
             //Sight radius is already maximum so don't do anything
-            if (player.SightRadius == 0)
+            /*if (player.SightRadius == 0)
             {
                 sightZeroCase = true;
             }
             else
             {
                 player.SightRadius += sightUpAmount;
-            }
+            }*/
             Game.MessageQueue.AddMessage("The darkness falls away in a glance.");
         }
 
@@ -45,16 +45,22 @@ namespace RogueBasin.PlayerEffects
         public override void OnEnd(Player player)
         {
             LogFile.Log.LogEntry("SightUp ended");
+            /*
             if (!sightZeroCase)
             {
                 player.SightRadius -= sightUpAmount;
-            }
+            }*/
             Game.MessageQueue.AddMessage("The shadows grow longer.");
         }
 
         protected override int GetDuration()
         {
             return duration;
+        }
+
+        public override int SightModifier()
+        {
+            return sightUpAmount;
         }
     }
 }

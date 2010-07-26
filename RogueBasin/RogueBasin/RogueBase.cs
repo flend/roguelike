@@ -187,8 +187,8 @@ namespace RogueBasin
                             if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
                                 Game.Dungeon.Player.CalculateCombatStats();
 
-                            //Check the 'on' status of special moves
-                            Game.Dungeon.CheckSpecialMoveValidity();
+                            //Check the 'on' status of special moves - now unnecessary?
+                            //Game.Dungeon.CheckSpecialMoveValidity();
 
                             ProfileEntry("Pre Screen Update");
 
@@ -2064,6 +2064,9 @@ namespace RogueBasin
                 Game.Dungeon.Player.Name = playerName;
                 Game.Dungeon.Player.PlayItemMovies = showMovies;
                 Game.Dungeon.Difficulty = diff;
+
+                //Do final player player
+                Game.Dungeon.Player.StartGameSetup();
 
                 //Move the player to the start location, triggering any triggers
                 Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);

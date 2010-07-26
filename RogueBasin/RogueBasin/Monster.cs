@@ -631,6 +631,16 @@ namespace RogueBasin
             return CombatResults.NeitherDied;
         }
 
+        /// <summary>
+        /// Calculate the derived (used by other functions) sight radius based on the player's NormalSightRadius and the light level of the dungeon level the monster is on
+        /// </summary>
+        public void CalculateSightRadius()
+        {
+            //Set vision
+            double sightRatio = NormalSightRadius / 5.0;
+            SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[LocationLevel].LightLevel * sightRatio);
+        }
+
         virtual public Color CreatureColor()
         {
             return ColorPresets.White;
