@@ -6,6 +6,7 @@ REPORTED: 14/07/10
 Often don't check for player in FOV (or even range).
 
 ** Spotting monsters
+REPORTED: 26/07/10
 
 If we spot a monster and it doens't see us, it will still be
 sleeping. It should probably wake up and act randomly.
@@ -18,12 +19,21 @@ Currently we give the player a cheat move when they enter a
 dungeon. Prob better to just make staircases take no time
 (timeAdvances = false)
 
+** CalculateCreatureFOV
+REPORTED: 26/07/10
+
+This is called a lot and not cached. It rarely changes (only when a
+creature has moved or similar) and could be very slow.
+
+We have both CalculateCreatureFOV(player) and CalculatePlayerFOV. I
+can't see any reason why these are called more than once per turn.
+
 ** Stamina can be above health
 
 Really true? Old bug report
 
 ** SightRadiusUp/Down
-
+FIXED: 26/07/10
 Should this use the new effect structure? Or is it OK? Not really sure
 how it works.
 

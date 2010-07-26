@@ -187,6 +187,17 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Monster isn't processed until it's been seen by the player
+        /// Used so that monsters don't wander around until necessary
+        /// Override as false for wake-on-sight or wake-on-attacked behaviour
+        /// </summary>
+        /// <returns></returns>
+        virtual protected bool WakesOnBeingSeen()
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Called when the creature is killed. Can be used to drop treasure. Not used at the moment.
         /// </summary>
         /// <returns></returns>

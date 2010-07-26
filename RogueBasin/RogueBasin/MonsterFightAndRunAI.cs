@@ -15,8 +15,9 @@ namespace RogueBasin
     }
 
     /// <summary>
-    /// Simple AI runs when it is down to a certain number of HP.
-    /// Now all the throwing AIs inherit off this as well
+    /// Base AI for all creatures.
+    /// Fighting creatures can use this class, other more complex classes inherit off it.
+    /// ProcessTurn() is currently used by all inherited classes
     /// </summary>
     public abstract class MonsterFightAndRunAI : Monster
     {
@@ -86,6 +87,23 @@ namespace RogueBasin
             else
             {
                 LastAttackedBy = Game.Dungeon.GetCreatureByUniqueID(LastAttackedByID);
+            }
+
+            //Creatures which sleep until seen (i.e. for ease of processing, not game effects)
+            if (Sleeping && WakesOnBeingSeen())
+            {
+                //Check to see if we should wake by looking for woken creatures in POV
+                //(when we drop through currentFOV may be unnecessarily recalculated)
+
+                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+                //Player sees up, wake up
+                if (currentFOV.CheckTileFOV(LocationMap.x, LocationMap.y))
+                {
+                    Sleeping = false;
+                    AIState = SimpleAIStates.RandomWalk;
+                    LogFile.Log.LogEntryDebug(this.Representation + " spotted by player so wakes", LogDebugLevel.Low);
+                }
             }
 
             //Sleeping creatures don't react until woken

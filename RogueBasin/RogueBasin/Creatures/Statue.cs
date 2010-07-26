@@ -133,5 +133,10 @@ namespace RogueBasin.Creatures
         {
             return false;
         }
+
+        protected override bool WakesOnBeingSeen()
+        {
+            return false;
+        }
     }
 }
