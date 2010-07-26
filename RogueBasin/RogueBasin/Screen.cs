@@ -20,6 +20,11 @@ namespace RogueBasin {
 
         public bool DebugMode { get; set; }
 
+        /// <summary>
+        /// Show flashes on attacks and thrown projectiles
+        /// </summary>
+        public bool CombatAnimations { get; set; }
+
         public bool SetTargetInRange = false;
 
         //Top left coord to start drawing the map at
@@ -166,6 +171,7 @@ namespace RogueBasin {
             Height = 35;
 
             DebugMode = false;
+            CombatAnimations = true;
 
             mapTopLeft = new Point(5, 5);
 
@@ -266,6 +272,11 @@ namespace RogueBasin {
         /// <param name="color"></param>
         public void DrawFlashLine(Point start, Point end, Color color)
         {
+            DrawFlashLine(start, end, color, 200, true);
+        }
+
+        public void DrawFlashLine(Point start, Point end, Color color, int timeMS, bool screenUpdate) {
+
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
@@ -311,17 +322,22 @@ namespace RogueBasin {
 
             rootConsole.ForegroundColor = normalForeground;
 
-            FlushConsole();
-
-            //Wait
-            TCODSystem.Sleep(200);
-
             //For screenshots only
             //KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
             //Redraw
-            Draw();
-            FlushConsole();
+            if (screenUpdate)
+            {
+                //Draw line overlay
+                FlushConsole();
+
+                //Wait
+                TCODSystem.Sleep((uint)timeMS);
+
+                //Draw normally
+                Draw();
+                FlushConsole();
+            }
         }
 
         /// <summary>
@@ -3010,5 +3026,97 @@ namespace RogueBasin {
 
 
 
+        /// <summary>
+        /// Do a missile attack animation. creature firing from start to finish in color
+        /// </summary>
+        /// <param name="LocationMap"></param>
+        /// <param name="point"></param>
+        /// <param name="point_3"></param>
+        /// <param name="color"></param>
+        internal void DrawMissileAttack(Monster creature, Point startPoint, Point endPoint, Color color)
+        {
+            if (!CombatAnimations)
+                return;
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw a flash line
+
+            int deltaX = endPoint.x - creature.LocationMap.x;
+            int deltaY = endPoint.y - creature.LocationMap.y;
+
+            //Get unit direction of delta
+            int unitX = deltaX > 0 ? 1 : (deltaX != 0 ? -1 : 0);
+            int unitY = deltaY > 0 ? 1 : (deltaY != 0 ? -1 : 0);
+
+            // (not used now)
+            Point newEndPoint = new Point(endPoint.x - unitX, endPoint.y - unitY);
+
+            DrawFlashLine(startPoint, endPoint, color, 0, false);
+
+            //Flash the attacker
+            MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
+            Color creatureColor = creature.CreatureColor();
+
+            if (creatureSquare.InPlayerFOV)
+            {
+                rootConsole.ForegroundColor = ColorPresets.Red;
+                rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
+            }
+
+            //Update the screen
+
+            //Draw flash
+            FlushConsole();
+
+            //Wait
+            TCODSystem.Sleep(100);
+
+            //Draw screen normally
+            Draw();
+            FlushConsole();
+        }
+
+        /// <summary>
+        /// Do a melee attack animation
+        /// </summary>
+        /// <param name="monsterFightAndRunAI"></param>
+        /// <param name="newTarget"></param>
+        internal void DrawMeleeAttack(Monster creature, Creature newTarget)
+        {
+            if (!CombatAnimations)
+                return;
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw screen normally
+            //Necessary since on a player move, his old position will show unless we do this
+            Draw();
+            FlushConsole();
+
+            //Flash the attacker
+            MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
+            Color creatureColor = creature.CreatureColor();
+
+            if (creatureSquare.InPlayerFOV)
+            {
+                rootConsole.ForegroundColor = ColorPresets.Red;
+                rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
+            }
+
+            //Update the screen
+
+            //Draw flash
+            FlushConsole();
+
+            //Wait
+            TCODSystem.Sleep(100);
+
+            //Draw screen normally
+            Draw();
+            FlushConsole();
+        }
     }
 }

@@ -20,7 +20,16 @@ namespace RogueBasin
         protected abstract double GetMissileRange();
 
         protected abstract string GetWeaponName();
-        
+
+        /// <summary>
+        /// Color of the projectile
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Color GetWeaponColor()
+        {
+            return ColorPresets.DarkGray;
+        }
+
         /// <summary>
         /// Override the following code from the hand to hand AI to give us some range
         /// </summary>
@@ -55,6 +64,9 @@ namespace RogueBasin
                     //It's a normal creature
                     result = AttackMonster(newTarget as Monster);
                 }
+
+                //Missile animation
+                Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
             }
             else
             {

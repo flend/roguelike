@@ -54,6 +54,15 @@ namespace RogueBasin
 
         protected abstract string GetWeaponName();
 
+        /// <summary>
+        /// Color of the projectile
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Color GetWeaponColor()
+        {
+            return ColorPresets.DarkGray;
+        }
+
         protected override string HitsPlayerCombatString()
         {
             string combatStr = "";
@@ -276,6 +285,9 @@ namespace RogueBasin
                         //It's a normal creature
                         result = AttackMonster(newTarget as Monster);
                     }
+
+                    //Missile animation
+                    Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
                 }
             }
             //Not so close we want to back away
@@ -311,6 +323,9 @@ namespace RogueBasin
                         //It's a normal creature
                         result = AttackMonster(newTarget as Monster);
                     }
+
+                    //Missile animation
+                    Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
                 }
             }
             //Not too close, not in range, chase the target
@@ -349,6 +364,9 @@ namespace RogueBasin
                     //It's a normal creature
                     result = AttackMonster(newTarget as Monster);
                 }
+
+                //Missile animation
+                Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
             }
 
             //Otherwise (or if the creature died), move towards it (or its corpse)

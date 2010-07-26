@@ -5,12 +5,6 @@ REPORTED: 14/07/10
 
 Often don't check for player in FOV (or even range).
 
-** Spotting monsters
-REPORTED: 26/07/10
-
-If we spot a monster and it doens't see us, it will still be
-sleeping. It should probably wake up and act randomly.
-
 *** STUFF TO CHECK
 
 ** Staircases
@@ -32,10 +26,10 @@ can't see any reason why these are called more than once per turn.
 
 Really true? Old bug report
 
-** SightRadiusUp/Down
-FIXED: 26/07/10
-Should this use the new effect structure? Or is it OK? Not really sure
-how it works.
+** Combat animations
+REPORTED: 26/07/10
+
+Seem to draw against a blank background when first entering dungeon?
 
 ** Stacking effects
 Do we want effects to stack? Presumably for equipment they need to -
@@ -51,26 +45,16 @@ special move, speed or monster effect.
 Is this really the best place to have all the enterDungeon stuff?
 E.g. sight and stuff. Better in Dungeon?
 
+REPORTED: 26/07/10
+
+Sight has been moved. There are still some movement functions that
+could be shared between stairs and some charming checks which could go
+into dungeon I guess.
+
 ** Marking uniques dead
 
 Saw some stuff in the log file that makes me think this might not
 work. Might want to have a UI screen to check easily.
-
-** Pick up lantern / eat berry
-
-Are the sight effects applied immediately (i.e. with the next screen
-update)?
-
-REPORTED: 26/07/10 
-
-Berry effects are applied immediately, but
-equipping a lantern isn't. It probably affects NormalSightRadius which
-isn't accessed until a dungeon staircase.
-
-FIXED: 26/07/10
-
-Both are now applied immediately. Moved sight into CalculateCombatStats()
-
 
 *** ENHANCEMENTS
 
@@ -103,18 +87,6 @@ ones (WallLeap). Could use the return value of DoMove().
 Currently it's not advancing for monsters not on the same
 level. Probably better to expand that to the same dungeon. Esp if we
 add more spells.
-
-** Creatures moving
-FIXED: 26/07/10
-
-Investigate not waking up creatures until the player sees them / they
-see a monser seen by the player. Otherwise groups tend to get broken
-up before the player ever sees them.
-
-** Spell is on check
-FIXED: 26/07/10
-
-Change to use types rather than objects.
 
 ** Special move enhancements
 
@@ -190,4 +162,44 @@ since it's less accident prone
 REPORTED: 14/06/10
 FIXED: 20/06/10
 Should use the new effect polling system. Need to check it works
+
+** Spotting monsters
+REPORTED: 26/07/10
+FIXED: 26/07/10
+
+If we spot a monster and it doens't see us, it will still be
+sleeping. It should probably wake up and act randomly.
+
+** Creatures moving
+FIXED: 26/07/10
+
+Investigate not waking up creatures until the player sees them / they
+see a monser seen by the player. Otherwise groups tend to get broken
+up before the player ever sees them.
+
+** Spell is on check
+FIXED: 26/07/10
+
+Change to use types rather than objects.
+
+** SightRadiusUp/Down
+FIXED: 26/07/10
+Should this use the new effect structure? Or is it OK? Not really sure
+how it works.
+
+** Pick up lantern / eat berry
+
+Are the sight effects applied immediately (i.e. with the next screen
+update)?
+
+REPORTED: 26/07/10 
+
+Berry effects are applied immediately, but
+equipping a lantern isn't. It probably affects NormalSightRadius which
+isn't accessed until a dungeon staircase.
+
+FIXED: 26/07/10
+
+Both are now applied immediately. Moved sight into CalculateCombatStats()
+
 
