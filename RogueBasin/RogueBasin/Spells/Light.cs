@@ -17,7 +17,7 @@ namespace RogueBasin.Spells
             Dungeon dungeon = Game.Dungeon;
 
             //Do we already have the effect?
-            if (player.IsEffectActive(new PlayerEffects.SightRadiusUp(0, 0)))
+            if (player.IsEffectActive(typeof(PlayerEffects.SightRadiusUp)))
             {
                 Game.MessageQueue.AddMessage("Spell already in effect.");
                 LogFile.Log.LogEntryDebug("Light already in effect", LogDebugLevel.Medium);

@@ -2223,6 +2223,9 @@ namespace RogueBasin
             //Instead set a flag on the monster and remove it after all turns are complete
             monster.Alive = false;
 
+            //Remove all existing effects
+            monster.RemoveAllEffects();
+
             //Notify the monster that it has been killed
             monster.NotifyMonsterDeath();
 

@@ -16,7 +16,7 @@ namespace RogueBasin.Spells
             Dungeon dungeon = Game.Dungeon;
 
             //Do we already have the effect?
-            if (player.IsEffectActive(new PlayerEffects.ArmourUp(0, 0)))
+            if (player.IsEffectActive(typeof(PlayerEffects.ArmourUp)))
             {
                 Game.MessageQueue.AddMessage("Spell already in effect.");
                 LogFile.Log.LogEntryDebug("Magic armour already in effect", LogDebugLevel.Medium);

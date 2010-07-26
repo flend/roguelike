@@ -486,7 +486,7 @@ namespace RogueBasin
                 }
 
                 //Don't do it twice
-                if(player.IsEffectActive(effectToUse)) {
+                if(player.IsEffectActive(effectToUse.GetType())) {
                     return false;
                 }
 
@@ -624,7 +624,7 @@ namespace RogueBasin
                     }
 
                     //Don't do it twice
-                    if (player.IsEffectActive(speedDownEff))
+                    if (player.IsEffectActive(typeof(PlayerEffects.SpeedDown)))
                     {
                         return false;
                     }
@@ -658,7 +658,7 @@ namespace RogueBasin
                     }
 
                     //Don't do it twice
-                    if (player.IsEffectActive(sightDownEff))
+                    if (player.IsEffectActive(typeof(PlayerEffects.SightRadiusDown)))
                     {
                         return false;
                     }

@@ -1061,17 +1061,13 @@ namespace RogueBasin
         /// </summary>
         /// <param name="itemType"></param>
         /// <returns></returns>
-        public bool IsEffectActive(PlayerEffect lookForEffect)
+        public bool IsEffectActive(Type effectType)
         {
-            foreach (PlayerEffect effect in effects)
-            {
-                if (Object.ReferenceEquals(effect.GetType(), lookForEffect.GetType()))
-                {
-                    return true;
-                }
+            PlayerEffect activeEffect = effects.Find(x => x.GetType() == effectType);
 
-            }
-
+            if (activeEffect != null)
+                return true;
+            
             return false;
         }
 
