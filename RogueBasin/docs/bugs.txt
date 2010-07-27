@@ -31,15 +31,6 @@ REPORTED: 26/07/10
 
 Seem to draw against a blank background when first entering dungeon?
 
-** Stacking effects
-Do we want effects to stack? Presumably for equipment they need to -
-but that's handled differently. Otherwise we will need independent
-checks in drinking potions / BurstOfSpeed etc. that they are not
-already on. In that case it's possible to allow stacking by making a
-slightly different Effect - e.g. SpecialMoveSpeedUp &
-PotionSpeedUp. Or put a flag in Effects if they came from a potion, or
-special move, speed or monster effect.
-
 ** StaircaseEntry
 
 Is this really the best place to have all the enterDungeon stuff?
@@ -58,10 +49,6 @@ work. Might want to have a UI screen to check easily.
 
 *** ENHANCEMENTS
 
-** Spell check
-
-Need to spell check plot docs - aspell?
-
 ** Magic effects
 REPORTED: 26/07/10
 
@@ -73,6 +60,16 @@ the class.
 Note that we will need to change ApplyEffect() since it current only
 uses the worse and best effects. I don't think anything uses this
 querk?
+
+-- From older entry on stacking
+
+Do we want effects to stack? Presumably for equipment they need to -
+but that's handled differently. Otherwise we will need independent
+checks in drinking potions / BurstOfSpeed etc. that they are not
+already on. In that case it's possible to allow stacking by making a
+slightly different Effect - e.g. SpecialMoveSpeedUp &
+PotionSpeedUp. Or put a flag in Effects if they came from a potion, or
+special move, speed or monster effect.
 
 ** Item is here
 
@@ -134,7 +131,13 @@ Dragon + dungeon was very easy for high-level melee character
 Burst of speed is too short duration to be worth doing
 
 Ogres too easy?
- 	  
+
+** Respawning
+REPORTED: 27/07/10
+
+Want monsters to respawn gradually (probably based on time since last
+on level, up to maximum occupancy of normal occupancy). This should
+make escaping interesting + the injury penalty
 
 *** FIXED / RESOLVED
 
@@ -202,4 +205,8 @@ FIXED: 26/07/10
 
 Both are now applied immediately. Moved sight into CalculateCombatStats()
 
+** Spell check
+FIXED: 27/07/10
+
+Need to spell check plot docs - aspell?
 
