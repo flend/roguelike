@@ -180,21 +180,31 @@ namespace RogueBasin
                     return;
                 }
 
-                //In FOV - fire at the player
-                CombatResults result;
+                //In preference they will use their special ability rather than fighting
+                //If they don't have a special ability or choose not to use it will return false
 
-                if (newTarget == Game.Dungeon.Player)
-                {
-                    result = AttackPlayer(newTarget as Player);
-                }
-                else
-                {
-                    //It's a normal creature
-                    result = AttackMonster(newTarget as Monster);
-                }
+                //Special abilities are defined in derived classes
 
-                //Missile animation
-                Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
+                bool usingSpecial = UseSpecialAbility();
+
+                if (!usingSpecial)
+                {
+                    //In FOV - fire at the player
+                    CombatResults result;
+
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+
+                    //Missile animation
+                    Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
+                }
             }
 
             //Not in range, chase the target
@@ -202,6 +212,15 @@ namespace RogueBasin
             {
                 ContinueChasing(newTarget);
             }
+        }
+
+        /// <summary>
+        /// Does the creature have a special ability that they use instead of missiles?
+        /// </summary>
+        /// <returns>If the creature used special ability. Return false if no special ability.</returns>
+        protected virtual bool UseSpecialAbility()
+        {
+            return false;
         }
 
         /// <summary>

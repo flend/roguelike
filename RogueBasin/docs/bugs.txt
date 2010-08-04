@@ -1,10 +1,5 @@
 *** BUGS PRE 1.5
 
-** Monster special abilities
-REPORTED: 14/07/10
-
-Often don't check for player in FOV (or even range).
-
 *** STUFF TO CHECK
 
 ** Staircases
@@ -210,3 +205,10 @@ FIXED: 27/07/10
 
 Need to spell check plot docs - aspell?
 
+** Monster special abilities
+REPORTED: 14/07/10
+FIXED: 04/08/10
+
+Often don't check for player in FOV (or even range).
+
+Didn't seem to be true and now inherits off throwAndRun anyway.
