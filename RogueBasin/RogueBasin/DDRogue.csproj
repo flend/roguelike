@@ -336,6 +336,7 @@
     <Compile Include="Spells\MagicMissile.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Spells\ShowItems.cs" />
     <Compile Include="Spells\SlowMonster.cs" />
     <Compile Include="StringEquivalent.cs" />
     <Compile Include="MonsterThrowAndRunAI.cs" />

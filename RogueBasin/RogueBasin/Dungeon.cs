@@ -815,6 +815,8 @@ namespace RogueBasin
             spells.Add(new Spells.EnergyBlast());
             spells.Add(new Spells.Exit());
             spells.Add(new Spells.Light());
+            spells.Add(new Spells.ShowItems());
+
 
             foreach (Spell move in spells)
             {
@@ -2315,6 +2317,32 @@ namespace RogueBasin
             foreach (Monster monster in deadMonsters)
             {
                 monsters.Remove(monster);
+            }
+        }
+
+        /// <summary>
+        /// Set all items on the floor in this level to visible
+        /// </summary>
+        /// <param name="level"></param>
+        public void RevealItemsOnLevel(int level)
+        {
+            //Check level
+            if (level < 0 || level > levels.Count)
+            {
+                LogFile.Log.LogEntryDebug("RevealItemsOnLevel: Asked for non-existant level: " + level, LogDebugLevel.High);
+                return;
+            }
+
+            //Find all items on level on floor
+
+            List<Item> itemsOnLevel = items.FindAll(x => x.LocationLevel == level);
+            List<Item> itemsOnFloor = itemsOnLevel.FindAll(x => !x.InInventory);
+
+            Map map = levels[level];
+
+            foreach (Item item in itemsOnFloor)
+            {
+                map.mapSquares[item.LocationMap.x, item.LocationMap.y].SeenByPlayerThisRun = true;
             }
         }
 
