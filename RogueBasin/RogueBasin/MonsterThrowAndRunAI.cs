@@ -7,6 +7,7 @@ namespace RogueBasin
 {
     public abstract class MonsterThrowAndRunAI : MonsterSimpleThrowingAI
     {
+
         /// <summary>
         /// Override the following code from the simple throwing AI to include backing away
         /// </summary>
@@ -164,7 +165,7 @@ namespace RogueBasin
                     }
 
                     //Missile animation
-                    Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
+                    Screen.Instance.DrawMissileAttack(this, newTarget, GetWeaponColor());
                 }
             }
 
@@ -203,7 +204,7 @@ namespace RogueBasin
                     }
 
                     //Missile animation
-                    Screen.Instance.DrawMissileAttack(this, new Point(LocationMap.x, LocationMap.y), new Point(newTarget.LocationMap.x, newTarget.LocationMap.y), GetWeaponColor());
+                    Screen.Instance.DrawMissileAttack(this, newTarget, GetWeaponColor());
                 }
             }
 

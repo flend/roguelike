@@ -3033,7 +3033,7 @@ namespace RogueBasin {
         /// <param name="point"></param>
         /// <param name="point_3"></param>
         /// <param name="color"></param>
-        internal void DrawMissileAttack(Monster creature, Point startPoint, Point endPoint, Color color)
+        internal void DrawMissileAttack(Monster originCreature, Creature target, Color color)
         {
             if (!CombatAnimations)
                 return;
@@ -3041,41 +3041,87 @@ namespace RogueBasin {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
+            //We need to path find a flash line so it doesn't go through any walls
+
+            //To do: cache the map
+
+            //Generate path object
+            TCODPathFinding path = new TCODPathFinding(Game.Dungeon.FOVs[originCreature.LocationLevel], 1.0);
+            path.ComputePath(originCreature.LocationMap.x, originCreature.LocationMap.y, target.LocationMap.x, target.LocationMap.y);
+
             //Draw a flash line
 
-            int deltaX = endPoint.x - creature.LocationMap.x;
-            int deltaY = endPoint.y - creature.LocationMap.y;
-
-            //Get unit direction of delta
-            int unitX = deltaX > 0 ? 1 : (deltaX != 0 ? -1 : 0);
-            int unitY = deltaY > 0 ? 1 : (deltaY != 0 ? -1 : 0);
-
-            // (not used now)
-            Point newEndPoint = new Point(endPoint.x - unitX, endPoint.y - unitY);
-
-            DrawFlashLine(startPoint, endPoint, color, 0, false);
+            //Draw the screen as normal
+            Draw();
 
             //Flash the attacker
-            MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
-            Color creatureColor = creature.CreatureColor();
+            MapSquare creatureSquare = Game.Dungeon.Levels[originCreature.LocationLevel].mapSquares[originCreature.LocationMap.x, originCreature.LocationMap.y];
+            Color creatureColor = originCreature.CreatureColor();
 
             if (creatureSquare.InPlayerFOV)
             {
-                rootConsole.ForegroundColor = ColorPresets.Red;
-                rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
+                rootConsole.ForegroundColor = ColorPresets.White;
+                rootConsole.PutChar(mapTopLeft.x + originCreature.LocationMap.x, mapTopLeft.y + originCreature.LocationMap.y, originCreature.Representation);
             }
 
-            //Update the screen
+            //Calculate and draw the line overlay
 
-            //Draw flash
+            int x, y;
+            int lastX, lastY;
+            int targetX = target.LocationMap.x;
+            int targetY = target.LocationMap.y;
+
+            path.GetPathOrigin(out x, out y);
+            lastX = x; lastY = y;
+
+            rootConsole.ForegroundColor = color;
+
+            bool finishedPath = false;
+
+            do
+            {
+                finishedPath = path.WalkPath(ref x, ref y, false);
+
+                int deltaX = x - lastX;
+                int deltaY = y - lastY;
+
+                char drawChar = '-';
+
+                if (deltaX < 0 && deltaY < 0)
+                    drawChar = '\\';
+                else if (deltaX < 0 && deltaY > 0)
+                    drawChar = '/';
+                else if (deltaX > 0 && deltaY < 0)
+                    drawChar = '/';
+                else if (deltaX > 0 && deltaY > 0)
+                    drawChar = '\\';
+                else if (deltaY == 0)
+                    drawChar = '-';
+                else if (deltaX == 0)
+                    drawChar = '|';
+
+                rootConsole.PutChar(mapTopLeft.x + x, mapTopLeft.y + y, drawChar);
+
+                lastX = x;
+                lastY = y;
+
+            } while (x != targetX || y != targetY);
+
+            path.Dispose();
+
+            rootConsole.ForegroundColor = normalForeground;
+
+            //Draw line overlay
             FlushConsole();
 
             //Wait
-            TCODSystem.Sleep(100);
+            TCODSystem.Sleep(200);
 
-            //Draw screen normally
+            //Draw normally
             Draw();
             FlushConsole();
+            
+           
         }
 
         /// <summary>

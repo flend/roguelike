@@ -2620,6 +2620,8 @@ namespace RogueBasin
         /// Returns the direction to go in (+-xy) for the next step towards the target
         /// If there's no route at all, return -1, -1. Right now we throw an exception for this, since it shouldn't happen in a connected dungeon
         /// If there's a route but its blocked by a creature return the originCreature's coords
+        /// 
+        /// Possibly to cache the original path finding map (before we start setting squares unwalkable)
         /// </summary>
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
