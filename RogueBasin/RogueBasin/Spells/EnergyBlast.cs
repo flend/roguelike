@@ -37,16 +37,21 @@ namespace RogueBasin.Spells
                 
                 //Attack the monster
 
-
-                Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(target.x, target.y), ColorPresets.Crimson);
-
-
                 //Check magic resistance
                 bool monsterResisted = CheckMagicResistance(squareContents.monster);
+                
+                //Draw attack
+                CombatResults results = CombatResults.DefenderDamaged;
+                if (monsterResisted)
+                {
+                    results = CombatResults.DefenderUnhurt;
+                }
+
+                Screen.Instance.DrawMissileAttack(player, squareContents.monster, results, ColorPresets.Crimson);
+
+                //If monster resisted no damage                
                 if (monsterResisted)
                     return true;
-
-                //Damage is based on Magic Stat (and creature's magic resistance)
 
                 //Damage base
                 
@@ -81,15 +86,6 @@ namespace RogueBasin.Spells
                 //Apply damage
                 player.ApplyDamageToMonster(squareContents.monster, damage, true, false);
                 
-
-                //Graphical effect
-                /*
-                TCODLineDrawing.InitLine(player.LocationMap.x, player.LocationMap.y, target.x, target.y);
-                int firstXStep = 0;
-                int firstYStep = 0;
-
-                TCODLineDrawing.StepLine(ref firstXStep, ref firstYStep);*/
-
                 return true;
             }
 

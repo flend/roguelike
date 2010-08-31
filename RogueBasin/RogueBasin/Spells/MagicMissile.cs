@@ -37,22 +37,21 @@ namespace RogueBasin.Spells
 
                 Monster monster = squareContents.monster;
 
-                //No magic resistance for magic missile - changed
-
-
-                Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(target.x, target.y), ColorPresets.Violet);
-
-
                 //Check magic resistance
-                bool monsterResisted = CheckMagicResistance(monster);
+                bool monsterResisted = CheckMagicResistance(squareContents.monster);
+
+                //Draw attack
+                CombatResults results = CombatResults.DefenderDamaged;
+                if (monsterResisted)
+                {
+                    results = CombatResults.DefenderUnhurt;
+                }
+
+                Screen.Instance.DrawMissileAttack(player, monster, results, ColorPresets.Crimson);
+
+                //If monster resisted no damage                
                 if (monsterResisted)
                     return true;
-
-                //Attack the monster
-
-                //Magic missile always hits
-
-                //Damage is based on Magic Stat (and creature's magic resistance)
 
                 //Damage base
                 

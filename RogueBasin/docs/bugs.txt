@@ -31,9 +31,10 @@ REPORTED: 30/08/10
 
 Do they work? I think so, they are called in the parent class. Check.
 
-** Flash lines
+** x targetting
 
-Use new pathfinding code
+Targets sleeping creatures if they are closest, which it probably
+shouldn't
 
 ** Path finding
 
