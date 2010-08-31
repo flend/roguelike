@@ -106,7 +106,7 @@ namespace RogueBasin.Creatures
             return new Creatures.Maleficarum();
         }
 
-        public override Color CreatureColor()
+        public override Color RepresentationColor()
         {
             return ColorPresets.Crimson;
         }

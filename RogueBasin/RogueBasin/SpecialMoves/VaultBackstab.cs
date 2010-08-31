@@ -230,7 +230,8 @@ namespace RogueBasin.SpecialMoves
             }
 
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 5, 0, 5 + bonus, -2 - bonus, true);
-            
+            Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
+
             //Move into their square if the monster dies as normal
             bool okToMoveIntoSquare = false;
             if (results == CombatResults.DefenderDied)

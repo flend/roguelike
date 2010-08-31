@@ -106,7 +106,7 @@ namespace RogueBasin.Creatures
             return new Peon();
         }
 
-        public override Color CreatureColor()
+        public override Color RepresentationColor()
         {
             return ColorPresets.GreenYellow;
         }

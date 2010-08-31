@@ -720,7 +720,7 @@ namespace RogueBasin
                     result = AttackMonster(newTarget as Monster);
                 }
 
-                Screen.Instance.DrawMeleeAttack(this, newTarget);
+                Screen.Instance.DrawMeleeAttack(this, newTarget, result);
 
                 //If we killed it, move into its square
                 if (result != CombatResults.DefenderDied)

@@ -26,6 +26,20 @@ REPORTED: 26/07/10
 
 Seem to draw against a blank background when first entering dungeon?
 
+** Combat animations for special ai creatures
+REPORTED: 30/08/10
+
+Do they work? I think so, they are called in the parent class. Check.
+
+** Flash lines
+
+Use new pathfinding code
+
+** Path finding
+
+GetPathTo() cache starting map. Also in DrawMissileAttack() - that one
+never changes so should be very cacheable
+
 ** StaircaseEntry
 
 Is this really the best place to have all the enterDungeon stuff?

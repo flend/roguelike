@@ -113,7 +113,7 @@ namespace RogueBasin.Creatures
             return new Creatures.Overlord();
         }
 
-        public override Color CreatureColor()
+        public override Color RepresentationColor()
         {
             return ColorPresets.Yellow;
         }

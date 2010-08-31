@@ -691,7 +691,7 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage("Ouch, you hurt yourself.");
                 LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
-                return CombatResults.NeitherDied;
+                return CombatResults.DefenderDamaged;
             }
 
             //Miss
@@ -702,7 +702,7 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage(playerMsg2);
             LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
-            return CombatResults.NeitherDied;
+            return CombatResults.DefenderUnhurt;
         }
 
         /// <summary>

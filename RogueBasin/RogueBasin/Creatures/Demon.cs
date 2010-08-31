@@ -106,7 +106,7 @@ namespace RogueBasin.Creatures
             return new Demon();
         }
 
-        public override Color CreatureColor()
+        public override Color RepresentationColor()
         {
             return ColorPresets.Red;
         }

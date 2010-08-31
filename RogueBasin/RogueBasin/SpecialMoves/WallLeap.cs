@@ -185,6 +185,7 @@ namespace RogueBasin.SpecialMoves
 
 
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, leapDistance + 1 + bonus, 0, leapDistance + 1 + bonus, 0, true);
+            Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
 
             //Move the PC to the new location
             Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);

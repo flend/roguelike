@@ -121,7 +121,7 @@ namespace RogueBasin.Creatures
             return 2;
         }
 
-        public override Color CreatureColor()
+        public override Color RepresentationColor()
         {
             return ColorPresets.HotPink;
         }

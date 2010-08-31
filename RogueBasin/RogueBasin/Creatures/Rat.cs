@@ -106,7 +106,7 @@ namespace RogueBasin.Creatures
             return 1;
         }
 
-        public override Color CreatureColor()
+        public override Color RepresentationColor()
         {
             return ColorPresets.Coral;
         }

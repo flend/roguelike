@@ -2155,7 +2155,7 @@ namespace RogueBasin {
 
                 //Colour depending on FOV (for development)
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
-                Color creatureColor = creature.CreatureColor();
+                Color creatureColor = creature.RepresentationColor();
 
                 bool drawCreature = true;
 
@@ -3027,17 +3027,27 @@ namespace RogueBasin {
 
 
         /// <summary>
-        /// Do a missile attack animation. creature firing from start to finish in color
+        /// Do a missile attack animation. creature firing from start to finish in color.
+        /// Currently checks if the target and origin creature are in FOV but not the path itself
+        /// Currently only used for MvP attacks
         /// </summary>
         /// <param name="LocationMap"></param>
         /// <param name="point"></param>
         /// <param name="point_3"></param>
         /// <param name="color"></param>
-        internal void DrawMissileAttack(Monster originCreature, Creature target, Color color)
+        internal void DrawMissileAttack(Creature originCreature, Creature target, CombatResults result, Color color)
         {
             if (!CombatAnimations)
                 return;
 
+            //Check that the player can see the action
+
+            MapSquare creatureSquare = Game.Dungeon.Levels[originCreature.LocationLevel].mapSquares[originCreature.LocationMap.x, originCreature.LocationMap.y];
+            MapSquare targetSquare = Game.Dungeon.Levels[target.LocationLevel].mapSquares[target.LocationMap.x, target.LocationMap.y];
+
+            if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
+                return;
+            
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
@@ -3055,14 +3065,12 @@ namespace RogueBasin {
             Draw();
 
             //Flash the attacker
-            MapSquare creatureSquare = Game.Dungeon.Levels[originCreature.LocationLevel].mapSquares[originCreature.LocationMap.x, originCreature.LocationMap.y];
-            Color creatureColor = originCreature.CreatureColor();
-
+            /*
             if (creatureSquare.InPlayerFOV)
             {
                 rootConsole.ForegroundColor = ColorPresets.White;
                 rootConsole.PutChar(mapTopLeft.x + originCreature.LocationMap.x, mapTopLeft.y + originCreature.LocationMap.y, originCreature.Representation);
-            }
+            }*/
 
             //Calculate and draw the line overlay
 
@@ -3109,19 +3117,34 @@ namespace RogueBasin {
 
             path.Dispose();
 
+            //Flash the target if they were damaged
+            //Draw them in either case so that we overwrite the missile animation on the target square with the creature
+
+            if (targetSquare.InPlayerFOV)
+            {
+                if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
+                {
+                    rootConsole.ForegroundColor = ColorPresets.Red;
+                    rootConsole.PutChar(mapTopLeft.x + target.LocationMap.x, mapTopLeft.y + target.LocationMap.y, target.Representation);
+                }
+                else
+                {
+                    rootConsole.ForegroundColor = target.RepresentationColor();
+                    rootConsole.PutChar(mapTopLeft.x + target.LocationMap.x, mapTopLeft.y + target.LocationMap.y, target.Representation);
+                }
+            }
+
             rootConsole.ForegroundColor = normalForeground;
 
             //Draw line overlay
             FlushConsole();
 
             //Wait
-            TCODSystem.Sleep(200);
+            TCODSystem.Sleep(100);
 
             //Draw normally
             Draw();
-            FlushConsole();
-            
-           
+            FlushConsole();          
         }
 
         /// <summary>
@@ -3129,9 +3152,17 @@ namespace RogueBasin {
         /// </summary>
         /// <param name="monsterFightAndRunAI"></param>
         /// <param name="newTarget"></param>
-        internal void DrawMeleeAttack(Monster creature, Creature newTarget)
+        internal void DrawMeleeAttack(Creature creature, Creature newTarget, CombatResults result)
         {
             if (!CombatAnimations)
+                return;
+
+            //Check that the player can see the action
+
+            MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
+            MapSquare targetSquare = Game.Dungeon.Levels[newTarget.LocationLevel].mapSquares[newTarget.LocationMap.x, newTarget.LocationMap.y];
+
+            if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
                 return;
 
             //Get screen handle
@@ -3143,14 +3174,27 @@ namespace RogueBasin {
             FlushConsole();
 
             //Flash the attacker
-            MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
-            Color creatureColor = creature.CreatureColor();
+            /*
+            Color creatureColor = creature.RepresentationColor();
 
             if (creatureSquare.InPlayerFOV)
             {
-                rootConsole.ForegroundColor = ColorPresets.Red;
+                rootConsole.ForegroundColor = ColorPresets.White;
                 rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
             }
+            */
+            //Flash the attached creature
+
+            if (targetSquare.InPlayerFOV)
+            {
+                if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
+                {
+                    rootConsole.ForegroundColor = ColorPresets.Red;
+                    rootConsole.PutChar(mapTopLeft.x + newTarget.LocationMap.x, mapTopLeft.y + newTarget.LocationMap.y, newTarget.Representation);
+                }
+            }
+
+
 
             //Update the screen
 

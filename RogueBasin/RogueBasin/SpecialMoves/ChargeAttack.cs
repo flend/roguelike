@@ -187,6 +187,7 @@ namespace RogueBasin.SpecialMoves
             }
 
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
+            Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
 
             moveCounter = 0;
             moveReady = false;

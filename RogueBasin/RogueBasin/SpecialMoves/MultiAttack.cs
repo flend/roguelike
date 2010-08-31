@@ -270,6 +270,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
+            Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
 
             //Stop any complaints about the ID not being valid
             if (!target.Alive)

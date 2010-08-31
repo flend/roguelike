@@ -10,7 +10,7 @@ namespace RogueBasin
     /// </summary>
     public enum CombatResults
     {
-        AttackerDied, DefenderDied, BothDied, NeitherDied
+        AttackerDied, DefenderDied, BothDied, NeitherDied, DefenderDamaged, DefenderUnhurt
     }
 
     /// <summary>
@@ -551,7 +551,7 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage(playerMsg3);
                 LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
-                return CombatResults.NeitherDied;
+                return CombatResults.DefenderDamaged;
             }
 
             //Miss
@@ -561,7 +561,7 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage(playerMsg2);
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
-            return CombatResults.NeitherDied;
+            return CombatResults.DefenderUnhurt;
         }
 
         public virtual CombatResults AttackMonster(Monster monster)
@@ -629,7 +629,7 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage(messageStr);
                 LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
 
-                return CombatResults.NeitherDied;
+                return CombatResults.DefenderDamaged;
             }
 
             //Miss
@@ -639,7 +639,7 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage(messageStr);
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
-            return CombatResults.NeitherDied;
+            return CombatResults.DefenderUnhurt;
         }
 
         /// <summary>
@@ -651,13 +651,6 @@ namespace RogueBasin
             double sightRatio = NormalSightRadius / 5.0;
             SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[LocationLevel].LightLevel * sightRatio);
         }
-
-        virtual public Color CreatureColor()
-        {
-            return ColorPresets.White;
-        }
-
-
 
         /// <summary>
         /// Creature cost for level gen

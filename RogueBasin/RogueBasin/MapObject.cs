@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin
 {
@@ -74,6 +75,15 @@ namespace RogueBasin
             {
                 representation = value;
             }
+        }
+
+        /// <summary>
+        /// Colour for representation. Override in derived classes.
+        /// </summary>
+        /// <returns></returns>
+        virtual public Color RepresentationColor()
+        {
+            return ColorPresets.White;
         }
 
         /// <summary>

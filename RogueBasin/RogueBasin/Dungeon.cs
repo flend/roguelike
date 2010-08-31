@@ -2157,6 +2157,7 @@ namespace RogueBasin
                     {
                         //Attack the passive creature.
                         CombatResults results = player.AttackMonster(contents.monster);
+                        Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
                         if (results == CombatResults.DefenderDied)
                         {
                             okToMoveIntoSquare = false;
@@ -2168,6 +2169,7 @@ namespace RogueBasin
                         //Monster hostile 
 
                         CombatResults results = player.AttackMonster(contents.monster);
+                        Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
                         if (results == CombatResults.DefenderDied)
                         {
                             okToMoveIntoSquare = false;

@@ -117,7 +117,7 @@ namespace RogueBasin.Creatures
             return new Ogre();
         }
 
-        public override Color CreatureColor()
+        public override Color RepresentationColor()
         {
             return ColorPresets.Brown;
         }

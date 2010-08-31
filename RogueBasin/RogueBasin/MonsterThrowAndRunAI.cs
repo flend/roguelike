@@ -165,7 +165,7 @@ namespace RogueBasin
                     }
 
                     //Missile animation
-                    Screen.Instance.DrawMissileAttack(this, newTarget, GetWeaponColor());
+                    Screen.Instance.DrawMissileAttack(this, newTarget, result, GetWeaponColor());
                 }
             }
 
@@ -204,7 +204,7 @@ namespace RogueBasin
                     }
 
                     //Missile animation
-                    Screen.Instance.DrawMissileAttack(this, newTarget, GetWeaponColor());
+                    Screen.Instance.DrawMissileAttack(this, newTarget, result, GetWeaponColor());
                 }
             }
 
