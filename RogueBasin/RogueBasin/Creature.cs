@@ -66,6 +66,8 @@ namespace RogueBasin
         /// </summary>
         public const int turnTicks = 10;
 
+
+
         /// <summary>
         /// A list of all the equipment slots the creature has
         /// </summary>

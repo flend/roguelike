@@ -149,6 +149,31 @@ namespace RogueBasin
             dungeons[1].open = true;
         }
 
+        /// <summary>
+        /// Setup the dungeon level starts and unique status
+        /// </summary>
+        public void SetupDungeonStartAndEndDebug()
+        {
+                DungeonProfile thisDung = new DungeonProfile();
+
+                thisDung.dungeonStartLevel = 1;
+                thisDung.dungeonEndLevel = 1;
+
+                dungeons.Add(thisDung);
+    
+
+            /*
+            for (int i = 0; i < 6; i++)
+            {
+                level3UniqueStatus.Add(false);
+                level4UniqueStatus.Add(false);
+            }*/
+
+            //Setup the original open dungeons
+            dungeons[0].open = true;
+        
+        }
+
         public List<DungeonProfile> Dungeons
         {
             get

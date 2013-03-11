@@ -39,15 +39,19 @@ namespace RogueBasin
 
             SetupPlayer();
 
-            SetupMaps();
+            SetupMapsDebug();
+
+            SpawnCreaturesDebug();
+
+            //SetupMaps();
 
             //Uniques must be spawned before creatures (and followers)
-            SpawnUniques();
+            //SpawnUniques();
 
-            SpawnCreaturesAndItems();
+            //SpawnCreaturesAndItems();
 
             //Debug only
-            SpawnItems();
+            //SpawnItems();
 
             return dungeon;
         }
@@ -825,6 +829,33 @@ namespace RogueBasin
 
             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 0);
         }
+
+        private void SpawnCreaturesDebug()
+        {
+
+            LogFile.Log.LogEntry("Generating creatures...");
+
+            Dungeon dungeon = Game.Dungeon;
+
+            //Debug monsters
+
+            List<Monster> monstersToAdd = new List<Monster>();
+
+            monstersToAdd.Add(new Creatures.Goblin());
+           
+            foreach (Monster monster in monstersToAdd)
+            {
+                Point location = new Point();
+                do
+                {
+                    location = dungeon.RandomWalkablePointInLevel(0);
+                } while (!dungeon.AddMonster(monster, 0, location));
+
+            }
+
+            SetLightLevelUniversal(0, 0, 0);
+        }
+
 
          private void SpawnCreaturesAndItems() {
 
@@ -1622,6 +1653,58 @@ namespace RogueBasin
                 } while (!dungeon.AddItem(item, level, location));
             }
         }
+
+        /// <summary>
+        /// Adds levels and interconnecting staircases
+        /// </summary>
+        private void SetupMapsDebug()
+        {
+            Dungeon dungeon = Game.Dungeon;
+
+            //Levels
+
+            //Set up the maps here. Light levels are set up in SpawnXXXXCreatures methods. These set the dungeons light and the creature sight. Perhaps set light here - TODO
+
+            //Set up the levels. Needs to be done here so the wilderness is initialized properly.
+
+            Game.Dungeon.DungeonInfo.SetupDungeonStartAndEndDebug();
+
+            //Make the generators
+
+            MapGeneratorCave caveGen = new MapGeneratorCave();
+            MapGeneratorBSPCave ruinedGen = new MapGeneratorBSPCave();
+            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+            //Set width height of all maps to 80 / 25
+            caveGen.Width = 80;
+            caveGen.Height = 25;
+
+            ruinedGen.Width = 80;
+            ruinedGen.Height = 25;
+
+            hallsGen.Width = 80;
+            hallsGen.Height = 25;
+
+            //DUNGEON 1 - levels 1
+
+
+            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+            int levelNo = dungeon.AddMap(hallMap);
+
+            hallsGen.AddUpStaircaseOnly(levelNo);
+            hallsGen.AddExitStaircaseOnly(levelNo);
+
+            //PC starts at start location
+            dungeon.Player.LocationLevel = 0;
+            dungeon.Player.LocationMap = hallsGen.GetUpStaircaseLocation();
+
+            //Build TCOD maps
+            //Necessary so connectivity checks on items and monsters can work
+            //Only place where this happens now
+            CalculateWalkableAndTCOD();
+
+        }
+
 
         /// <summary>
         /// Adds levels and interconnecting staircases
