@@ -31,7 +31,7 @@ namespace RogueBasin
                  }
             }
 
-            if(backAwayFromTarget && CanMove()) {
+            if(backAwayFromTarget && CanMove() && WillPursue()) {
 
                 //Target is too close, so back away before firing
 
@@ -147,12 +147,16 @@ namespace RogueBasin
                 if (goodPath)
                 {
                     LocationMap = nextStep;
+                    SetHeadingToTarget(newTarget);
                 }
-                else
+                else if(WillAttack())
                 {
                     //If not, don't back away and attack
                     //(target in FOV)
                     CombatResults result;
+
+                    //Set heading to target
+                    SetHeadingToTarget(newTarget);
 
                     if (newTarget == Game.Dungeon.Player)
                     {
@@ -170,7 +174,7 @@ namespace RogueBasin
             }
 
             //Close enough to fire. Not backing away (either far enough away or chose not to)
-            else if (range < GetMissileRange() + 0.005)
+            else if (range < GetMissileRange() + 0.005 && WillAttack())
             {
                 //In range
 
@@ -192,6 +196,9 @@ namespace RogueBasin
                 {
                     //In FOV - fire at the player
                     CombatResults result;
+
+                    //Set heading to target
+                    SetHeadingToTarget(newTarget);
 
                     if (newTarget == Game.Dungeon.Player)
                     {
@@ -233,13 +240,14 @@ namespace RogueBasin
             return 100;
         }
 
-        //Could be replaced with the SimpleThrowingAI one since the debug check should never happen
         private void ContinueChasing(Creature newTarget)
         {
-            //If not, move towards the player
+            //Chase the player
+            //They are either out of range or out of FOV
+            //For now, pursuing creatures know how to move their FOV to get the player
 
-            //Return if we can't move
-            if (!CanMove())
+            //Return if we can't move or won't pursue
+            if (!CanMove() || !WillPursue())
                 return;
 
             //Find location of next step on the path towards them
@@ -247,25 +255,35 @@ namespace RogueBasin
 
             bool moveIntoSquare = true;
 
-            //If this is the same as the target creature's location, we are adjacent. Something is wrong, but attack anyway
+            //If this is the same as the target creature's location, we are adjacent. TODO: change our FOV instead of moving. 
+            //We are allowed to attack in this case. TODO: more fun if not?
             if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
             {
-                LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Adjacent to target and still moving towards", LogDebugLevel.High);
-                //This does appear to happen now due to the unusual shaped FOVs.
+                LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Adjacent to target so changing FOV only ", LogDebugLevel.Low);
+                
+                //This does appear to happen now due to the unusual shaped FOVs (i.e. adjacent but out of FOV)
+                SetHeadingToTarget(newTarget);
+
                 //Setting this flag stops us moving on top of another creature
                 moveIntoSquare = false;
 
-                //Fire at the player
-                CombatResults result;
+                if (WillAttack())
+                {
+                    //Fire at the player
+                    CombatResults result;
 
-                if (newTarget == Game.Dungeon.Player)
-                {
-                    result = AttackPlayer(newTarget as Player);
-                }
-                else
-                {
-                    //It's a normal creature
-                    result = AttackMonster(newTarget as Monster);
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
+
+                    //Missile animation
+                    Screen.Instance.DrawMissileAttack(this, newTarget, result, GetWeaponColor());
                 }
             }
 
@@ -273,7 +291,9 @@ namespace RogueBasin
             if (moveIntoSquare)
             {
                 LocationMap = nextStep;
+                SetHeadingToTarget(newTarget);
             }
         }
+
     }
 }

@@ -21,9 +21,9 @@ namespace RogueBasin
         /// <param name="oldPoint"></param>
         /// <param name="newPoint"></param>
         /// <returns></returns>
-        public static double DirectionBetweenPoints(Point oldPoint, Point newPoint) {
+        public static double AngleFromOriginToTarget(Point origin, Point target) {
  
-            Point deltaDir = newPoint - oldPoint;
+            Point deltaDir = target - origin;
 
             int deltaX = deltaDir.x;
             int deltaY = deltaDir.y;

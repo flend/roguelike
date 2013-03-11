@@ -80,12 +80,15 @@ namespace RogueBasin
             set
             {
                 //If we have a previous location, set the creature's heading
+                
+                //Handled in the AI, since it has more useful information about where to point
+                /*
                 if (LocationMap != null)
                 {
-                    this.Heading = DirectionUtil.DirectionBetweenPoints(LocationMap, value);
+                    this.Heading = DirectionUtil.AngleFromOriginToTarget(LocationMap, value);
                     LogFile.Log.LogEntryDebug("Creature: " + this.Representation.ToString() + " Returned direction: " + this.Heading.ToString(), LogDebugLevel.Low);
                 }
-
+                */
                 base.LocationMap = value;
             }
         }

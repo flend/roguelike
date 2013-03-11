@@ -502,6 +502,7 @@ namespace RogueBasin
                         //Move if allowed
                         if (okToMoveIntoSquare)
                         {
+                            SetHeadingToMapSquare(newLocation);
                             LocationMap = newLocation;
                         }
                     }
@@ -655,6 +656,7 @@ namespace RogueBasin
                 //If we found a good path, walk it
                 if (goodPath)
                 {
+                    SetHeadingToMapSquare(nextStep);
                     LocationMap = nextStep;
                 }
                 else
@@ -690,6 +692,23 @@ namespace RogueBasin
                 //Not charmed - pursue and attack
                 FollowAndAttack(newTarget);
             }
+        }
+
+        /// <summary>
+        /// Call before updating LocationMap. Points creature heading at location
+        /// </summary>
+        /// <param name="nextStep"></param>
+        protected void SetHeadingToMapSquare(Point nextStep)
+        {
+            Heading = DirectionUtil.AngleFromOriginToTarget(LocationMap, nextStep);
+        }
+
+        /// <summary>
+        /// Call after updating LocationMap. Aim at the target
+        /// </summary>
+        protected void SetHeadingToTarget(Creature newTarget)
+        {
+            Heading = DirectionUtil.AngleFromOriginToTarget(this.LocationMap, newTarget.LocationMap);
         }
 
         protected virtual void FollowAndAttack(Creature newTarget)
@@ -744,6 +763,7 @@ namespace RogueBasin
                 if (moveIntoSquare && CanMove())
                 {
                     LocationMap = nextStep;
+                    SetHeadingToTarget(newTarget);
                 }
             }
             else {
@@ -779,6 +799,7 @@ namespace RogueBasin
             if (moveIntoSquare)
             {
                 LocationMap = nextStep;
+                SetHeadingToTarget(player);
             }
         }
     
