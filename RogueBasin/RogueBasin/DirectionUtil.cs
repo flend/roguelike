@@ -112,6 +112,37 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Return a vector (integer direction, length not necessarily 1) in the direction
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        public static Point VectorFromDirection(Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.N:
+                    return new Point(0, -1);
+                case Direction.NE:
+                    return new Point(1, -1);
+                case Direction.E:
+                    return new Point(1, 0);
+                case Direction.SE:
+                    return new Point(1, 1);
+                case Direction.S:
+                    return new Point(0, 1);
+                case Direction.SW:
+                    return new Point(-1, 1);
+                case Direction.W:
+                    return new Point(-1, 0);
+                case Direction.NW:
+                    return new Point(-1, -1);
+                default:
+                    //Impossible
+                    return new Point(0, 1);
+            }
+        }
+
+        /// <summary>
         /// Offset start by one square in direction of direction
         /// </summary>
         /// <param name="dir"></param>
@@ -119,29 +150,7 @@ namespace RogueBasin
         /// <returns></returns>
         public static Point NextPointFromDirection(Direction direction, Point start)
         {
-            switch (direction)
-            {
-                case Direction.N:
-                    return start + new Point(0, -1);
-                case Direction.NE:
-                    return start + new Point(1, -1);
-                case Direction.E:
-                    return start + new Point(1, 0);
-                case Direction.SE:
-                    return start + new Point(1, 1);
-                case Direction.S:
-                    return start + new Point(0, 1);
-                case Direction.SW:
-                    return start + new Point(-1, 1);
-                case Direction.W:
-                    return start + new Point(-1, 0);
-                case Direction.NW:
-                    return start + new Point(-1, -1);
-
-            }
-
-            //Impossible
-            return start;
+            return start + VectorFromDirection(direction);
         }
     }
 }
