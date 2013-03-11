@@ -15,20 +15,27 @@ namespace RogueBasin
     static public class DirectionUtil
     {
 
-        public static Direction DirectionBetweenPoints(Point oldPoint, Point newPoint) {
+        /// <summary>
+        /// Return angular heading we will be set to after a move
+        /// </summary>
+        /// <param name="oldPoint"></param>
+        /// <param name="newPoint"></param>
+        /// <returns></returns>
+        public static double DirectionBetweenPoints(Point oldPoint, Point newPoint) {
  
             Point deltaDir = newPoint - oldPoint;
 
             int deltaX = deltaDir.x;
             int deltaY = deltaDir.y;
 
+            /*
             //Ensure that single square moves are dealt with correctly
 
             if(Math.Abs(deltaX) >= -1 && Math.Abs(deltaX) <= 1 &&
                 Math.Abs(deltaY) >= -1 && Math.Abs(deltaY) <= 1) {
 
                 return DirectionUtil.DirectionFromMove(deltaX, deltaY);
-            }
+            }*/
 
             //Otherwise do by angle
 
@@ -37,6 +44,8 @@ namespace RogueBasin
 			if (deltaX < 0)
 				angle += Math.PI;
 
+            return angle;
+            /*
 			// NE: -3p/8 -> -pi/8
 			// E: -pi/8 -> pi/8
 			// SE: pi/8 -> 3pi/8
@@ -70,7 +79,7 @@ namespace RogueBasin
 				thisDirection = Direction.N;
 			}
 
-            return thisDirection;
+            return thisDirection;*/
 		}
 
         /// <summary>
@@ -79,7 +88,7 @@ namespace RogueBasin
         /// <param name="deltaX"></param>
         /// <param name="deltaY"></param>
         /// <returns></returns>
-        public static Direction DirectionFromMove(int deltaX, int deltaY)
+        public static double DirectionFromMove(int deltaX, int deltaY)
         {
             if(Math.Abs(deltaX) > 1 || Math.Abs(deltaY) > 1) {
 
@@ -88,26 +97,35 @@ namespace RogueBasin
                 throw new ApplicationException(error);
             }
 
+            // NE: -3p/8 -> -pi/8
+            // E: -pi/8 -> pi/8
+            // SE: pi/8 -> 3pi/8
+            // S: 3pi/8 -> 5pi/8
+            // SW: 5pi/8 -> 7pi/8
+            // W: 7pi/8 -> 9pi/8
+            // NW: 9pi/8 -> 11pi/8
+            // N: 11pi/8 -> 13pi/2 & -p/2 -> -3p/8
+
             if(deltaX == 0 && deltaY == -1)
-                return Direction.N;
+                return -1 * Math.PI / 2;
             if(deltaX == 1 && deltaY == -1)
-                return Direction.NE;
+                return -1 * Math.PI / 4;
             if(deltaX == 1 && deltaY == 0)
-                return Direction.E;
+                return 0;
             if(deltaX == 1 && deltaY == 1)
-                return Direction.SE;
+                return Math.PI / 4;
             if(deltaX == 0 && deltaY == 1)
-                return Direction.S;
+                return Math.PI / 2;
             if(deltaX == -1 && deltaY == 1)
-                return Direction.SW;
+                return 3 * Math.PI / 4;
             if(deltaX == -1 && deltaY == 0)
-                return Direction.W;
+                return Math.PI;
             if(deltaX == -1 && deltaY == -1)
-                return Direction.NW;
+                return 5 * Math.PI / 4;
 
             string error2 = "DirectionFromMove: Can't find heading (BUG) returning North";
             LogFile.Log.LogEntry(error2);
-            return Direction.N;
+            return -1 * Math.PI / 2;
 
         }
 
@@ -143,14 +161,45 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Offset start by one square in direction of direction
+        /// Find the square adjacent to start at the angle specified
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="start"></param>
         /// <returns></returns>
-        public static Point NextPointFromDirection(Direction direction, Point start)
+        public static List<Point> SurroundingPointsFromDirection(double angle, Point start)
         {
-            return start + VectorFromDirection(direction);
+
+            Vector3 unitVector = new Vector3(Math.Cos(angle), Math.Sin(angle), 0);
+
+            //Build dictionary of the angle of vectors to the surrounding spaces
+            List<KeyValuePair<double, Point>> surroundingSpaces = new List<KeyValuePair<double,Point>>();
+
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 2, new Point(0, -1)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 4, new Point(1, -1)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(0, new Point(1, 0)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI / 4, new Point(1, 1)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI / 2, new Point(0, 1)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(3 * Math.PI / 4, new Point(-1, 1)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI, new Point(-1, 0)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(5 * Math.PI / 4, new Point(-1, -1)));
+
+            //Sort the dictionary in terms of abs difference from the requested angle
+
+            List<KeyValuePair<double, Point>> myList = surroundingSpaces;
+
+            myList.Sort( (firstPair, nextPair) =>
+            {
+                return (Math.Abs(firstPair.Key - angle).CompareTo(Math.Abs(nextPair.Key - angle)));
+            });
+            
+            //Top 3 in dictionary ought to be the closest adjacent points to that direction
+            List<Point> retPoints = new List<Point>();
+
+            retPoints.Add(start + myList[0].Value);
+            retPoints.Add(start + myList[1].Value);
+            retPoints.Add(start + myList[2].Value);
+
+            return retPoints;
         }
     }
 }

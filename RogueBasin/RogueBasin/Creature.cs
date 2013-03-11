@@ -41,7 +41,7 @@ namespace RogueBasin
         /// Where the creature is facing. Set after move.
         /// Should be set on character creation (perhaps using helper function)
         /// </summary>
-        public Direction Heading { get; set; }
+        public double Heading { get; set; }
 
         /// <summary>
         /// Sight radius

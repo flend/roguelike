@@ -2208,18 +2208,21 @@ namespace RogueBasin {
                     rootConsole.PutChar(monsterX, monsterY, creature.Representation);
 
                     //Heading
-                    Point headingLoc = DirectionUtil.NextPointFromDirection(creature.Heading, new Point(monsterX, monsterY));
+                    List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY));
 
-                    //Check heading is drawable
-
-                    Map map = Game.Dungeon.Levels[creature.LocationLevel];
-
-                    LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
-
-                    if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
-                        && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)
+                    foreach (Point headingLoc in headingMarkers)
                     {
-                        rootConsole.PutChar(headingLoc.x, headingLoc.y, creature.HeadingRepresentation);
+                        //Check heading is drawable
+
+                        Map map = Game.Dungeon.Levels[creature.LocationLevel];
+
+                        LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
+
+                        if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
+                            && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)
+                        {
+                            rootConsole.PutChar(headingLoc.x, headingLoc.y, creature.HeadingRepresentation);
+                        }
                     }
                 }
             }

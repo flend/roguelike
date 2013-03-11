@@ -78,22 +78,21 @@ namespace RogueBasin
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        private bool TriangularFOV(Point origin, Direction direction, int range, int testPointX, int testPointY)
+        private bool TriangularFOV(Point origin, double direction, int range, int testPointX, int testPointY)
         {
             //To avoid problems normalizing 0 length vectors
             if (origin.x == testPointX && origin.y == testPointY)
                 return true;
 
             //Seed vector from direction
-            Point directionVector = DirectionUtil.VectorFromDirection(direction);
-            Vector3 directionVec = new Vector3(directionVector.x, directionVector.y, 0);
+            Vector3 directionVector = new Vector3(Math.Cos(direction), Math.Sin(direction), 0);
 
             //Vector to test point
             Vector3 testPointVec = new Vector3(testPointX - origin.x, testPointY - origin.y, 0);
 
             //Find angle between directionVec and test point vector
 
-            double dirAngle = Vector3.Angle(testPointVec, directionVec);
+            double dirAngle = Vector3.Angle(testPointVec, directionVector);
             
             //Is angle less than 50 deg? (more permissive than 45)
             if (Math.Abs(dirAngle) > Math.PI / 3.6)
