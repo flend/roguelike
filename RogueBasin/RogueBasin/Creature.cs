@@ -37,6 +37,7 @@ namespace RogueBasin
 
         public int LastAttackedByID { get; set; }
 
+        public CreatureFOV.CreatureFOVType FOVType { get; set; }
 
         /// <summary>
         /// Sight radius

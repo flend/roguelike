@@ -705,7 +705,7 @@ namespace RogueBasin
 
             double distance;
 
-            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             foreach (Monster creature in monsters)
             {
@@ -2507,7 +2507,7 @@ namespace RogueBasin
         /// Calculates the FOV for a creature
         /// </summary>
         /// <param name="creature"></param>
-        public TCODFov CalculateCreatureFOV(Creature creature)
+        public CreatureFOV CalculateCreatureFOV(Creature creature)
         {
             Map currentMap = levels[creature.LocationLevel];
             TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
@@ -2515,7 +2515,10 @@ namespace RogueBasin
             //Update FOV
             tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
-            return tcodFOV;
+            //Wrapper with game-specific FOV layer
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, tcodFOV, creature.FOVType);
+
+            return wrappedFOV;
 
         }
 

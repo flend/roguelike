@@ -15,8 +15,8 @@ namespace RogueBasin
         protected override void FollowAndAttack(Creature newTarget) {
             
             double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
-            
-            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
             bool backAwayFromTarget = false;
 

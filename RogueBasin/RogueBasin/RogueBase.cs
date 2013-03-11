@@ -1407,7 +1407,7 @@ namespace RogueBasin
             //Try to cast the spell
 
             //Get the FOV from Dungeon (this also updates the map creature FOV state)
-            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             //Try the last target
             if (lastSpellTarget != null)

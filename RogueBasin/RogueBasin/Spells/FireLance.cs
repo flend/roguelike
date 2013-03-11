@@ -23,7 +23,7 @@ namespace RogueBasin.Spells
             //Check the target is within FOV
 
             //Get the FOV from Dungeon (this also updates the map creature FOV state)
-            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
 
             //Is the target in FOV
             if (!currentFOV.CheckTileFOV(target.x, target.y))

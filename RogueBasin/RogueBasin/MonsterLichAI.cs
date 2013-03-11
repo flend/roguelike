@@ -99,7 +99,7 @@ namespace RogueBasin
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
 
                 //Get the FOV from Dungeon (this also updates the map creature FOV state)
-                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
                 //currentFOV.CalculateFOV(LocationMap.x, LocationMap.y, SightRadius);
 
                 //Check for other creatures within this creature's FOV

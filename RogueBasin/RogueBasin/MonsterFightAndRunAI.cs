@@ -95,7 +95,7 @@ namespace RogueBasin
                 //Check to see if we should wake by looking for woken creatures in POV
                 //(when we drop through currentFOV may be unnecessarily recalculated)
 
-                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
                 //Player sees up, wake up
                 if (currentFOV.CheckTileFOV(LocationMap.x, LocationMap.y))
@@ -112,7 +112,7 @@ namespace RogueBasin
                 //Check to see if we should wake by looking for woken creatures in POV
                 //(when we drop through currentFOV may be unnecessarily recalculated)
 
-                TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
                 foreach (Monster monster in Game.Dungeon.Monsters)
                 {
@@ -283,7 +283,7 @@ namespace RogueBasin
                     //Won't attack passive creatures (otherwise will de-passify them and it would be annoying)
 
                     //Look for creatures in FOV
-                    TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
                     //List will contain monsters & player
                     List<Monster> monstersInFOV = new List<Monster>();
@@ -355,7 +355,7 @@ namespace RogueBasin
                     //Normal fighting behaviour
 
                     //Find creatures & PC in FOV
-                    TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
                     List<Creature> monstersInFOV = new List<Creature>();
 
