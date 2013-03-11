@@ -18,7 +18,7 @@ namespace RogueBasin
 
         public MonsterSimpleAI()
         {
-            AIState = SimpleAIStates.RandomWalk;
+            AIState = SimpleAIStates.Patrol;
             currentTarget = null;
         }
         

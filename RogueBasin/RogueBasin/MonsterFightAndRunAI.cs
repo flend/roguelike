@@ -8,10 +8,19 @@ namespace RogueBasin
 {
     public enum SimpleAIStates
     {
-        RandomWalk,
+        Patrol,
+        InvestigateSound,
         Pursuit,
         Fleeing,
         Returning
+    }
+
+    public enum PatrolType
+    {
+        RandomWalk,
+        Static,
+        Rotate,
+        Waypoints
     }
 
     /// <summary>
@@ -26,7 +35,7 @@ namespace RogueBasin
         protected Creature currentTarget;
         public int currentTargetID = -1;
         protected int lastHitpoints;
-
+        
         /// <summary>
         /// Longest distance charmed creature will go away from the PC
         /// </summary>
@@ -37,9 +46,14 @@ namespace RogueBasin
         /// </summary>
         protected const double recoverDistance = 2.0;
 
+        /// <summary>
+        /// List of waypoints, may be used by the patrol AI
+        /// </summary>
+        protected List<Point> wayPoints = new List<Point>();
+
         public MonsterFightAndRunAI()
         {
-            AIState = SimpleAIStates.RandomWalk;
+            AIState = SimpleAIStates.Patrol;
             currentTarget = null;
 
             lastHitpoints = MaxHitpoints;
@@ -56,18 +70,63 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Does the creature pursue other creatures?
+        /// </summary>
+        protected virtual bool WillPursue() {
+            //By default creatures pursue
+            return true;
+        }
+
+        /// <summary>
+        /// Does the creature has the ability to attack the PC and other creatures?
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Boolean WillAttack() {
+
+            return true;
+        }
+
+        /// <summary>
+        /// Override to set what patrol type (default move behaviour) this creature has
+        /// </summary>
+        /// <returns></returns>
+        protected virtual PatrolType GetPatrolType()
+        {
+            //RW may be safer than static as a default
+            return PatrolType.RandomWalk;
+        }
+
+        /// <summary>
+        /// If set to Rotate patrol, do we go clockwise or anti-clockwise?
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool GetPatrolRotationClockwise()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// To refactor
+        /// </summary>
+        /// <returns></returns>
+        protected virtual int GetPatrolRotationSpeed()
+        {
+            return 1;
+        }
+
+
+        /// <summary>
         /// Main loop called on each turn when we move
         /// </summary>
         public override void ProcessTurn()
         {
             //If in pursuit state, continue to pursue enemy until it is dead (or creature itself is killed) [no FOV used after initial target selected]
-            
-            //If in randomWalk state, look for new enemies in FOV.
-            //Closest enemy becomes new target
-            
-            //If no targets, move randomly
+            //TODO: add forget mode?
 
             Random rand = Game.Random;
+
+            //RESTORE STATE AFTER SAVE
+            //Creature references may be circular, and will crash serialization, so an index is used instead
 
             //Restore currentTarget reference from ID, in case we have reloaded
             if (currentTargetID == -1)
@@ -89,6 +148,10 @@ namespace RogueBasin
                 LastAttackedBy = Game.Dungeon.GetCreatureByUniqueID(LastAttackedByID);
             }
 
+            //TEST SLEEPING CREATURES
+            //Sleeping is a Creature state that is used like an AI state
+            //This is OK since we exit immediately
+
             //Creatures which sleep until seen (i.e. for ease of processing, not game effects)
             if (Sleeping && WakesOnBeingSeen())
             {
@@ -97,16 +160,16 @@ namespace RogueBasin
 
                 CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
-                //Player sees up, wake up
+                //Player sees monster, wake up
                 if (currentFOV.CheckTileFOV(LocationMap.x, LocationMap.y))
                 {
                     Sleeping = false;
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                     LogFile.Log.LogEntryDebug(this.Representation + " spotted by player so wakes", LogDebugLevel.Low);
                 }
             }
 
-            //Sleeping creatures don't react until woken
+            //Sleeping creatures don't react until they see a woken creature
             if (Sleeping && WakesOnSight())
             {
                 //Check to see if we should wake by looking for woken creatures in POV
@@ -133,19 +196,19 @@ namespace RogueBasin
                     if (!monster.Sleeping)
                     {
                         Sleeping = false;
-                        AIState = SimpleAIStates.RandomWalk;
+                        AIState = SimpleAIStates.Patrol;
                         LogFile.Log.LogEntryDebug(this.Representation + " spots awake " + monster.Representation + " and wakes", LogDebugLevel.Low);
                         break;
                     }
                 }
 
-                //Check the player
+                //Check if we can see the player
                 if (Game.Dungeon.Player.LocationLevel == this.LocationLevel &&
                     currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
                 {
                     //In FOV wake
                     Sleeping = false;
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                     LogFile.Log.LogEntryDebug(this.Representation + " spots player and wakes", LogDebugLevel.Low);
                 }
             }
@@ -154,7 +217,8 @@ namespace RogueBasin
             if (Sleeping)
                 return;
 
-            //If a charmed creature is returning to the PC, continue to do
+            //RETURNING - used when a charmed creature gets a long way from the PC
+
             if (AIState == SimpleAIStates.Returning)
             {
                 //Don't stop on an attack otherwise charmed creatures will be frozen in front of missile troops
@@ -173,7 +237,7 @@ namespace RogueBasin
                     if (distance <= recoverDistance)
                     {
                         //Reset AI and fall through
-                        AIState = SimpleAIStates.RandomWalk;
+                        AIState = SimpleAIStates.Patrol;
                         LogFile.Log.LogEntryDebug(this.Representation + " close enough to PC", LogDebugLevel.Medium);
                     }
                     
@@ -181,6 +245,8 @@ namespace RogueBasin
                     FollowPC();
                 //}
             }
+
+            //PURSUIT MODES - Pursuit [active] and Fleeing [temporarily fleeing, will return to target]
 
             if (AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit)
             {
@@ -191,41 +257,41 @@ namespace RogueBasin
                 //still required?
                 if (currentTarget == null)
                 {
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
 
                 //Is target yet living?
                 else if (currentTarget.Alive == false)
                 {
                     //If not, go to non-chase state
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 //Charmed creatures should not attack other charmed creatures
                 else if (Charmed && targetMonster != null && targetMonster.Charmed)
                 {
                     //Go to non-chase state
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 //Is target on another level (i.e. has escaped down the stairs)
                 else if (currentTarget.LocationLevel != this.LocationLevel)
                 {
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 //Have we just become charmed? Reset AI (stop chasing player)
                 else if (currentTarget == Game.Dungeon.Player && Charmed)
                 {
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 //Have we just become passive? Reset AI (stop chasing player)
                 else if (currentTarget == Game.Dungeon.Player && Passive)
                 {
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 //Have we just been attacked by a new enemy?
                 else if (LastAttackedBy != null && LastAttackedBy.Alive && LastAttackedBy != currentTarget)
                 {
                     //Reset the AI for now
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 else
                 {
@@ -235,46 +301,15 @@ namespace RogueBasin
                 }
             }
             
-            //Initial state. Could be drop through from above
+            //CHECK SOUNDS AND MOVE TO INVESTIGATE STATE
+            //if yes, change state, act and return
 
-            if(AIState == SimpleAIStates.RandomWalk) {
-                //RandomWalk state
+            //PATROL STATE - MOVE WHEN NOT ACTIVELY ENGAGED WITH ANOTHER CREATURE
 
-                //Search an area of sightRadius on either side for creatures and check they are in the FOV
-
+            if(AIState == SimpleAIStates.Patrol) {
+     
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
                 
-                
-
-                //currentFOV.CalculateFOV(LocationMap.x, LocationMap.y, SightRadius);
-
-                //Check for other creatures within this creature's FOV
-                /*
-                int xl = LocationMap.x - SightRadius;
-                int xr = LocationMap.x + SightRadius;
-
-                int yt = LocationMap.y - SightRadius;
-                int yb = LocationMap.y + SightRadius;
-
-                //If sight is infinite, check all the map
-                if (SightRadius == 0)
-                {
-                    xl = 0;
-                    xr = currentMap.width;
-                    yt = 0;
-                    yb = currentMap.height;
-                }
-                
-                if (xl < 0)
-                    xl = 0;
-                if(xr >= currentMap.width)
-                    xr = currentMap.width - 1;
-                if (yt < 0)
-                    yt = 0;
-                if (yb >= currentMap.height)
-                    yb = currentMap.height - 1;
-                */
-
                 //AI branches here depending on if we are charmed or passive
 
                 if (this.Charmed)
@@ -348,7 +383,7 @@ namespace RogueBasin
                 else if (Passive)
                 {
                     //Passive - Won't attack the PC
-                    MoveRandomSquareNoAttack();
+                    DoPatrol();
                 }
                 else
                 {
@@ -388,31 +423,32 @@ namespace RogueBasin
                         }
                     }
 
-                    //Have we just been attacked by a new enemy?
+                    //Have we just been attacked by a new enemy? If so, respond to them
                     if (LastAttackedBy != null && LastAttackedBy.Alive && LastAttackedBy != currentTarget)
                     {
                         //Is this target within FOV? If so, attack it
-                        if(monstersInFOV.Contains(LastAttackedBy)) {
+                        if (monstersInFOV.Contains(LastAttackedBy))
+                        {
 
                             LogFile.Log.LogEntryDebug(this.Representation + " changes target to " + LastAttackedBy.Representation, LogDebugLevel.Medium);
                             AIState = SimpleAIStates.Pursuit;
                             ChaseCreature(LastAttackedBy);
                             return;
                         }
-                        else {
+                        else
+                        {
                             //Continue chasing whoever it was we were chasing last
                             if (currentTarget != null)
                             {
                                 AIState = SimpleAIStates.Pursuit;
                                 ChaseCreature(currentTarget);
                             }
-                                return;
+                            return;
                         }
                     }
-                    
-                    //The next bit could be tidied up now
 
-                    //Attack PC if seen
+                    //Pursue PC if seen
+                    //Technically, go into pursuit mode, which may not involve actual movement
                     if (monstersInFOV.Contains(Game.Dungeon.Player))
                     {
                         Creature closestCreature = Game.Dungeon.Player;
@@ -423,103 +459,93 @@ namespace RogueBasin
                     }
                     else
                     {
-                        //Otherwise just move at random
-                        MoveRandomSquareNoAttack();
-                    }
-                }
-
-                //COMMENT THIS
-                //If there are possible targets, find the closest and chase it
-                //Otherwise continue to move randomly
-                /*
-                if (creaturesInFOV.Count > 0)
-                {
-                    
-                    //Find the closest creature
-                    Creature closestCreature = null;
-                    double closestDistance = Double.MaxValue; //a long way
-
-                    foreach (Creature creature in creaturesInFOV)
-                    {
-                        double distanceSq = Math.Pow(creature.LocationMap.x - this.LocationMap.x, 2) +
-                            Math.Pow(creature.LocationMap.y - this.LocationMap.y, 2);
-
-                        double distance = Math.Sqrt(distanceSq);
-
-                        if (distance < closestDistance)
-                        {
-                            closestDistance = distance;
-                            closestCreature = creature;
-                        }
+                        //We haven't got anything to do and we can't see the PC
+                        //Do normal movement
+                        DoPatrol();
                     }
 
-
-                    //Start chasing this creature
-                    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Medium);
-                    ChaseCreature(closestCreature);
                 }
-                
-                  //UNCOMMENT THIS
-                //Current behaviour: only chase the PC
-                if(creaturesInFOV.Contains(Game.Dungeon.Player)) {
-                    Creature closestCreature = Game.Dungeon.Player;
-                    //Start chasing this creature
-                    LogFile.Log.LogEntryDebug(this.Representation + " chases " + closestCreature.Representation, LogDebugLevel.Low);
-                    AIState = SimpleAIStates.Pursuit;
-                    ChaseCreature(closestCreature);
-                 //END COMMENTING
-                }*/
-
-
             }
         }
 
-        protected void MoveRandomSquareNoAttack()
+        protected void DoPatrol()
         {
-            //Move randomly.
+            //Carry out patrol movement
 
             //Return if we can't move
             if (!CanMove())
                 return;
 
-            int direction = Game.Random.Next(9);
-
-            int moveX = 0;
-            int moveY = 0;
-
-            moveX = direction / 3 - 1;
-            moveY = direction % 3 - 1;
-
-            //If we're not moving quit at this point, otherwise the target square will be the one we're in
-            if (moveX == 0 && moveY == 0)
+            switch (GetPatrolType())
             {
-                return;
+                case PatrolType.Static:
+
+                    //Don't move
+                    return;
+
+                case PatrolType.Rotate:
+                    {
+
+
+                    }
+
+                    return;
+
+
+                case PatrolType.RandomWalk:
+                    {
+
+                        int direction = Game.Random.Next(9);
+
+                        int moveX = 0;
+                        int moveY = 0;
+
+                        moveX = direction / 3 - 1;
+                        moveY = direction % 3 - 1;
+
+                        //If we're not moving quit at this point, otherwise the target square will be the one we're in
+                        if (moveX == 0 && moveY == 0)
+                        {
+                            return;
+                        }
+
+                        //Check this is a valid move
+                        bool validMove = false;
+                        Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
+
+                        validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation);
+
+                        //Give up if this is not a valid move
+                        if (!validMove)
+                            return;
+
+                        //Check if the square is occupied by a PC or monster
+                        SquareContents contents = Game.Dungeon.MapSquareContents(LocationLevel, newLocation);
+                        bool okToMoveIntoSquare = false;
+
+                        if (contents.empty)
+                        {
+                            okToMoveIntoSquare = true;
+                        }
+
+                        //Move if allowed
+                        if (okToMoveIntoSquare)
+                        {
+                            LocationMap = newLocation;
+                        }
+                    }
+                    break;
+
+                case PatrolType.Waypoints:
+                    {
+                       
+
+
+                    }
+                    return;
+                    
             }
 
-            //Check this is a valid move
-            bool validMove = false;
-            Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
-
-            validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation);
-
-            //Give up if this is not a valid move
-            if (!validMove)
-                return;
-
-            //Check if the square is occupied by a PC or monster
-            SquareContents contents = Game.Dungeon.MapSquareContents(LocationLevel, newLocation);
-            bool okToMoveIntoSquare = false;
-
-            if (contents.empty)
-            {
-                okToMoveIntoSquare = true;
-            }
-
-            //Move if allowed
-            if (okToMoveIntoSquare)
-            {
-                LocationMap = newLocation;
-            }
         }
 
         private void ChaseCreature(Creature newTarget)
@@ -697,7 +723,7 @@ namespace RogueBasin
 
         protected virtual void FollowAndAttack(Creature newTarget)
         {
-            //Find location of next step on the path towards them
+            //Find location of next step on the path towards target
             
             Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
 
@@ -706,39 +732,53 @@ namespace RogueBasin
             //If this is the same as the target creature's location, we are adjacent and can attack
             if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
             {
-                //Attack the monster
-                //Ugly select here
-                CombatResults result;
+                //Can't move into square unless we kill the creature
+                moveIntoSquare = false;
 
-                if (newTarget == Game.Dungeon.Player)
-                {
-                    result = AttackPlayer(newTarget as Player);
-                }
-                else
-                {
-                    //It's a normal creature
-                    result = AttackMonster(newTarget as Monster);
-                }
+                //If we can attack, attack the monster or PC
+                if(WillAttack()) {
 
-                Screen.Instance.DrawMeleeAttack(this, newTarget, result);
+                    CombatResults result;
 
-                //If we killed it, move into its square
-                if (result != CombatResults.DefenderDied)
-                {
-                    moveIntoSquare = false;
-                }
+                    if (newTarget == Game.Dungeon.Player)
+                    {
+                        result = AttackPlayer(newTarget as Player);
+                    }
+                    else
+                    {
+                        //It's a normal creature
+                        result = AttackMonster(newTarget as Monster);
+                    }
 
-                //Exception for immortal player
-                if (newTarget == Game.Dungeon.Player && Game.Dungeon.PlayerImmortal)
-                {
-                    moveIntoSquare = false;
+                    Screen.Instance.DrawMeleeAttack(this, newTarget, result);
+
+                    //If we killed it, move into its square
+                    if (result == CombatResults.DefenderDied)
+                    {
+                        moveIntoSquare = true;
+                    }
+
+                    //Exception for immortal player
+                    if (newTarget == Game.Dungeon.Player && Game.Dungeon.PlayerImmortal)
+                    {
+                        moveIntoSquare = false;
+                    }
                 }
             }
 
             //Otherwise (or if the creature died), move towards it (or its corpse)
-            if (moveIntoSquare && CanMove())
-            {
-                LocationMap = nextStep;
+            if(WillPursue()) {
+                
+                //If we want to pursue, move towards the creature
+                if (moveIntoSquare && CanMove())
+                {
+                    LocationMap = nextStep;
+                }
+            }
+            else {
+                //If we don't we continue our normal Patrol route
+                //(we are set to Pursuit in the AI though)
+                DoPatrol();
             }
         }
 

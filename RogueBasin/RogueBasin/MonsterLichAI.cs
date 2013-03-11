@@ -22,7 +22,7 @@ namespace RogueBasin
 
         public MonsterLichAI()
         {
-            AIState = SimpleAIStates.RandomWalk;
+            AIState = SimpleAIStates.Patrol;
             currentTarget = null;
 
             Sleeping = true;
@@ -68,19 +68,19 @@ namespace RogueBasin
                 //Check we have a valid target (may not after reload)
                 if (currentTarget == null)
                 {
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
 
                 //Is target yet living?
                 else if (currentTarget.Alive == false)
                 {
                     //If not, go to non-chase state
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 //Is target on another level (i.e. has escaped down the stairs)
                 else if (currentTarget.LocationLevel != this.LocationLevel)
                 {
-                    AIState = SimpleAIStates.RandomWalk;
+                    AIState = SimpleAIStates.Patrol;
                 }
                 else
                 {
@@ -90,7 +90,7 @@ namespace RogueBasin
                 }
             }
 
-            if (AIState == SimpleAIStates.RandomWalk)
+            if (AIState == SimpleAIStates.Patrol)
             {
                 //RandomWalk state
 

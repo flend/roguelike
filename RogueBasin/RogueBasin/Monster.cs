@@ -86,7 +86,9 @@ namespace RogueBasin
 
             Charmed = false;
             Passive = false;
-            Sleeping = true;
+            
+            //In FlatlineRL monsters default to awake
+            Sleeping = false;
 
             Unique = false;
         }
