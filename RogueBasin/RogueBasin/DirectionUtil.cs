@@ -201,5 +201,30 @@ namespace RogueBasin
 
             return retPoints;
         }
+
+        /// <summary>
+        /// Rotate heading, ensuring we keep within the - pi / 2 -> 3 pi / 2 angular range used for headings.
+        /// All rotation of heading vectors should use this function
+        /// </summary>
+        /// <param name="heading"></param>
+        /// <param name="angleToRotate"></param>
+        /// <param name="clockwise"></param>
+        /// <returns></returns>
+        public static double RotateHeading(double heading, double angleToRotate, bool clockwise)
+        {
+            if (clockwise)
+            {
+                heading += angleToRotate;
+            }
+            else
+                heading -= angleToRotate;
+
+            if (heading < -Math.PI / 2)
+                heading += 2 * Math.PI;
+            if (heading > 3 * Math.PI / 2)
+                heading -= 2 * Math.PI;
+
+            return heading;
+        }
     }
 }

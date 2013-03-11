@@ -51,6 +51,12 @@ namespace RogueBasin
         /// </summary>
         protected List<Point> wayPoints = new List<Point>();
 
+        /// <summary>
+        /// For rotation patrol, how many turns since we last rotated?
+        /// </summary>
+        protected int rotationTurns = 0;
+
+
         public MonsterFightAndRunAI()
         {
             AIState = SimpleAIStates.Patrol;
@@ -67,51 +73,6 @@ namespace RogueBasin
             double distance = Math.Sqrt(distanceSq);
 
             return distance;
-        }
-
-        /// <summary>
-        /// Does the creature pursue other creatures?
-        /// </summary>
-        protected virtual bool WillPursue() {
-            //By default creatures pursue
-            return true;
-        }
-
-        /// <summary>
-        /// Does the creature has the ability to attack the PC and other creatures?
-        /// </summary>
-        /// <returns></returns>
-        protected virtual Boolean WillAttack() {
-
-            return true;
-        }
-
-        /// <summary>
-        /// Override to set what patrol type (default move behaviour) this creature has
-        /// </summary>
-        /// <returns></returns>
-        protected virtual PatrolType GetPatrolType()
-        {
-            //RW may be safer than static as a default
-            return PatrolType.RandomWalk;
-        }
-
-        /// <summary>
-        /// If set to Rotate patrol, do we go clockwise or anti-clockwise?
-        /// </summary>
-        /// <returns></returns>
-        protected virtual bool GetPatrolRotationClockwise()
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// To refactor
-        /// </summary>
-        /// <returns></returns>
-        protected virtual int GetPatrolRotationSpeed()
-        {
-            return 1;
         }
 
 
@@ -485,7 +446,17 @@ namespace RogueBasin
 
                 case PatrolType.Rotate:
                     {
+                        //Still waiting to rotate?
+                        if (rotationTurns != GetPatrolRotationSpeed())
+                        {
+                            rotationTurns++;
+                            return;
+                        }
 
+                        //Rotate this turn
+                        rotationTurns = 0;
+
+                        Heading = DirectionUtil.RotateHeading(Heading, GetPatrolRotationAngle(), GetPatrolRotationClockwise());
 
                     }
 
@@ -948,5 +919,63 @@ namespace RogueBasin
             currentTarget = null;
             currentTargetID = -1;
         }
+
+
+        /// <summary>
+        /// Does the creature pursue other creatures?
+        /// </summary>
+        protected virtual bool WillPursue()
+        {
+            //By default creatures pursue
+            return true;
+        }
+
+        /// <summary>
+        /// Does the creature has the ability to attack the PC and other creatures?
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Boolean WillAttack()
+        {
+
+            return true;
+        }
+
+        /// <summary>
+        /// Override to set what patrol type (default move behaviour) this creature has
+        /// </summary>
+        /// <returns></returns>
+        protected virtual PatrolType GetPatrolType()
+        {
+            //RW may be safer than static as a default
+            return PatrolType.RandomWalk;
+        }
+
+        /// <summary>
+        /// If set to Rotate patrol, do we go clockwise or anti-clockwise?
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool GetPatrolRotationClockwise()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// How many turns does it take to do one rotation
+        /// </summary>
+        /// <returns></returns>
+        protected virtual int GetPatrolRotationSpeed()
+        {
+            return 1;
+        }
+
+        /// <summary>
+        /// How many radians to turn in one rotation?
+        /// </summary>
+        /// <returns></returns>
+        protected virtual double GetPatrolRotationAngle()
+        {
+            return Math.PI / 4;
+        }
+
     }
 }

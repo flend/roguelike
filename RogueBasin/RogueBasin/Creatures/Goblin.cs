@@ -80,6 +80,21 @@ namespace RogueBasin.Creatures
             return CreatureFOV.CreatureFOVType.Triangular;
         }
 
+        protected override PatrolType GetPatrolType()
+        {
+            return PatrolType.Rotate;
+        }
+
+        protected override double GetPatrolRotationAngle()
+        {
+            return Math.PI / 8;
+        }
+
+        protected override int GetPatrolRotationSpeed()
+        {
+            return 2;
+        }
+
         protected override string GetWeaponName()
         {
             return "throws a dagger";
