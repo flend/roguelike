@@ -43,6 +43,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />
     <Compile Include="Creature.cs" />
     <Compile Include="CreatureEffect.cs" />

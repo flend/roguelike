@@ -43,7 +43,7 @@ namespace RogueBasin
         /// <summary>
         /// Point within the level the object is at
         /// </summary>
-        public Point LocationMap
+        virtual public Point LocationMap
         {
             get
             {
@@ -51,7 +51,7 @@ namespace RogueBasin
             }
             set
             {
-                locationMap = value;
+               locationMap = value;
             }
         }
 
@@ -74,6 +74,17 @@ namespace RogueBasin
             set
             {
                 representation = value;
+            }
+        }
+
+        /// <summary>
+        /// Character for the monster's heading. Can be overriden in derived classes.
+        /// </summary>
+        public char HeadingRepresentation
+        {
+            get
+            {
+                return '*';
             }
         }
 

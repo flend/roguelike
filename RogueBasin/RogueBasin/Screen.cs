@@ -2201,7 +2201,26 @@ namespace RogueBasin {
                     else
                         rootConsole.BackgroundColor = normalBackground;
 
-                    rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
+                    //Creature
+                    int monsterX = mapTopLeft.x + creature.LocationMap.x;
+                    int monsterY = mapTopLeft.y + creature.LocationMap.y;
+
+                    rootConsole.PutChar(monsterX, monsterY, creature.Representation);
+
+                    //Heading
+                    Point headingLoc = DirectionUtil.NextPointFromDirection(creature.Heading, new Point(monsterX, monsterY));
+
+                    //Check heading is drawable
+
+                    Map map = Game.Dungeon.Levels[creature.LocationLevel];
+
+                    LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
+
+                    if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
+                        && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)
+                    {
+                        rootConsole.PutChar(headingLoc.x, headingLoc.y, creature.HeadingRepresentation);
+                    }
                 }
             }
 

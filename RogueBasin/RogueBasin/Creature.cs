@@ -37,7 +37,16 @@ namespace RogueBasin
 
         public int LastAttackedByID { get; set; }
 
+        /// <summary>
+        /// What FOV we have in addition to the tcod
+        /// </summary>
         public CreatureFOV.CreatureFOVType FOVType { get; set; }
+
+        /// <summary>
+        /// Where the creature is facing. Set after move.
+        /// Should be set on character creation (perhaps using helper function)
+        /// </summary>
+        public Direction Heading { get; set; }
 
         /// <summary>
         /// Sight radius
@@ -66,7 +75,25 @@ namespace RogueBasin
         /// </summary>
         public const int turnTicks = 10;
 
+        /** For a creature, set heading when it moves */
+        public override Point LocationMap
+        {
+            get
+            {
+                return base.LocationMap;
+            }
+            set
+            {
+                //If we have a previous location, set the creature's heading
+                if (LocationMap != null)
+                {
+                    this.Heading = DirectionUtil.DirectionBetweenPoints(LocationMap, value);
+                    LogFile.Log.LogEntryDebug("Creature: " + this.Representation.ToString() + " Returned direction: " + this.Heading.ToString(), LogDebugLevel.Low);
+                }
 
+                base.LocationMap = value;
+            }
+        }
 
         /// <summary>
         /// A list of all the equipment slots the creature has
@@ -130,6 +157,8 @@ namespace RogueBasin
 
             NormalSightRadius = 5;
 
+            FOVType = CreatureFOV.CreatureFOVType.Base;
+
             inventory = new Inventory();
 
             equipmentSlots = new List<EquipmentSlotInfo>();
@@ -138,9 +167,20 @@ namespace RogueBasin
             UniqueID = 0;
 
             RandomStartTurnClock();
+
+            //By default set a random heading. Override from outside
+            SetRandomHeading();
         }
 
-                //Creatures start with a random amount in their turn clock. This stops them all moving simultaneously (looks strange if the player is fast)
+        private void SetRandomHeading()
+        {
+            int randX = Game.Random.Next(-1, 2);
+            int randY = Game.Random.Next(-1, 2);
+
+            Heading = DirectionUtil.DirectionFromMove(randX, randY);
+        }
+
+        //Creatures start with a random amount in their turn clock. This stops them all moving simultaneously (looks strange if the player is fast)
         private void RandomStartTurnClock()
         {
             turnClock = Game.Random.Next(turnClockLimit);
