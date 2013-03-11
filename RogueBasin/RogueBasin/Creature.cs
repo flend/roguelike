@@ -38,11 +38,6 @@ namespace RogueBasin
         public int LastAttackedByID { get; set; }
 
         /// <summary>
-        /// What FOV we have in addition to the tcod
-        /// </summary>
-        public CreatureFOV.CreatureFOVType FOVType { get; set; }
-
-        /// <summary>
         /// Where the creature is facing. Set after move.
         /// Should be set on character creation (perhaps using helper function)
         /// </summary>
@@ -156,8 +151,6 @@ namespace RogueBasin
             LastAttackedByID = -1;
 
             NormalSightRadius = 5;
-
-            FOVType = CreatureFOV.CreatureFOVType.Base;
 
             inventory = new Inventory();
 
@@ -273,6 +266,13 @@ namespace RogueBasin
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
         public abstract int DamageModifier();
+
+        /// <summary>
+        /// What FOV we have in addition to the tcod
+        /// </summary>
+        public virtual CreatureFOV.CreatureFOVType FOVType() { 
+            return CreatureFOV.CreatureFOVType.Base;
+        }
 
         /// <summary>
         /// Creature base speed

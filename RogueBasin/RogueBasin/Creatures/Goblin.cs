@@ -75,6 +75,11 @@ namespace RogueBasin.Creatures
             return 0;
         }
 
+        public override CreatureFOV.CreatureFOVType FOVType()
+        {
+            return CreatureFOV.CreatureFOVType.Triangular;
+        }
+
         protected override string GetWeaponName()
         {
             return "throws a dagger";

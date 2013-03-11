@@ -2541,7 +2541,7 @@ namespace RogueBasin
             tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
-            CreatureFOV wrappedFOV = new CreatureFOV(creature, tcodFOV, creature.FOVType);
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, tcodFOV, creature.FOVType());
 
             return wrappedFOV;
 
@@ -2549,7 +2549,7 @@ namespace RogueBasin
 
         /// <summary>
         /// Calculates the FOV for a creature if it was in the location
-        public TCODFov CalculateCreatureFOV(Creature creature, Point location)
+        public CreatureFOV CalculateCreatureFOV(Creature creature, Point location)
         {
             Map currentMap = levels[creature.LocationLevel];
             TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
@@ -2557,7 +2557,10 @@ namespace RogueBasin
             //Update FOV
             tcodFOV.CalculateFOV(location.x, location.y, creature.SightRadius);
 
-            return tcodFOV;
+            //Wrapper with game-specific FOV layer
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, tcodFOV, creature.FOVType(), location);
+
+            return wrappedFOV;
 
         }
 
@@ -2572,27 +2575,31 @@ namespace RogueBasin
                 return;
 
             Map currentMap = levels[creature.LocationLevel];
-            TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
+            //TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
            
             //Calculate FOV
-            tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
+            CreatureFOV creatureFov = Game.Dungeon.CalculateCreatureFOV(creature);
 
             //Only check sightRadius around the creature
-
+            /*
             int xl = creature.LocationMap.x - creature.SightRadius;
             int xr = creature.LocationMap.x + creature.SightRadius;
 
             int yt = creature.LocationMap.y - creature.SightRadius;
             int yb = creature.LocationMap.y + creature.SightRadius;
-
+            */
             //If sight is infinite, check all the map
-            if (creature.SightRadius == 0)
-            {
-                xl = 0;
-                xr = currentMap.width;
-                yt = 0;
-                yb = currentMap.height;
-            }
+            //if (creature.SightRadius == 0)
+            //{
+            //}
+
+            //Always check the whole map (now we have strange FOVs)
+            // (may not be necessary)
+
+            int xl = 0;
+            int xr = currentMap.width;
+            int yt = 0;
+            int yb = currentMap.height;
 
             if (xl < 0)
                 xl = 0;
@@ -2608,7 +2615,7 @@ namespace RogueBasin
                 for (int j = yt; j <= yb; j++)
                 {
                     MapSquare thisSquare = currentMap.mapSquares[i, j];
-                    bool inFOV = tcodFOV.CheckTileFOV(i, j);
+                    bool inFOV = creatureFov.CheckTileFOV(i, j);
                     if(inFOV)
                         thisSquare.InMonsterFOV = true;
                 }
@@ -2624,10 +2631,8 @@ namespace RogueBasin
             //Get TCOD to calculate the player's FOV
             Map currentMap = levels[Player.LocationLevel];
 
-            TCODFov tcodFOV = levelTCODMaps[Player.LocationLevel];
+            CreatureFOV tcodFOV = Game.Dungeon.CalculateCreatureFOV(player);
             
-            tcodFOV.CalculateFOV(Player.LocationMap.x, Player.LocationMap.y, Player.SightRadius);
-
             //Set the FOV flags on the map
             //Process the whole level, which effectively resets out-of-FOV areas
 

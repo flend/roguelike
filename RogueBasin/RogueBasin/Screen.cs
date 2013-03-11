@@ -1757,8 +1757,8 @@ namespace RogueBasin {
             RootConsole rootConsole = RootConsole.GetInstance();
 
             //Are we in town or the wilderness? Don't show stats
-            if (player.LocationLevel < 2)
-                return;
+            //if (player.LocationLevel < 2)
+            //    return;
 
             statsDisplayTopLeft = new Point(2, 31);
 

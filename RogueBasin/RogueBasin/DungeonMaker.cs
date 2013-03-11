@@ -842,10 +842,10 @@ namespace RogueBasin
             List<Monster> monstersToAdd = new List<Monster>();
 
             monstersToAdd.Add(new Creatures.Goblin());
-            monstersToAdd.Add(new Creatures.Goblin());
-            monstersToAdd.Add(new Creatures.Goblin());
-            monstersToAdd.Add(new Creatures.Goblin());
-            monstersToAdd.Add(new Creatures.Goblin());
+           // monstersToAdd.Add(new Creatures.Goblin());
+           // monstersToAdd.Add(new Creatures.Goblin());
+          //  monstersToAdd.Add(new Creatures.Goblin());
+//monstersToAdd.Add(new Creatures.Goblin());
            
             foreach (Monster monster in monstersToAdd)
             {
@@ -857,7 +857,7 @@ namespace RogueBasin
 
             }
 
-            SetLightLevelUniversal(0, 0, 0);
+            SetLightLevelUniversal(0, 0, 5);
         }
 
 

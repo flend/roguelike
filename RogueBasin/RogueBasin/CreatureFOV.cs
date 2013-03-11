@@ -16,6 +16,7 @@ namespace RogueBasin
         TCODFov tcodFOV;
         CreatureFOVType type;
         Creature creature;
+        Point overrideLocation = null;
 
         public CreatureFOV(Creature creature, TCODFov fov, CreatureFOVType creatureFOVType)
         {
@@ -24,9 +25,32 @@ namespace RogueBasin
             this.creature = creature;
         }
 
+        /// <summary>
+        /// This uses an overriden location for the creature
+        /// </summary>
+        /// <param name="creature"></param>
+        /// <param name="fov"></param>
+        /// <param name="creatureFOVType"></param>
+        /// <param name="locationX"></param>
+        /// <param name="locationY"></param>
+        public CreatureFOV(Creature creature, TCODFov fov, CreatureFOVType creatureFOVType, Point overrideLocation)
+        {
+            this.tcodFOV = fov;
+            this.type = creatureFOVType;
+            this.creature = creature;
+            this.overrideLocation = overrideLocation;
+        }
+
 
         public bool CheckTileFOV(int x, int y)
         {
+            //Check for overriden origin (creature) location
+            Point origin = creature.LocationMap;
+            if (overrideLocation != null)
+            {
+                origin = overrideLocation;
+            }
+
             //Check game-specific FOV
 
             bool gameFOVPass = true;
@@ -36,9 +60,8 @@ namespace RogueBasin
                     break;
 
                 case CreatureFOVType.Triangular:
-                    //gameFOVPass = TriangularFOV(creature.LocationMap, x, y);
+                    gameFOVPass = TriangularFOV(origin, creature.Heading, creature.SightRadius, x, y);
                     break;
-                    
             }
 
             if (!gameFOVPass)
@@ -57,18 +80,30 @@ namespace RogueBasin
         /// <returns></returns>
         private bool TriangularFOV(Point origin, Direction direction, int range, int testPointX, int testPointY)
         {
+            //To avoid problems normalizing 0 length vectors
+            if (origin.x == testPointX && origin.y == testPointY)
+                return true;
+
             //Seed vector from direction
             Point directionVector = DirectionUtil.VectorFromDirection(direction);
+            Vector3 directionVec = new Vector3(directionVector.x, directionVector.y, 0);
 
-            //Find angle between directionVector and test point vector
-            //Is angle less than 45 deg?
+            //Vector to test point
+            Vector3 testPointVec = new Vector3(testPointX - origin.x, testPointY - origin.y, 0);
 
-            //Find range of test point vector (pythag)
-            //Is range less than range?
+            //Find angle between directionVec and test point vector
 
-            //Need C# vector class
+            double dirAngle = Vector3.Angle(testPointVec, directionVec);
+            
+            //Is angle less than 50 deg? (more permissive than 45)
+            if (Math.Abs(dirAngle) > Math.PI / 3.6)
+                return false;
 
-            throw new NotImplementedException();
+            //Is magnitude of testPointVec < range?
+            if (testPointVec.Magnitude > range)
+                return false;
+
+            return true;
         }
 
         private bool LineFOV(Point origin, Direction direction, int range, int width, int testPointX, int testPointY)

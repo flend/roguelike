@@ -127,7 +127,7 @@ namespace RogueBasin
                     //Check that the target is visible from the square we are fleeing to
                     //This may prove to be too expensive
 
-                    TCODFov projectedFOV = Game.Dungeon.CalculateCreatureFOV(this, nextStep);
+                    CreatureFOV projectedFOV = Game.Dungeon.CalculateCreatureFOV(this, nextStep);
 
                     if (!projectedFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y))
                     {
@@ -251,6 +251,10 @@ namespace RogueBasin
             if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
             {
                 LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Adjacent to target and still moving towards", LogDebugLevel.High);
+                //This does appear to happen now due to the unusual shaped FOVs.
+                //Setting this flag stops us moving on top of another creature
+                moveIntoSquare = false;
+
                 //Fire at the player
                 CombatResults result;
 
