@@ -26,5 +26,15 @@ namespace RogueBasin
             LevelLocation = soundLevel;
         }
 
+        /// <summary>
+        /// Decayed magnitude of sound at WorldClock time passed in
+        /// </summary>
+        /// <param name="timeNow"></param>
+        /// <returns></returns>
+        public double DecayedMagnitude(long timeNow)
+        {
+            return Math.Max(0, (1000 - (timeNow - this.SoundTime)) / 1000.0);
+        }
+
     }
 }

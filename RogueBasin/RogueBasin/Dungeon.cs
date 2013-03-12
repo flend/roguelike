@@ -2595,6 +2595,12 @@ namespace RogueBasin
                 double soundRadiusD = Math.Max(soundMinSize, soundMaxSize * sEffect.SoundMagnitude);
                 int soundRadius = (int)Math.Ceiling(soundRadiusD);
 
+                //Decayed magnitude of sound
+                double soundDecay = sEffect.DecayedMagnitude(WorldClock);
+
+                if (soundDecay < 0.0001)
+                    continue;
+
                 //Draw circle around sound
 
                 int xl = sEffect.MapLocation.x - soundRadius;
@@ -2616,11 +2622,7 @@ namespace RogueBasin
                 {
                     for (int j = yt; j <= yb; j++)
                     {
-                        double soundDecay = Math.Max(0, (1000 - (WorldClock - sEffect.SoundTime)) / 1000.0);
-
-                        if(soundDecay < 0.0001)
-                            continue;
-
+                
                         MapSquare thisSquare = currentMap.mapSquares[i, j];
                         if ( Math.Sqrt( Math.Pow(i - sEffect.MapLocation.x, 2) + Math.Pow(j - sEffect.MapLocation.y, 2) ) <= soundRadiusD)
                         {
@@ -2663,7 +2665,7 @@ namespace RogueBasin
             //}
 
             //Always check the whole map (now we have strange FOVs)
-            // (may not be necessary)
+            // (may not be necessary) [and is certainly slow]
 
             int xl = 0;
             int xr = currentMap.width;
