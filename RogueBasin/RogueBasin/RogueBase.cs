@@ -99,7 +99,7 @@ namespace RogueBasin
                         //ProfileEntry("Pre event");
 
                         //Increment time on all global (dungeon) events
-                        Game.Dungeon.IncrementEventTime();
+                        //Game.Dungeon.IncrementEventTime();
 
                         //All creatures get IncrementTurnTime() called on them each worldClock tick
                         //They internally keep track of when they should take another turn
@@ -181,6 +181,9 @@ namespace RogueBasin
                                 Game.Dungeon.ShowCreatureFOVOnMap(monster);
                             }
 
+                            Game.Dungeon.ShowSoundsOnMap();
+
+
                             ProfileEntry("Post Monster POV");
 
                             //For effects that end to update the screen correctly
@@ -208,6 +211,7 @@ namespace RogueBasin
 
                             //Reset the creature FOV display
                             Game.Dungeon.ResetCreatureFOVOnMap();
+                            Game.Dungeon.ResetSoundOnMap();
 
                             //Game.MessageQueue.AddMessage("Finished PC move");
                             Game.Dungeon.PlayerHadBonusTurn = true;
@@ -443,10 +447,11 @@ namespace RogueBasin
                                     break;
 
                                 case 'K':
-                                    Game.Dungeon.FlipTerrain("river");
-                                    Game.Dungeon.FlipTerrain("forest");
-                                    Game.Dungeon.FlipTerrain("grave");
-                                    Game.Dungeon.FlipTerrain("final");
+                                    //Add a sound at the player's location
+                                    Game.Dungeon.AddSoundEffect(1.0, Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+                                    //refresh the sound display
+                                    Game.Dungeon.ShowSoundsOnMap();
+
                                     Screen.Instance.Update();
                                     break;
 
@@ -498,7 +503,7 @@ namespace RogueBasin
                                         LogFile.Log.DebugLevel = 1;
 
                                     LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
-
+                                    
                                     break;
 
                                 case 'T':

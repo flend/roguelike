@@ -361,9 +361,9 @@ namespace RogueBasin
         public bool PlayerHadBonusTurn { get; set; }
 
         /// <summary>
-        /// List of global events
+        /// List of global events, indexed by the time they occur
         /// </summary>
-        List<DungeonEffect> effects;
+        List<KeyValuePair<long, SoundEffect>> effects;
 
         Color defaultPCColor = ColorPresets.White;
 
@@ -375,7 +375,10 @@ namespace RogueBasin
             features = new List<Feature>();
             levelTCODMaps = new List<TCODFov>();
             //levelTCODMapsIgnoringClosedDoors = new List<TCODFov>();
-            effects = new List<DungeonEffect>();
+
+            ///DungeonEffects are indexed by the time that they occur
+            effects = new List<KeyValuePair<long, SoundEffect>>();
+
             specialMoves = new List<SpecialMove>();
             spells = new List<Spell>();
             HiddenNameInfo = new List<HiddenNameInfo>();
@@ -1712,7 +1715,7 @@ namespace RogueBasin
         /// <summary>
         /// For serialization only
         /// </summary>
-        public List<DungeonEffect> Effects
+        public List<KeyValuePair<long, SoundEffect>> Effects
         {
             get
             {
@@ -2528,6 +2531,16 @@ namespace RogueBasin
             }
         }
 
+        public void ResetSoundOnMap()
+        {
+            Map level = levels[Player.LocationLevel];
+
+            foreach (MapSquare sq in level.mapSquares)
+            {
+                sq.SoundMag = 0;
+            }
+        }
+
         /// <summary>
         /// Calculates the FOV for a creature
         /// </summary>
@@ -2561,6 +2574,62 @@ namespace RogueBasin
             CreatureFOV wrappedFOV = new CreatureFOV(creature, tcodFOV, creature.FOVType(), location);
 
             return wrappedFOV;
+
+        }
+
+        /// <summary>
+        /// Show all sounds on map for debug purposes
+        /// </summary>
+        public void ShowSoundsOnMap()
+        {
+            //Debug: show all sounds on the map
+
+            int soundMaxSize = 5;
+            int soundMinSize = 1;
+            
+            foreach (KeyValuePair<long, SoundEffect> effectPair in Game.Dungeon.Effects)
+            {
+                SoundEffect sEffect = effectPair.Value;
+
+                Map currentMap = levels[sEffect.LevelLocation];
+                double soundRadiusD = Math.Max(soundMinSize, soundMaxSize * sEffect.SoundMagnitude);
+                int soundRadius = (int)Math.Ceiling(soundRadiusD);
+
+                //Draw circle around sound
+
+                int xl = sEffect.MapLocation.x - soundRadius;
+                int xr = sEffect.MapLocation.x + soundRadius;
+
+                int yt = sEffect.MapLocation.y - soundRadius;
+                int yb = sEffect.MapLocation.y + soundRadius;
+
+                if (xl < 0)
+                    xl = 0;
+                if (xr >= currentMap.width)
+                    xr = currentMap.width - 1;
+                if (yt < 0)
+                    yt = 0;
+                if (yb >= currentMap.height)
+                    yb = currentMap.height - 1;
+
+                for (int i = xl; i <= xr; i++)
+                {
+                    for (int j = yt; j <= yb; j++)
+                    {
+                        double soundDecay = Math.Max(0, (1000 - (WorldClock - sEffect.SoundTime)) / 1000.0);
+
+                        if(soundDecay < 0.0001)
+                            continue;
+
+                        MapSquare thisSquare = currentMap.mapSquares[i, j];
+                        if ( Math.Sqrt( Math.Pow(i - sEffect.MapLocation.x, 2) + Math.Pow(j - sEffect.MapLocation.y, 2) ) <= soundRadiusD)
+                        {
+                            thisSquare.SoundMag = soundDecay;
+                        }
+                    }
+                }
+
+            }
 
         }
 
@@ -2989,29 +3058,58 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Increment time on all dungeon (global) events. Events that expire will run their onExit() routines and then delete themselves from the list
+        /// Add a dungeon-wide sound effect, occurring now on the WorldClock
+        /// mapLevel - dungeonLevel
+        /// soundMagnitude - 0 -> 1
+        /// mapLocation - mapLocation
         /// </summary>
-        internal void IncrementEventTime()
+        internal void AddSoundEffect(double soundMagnitude, int mapLevel, Point mapLocation)
         {
-            //Increment time on events and remove finished ones
-            List<DungeonEffect> finishedEffects = new List<DungeonEffect>();
-
-            foreach (DungeonEffect effect in effects)
-            {
-                effect.IncrementTime();
-
-                if (effect.HasEnded())
-                {
-                    finishedEffects.Add(effect);
-                }
-            }
-
-            //Remove finished effects
-            foreach (DungeonEffect effect in finishedEffects)
-            {
-                effects.Remove(effect);
-            }
+            effects.Add(new KeyValuePair<long, SoundEffect>(WorldClock, new SoundEffect(this, WorldClock, soundMagnitude, mapLevel, mapLocation)));
+            LogFile.Log.LogEntryDebug("Adding new sound mag: " + soundMagnitude.ToString() + " at level: " + mapLevel.ToString() + " loc: " + mapLocation.ToString(), LogDebugLevel.Medium);
         }
+
+        /// <summary>
+        /// Return sounds after (not including) a particular tick. Used to check for new sounds since last decision
+        /// </summary>
+        /// <param name="soundAfterThisTime"></param>
+        /// <returns></returns>
+        internal List<KeyValuePair<long, SoundEffect>> GetSoundsAfterTime(long soundAfterThisTime)
+        {
+            List<KeyValuePair<long, SoundEffect>> newSounds = new List<KeyValuePair<long, SoundEffect>>();
+
+            //Should do a binary search here
+
+            //Could cache the result
+
+            //SortedList doesn't let us do duplicate keys, so I need a filtering solution instead (inefficient)
+
+            foreach (KeyValuePair<long, SoundEffect> soundPair in effects)
+            {
+                if (soundPair.Key > soundAfterThisTime)
+                    newSounds.Add(soundPair);
+            }
+
+            /*
+            IList<long> keys = effects.Keys;
+            IList<SoundEffect> values = effects.Values;
+
+            int firstIndexGreater = keys.Count;
+            
+            for (int i = keys.Count - 1; i >= 0; i--)
+            {
+                if (keys[i] > soundAfterThisTime)
+                    firstIndexGreater = i;
+            }
+
+            for (int i = firstIndexGreater; i <= keys.Count; i++)
+            {
+                newSounds.Add(keys[i], values[i]);
+            }*/
+
+            return newSounds;
+        }
+
 
         /// <summary>
         /// Return a (the first) feature at this location or null. Ignores decorativefeatures

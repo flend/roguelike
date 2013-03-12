@@ -1004,5 +1004,30 @@ namespace RogueBasin
             return Math.PI / 4;
         }
 
+        //For serialisation
+        public List<Point> WayPoints
+        {
+            get
+            {
+                return wayPoints;
+            }
+            set
+            {
+                wayPoints = value;
+            }
+        }
+
+        //For serialisation
+        public int RotationTurns
+        {
+            get
+            {
+                return rotationTurns;
+            }
+            set
+            {
+                rotationTurns = value;
+            }
+        }
     }
 }

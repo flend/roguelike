@@ -84,6 +84,7 @@ namespace RogueBasin {
 
         Color messageColor = ColorPresets.White;
 
+        Color soundColor = ColorPresets.Yellow;
 
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
@@ -724,14 +725,6 @@ namespace RogueBasin {
             //Draw targetting cursor
             if (targettingMode)
                 DrawTargettingCursor();
-
-            //If we're in town draw town overlays
-            /*
-            if (Game.Dungeon.Player.LocationLevel == 0)
-            {
-                DrawCalendar();
-                DrawStatsBox();
-            }*/
 
             //Draw any overlay screens
             if (displayInventory)
@@ -2439,9 +2432,16 @@ namespace RogueBasin {
                     //Monster FOV in debug mode
                     if (DebugMode)
                     {
+                        //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
                             drawColor = Color.Interpolate(drawColor, ColorPresets.Red, 0.6);
+                        }
+
+                        //Draw sounds
+                        if (map.mapSquares[i, j].SoundMag > 0.0001)
+                        {
+                            drawColor = Color.Interpolate(drawColor, ColorPresets.Yellow, map.mapSquares[i, j].SoundMag);
                         }
                     }
                     rootConsole.ForegroundColor = drawColor;

@@ -65,6 +65,11 @@ namespace RogueBasin
         {
             return new Point(i.x + j.x, i.y + j.y);
         }
+
+        public override string ToString()
+        {
+            return "(x: " + this.x + ",y: " + this.y + ")";
+        }
     }
     
     public enum MapTerrain
@@ -236,6 +241,11 @@ namespace RogueBasin
                 inMonsterFOV = value;
             }
         }
+
+        /// <summary>
+        /// Sound magnitude at this square (debug only)
+        /// </summary>
+        public double SoundMag { get; set; }
 
         /// <summary>
         /// Sets walkable and non-light blocking

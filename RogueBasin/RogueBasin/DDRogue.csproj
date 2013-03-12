@@ -303,6 +303,7 @@
     <Compile Include="RogueBase.cs" />
     <Compile Include="SaveGameInfo.cs" />
     <Compile Include="Screen.cs" />
+    <Compile Include="SoundEffect.cs" />
     <Compile Include="SpecialMove.cs">
       <SubType>Code</SubType>
     </Compile>
