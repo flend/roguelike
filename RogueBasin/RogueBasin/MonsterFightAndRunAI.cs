@@ -35,7 +35,9 @@ namespace RogueBasin
         protected Creature currentTarget;
         public int currentTargetID = -1;
         protected int lastHitpoints;
-        
+
+        public int CurrentSoundID { get; set; }
+
         /// <summary>
         /// Longest distance charmed creature will go away from the PC
         /// </summary>
@@ -61,6 +63,8 @@ namespace RogueBasin
         {
             AIState = SimpleAIStates.Patrol;
             currentTarget = null;
+
+            CurrentSoundID = -1;
 
             lastHitpoints = MaxHitpoints;
         }
@@ -260,15 +264,12 @@ namespace RogueBasin
                     ChaseCreature(currentTarget);
                 }
             }
-            
-            //CHECK SOUNDS AND MOVE TO INVESTIGATE STATE
-            //if yes, change state, act and return
 
-            //PATROL STATE - MOVE WHEN NOT ACTIVELY ENGAGED WITH ANOTHER CREATURE
+            //PATROL STATE OR INVESTIGATE STATE
 
-            //First check to see if we need to switch out of patrol
+            //Check states which override patrol or investigate (e.g being attacked, charmed, seeing the PC)
 
-            if(AIState == SimpleAIStates.Patrol) {
+            if(AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) {
      
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
                 
@@ -402,9 +403,11 @@ namespace RogueBasin
                         }
                     }
 
+                    //Check if we can see the PC and pursue them
+
                     //If we are not currently pursuing anything and we see the PC, pursue if seen
                     //Technically, go into pursuit mode, which may not involve actual movement
-                    if (AIState == SimpleAIStates.Patrol && monstersInFOV.Contains(Game.Dungeon.Player))
+                    if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && monstersInFOV.Contains(Game.Dungeon.Player))
                     {
                         Creature closestCreature = Game.Dungeon.Player;
                         //Start chasing this creature
@@ -415,7 +418,19 @@ namespace RogueBasin
                 }
             }
 
-            //If nothing else happened, do the Patrol
+            //INVESTIGATE SOUNDS
+
+            //If a new sound has happened, calculate interest
+            //If high interest, make this our target
+            //Continue to investigate the sound
+            //If we've reached the target, return to Patrol [sightings are handled above]
+
+            if (AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound)
+            {
+
+            }
+
+            //If nothing else happened, do the Patrol action
             if (AIState == SimpleAIStates.Patrol || WillAlwaysPatrol())
             {
                 //We haven't got anything to do and we can't see the PC
