@@ -258,7 +258,6 @@ namespace RogueBasin
                 {
                     //Otherwise continue to pursue or flee
                     ChaseCreature(currentTarget);
-                    return;
                 }
             }
             
@@ -266,6 +265,8 @@ namespace RogueBasin
             //if yes, change state, act and return
 
             //PATROL STATE - MOVE WHEN NOT ACTIVELY ENGAGED WITH ANOTHER CREATURE
+
+            //First check to see if we need to switch out of patrol
 
             if(AIState == SimpleAIStates.Patrol) {
      
@@ -341,12 +342,7 @@ namespace RogueBasin
                     }
 
                 }
-                else if (Passive)
-                {
-                    //Passive - Won't attack the PC
-                    DoPatrol();
-                }
-                else
+                else if(!Passive)
                 {
                     //Normal fighting behaviour
 
@@ -394,7 +390,6 @@ namespace RogueBasin
                             LogFile.Log.LogEntryDebug(this.Representation + " changes target to " + LastAttackedBy.Representation, LogDebugLevel.Medium);
                             AIState = SimpleAIStates.Pursuit;
                             ChaseCreature(LastAttackedBy);
-                            return;
                         }
                         else
                         {
@@ -404,13 +399,12 @@ namespace RogueBasin
                                 AIState = SimpleAIStates.Pursuit;
                                 ChaseCreature(currentTarget);
                             }
-                            return;
                         }
                     }
 
-                    //Pursue PC if seen
+                    //If we are not currently pursuing anything and we see the PC, pursue if seen
                     //Technically, go into pursuit mode, which may not involve actual movement
-                    if (monstersInFOV.Contains(Game.Dungeon.Player))
+                    if (AIState == SimpleAIStates.Patrol && monstersInFOV.Contains(Game.Dungeon.Player))
                     {
                         Creature closestCreature = Game.Dungeon.Player;
                         //Start chasing this creature
@@ -418,14 +412,15 @@ namespace RogueBasin
                         AIState = SimpleAIStates.Pursuit;
                         ChaseCreature(closestCreature);
                     }
-                    else
-                    {
-                        //We haven't got anything to do and we can't see the PC
-                        //Do normal movement
-                        DoPatrol();
-                    }
-
                 }
+            }
+
+            //If nothing else happened, do the Patrol
+            if (AIState == SimpleAIStates.Patrol || WillAlwaysPatrol())
+            {
+                //We haven't got anything to do and we can't see the PC
+                //Do normal movement
+                DoPatrol();
             }
         }
 
@@ -433,9 +428,7 @@ namespace RogueBasin
         {
             //Carry out patrol movement
 
-            //Return if we can't move
-            if (!CanMove())
-                return;
+            //Don't return if we can't move here (because we may still want to rotate etc.)
 
             switch (GetPatrolType())
             {
@@ -465,6 +458,10 @@ namespace RogueBasin
 
                 case PatrolType.RandomWalk:
                     {
+
+                        //Override if we can't move
+                        if (!CanMove())
+                            return;
 
                         int direction = Game.Random.Next(9);
 
@@ -943,12 +940,21 @@ namespace RogueBasin
 
 
         /// <summary>
-        /// Does the creature pursue other creatures?
+        /// Does the creature pursue + lock-on to other creatures?
         /// </summary>
         protected virtual bool WillPursue()
         {
             //By default creatures pursue
             return true;
+        }
+
+        /// <summary>
+        /// Does the creature always do their patrol option, even if they are engaged with a target (e.g. fixed rotating turrets)?
+        /// </summary>
+        protected virtual bool WillAlwaysPatrol()
+        {
+            //By default creatures don't always patrol
+            return false;
         }
 
         /// <summary>

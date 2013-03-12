@@ -197,8 +197,9 @@ namespace RogueBasin
                     //In FOV - fire at the player
                     CombatResults result;
 
-                    //Set heading to target
-                    SetHeadingToTarget(newTarget);
+                    //Set heading to target (only if we are a Pursuing creature, capable of adapting our heading)
+                    if(WillPursue())
+                        SetHeadingToTarget(newTarget);
 
                     if (newTarget == Game.Dungeon.Player)
                     {

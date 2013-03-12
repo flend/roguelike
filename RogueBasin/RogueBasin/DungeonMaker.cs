@@ -841,10 +841,15 @@ namespace RogueBasin
 
             List<Monster> monstersToAdd = new List<Monster>();
 
+            monstersToAdd.Add(new Creatures.RotatingTurret());
+            monstersToAdd.Add(new Creatures.RotatingTurret());
             monstersToAdd.Add(new Creatures.Goblin());
-           // monstersToAdd.Add(new Creatures.Goblin());
-           // monstersToAdd.Add(new Creatures.Goblin());
-          //  monstersToAdd.Add(new Creatures.Goblin());
+            monstersToAdd.Add(new Creatures.Goblin());
+            monstersToAdd.Add(new Creatures.Drone());
+            monstersToAdd.Add(new Creatures.Drone());
+
+          
+            //  monstersToAdd.Add(new Creatures.Goblin());
 //monstersToAdd.Add(new Creatures.Goblin());
            
             foreach (Monster monster in monstersToAdd)
