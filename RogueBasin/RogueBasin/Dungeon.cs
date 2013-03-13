@@ -2592,14 +2592,14 @@ namespace RogueBasin
                 SoundEffect sEffect = effectPair.Value;
 
                 Map currentMap = levels[sEffect.LevelLocation];
-                double soundRadiusD = Math.Max(soundMinSize, soundMaxSize * sEffect.SoundMagnitude);
-                int soundRadius = (int)Math.Ceiling(soundRadiusD);
 
-                //Decayed magnitude of sound
+                //Check if the sound is too old to draw
                 double soundDecay = sEffect.DecayedMagnitude(WorldClock);
 
                 if (soundDecay < 0.0001)
                     continue;
+
+                int soundRadius = (int)Math.Ceiling(sEffect.SoundRadius());
 
                 //Draw circle around sound
 
@@ -2622,12 +2622,8 @@ namespace RogueBasin
                 {
                     for (int j = yt; j <= yb; j++)
                     {
-                
                         MapSquare thisSquare = currentMap.mapSquares[i, j];
-                        if ( Math.Sqrt( Math.Pow(i - sEffect.MapLocation.x, 2) + Math.Pow(j - sEffect.MapLocation.y, 2) ) <= soundRadiusD)
-                        {
-                            thisSquare.SoundMag = soundDecay;
-                        }
+                        thisSquare.SoundMag = sEffect.DecayedMagnitude(WorldClock, sEffect.LevelLocation, new Point(i, j));
                     }
                 }
 
