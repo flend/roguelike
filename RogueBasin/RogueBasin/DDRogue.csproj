@@ -245,6 +245,7 @@
     <Compile Include="LastMapGeneratorFromASCIIFile.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="MapGenerator.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
     <Compile Include="MapGeneratorBSPCave.cs" />
     <Compile Include="MapGeneratorCave.cs" />

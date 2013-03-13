@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin
 {
-    class MapGeneratorBSPCave
+    class MapGeneratorBSPCave : MapGenerator
     {
         int width = 40;
         int height = 40;
@@ -135,7 +135,7 @@ namespace RogueBasin
             //SetLightBlocking(baseMap);
 
             //Set the PC start location in a random room
-            baseMap.PCStartLocation = rootNode.RandomRoomPoint();
+            baseMap.PCStartLocation = rootNode.RandomRoomPoint().GetPointInRoomOnly();
 
             //Now we use the cave algorithm to eat the map
             //Instead of setting this Empty like in cave, set them to Corridor temporarily (so the algo knows where it's been)
@@ -451,7 +451,7 @@ namespace RogueBasin
         /// Returns only points in rooms (not corridors)
         /// </summary>
         /// <returns></returns>
-        public Point RandomPointInRoom()
+        public override PointInRoom RandomPointInRoom()
         {
             return rootNode.RandomRoomPoint();
         }
@@ -460,7 +460,7 @@ namespace RogueBasin
         /// Returns a point anywhere the terrain is empty
         /// </summary>
         /// <returns></returns>
-        public Point RandomWalkablePoint()
+        public override Point RandomWalkablePoint()
         {
             do
             {

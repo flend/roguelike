@@ -70,17 +70,17 @@ namespace RogueBasin
         }
 
         //Find a random point within a room
-        public Point RandomRoomPoint()
+        public PointInRoom RandomRoomPoint()
         {
             return FindRandomRoomPoint();
         }
 
-        private Point FindRandomRoomPoint()
+        private PointInRoom FindRandomRoomPoint()
         {
             //Go down the tree to a random left. When there find a random point in the room and return it
             Random rand = MapGeneratorBSP.rand;
-            
-            Point retPoint = new Point(-1, -1);
+
+            PointInRoom retPoint = null;
 
             //If we have both children choose one
             if (childLeft != null && childRight != null)
@@ -114,13 +114,13 @@ namespace RogueBasin
 
             //If it's the first leaf we've come to 
             //Find point in the room
-            if (retPoint.x == -1)
+            if (retPoint == null)
             {
 
                 int x = roomX + 1 + rand.Next(roomWidth - 2);
                 int y = roomY + 1 + rand.Next(roomHeight - 2);
 
-                return new Point(x, y);
+                return new PointInRoom(x, y, roomX, roomY, roomWidth, roomHeight);
             }
 
             return retPoint;
@@ -693,7 +693,7 @@ namespace RogueBasin
         }
     }
 
-    class MapGeneratorBSP
+    class MapGeneratorBSP : MapGenerator
     {
         int width = 40;
         int height = 40;
@@ -776,7 +776,7 @@ namespace RogueBasin
             //SetLightBlocking(baseMap);
 
             //Set the PC start location in a random room
-            baseMap.PCStartLocation = rootNode.RandomRoomPoint();
+            baseMap.PCStartLocation = rootNode.RandomRoomPoint().GetPointInRoomOnly();
 
             return baseMap;
         }
@@ -975,7 +975,7 @@ namespace RogueBasin
         /// Returns only points in rooms (not corridors)
         /// </summary>
         /// <returns></returns>
-        public Point RandomPointInRoom()
+        public override PointInRoom RandomPointInRoom()
         {
             return rootNode.RandomRoomPoint();
         }
@@ -984,7 +984,7 @@ namespace RogueBasin
         /// Returns a point anywhere the terrain is empty
         /// </summary>
         /// <returns></returns>
-        public Point RandomWalkablePoint()
+        public override Point RandomWalkablePoint()
         {
             do
             {
