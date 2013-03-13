@@ -174,14 +174,22 @@ namespace RogueBasin
             //Build dictionary of the angle of vectors to the surrounding spaces
             List<KeyValuePair<double, Point>> surroundingSpaces = new List<KeyValuePair<double,Point>>();
 
+            //Include this point with both normally and with +2pi so that angles like 3pi / 2 pick this as the closest
             surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 2, new Point(0, -1)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 2 + 2 * Math.PI, new Point(0, -1)));
+
             surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 4, new Point(1, -1)));
             surroundingSpaces.Add(new KeyValuePair<double, Point>(0, new Point(1, 0)));
             surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI / 4, new Point(1, 1)));
             surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI / 2, new Point(0, 1)));
             surroundingSpaces.Add(new KeyValuePair<double, Point>(3 * Math.PI / 4, new Point(-1, 1)));
             surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI, new Point(-1, 0)));
+
+            //Include this point with both normally and with -2pi so that angles like -pi / 2 pick this as the closest
             surroundingSpaces.Add(new KeyValuePair<double, Point>(5 * Math.PI / 4, new Point(-1, -1)));
+            surroundingSpaces.Add(new KeyValuePair<double, Point>(5 * Math.PI / 4 - 2 * Math.PI, new Point(-1, -1)));
+
+            //LogFile.Log.LogEntryDebug("points for angle: " + angle, LogDebugLevel.High);
 
             //Sort the dictionary in terms of abs difference from the requested angle
 
