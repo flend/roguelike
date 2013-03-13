@@ -189,7 +189,7 @@ namespace RogueBasin.Creatures
         /// <returns></returns>
         protected override double GetMissileRange()
         {
-            return 3.0;
+            return 5.0;
         }
 
         protected override string GetWeaponName()

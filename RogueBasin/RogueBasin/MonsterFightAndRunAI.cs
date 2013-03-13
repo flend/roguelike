@@ -450,10 +450,11 @@ namespace RogueBasin
             //Continue to investigate the sound
             //If we've reached the target, return to Patrol [sightings are handled above]
 
-            //Only monsters that can move and will pursue are interested in sounds
+            //Monster that don't pursue still have a chance to direct their FOVs at sounds
 
-            if (AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound &&
-                CanMove() && WillPursue())
+            bool moveFollowingSound = false;
+
+            if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && WillInvestigateSounds() )
             {
                 double currentSoundInterest;
 
@@ -520,12 +521,13 @@ namespace RogueBasin
                 //For a new or existing sound, pursue it
                 if (AIState == SimpleAIStates.InvestigateSound)
                 {
-                    InvestigateSound();
+                    moveFollowingSound = InvestigateSound();
                 }
             }
 
             //If nothing else happened, do the Patrol action
-            if (AIState == SimpleAIStates.Patrol || WillAlwaysPatrol())
+            //Don't if we moved in response to a sound
+            if ((AIState == SimpleAIStates.Patrol && !moveFollowingSound) || WillAlwaysPatrol())
             {
                 //We haven't got anything to do and we can't see the PC
                 //Do normal movement
@@ -554,8 +556,9 @@ namespace RogueBasin
         /// <summary>
         /// Used for the InvestigateSound AI state.
         /// Approach the sound location. Other checks in ProcessTurn() will take over if we see a target to pursue
+        /// Return true if we made a move (so we can't patrol this turn)
         /// </summary>
-        private void InvestigateSound()
+        private bool InvestigateSound()
         {
             //Check the square is pathable to
             Point nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
@@ -567,13 +570,27 @@ namespace RogueBasin
                 ResetFollowingSound();
                 AIState = SimpleAIStates.Patrol;
 
-                return;
+                return false;
             }
 
             //(if temporarily blocked will just attempt to move onto their own square)
-            //Walk towards sound origin
-            SetHeadingToMapSquare(nextStep);
-            LocationMap = nextStep;
+            
+            //Only creatures that pursue actually move
+            if (WillPursue() && CanMove())
+            {
+                SetHeadingToMapSquare(nextStep);
+                LocationMap = nextStep;
+            }
+            else
+            {
+                //Creature that can't move or don't pursue reset to Patrol now, but get a chance to detect the PC in the next loop
+                SetHeadingToMapSquare(nextStep);
+                LogFile.Log.LogEntryDebug(this.Representation + " (non-pursue) changing heading only for sound " + currentSound, LogDebugLevel.Medium);
+                ResetFollowingSound();
+                AIState = SimpleAIStates.Patrol;
+
+                return true;
+            }
 
             //We made it? Go back to patrol
             if (nextStep.x == currentSound.MapLocation.x && nextStep.y == currentSound.MapLocation.y)
@@ -581,7 +598,10 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug(this.Representation + " reached source of sound " + currentSound + ". Returning to patrol", LogDebugLevel.Low);
                 ResetFollowingSound();
                 AIState = SimpleAIStates.Patrol;
+                return true;
             }
+
+            return true;
         }
 
         protected void DoPatrol()
@@ -1193,6 +1213,15 @@ namespace RogueBasin
         protected virtual double GetPatrolRotationAngle()
         {
             return Math.PI / 4;
+        }
+
+        /// <summary>
+        /// Set to false to ignore sounds. Can't move already ignore sounds
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool WillInvestigateSounds()
+        {
+            return true;
         }
 
         public List<Point> Waypoints

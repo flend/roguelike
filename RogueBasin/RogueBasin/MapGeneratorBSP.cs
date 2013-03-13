@@ -41,7 +41,7 @@ namespace RogueBasin
 
         //Smaller numbers make larger areas more likely
         //Numbers 5 or below make a significant difference
-        const int noSplitChance = 5;
+        const int noSplitChance = 1;
         //Multiple of BSPwidth above which we must split
         const int mustSplitSize = 3;
 
@@ -50,7 +50,7 @@ namespace RogueBasin
         const double maximumSplit = 0.6;
 
         //How much of the BSP square is filled by a room
-        const double minFill = 0.7;
+        const double minFill = 0.9;
         const double maxFill = 1.0;
         
         //Tree depth counter

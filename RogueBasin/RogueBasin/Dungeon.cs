@@ -1639,7 +1639,7 @@ namespace RogueBasin
             //Not walkable
             if (!levels[level].mapSquares[location.x, location.y].Walkable)
             {
-                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Not Walkable", LogDebugLevel.Low);
+                //LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Not Walkable", LogDebugLevel.Low);
                 return false;
             }
 
@@ -1648,14 +1648,14 @@ namespace RogueBasin
             //A wall - should be caught above
             if (!Dungeon.IsTerrainWalkable(levels[level].mapSquares[location.x, location.y].Terrain))
             {
-                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: not walkable by terrain type", LogDebugLevel.High);
+                //LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: not walkable by terrain type", LogDebugLevel.High);
                 return false;
             }
 
             //Void (outside of map) - should be caught above
             if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.Void)
             {
-                LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Void", LogDebugLevel.High);
+                //LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: Void", LogDebugLevel.High);
                 return false;
             }
 
