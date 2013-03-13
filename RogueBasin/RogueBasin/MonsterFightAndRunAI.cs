@@ -553,10 +553,15 @@ namespace RogueBasin
 
             if (nextStep.x == -1 && nextStep.y == -1)
             {
-                //Not routeable for now, wait
+                //Not routeable due to doors etc.
+                LogFile.Log.LogEntryDebug(this.Representation + " permanently blocked on sound " + currentSound + ". Returning to patrol", LogDebugLevel.Medium);
+                ResetFollowingSound();
+                AIState = SimpleAIStates.Patrol;
+
                 return;
             }
 
+            //(if temporarily blocked will just attempt to move onto their own square)
             //Walk towards sound origin
             SetHeadingToMapSquare(nextStep);
             LocationMap = nextStep;
@@ -843,6 +848,10 @@ namespace RogueBasin
         /// <param name="nextStep"></param>
         protected void SetHeadingToMapSquare(Point nextStep)
         {
+            //If we're not actually moving anywhere, don't alter heading
+            if (nextStep == this.LocationMap)
+                return;
+
             Heading = DirectionUtil.AngleFromOriginToTarget(LocationMap, nextStep);
         }
 
