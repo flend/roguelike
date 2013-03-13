@@ -43,6 +43,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="Creatures\AlertBot.cs" />
     <Compile Include="Creatures\Drone.cs" />
     <Compile Include="Creatures\Ferret.cs">
       <SubType>Code</SubType>

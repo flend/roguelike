@@ -457,7 +457,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// REPLACE THIS WHEN THE FIRST BSP IS SORTED
+        /// REPLACE THIS WHEN THE FIRST BSP IS SORTED - OUT OF DATE
         /// </summary>
         /// <returns></returns>
         public override CreaturePatrol CreatureStartPosAndWaypoints(bool clockwise)

@@ -3078,11 +3078,15 @@ namespace RogueBasin
         /// soundMagnitude - 0 -> 1
         /// mapLocation - mapLocation
         /// </summary>
-        internal void AddSoundEffect(double soundMagnitude, int mapLevel, Point mapLocation)
+        internal SoundEffect AddSoundEffect(double soundMagnitude, int mapLevel, Point mapLocation)
         {
-            effects.Add(new KeyValuePair<long, SoundEffect>(WorldClock, new SoundEffect(nextUniqueSoundID, this, WorldClock, soundMagnitude, mapLevel, mapLocation)));
+            SoundEffect newEffect = new SoundEffect(nextUniqueSoundID, this, WorldClock, soundMagnitude, mapLevel, mapLocation);
+
+            effects.Add(new KeyValuePair<long, SoundEffect>(WorldClock, newEffect));
             nextUniqueSoundID++;
             LogFile.Log.LogEntryDebug("Adding new sound mag: " + soundMagnitude.ToString() + " at level: " + mapLevel.ToString() + " loc: " + mapLocation.ToString(), LogDebugLevel.Medium);
+
+            return newEffect;
         }
 
         /// <summary>

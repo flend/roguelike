@@ -860,8 +860,14 @@ namespace RogueBasin
                 Creatures.PerimeterBot patrolBot = new Creatures.PerimeterBot();
                 AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
             }
+
+            for (int i = 0; i < 4; i++)
+            {
+                Creatures.AlertBot patrolBot = new Creatures.AlertBot();
+                AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
+            }
             
-            SetLightLevelUniversal(0, 0, 5);
+            SetLightLevelUniversal(0, 0, 10);
         }
 
         /// <summary>

@@ -6,26 +6,28 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Patrolling Robot. Will not break off patrol but will fire at enemies within FOV
+    /// Fast randomly moving robot with long range. Will make a loud sound if sees player.
+    /// Will not pursue or respond to sounds itself.
     /// </summary>
-    public class PerimeterBot : MonsterThrowAndRunAI
+    public class AlertBot : MonsterThrowAndRunAI
     {
         const int classDeltaHitpoints = 4;
         const int classMinHitpoints = 1;
 
         bool rotationClockwise = true;
 
-        public PerimeterBot()
+        long lastAlertTime = -1;
+
+        public AlertBot()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
-            NormalSightRadius = 4;
+            NormalSightRadius = 10;
+        }
 
-            //Randomize which way we rotate (should be serialized)
-            if (Game.Random.Next(2) > 0)
-            {
-                rotationClockwise = false;
-            }
+        public override int BaseSpeed()
+        {
+            return 200;
         }
 
         public override void InventoryDrop()
@@ -69,53 +71,49 @@ namespace RogueBasin.Creatures
             return 0;
         }
 
-        /// <summary>
-        /// Will not leave patrol route.
-        /// </summary>
-        /// <returns></returns>
-        protected override bool WillPursue()
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// If true, will not leave route even when firing
-        /// </summary>
-        /// <returns></returns>
-        protected override bool WillAlwaysPatrol()
-        {
-            return false;
-        }
-
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Triangular;
+            return CreatureFOV.CreatureFOVType.Base;
         }
 
         protected override PatrolType GetPatrolType()
         {
-            return PatrolType.Waypoints;
+            return PatrolType.RandomWalk;
         }
 
-        public override bool GetPatrolRotationClockwise()
+        protected override bool WillPursue()
         {
-            return rotationClockwise;
+ 	        return false;
+        }
+
+        protected override bool  WillInvestigateSounds()
+        {
+ 	        return false;
+        }
+
+        /// <summary>
+        /// The bot keeps moving around. Particularly useful since it doens't fire it's special ability each time
+        /// </summary>
+        /// <returns></returns>
+        protected override bool WillAlwaysPatrol()
+        {
+            return true;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "perimeter bot"; } }
+        public override string SingleDescription { get { return "alert bot"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "perimeter bots"; } }
+        public override string GroupDescription { get { return "alert bots"; } }
 
         protected override char GetRepresentation()
         {
-            return 'r';
+            return '!';
         }
 
         protected override int GetChanceToRecover()
@@ -143,19 +141,14 @@ namespace RogueBasin.Creatures
             return 1;
         }
 
-        protected override int GetChanceToBackAway()
-        {
-            return 0;
-        }
-
         public override Monster NewCreatureOfThisType()
         {
-            return new PerimeterBot();
+            return new AlertBot();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.Tomato;
+            return ColorPresets.GreenYellow;
         }
 
         public override int GetCombatXP()
@@ -183,16 +176,39 @@ namespace RogueBasin.Creatures
             return true;
         }
 
+        /// <summary>
+        /// Alert bot has a long range to use its alerting ability
+        /// </summary>
+        /// <returns></returns>
         protected override double GetMissileRange()
         {
-            return 5.0;
+            return 10.0;
         }
 
         protected override string GetWeaponName()
         {
-            return "fires a railgun";
+            return "sounds the alert!";
         }
 
+        protected override bool UseSpecialAbility()
+        {
+            //Don't make too many sounds otherwise it will slow the game down
+            //Return true to stop the bot firing
+            if (lastAlertTime != -1 && lastAlertTime + 100 > Game.Dungeon.WorldClock)
+            {
+                return true;
+            }
+
+ 	        //Alert bot makes a loud sound at its location
+            string playerMsg = "The alert bot sounds the alert!";
+            Game.MessageQueue.AddMessage(playerMsg);
+            
+            SoundEffect effect = Game.Dungeon.AddSoundEffect(1.0, this.LocationLevel, this.LocationMap);
+            lastAlertTime = Game.Dungeon.WorldClock;
+            LogFile.Log.LogEntryDebug("Alert bot makes sound: " + effect + " at time: " + Game.Dungeon.WorldClock, LogDebugLevel.Medium);
+
+            return true;
+        }
 
     }
 }
