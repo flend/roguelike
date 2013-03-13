@@ -249,8 +249,13 @@ namespace RogueBasin
 
             //Return if we can't move or won't pursue
             if (!CanMove() || !WillPursue())
+            {
+                //Return to patrol mode. This allows creatures to go back to patrolling if the PC moves out of range
+                AIState = SimpleAIStates.Patrol;
+                LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Out of range but can't pursue, returning to patrol ", LogDebugLevel.Medium);
                 return;
-
+            }
+             
             //Find location of next step on the path towards them
             Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
 

@@ -855,9 +855,9 @@ namespace RogueBasin
             Monster goblin = new Creatures.Goblin();
             AddMonsterRandomWalkablePoint(goblin, 0);
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 4; i++)
             {
-                Creatures.PatrolBot patrolBot = new Creatures.PatrolBot();
+                Creatures.PerimeterBot patrolBot = new Creatures.PerimeterBot();
                 AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
             }
             

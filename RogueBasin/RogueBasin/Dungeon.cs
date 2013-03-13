@@ -2758,6 +2758,13 @@ namespace RogueBasin
             bool pathBlockedByCreature = false;
             Point nextStep = new Point(-1, -1);
 
+            //Check for pathing to own square - return blocked but not terminally
+            if (originCreature.LocationMap.x == destCreature.LocationMap.x && originCreature.LocationMap.y == destCreature.LocationMap.y)
+            {
+                LogFile.Log.LogEntryDebug("Monster trying to path to monster on same square", LogDebugLevel.High);
+                return new Point(destCreature.LocationMap.x, destCreature.LocationMap.y);
+            }
+
             do
             {
                 //Generate path object
@@ -2920,6 +2927,10 @@ namespace RogueBasin
             bool pathBlockedByCreature = false;
             Point nextStep = new Point(-1, -1);
 
+            //Check for pathing to own square - return blocked but not terminally
+            if (originCreature.LocationMap.x == destCreature.x && originCreature.LocationMap.y == destCreature.y)
+                return new Point(destCreature.x, destCreature.y);
+
             do
             {
                 //Generate path object
@@ -2979,7 +2990,10 @@ namespace RogueBasin
                     //Is it the source creature itself?
                     if (creature.LocationMap.x == originCreature.LocationMap.x &&
                         creature.LocationMap.y == originCreature.LocationMap.y)
+                    {
+
                         continue;
+                    }
 
                     //Another creature is blocking
                     if (creature.LocationMap.x == x && creature.LocationMap.y == y)
@@ -4034,6 +4048,9 @@ namespace RogueBasin
 
         public void PlayerLeavesDungeon()
         {
+
+            //TODO
+
             //Check if this is the end of the game
             if (!DungeonInfo.LastMission)
             {
@@ -4066,7 +4083,7 @@ namespace RogueBasin
                 Game.Dungeon.PlayerBackToTown();
                 SyncStatsWithTraining();
 
-                Player.CurrentDungeon = -1;
+                Player.CurrentDungeon = 0;
             }
             else
             {

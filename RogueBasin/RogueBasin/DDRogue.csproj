@@ -50,7 +50,10 @@
     <Compile Include="Creatures\Goblin.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\PatrolBot.cs" />
+    <Compile Include="Creatures\PatrolBot.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Creatures\PerimeterBot.cs" />
     <Compile Include="Creatures\RotatingTurret.cs" />
     <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />

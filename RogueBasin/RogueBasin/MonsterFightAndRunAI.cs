@@ -228,7 +228,7 @@ namespace RogueBasin
                     {
                         //Reset AI and fall through
                         AIState = SimpleAIStates.Patrol;
-                        LogFile.Log.LogEntryDebug(this.Representation + " close enough to PC", LogDebugLevel.Medium);
+                        LogFile.Log.LogEntryDebug(this.Representation + " close enough to PC", LogDebugLevel.Low);
                     }
                     
                     //Otherwise follow the PC back
@@ -357,7 +357,7 @@ namespace RogueBasin
                         }
 
                         //Start chasing this creature
-                        LogFile.Log.LogEntryDebug(this.Representation + " charm chases " + closestCreature.Representation, LogDebugLevel.Medium);
+                        LogFile.Log.LogEntryDebug(this.Representation + " charm chases " + closestCreature.Representation, LogDebugLevel.Low);
                         AIState = SimpleAIStates.Pursuit;
                         ChaseCreature(closestCreature);
                     }
@@ -508,8 +508,12 @@ namespace RogueBasin
                     if (currentSoundInterest < 0.01)
                     {
                         //Sound has decayed so much it's not interesting, or we never had an interesting sound
-                        ResetFollowingSound(); 
+                        ResetFollowingSound();
+                        if(AIState == SimpleAIStates.InvestigateSound)
+                            LogFile.Log.LogEntryDebug(this.Representation + " sound " + currentSound + " is old, resetting", LogDebugLevel.Low);
                         AIState = SimpleAIStates.Patrol;
+                        
+
                     }
                 }
 
@@ -574,7 +578,7 @@ namespace RogueBasin
             //We made it? Go back to patrol
             if (nextStep.x == currentSound.MapLocation.x && nextStep.y == currentSound.MapLocation.y)
             {
-                LogFile.Log.LogEntryDebug(this.Representation + " reached source of sound " + currentSound + ". Returning to patrol", LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug(this.Representation + " reached source of sound " + currentSound + ". Returning to patrol", LogDebugLevel.Low);
                 ResetFollowingSound();
                 AIState = SimpleAIStates.Patrol;
             }
@@ -665,7 +669,7 @@ namespace RogueBasin
                     {
                         if (Waypoints.Count == 0)
                         {
-                            LogFile.Log.LogEntryDebug("Can't patrol - no way points", LogDebugLevel.High);
+                            LogFile.Log.LogEntryDebug(this.Representation + " Can't patrol - no way points", LogDebugLevel.High);
                             return;
                         }
 
@@ -676,7 +680,7 @@ namespace RogueBasin
                         if (nextStep.x == -1 && nextStep.y == -1)
                         {
                             //Not routeable - should never happen
-                            LogFile.Log.LogEntryDebug("Can't patrol - unrouteable waypoint", LogDebugLevel.High);
+                            LogFile.Log.LogEntryDebug(this.Representation + " Can't patrol - unrouteable waypoint", LogDebugLevel.High);
                             return;
                         }
 
@@ -690,7 +694,7 @@ namespace RogueBasin
                         {
                             int nextWaypoint = (CurrentWaypoint + 1) % Waypoints.Count;
 
-                            LogFile.Log.LogEntryDebug(this.Representation + " reached waypoint " + CurrentWaypoint + ". Moving to waypoint " + nextWaypoint, LogDebugLevel.Medium);
+                            LogFile.Log.LogEntryDebug(this.Representation + " reached waypoint " + CurrentWaypoint + ". Moving to waypoint " + nextWaypoint, LogDebugLevel.Low);
                             CurrentWaypoint = nextWaypoint;
                         }
                     }
@@ -721,7 +725,7 @@ namespace RogueBasin
                 if (Game.Random.Next(100) < chanceToRecover)
                 {
                     AIState = SimpleAIStates.Pursuit;
-                    LogFile.Log.LogEntryDebug(this.SingleDescription + " recovered", LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug(this.Representation + " recovered", LogDebugLevel.Medium);
                 }
             }
             else
@@ -736,7 +740,7 @@ namespace RogueBasin
                         if (Game.Random.Next(100) < chanceToFlee)
                         {
                             AIState = SimpleAIStates.Fleeing;
-                            LogFile.Log.LogEntryDebug(this.SingleDescription + " fleeing", LogDebugLevel.Medium);
+                            LogFile.Log.LogEntryDebug(this.Representation + " fleeing", LogDebugLevel.Medium);
                         }
                     }
                 }
@@ -862,7 +866,7 @@ namespace RogueBasin
 
                         if (distance > maxChaseDistance)
                         {
-                            LogFile.Log.LogEntryDebug(this.SingleDescription + " returns to PC", LogDebugLevel.Medium);
+                            LogFile.Log.LogEntryDebug(this.SingleDescription + " returns to PC", LogDebugLevel.Low);
                             AIState = SimpleAIStates.Returning;
                             FollowPC();
                         }
@@ -994,7 +998,7 @@ namespace RogueBasin
                 Game.Random.Next(100) < GetChanceToRecoverOnBeingHit())
             {
                 AIState = SimpleAIStates.Pursuit;
-                LogFile.Log.LogEntry(this.SingleDescription + "recovers and returns to the fight");
+                LogFile.Log.LogEntryDebug(this.Representation + " recovers and returns to the fight", LogDebugLevel.Low);
             }
         }
 

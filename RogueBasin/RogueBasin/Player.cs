@@ -257,7 +257,7 @@ namespace RogueBasin
 
             //Sight
 
-            NormalSightRadius = 5;
+            NormalSightRadius = 0;
 
             if(inv.ContainsItem(new Items.Lantern()))
                 NormalSightRadius = 7;
