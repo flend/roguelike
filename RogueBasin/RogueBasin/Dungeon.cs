@@ -346,6 +346,11 @@ namespace RogueBasin
         public int nextUniqueID = 1;
 
         /// <summary>
+        /// Sounds have a unique ID. This stores the next free ID.
+        /// </summary>
+        public int nextUniqueSoundID = 0;
+
+        /// <summary>
         /// Set to false to end the game
         /// </summary>
         public bool RunMainLoop { get; set;}
@@ -911,6 +916,7 @@ namespace RogueBasin
                 saveGameInfo.difficulty = this.Difficulty;
                 saveGameInfo.dungeonInfo = this.dungeonInfo;
                 saveGameInfo.nextUniqueID = this.nextUniqueID;
+                saveGameInfo.nextUniqueSoundID = this.nextUniqueSoundID;
                 saveGameInfo.messageLog = Game.MessageQueue.GetMessageHistoryAsList();
 
                 //Make maps into serializablemaps and store
@@ -2583,9 +2589,6 @@ namespace RogueBasin
         public void ShowSoundsOnMap()
         {
             //Debug: show all sounds on the map
-
-            int soundMaxSize = 5;
-            int soundMinSize = 1;
             
             foreach (KeyValuePair<long, SoundEffect> effectPair in Game.Dungeon.Effects)
             {
@@ -3063,8 +3066,27 @@ namespace RogueBasin
         /// </summary>
         internal void AddSoundEffect(double soundMagnitude, int mapLevel, Point mapLocation)
         {
-            effects.Add(new KeyValuePair<long, SoundEffect>(WorldClock, new SoundEffect(this, WorldClock, soundMagnitude, mapLevel, mapLocation)));
+            effects.Add(new KeyValuePair<long, SoundEffect>(WorldClock, new SoundEffect(nextUniqueSoundID, this, WorldClock, soundMagnitude, mapLevel, mapLocation)));
+            nextUniqueSoundID++;
             LogFile.Log.LogEntryDebug("Adding new sound mag: " + soundMagnitude.ToString() + " at level: " + mapLevel.ToString() + " loc: " + mapLocation.ToString(), LogDebugLevel.Medium);
+        }
+
+        /// <summary>
+        /// Get Sound Effect by ID. Sound effects are stored by ID in creatures for easier serialization
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        internal SoundEffect GetSoundByID(int id)
+        {
+            //Data structure really needs indexing on id
+            foreach (KeyValuePair<long, SoundEffect> ef in effects)
+            {
+                if (ef.Value.ID == id)
+                    return ef.Value;
+            }
+            string msg = "Can't find sound ID: " + id;
+            LogFile.Log.LogEntryDebug(msg, LogDebugLevel.High);
+            throw new ApplicationException(msg);
         }
 
         /// <summary>

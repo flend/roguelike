@@ -102,6 +102,7 @@ namespace RogueBasin
         public int dateCounter = 0;
 
         public int nextUniqueID;
+        public int nextUniqueSoundID;
 
         /// <summary>
         /// List of global events

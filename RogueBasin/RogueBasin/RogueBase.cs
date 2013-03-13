@@ -920,6 +920,7 @@ namespace RogueBasin
                 newDungeon.DungeonInfo = readData.dungeonInfo;
                 newDungeon.dateCounter = readData.dateCounter;
                 newDungeon.nextUniqueID = readData.nextUniqueID;
+                newDungeon.nextUniqueSoundID = readData.nextUniqueSoundID;
 
                 Game.MessageQueue.TakeMessageHistoryFromList(readData.messageLog);
                 

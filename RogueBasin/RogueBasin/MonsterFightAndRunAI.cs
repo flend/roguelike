@@ -39,6 +39,13 @@ namespace RogueBasin
         public int CurrentSoundID { get; set; }
 
         /// <summary>
+        /// This is cached here since sounds are not nicely look-upable by Id.
+        /// Serialization shouldn't be a problem but it will take a copy which is kind of horrible and might cause bugs in future
+        /// </summary>
+        [XmlIgnore]
+        protected SoundEffect currentSound;
+
+        /// <summary>
         /// Longest distance charmed creature will go away from the PC
         /// </summary>
         protected const double maxChaseDistance = 5.0;
@@ -57,7 +64,6 @@ namespace RogueBasin
         /// For rotation patrol, how many turns since we last rotated?
         /// </summary>
         protected int rotationTurns = 0;
-
 
         public MonsterFightAndRunAI()
         {
@@ -111,6 +117,16 @@ namespace RogueBasin
             else
             {
                 LastAttackedBy = Game.Dungeon.GetCreatureByUniqueID(LastAttackedByID);
+            }
+
+            //Restore sound
+            if (CurrentSoundID == -1)
+            {
+                currentSound = null;
+            }
+            else
+            {
+                currentSound = Game.Dungeon.GetSoundByID(CurrentSoundID);
             }
 
             //TEST SLEEPING CREATURES
@@ -427,6 +443,19 @@ namespace RogueBasin
 
             if (AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound)
             {
+                double currentSoundInterestScore;
+
+                if (CurrentSoundID == -1)
+                {
+                    currentSoundInterestScore = 0.0;
+                }
+                else
+                {
+
+
+                }
+
+
 
             }
 
