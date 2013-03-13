@@ -41,7 +41,7 @@ namespace RogueBasin
 
             SetupMapsDebug();
 
-            SpawnCreaturesDebug();
+            
 
             //SetupMaps();
 
@@ -830,7 +830,7 @@ namespace RogueBasin
             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 0);
         }
 
-        private void SpawnCreaturesDebug()
+        private void SpawnCreaturesDebug(MapGeneratorBSP mapGenerator)
         {
 
             LogFile.Log.LogEntry("Generating creatures...");
@@ -840,29 +840,82 @@ namespace RogueBasin
             //Debug monsters
 
             List<Monster> monstersToAdd = new List<Monster>();
-
+            /*
             monstersToAdd.Add(new Creatures.RotatingTurret());
             monstersToAdd.Add(new Creatures.RotatingTurret());
-            monstersToAdd.Add(new Creatures.Goblin());
-            monstersToAdd.Add(new Creatures.Goblin());
-            monstersToAdd.Add(new Creatures.Drone());
-            monstersToAdd.Add(new Creatures.Drone());
+            monstersToAdd.Add(new Creatures.Goblin());*/
+           // monstersToAdd.Add(new Creatures.Goblin());
+            //monstersToAdd.Add(new Creatures.Drone());
+            //monstersToAdd.Add(new Creatures.Drone());
 
           
             //  monstersToAdd.Add(new Creatures.Goblin());
 //monstersToAdd.Add(new Creatures.Goblin());
-           
-            foreach (Monster monster in monstersToAdd)
+
+            Monster goblin = new Creatures.Goblin();
+            AddMonsterRandomWalkablePoint(goblin, 0);
+
+            for (int i = 0; i < 10; i++)
             {
-                Point location = new Point();
-                do
-                {
-                    location = dungeon.RandomWalkablePointInLevel(0);
-                } while (!dungeon.AddMonster(monster, 0, location));
-
+                Creatures.PatrolBot patrolBot = new Creatures.PatrolBot();
+                AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
             }
-
+            
             SetLightLevelUniversal(0, 0, 5);
+        }
+
+        /// <summary>
+        /// Add a monster with a random patrol. Needs the mapgenerator of the level in question
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="mapGen"></param>
+        private void AddMonsterRandomPatrol(MonsterFightAndRunAI monster, int level, MapGenerator mapGen)
+        {
+
+            Dungeon dungeon = Game.Dungeon;
+
+            Point startLocation;
+
+            int loops = 0;
+            int maxLoops = 50;
+
+            do
+            {
+                CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypoints(monster.GetPatrolRotationClockwise());
+                monster.Waypoints = patrol.Waypoints;
+                startLocation = patrol.StartPos;
+
+                loops++;
+            } while (!dungeon.AddMonster(monster, level, startLocation) && loops < maxLoops);
+
+            if (loops == maxLoops)
+            {
+                LogFile.Log.LogEntryDebug("Failed to place patrolling monster: " + monster.Representation, LogDebugLevel.High);
+            }
+        }
+
+        /// <summary>
+        /// Add a monster at a random walkable point in the dungeon
+        /// Queries the dungeon for walkable places
+        /// </summary>
+        /// <param name="monster"></param>
+        private void AddMonsterRandomWalkablePoint(Monster monster, int level) {
+
+            Dungeon dungeon = Game.Dungeon;
+
+            Point location;
+
+            int loops = 0;
+            int maxLoops = 50;
+
+            do {
+                location = dungeon.RandomWalkablePointInLevel(level);
+                loops++;
+            } while (!dungeon.AddMonster(monster, level, location) && loops < maxLoops);
+
+            if(loops == maxLoops) {
+                LogFile.Log.LogEntryDebug("Failed to place: " + monster.Representation, LogDebugLevel.High);
+            }
         }
 
 
@@ -1711,6 +1764,9 @@ namespace RogueBasin
             //Necessary so connectivity checks on items and monsters can work
             //Only place where this happens now
             CalculateWalkableAndTCOD();
+
+            //Place monsters in level
+            SpawnCreaturesDebug(hallsGen);
 
         }
 

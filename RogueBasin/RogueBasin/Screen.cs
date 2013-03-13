@@ -2138,6 +2138,66 @@ namespace RogueBasin {
             //Set default colour
             //rootConsole.ForegroundColor = creatureColor;
 
+            //Draw stuff about creatures which should be overwritten by other creatures
+            foreach (Monster creature in creatureList)
+            {
+                if (creature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                    continue;
+
+                if (!creature.Alive)
+                    continue;
+
+                int monsterX = mapTopLeft.x + creature.LocationMap.x;
+                int monsterY = mapTopLeft.y + creature.LocationMap.y;
+
+                Color creatureColor = creature.RepresentationColor();
+                rootConsole.ForegroundColor = creatureColor;
+
+                MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
+                bool drawCreature = true;
+
+                if (creatureSquare.InPlayerFOV)
+                {
+                    //In FOV
+                    //rootConsole.ForegroundColor = creature.CreatureColor();
+                }
+                else if (creatureSquare.SeenByPlayer)
+                {
+                    //Not in FOV but seen
+                    if (!DebugMode)
+                        drawCreature = false;
+                    //creatureColor = hiddenColor;
+                }
+                else
+                {
+                    //Never in FOV
+                    if (!DebugMode)
+                        drawCreature = false;
+
+                }
+
+                if (!drawCreature)
+                    continue;
+
+                //Heading
+                List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY));
+
+                foreach (Point headingLoc in headingMarkers)
+                {
+                    //Check heading is drawable
+
+                    Map map = Game.Dungeon.Levels[creature.LocationLevel];
+
+                    LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
+
+                    if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
+                        && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)
+                    {
+                        rootConsole.PutChar(headingLoc.x, headingLoc.y, creature.HeadingRepresentation);
+                    }
+                }
+            }
+
             foreach (Monster creature in creatureList)
             {
                 //Not on this level
@@ -2179,6 +2239,22 @@ namespace RogueBasin {
                     {
                         creatureColor = Color.Interpolate(creatureColor, ColorPresets.Red, 0.4);
                     }
+
+                    //Draw waypoints
+                    MonsterFightAndRunAI monsterWithWP = creature as MonsterFightAndRunAI;
+                    if (monsterWithWP != null &&
+                        monsterWithWP.Waypoints.Count > 0)
+                    {
+                        int wpNo = 0;
+                        foreach (Point wp in monsterWithWP.Waypoints)
+                        {
+                            int wpX = mapTopLeft.x + wp.x;
+                            int wpY = mapTopLeft.y + wp.y;
+
+                            rootConsole.PutChar(wpX, wpY, wpNo.ToString()[0]);
+                            wpNo++;
+                        }
+                    }
                 }
 
                 if (drawCreature)
@@ -2200,23 +2276,7 @@ namespace RogueBasin {
 
                     rootConsole.PutChar(monsterX, monsterY, creature.Representation);
 
-                    //Heading
-                    List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY));
-
-                    foreach (Point headingLoc in headingMarkers)
-                    {
-                        //Check heading is drawable
-
-                        Map map = Game.Dungeon.Levels[creature.LocationLevel];
-
-                        LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
-
-                        if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
-                            && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)
-                        {
-                            rootConsole.PutChar(headingLoc.x, headingLoc.y, creature.HeadingRepresentation);
-                        }
-                    }
+                    
                 }
             }
 

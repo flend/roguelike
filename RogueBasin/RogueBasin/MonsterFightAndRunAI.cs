@@ -43,6 +43,11 @@ namespace RogueBasin
         public long LastCheckedSounds { get; set; }
 
         /// <summary>
+        /// Which waypoint are we headed towards next?
+        /// </summary>
+        public int CurrentWaypoint { get; set; }
+
+        /// <summary>
         /// This is cached here since sounds are not nicely look-upable by Id.
         /// Serialization shouldn't be a problem but it will take a copy which is kind of horrible and might cause bugs in future
         /// </summary>
@@ -658,12 +663,39 @@ namespace RogueBasin
 
                 case PatrolType.Waypoints:
                     {
-                       
+                        if (Waypoints.Count == 0)
+                        {
+                            LogFile.Log.LogEntryDebug("Can't patrol - no way points", LogDebugLevel.High);
+                            return;
+                        }
 
+                        //Head towards next waypoint
+                        //Check the square is pathable to
+                        Point nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
 
+                        if (nextStep.x == -1 && nextStep.y == -1)
+                        {
+                            //Not routeable - should never happen
+                            LogFile.Log.LogEntryDebug("Can't patrol - unrouteable waypoint", LogDebugLevel.High);
+                            return;
+                        }
+
+                        //(if temporarily blocked will just attempt to move onto their own square)
+                        //Walk towards waypoint
+                        SetHeadingToMapSquare(nextStep);
+                        LocationMap = nextStep;
+
+                        //We made it? Go to next waypoint
+                        if (nextStep.x == Waypoints[CurrentWaypoint].x && nextStep.y == Waypoints[CurrentWaypoint].y)
+                        {
+                            int nextWaypoint = (CurrentWaypoint + 1) % Waypoints.Count;
+
+                            LogFile.Log.LogEntryDebug(this.Representation + " reached waypoint " + CurrentWaypoint + ". Moving to waypoint " + nextWaypoint, LogDebugLevel.Medium);
+                            CurrentWaypoint = nextWaypoint;
+                        }
                     }
                     return;
-                    
+
             }
 
         }
@@ -1133,10 +1165,10 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// If set to Rotate patrol, do we go clockwise or anti-clockwise?
+        /// If set to Rotate or Waypoints patrol, do we go clockwise or anti-clockwise?
         /// </summary>
         /// <returns></returns>
-        protected virtual bool GetPatrolRotationClockwise()
+        public virtual bool GetPatrolRotationClockwise()
         {
             return false;
         }
@@ -1159,8 +1191,7 @@ namespace RogueBasin
             return Math.PI / 4;
         }
 
-        //For serialisation
-        public List<Point> WayPoints
+        public List<Point> Waypoints
         {
             get
             {

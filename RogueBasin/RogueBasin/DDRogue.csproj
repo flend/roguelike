@@ -44,9 +44,13 @@
   -->
   <ItemGroup>
     <Compile Include="Creatures\Drone.cs" />
+    <Compile Include="Creatures\Ferret.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\Goblin.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\PatrolBot.cs" />
     <Compile Include="Creatures\RotatingTurret.cs" />
     <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />
@@ -73,9 +77,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\FaerieUnique.cs" />
-    <Compile Include="Creatures\Ferret.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Creatures\FerretUnique.cs" />
     <Compile Include="Creatures\Friend.cs">
       <SubType>Code</SubType>

@@ -457,6 +457,80 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// REPLACE THIS WHEN THE FIRST BSP IS SORTED
+        /// </summary>
+        /// <returns></returns>
+        public override CreaturePatrol CreatureStartPosAndWaypoints(bool clockwise)
+        {
+            //Find a leaf room
+            PointInRoom room = RandomPointInRoom();
+
+            //Calculate a patrol around the room
+            int freeSpaceX = room.RoomWidth - 2;
+            int freeSpaceY = room.RoomHeight - 2;
+
+            int patrolIndentX = Game.Random.Next(freeSpaceX / 4);
+            int patrolIndentY = Game.Random.Next(freeSpaceY / 4);
+
+            //Waypoints
+            List<Point> waypointsBase = new List<Point>();
+
+            Point tl = new Point(room.RoomX + 1 + patrolIndentX, room.RoomY + 1 + patrolIndentY);
+            waypointsBase.Add(tl);
+            Point tr = new Point(room.RoomX + room.RoomWidth - 1 - patrolIndentX, room.RoomY + 1 + patrolIndentY);
+            waypointsBase.Add(tr);
+            Point br = new Point(room.RoomX + 1 + patrolIndentX, room.RoomY + room.RoomHeight - 1 - patrolIndentY);
+            waypointsBase.Add(br);
+            Point bl = new Point(room.RoomX + room.RoomWidth - 1 - patrolIndentX, room.RoomY + room.RoomHeight - 1 - patrolIndentY);            
+            waypointsBase.Add(bl);
+
+            //Start position is a random spot on this square
+            //Pair: side index, Point
+            List<KeyValuePair<int, Point>> startPos = new List<KeyValuePair<int, Point>>();
+
+            for (int i = tl.x; i <= tr.x; i++)
+            {
+                //Top
+                startPos.Add(new KeyValuePair<int, Point>(0, new Point(i, tl.y)));
+                startPos.Add(new KeyValuePair<int, Point>(2, new Point(i, bl.y)));
+            }
+
+            for (int j = tl.y + 1; j <= bl.y - 1; j++)
+            {
+                startPos.Add(new KeyValuePair<int, Point>(3, new Point(tl.x, j)));
+                startPos.Add(new KeyValuePair<int, Point>(1, new Point(tr.x, j)));
+            }
+            
+            KeyValuePair<int, Point> startLoc = startPos[Game.Random.Next(startPos.Count)];
+
+            //Depending on the startLoc, re-order the waypoints so we to a suitable first point
+            List<Point> waypointsReordered = new List<Point>();
+
+            if (clockwise == true)
+            {
+                for (int i = 1; i < 5; i++)
+                {
+                    waypointsReordered.Add(waypointsBase[startLoc.Key + i % 4]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    int wayPointNo = startLoc.Key - i;
+                    if (wayPointNo < 0)
+                        wayPointNo += 4;
+
+                    waypointsReordered.Add(waypointsBase[wayPointNo]);
+                }
+            }
+
+            return new CreaturePatrol(startLoc.Value, waypointsReordered);
+
+        }
+
+
+        /// <summary>
         /// Returns a point anywhere the terrain is empty
         /// </summary>
         /// <returns></returns>

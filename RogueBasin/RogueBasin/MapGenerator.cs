@@ -4,14 +4,15 @@ using System.Text;
 
 namespace RogueBasin
 {
+
     public class PointInRoom {
 
         public int X { get; set; }
-        int Y  { get; set; }
-        int RoomX  { get; set; }
-        int RoomY  { get; set; }
-        int RoomWidth  { get; set; }
-        int RoomHeight { get; set; }
+        public int Y { get; set; }
+        public int RoomX { get; set; }
+        public int RoomY { get; set; }
+        public int RoomWidth { get; set; }
+        public int RoomHeight { get; set; }
 
         /// <summary>
         /// roomX, roomY should be TL wall, roomX + roomWidth, roomY + roomHeight should be BR wall
@@ -41,6 +42,19 @@ namespace RogueBasin
             return new Point(X, Y);
         }
     }
+
+    public class CreaturePatrol
+    {
+        public Point StartPos { get; set; }
+        public List<Point> Waypoints { get; set; }
+
+        public CreaturePatrol(Point startPos, List<Point> waypoints)
+        {
+            this.StartPos = startPos;
+            this.Waypoints = waypoints;
+        }
+
+    }
     
     /// <summary>
     /// All random generators in FlatlineRL should return this, so that we can intelligently place creatures etc.
@@ -58,5 +72,11 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         public abstract Point RandomWalkablePoint();
+
+        /// <summary>
+        /// Produce a random start location & list of creature waypoints for patrol.
+        /// </summary>
+        /// <returns></returns>
+        public abstract CreaturePatrol CreatureStartPosAndWaypoints(bool clockwisePatrol);
     }
 }

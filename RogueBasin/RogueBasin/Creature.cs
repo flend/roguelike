@@ -21,6 +21,11 @@ namespace RogueBasin
         List<EquipmentSlotInfo> equipmentSlots;
 
         /// <summary>
+        /// If the monster is patrolling, they visit these way points in order
+        /// </summary>
+        List<Point> wayPoints;
+
+        /// <summary>
         /// Is the creature still alive?
         /// </summary>
         bool alive;
