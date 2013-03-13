@@ -135,5 +135,10 @@ namespace RogueBasin
 
         }
 
+        public override string ToString()
+        {
+            return "id: " + ID + " mag: " + this.SoundMagnitude + " loc: " + this.MapLocation;
+        }
+
     }
 }

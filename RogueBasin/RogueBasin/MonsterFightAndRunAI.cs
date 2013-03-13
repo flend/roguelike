@@ -38,6 +38,10 @@ namespace RogueBasin
 
         public int CurrentSoundID { get; set; }
 
+        public double CurrentSoundInterestScore { get; set; }
+
+        public long LastCheckedSounds { get; set; }
+
         /// <summary>
         /// This is cached here since sounds are not nicely look-upable by Id.
         /// Serialization shouldn't be a problem but it will take a copy which is kind of horrible and might cause bugs in future
@@ -441,22 +445,74 @@ namespace RogueBasin
             //Continue to investigate the sound
             //If we've reached the target, return to Patrol [sightings are handled above]
 
-            if (AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound)
+            //Only monsters that can move and will pursue are interested in sounds
+
+            if (AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound &&
+                CanMove() && WillPursue())
             {
-                double currentSoundInterestScore;
+                double currentSoundInterest;
 
                 if (CurrentSoundID == -1)
                 {
-                    currentSoundInterestScore = 0.0;
+                    currentSoundInterest = 0.0;
+                }
+                else {
+                    //Interest in the last interesting sound will decay over time
+                    currentSoundInterest = currentSound.DecayedInterest(CurrentSoundInterestScore, Game.Dungeon.WorldClock);
+                }
+
+                //Get sounds which have happened since we last looked (and update)
+                //TODO: reset this when we leave a pursuit state - could look at very old sounds then??
+
+                List<KeyValuePair<long, SoundEffect>> newSounds = Game.Dungeon.GetSoundsAfterTime(LastCheckedSounds);
+                LastCheckedSounds = Game.Dungeon.WorldClock;
+
+                SoundEffect newSoundToFollow = null;
+                int newSoundToFollowID = -1;
+                double newSoundInterest = currentSoundInterest;
+
+                foreach(KeyValuePair<long, SoundEffect> soundEvent in newSounds) {
+                    SoundEffect sEffect = soundEvent.Value;
+
+                    double newSoundScore = sEffect.DecayedMagnitude(this.LocationLevel, this.LocationMap);
+
+                    if (newSoundScore > newSoundInterest)
+                    {
+                        newSoundToFollowID = sEffect.ID;
+                        newSoundToFollow = sEffect;
+                        newSoundInterest = newSoundScore;
+                    }
+                }
+
+
+                //Have we found a new more interesting sound?
+                //If so, follow it
+                if (newSoundToFollowID != -1)
+                {
+                    LogFile.Log.LogEntryDebug(this.Representation + " new sound target: " + newSoundToFollow + "[ int: " + newSoundInterest + "] (old: " + currentSound + " [ int: " + currentSoundInterest + "])", LogDebugLevel.Medium);
+
+                    //Change sound
+                    
+                    //A sound we choose gets a boost in interest to give us a bit of hystersis
+                     SetSoundToFollow(newSoundToFollow, newSoundInterest * 1.5);
+
+                    AIState = SimpleAIStates.InvestigateSound;
                 }
                 else
                 {
-
-
+                    if (currentSoundInterest < 0.01)
+                    {
+                        //Sound has decayed so much it's not interesting, or we never had an interesting sound
+                        ResetFollowingSound(); 
+                        AIState = SimpleAIStates.Patrol;
+                    }
                 }
 
-
-
+                //For a new or existing sound, pursue it
+                if (AIState == SimpleAIStates.InvestigateSound)
+                {
+                    InvestigateSound();
+                }
             }
 
             //If nothing else happened, do the Patrol action
@@ -465,6 +521,52 @@ namespace RogueBasin
                 //We haven't got anything to do and we can't see the PC
                 //Do normal movement
                 DoPatrol();
+            }
+        }
+
+        /// <summary>
+        /// Reset sound state. Doesn't change AI
+        /// </summary>
+        private void ResetFollowingSound()
+        {
+            CurrentSoundID = -1;
+            currentSound = null;
+            CurrentSoundInterestScore = 0.0;
+        }
+
+        private void SetSoundToFollow(SoundEffect sound, double interest)
+        {
+            CurrentSoundID = sound.ID;
+            CurrentSoundInterestScore = interest;
+            currentSound = sound;
+
+        }
+
+        /// <summary>
+        /// Used for the InvestigateSound AI state.
+        /// Approach the sound location. Other checks in ProcessTurn() will take over if we see a target to pursue
+        /// </summary>
+        private void InvestigateSound()
+        {
+            //Check the square is pathable to
+            Point nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
+
+            if (nextStep.x == -1 && nextStep.y == -1)
+            {
+                //Not routeable for now, wait
+                return;
+            }
+
+            //Walk towards sound origin
+            SetHeadingToMapSquare(nextStep);
+            LocationMap = nextStep;
+
+            //We made it? Go back to patrol
+            if (nextStep.x == currentSound.MapLocation.x && nextStep.y == currentSound.MapLocation.y)
+            {
+                LogFile.Log.LogEntryDebug(this.Representation + " reached source of sound " + currentSound + ". Returning to patrol", LogDebugLevel.Medium);
+                ResetFollowingSound();
+                AIState = SimpleAIStates.Patrol;
             }
         }
 
