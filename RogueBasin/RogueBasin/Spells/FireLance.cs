@@ -145,7 +145,7 @@ namespace RogueBasin.Spells
                     break;
                 }
 
-                if (dungeon.GetDistanceBetween(player.LocationMap, new Point(currentX, currentY)) > fireRange)
+                if (Dungeon.GetDistanceBetween(player.LocationMap, new Point(currentX, currentY)) > fireRange)
                 {
                     //Finish - range
                     LogFile.Log.LogEntryDebug("(range) Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Medium);
@@ -195,7 +195,7 @@ namespace RogueBasin.Spells
                     break;
                 }
 
-                if (dungeon.GetDistanceBetween(player.LocationMap, new Point(currentX, currentY)) > fireRange)
+                if (Dungeon.GetDistanceBetween(player.LocationMap, new Point(currentX, currentY)) > fireRange)
                 {
                     //Finish - range
                     LogFile.Log.LogEntryDebug("(range) Finished line 1 at: x: " + currentX + " y:" + currentY, LogDebugLevel.Medium);

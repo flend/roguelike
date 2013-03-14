@@ -601,7 +601,7 @@ namespace RogueBasin
                 range += 1;
             }*/
 
-            if (toCast.NeedsTarget() && Game.Dungeon.GetDistanceBetween(LocationMap, target) > range)
+            if (toCast.NeedsTarget() && Dungeon.GetDistanceBetween(LocationMap, target) > range)
             {
                 Game.MessageQueue.AddMessage("Out of range!");
                 LogFile.Log.LogEntryDebug("Out of range for " + toCast.SpellName(), LogDebugLevel.Medium);

@@ -1060,7 +1060,7 @@ namespace RogueBasin
 
                  innerLoopCount++;
 
-                 if (Game.Dungeon.GetDistanceBetween(centerLoc, location) > looseGroupDist && innerLoopCount < 50)
+                 if (Dungeon.GetDistanceBetween(centerLoc, location) > looseGroupDist && innerLoopCount < 50)
                      continue;
 
                  outerLoopCount++;
@@ -1780,8 +1780,8 @@ namespace RogueBasin
         {
             //Spawn some items
 
-            dungeon.AddItemNoChecks(new Items.Pistol(), 0, dungeon.Player.LocationMap);
-            dungeon.AddItemNoChecks(new Items.Vibroblade(), 0, new Point(dungeon.Player.LocationMap.x+1,dungeon.Player.LocationMap.y));
+            dungeon.AddItemNoChecks(new Items.Shotgun(), 0, dungeon.Player.LocationMap);
+            dungeon.AddItemNoChecks(new Items.Pistol(), 0, new Point(dungeon.Player.LocationMap.x+1,dungeon.Player.LocationMap.y));
             dungeon.AddItemNoChecks(new Items.StealthCloak(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
 
         }

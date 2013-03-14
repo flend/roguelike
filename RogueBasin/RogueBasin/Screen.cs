@@ -102,6 +102,9 @@ namespace RogueBasin {
         Point trainingBL;
 
         bool displayInventory;
+
+        const int missileDelay = 250;
+        const int meleeDelay = 100;
         
         /// <summary>
         /// Equipment screen is displayed
@@ -235,59 +238,7 @@ namespace RogueBasin {
 
         }
 
-        /// <summary>
-        /// Returns the points in a circular target, so the original contents can be cached etc. or it can drawn
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        public List<Point> GetPointsForCircularTarget(Point location, int size)
-        {
-            List<Point> splashSquares = new List<Point>();
-
-            for (int i = location.x - size; i < location.x + size; i++)
-            {
-                for (int j = location.y - size; j < location.y + size; j++)
-                {
-                    if(i >= 0 && i < Width && j >= 0 && j < Height) {
-
-                        if (Math.Pow(i - location.x, 2) + Math.Pow(j - location.y, 2) < Math.Pow(size, 2))
-                        {
-                            splashSquares.Add(new Point(i, j));
-                        }
-                    }
-                }
-            }
-
-            return splashSquares;
-        }
-
-        /// <summary>
-        /// Returns the points in a circular target, so the original contents can be cached etc. or it can drawn
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        public List<Point> GetPointsForTriangularTarget(Point origin, Point target, int range)
-        {
-            List<Point> triangularPoints = new List<Point>();
-
-            double angle = DirectionUtil.AngleFromOriginToTarget(origin, target);
-
-            for (int i = origin.x - range; i < origin.x + range; i++)
-            {
-                for (int j = origin.y - range; j < origin.y + range; j++)
-                {
-                    if(i >= 0 && i < Width && j >= 0 && j < Height) {
-                        if(CreatureFOV.TriangularFOV(origin, angle, range, i, j)) {
-                            triangularPoints.Add(new Point(i, j));
-                        }
-                    }
-                }
-            }
-
-            return triangularPoints;
-        }
+        
 
         public void DrawTriangularTarget(Point origin, Point target, int range, Color foregroundColor, Color backgroundColor, char drawChar)
         {
@@ -365,6 +316,95 @@ namespace RogueBasin {
         }
 
         /// <summary>
+        /// Returns the points in a triangular target from origin to target
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public List<Point> GetPointsForTriangularTarget(Point origin, Point target, int range)
+        {
+            List<Point> triangularPoints = new List<Point>();
+
+            double angle = DirectionUtil.AngleFromOriginToTarget(origin, target);
+
+            for (int i = origin.x - range; i < origin.x + range; i++)
+            {
+                for (int j = origin.y - range; j < origin.y + range; j++)
+                {
+                    if (i >= 0 && i < this.Width && j >= 0 && j < this.Height)
+                    {
+                        if (CreatureFOV.TriangularFOV(origin, angle, range, i, j))
+                        {
+                            triangularPoints.Add(new Point(i, j));
+                        }
+                    }
+                }
+            }
+
+            return triangularPoints;
+        }
+
+        /// <summary>
+        /// Returns the points in a circular target
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public List<Point> GetPointsForCircularTarget(Point location, int size)
+        {
+            List<Point> splashSquares = new List<Point>();
+
+            for (int i = location.x - size; i < location.x + size; i++)
+            {
+                for (int j = location.y - size; j < location.y + size; j++)
+                {
+                    if (i >= 0 && i < Width && j >= 0 && j < Height)
+                    {
+
+                        if (Math.Pow(i - location.x, 2) + Math.Pow(j - location.y, 2) < Math.Pow(size, 2))
+                        {
+                            splashSquares.Add(new Point(i, j));
+                        }
+                    }
+                }
+            }
+
+            return splashSquares;
+        }
+
+        /// <summary>
+        /// Get points on a line in order.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public List<Point> GetPathLinePoints(Point start, Point end)
+        {
+            List<Point> pointsToRet = new List<Point>();
+
+            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
+            //Don't draw the first char (where the player is)
+
+            int currentX = start.x;
+            int currentY = start.y;
+
+            bool finishedLine = false;
+
+            do
+            {
+                int lastX = currentX;
+                int lastY = currentY;
+
+                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+                if (currentX >= 0 && currentX < Width && currentY >= 0 && currentY < Height)
+                    pointsToRet.Add(new Point(currentX, currentY));
+            } while (!finishedLine);
+
+            return pointsToRet;
+        }
+
+        /// <summary>
         /// Draw a flash effect of a line
         /// Start is the origin (line is not drawn here, but origin used to calculate shape of line)
         /// </summary>
@@ -405,31 +445,6 @@ namespace RogueBasin {
         protected void DrawPathLine(Point start, Point end, Color foregroundColor, Color backgroundColor)
         {
             DrawPathLine(start, end, foregroundColor, backgroundColor, (char)0);
-        }
-
-        protected List<Point> GetPathLinePoints(Point start, Point end)
-        {
-            List<Point> pointsToRet = new List<Point>();
-
-            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
-            //Don't draw the first char (where the player is)
-
-            int currentX = start.x;
-            int currentY = start.y;
-
-            bool finishedLine = false;
-
-            do
-            {
-                int lastX = currentX;
-                int lastY = currentY;
-
-                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
-
-                pointsToRet.Add(new Point(currentX, currentY));
-            } while (!finishedLine);
-
-            return pointsToRet;
         }
 
         /// <summary>
@@ -948,6 +963,50 @@ namespace RogueBasin {
 
         }
 
+        /// <summary>
+        /// Draw a shotgun blast. Pass in the actual damage sqs, since they are calculated in the OnFire()
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="target"></param>
+        /// <param name="size"></param>
+        public void DrawShotgunMissileAttack(List <Point> targetSquares)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+            
+            rootConsole.ForegroundColor = ColorPresets.Red;
+            rootConsole.BackgroundColor = ColorPresets.Black;
+
+            //Clone the list since we mangle it
+            List<Point> mangledPoints = new List<Point>();
+            foreach (Point p in targetSquares)
+            {
+                mangledPoints.Add(new Point(p));
+            }
+
+            //Offset origin and target onto map
+            foreach (Point p in mangledPoints)
+            {
+                p.x += mapTopLeft.x;
+                p.y += mapTopLeft.y;
+
+                rootConsole.PutChar(p.x, p.y, '*');
+            }
+
+            rootConsole.ForegroundColor = normalForeground;
+
+            //Draw line overlay
+            FlushConsole();
+
+            //Wait
+            TCODSystem.Sleep(missileDelay);
+
+            //Draw normally
+            Draw();
+            FlushConsole(); 
+        }
+
+
         private void DrawTargettingCursor()
         {
             //Get screen handle
@@ -1036,7 +1095,17 @@ namespace RogueBasin {
                         int size = 5;
 
                         //Cache original contents
-                        List<Point> splashSquares = GetPointsForTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size);
+                        //List<Point> splashSquares = GetPointsForTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size);
+                        
+                        //Using FOV-modified version for extra accuracy!
+                        CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+                        List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, size);
+                        //offset
+                        foreach(Point p in splashSquares) {
+                            p.x += mapTopLeft.x;
+                            p.y += mapTopLeft.y;
+                        }
+
                         List<char> contents = new List<char>();
                         foreach (Point p in splashSquares)
                         {
@@ -3419,7 +3488,7 @@ namespace RogueBasin {
             FlushConsole();
 
             //Wait
-            TCODSystem.Sleep(100);
+            TCODSystem.Sleep(missileDelay);
 
             //Draw normally
             Draw();
@@ -3481,7 +3550,7 @@ namespace RogueBasin {
             FlushConsole();
 
             //Wait
-            TCODSystem.Sleep(100);
+            TCODSystem.Sleep(meleeDelay);
 
             //Draw screen normally
             Draw();

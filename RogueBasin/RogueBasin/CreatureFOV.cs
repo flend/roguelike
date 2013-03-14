@@ -118,6 +118,68 @@ namespace RogueBasin
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Returns the points in a triangular target (i.e. shotgun weapon) from origin to target.
+        /// Only returns points within FOV. Moral: If you can see it, you can shoot it.
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public List<Point> GetPointsForTriangularTargetInFOV(Point origin, Point target, int range)
+        {
+            List<Point> triangularPoints = new List<Point>();
+
+            double angle = DirectionUtil.AngleFromOriginToTarget(origin, target);
+
+            for (int i = origin.x - range; i < origin.x + range; i++)
+            {
+                for (int j = origin.y - range; j < origin.y + range; j++)
+                {
+                    //Check for creature's FOV
+                    //If OK, check to see if it falls within a TriangularFOV (blast radius)
+                    if (CheckTileFOV(i, j) && CreatureFOV.TriangularFOV(origin, angle, range, i, j))
+                    {
+                        triangularPoints.Add(new Point(i, j));
+                    }
+                }
+            }
+
+            return triangularPoints;
+        }
+
+        /// <summary>
+        /// Get points on a line in order.
+        /// /// Only returns points within FOV. Moral: If you can see it, you can shoot it.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public List<Point> GetPathLinePointsInFOV(Point start, Point end)
+        {
+            List<Point> pointsToRet = new List<Point>();
+
+            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
+            //Don't draw the first char (where the player is)
+
+            int currentX = start.x;
+            int currentY = start.y;
+
+            bool finishedLine = false;
+
+            do
+            {
+                int lastX = currentX;
+                int lastY = currentY;
+
+                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+                if (CheckTileFOV(currentX, currentY))
+                    pointsToRet.Add(new Point(currentX, currentY));
+            } while (!finishedLine);
+
+            return pointsToRet;
+        }
+
 
 
     }

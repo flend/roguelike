@@ -139,5 +139,11 @@ namespace RogueBasin
         /// <returns></returns>
         int RangeFire();
 
+        /// <summary>
+        /// Noise mag of this weapon on firing
+        /// </summary>
+        /// <returns></returns>
+        double FireSoundMagnitude();
+
     }
 }

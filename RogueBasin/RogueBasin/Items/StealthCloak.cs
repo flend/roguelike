@@ -225,5 +225,14 @@ namespace RogueBasin.Items
             return 5;
         }
 
+        /// <summary>
+        /// Noise mag of this weapon on firing
+        /// </summary>
+        /// <returns></returns>
+        public double FireSoundMagnitude()
+        {
+            return 0.0;
+        }
+
     }
 }

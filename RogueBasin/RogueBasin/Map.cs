@@ -4,7 +4,8 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    //Represents a level map
+    //Represents a point
+    //This should be immutable
     public class Point {
         public int x;
         public int y;
@@ -18,6 +19,12 @@ namespace RogueBasin
         public Point(int x, int y) {
             this.x = x;
             this.y = y;
+        }
+
+        public Point(Point oldP)
+        {
+            this.x = oldP.x;
+            this.y = oldP.y;
         }
 
         public static bool operator ==(Point i, Point j)
@@ -320,5 +327,7 @@ namespace RogueBasin
                 }
             }
         }
+
+        
     }
 }

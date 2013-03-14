@@ -1418,7 +1418,7 @@ namespace RogueBasin
             }
 
             //Check we are in range of target (not done above)
-            if (Game.Dungeon.GetDistanceBetween(player.LocationMap, target) > range)
+            if (Dungeon.GetDistanceBetween(player.LocationMap, target) > range)
             {
                 Game.MessageQueue.AddMessage("Out of range!");
                 LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
@@ -1677,7 +1677,7 @@ namespace RogueBasin
             Screen.Instance.Target = start;
             Screen.Instance.TargetType = type;
 
-            if (Game.Dungeon.GetDistanceBetween(start, Game.Dungeon.Player.LocationMap) > range)
+            if (Dungeon.GetDistanceBetween(start, Game.Dungeon.Player.LocationMap) > range)
             {
                 Screen.Instance.SetTargetInRange = false;
             }
@@ -1744,7 +1744,7 @@ namespace RogueBasin
                     //Otherwise OK
                     target = newPoint;
 
-                    if (Game.Dungeon.GetDistanceBetween(newPoint, Game.Dungeon.Player.LocationMap) > range)
+                    if (Dungeon.GetDistanceBetween(newPoint, Game.Dungeon.Player.LocationMap) > range)
                     {
                         Screen.Instance.SetTargetInRange = false;
                     }

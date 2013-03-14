@@ -5,72 +5,19 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Shotgun : Item, IEquippableItem
+    public class Pistol : Item, IEquippableItem
     {
+
+        /// <summary>
+        /// Public for serialization
+        /// </summary>
         public int Ammo { get; set; }
 
-        public Shotgun()
+        public Pistol()
         {
             Ammo = MaxAmmo();
         }
 
-        /// <summary>
-        /// Fires the item - probably should be a method
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public bool FireItem(Point target)
-        {
-            //Should be guaranteed in range by caller
-
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-
-            LogFile.Log.LogEntryDebug("Firing shotgun", LogDebugLevel.Medium);
-
-            //The shotgun fires towards its target and does less damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, RangeFire());
-            
-            //Draw attack
-            Screen.Instance.DrawShotgunMissileAttack(targetSquares);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Dungeon.GetDistanceBetween(player.LocationMap, m.LocationMap));
-                    int damage = 10 - rangeToMonster;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.ApplyDamageToMonster(squareContents.monster, damage, false, false);
-                }
-            }
-
-            //Remove 1 ammo
-            Ammo--;
-
-            return true;
-        }
- 
         /// <summary>
         /// Equipment slots where we can be equipped
         /// </summary>
@@ -87,7 +34,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Pistol equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -122,7 +69,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Pistol unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -135,7 +82,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "shotgun"; }
+            get { return "pistol"; }
         }
 
         /// <summary>
@@ -143,7 +90,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "shotguns"; }
+            get { return "pistols"; }
         }
 
         protected override char GetRepresentation()
@@ -153,7 +100,7 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return ColorPresets.Gainsboro;
         }
 
         public int ArmourClassModifier()
@@ -209,7 +156,7 @@ namespace RogueBasin.Items
 
         public int MaxAmmo()
         {
-            return 2;
+            return 3;
         }
 
         public int RemainingAmmo()
@@ -217,7 +164,77 @@ namespace RogueBasin.Items
             return Ammo;
         }
 
-        public bool ThrowItem(Point p, Creature c)
+        /// <summary>
+        /// Fires the item - probably should be a method
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public bool FireItem(Point target)
+        {
+            //Should be guaranteed in range by caller
+
+            Player player = Game.Dungeon.Player;
+            Dungeon dungeon = Game.Dungeon;
+
+            LogFile.Log.LogEntryDebug("Firing pistol", LogDebugLevel.Medium);
+
+            //Get the points along the line of where we are firing
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
+            List<Point> targetSquares = currentFOV.GetPathLinePointsInFOV(player.LocationMap, target);
+
+            //Remove 1 ammo
+            Ammo--;
+
+            //Hit the first monster only
+            Monster monster = null;
+            foreach (Point p in targetSquares)
+            {
+                //Check there is a monster at target
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
+
+                //Hit the monster if it's there
+                if (squareContents.monster != null)
+                {
+                    monster = squareContents.monster;
+                    break;
+                }
+            }
+
+            //Make firing sound
+            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            if(monster == null) {
+                LogFile.Log.LogEntryDebug("No monster in target for Pistol.Ammo used anyway.", LogDebugLevel.Medium);
+                return true;
+            }
+
+            //Draw attack
+
+            Screen.Instance.DrawShotgunMissileAttack(targetSquares);
+
+            //Damage monster
+            
+            int damageBase = 2;
+
+            string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 2";
+            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+            //Apply damage
+            player.ApplyDamageToMonster(monster, damageBase, false, false);
+
+            return true;
+          
+        }
+
+
+        /// <summary>
+        /// Throws the item - check if we can't pull this out
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public bool ThrowItem(Point target, Creature enemyTarget)
         {
             return true;
         }
@@ -248,7 +265,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public virtual TargettingType TargetTypeFire()
         {
-            return TargettingType.Shotgun;
+            return TargettingType.Line;
         }
 
         /// <summary>
@@ -266,16 +283,12 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 10;
+            return 5;
         }
 
-        /// <summary>
-        /// Noise mag of this weapon on firing
-        /// </summary>
-        /// <returns></returns>
         public double FireSoundMagnitude()
         {
-            return 1.0;
+            return 0.66;
         }
 
     }

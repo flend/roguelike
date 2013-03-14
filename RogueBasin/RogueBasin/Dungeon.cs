@@ -641,7 +641,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="obj1"></param>
         /// <param name="obj2"></param>
-        public double GetDistanceBetween(Point p1, Point p2)
+        public static double GetDistanceBetween(Point p1, Point p2)
         {
             double distance = Math.Sqrt(Math.Pow(p1.x - p2.x, 2.0) + Math.Pow(p1.y - p2.y, 2.0));
             return distance;
