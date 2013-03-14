@@ -98,6 +98,10 @@ namespace RogueBasin
             if (Math.Abs(dirAngle) > Math.PI / 3.6)
                 return false;
 
+            //Also fail if it's behind us. Extra check seems to be necessary
+            if (Vector3.DotProduct(testPointVec, directionVector) < 0)
+                return false;
+
             //Is magnitude of testPointVec < range?
             if (testPointVec.Magnitude > range)
                 return false;
