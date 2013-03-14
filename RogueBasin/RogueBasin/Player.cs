@@ -712,6 +712,55 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Apply stun damage (miss n-turns) to monster. All stun attacks are routed through here
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="stunTurns"></param>
+        /// <returns></returns>
+        public CombatResults ApplyStunDamageToMonster(Monster monster, int stunTurns)
+        {
+            //Wake monster up etc.
+            AIForMonsterIsAttacked(monster);
+
+            int monsterOrigStunTurns = monster.StunnedTurns;
+
+            //Do we hit the monster?
+            if (stunTurns > 0)
+            {
+                monster.StunnedTurns += stunTurns;
+
+                //Notify the creature that it has taken damage
+                //It may activate a special ability or stop running away etc.
+                monster.NotifyHitByCreature(this, 0);
+
+                //Message string
+                string playerMsg2 = "";
+                if (!monster.Unique)
+                    playerMsg2 += "The ";
+                playerMsg2 += monster.SingleDescription + " is stunned!";
+                Game.MessageQueue.AddMessage(playerMsg2);
+
+                string debugMsg2 = "MStun: " + monsterOrigStunTurns + "->" + monster.StunnedTurns;
+                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+
+            string playerMsg3 = "";
+            if (!monster.Unique)
+                playerMsg3 += "The ";
+            playerMsg3 += monster.SingleDescription + " shrugs off the attack.";
+            Game.MessageQueue.AddMessage(playerMsg3);
+            string debugMsg3 = "MStun: " + monsterOrigStunTurns + "->" + monster.StunnedTurns;
+            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+
+        }
+
+        /// <summary>
         /// Apply damage to monster and deal with death. All player attacks are routed through here.
         /// </summary>
         /// <param name="monster"></param>
@@ -719,26 +768,8 @@ namespace RogueBasin
         /// <returns></returns>
         public CombatResults ApplyDamageToMonster(Monster monster, int damage, bool magicUse, bool specialMove)
         {
-            //Set the attacked by marker
-            monster.LastAttackedBy = this;
-            monster.LastAttackedByID = this.UniqueID;
-
-            //Was this a passive creature? It loses that flag
-            if (monster.Passive)
-                monster.UnpassifyCreature();
-
-            //Was this a sleeping creature? It loses that flag
-            if (monster.Sleeping)
-            {
-                monster.WakeCreature();
-
-                //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
-                Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
-                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by player", LogDebugLevel.Low);
-            }
-
-            //Notify the creature that it has been hit
-            monster.NotifyAttackByCreature(this);
+            //Wake monster up etc.
+            AIForMonsterIsAttacked(monster);
 
             //Do we hit the monster?
             if (damage > 0)
@@ -766,7 +797,7 @@ namespace RogueBasin
                     Kills.Add(monster);
 
                     //Message string
-                    string playerMsg = "You knocked out ";
+                    string playerMsg = "You destroyed ";
                     if(!monster.Unique)
                         playerMsg += "the ";
                     playerMsg += monster.SingleDescription + ".";
@@ -802,6 +833,34 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
 
             return CombatResults.NeitherDied;
+        }
+
+        /// <summary>
+        /// Monster has been attacked. Wake it up etc.
+        /// </summary>
+        /// <param name="monster"></param>
+        private void AIForMonsterIsAttacked(Monster monster)
+        {
+            //Set the attacked by marker
+            monster.LastAttackedBy = this;
+            monster.LastAttackedByID = this.UniqueID;
+
+            //Was this a passive creature? It loses that flag
+            if (monster.Passive)
+                monster.UnpassifyCreature();
+
+            //Was this a sleeping creature? It loses that flag
+            if (monster.Sleeping)
+            {
+                monster.WakeCreature();
+
+                //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
+                Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
+                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by player", LogDebugLevel.Low);
+            }
+
+            //Notify the creature that it has been hit
+            monster.NotifyAttackByCreature(this);
         }
 
         /// <summary>

@@ -138,6 +138,14 @@ namespace RogueBasin
                 currentSound = Game.Dungeon.GetSoundByID(CurrentSoundID);
             }
 
+            //Stunned creatures miss turns
+            if (StunnedTurns > 0)
+            {
+                StunnedTurns--;
+                LogFile.Log.LogEntryDebug(this.Representation + " is stunned for " + StunnedTurns + " more turns", LogDebugLevel.Low);
+                return;
+            }
+
             //TEST SLEEPING CREATURES
             //Sleeping is a Creature state that is used like an AI state
             //This is OK since we exit immediately

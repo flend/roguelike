@@ -164,6 +164,42 @@ namespace RogueBasin.Items
             return Ammo;
         }
 
+        List<Point> targetSquares = null;
+
+        void CalculateTrajectory(Point target)
+        {
+            Player player = Game.Dungeon.Player;
+            Dungeon dungeon = Game.Dungeon;
+
+            //Get the points along the line of where we are firing
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
+            targetSquares = currentFOV.GetPathLinePointsInFOV(player.LocationMap, target);
+        }
+
+        private Monster FirstMonsterInTrajectory() {
+
+            Player player = Game.Dungeon.Player;
+            Dungeon dungeon = Game.Dungeon;
+
+            //Hit the first monster only
+            Monster monster = null;
+            foreach (Point p in targetSquares)
+            {
+                //Check there is a monster at target
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, p);
+
+                //Hit the monster if it's there
+                if (squareContents.monster != null)
+                {
+                    monster = squareContents.monster;
+                    break;
+                }
+            }
+
+            return monster;
+
+        }
+
         /// <summary>
         /// Fires the item - probably should be a method
         /// </summary>
@@ -179,30 +215,16 @@ namespace RogueBasin.Items
 
             LogFile.Log.LogEntryDebug("Firing pistol", LogDebugLevel.Medium);
 
-            //Get the points along the line of where we are firing
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPathLinePointsInFOV(player.LocationMap, target);
-
             //Remove 1 ammo
             Ammo--;
 
-            //Hit the first monster only
-            Monster monster = null;
-            foreach (Point p in targetSquares)
-            {
-                //Check there is a monster at target
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
-
-                //Hit the monster if it's there
-                if (squareContents.monster != null)
-                {
-                    monster = squareContents.monster;
-                    break;
-                }
-            }
-
             //Make firing sound
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Find monster target
+
+            CalculateTrajectory(target);
+            Monster monster = FirstMonsterInTrajectory();
 
             if(monster == null) {
                 LogFile.Log.LogEntryDebug("No monster in target for Pistol.Ammo used anyway.", LogDebugLevel.Medium);
@@ -224,7 +246,6 @@ namespace RogueBasin.Items
             player.ApplyDamageToMonster(monster, damageBase, false, false);
 
             return true;
-          
         }
 
 
@@ -240,10 +261,25 @@ namespace RogueBasin.Items
 
             Player player = Game.Dungeon.Player;
 
-            //Make throwing sound
-            Game.Dungeon.AddSoundEffect(ThrowSoundMagnitude(), player.LocationLevel, player.LocationMap);
+            //Make throwing sound AT target location
+            Game.Dungeon.AddSoundEffect(ThrowSoundMagnitude(), player.LocationLevel, target);
 
-            //Stun enemy for 1 round (to do)
+            //Find monster target
+
+            CalculateTrajectory(target);
+            Monster monster = FirstMonsterInTrajectory();
+
+            if(monster == null) {
+                LogFile.Log.LogEntryDebug("No monster in target for Pistol.Ammo used anyway.", LogDebugLevel.Medium);
+                return true;
+            }
+
+            //Draw attack
+
+            Screen.Instance.DrawShotgunMissileAttack(targetSquares);
+
+            //Stun enemy for 2 rounds
+            player.ApplyStunDamageToMonster(monster, 5);
 
             return true;
         }

@@ -116,6 +116,15 @@ namespace RogueBasin
         /// </summary>
         int maxHitpoints;
 
+        /// <summary>
+        /// The monster is stunned for this many turns, and will miss this many AI turns
+        /// </summary>
+        public int StunnedTurns
+        {
+            get;
+            set;
+        }
+
         public int Hitpoints
         {
             get
