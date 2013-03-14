@@ -440,6 +440,9 @@ namespace RogueBasin
                                     Game.Dungeon.Player.HitpointsStat = 200;
                                     Game.Dungeon.Player.MaxHitpointsStat = 200;
 
+                                    Game.Dungeon.Player.Hitpoints = 100;
+                                    Game.Dungeon.Player.MagicPoints = 100;
+
                                     //Game.Dungeon.DungeonInfo.DragonDead = false;
 
                                     //Game.Dungeon.EndOfGame();
@@ -1305,13 +1308,14 @@ namespace RogueBasin
             Player player = Game.Dungeon.Player;
             
             //No casting in town or wilderness
+            /*
             if (player.LocationLevel < 2)
             {
                 Game.MessageQueue.AddMessage("You want to save your spells for the dungeons.");
                 LogFile.Log.LogEntryDebug("Attempted to cast spell outside of dungeon", LogDebugLevel.Low);
 
                 return false;
-            }
+            }*/
 
             //Get the user's selection
             Spell toCast = SelectSpell();
@@ -1329,12 +1333,9 @@ namespace RogueBasin
             {
                 //Find spell range
                 int range = toCast.GetRange();
-                if (player.Inventory.ContainsItem(new Items.ExtendOrb()))
-                {
-                    range += 1;
-                }
+                TargettingType targetType = toCast.TargetType();
 
-                targettingSuccess = TargetSpell(out target, range);
+                targettingSuccess = TargetSpell(out target, range, targetType);
             }
 
             //User exited
@@ -1546,7 +1547,7 @@ namespace RogueBasin
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private bool TargetSpell(out Point target, int range)
+        private bool TargetSpell(out Point target, int range, TargettingType targetType)
         {
             Player player = Game.Dungeon.Player;
 
@@ -1587,7 +1588,7 @@ namespace RogueBasin
             */
             //Get the desired target from the player
 
-            return GetTargetFromPlayer(startPoint, out target, range);
+            return GetTargetFromPlayer(startPoint, out target, targetType, range);
         }
 
         /// <summary>
@@ -1595,12 +1596,12 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        private bool GetTargetFromPlayer(Point start, out Point target, int range)
+        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range)
         {
-
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
             Screen.Instance.Target = start;
+            Screen.Instance.TargetType = type;
 
             if (Game.Dungeon.GetDistanceBetween(start, Game.Dungeon.Player.LocationMap) > range)
             {
@@ -2030,7 +2031,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 1;
+            LogFile.Log.DebugLevel = 2;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();

@@ -78,7 +78,7 @@ namespace RogueBasin
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        private bool TriangularFOV(Point origin, double direction, int range, int testPointX, int testPointY)
+        public static bool TriangularFOV(Point origin, double direction, int range, int testPointX, int testPointY)
         {
             //To avoid problems normalizing 0 length vectors
             if (origin.x == testPointX && origin.y == testPointY)

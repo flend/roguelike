@@ -49,6 +49,15 @@ namespace RogueBasin
         public virtual bool NeedsTarget() { return false; }
 
         /// <summary>
+        /// What type of targetting reticle is needed? [if this is a targettable spell]
+        /// </summary>
+        /// <returns></returns>
+        public virtual TargettingType TargetType()
+        {
+            return TargettingType.Line;
+        }
+
+        /// <summary>
         /// Cost in MPs
         /// </summary>
         /// <returns></returns>

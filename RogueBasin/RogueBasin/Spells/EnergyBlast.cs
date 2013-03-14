@@ -101,12 +101,17 @@ namespace RogueBasin.Spells
 
         public override int GetRange()
         {
-            return 4;
+            return 15;
         }
 
         public override bool NeedsTarget()
         {
             return true;
+        }
+
+        public override TargettingType TargetType()
+        {
+            return TargettingType.Shotgun;
         }
 
         public override string SpellName()

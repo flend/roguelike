@@ -150,6 +150,8 @@ namespace RogueBasin {
         /// </summary>
         public Point Target { get; set; }
 
+        public TargettingType TargetType { get; set; }
+
         //Current movie
         List <MovieFrame> movieFrames;
 
@@ -232,6 +234,102 @@ namespace RogueBasin {
         }
 
         /// <summary>
+        /// Returns the points in a circular target, so the original contents can be cached etc. or it can drawn
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public List<Point> GetPointsForCircularTarget(Point location, int size)
+        {
+            List<Point> splashSquares = new List<Point>();
+
+            for (int i = location.x - size; i < location.x + size; i++)
+            {
+                for (int j = location.y - size; j < location.y + size; j++)
+                {
+                    if(i >= 0 && i < Width && j >= 0 && j < Height) {
+
+                        if (Math.Pow(i - location.x, 2) + Math.Pow(j - location.y, 2) < Math.Pow(size, 2))
+                        {
+                            splashSquares.Add(new Point(i, j));
+                        }
+                    }
+                }
+            }
+
+            return splashSquares;
+        }
+
+        /// <summary>
+        /// Returns the points in a circular target, so the original contents can be cached etc. or it can drawn
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public List<Point> GetPointsForTriangularTarget(Point origin, Point target, int range)
+        {
+            List<Point> triangularPoints = new List<Point>();
+
+            double angle = DirectionUtil.AngleFromOriginToTarget(origin, target);
+
+            for (int i = origin.x - range; i < origin.x + range; i++)
+            {
+                for (int j = origin.y - range; j < origin.y + range; j++)
+                {
+                    if(i >= 0 && i < Width && j >= 0 && j < Height) {
+                        if(CreatureFOV.TriangularFOV(origin, angle, range, i, j)) {
+                            triangularPoints.Add(new Point(i, j));
+                        }
+                    }
+                }
+            }
+
+            return triangularPoints;
+        }
+
+        public void DrawTriangularTarget(Point origin, Point target, int range, Color foregroundColor, Color backgroundColor, char drawChar)
+        {
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.ForegroundColor = foregroundColor;
+            rootConsole.BackgroundColor = backgroundColor;
+
+            List<Point> splashSquares = GetPointsForTriangularTarget(origin, target, range);
+            foreach (Point p in splashSquares)
+            {
+                rootConsole.PutChar(p.x, p.y, drawChar);
+            }
+
+            rootConsole.ForegroundColor = normalForeground;
+            rootConsole.BackgroundColor = normalBackground;
+
+        }
+
+
+        public void DrawCircularTarget(Point location, Color foregroundColor, Color backgroundColor, int size, char drawChar)
+        {
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.ForegroundColor = foregroundColor;
+            rootConsole.BackgroundColor = backgroundColor;
+
+            List<Point> splashSquares = GetPointsForCircularTarget(location, size);
+            foreach (Point p in splashSquares)
+            {
+                rootConsole.PutChar(p.x, p.y, drawChar);
+            }
+
+            rootConsole.ForegroundColor = normalForeground;
+            rootConsole.BackgroundColor = normalBackground;
+
+        }
+
+
+        /// <summary>
         /// Draw a fireball effect
         /// </summary>
         /// <param name="sqs"></param>
@@ -275,6 +373,108 @@ namespace RogueBasin {
         {
             DrawFlashLine(start, end, color, 200, true);
         }
+
+        protected char LineChar(int deltaX, int deltaY) {
+
+            char drawChar = '-';
+
+            if (deltaX < 0 && deltaY < 0)
+                drawChar = '\\';
+            else if (deltaX < 0 && deltaY > 0)
+                drawChar = '/';
+            else if (deltaX > 0 && deltaY < 0)
+                drawChar = '/';
+            else if (deltaX > 0 && deltaY > 0)
+                drawChar = '\\';
+            else if (deltaY == 0)
+                drawChar = '-';
+            else if (deltaX == 0)
+                drawChar = '|';
+
+            return drawChar;
+        }
+
+        /// <summary>
+        /// Draw a line following a path on the console.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="color"></param>
+        protected void DrawPathLine(Point start, Point end, Color foregroundColor, Color backgroundColor)
+        {
+            DrawPathLine(start, end, foregroundColor, backgroundColor, (char)0);
+        }
+
+        protected List<Point> GetPathLinePoints(Point start, Point end)
+        {
+            List<Point> pointsToRet = new List<Point>();
+
+            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
+            //Don't draw the first char (where the player is)
+
+            int currentX = start.x;
+            int currentY = start.y;
+
+            bool finishedLine = false;
+
+            do
+            {
+                int lastX = currentX;
+                int lastY = currentY;
+
+                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+                pointsToRet.Add(new Point(currentX, currentY));
+            } while (!finishedLine);
+
+            return pointsToRet;
+        }
+
+        /// <summary>
+        /// Draw a line following a path on the console. Override default line drawing
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="color"></param>
+        protected void DrawPathLine(Point start, Point end, Color foregroundColor, Color backgroundColor, char drawChar)
+        {
+
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw the line overlay
+
+            //Cast a line between the start and end
+            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
+            //Don't draw the first char (where the player is)
+
+            rootConsole.ForegroundColor = foregroundColor;
+            rootConsole.BackgroundColor = backgroundColor;
+
+            int currentX = start.x;
+            int currentY = start.y;
+
+            bool finishedLine = false;
+
+            do {
+                int lastX = currentX;
+                int lastY = currentY;
+
+                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+                char c;
+                if (drawChar == 0)
+                    c = LineChar(currentX - lastX, currentY - lastY);
+                else
+                    c = drawChar;
+
+                rootConsole.PutChar(currentX, currentY, c);
+            } while (!finishedLine);
+                        
+            rootConsole.ForegroundColor = normalForeground;
+            rootConsole.BackgroundColor = normalBackground;
+        }
+
 
         public void DrawFlashLine(Point start, Point end, Color color, int timeMS, bool screenUpdate) {
 
@@ -751,13 +951,112 @@ namespace RogueBasin {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
+            Player player = Game.Dungeon.Player;
+
+            int playerX = mapTopLeft.x + player.LocationMap.x;
+            int playerY = mapTopLeft.y + player.LocationMap.y;
+
             int xLoc = mapTopLeft.x + Target.x;
             int yLoc = mapTopLeft.y + Target.y;
 
-            //Get what's there
+            //Draw the target
+
             char charAtPoint = rootConsole.GetChar(xLoc, yLoc);
 
-            //Replace with the same but with targetting background
+            //Draw the area of effect
+
+            switch (TargetType)
+            {
+                case TargettingType.Line:
+
+  
+                    //Draw a line up to the target
+                    DrawPathLine(new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
+                    break;
+
+                case TargettingType.LineThrough:
+
+                    //Cache original contents
+                    List<Point> lineSquares = GetPathLinePoints(new Point(playerX, playerY), new Point(xLoc, yLoc));
+                    List<char> linecontents = new List<char>();
+                    foreach (Point p in lineSquares)
+                    {
+                        linecontents.Add(rootConsole.GetChar(p.x, p.y));
+                    }
+
+                    //Draw a line up to the target
+                    DrawPathLine(new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
+
+                    rootConsole.BackgroundColor = targetBackground;
+                    rootConsole.ForegroundColor = ColorPresets.Red;
+
+                    //Draw original contents back
+                    int index = 0;
+                    foreach (Point p in lineSquares)
+                    {
+                        rootConsole.PutChar(p.x, p.y, linecontents[index]);
+                        index++;
+                    }
+                    break;
+
+                case TargettingType.Rocket:
+                    {
+                        int size = 2;
+
+                        //Cache original contents
+                        List<Point> splashSquares = GetPointsForCircularTarget(new Point(xLoc, yLoc), size);
+                        List<char> contents = new List<char>();
+                        foreach (Point p in splashSquares)
+                        {
+                            contents.Add(rootConsole.GetChar(p.x, p.y));
+                        }
+
+                        //Draw a line up to the target
+                        DrawPathLine(new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
+                        //Circular target on the target
+                        DrawCircularTarget(new Point(xLoc, yLoc), ColorPresets.Red, targetBackground, size, '*');
+
+                        rootConsole.BackgroundColor = targetBackground;
+                        rootConsole.ForegroundColor = ColorPresets.Red;
+
+                        //Draw original contents back
+                        int index2 = 0;
+                        foreach (Point p in splashSquares)
+                        {
+                            rootConsole.PutChar(p.x, p.y, contents[index2]);
+                            index2++;
+                        }
+                    }
+                    break;
+
+                case TargettingType.Shotgun:
+                    {
+                        int size = 5;
+
+                        //Cache original contents
+                        List<Point> splashSquares = GetPointsForTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size);
+                        List<char> contents = new List<char>();
+                        foreach (Point p in splashSquares)
+                        {
+                            contents.Add(rootConsole.GetChar(p.x, p.y));
+                        }
+
+                        //Triangle target on the player
+                        DrawTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size, ColorPresets.Red, targetBackground, '*');
+                        
+                        rootConsole.BackgroundColor = targetBackground;
+                        rootConsole.ForegroundColor = ColorPresets.Red;
+
+                        //Draw original contents back
+                        int index2 = 0;
+                        foreach (Point p in splashSquares)
+                        {
+                            rootConsole.PutChar(p.x, p.y, contents[index2]);
+                            index2++;
+                        }
+                    }
+                    break;
+            }
 
             if (SetTargetInRange)
             {
