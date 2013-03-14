@@ -18,7 +18,7 @@ namespace RogueBasin.Creatures
         public PixieUnique()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             Speed = 200;
 
             Unique = true;

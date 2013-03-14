@@ -27,41 +27,10 @@ namespace RogueBasin
 
     [System.Xml.Serialization.XmlInclude(typeof(Items.PotionMPRestore))]
 
-    [System.Xml.Serialization.XmlInclude(typeof(Items.PrettyDress))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.KnockoutDress))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.LongSword))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Lantern))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.LeatherArmour))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.MetalArmour))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.ExtendOrb))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.RestoreOrb))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.StaffPower))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.SparklingEarrings))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Dagger))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.HealingPotion))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.GodSword))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.MapGem))]
 
-    [System.Xml.Serialization.XmlInclude(typeof(Items.ShortSword))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Bracelet))]
-
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Badge))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Band))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Boots))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Bracer))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.GlassGem))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Greaves))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.LeadRing))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Lockpicks))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Sash))]
-
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Glove))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Backpack))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Book))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Stone))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Medal))]
-    [System.Xml.Serialization.XmlInclude(typeof(Items.Flint))]
-    
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Shotgun))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Vibroblade))]
     public abstract class Item : MapObject
     {
         Color defaultItemColor = ColorPresets.Red;

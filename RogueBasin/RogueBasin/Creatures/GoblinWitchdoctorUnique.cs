@@ -18,7 +18,7 @@ namespace RogueBasin.Creatures
         public GoblinWitchdoctorUnique()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             Unique = true;
             UniqueName = "Damastrals the Goblin Witchdoctor";
         }

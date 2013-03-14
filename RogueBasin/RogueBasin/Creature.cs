@@ -21,11 +21,6 @@ namespace RogueBasin
         List<EquipmentSlotInfo> equipmentSlots;
 
         /// <summary>
-        /// If the monster is patrolling, they visit these way points in order
-        /// </summary>
-        List<Point> wayPoints;
-
-        /// <summary>
         /// Is the creature still alive?
         /// </summary>
         bool alive;
@@ -234,6 +229,8 @@ namespace RogueBasin
 
             return true;
         }
+
+
 
         /// <summary>
         /// Drop all inventory (perhaps you died). Currently drops all items on the floor, could extend by looking at surrounding squares. Use the dig algorithm

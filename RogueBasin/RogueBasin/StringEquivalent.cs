@@ -91,8 +91,8 @@ namespace RogueBasin
 
         private static void SetupEquipmentSlots()
         {
-            EquipmentSlots.Add(EquipmentSlot.Body, "Body");
-            EquipmentSlots.Add(EquipmentSlot.RightHand, "Right Hand");
+            EquipmentSlots.Add(EquipmentSlot.Utility, "Body");
+            EquipmentSlots.Add(EquipmentSlot.Weapon, "Right Hand");
         }
     }
 }

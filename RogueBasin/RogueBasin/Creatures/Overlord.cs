@@ -18,7 +18,7 @@ namespace RogueBasin.Creatures
         public Overlord()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
         }
 
         public override int BaseSpeed()

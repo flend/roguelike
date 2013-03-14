@@ -17,7 +17,7 @@ namespace RogueBasin.Creatures
         public Necromancer()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
         }
 
         public override void InventoryDrop()

@@ -14,14 +14,12 @@ namespace RogueBasin.Creatures
         const int classDeltaHitpoints = 4;
         const int classMinHitpoints = 1;
 
-        bool rotationClockwise = true;
-
         long lastAlertTime = -1;
 
         public AlertBot()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 10;
         }
 

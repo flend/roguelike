@@ -364,7 +364,7 @@ namespace RogueBasin
                                 case 'd':
                                 case 'D':
                                     //Drop items if in town
-                                    DropItems();
+                                    //DropItems();
                                     Screen.Instance.Update();
                                     timeAdvances = false;
                                     break;
@@ -1777,7 +1777,9 @@ namespace RogueBasin
             if (equipItem != null)
             {
                 //The item is equippable
-                player.EquipItemNoSlots(equipItem);
+
+                //Place in an equipment slot and drop the old item
+                player.EquipAndReplaceItem(itemToPickUp);
             }
             else
             {

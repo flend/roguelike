@@ -14,7 +14,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="slot"></param>
         /// <returns></returns>
-        bool CanBeEquippedInSlot(EquipmentSlot slot);
+        //bool CanBeEquippedInSlot(EquipmentSlot slot);
 
         /// <summary>
         /// Returns a list of possible equipment slots that the item can be equipped in
@@ -63,6 +63,80 @@ namespace RogueBasin
         /// <returns></returns>
         int HitModifier();
 
+        //FLATLINERL ACTIONS
+
+        /// <summary>
+        /// Can be used in melee
+        /// </summary>
+        /// <returns></returns>
+        bool HasMeleeAction();
+
+        /// <summary>
+        /// Can be fired
+        /// </summary>
+        /// <returns></returns>
+        bool HasFireAction();
+        /// <summary>
+        /// Can be thrown
+        /// </summary>
+        /// <returns></returns>
+        bool HasThrowAction();
+
+        /// <summary>
+        /// Can be operated
+        /// </summary>
+        /// <returns></returns>
+        bool HasOperateAction();
+
+        int RemainingAmmo();
+
+        /// <summary>
+        /// Fires the item - probably should be a method
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        bool FireItem(Point target, Creature enemyTarget);
+
+        /// <summary>
+        /// Throws the item - check if we can't pull this out
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        bool ThrowItem(Point target, Creature enemyTarget);
+
+        /// <summary>
+        /// Operates the item - definitely a method
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        bool OperateItem();
+
+        /// <summary>
+        /// What type of targetting reticle is needed? [for throwing]
+        /// </summary>
+        /// <returns></returns>
+        TargettingType TargetTypeThrow();
+
+        /// <summary>
+        /// What type of targetting reticle is needed? [for firing]
+        /// </summary>
+        /// <returns></returns>
+        TargettingType TargetTypeFire();
+
+        /// <summary>
+        /// Throwing range
+        /// </summary>
+        /// <returns></returns>
+        int RangeThrow();
+
+        /// <summary>
+        /// Firing range
+        /// </summary>
+        /// <returns></returns>
+        int RangeFire();
 
     }
 }

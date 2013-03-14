@@ -155,8 +155,8 @@ namespace RogueBasin
             CurrentDungeon = -1;
 
             //Add default equipment slots
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Body));
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Utility));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
             //Set initial HP
             SetupInitialHP();
@@ -248,20 +248,22 @@ namespace RogueBasin
             CharmPoints = CharmStat;
 
             //Max charmed creatures
+            /*
             if (inv.ContainsItem(new Items.SparklingEarrings()))
             {
                 MaxCharmedCreatures = 2;
             }
             else
                 MaxCharmedCreatures = 1;
-
+            */
             //Sight
 
             NormalSightRadius = 0;
 
+            /*
             if(inv.ContainsItem(new Items.Lantern()))
                 NormalSightRadius = 7;
-
+            */
             //Speed
 
             int speedDelta = SpeedStat - 10;
@@ -312,7 +314,7 @@ namespace RogueBasin
             //Armour
 
             Screen.Instance.PCColor = ColorPresets.White;
-
+            /*
             if (inv.ContainsItem(new Items.MetalArmour()) && AttackStat > 50)
             {
                 ArmourClassAccess += 6;
@@ -334,11 +336,12 @@ namespace RogueBasin
                 CharmPoints += 20;
                 ArmourClassAccess += 1;
                 Screen.Instance.PCColor = ColorPresets.BlueViolet;
-            }
+            }*/
 
             //Consider equipped weapons (only 1 will work)
             DamageModifierAccess = 0;
 
+            /*
             if (inv.ContainsItem(new Items.GodSword()))
             {
                 DamageModifierAccess += 8;
@@ -354,7 +357,7 @@ namespace RogueBasin
             else if (inv.ContainsItem(new Items.Dagger()))
             {
                 DamageModifierAccess += 1;
-            }
+            }*/
 
             //Check and apply effects
 
@@ -590,10 +593,11 @@ namespace RogueBasin
 
             //Check we are in target
             int range = toCast.GetRange();
+            /*
             if (Inventory.ContainsItem(new Items.ExtendOrb()))
             {
                 range += 1;
-            }
+            }*/
 
             if (toCast.NeedsTarget() && Game.Dungeon.GetDistanceBetween(LocationMap, target) > range)
             {
@@ -884,11 +888,12 @@ namespace RogueBasin
             Item glove = null;
             foreach (Item item in Inventory.Items)
             {
+                /*
                 if (item as Items.Glove != null)
                 {
                     glove = item as Items.Glove;
                     break;
-                }
+                }*/
             }
 
             if (glove != null && specialMove)
@@ -1192,6 +1197,196 @@ namespace RogueBasin
             return true;
         }
 
+
+        /// <summary>
+        /// Drop an item. Equippable items never exist in the inventory in FlatlineRL
+        /// </summary>
+        /// <param name="itemToDrop"></param>
+        /// <returns></returns>
+        public bool DropEquippableItem(Item itemToDrop)
+        {
+            //Add back to the dungeon store
+            Game.Dungeon.Items.Add(itemToDrop);
+
+            itemToDrop.LocationLevel = this.LocationLevel;
+            itemToDrop.LocationMap = this.LocationMap;
+            itemToDrop.InInventory = false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Pick up an item. Equippable items never exist in the inventory in FlatlineRL
+        /// </summary>
+        /// <param name="itemToDrop"></param>
+        /// <returns></returns>
+        public bool PickupEquippableItem(Item itemToPickup)
+        {
+            //Remove from the dungeon store, to avoid duplication on serialization
+            Game.Dungeon.Items.Remove(itemToPickup);
+
+            itemToPickup.InInventory = true;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Equip an item into a relevant slot.
+        /// Will unequip and drop an item in the same slot.
+        /// Returns true if operation successful
+        /// </summary>
+        /// <param name="selectedGroup"></param>
+        /// <returns></returns>
+        public bool EquipAndReplaceItem(Item itemToUse)
+        {
+            //Check if this item is equippable
+            IEquippableItem equippableItem = itemToUse as IEquippableItem;
+
+            if (equippableItem == null)
+            {
+                LogFile.Log.LogEntryDebug("Can't equip item, not equippable: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
+                return false;
+            }
+
+            //Find all matching slots available on the player
+
+            List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
+            //Is always only 1 slot in FlatlineRL
+
+            EquipmentSlot itemSlot = itemPossibleSlots[0];
+            
+            //We always have 2 equipment slots, 1 of each type on a player in FlatlineRL
+            //So we should match exactly on 1 free slot
+
+            List<EquipmentSlotInfo> matchingEquipSlots = new List<EquipmentSlotInfo>();
+
+            foreach (EquipmentSlot slotType in itemPossibleSlots)
+            {
+                matchingEquipSlots.AddRange(this.EquipmentSlots.FindAll(x => x.slotType == slotType));
+            }
+
+            //No suitable slots
+            if (matchingEquipSlots.Count == 0)
+            {
+                LogFile.Log.LogEntryDebug("Can't equip item, no valid slots: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
+
+                return false;
+            }
+
+            //Look for first empty slot
+
+            EquipmentSlotInfo freeSlot = matchingEquipSlots.Find(x => x.equippedItem == null);
+
+            if (freeSlot == null)
+            {
+                //Not slots free, unequip first slot
+                Item oldItem = matchingEquipSlots[0].equippedItem;
+                IEquippableItem oldItemEquippable = oldItem as IEquippableItem;
+
+                //Sanity check
+                if (oldItemEquippable == null)
+                {
+                    LogFile.Log.LogEntry("Old item did not equist: " + oldItem.SingleItemDescription);
+                    return false;
+                }
+
+                LogFile.Log.LogEntryDebug("Dropping old item " + oldItem.SingleItemDescription, LogDebugLevel.Medium);
+
+                //Run unequip routine
+                oldItemEquippable.UnEquip(this);
+                oldItem.IsEquipped = false;
+
+                //Drop the old item
+                DropEquippableItem(oldItem);
+                
+                //This slot is now free
+                freeSlot = matchingEquipSlots[0];
+            }
+
+            //We now have a free slot to equip in
+
+            //Put new item in first relevant slot and run equipping routine
+            matchingEquipSlots[0].equippedItem = itemToUse;
+            equippableItem.Equip(this);
+            itemToUse.IsEquipped = true;
+
+            PickupEquippableItem(itemToUse);
+
+            LogFile.Log.LogEntryDebug("Equipping new item " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
+
+            //Message the user
+            LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
+            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped in " + StringEquivalent.EquipmentSlots[matchingEquipSlots[0].slotType]);
+
+            return true;
+        }
+
+        /// <summary>
+        /// FlatlineRL - return equipped weapon or null
+        /// </summary>
+        /// <returns></returns>
+        public IEquippableItem GetEquippedWeapon() 
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Weapon);
+
+            if(weaponSlot == null) {
+                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem as IEquippableItem;
+        }
+
+        /// <summary>
+        /// FlatlineRL - return equipped weapon as item reference (always works)
+        /// </summary>
+        /// <returns></returns>
+        public Item GetEquippedWeaponAsItem()
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Weapon);
+
+            if(weaponSlot == null) {
+                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem;
+        }
+
+        /// <summary>
+        /// FlatlineRL - return equipped utility or null
+        /// </summary>
+        /// <returns></returns>
+        public IEquippableItem GetEquippedUtility()
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Utility);
+
+            if(weaponSlot == null) {
+                LogFile.Log.LogEntryDebug("Can't find utility slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem as IEquippableItem;
+        }
+
+        /// <summary>
+        /// FlatlineRL - return equipped utility or null
+        /// </summary>
+        /// <returns></returns>
+        public Item GetEquippedUtilityAsItem()
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Utility);
+
+            if(weaponSlot == null) {
+                LogFile.Log.LogEntryDebug("Can't find utility slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem;
+        }
+
         /// <summary>
         /// Predicate for matching equipment slot of EquipmentSlot type
         /// </summary>
@@ -1248,6 +1443,8 @@ namespace RogueBasin
 
             return usedSuccessfully;
         }
+
+
 
         /// <summary>
         /// Simpler version of equip item, doesn't care about slots

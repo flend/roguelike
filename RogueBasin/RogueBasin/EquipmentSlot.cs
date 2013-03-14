@@ -6,6 +6,6 @@ namespace RogueBasin
 {
     public enum EquipmentSlot
     {
-        RightHand, Body
+        Weapon, Utility
     }
 }

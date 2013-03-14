@@ -12,7 +12,7 @@ namespace RogueBasin.Creatures
         public SkeletalArcher()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
         }
         public override Monster NewCreatureOfThisType()
         {

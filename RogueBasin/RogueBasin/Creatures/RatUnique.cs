@@ -18,7 +18,7 @@ namespace RogueBasin.Creatures
         public RatUnique()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             SightRadius = 6;
             Unique = true;
 

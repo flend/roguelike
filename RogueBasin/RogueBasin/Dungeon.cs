@@ -4733,11 +4733,12 @@ namespace RogueBasin
             player.MaxMagicPoints = (int)Math.Ceiling(player.MagicStat * 2.5);
             player.MagicPoints = (int)Math.Ceiling(player.MagicStat * 2.5);
 
+            /*
             if (inv.ContainsItem(new Items.StaffPower()))
             {
                 player.MaxMagicPoints = (int)Math.Ceiling(player.MagicStat * 3.5);
                 player.MagicPoints = (int)Math.Ceiling(player.MagicStat * 3.5);
-            }
+            }*/
 
             //Set all the stats that can be set at any time
             player.CalculateCombatStats();

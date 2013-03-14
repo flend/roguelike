@@ -857,6 +857,12 @@ namespace RogueBasin
 
             for (int i = 0; i < 4; i++)
             {
+                Creatures.RotatingTurret rot = new Creatures.RotatingTurret();
+                AddMonsterRandomWalkablePoint(rot, 0);
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
                 Creatures.PerimeterBot patrolBot = new Creatures.PerimeterBot();
                 AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
             }
@@ -868,6 +874,9 @@ namespace RogueBasin
             }
             
             SetLightLevelUniversal(0, 0, 10);
+
+            
+
         }
 
         /// <summary>
@@ -1289,7 +1298,7 @@ namespace RogueBasin
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 1;
             PlaceMonster(uniqueLevel, ferret);
 
-            ferret.PickUpItem(new RogueBasin.Items.Dagger());
+            //ferret.PickUpItem(new RogueBasin.Items.Dagger());
 
             //Level 2: Unique rat
 
@@ -1297,7 +1306,7 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 2;
             PlaceMonster(uniqueLevel, rat);
             
-            rat.PickUpItem(new RogueBasin.Items.Lantern());
+            //rat.PickUpItem(new RogueBasin.Items.Lantern());
  
             //Level 3: Unique goblin witchdoctor
 
@@ -1305,7 +1314,7 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(0) + 3;
             PlaceMonster(uniqueLevel, gobbo);
 
-            gobbo.PickUpItem(new RogueBasin.Items.Glove());
+            //gobbo.PickUpItem(new RogueBasin.Items.Glove());
 
             //Followers get spawned in SpawnCaveUniqueFollowers() called by SpawnDungeon()
         }
@@ -1355,8 +1364,8 @@ namespace RogueBasin
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1) + 2;
             Point uniqLoc = PlaceMonster(uniqueLevel, spider);
 
-            Items.ShortSword sword = new RogueBasin.Items.ShortSword();
-            spider.PickUpItem(sword);
+           // Items.ShortSword sword = new RogueBasin.Items.ShortSword();
+           // spider.PickUpItem(sword);
             
             //Level 4 : Unique ogre
 
@@ -1364,8 +1373,8 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(1) + 3;
             uniqLoc = PlaceMonster(uniqueLevel, ogre);
 
-            Items.PrettyDress dress = new RogueBasin.Items.PrettyDress();
-            ogre.PickUpItem(dress);           
+            //Items.PrettyDress dress = new RogueBasin.Items.PrettyDress();
+            //ogre.PickUpItem(dress);           
         }
 
         private void SpawnWaterCaveUniqueFollowers()
@@ -1404,8 +1413,8 @@ namespace RogueBasin
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 1;
             Point uniqLoc = PlaceMonster(uniqueLevel, faerie);
 
-            Items.SparklingEarrings earring = new RogueBasin.Items.SparklingEarrings();
-            faerie.PickUpItem(earring);
+            //Items.SparklingEarrings earring = new RogueBasin.Items.SparklingEarrings();
+           // faerie.PickUpItem(earring);
 
             //Level 3 : Unique black unicorn
 
@@ -1413,8 +1422,8 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 2;
             uniqLoc = PlaceMonster(uniqueLevel, unicorn);
 
-            Items.LeatherArmour leather = new RogueBasin.Items.LeatherArmour();
-            unicorn.PickUpItem(leather);
+          //  Items.LeatherArmour leather = new RogueBasin.Items.LeatherArmour();
+           // unicorn.PickUpItem(leather);
 
             //Level 4 : Unique pixie
 
@@ -1422,8 +1431,8 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(2) + 3;
             uniqLoc = PlaceMonster(uniqueLevel, pixie);
 
-            Items.StaffPower staff = new RogueBasin.Items.StaffPower();
-            pixie.PickUpItem(staff);  
+            //Items.StaffPower staff = new RogueBasin.Items.StaffPower();
+           // pixie.PickUpItem(staff);  
         }
 
         private void SpawnForestUniqueFollowers()
@@ -1474,8 +1483,8 @@ namespace RogueBasin
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5) + 2;
             Point uniqLoc = PlaceMonster(uniqueLevel, mal);
 
-            Items.RestoreOrb orb = new RogueBasin.Items.RestoreOrb();
-            mal.PickUpItem(orb);
+            //Items.RestoreOrb orb = new RogueBasin.Items.RestoreOrb();
+           // mal.PickUpItem(orb);
 
             //Level 4 : Unique Overlord
 
@@ -1483,8 +1492,8 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5) + 3;
             uniqLoc = PlaceMonster(uniqueLevel, overlord);
 
-            Items.GodSword sword = new RogueBasin.Items.GodSword();
-            overlord.PickUpItem(sword);
+           // Items.GodSword sword = new RogueBasin.Items.GodSword();
+          //  overlord.PickUpItem(sword);
 
             
         }
@@ -1531,8 +1540,8 @@ namespace RogueBasin
             int uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4) + 3;
             Point uniqLoc = PlaceMonster(uniqueLevel, necro);
 
-            Items.MetalArmour armour = new RogueBasin.Items.MetalArmour();
-            necro.PickUpItem(armour);
+          //  Items.MetalArmour armour = new RogueBasin.Items.MetalArmour();
+         //   necro.PickUpItem(armour);
 
             // Level 3 : Unique Skeleton
             
@@ -1540,8 +1549,8 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4) + 2;
             uniqLoc = PlaceMonster(uniqueLevel, skel);
 
-            Items.ExtendOrb orb = new RogueBasin.Items.ExtendOrb();
-            skel.PickUpItem(orb);
+        //    Items.ExtendOrb orb = new RogueBasin.Items.ExtendOrb();
+        //    skel.PickUpItem(orb);
 
             // Level 2 : Unique Ghoul
 
@@ -1549,8 +1558,8 @@ namespace RogueBasin
             uniqueLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4) + 1;
             uniqLoc = PlaceMonster(uniqueLevel, ghoul);
 
-            Items.LongSword sword = new RogueBasin.Items.LongSword();
-            ghoul.PickUpItem(sword);
+           // Items.LongSword sword = new RogueBasin.Items.LongSword();
+          //  ghoul.PickUpItem(sword);
         }
 
         private void SpawnCryptUniqueFollowers()
@@ -1599,7 +1608,7 @@ namespace RogueBasin
 
             //Add his items
             Items.HealingPotion dag = new RogueBasin.Items.HealingPotion();
-            uruk.PickUpItem(dag);
+          uruk.PickUpItem(dag);
 
             //Level 4 : Unique Orc Shaman
 
@@ -1609,8 +1618,8 @@ namespace RogueBasin
 
             //Add his items
 
-            Items.KnockoutDress dress = new RogueBasin.Items.KnockoutDress();
-            shaman.PickUpItem(dress);            
+         //   Items.KnockoutDress dress = new RogueBasin.Items.KnockoutDress();
+         //   shaman.PickUpItem(dress);            
         }
 
         private void SpawnOrcUniqueFollowers()
@@ -1655,21 +1664,10 @@ namespace RogueBasin
              
             //Spawn all the collect items
 
-            dungeon.AddItemNoChecks(new Items.Glove(), 0, dungeon.Player.LocationMap);
-            dungeon.AddItemNoChecks(new Items.LeatherArmour(), 0, new Point(dungeon.Player.LocationMap.x + 1, dungeon.Player.LocationMap.y));
-            dungeon.AddItemNoChecks(new Items.MetalArmour(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
-            dungeon.AddItemNoChecks(new Items.GodSword(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y + 1));
-            dungeon.AddItemNoChecks(new Items.ShortSword(), 0, new Point(dungeon.Player.LocationMap.x + 1, dungeon.Player.LocationMap.y + 1));
-            dungeon.AddItemNoChecks(new Items.LongSword(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y + 1));
-            dungeon.AddItemNoChecks(new Items.PrettyDress(), 0, new Point(dungeon.Player.LocationMap.x - 1, dungeon.Player.LocationMap.y + 1));
-            dungeon.AddItemNoChecks(new Items.MapGem(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y + 1));
-            dungeon.AddItemNoChecks(new Items.Lantern(), 0, new Point(dungeon.Player.LocationMap.x - 3, dungeon.Player.LocationMap.y + 1));
+            
+            
             dungeon.AddItemNoChecks(new Items.HealingPotion(), 0, new Point(dungeon.Player.LocationMap.x, dungeon.Player.LocationMap.y + 2));
-            dungeon.AddItemNoChecks(new Items.StaffPower(), 0, new Point(dungeon.Player.LocationMap.x - 1, dungeon.Player.LocationMap.y + 2));
-            dungeon.AddItemNoChecks(new Items.RestoreOrb(), 0, new Point(dungeon.Player.LocationMap.x -2, dungeon.Player.LocationMap.y + 2));
-            dungeon.AddItemNoChecks(new Items.KnockoutDress(), 0, new Point(dungeon.Player.LocationMap.x - 3, dungeon.Player.LocationMap.y - 1));
-            dungeon.AddItemNoChecks(new Items.ExtendOrb(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 2));
-            dungeon.AddItemNoChecks(new Items.SparklingEarrings(), 0, new Point(dungeon.Player.LocationMap.x - 2, dungeon.Player.LocationMap.y - 1));
+  
 
             //Spawn all the potions / berries
              
@@ -1744,13 +1742,13 @@ namespace RogueBasin
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
             //Set width height of all maps to 80 / 25
-            caveGen.Width = 80;
+            caveGen.Width = 60;
             caveGen.Height = 25;
 
-            ruinedGen.Width = 80;
+            ruinedGen.Width = 60;
             ruinedGen.Height = 25;
 
-            hallsGen.Width = 80;
+            hallsGen.Width = 60;
             hallsGen.Height = 25;
 
             //DUNGEON 1 - levels 1
@@ -1774,8 +1772,19 @@ namespace RogueBasin
             //Place monsters in level
             SpawnCreaturesDebug(hallsGen);
 
+            SpawnItemsDebug();
         }
 
+
+        private void SpawnItemsDebug()
+        {
+            //Spawn some items
+
+            dungeon.AddItemNoChecks(new Items.Shotgun(), 0, dungeon.Player.LocationMap);
+            dungeon.AddItemNoChecks(new Items.Vibroblade(), 0, new Point(dungeon.Player.LocationMap.x+1,dungeon.Player.LocationMap.y));
+            dungeon.AddItemNoChecks(new Items.StealthCloak(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
+
+        }
 
         /// <summary>
         /// Adds levels and interconnecting staircases

@@ -6,17 +6,26 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Chasing monster that doesn't attack and can be used as a shield???
+    /// Patrolling Robot. Will chase and engage in Melee
     /// </summary>
-    public class Drone : MonsterThrowAndRunAI
+    public class PatrolBot : MonsterFightAndRunAI
     {
-        const int classDeltaHitpoints = 5;
-        const int classMinHitpoints = 5;
+        const int classDeltaHitpoints = 4;
+        const int classMinHitpoints = 1;
 
-        public Drone()
+        bool rotationClockwise = true;
+
+        public PatrolBot()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
+            NormalSightRadius = 4;
+
+            //Randomize which way we rotate (should be serialized)
+            if (Game.Random.Next(2) > 0)
+            {
+                rotationClockwise = false;
+            }
         }
 
         public override void InventoryDrop()
@@ -24,11 +33,6 @@ namespace RogueBasin.Creatures
             //Nothing to drop
 
             //Hmm, could use this corpses
-        }
-
-        public override Monster NewCreatureOfThisType()
-        {
-            return new Drone();
         }
 
         protected override int ClassMaxHitpoints()
@@ -41,7 +45,7 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override int ArmourClass()
         {
-            return 7;
+            return 5;
         }
 
         /// <summary>
@@ -62,16 +66,6 @@ namespace RogueBasin.Creatures
 
         public override int HitModifier()
         {
-            return 1;
-        }
-
-        protected override double GetMissileRange()
-        {
-            return 3.0;
-        }
-
-        protected override int GetChanceToBackAway()
-        {
             return 0;
         }
 
@@ -82,67 +76,73 @@ namespace RogueBasin.Creatures
 
         protected override PatrolType GetPatrolType()
         {
-            return PatrolType.RandomWalk;
+            return PatrolType.Waypoints;
         }
 
-        protected override bool WillAttack()
+        public override bool GetPatrolRotationClockwise()
         {
-            return false;
-        }
-
-        protected override string GetWeaponName()
-        {
-            return "throws a dagger";
+            return rotationClockwise;
         }
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "goblin"; } }
+        public override string SingleDescription { get { return "ferret"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription  { get { return "goblins"; } }
+        public override string GroupDescription { get { return "ferrets"; } }
 
         protected override char GetRepresentation()
         {
-            return 'd';
+            return 'P';
         }
 
-        protected override int RelaxDirectionAt()
+        protected override int GetChanceToRecover()
+        {
+            return 10;
+        }
+
+        protected override int GetChanceToFlee()
         {
             return 0;
         }
 
-        protected override int GetTotalFleeLoops()
+        protected override int GetMaxHPWillFlee()
         {
-            return 5;
+            return Hitpoints;
         }
+
         public override int CreatureCost()
         {
-            return 20;
+            return 10;
         }
 
         public override int CreatureLevel()
         {
-            return 2;
+            return 1;
+        }
+
+        public override Monster NewCreatureOfThisType()
+        {
+            return new PatrolBot();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.DarkGreen;
-        }
-
-        public override int GetMagicXP()
-        {
-            return 20;
+            return ColorPresets.WhiteSmoke;
         }
 
         public override int GetCombatXP()
         {
-            return 20;
+            return 10;
+        }
+
+        public override int GetMagicXP()
+        {
+            return 10;
         }
 
         public override int GetMagicRes()
@@ -152,7 +152,7 @@ namespace RogueBasin.Creatures
 
         public override int GetCharmRes()
         {
-            return 10;
+            return 5;
         }
 
         public override bool CanBeCharmed()

@@ -18,7 +18,7 @@ namespace RogueBasin.Creatures
         public OverlordUnique()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
             Unique = true;
             UniqueName = "Derang the Unkillable";

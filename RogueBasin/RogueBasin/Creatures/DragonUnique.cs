@@ -18,7 +18,7 @@ namespace RogueBasin.Creatures
         public DragonUnique()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             Unique = true;
             UniqueName = "Fafir the Fiery";
         }

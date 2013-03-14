@@ -13,7 +13,7 @@ namespace RogueBasin.Creatures
         public Ghoul()
         {
             //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.RightHand));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             Speed = 90;
         }
 

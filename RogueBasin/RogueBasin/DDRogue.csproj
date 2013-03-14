@@ -178,42 +178,9 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
-    <Compile Include="Items\Backpack.cs" />
-    <Compile Include="Items\Badge.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\Book.cs" />
-    <Compile Include="Items\Boots.cs" />
-    <Compile Include="Items\Bracelet.cs" />
-    <Compile Include="Items\Bracer.cs" />
-    <Compile Include="Items\Band.cs" />
-    <Compile Include="Items\Dagger.cs" />
-    <Compile Include="Items\ExtendOrb.cs" />
-    <Compile Include="Items\Flint.cs" />
-    <Compile Include="Items\GlassGem.cs" />
-    <Compile Include="Items\Glove.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\GodSword.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\Greaves.cs" />
     <Compile Include="Items\HealingPotion.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Items\KnockoutDress.cs" />
-    <Compile Include="Items\Lantern.cs" />
-    <Compile Include="Items\LeadRing.cs" />
-    <Compile Include="Items\LeatherArmour.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\Lockpicks.cs" />
-    <Compile Include="Items\LongSword.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\MapGem.cs" />
-    <Compile Include="Items\Medal.cs" />
-    <Compile Include="Items\MetalArmour.cs" />
     <Compile Include="Items\Potion.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -230,21 +197,12 @@
     <Compile Include="Items\PotionSuperSpeedUp.cs" />
     <Compile Include="Items\PotionToHitUp.cs" />
     <Compile Include="Items\PotionSpeedUp.cs" />
-    <Compile Include="Items\PrettyDress.cs">
+    <Compile Include="Items\Shotgun.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Items\RestoreOrb.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\Sash.cs" />
-    <Compile Include="Items\ShortSword.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\SparklingEarrings.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Items\StaffPower.cs" />
-    <Compile Include="Items\Stone.cs" />
+    <Compile Include="Items\SoundGrenade.cs" />
+    <Compile Include="Items\StealthCloak.cs" />
+    <Compile Include="Items\Vibroblade.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="LastMapGeneratorFromASCIIFile.cs" />

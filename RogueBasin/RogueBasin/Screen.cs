@@ -63,7 +63,9 @@ namespace RogueBasin {
         Color neverSeenFOVTerrainColor;
         Color inMonsterFOVTerrainColor = ColorPresets.Blue;
 
-        
+
+        Color statsColor = ColorPresets.White;
+
         Color creatureColor = ColorPresets.White;
         Color itemColor = ColorPresets.Red ;
         Color featureColor = ColorPresets.White;
@@ -2052,255 +2054,121 @@ namespace RogueBasin {
             //if (player.LocationLevel < 2)
             //    return;
 
-            statsDisplayTopLeft = new Point(2, 31);
+            statsDisplayTopLeft = new Point(66, 1);
 
-            hitpointsOffset = new Point(2, 0);
-            maxHitpointsOffset = new Point(9, 0);
-            overdriveHitpointsOffset = new Point(16, 0);
-            armourOffset = new Point(26, 0);
-            damageOffset = new Point(33, 0);
-            speedOffset = new Point(78, 0);
-            playerLevelOffset = new Point(65, 0);
-            worldTickOffset = new Point(69, 0);
-            levelOffset = new Point(63, 0);
-            Point magicOffset = new Point(14, 0);
-            Point maxMagicOffset = new Point(21, 0);
-            Point charmOffset = new Point(51, 0);
+            //Blank stats area
+            rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
 
-            //Draw status line
+            hitpointsOffset = new Point(0, 5);
+            Point weaponOffset = new Point(0, 8);
+            Point utilityOffset = new Point(0, 15);
 
-            string hpStr;
-            if (player.Hitpoints >= 100)
-                hpStr = player.Hitpoints.ToString();
-            else
-                hpStr = " " + player.Hitpoints.ToString();
+            //Draw HP Status
 
-            string maxHPStr;
-            if (player.MaxHitpoints >= 100)
-                maxHPStr = player.MaxHitpoints.ToString();
-            else
-                maxHPStr = " " + player.MaxHitpoints.ToString();
+            int hpBarLength = 11;
+            double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
+            int hpBarEntries = (int)Math.Ceiling(hpBarLength * playerHPRatio) - 1;
 
-            string hitpointsString = "HP: " + hpStr;
-            string maxHitpointsString = "/" + maxHPStr;
-            //string overdriveHitpointsString = "(" + player.OverdriveHitpoints.ToString() + ")";
-
+            rootConsole.ForegroundColor = statsColor;
             rootConsole.PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
-
-            if (player.Hitpoints < (int)Math.Floor(player.MaxHitpoints / 5.0))
-            {
-                rootConsole.ForegroundColor = ColorPresets.Red;
-            } else if(player.Hitpoints < (int)Math.Floor(player.MaxHitpoints / 3.0))
-            {
-                rootConsole.ForegroundColor = ColorPresets.Orange;
-            }
-            rootConsole.PrintLine(hpStr, statsDisplayTopLeft.x + hitpointsOffset.x + 4, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
-
-            rootConsole.ForegroundColor = ColorPresets.White;
             
-            rootConsole.PrintLine(maxHitpointsString, statsDisplayTopLeft.x + maxHitpointsOffset.x, statsDisplayTopLeft.y + maxHitpointsOffset.y, LineAlignment.Left);
-            //rootConsole.PrintLine(overdriveHitpointsString, statsDisplayTopLeft.x + overdriveHitpointsOffset.x, statsDisplayTopLeft.y + overdriveHitpointsOffset.y, LineAlignment.Left);
-
-            string mgStr;
-            if (player.MagicPoints >= 100)
-                mgStr = player.MagicPoints.ToString();
-            else
-                mgStr = " " + player.MagicPoints.ToString();
-
-            string maxMGStr;
-            if (player.MaxMagicPoints >= 100)
-                maxMGStr = player.MaxMagicPoints.ToString();
-            else
-                maxMGStr = " " + player.MaxMagicPoints.ToString();
-
-
-            string mpString = "MP: " + mgStr;
-            string maxMPString = "/" + maxMGStr;
-
-            rootConsole.PrintLine(mpString, statsDisplayTopLeft.x + magicOffset.x, statsDisplayTopLeft.y + magicOffset.y, LineAlignment.Left);
-            rootConsole.PrintLine(maxMPString, statsDisplayTopLeft.x + maxMagicOffset.x, statsDisplayTopLeft.y + maxMagicOffset.y, LineAlignment.Left);
-
-            string armourString = "AC: " + player.ArmourClass().ToString();
-
-            rootConsole.PrintLine(armourString, statsDisplayTopLeft.x + armourOffset.x, statsDisplayTopLeft.y + armourOffset.y, LineAlignment.Left);
-
-            string damageString = "Attk: (+" + player.HitModifier() + ") 1d" + player.DamageBase() + "+" + player.DamageModifier();
-
-            rootConsole.PrintLine(damageString, statsDisplayTopLeft.x + damageOffset.x, statsDisplayTopLeft.y + damageOffset.y, LineAlignment.Left);
-
-            string charmString = "Chrm: " + Game.Dungeon.Player.CharmPoints.ToString() + " (" + Game.Dungeon.Player.CurrentCharmedCreatures.ToString() + ")";
-
-            rootConsole.PrintLine(charmString, statsDisplayTopLeft.x + charmOffset.x, statsDisplayTopLeft.y + charmOffset.y, LineAlignment.Left);
-                 
-            int dungLevel =  (player.LocationLevel - 2) % 4 + 1;
-            string pLvlString = "Dng #" + (player.CurrentDungeon + 1) + " Lvl " + dungLevel;
-            
-            rootConsole.PrintLine(pLvlString, statsDisplayTopLeft.x + playerLevelOffset.x, statsDisplayTopLeft.y + playerLevelOffset.y, LineAlignment.Left);
-
-            string speedString = "Normal";// +player.Speed;
-
-            if (player.Speed > 100)
-                speedString = "Fast";// +player.Speed;
-            if (player.Speed > 150)
-                speedString = "V. Fast";// +player.Speed;
-
-            //debug
-            speedString = player.Speed.ToString();
-
-            rootConsole.PrintLine(speedString, statsDisplayTopLeft.x + speedOffset.x, statsDisplayTopLeft.y + speedOffset.y, LineAlignment.Left);
-
-//            string ticksString = "Tk: " + Game.Dungeon.WorldClock.ToString();
-
-            //rootConsole.PrintLine(ticksString, statsDisplayTopLeft.x + worldTickOffset.x, statsDisplayTopLeft.y + worldTickOffset.y, LineAlignment.Left);
-
-  //          string levelString = "DL: " + Game.Dungeon.Player.LocationLevel.ToString();
-
-    //        rootConsole.PrintLine(levelString, statsDisplayTopLeft.x + levelOffset.x, statsDisplayTopLeft.y + levelOffset.y, LineAlignment.Left);
-
-            //Draw PrincessRL training stats
-            /*
-            string trainHitpointsString = "Stamina: " + player.HitpointsStat.ToString();
-            string trainMaxHitpointsString = "Health: " + player.MaxHitpointsStat.ToString();
-            string trainAttackString = "Attack: " + player.AttackStat.ToString();
-            string trainSpeedString = "Speed: " + player.SpeedStat.ToString();
-            string trainCharmString = "Charm: " + player.CharmStat.ToString();
-            string trainMagicString = "Magic: " + player.MagicStat.ToString();
-
-            rootConsole.PrintLine(trainHitpointsString, trainStatsLine.x + 0, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainMaxHitpointsString, trainStatsLine.x + 13, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainAttackString, trainStatsLine.x + 25, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainSpeedString, trainStatsLine.x + 37, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainCharmString, trainStatsLine.x + 49, trainStatsLine.y, LineAlignment.Left);
-            rootConsole.PrintLine(trainMagicString, trainStatsLine.x + 61, trainStatsLine.y, LineAlignment.Left);
-            */
-            //Draw PrincessRL specific line
-            /*
-            Point charmPointOffset = new Point(20, 0);
-
-            string charmedString = "ChmMax: " + Game.Dungeon.Player.CurrentCharmedCreatures.ToString() + "/" + Game.Dungeon.Player.MaxCharmedCreatures.ToString();
-            rootConsole.PrintLine(charmedString, princessStatsTopLeft.x + charmOffset.x, princessStatsTopLeft.y + charmOffset.y, LineAlignment.Left);
-
-            string charmAbilityStr = "Chm: " + Game.Dungeon.Player.CharmPoints.ToString();
-            rootConsole.PrintLine(charmAbilityStr, princessStatsTopLeft.x + charmPointOffset.x, princessStatsTopLeft.y + charmPointOffset.y, LineAlignment.Left);
-            */
-            //string calendarString = "Month: " + Game.Dungeon.GetDateMonth() + " Day: " + Game.Dungeon.GetDateDay();
-            //if (Game.Dungeon.IsWeekday())
-            //    calendarString += " Monday";
-            //else if (Game.Dungeon.IsNormalWeekend())
-            //    calendarString += " Saturday";
-            //else if (Game.Dungeon.IsAdventureWeekend())
-            //    calendarString += " End of Month";
-
-            //rootConsole.PrintLine(calendarString, princessStatsTopLeft.x + calendarOffset.x, princessStatsTopLeft.y + calendarOffset.y, LineAlignment.Left);
-
-            //Draw moves line
-
-            bool anyMovesKnown = false;
-
-            if (Game.Dungeon.SpecialMoves != null)
+            for (int i = 0; i < hpBarEntries; i++)
             {
-                foreach (SpecialMove m in Game.Dungeon.SpecialMoves)
+                if (i < hpBarEntries)
                 {
-                    if (m.Known)
-                        anyMovesKnown = true;
+                    rootConsole.ForegroundColor = ColorPresets.Green;
+                    rootConsole.PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*');
                 }
-            }
-
-            if (anyMovesKnown)
-            {
-                //Count special moves
-                int totalSpecialMoves = Game.Dungeon.SpecialMoves.Count;
-
-                //Abbreviations are 4 characters long + space
-                int specGap = 2;
-                int totalSpecialMoveWidth = 4 * totalSpecialMoves + (totalSpecialMoves - 1) * specGap;
-                string strIntro = "Combat moves:    ";
-                int specialMoveLineX = (Width - totalSpecialMoveWidth - strIntro.Length) / 2;
-                Point specialMoveDraw = new Point(specialMoveLineX, specialMoveStatusLine.y);
-
-
-                rootConsole.PrintLine(strIntro, specialMoveDraw.x, specialMoveDraw.y, LineAlignment.Left);
-                specialMoveDraw.x += strIntro.Length;
-
-                //Draw each special move status
-                foreach (SpecialMove move in Game.Dungeon.SpecialMoves)
-                {
-                    Color drawColor = new Color();
-
-                    //Calculate the colour
-
-                    //Not known - black
-                    if (!move.Known)
-                    {
-                        drawColor = ColorPresets.DarkGray;
-                    }
-
-                    //Known but not in progress, white
-
-                    else if (move.CurrentStage() == 0)
-                    {
-                        drawColor = ColorPresets.White;
-                    }
-
-                    //In progress, get increasingly red with stage
-                    else
-                    {
-                        double percentDone = move.CurrentStage() / (double)move.TotalStages();
-
-                        if (percentDone > 1)
-                            percentDone = 1;
-
-                        //Interpolate between red and white
-                        drawColor = Color.Interpolate(ColorPresets.White, ColorPresets.Red, percentDone);
-                    }
-
-                    //Draw name of move
-                    rootConsole.ForegroundColor = drawColor;
-                    rootConsole.PrintLine(move.Abbreviation(), specialMoveDraw.x, specialMoveDraw.y, LineAlignment.Left);
-
-                    //Move along
-                    specialMoveDraw.x += 4 + specGap;
-                }
-            }
-            /*
-            //Draw moves line
-
-            //Count special moves
-            int totalSpells = Game.Dungeon.Spells.Count;
-
-            //Abbreviations are 4 characters long + space
-            totalSpecialMoveWidth = 4 * totalSpells + totalSpells - 1;
-
-            specialMoveLineX = (Width - totalSpecialMoveWidth) / 2;
-            specialMoveDraw = new Point(specialMoveLineX, spellStatusLine.y);
-
-            //Draw each spells status
-            foreach (Spell spell in Game.Dungeon.Spells)
-            {
-                Color drawColor = new Color();
-
-                //Calculate the colour
-
-                //Not known - black
-                if (!spell.Known)
-                {
-                    drawColor = ColorPresets.DarkGray;
-                }
-
-                //Known, white
-
                 else
                 {
-                    drawColor = ColorPresets.White;
+                    rootConsole.ForegroundColor = ColorPresets.Red;
+                    rootConsole.PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*');
+                }
+            }
+
+            rootConsole.ForegroundColor = statsColor;
+
+            //Draw equipped weapon
+
+            Item weapon = Game.Dungeon.Player.GetEquippedWeaponAsItem();
+
+            string weaponStr = "Weapon: ";
+
+            rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left);
+
+            if (weapon != null)
+            {
+                weaponStr = weapon.SingleItemDescription;
+                rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left);
+
+                IEquippableItem weaponE = weapon as IEquippableItem;
+
+                string uses = "";
+                if (weaponE.HasMeleeAction())
+                {
+                    uses += "melee ";
                 }
 
-                //Draw name of move
-                rootConsole.ForegroundColor = drawColor;
-                rootConsole.PrintLine(spell.Abbreviation(), specialMoveDraw.x, specialMoveDraw.y, LineAlignment.Left);
+                if (weaponE.HasFireAction())
+                {
+                    uses += "(f)ire ";
+                }
 
-                //Move along
-                specialMoveDraw.x += 5;
-            }*/
+                if (weaponE.HasThrowAction())
+                {
+                    uses += "(t)hrow ";
+                }
+
+                if (weaponE.HasOperateAction())
+                {
+                    uses += "(U)se";
+                }
+
+                rootConsole.PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+            }
+            else
+            {
+                weaponStr = "Nothing";
+                rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left);
+            }
+            
+
+            //Draw equipped utility
+
+            Item utility = Game.Dungeon.Player.GetEquippedUtilityAsItem();
+
+            string utilityStr = "Utility: ";
+            rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left);
+
+            if (utility != null)
+            {
+                utilityStr = utility.SingleItemDescription;
+         
+                rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
+
+                IEquippableItem utilityE = utility as IEquippableItem;
+
+                string uses = "";
+                
+                if (utilityE.HasOperateAction())
+                {
+                    uses += "(u)se";
+                }
+
+                if (utilityE.HasThrowAction())
+                {
+                    uses += "(t)hrow ";
+                }
+
+                rootConsole.PrintLine(uses, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
+            }
+             
+            else
+            {
+                utilityStr = "Nothing";
+                rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
+            }
+
 
             //Restore to normal colour - not nice
             rootConsole.ForegroundColor = ColorPresets.White;

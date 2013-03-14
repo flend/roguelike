@@ -8,7 +8,7 @@ namespace RogueBasin.Items
     /// <summary>
     /// Plot item
     /// </summary>
-    public class HealingPotion : Item, IEquippableItem, IUseableItem
+    public class HealingPotion : Item, IUseableItem
     {
         bool usedUp;
 
@@ -19,7 +19,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool CanBeEquippedInSlot(EquipmentSlot slot)
         {
-            if (slot == EquipmentSlot.RightHand)
+            if (slot == EquipmentSlot.Weapon)
                 return true;
 
             return false;
@@ -32,7 +32,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.RightHand);
+                retList.Add(EquipmentSlot.Weapon);
 
                 return retList;
             }
