@@ -368,6 +368,8 @@ namespace RogueBasin
             CalculateSightRadius();
         }
 
+
+
         /// <summary>
         /// Calculate the derived (used by other functions) sight radius based on the player's NormalSightRadius and the light level of the dungeon level the player is on
         /// Note that 0 is infinite

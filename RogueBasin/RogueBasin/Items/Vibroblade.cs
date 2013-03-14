@@ -149,13 +149,19 @@ namespace RogueBasin.Items
             return 0;
         }
 
+        public int MaxAmmo()
+        {
+            return 0;
+        }
+
+
         /// <summary>
         /// Fires the item - probably should be a method
         /// </summary>
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        public bool FireItem(Point target, Creature enemyTarget)
+        public bool FireItem(Point target)
         {
             return false;
         }

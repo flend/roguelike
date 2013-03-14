@@ -303,10 +303,10 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'z':
-                                case 'Z':
-                                    //Cast spell (just target for now)
-                                    timeAdvances = SelectAndCastSpell();
+                                case 'f':
+                                //case 'Z':
+                                    //Fire weapon
+                                    timeAdvances = FireWeapon();
                                     if (!timeAdvances)
                                         Screen.Instance.Update();
                                     if (timeAdvances)
@@ -458,7 +458,7 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     break;
 
-                                case 'f':
+                                case 'z':
                                     //Learn all moves
                                     Game.Dungeon.PlayerLearnsAllMoves();
                                     Game.MessageQueue.AddMessage("Learnt all moves.");
@@ -1377,6 +1377,80 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Cast a spell. Returns if time passes.
+        /// </summary>
+        /// <returns></returns>
+        private bool FireWeapon()
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            //Check we have a fireable weapon
+            IEquippableItem weapon = player.GetEquippedWeapon();
+            Item weaponI = player.GetEquippedWeaponAsItem();
+
+            if (weapon == null || !weapon.HasFireAction())
+            {
+                Game.MessageQueue.AddMessage("Need a weapon that can fire.");
+                return false;
+            }
+
+            Point target = new Point();
+            bool targettingSuccess = true;
+
+            //Find spell range
+            int range = weapon.RangeFire();
+            TargettingType targetType = weapon.TargetTypeFire();
+
+            targettingSuccess = TargetSpell(out target, range, targetType);
+
+            //User exited
+            if (!targettingSuccess)
+                return false;
+
+            //Check ammo
+            if (weapon.RemainingAmmo() < 1)
+            {
+                Game.MessageQueue.AddMessage("Not enough ammo for " + weaponI.SingleItemDescription);
+                LogFile.Log.LogEntryDebug("Not enough ammo for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+
+                return false;
+            }
+
+            //Check we are in range of target (not done above)
+            if (Game.Dungeon.GetDistanceBetween(player.LocationMap, target) > range)
+            {
+                Game.MessageQueue.AddMessage("Out of range!");
+                LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+
+                return false;
+            }
+
+            //Actually do firing action
+            bool success = weapon.FireItem(target);
+
+            //Store details for a recast
+
+            //If we successfully cast, store the target
+            if (success)
+            {
+                //Spell target is the creature (monster or PC)
+
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
+
+                //Is there a creature here? If so, store
+                if (squareContents.monster != null)
+                    lastSpellTarget = squareContents.monster;
+
+                if (squareContents.player != null)
+                    lastSpellTarget = squareContents.player;
+            }
+
+            //Time only goes past if successfully cast
+            return success;
+        }
+
+        /// <summary>
         /// Recast the last spell at the same target
         /// </summary>
         /// <returns></returns>
@@ -1610,7 +1684,7 @@ namespace RogueBasin
             else
                 Screen.Instance.SetTargetInRange = true;
 
-            Game.MessageQueue.AddMessage("Find a target. z to fire. ESC to exit.");
+            Game.MessageQueue.AddMessage("Find a target. f to fire. ESC to exit.");
             Screen.Instance.Update();
 
             bool keepLooping = true;
@@ -1642,7 +1716,7 @@ namespace RogueBasin
                         switch (keyCode)
                         {
 
-                            case 'z':
+                            case 'f':
 
                                 validFire = true;
                                 keepLooping = false;

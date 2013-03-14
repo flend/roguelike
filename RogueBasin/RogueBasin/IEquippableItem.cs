@@ -88,6 +88,7 @@ namespace RogueBasin
         /// <returns></returns>
         bool HasOperateAction();
 
+        int MaxAmmo();
         int RemainingAmmo();
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace RogueBasin
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        bool FireItem(Point target, Creature enemyTarget);
+        bool FireItem(Point target);
 
         /// <summary>
         /// Throws the item - check if we can't pull this out

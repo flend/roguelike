@@ -2098,10 +2098,39 @@ namespace RogueBasin {
 
             if (weapon != null)
             {
+                IEquippableItem weaponE = weapon as IEquippableItem;
+                
                 weaponStr = weapon.SingleItemDescription;
                 rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left);
 
-                IEquippableItem weaponE = weapon as IEquippableItem;
+                //Ammo
+                if (weaponE.HasFireAction())
+                {
+                    rootConsole.PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+        
+                    //TODO infinite ammo?
+                    int ammoBarLength = 11;
+                    double weaponAmmoRatio = weaponE.RemainingAmmo() / (double) weaponE.MaxAmmo();
+                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio) - 1;
+
+                    for (int i = 0; i < ammoBarEntries; i++)
+                    {
+                        if (i < ammoBarEntries)
+                        {
+                            rootConsole.ForegroundColor = ColorPresets.Blue;
+                            rootConsole.PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*');
+                        }
+                        else
+                        {
+                            rootConsole.ForegroundColor = ColorPresets.Gray;
+                            rootConsole.PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*');
+                        }
+                    }
+                }
+
+                rootConsole.ForegroundColor = statsColor;
+             
+                //Uses
 
                 string uses = "";
                 if (weaponE.HasMeleeAction())
@@ -2124,7 +2153,7 @@ namespace RogueBasin {
                     uses += "(U)se";
                 }
 
-                rootConsole.PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+                rootConsole.PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
             }
             else
             {

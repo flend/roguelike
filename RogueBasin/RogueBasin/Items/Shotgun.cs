@@ -7,6 +7,12 @@ namespace RogueBasin.Items
 {
     public class Shotgun : Item, IEquippableItem
     {
+        public int Ammo { get; set; }
+
+        public Shotgun()
+        {
+            Ammo = MaxAmmo();
+        }
  
         /// <summary>
         /// Equipment slots where we can be equipped
@@ -144,10 +150,14 @@ namespace RogueBasin.Items
             return false;
         }
 
+        public int MaxAmmo()
+        {
+            return 2;
+        }
+
         public int RemainingAmmo()
         {
-
-            return 0;
+            return Ammo;
         }
 
         /// <summary>
@@ -156,7 +166,7 @@ namespace RogueBasin.Items
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        public bool FireItem(Point target, Creature enemyTarget)
+        public bool FireItem(Point target)
         {
             return true;
         }
