@@ -105,7 +105,7 @@ namespace RogueBasin
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        bool ThrowItem(Point target, Creature enemyTarget);
+        bool ThrowItem(Point target);
 
         /// <summary>
         /// Operates the item - definitely a method
@@ -144,6 +144,12 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         double FireSoundMagnitude();
+
+        /// <summary>
+        /// Noise mag of this weapon on throwing
+        /// </summary>
+        /// <returns></returns>
+        double ThrowSoundMagnitude();
 
     }
 }

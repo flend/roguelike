@@ -217,7 +217,7 @@ namespace RogueBasin.Items
             return Ammo;
         }
 
-        public bool ThrowItem(Point p, Creature c)
+        public bool ThrowItem(Point p)
         {
             return true;
         }
@@ -276,6 +276,15 @@ namespace RogueBasin.Items
         public double FireSoundMagnitude()
         {
             return 1.0;
+        }
+
+        /// <summary>
+        /// Noise mag of this weapon on throwing
+        /// </summary>
+        /// <returns></returns>
+        public double ThrowSoundMagnitude()
+        {
+            return 0.3;
         }
 
     }

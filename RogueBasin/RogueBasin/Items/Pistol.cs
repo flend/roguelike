@@ -234,8 +234,17 @@ namespace RogueBasin.Items
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        public bool ThrowItem(Point target, Creature enemyTarget)
+        public bool ThrowItem(Point target)
         {
+            LogFile.Log.LogEntryDebug("Throwing pistol", LogDebugLevel.Medium);
+
+            Player player = Game.Dungeon.Player;
+
+            //Make throwing sound
+            Game.Dungeon.AddSoundEffect(ThrowSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Stun enemy for 1 round (to do)
+
             return true;
         }
 
@@ -274,7 +283,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 5;
+            return 8;
         }
 
         /// <summary>
@@ -283,12 +292,20 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 5;
+            return 8;
         }
 
         public double FireSoundMagnitude()
         {
             return 0.66;
+        }
+
+        /// <summary>
+        /// Noise mag of this weapon on throwing
+        /// </summary>
+        /// <returns></returns>
+        public double ThrowSoundMagnitude() {
+            return 0.2;   
         }
 
     }

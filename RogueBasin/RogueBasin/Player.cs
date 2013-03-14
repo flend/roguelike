@@ -1201,20 +1201,31 @@ namespace RogueBasin
 
 
         /// <summary>
-        /// Drop an item. Equippable items never exist in the inventory in FlatlineRL
+        /// Drop an item at a specific point. Equippable items never exist in the inventory in FlatlineRL
+        /// </summary>
+        /// <param name="itemToDrop"></param>
+        /// <returns></returns>
+        public bool DropEquippableItem(Item itemToDrop, int levelToDropAt, Point locToDropAt)
+        {
+            //Add back to the dungeon store
+            Game.Dungeon.Items.Add(itemToDrop);
+
+            itemToDrop.LocationLevel = levelToDropAt;
+            itemToDrop.LocationMap = locToDropAt;
+            itemToDrop.InInventory = false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Drop an item at current location. Equippable items never exist in the inventory in FlatlineRL
         /// </summary>
         /// <param name="itemToDrop"></param>
         /// <returns></returns>
         public bool DropEquippableItem(Item itemToDrop)
         {
             //Add back to the dungeon store
-            Game.Dungeon.Items.Add(itemToDrop);
-
-            itemToDrop.LocationLevel = this.LocationLevel;
-            itemToDrop.LocationMap = this.LocationMap;
-            itemToDrop.InInventory = false;
-
-            return true;
+            return DropEquippableItem(itemToDrop, this.LocationLevel, this.LocationMap);
         }
 
         /// <summary>
@@ -1296,12 +1307,7 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntryDebug("Dropping old item " + oldItem.SingleItemDescription, LogDebugLevel.Medium);
 
-                //Run unequip routine
-                oldItemEquippable.UnEquip(this);
-                oldItem.IsEquipped = false;
-
-                //Drop the old item
-                DropEquippableItem(oldItem);
+                UnequipAndDropItem(oldItem);
                 
                 //This slot is now free
                 freeSlot = matchingEquipSlots[0];
@@ -1323,6 +1329,39 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped in " + StringEquivalent.EquipmentSlots[matchingEquipSlots[0].slotType]);
 
             return true;
+        }
+        /// <summary>
+        /// FlatlineRL - unequip and item at drop at player loc
+        /// </summary>
+        public void UnequipAndDropItem(Item item)
+        {
+            UnequipAndDropItem(item, this.LocationLevel, this.LocationMap);
+        }
+
+        /// <summary>
+        /// FlatlineRL - unequip and item at drop at the coords given
+        /// </summary>
+        public void UnequipAndDropItem(Item item, int levelToDrop, Point toDropLoc)
+        {
+            //Run unequip routine
+            IEquippableItem equipItem = item as IEquippableItem;
+            equipItem.UnEquip(this);
+            item.IsEquipped = false;
+
+            //Locate the slot it was in and empty it
+            EquipmentSlotInfo oldSlot = EquipmentSlots.Find(x => x.equippedItem == item);
+            if (oldSlot == null)
+            {
+                LogFile.Log.LogEntryDebug("Error - can't find equipment slot for item " + item.SingleItemDescription, LogDebugLevel.High);
+            }
+            else
+            {
+                oldSlot.equippedItem = null;
+            }
+
+            //Drop the old item
+            DropEquippableItem(item, levelToDrop, toDropLoc);
+
         }
 
         /// <summary>

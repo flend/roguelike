@@ -313,6 +313,16 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                case 't':
+                                    //Throw weapon
+                                    timeAdvances = ThrowWeapon();
+                                    if (!timeAdvances)
+                                        Screen.Instance.Update();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
+
                                 case 'x':
                                 case 'X':
                                     //Recast last spells
@@ -335,6 +345,7 @@ namespace RogueBasin
 
 
                                 case ',':
+                                case 'g':
                                     //Pick up item
                                     timeAdvances = PickUpItem();
                                     //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
@@ -468,11 +479,7 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-                                case 't':
-                                    //teleport to stairs
-                                    TeleportToDownStairs();
-                                    Screen.Instance.Update();
-                                    break;
+                                
 
                                 case 'W':
                                     //screen debug mode
@@ -1335,7 +1342,7 @@ namespace RogueBasin
                 int range = toCast.GetRange();
                 TargettingType targetType = toCast.TargetType();
 
-                targettingSuccess = TargetSpell(out target, range, targetType);
+                targettingSuccess = TargetAttack(out target, range, targetType, 'z');
             }
 
             //User exited
@@ -1377,7 +1384,106 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Cast a spell. Returns if time passes.
+        /// Throw weapon. Returns if time passes.
+        /// </summary>
+        /// <returns></returns>
+        private bool ThrowWeapon()
+        {
+            return ThrowWeaponOrUtility(true);
+        }
+
+        /// <summary>
+        /// Throw utility. Returns if time passes.
+        /// </summary>
+        /// <returns></returns>
+        private bool ThrowUtility()
+        {
+            return ThrowWeaponOrUtility(false);
+        }
+
+        private bool ThrowWeaponOrUtility(bool isWeapon) {
+
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            //Check we have a throwable item
+
+            IEquippableItem toThrow = null;
+            Item toThrowItem = null;
+
+            char confirmChar = 't';
+            if (isWeapon)
+            {
+                toThrow = player.GetEquippedWeapon();
+                toThrowItem = player.GetEquippedWeaponAsItem();
+            }
+            else
+            {
+                toThrow = player.GetEquippedUtility();
+                toThrowItem = player.GetEquippedUtilityAsItem();
+                confirmChar = 'T';
+            }
+
+            if (toThrow == null || !toThrow.HasThrowAction())
+            {
+                Game.MessageQueue.AddMessage("Need an item that can be thrown.");
+                return false;
+            }
+
+            Point target = new Point();
+            bool targettingSuccess = true;
+
+            //Find spell range
+            int range = toThrow.RangeThrow();
+            TargettingType targetType = toThrow.TargetTypeThrow();
+
+            targettingSuccess = TargetAttack(out target, range, targetType, confirmChar);
+
+            //User exited
+            if (!targettingSuccess)
+                return false;
+
+            //Check we are in range of target (not done above)
+            if (Dungeon.GetDistanceBetween(player.LocationMap, target) > range)
+            {
+                Game.MessageQueue.AddMessage("Out of range!");
+                LogFile.Log.LogEntryDebug("Out of range (throw) for " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
+
+                return false;
+            }
+
+            //Actually do firing action
+            bool success = toThrow.ThrowItem(target);
+
+            //Drop the item at the end point
+            if (success)
+            {
+                Point dropTarget = target;
+
+                //If there is a creature at the end point, try to find a free area
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
+
+                //Is there a creature here? If so, try to find another location
+                if (squareContents.monster != null)
+                {
+                    //Get surrounding squares
+                    List<Point> freeSqs = dungeon.GetFreeAdjacentSquares(player.LocationLevel, target);
+
+                    if (freeSqs.Count > 0)
+                    {
+                        dropTarget = freeSqs[Game.Random.Next(freeSqs.Count)];
+                    }
+                }
+
+                player.UnequipAndDropItem(toThrowItem, player.LocationLevel, dropTarget);
+            }
+
+            //Time only goes past if successfully thrown
+            return success;
+        }
+
+        /// <summary>
+        /// Fire weapon. Returns if time passes.
         /// </summary>
         /// <returns></returns>
         private bool FireWeapon()
@@ -1402,7 +1508,7 @@ namespace RogueBasin
             int range = weapon.RangeFire();
             TargettingType targetType = weapon.TargetTypeFire();
 
-            targettingSuccess = TargetSpell(out target, range, targetType);
+            targettingSuccess = TargetAttack(out target, range, targetType, 'f');
 
             //User exited
             if (!targettingSuccess)
@@ -1621,7 +1727,7 @@ namespace RogueBasin
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private bool TargetSpell(out Point target, int range, TargettingType targetType)
+        private bool TargetAttack(out Point target, int range, TargettingType targetType, char confirmChar)
         {
             Player player = Game.Dungeon.Player;
 
@@ -1662,7 +1768,7 @@ namespace RogueBasin
             */
             //Get the desired target from the player
 
-            return GetTargetFromPlayer(startPoint, out target, targetType, range);
+            return GetTargetFromPlayer(startPoint, out target, targetType, range, confirmChar);
         }
 
         /// <summary>
@@ -1670,7 +1776,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range)
+        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range, char confirmChar)
         {
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
@@ -1684,7 +1790,7 @@ namespace RogueBasin
             else
                 Screen.Instance.SetTargetInRange = true;
 
-            Game.MessageQueue.AddMessage("Find a target. f to fire. ESC to exit.");
+            Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
             Screen.Instance.Update();
 
             bool keepLooping = true;
@@ -1713,14 +1819,10 @@ namespace RogueBasin
                     if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                     {
                         char keyCode = (char)userKey.Character;
-                        switch (keyCode)
-                        {
-
-                            case 'f':
+                        if(keyCode == confirmChar) {
 
                                 validFire = true;
                                 keepLooping = false;
-                                break;
                         }
                     }
 
@@ -1753,7 +1855,7 @@ namespace RogueBasin
 
                     //Update screen
                     Screen.Instance.Target = newPoint;
-                    Game.MessageQueue.AddMessage("Find a target. z to fire. ESC to exit.");
+                    Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
                     Screen.Instance.Update();
 
                 }

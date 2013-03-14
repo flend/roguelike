@@ -4766,5 +4766,48 @@ namespace RogueBasin
         {
             return;
         }
+
+        public List<Point> GetFreeAdjacentSquares(int locationLevel, Point locationMap) {
+
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSq = new List<Point>();
+            List<Point> adjacentSqFree = new List<Point>();
+
+            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y - 1));
+            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y));
+            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y + 1));
+            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y - 1));
+            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y));
+            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y + 1));
+            adjacentSq.Add(new Point(locationMap.x, locationMap.y + 1));
+            adjacentSq.Add(new Point(locationMap.x, locationMap.y - 1));
+
+            foreach (Point p in adjacentSq)
+            {
+                if (p.x >= 0 && p.x < levelMap.width
+                    && p.y >= 0 && p.y < levelMap.height)
+                {
+                    if (!MapSquareIsWalkable(locationLevel, p))
+                    {
+                        continue;
+                    }
+
+                    //Check square has nothing else on it
+                    SquareContents contents = MapSquareContents(locationLevel, p);
+
+                    if (contents.monster != null)
+                    {
+                        continue;
+                    }
+
+                    //Empty and walkable
+                    adjacentSqFree.Add(p);
+
+                }
+            }
+
+            return adjacentSqFree;
+        }
     }
 }
