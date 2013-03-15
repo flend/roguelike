@@ -900,7 +900,7 @@ namespace RogueBasin
 
             do
             {
-                CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypointsSisterRooms(monster.GetPatrolRotationClockwise());
+                CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypointsSisterRooms(monster.GetPatrolRotationClockwise(), 3);
                 monster.Waypoints = patrol.Waypoints;
                 startLocation = patrol.StartPos;
 

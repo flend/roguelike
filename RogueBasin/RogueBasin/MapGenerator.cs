@@ -74,15 +74,15 @@ namespace RogueBasin
         public abstract Point RandomWalkablePoint();
 
         /// <summary>
-        /// Produce a random start location & list of creature waypoints for patrol.
+        /// Produce a random start location & list of creature waypoints for patrol (around a room).
         /// </summary>
         /// <returns></returns>
         public abstract CreaturePatrol CreatureStartPosAndWaypoints(bool clockwisePatrol);
 
         /// <summary>
-        /// Produce a random start location & list of creature waypoints for patrol.
+        /// Produce a random start location & list of creature waypoints for patrol (to the centre of a number of rooms).
         /// </summary>
         /// <returns></returns>
-        public abstract CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwisePatrol);
+        public abstract CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwisePatrol, int numberOfWayPoints);
     }
 }

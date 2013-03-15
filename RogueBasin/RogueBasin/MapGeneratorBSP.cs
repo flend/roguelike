@@ -1136,6 +1136,7 @@ namespace RogueBasin
 
         }
 
+        /*
         /// <summary>
         /// Find a route between sistering rooms
         /// </summary>
@@ -1143,7 +1144,7 @@ namespace RogueBasin
         public override CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwise)
         {
             //Find a leaf room
-            List<PointInRoom> sisterRoomPoints = rootNode.GetRandomSisterRooms();
+            List<PointInRoom> sisterRoomPoints = rootNode.GetRandomSisterRooms(4);
 
             //use reordered for the 2nd room (where start pos is) and base for first room
             List<List<Point>> waypointReorderedAll = new List<List<Point>>();
@@ -1242,7 +1243,62 @@ namespace RogueBasin
             return new CreaturePatrol(startLoc.Value, newWaypoints);
 
         }
+        */
 
+        public class toSort
+        {
+            public PointInRoom index;
+            public int coord;
+
+            public toSort(PointInRoom index, int coord)
+            {
+                this.index = index;
+                this.coord = coord;
+            }
+
+        }
+
+        /// <summary>
+        /// Find a route between center of sistering rooms
+        /// </summary>
+        /// <returns></returns>
+        public override CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwise, int noOfRooms)
+        {
+            //Find a leaf room
+            int totalRoomsToVisit = noOfRooms;
+
+            List<PointInRoom> sisterRoomPoints = rootNode.GetRandomSisterRooms(totalRoomsToVisit);
+
+            List<List<Point>> waypointReorderedAll = new List<List<Point>>();
+
+            //Find a simple path between a point in each of the rooms
+
+            List<toSort> allWaypointsIndices = new List<toSort>();
+
+            for (int r = 0; r < sisterRoomPoints.Count; r++)
+            {
+                if (clockwise)
+                {
+                    allWaypointsIndices.Add(new toSort(sisterRoomPoints[r], sisterRoomPoints[r].X));
+                }
+                else
+                {
+                    allWaypointsIndices.Add(new toSort(sisterRoomPoints[r], sisterRoomPoints[r].Y));
+                }
+            }
+
+            //Sort by relevant value
+            allWaypointsIndices.Sort((a, b) => a.coord.CompareTo(b.coord));
+
+            List<Point> allWaypoints = new List<Point>();
+            foreach (toSort s in allWaypointsIndices)
+            {
+                allWaypoints.Add(new Point(s.index.RoomX + s.index.RoomWidth / 2, s.index.RoomY + s.index.RoomHeight / 2));
+            }
+
+            return new CreaturePatrol(allWaypoints[0], allWaypoints);
+
+        }
 
         public int Width
         {

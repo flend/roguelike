@@ -74,6 +74,11 @@ namespace RogueBasin
         /// </summary>
         protected int rotationTurns = 0;
 
+        /// <summary>
+        /// Following waypoints up in order?
+        /// </summary>
+        protected bool waypointsInc = true;
+
         public MonsterFightAndRunAI()
         {
             AIState = SimpleAIStates.Patrol;
@@ -728,7 +733,32 @@ namespace RogueBasin
                         //We made it? Go to next waypoint
                         if (nextStep.x == Waypoints[CurrentWaypoint].x && nextStep.y == Waypoints[CurrentWaypoint].y)
                         {
-                            int nextWaypoint = (CurrentWaypoint + 1) % Waypoints.Count;
+                            int nextWaypoint;
+                            if (HasSquarePatrol())
+                                nextWaypoint = (CurrentWaypoint + 1) % Waypoints.Count;
+                            else
+                            {
+                                if (WaypointsInc)
+                                {
+                                    nextWaypoint = CurrentWaypoint + 1;
+                                    if (nextWaypoint == Waypoints.Count)
+                                    {
+                                        WaypointsInc = false;
+                                        nextWaypoint = CurrentWaypoint - 1;
+                                    }
+                                }
+                                else
+                                {
+                                    nextWaypoint = CurrentWaypoint - 1;
+                                    if (nextWaypoint < 0)
+                                    {
+                                        WaypointsInc = true;
+                                        nextWaypoint = 1;
+                                    }
+
+                                }
+
+                            }
 
                             LogFile.Log.LogEntryDebug(this.Representation + " reached waypoint " + CurrentWaypoint + ". Moving to waypoint " + nextWaypoint, LogDebugLevel.Low);
                             CurrentWaypoint = nextWaypoint;
@@ -1287,12 +1317,39 @@ namespace RogueBasin
             }
         }
 
+        public bool WaypointsInc
+        {
+            get
+            {
+                return waypointsInc;
+            }
+            set
+            {
+                waypointsInc = value;
+            }
+
+        }
+
+
+
         /// <summary>
         /// Monster can open doors, so uses with-opened-doors routing
         /// </summary>
         /// <returns></returns>
         public virtual bool CanOpenDoors() {
             return false;
+        }
+
+        /// <summary>
+        /// Used for creatures which follow square patrol patterns.
+        /// 
+        /// For SquarePatrol use CreatureStartPosAndWaypoints()
+        /// For LinearPatrol use CreatureStartPosAndWaypointsSisterRooms()
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool HasSquarePatrol()
+        {
+            return true;
         }
     }
 }

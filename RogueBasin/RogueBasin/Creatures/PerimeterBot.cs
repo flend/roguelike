@@ -199,6 +199,11 @@ namespace RogueBasin.Creatures
             return true;
         }
 
+        public override bool HasSquarePatrol()
+        {
+            return false;
+        }
+
 
     }
 }
