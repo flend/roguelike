@@ -569,7 +569,11 @@ namespace RogueBasin
         private bool InvestigateSound()
         {
             //Check the square is pathable to
-            Point nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
+            Point nextStep;
+            if(!CanOpenDoors())
+                nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
+            else
+                nextStep = Game.Dungeon.GetPathFromCreatureToPointOpenedDoors(this.LocationLevel, this, currentSound.MapLocation);
 
             if (nextStep.x == -1 && nextStep.y == -1)
             {
@@ -587,7 +591,7 @@ namespace RogueBasin
             if (WillPursue() && CanMove())
             {
                 SetHeadingToMapSquare(nextStep);
-                LocationMap = nextStep;
+                MoveIntoSquare(nextStep);
             }
             else
             {
@@ -688,7 +692,7 @@ namespace RogueBasin
                         if (okToMoveIntoSquare)
                         {
                             SetHeadingToMapSquare(newLocation);
-                            LocationMap = newLocation;
+                            MoveIntoSquare(newLocation);
                         }
                     }
                     break;
@@ -703,7 +707,11 @@ namespace RogueBasin
 
                         //Head towards next waypoint
                         //Check the square is pathable to
-                        Point nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
+                        Point nextStep;
+                        if(!CanOpenDoors())
+                            nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
+                        else
+                            nextStep = Game.Dungeon.GetPathFromCreatureToPointOpenedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
 
                         if (nextStep.x == -1 && nextStep.y == -1)
                         {
@@ -715,7 +723,7 @@ namespace RogueBasin
                         //(if temporarily blocked will just attempt to move onto their own square)
                         //Walk towards waypoint
                         SetHeadingToMapSquare(nextStep);
-                        LocationMap = nextStep;
+                        MoveIntoSquare(nextStep);
 
                         //We made it? Go to next waypoint
                         if (nextStep.x == Waypoints[CurrentWaypoint].x && nextStep.y == Waypoints[CurrentWaypoint].y)
@@ -850,7 +858,10 @@ namespace RogueBasin
                     }
 
                     //Check the square is pathable to
-                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                    if(!CanOpenDoors())
+                        nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                    else
+                        nextStep = Game.Dungeon.GetPathFromCreatureToPointOpenedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
 
                     if (nextStep.x == -1 && nextStep.y == -1)
                     {
@@ -869,7 +880,7 @@ namespace RogueBasin
                 if (goodPath)
                 {
                     SetHeadingToMapSquare(nextStep);
-                    LocationMap = nextStep;
+                    MoveIntoSquare(nextStep);
                 }
                 else
                 {
@@ -930,8 +941,12 @@ namespace RogueBasin
         protected virtual void FollowAndAttack(Creature newTarget)
         {
             //Find location of next step on the path towards target
-            
-            Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+
+            Point nextStep;
+            if(!CanOpenDoors())
+                nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+            else
+                nextStep = Game.Dungeon.GetPathToOpenedDoors(this, newTarget);
 
             bool moveIntoSquare = true;
 
@@ -978,7 +993,7 @@ namespace RogueBasin
                 //If we want to pursue, move towards the creature
                 if (moveIntoSquare && CanMove())
                 {
-                    LocationMap = nextStep;
+                    MoveIntoSquare(nextStep);
                     SetHeadingToTarget(newTarget);
                 }
             }
@@ -1014,11 +1029,26 @@ namespace RogueBasin
             //Move into square - seems low level but GetPathTo return no move if not possible
             if (moveIntoSquare)
             {
-                LocationMap = nextStep;
+                MoveIntoSquare(nextStep);
                 SetHeadingToTarget(player);
             }
         }
     
+        /// <summary>
+        /// Move into the square, opening doors as necessary
+        /// </summary>
+        /// <param name="nextStep"></param>
+        protected void MoveIntoSquare(Point nextStep) {
+
+            MapTerrain doorTerrain = Game.Dungeon.GetTerrainAtPoint(this.LocationLevel, nextStep);
+    
+            if(doorTerrain == MapTerrain.ClosedDoor) {
+                Game.Dungeon.OpenDoor(this.LocationLevel, nextStep);
+                LogFile.Log.LogEntryDebug(this.Representation + " opened door", LogDebugLevel.Medium);
+            }
+
+             LocationMap = nextStep;
+        }
 
         public void RecoverOnBeingHit()
         {
@@ -1255,6 +1285,14 @@ namespace RogueBasin
             {
                 rotationTurns = value;
             }
+        }
+
+        /// <summary>
+        /// Monster can open doors, so uses with-opened-doors routing
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool CanOpenDoors() {
+            return false;
         }
     }
 }

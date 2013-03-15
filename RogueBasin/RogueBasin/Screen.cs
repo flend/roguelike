@@ -2256,7 +2256,7 @@ namespace RogueBasin {
 
                 if (utilityE.HasThrowAction())
                 {
-                    uses += "(t)hrow ";
+                    uses += "(T)hrow ";
                 }
 
                 rootConsole.PrintLine(uses, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);

@@ -164,5 +164,10 @@ namespace RogueBasin.Creatures
         {
             return true;
         }
+
+        public override bool CanOpenDoors()
+        {
+            return true;
+        }
     }
 }

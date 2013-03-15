@@ -29,6 +29,8 @@ namespace RogueBasin
 
     [System.Xml.Serialization.XmlInclude(typeof(Items.HealingPotion))]
 
+    [System.Xml.Serialization.XmlInclude(typeof(Items.SoundGrenade))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Pistol))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Shotgun))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Vibroblade))]
     public abstract class Item : MapObject

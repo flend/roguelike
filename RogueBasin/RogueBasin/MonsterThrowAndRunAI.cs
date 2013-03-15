@@ -63,7 +63,10 @@ namespace RogueBasin
                         relaxDirection = true;
 
                     //Find the square to move to
-                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                    if(!CanOpenDoors())
+                        nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                    else
+                        nextStep = Game.Dungeon.GetPathFromCreatureToPointOpenedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
 
                     //Check the square is pathable to
                     if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
@@ -146,7 +149,7 @@ namespace RogueBasin
                 //If we found a good path, walk it
                 if (goodPath)
                 {
-                    LocationMap = nextStep;
+                    MoveIntoSquare(nextStep);
                     SetHeadingToTarget(newTarget);
                 }
                 else if(WillAttack())
@@ -296,7 +299,7 @@ namespace RogueBasin
             //Otherwise (or if the creature died), move towards it (or its corpse)
             if (moveIntoSquare)
             {
-                LocationMap = nextStep;
+                MoveIntoSquare(nextStep);
                 SetHeadingToTarget(newTarget);
             }
         }

@@ -852,9 +852,13 @@ namespace RogueBasin
             //  monstersToAdd.Add(new Creatures.Goblin());
 //monstersToAdd.Add(new Creatures.Goblin());
 
-            Monster goblin = new Creatures.Goblin();
-            AddMonsterRandomWalkablePoint(goblin, 0);
+            for (int i = 0; i < 6; i++)
+            {
+                Monster goblin = new Creatures.Goblin();
+                AddMonsterRandomWalkablePoint(goblin, 0);
+            }
 
+            /*
             for (int i = 0; i < 4; i++)
             {
                 Creatures.RotatingTurret rot = new Creatures.RotatingTurret();
@@ -872,7 +876,7 @@ namespace RogueBasin
                 Creatures.AlertBot patrolBot = new Creatures.AlertBot();
                 AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
             }
-            
+            */
             SetLightLevelUniversal(0, 0, 10);
 
             
