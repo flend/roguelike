@@ -52,7 +52,9 @@ namespace RogueBasin
         //How much of the BSP square is filled by a room
         const double minFill = 0.9;
         const double maxFill = 1.0;
-        
+
+        bool twoWideCorridor = false;
+
         //Tree depth counter
         int treeDepth;
         bool newConnectionMade;
@@ -585,6 +587,16 @@ namespace RogueBasin
                 {
                     baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
                     baseMap.mapSquares[sq.x, sq.y].SetOpen();
+
+                    //Try 2 width
+                    if (twoWideCorridor)
+                    {
+                        if (sq.y - 1 > 0 && sq.y - 1 < height)
+                        {
+                            baseMap.mapSquares[sq.x, sq.y - 1].Terrain = MapTerrain.Corridor;
+                            baseMap.mapSquares[sq.x, sq.y - 1].SetOpen();
+                        }
+                    }
                 }
             }
             else
@@ -748,6 +760,16 @@ namespace RogueBasin
                 {
                     baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
                     baseMap.mapSquares[sq.x, sq.y].SetOpen();
+
+                    //Try 2 width
+                    if (twoWideCorridor)
+                    {
+                        if (sq.x - 1 > 0 && sq.x - 1 < width)
+                        {
+                            baseMap.mapSquares[sq.x - 1, sq.y].Terrain = MapTerrain.Corridor;
+                            baseMap.mapSquares[sq.x - 1, sq.y].SetOpen();
+                        }
+                    }
                 }
 
 
@@ -1269,6 +1291,14 @@ namespace RogueBasin
 
             List<PointInRoom> sisterRoomPoints = rootNode.GetRandomSisterRooms(totalRoomsToVisit);
 
+            //Fully random
+            /*
+            List<PointInRoom> sisterRoomPoints = new List<PointInRoom>();
+            for (int i = 0; i < noOfRooms; i++)
+            {
+                sisterRoomPoints.Add(rootNode.RandomRoomPoint());
+            }*/
+
             List<List<Point>> waypointReorderedAll = new List<List<Point>>();
 
             //Find a simple path between a point in each of the rooms
@@ -1291,10 +1321,31 @@ namespace RogueBasin
             allWaypointsIndices.Sort((a, b) => a.coord.CompareTo(b.coord));
 
             List<Point> allWaypoints = new List<Point>();
+
+            Point lastPoint = null;
+
+            //Remove duplicates
+
+            for (int i = 0; i < allWaypointsIndices.Count; i++)
+            {
+                Point newWaypoint = new Point(allWaypointsIndices[i].index.RoomX + allWaypointsIndices[i].index.RoomWidth / 2, allWaypointsIndices[i].index.RoomY + allWaypointsIndices[i].index.RoomHeight / 2);
+
+                if(lastPoint != null) {
+                    if (newWaypoint == lastPoint)
+                        continue;
+                }
+
+                allWaypoints.Add(newWaypoint);
+                lastPoint = newWaypoint;
+            }
+
+            /*
+
+            
             foreach (toSort s in allWaypointsIndices)
             {
                 allWaypoints.Add(new Point(s.index.RoomX + s.index.RoomWidth / 2, s.index.RoomY + s.index.RoomHeight / 2));
-            }
+            }*/
 
             return new CreaturePatrol(allWaypoints[0], allWaypoints);
 
