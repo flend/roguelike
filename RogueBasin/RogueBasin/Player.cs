@@ -1424,6 +1424,32 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// FlatlineRL - unequip item and remove it from the game
+        /// </summary>
+        public void UnequipAndDestroyItem(Item item)
+        {
+            //Run unequip routine
+            IEquippableItem equipItem = item as IEquippableItem;
+            equipItem.UnEquip(this);
+            item.IsEquipped = false;
+
+            //Locate the slot it was in and empty it
+            EquipmentSlotInfo oldSlot = EquipmentSlots.Find(x => x.equippedItem == item);
+            if (oldSlot == null)
+            {
+                LogFile.Log.LogEntryDebug("Error - can't find equipment slot for item " + item.SingleItemDescription, LogDebugLevel.High);
+            }
+            else
+            {
+                oldSlot.equippedItem = null;
+            }
+
+            //Delete the old item
+            //There should now be no references to it
+
+        }
+
+        /// <summary>
         /// FlatlineRL - return equipped weapon or null
         /// </summary>
         /// <returns></returns>

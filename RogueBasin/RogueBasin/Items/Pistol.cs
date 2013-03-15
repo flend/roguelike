@@ -166,24 +166,44 @@ namespace RogueBasin.Items
 
         List<Point> targetSquares = null;
 
-        void CalculateTrajectory(Point target)
+        /// <summary>
+        /// Widely used functions are static public
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static List<Point> CalculateTrajectory(Point target)
         {
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
 
             //Get the points along the line of where we are firing
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            targetSquares = currentFOV.GetPathLinePointsInFOV(player.LocationMap, target);
+            List<Point> trajPoints = currentFOV.GetPathLinePointsInFOV(player.LocationMap, target);
+
+            //Also exclude unwalkable points (since we will use this to determine where our item falls
+            List<Point> walkableSq = new List<Point>();
+            foreach (Point p in trajPoints)
+            {
+                if (Game.Dungeon.MapSquareIsWalkable(Game.Dungeon.Player.LocationLevel, p))
+                    walkableSq.Add(p);
+            }
+
+            return walkableSq;
         }
 
-        private Monster FirstMonsterInTrajectory() {
+        /// <summary>
+        /// Widely used functions are static public
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static Monster FirstMonsterInTrajectory(List<Point> squares) {
 
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
 
             //Hit the first monster only
             Monster monster = null;
-            foreach (Point p in targetSquares)
+            foreach (Point p in squares)
             {
                 //Check there is a monster at target
                 SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, p);
@@ -223,8 +243,8 @@ namespace RogueBasin.Items
 
             //Find monster target
 
-            CalculateTrajectory(target);
-            Monster monster = FirstMonsterInTrajectory();
+            targetSquares = Pistol.CalculateTrajectory(target);
+            Monster monster = Pistol.FirstMonsterInTrajectory(targetSquares);
 
             if(monster == null) {
                 LogFile.Log.LogEntryDebug("No monster in target for Pistol.Ammo used anyway.", LogDebugLevel.Medium);
@@ -250,38 +270,64 @@ namespace RogueBasin.Items
 
 
         /// <summary>
-        /// Throws the item - check if we can't pull this out
+        /// Throws the item
         /// </summary>
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        public bool ThrowItem(Point target)
+        public Point ThrowItem(Point target)
         {
-            LogFile.Log.LogEntryDebug("Throwing pistol", LogDebugLevel.Medium);
+            return Pistol.ThrowItemGeneric(this, target, 3);
+        }
+
+        /// <summary>
+        /// Generic throw method for most normal items
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static Point ThrowItemGeneric(IEquippableItem item, Point target, int stunTurns)
+        {
+            Item itemAsItem = item as Item;
+
+            LogFile.Log.LogEntryDebug("Throwing " + itemAsItem.SingleItemDescription, LogDebugLevel.Medium);
 
             Player player = Game.Dungeon.Player;
 
-            //Make throwing sound AT target location
-            Game.Dungeon.AddSoundEffect(ThrowSoundMagnitude(), player.LocationLevel, target);
-
             //Find monster target
 
-            CalculateTrajectory(target);
-            Monster monster = FirstMonsterInTrajectory();
+            List<Point> targetSquares = Pistol.CalculateTrajectory(target);
+            Monster monster = Pistol.FirstMonsterInTrajectory(targetSquares);
 
-            if(monster == null) {
-                LogFile.Log.LogEntryDebug("No monster in target for Pistol.Ammo used anyway.", LogDebugLevel.Medium);
-                return true;
+            //Find where it landed
+
+            //Destination will be the last square in trajectory
+            Point destination;
+            if (targetSquares.Count > 0)
+                destination = targetSquares[targetSquares.Count - 1];
+            else
+                //Threw it on themselves!
+                destination = player.LocationMap;
+            
+            //Stopped by a monster
+            if (monster != null)
+            {
+                destination = monster.LocationMap;
             }
 
-            //Draw attack
+            //Make throwing sound AT target location
+            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), player.LocationLevel, destination);
 
+            //Draw throw
             Screen.Instance.DrawShotgunMissileAttack(targetSquares);
 
-            //Stun enemy for 2 rounds
-            player.ApplyStunDamageToMonster(monster, 5);
+            //Stun enemy for 3 rounds
+            if (monster != null && stunTurns > 0)
+            {
+                player.ApplyStunDamageToMonster(monster, stunTurns);
+            }
 
-            return true;
+            return destination;
         }
 
         /// <summary>
@@ -342,6 +388,15 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double ThrowSoundMagnitude() {
             return 0.2;   
+        }
+
+        /// <summary>
+        /// Destroyed on throw
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnThrow()
+        {
+            return false;
         }
 
     }

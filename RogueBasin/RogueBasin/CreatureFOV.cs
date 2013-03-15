@@ -178,7 +178,9 @@ namespace RogueBasin
                 finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
 
                 if (CheckTileFOV(currentX, currentY))
+                {
                     pointsToRet.Add(new Point(currentX, currentY));
+                }
             } while (!finishedLine);
 
             return pointsToRet;

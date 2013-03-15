@@ -1782,7 +1782,7 @@ namespace RogueBasin
 
             dungeon.AddItemNoChecks(new Items.Shotgun(), 0, dungeon.Player.LocationMap);
             dungeon.AddItemNoChecks(new Items.Pistol(), 0, new Point(dungeon.Player.LocationMap.x+1,dungeon.Player.LocationMap.y));
-            dungeon.AddItemNoChecks(new Items.StealthCloak(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
+            dungeon.AddItemNoChecks(new Items.SoundGrenade(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
 
         }
 

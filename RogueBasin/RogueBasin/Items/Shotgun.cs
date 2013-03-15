@@ -115,6 +115,18 @@ namespace RogueBasin.Items
             return true;
         }
 
+
+        /// <summary>
+        /// Throws the item
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public Point ThrowItem(Point target)
+        {
+            return Pistol.ThrowItemGeneric(this, target, 3);
+        }
+
         /// <summary>
         /// not used in this game
         /// </summary>
@@ -217,11 +229,6 @@ namespace RogueBasin.Items
             return Ammo;
         }
 
-        public bool ThrowItem(Point p)
-        {
-            return true;
-        }
-
         /// <summary>
         /// Operates the item - definitely a method
         /// </summary>
@@ -285,6 +292,15 @@ namespace RogueBasin.Items
         public double ThrowSoundMagnitude()
         {
             return 0.3;
+        }
+
+        /// <summary>
+        /// Destroyed on throw
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnThrow()
+        {
+            return false;
         }
 
     }

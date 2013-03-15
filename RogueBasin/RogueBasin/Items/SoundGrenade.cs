@@ -24,7 +24,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("SoundGrenade equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -53,13 +53,27 @@ namespace RogueBasin.Items
         }
 
         /// <summary>
+        /// Throws the item. Can use generic, it's just 
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public Point ThrowItem(Point target)
+        {
+            Point dest = Pistol.ThrowItemGeneric(this, target, 0);
+            Game.MessageQueue.AddMessage("The siren grenade explodes!");
+            return dest;
+        }
+
+
+        /// <summary>
         /// not used in this game
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("SoundGrenade unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -72,7 +86,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "shotgun"; }
+            get { return "siren grenade"; }
         }
 
         /// <summary>
@@ -80,17 +94,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "shotguns"; }
+            get { return "siren grenades"; }
         }
 
         protected override char GetRepresentation()
         {
-            return '{';
+            return 'o';
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return ColorPresets.Azure;
         }
 
         public int ArmourClassModifier()
@@ -166,16 +180,6 @@ namespace RogueBasin.Items
             return false;
         }
 
-        /// <summary>
-        /// Throws the item - check if we can't pull this out
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public bool ThrowItem(Point target)
-        {
-            return false;
-        }
 
         /// <summary>
         /// Operates the item - definitely a method
@@ -240,6 +244,15 @@ namespace RogueBasin.Items
         public double ThrowSoundMagnitude()
         {
             return 1;
+        }
+
+        /// <summary>
+        /// Destroyed on throw
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnThrow()
+        {
+            return true;
         }
 
     }

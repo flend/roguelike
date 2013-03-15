@@ -322,6 +322,15 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                case 'T':
+                                    //Throw utility
+                                    timeAdvances = ThrowUtility();
+                                    if (!timeAdvances)
+                                        Screen.Instance.Update();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
 
                                 case 'x':
                                 case 'X':
@@ -514,11 +523,6 @@ namespace RogueBasin
 
                                     LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
                                     
-                                    break;
-
-                                case 'T':
-                                    Game.Dungeon.MoveToNextDate();
-                                    timeAdvances = true;
                                     break;
 
                                 case 'v':
@@ -1452,22 +1456,30 @@ namespace RogueBasin
                 return false;
             }
 
-            //Actually do firing action
-            bool success = toThrow.ThrowItem(target);
+            //Actually do throwing action
+            Point destinationSq = toThrow.ThrowItem(target);
 
-            //Drop the item at the end point
-            if (success)
+            //Destroy it if required
+            if (toThrow.DestroyedOnThrow())
             {
-                Point dropTarget = target;
+                player.UnequipAndDestroyItem(toThrowItem);
+                return true;
+            }
+
+            if (destinationSq != null)
+            {
+                //Drop the item at the end point
+
+                Point dropTarget = destinationSq;
 
                 //If there is a creature at the end point, try to find a free area
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, destinationSq);
 
                 //Is there a creature here? If so, try to find another location
                 if (squareContents.monster != null)
                 {
                     //Get surrounding squares
-                    List<Point> freeSqs = dungeon.GetFreeAdjacentSquares(player.LocationLevel, target);
+                    List<Point> freeSqs = dungeon.GetFreeAdjacentSquares(player.LocationLevel, destinationSq);
 
                     if (freeSqs.Count > 0)
                     {
@@ -1479,7 +1491,7 @@ namespace RogueBasin
             }
 
             //Time only goes past if successfully thrown
-            return success;
+            return true;
         }
 
         /// <summary>

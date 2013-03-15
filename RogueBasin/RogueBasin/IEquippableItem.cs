@@ -100,12 +100,13 @@ namespace RogueBasin
         bool FireItem(Point target);
 
         /// <summary>
-        /// Throws the item - check if we can't pull this out
+        /// Throws the item - check if we can't pull this out.
+        /// Returns where the item lands
         /// </summary>
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        bool ThrowItem(Point target);
+        Point ThrowItem(Point target);
 
         /// <summary>
         /// Operates the item - definitely a method
@@ -150,6 +151,12 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         double ThrowSoundMagnitude();
+
+        /// <summary>
+        /// Destroyed on throw
+        /// </summary>
+        /// <returns></returns>
+        bool DestroyedOnThrow();
 
     }
 }

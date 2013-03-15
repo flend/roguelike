@@ -172,9 +172,9 @@ namespace RogueBasin.Items
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
-        public bool ThrowItem(Point target)
+        public Point ThrowItem(Point target)
         {
-            return true;
+            return null;
         }
 
         /// <summary>
@@ -240,6 +240,15 @@ namespace RogueBasin.Items
         public double ThrowSoundMagnitude()
         {
             return 0.1;
+        }
+
+        /// <summary>
+        /// Destroyed on throw
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnThrow()
+        {
+            return false;
         }
 
     }
