@@ -865,11 +865,18 @@ namespace RogueBasin
                 AddMonsterRandomWalkablePoint(rot, 0);
             }*/
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 4; i++)
             {
                 Creatures.PerimeterBot patrolBot = new Creatures.PerimeterBot();
-                AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
+                AddMonsterSquarePatrol(patrolBot, 0, mapGenerator);
             }
+
+            for (int i = 0; i < 4; i++)
+            {
+                Creatures.PerimeterBotLinear patrolBot = new Creatures.PerimeterBotLinear();
+                AddMonsterLinearPatrol(patrolBot, 0, mapGenerator);
+            }
+
             /*
             for (int i = 0; i < 4; i++)
             {
@@ -888,7 +895,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="monster"></param>
         /// <param name="mapGen"></param>
-        private void AddMonsterRandomPatrol(MonsterFightAndRunAI monster, int level, MapGenerator mapGen)
+        private void AddMonsterLinearPatrol(MonsterFightAndRunAI monster, int level, MapGenerator mapGen)
         {
 
             Dungeon dungeon = Game.Dungeon;
@@ -901,6 +908,36 @@ namespace RogueBasin
             do
             {
                 CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypointsSisterRooms(monster.GetPatrolRotationClockwise(), 3);
+                monster.Waypoints = patrol.Waypoints;
+                startLocation = patrol.StartPos;
+
+                loops++;
+            } while (!dungeon.AddMonster(monster, level, startLocation) && loops < maxLoops);
+
+            if (loops == maxLoops)
+            {
+                LogFile.Log.LogEntryDebug("Failed to place patrolling monster: " + monster.Representation, LogDebugLevel.High);
+            }
+        }
+
+        /// <summary>
+        /// Add a monster with a random patrol. Needs the mapgenerator of the level in question
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="mapGen"></param>
+        private void AddMonsterSquarePatrol(MonsterFightAndRunAI monster, int level, MapGenerator mapGen)
+        {
+
+            Dungeon dungeon = Game.Dungeon;
+
+            Point startLocation;
+
+            int loops = 0;
+            int maxLoops = 50;
+
+            do
+            {
+                CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypoints(monster.GetPatrolRotationClockwise());
                 monster.Waypoints = patrol.Waypoints;
                 startLocation = patrol.StartPos;
 

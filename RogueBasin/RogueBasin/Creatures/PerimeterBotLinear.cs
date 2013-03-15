@@ -8,14 +8,14 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Patrolling Robot. Will not break off patrol but will fire at enemies within FOV
     /// </summary>
-    public class PerimeterBot : MonsterThrowAndRunAI
+    public class PerimeterBotLinear : MonsterThrowAndRunAI
     {
         const int classDeltaHitpoints = 4;
         const int classMinHitpoints = 1;
 
         bool rotationClockwise = true;
 
-        public PerimeterBot()
+        public PerimeterBotLinear()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -150,7 +150,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new PerimeterBot();
+            return new PerimeterBotLinear();
         }
 
         public override Color RepresentationColor()
@@ -201,7 +201,7 @@ namespace RogueBasin.Creatures
 
         public override bool HasSquarePatrol()
         {
-            return true;
+            return false;
         }
 
 
