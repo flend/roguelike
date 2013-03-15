@@ -35,6 +35,14 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// For serialization
+        /// </summary>
+        public SoundEffect()
+        {
+
+        }
+
+        /// <summary>
         /// Decayed magnitude of sound at WorldClock time passed in.
         /// </summary>
         /// <param name="timeNow"></param>

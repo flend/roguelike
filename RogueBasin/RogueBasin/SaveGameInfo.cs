@@ -107,7 +107,7 @@ namespace RogueBasin
         /// <summary>
         /// List of global events
         /// </summary>
-        public List<KeyValuePair<long, SoundEffect>> effects;
+        public List<SoundEffect> effects;
 
         public DungeonInfo dungeonInfo;
     }

@@ -935,6 +935,7 @@ namespace RogueBasin
                 newDungeon.dateCounter = readData.dateCounter;
                 newDungeon.nextUniqueID = readData.nextUniqueID;
                 newDungeon.nextUniqueSoundID = readData.nextUniqueSoundID;
+                newDungeon.Effects = readData.effects;
 
                 Game.MessageQueue.TakeMessageHistoryFromList(readData.messageLog);
                 

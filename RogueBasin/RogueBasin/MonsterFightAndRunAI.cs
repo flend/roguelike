@@ -478,15 +478,15 @@ namespace RogueBasin
                 //Get sounds which have happened since we last looked (and update)
                 //TODO: reset this when we leave a pursuit state - could look at very old sounds then??
 
-                List<KeyValuePair<long, SoundEffect>> newSounds = Game.Dungeon.GetSoundsAfterTime(LastCheckedSounds);
+                List<SoundEffect> newSounds = Game.Dungeon.GetSoundsAfterTime(LastCheckedSounds);
                 LastCheckedSounds = Game.Dungeon.WorldClock;
 
                 SoundEffect newSoundToFollow = null;
                 int newSoundToFollowID = -1;
                 double newSoundInterest = currentSoundInterest;
 
-                foreach(KeyValuePair<long, SoundEffect> soundEvent in newSounds) {
-                    SoundEffect sEffect = soundEvent.Value;
+                foreach(SoundEffect soundEvent in newSounds) {
+                    SoundEffect sEffect = soundEvent;
 
                     double newSoundScore = sEffect.DecayedMagnitude(this.LocationLevel, this.LocationMap);
 

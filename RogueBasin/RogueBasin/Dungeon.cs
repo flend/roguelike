@@ -368,7 +368,7 @@ namespace RogueBasin
         /// <summary>
         /// List of global events, indexed by the time they occur
         /// </summary>
-        List<KeyValuePair<long, SoundEffect>> effects;
+        List<SoundEffect> effects;
 
         Color defaultPCColor = ColorPresets.White;
 
@@ -382,7 +382,7 @@ namespace RogueBasin
             levelTCODMapsIgnoringClosedDoors = new List<TCODFov>();
 
             ///DungeonEffects are indexed by the time that they occur
-            effects = new List<KeyValuePair<long, SoundEffect>>();
+            effects = new List<SoundEffect>();
 
             specialMoves = new List<SpecialMove>();
             spells = new List<Spell>();
@@ -918,6 +918,7 @@ namespace RogueBasin
                 saveGameInfo.nextUniqueID = this.nextUniqueID;
                 saveGameInfo.nextUniqueSoundID = this.nextUniqueSoundID;
                 saveGameInfo.messageLog = Game.MessageQueue.GetMessageHistoryAsList();
+                saveGameInfo.effects = this.Effects;
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -1730,7 +1731,7 @@ namespace RogueBasin
         /// <summary>
         /// For serialization only
         /// </summary>
-        public List<KeyValuePair<long, SoundEffect>> Effects
+        public List<SoundEffect> Effects
         {
             get
             {
@@ -2563,9 +2564,9 @@ namespace RogueBasin
         {
             //Debug: show all sounds on the map
             
-            foreach (KeyValuePair<long, SoundEffect> effectPair in Game.Dungeon.Effects)
+            foreach (SoundEffect effectPair in Game.Dungeon.Effects)
             {
-                SoundEffect sEffect = effectPair.Value;
+                SoundEffect sEffect = effectPair;
 
                 Map currentMap = levels[sEffect.LevelLocation];
 
@@ -3394,7 +3395,7 @@ namespace RogueBasin
         {
             SoundEffect newEffect = new SoundEffect(nextUniqueSoundID, this, WorldClock, soundMagnitude, mapLevel, mapLocation);
 
-            effects.Add(new KeyValuePair<long, SoundEffect>(WorldClock, newEffect));
+            effects.Add(newEffect);
             nextUniqueSoundID++;
             LogFile.Log.LogEntryDebug("Adding new sound mag: " + soundMagnitude.ToString() + " at level: " + mapLevel.ToString() + " loc: " + mapLocation.ToString(), LogDebugLevel.Medium);
 
@@ -3409,10 +3410,10 @@ namespace RogueBasin
         internal SoundEffect GetSoundByID(int id)
         {
             //Data structure really needs indexing on id
-            foreach (KeyValuePair<long, SoundEffect> ef in effects)
+            foreach (SoundEffect ef in effects)
             {
-                if (ef.Value.ID == id)
-                    return ef.Value;
+                if (ef.ID == id)
+                    return ef;
             }
             string msg = "Can't find sound ID: " + id;
             LogFile.Log.LogEntryDebug(msg, LogDebugLevel.High);
@@ -3424,9 +3425,9 @@ namespace RogueBasin
         /// </summary>
         /// <param name="soundAfterThisTime"></param>
         /// <returns></returns>
-        internal List<KeyValuePair<long, SoundEffect>> GetSoundsAfterTime(long soundAfterThisTime)
+        internal List<SoundEffect> GetSoundsAfterTime(long soundAfterThisTime)
         {
-            List<KeyValuePair<long, SoundEffect>> newSounds = new List<KeyValuePair<long, SoundEffect>>();
+            List<SoundEffect> newSounds = new List<SoundEffect>();
 
             //Should do a binary search here
 
@@ -3434,9 +3435,9 @@ namespace RogueBasin
 
             //SortedList doesn't let us do duplicate keys, so I need a filtering solution instead (inefficient)
 
-            foreach (KeyValuePair<long, SoundEffect> soundPair in effects)
+            foreach (SoundEffect soundPair in effects)
             {
-                if (soundPair.Key > soundAfterThisTime)
+                if (soundPair.SoundTime > soundAfterThisTime)
                     newSounds.Add(soundPair);
             }
 

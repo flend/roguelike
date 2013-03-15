@@ -172,28 +172,28 @@ namespace RogueBasin
             Vector3 unitVector = new Vector3(Math.Cos(angle), Math.Sin(angle), 0);
 
             //Build dictionary of the angle of vectors to the surrounding spaces
-            List<KeyValuePair<double, Point>> surroundingSpaces = new List<KeyValuePair<double,Point>>();
+            List<KeyValue<double, Point>> surroundingSpaces = new List<KeyValue<double,Point>>();
 
             //Include this point with both normally and with +2pi so that angles like 3pi / 2 pick this as the closest
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 2, new Point(0, -1)));
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 2 + 2 * Math.PI, new Point(0, -1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(-1 * Math.PI / 2, new Point(0, -1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(-1 * Math.PI / 2 + 2 * Math.PI, new Point(0, -1)));
 
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(-1 * Math.PI / 4, new Point(1, -1)));
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(0, new Point(1, 0)));
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI / 4, new Point(1, 1)));
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI / 2, new Point(0, 1)));
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(3 * Math.PI / 4, new Point(-1, 1)));
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(Math.PI, new Point(-1, 0)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(-1 * Math.PI / 4, new Point(1, -1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(0, new Point(1, 0)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(Math.PI / 4, new Point(1, 1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(Math.PI / 2, new Point(0, 1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(3 * Math.PI / 4, new Point(-1, 1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(Math.PI, new Point(-1, 0)));
 
             //Include this point with both normally and with -2pi so that angles like -pi / 2 pick this as the closest
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(5 * Math.PI / 4, new Point(-1, -1)));
-            surroundingSpaces.Add(new KeyValuePair<double, Point>(5 * Math.PI / 4 - 2 * Math.PI, new Point(-1, -1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(5 * Math.PI / 4, new Point(-1, -1)));
+            surroundingSpaces.Add(new KeyValue<double, Point>(5 * Math.PI / 4 - 2 * Math.PI, new Point(-1, -1)));
 
             //LogFile.Log.LogEntryDebug("points for angle: " + angle, LogDebugLevel.High);
 
             //Sort the dictionary in terms of abs difference from the requested angle
 
-            List<KeyValuePair<double, Point>> myList = surroundingSpaces;
+            List<KeyValue<double, Point>> myList = surroundingSpaces;
 
             myList.Sort( (firstPair, nextPair) =>
             {

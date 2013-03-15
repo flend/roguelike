@@ -788,7 +788,7 @@ namespace RogueBasin
         private void AddDoors()
         {
             int doorChanceMax = 5;
-            int closedDoorChance = 2;
+            int closedDoorChance = 5;
 
             for (int i = 0; i < width; i++)
             {
