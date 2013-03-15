@@ -1803,7 +1803,7 @@ namespace RogueBasin
 
             //PC starts at start location
             dungeon.Player.LocationLevel = 0;
-            dungeon.Player.LocationMap = hallsGen.GetUpStaircaseLocation();
+            dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
 
             //Build TCOD maps
             //Necessary so connectivity checks on items and monsters can work

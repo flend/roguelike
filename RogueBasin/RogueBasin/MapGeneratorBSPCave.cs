@@ -544,6 +544,11 @@ namespace RogueBasin
 
         }
 
+        public override Point GetPlayerStartLocation()
+        {
+            return baseMap.PCStartLocation;
+        }
+
         /// <summary>
         /// Find a route between sistering rooms
         /// </summary>

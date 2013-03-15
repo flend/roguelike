@@ -85,6 +85,8 @@ namespace RogueBasin {
         Color literalColor = ColorPresets.BurlyWood;
         Color literalTextColor = ColorPresets.White;
 
+        Color headingColor = ColorPresets.Yellow;
+
         Color messageColor = ColorPresets.White;
 
         Color soundColor = ColorPresets.Yellow;
@@ -163,6 +165,9 @@ namespace RogueBasin {
 
         public Color PCColor { get; set;}
 
+        public bool SeeAllMonsters { get; set; }
+        public bool SeeAllMap { get; set; }
+
         public static Screen Instance
         {
             get
@@ -217,6 +222,9 @@ namespace RogueBasin {
             PCColor = ColorPresets.White;
 
             trainingStatsRecord = new List<TrainStats>();
+
+            SeeAllMonsters = true;
+            SeeAllMap = true;
         }
 
         //Setup the screen
@@ -2442,6 +2450,12 @@ namespace RogueBasin {
 
                 }
 
+                //In many levels in FlatlineRL, we can see all the monsters
+                if (SeeAllMonsters)
+                {
+                    drawCreature = true;
+                }
+
                 if (!drawCreature)
                     continue;
 
@@ -2454,12 +2468,19 @@ namespace RogueBasin {
 
                     Map map = Game.Dungeon.Levels[creature.LocationLevel];
 
-                    LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
+                    //LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
 
                     if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
-                        && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)
+                        && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)// && Game.Dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(headingLoc.x, headingLoc.y))
                     {
-                        rootConsole.PutChar(headingLoc.x, headingLoc.y, creature.HeadingRepresentation);
+                        //Draw as an coloring on the current icon
+                        char charToOverwrite = rootConsole.GetChar(headingLoc.x, headingLoc.y);
+                        //Dot is too hard to see
+                        if (charToOverwrite == '.')
+                            charToOverwrite = '\x9';
+                        rootConsole.ForegroundColor = creature.RepresentationColor();
+
+                        rootConsole.PutChar(headingLoc.x, headingLoc.y, charToOverwrite);
                     }
                 }
             }
@@ -2498,6 +2519,13 @@ namespace RogueBasin {
                         drawCreature = false;
                     
                 }
+
+                //In many levels in FlatlineRL, we can see all the monsters
+                if (SeeAllMonsters)
+                {
+                    drawCreature = true;
+                }
+
 
                 if (DebugMode)
                 {
@@ -2734,7 +2762,6 @@ namespace RogueBasin {
                         screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
                         drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
                     }
-                    
                    
                     if (map.mapSquares[i, j].InPlayerFOV || Game.Dungeon.Player.LocationLevel == 0)
                     {
@@ -2760,6 +2787,13 @@ namespace RogueBasin {
                     //Monster FOV in debug mode
                     if (DebugMode)
                     {
+                        //Draw player FOV explicitally
+                        if (map.mapSquares[i, j].InPlayerFOV)
+                        {
+                            drawColor = Color.Interpolate(drawColor, ColorPresets.Blue, 0.6);
+                        }
+
+
                         //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
@@ -2772,6 +2806,13 @@ namespace RogueBasin {
                             drawColor = Color.Interpolate(drawColor, ColorPresets.Yellow, map.mapSquares[i, j].SoundMag);
                         }
                     }
+
+                    //In FlatlineRL you can normally see the whole map
+                    if (SeeAllMap)
+                    {
+                        rootConsole.ForegroundColor = drawColor;
+                    }
+
                     rootConsole.ForegroundColor = drawColor;
                     rootConsole.PutChar(screenX, screenY, screenChar);
                 }
@@ -3464,7 +3505,7 @@ namespace RogueBasin {
                 lastX = x;
                 lastY = y;
 
-            } while (x != targetX || y != targetY);
+            } while (x != targetX || y != targetY && x != lastX && y != lastY);
 
             path.Dispose();
 

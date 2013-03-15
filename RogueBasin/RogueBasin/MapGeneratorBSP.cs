@@ -860,9 +860,221 @@ namespace RogueBasin
             //SetLightBlocking(baseMap);
 
             //Set the PC start location in a random room
-            baseMap.PCStartLocation = rootNode.RandomRoomPoint().GetPointInRoomOnly();
+            baseMap.PCStartLocation = AddEntryRoomForPlayer();
 
             return baseMap;
+        }
+
+        public override Point GetPlayerStartLocation()
+        {
+            return baseMap.PCStartLocation;
+        }
+
+        private Point AddEntryRoomForPlayer()
+        {
+            bool stillTrying = true;
+
+            do
+            {
+
+                //Cast a ray from a side of the map.
+                int side = Game.Random.Next(4);
+
+                int roomX = 0;
+                int roomY = 0;
+                int roomWidth = 3;
+                int roomHeight = 3;
+
+                side = 3;
+
+                Point doorLoc = new Point(0, 0);
+                Point playerLoc = new Point(0, 0);
+
+                switch (side)
+                {
+
+                    case 0:
+                        {
+                            //North
+
+                            int xOrigin = Game.Random.Next(width);
+
+                            int y;
+                            for (y = 0; y < height; y++)
+                            {
+
+                                if (baseMap.mapSquares[xOrigin, y].Terrain == MapTerrain.Empty)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //Failed to find anywhere to break into?
+                            if (y == baseMap.height)
+                            {
+                                LogFile.Log.LogEntryDebug("Failed to find intersection with level, retrying", LogDebugLevel.Medium);
+                                continue;
+                            }
+
+                            doorLoc = new Point(xOrigin, y - 1);
+                            playerLoc = new Point(xOrigin, y - 2);
+
+                            roomX = xOrigin - 1;
+                            roomY = doorLoc.y - 2;
+                        }
+                        break;
+
+                    case 1:
+                        {
+                            //South
+
+                            int xOrigin = Game.Random.Next(width);
+
+                            int y;
+                            for (y = height - 1; y >= 0; y--)
+                            {
+
+                                if (baseMap.mapSquares[xOrigin, y].Terrain == MapTerrain.Empty)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //Failed to find anywhere to break into?
+                            if (y == -1)
+                            {
+                                LogFile.Log.LogEntryDebug("Failed to find intersection with level, retrying", LogDebugLevel.Medium);
+                                continue;
+                            }
+
+                            doorLoc = new Point(xOrigin, y + 1);
+                            playerLoc = new Point(xOrigin, y + 2);
+
+                            roomX = xOrigin - 1;
+                            roomY = doorLoc.y;
+                        }
+                        break;
+
+                    case 2:
+                        {
+                            //West
+
+                            int yOrigin = Game.Random.Next(height);
+
+                            int x;
+                            for (x = 0; x < width; x++)
+                            {
+
+                                if (baseMap.mapSquares[x, yOrigin].Terrain == MapTerrain.Empty)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //Failed to find anywhere to break into?
+                            if (x == width)
+                            {
+                                LogFile.Log.LogEntryDebug("Failed to find intersection with level, retrying", LogDebugLevel.Medium);
+                                continue;
+                            }
+
+                            doorLoc = new Point(x - 1, yOrigin);
+                            playerLoc = new Point(x - 2, yOrigin);
+
+                            roomX = x - 3;
+                            roomY = yOrigin - 1;
+                        }
+                        break;
+
+                    case 3:
+                        {
+                            //East
+
+                            int yOrigin = Game.Random.Next(height);
+
+                            int x;
+                            for (x = width - 1; x >= 0; x--)
+                            {
+
+                                if (baseMap.mapSquares[x, yOrigin].Terrain == MapTerrain.Empty)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //Failed to find anywhere to break into?
+                            if (x == -1)
+                            {
+                                LogFile.Log.LogEntryDebug("Failed to find intersection with level, retrying", LogDebugLevel.Medium);
+                                continue;
+                            }
+
+                            doorLoc = new Point(x + 1, yOrigin);
+                            playerLoc = new Point(x + 2, yOrigin);
+
+                            roomX = doorLoc.x;
+                            roomY = yOrigin - 1;
+                        }
+                        break;
+
+                }
+
+                //Check there is room for the 3x3 room
+
+                bool enoughRoom = true;
+
+                for (int i = roomX; i < roomX + roomWidth; i++)
+                {
+                    for (int j = roomY; j < roomY + roomHeight; j++)
+                    {
+                        if (i < 0 || j < 0)
+                        {
+                            enoughRoom = false;
+                            continue;
+                        }
+                        if (i >= width || j >= height)
+                        {
+                            enoughRoom = false;
+                            continue;
+                        }
+                    }
+                }
+
+                if (!enoughRoom)
+                    continue;
+
+                //if (baseMap.mapSquares[i, j].Terrain != MapTerrain.Void && baseMap.mapSquares[i, j].Terrain != MapTerrain.Wall)
+                //{
+                //    enoughRoom = false;
+                //    continue;
+                //}
+                //It's almost impossible that we will block off an area, and this check fails for maps with rooms close to the edge
+
+
+                //Draw room 
+                for (int i = roomX; i < roomX + roomWidth; i++)
+                {
+                    for (int j = roomY; j < roomY + roomHeight; j++)
+                    {
+                        baseMap.mapSquares[i, j].Terrain = MapTerrain.Wall;
+                        baseMap.mapSquares[i, j].SetBlocking();
+                    }
+                }
+
+
+
+                //Draw entry room
+                baseMap.mapSquares[doorLoc.x, doorLoc.y].Terrain = MapTerrain.ClosedDoor;
+
+                //Draw player space
+                baseMap.mapSquares[playerLoc.x, playerLoc.y].Terrain = MapTerrain.Empty;
+                baseMap.mapSquares[playerLoc.x, playerLoc.y].SetOpen();
+
+                return (playerLoc);
+
+            } while (stillTrying);
+
+            return null;
         }
 
         /// <summary>

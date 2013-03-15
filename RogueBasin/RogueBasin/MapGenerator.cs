@@ -84,5 +84,7 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         public abstract CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwisePatrol, int numberOfWayPoints);
+
+        public abstract Point GetPlayerStartLocation();
     }
 }
