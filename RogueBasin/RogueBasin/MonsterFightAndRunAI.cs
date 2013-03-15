@@ -725,7 +725,17 @@ namespace RogueBasin
                             return;
                         }
 
-                        //(if temporarily blocked will just attempt to move onto their own square)
+                        //Temporarily blocked
+                        if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
+                        {
+                            //Pick a random waypoint to continue to
+                            CurrentWaypoint = Game.Random.Next(Waypoints.Count);
+                            //Will continue there next turn
+
+                            LogFile.Log.LogEntryDebug(this.Representation + " temporarily blocked - picking new waypoint", LogDebugLevel.Medium);
+                            return;
+                        }
+                        
                         //Walk towards waypoint
                         SetHeadingToMapSquare(nextStep);
                         MoveIntoSquare(nextStep);

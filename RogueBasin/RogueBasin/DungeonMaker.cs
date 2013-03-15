@@ -871,7 +871,7 @@ namespace RogueBasin
                 AddMonsterSquarePatrol(patrolBot, 0, mapGenerator);
             }
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 12; i++)
             {
                 Creatures.PerimeterBotLinear patrolBot = new Creatures.PerimeterBotLinear();
                 AddMonsterLinearPatrol(patrolBot, 0, mapGenerator);
