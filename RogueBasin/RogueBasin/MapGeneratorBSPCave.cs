@@ -457,7 +457,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// REPLACE THIS WHEN THE FIRST BSP IS SORTED - OUT OF DATE
+        /// Initial implementation at leaf nodes only. TODO: try parents & also redo map for waypoints
         /// </summary>
         /// <returns></returns>
         public override CreaturePatrol CreatureStartPosAndWaypoints(bool clockwise)
@@ -466,8 +466,8 @@ namespace RogueBasin
             PointInRoom room = RandomPointInRoom();
 
             //Calculate a patrol around the room
-            int freeSpaceX = room.RoomWidth - 2;
-            int freeSpaceY = room.RoomHeight - 2;
+            int freeSpaceX = (int)Math.Max(0, room.RoomWidth - 2);
+            int freeSpaceY = (int)Math.Max(0, room.RoomHeight - 2);
 
             int patrolIndentX = Game.Random.Next(freeSpaceX / 4);
             int patrolIndentY = Game.Random.Next(freeSpaceY / 4);
@@ -476,12 +476,14 @@ namespace RogueBasin
             List<Point> waypointsBase = new List<Point>();
 
             Point tl = new Point(room.RoomX + 1 + patrolIndentX, room.RoomY + 1 + patrolIndentY);
+            Point tr = new Point(room.RoomX + room.RoomWidth - 2 - patrolIndentX, room.RoomY + 1 + patrolIndentY);
+            Point bl = new Point(room.RoomX + 1 + patrolIndentX, room.RoomY + room.RoomHeight - 2 - patrolIndentY);
+
+            Point br = new Point(room.RoomX + room.RoomWidth - 2 - patrolIndentX, room.RoomY + room.RoomHeight - 2 - patrolIndentY);
+
             waypointsBase.Add(tl);
-            Point tr = new Point(room.RoomX + room.RoomWidth - 1 - patrolIndentX, room.RoomY + 1 + patrolIndentY);
             waypointsBase.Add(tr);
-            Point br = new Point(room.RoomX + 1 + patrolIndentX, room.RoomY + room.RoomHeight - 1 - patrolIndentY);
             waypointsBase.Add(br);
-            Point bl = new Point(room.RoomX + room.RoomWidth - 1 - patrolIndentX, room.RoomY + room.RoomHeight - 1 - patrolIndentY);            
             waypointsBase.Add(bl);
 
             //Start position is a random spot on this square
@@ -500,7 +502,7 @@ namespace RogueBasin
                 startPos.Add(new KeyValuePair<int, Point>(3, new Point(tl.x, j)));
                 startPos.Add(new KeyValuePair<int, Point>(1, new Point(tr.x, j)));
             }
-            
+
             KeyValuePair<int, Point> startLoc = startPos[Game.Random.Next(startPos.Count)];
 
             //Depending on the startLoc, re-order the waypoints so we to a suitable first point
@@ -510,7 +512,7 @@ namespace RogueBasin
             {
                 for (int i = 1; i < 5; i++)
                 {
-                    waypointsReordered.Add(waypointsBase[startLoc.Key + i % 4]);
+                    waypointsReordered.Add(waypointsBase[(startLoc.Key + i) % 4]);
                 }
             }
             else
@@ -526,6 +528,114 @@ namespace RogueBasin
             }
 
             return new CreaturePatrol(startLoc.Value, waypointsReordered);
+
+        }
+
+        /// <summary>
+        /// Find a route between sistering rooms
+        /// </summary>
+        /// <returns></returns>
+        public override CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwise)
+        {
+            //Find a leaf room
+            int totalRoomsToVisit = 3;
+
+            List<PointInRoom> sisterRoomPoints = rootNode.GetRandomSisterRooms(totalRoomsToVisit);
+
+            List<List<Point>> waypointReorderedAll = new List<List<Point>>();
+
+            //Find a simple path between a point in each of the rooms
+
+            List<Point> allWaypoints = new List<Point>();
+
+            for (int r = 0; r < sisterRoomPoints.Count; r++)
+            {
+                allWaypoints.Add(new Point(sisterRoomPoints[r].X, sisterRoomPoints[r].Y));
+            }
+
+            //(arbitary use the 2nd startloc)
+            KeyValuePair<int, Point> startLoc = new KeyValuePair<int, Point>();
+
+            //Calculate waypoints for each room then pick 2 from each
+            for (int r = 0; r < 2; r++)
+            {
+
+                PointInRoom room = sisterRoomPoints[r];
+
+                //Calculate a patrol around the room
+                int freeSpaceX = (int)Math.Max(0, room.RoomWidth - 2);
+                int freeSpaceY = (int)Math.Max(0, room.RoomHeight - 2);
+
+                int patrolIndentX = Game.Random.Next(freeSpaceX / 4);
+                int patrolIndentY = Game.Random.Next(freeSpaceY / 4);
+
+                //Waypoints
+                List<Point> waypointsBase = new List<Point>();
+
+                Point tl = new Point(room.RoomX + 1 + patrolIndentX, room.RoomY + 1 + patrolIndentY);
+                Point tr = new Point(room.RoomX + room.RoomWidth - 2 - patrolIndentX, room.RoomY + 1 + patrolIndentY);
+                Point bl = new Point(room.RoomX + 1 + patrolIndentX, room.RoomY + room.RoomHeight - 2 - patrolIndentY);
+
+                Point br = new Point(room.RoomX + room.RoomWidth - 2 - patrolIndentX, room.RoomY + room.RoomHeight - 2 - patrolIndentY);
+
+                waypointsBase.Add(tl);
+                waypointsBase.Add(tr);
+                waypointsBase.Add(br);
+                waypointsBase.Add(bl);
+
+                //Start position is a random spot on this square
+                //Pair: side index, Point
+                List<KeyValuePair<int, Point>> startPos = new List<KeyValuePair<int, Point>>();
+
+                for (int i = tl.x; i <= tr.x; i++)
+                {
+                    //Top
+                    startPos.Add(new KeyValuePair<int, Point>(0, new Point(i, tl.y)));
+                    startPos.Add(new KeyValuePair<int, Point>(2, new Point(i, bl.y)));
+                }
+
+                for (int j = tl.y + 1; j <= bl.y - 1; j++)
+                {
+                    startPos.Add(new KeyValuePair<int, Point>(3, new Point(tl.x, j)));
+                    startPos.Add(new KeyValuePair<int, Point>(1, new Point(tr.x, j)));
+                }
+
+                startLoc = startPos[Game.Random.Next(startPos.Count)];
+
+                //Depending on the startLoc, re-order the waypoints so we to a suitable first point
+                List<Point> waypointsReordered = new List<Point>();
+
+                if (clockwise == true)
+                {
+                    for (int i = 1; i < 5; i++)
+                    {
+                        waypointsReordered.Add(waypointsBase[(startLoc.Key + i) % 4]);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int wayPointNo = startLoc.Key - i;
+                        if (wayPointNo < 0)
+                            wayPointNo += 4;
+
+                        waypointsReordered.Add(waypointsBase[wayPointNo]);
+                    }
+                }
+
+                waypointReorderedAll.Add(waypointsReordered);
+            }
+
+            //Pick the first 2 waypoints from the first room and the last 2 from the 2nd
+            List<Point> newWaypoints = new List<Point>();
+
+            newWaypoints.Add(waypointReorderedAll[0][0]);
+            newWaypoints.Add(waypointReorderedAll[0][1]);
+            newWaypoints.Add(waypointReorderedAll[1][2]);
+            newWaypoints.Add(waypointReorderedAll[1][3]);
+
+            return new CreaturePatrol(startLoc.Value, newWaypoints);
 
         }
 

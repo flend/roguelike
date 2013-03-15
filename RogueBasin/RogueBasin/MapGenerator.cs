@@ -78,5 +78,11 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         public abstract CreaturePatrol CreatureStartPosAndWaypoints(bool clockwisePatrol);
+
+        /// <summary>
+        /// Produce a random start location & list of creature waypoints for patrol.
+        /// </summary>
+        /// <returns></returns>
+        public abstract CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwisePatrol);
     }
 }

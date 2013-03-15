@@ -206,6 +206,7 @@
     <Compile Include="Items\Vibroblade.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />
+    <Compile Include="KeyValue.cs" />
     <Compile Include="LastMapGeneratorFromASCIIFile.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />

@@ -193,6 +193,12 @@ namespace RogueBasin.Creatures
             return "fires a railgun";
         }
 
+        //Can open doors on patrol
+        public override bool CanOpenDoors()
+        {
+            return true;
+        }
+
 
     }
 }

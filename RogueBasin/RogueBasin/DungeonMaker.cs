@@ -852,25 +852,25 @@ namespace RogueBasin
             //  monstersToAdd.Add(new Creatures.Goblin());
 //monstersToAdd.Add(new Creatures.Goblin());
 
-            for (int i = 0; i < 6; i++)
+          /*  for (int i = 0; i < 2; i++)
             {
                 Monster goblin = new Creatures.Goblin();
                 AddMonsterRandomWalkablePoint(goblin, 0);
-            }
+            }*/
 
             /*
             for (int i = 0; i < 4; i++)
             {
                 Creatures.RotatingTurret rot = new Creatures.RotatingTurret();
                 AddMonsterRandomWalkablePoint(rot, 0);
-            }
+            }*/
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 1; i++)
             {
                 Creatures.PerimeterBot patrolBot = new Creatures.PerimeterBot();
                 AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
             }
-
+            /*
             for (int i = 0; i < 4; i++)
             {
                 Creatures.AlertBot patrolBot = new Creatures.AlertBot();
@@ -900,7 +900,7 @@ namespace RogueBasin
 
             do
             {
-                CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypoints(monster.GetPatrolRotationClockwise());
+                CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypointsSisterRooms(monster.GetPatrolRotationClockwise());
                 monster.Waypoints = patrol.Waypoints;
                 startLocation = patrol.StartPos;
 
