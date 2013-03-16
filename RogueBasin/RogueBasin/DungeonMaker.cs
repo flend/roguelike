@@ -233,6 +233,7 @@ namespace RogueBasin
             levelToRespawn.Add(missionLevel);
             SpawnCreaturesFlatline(levelToRespawn, levelGen);
             SpawnItemsFlatline(levelToRespawn, levelGen);
+            SpawnObjectivesFlatline(levelToRespawn, levelGen);
         }
 
         //Spawning shared variables
@@ -880,6 +881,55 @@ namespace RogueBasin
             {
                 LogFile.Log.LogEntryDebug("Failed to place patrolling monster: " + monster.Representation, LogDebugLevel.High);
             }
+        }
+
+        /// <summary>
+        /// Add a monster with a random patrol. Needs the mapgenerator of the level in question
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="mapGen"></param>
+        private bool AddMonsterFarFromLocation(Monster monster, Point location, int level, MapGenerator mapGen)
+        {
+
+            //Offset location
+
+            int maxLoops = 50;
+            int loops = 0;
+
+            Point toPlaceLoc = new Point(location);
+
+            int distance = 40;
+
+            do
+            {
+                toPlaceLoc.x = location.x + (int)Gaussian.BoxMuller(distance, 5);
+                toPlaceLoc.y = location.y + (int)Gaussian.BoxMuller(distance, 5);
+
+                loops++;
+                distance--;
+
+            } while (!Game.Dungeon.AddMonster(monster, level, toPlaceLoc) && loops < maxLoops);
+
+            if (loops == maxLoops)
+            {
+                LogFile.Log.LogEntryDebug("Failed to place: " + monster.Representation + " far from to: " + location + " reverting to random placement", LogDebugLevel.Medium);
+
+                loops = 0;
+
+                do
+                {
+                    toPlaceLoc = Game.Dungeon.RandomWalkablePointInLevel(level);
+                    loops++;
+
+                } while (!Game.Dungeon.AddMonster(monster, level, toPlaceLoc) && loops < maxLoops);
+
+                LogFile.Log.LogEntryDebug("Failed to place: " + monster.Representation + " giving up", LogDebugLevel.High);
+                return false;
+            }
+
+            LogFile.Log.LogEntryDebug("Item " + monster.Representation + " placed at: " + location.ToString(), LogDebugLevel.High);
+
+            return true;
         }
 
         /// <summary>
@@ -2130,6 +2180,8 @@ namespace RogueBasin
             SpawnCreaturesFlatline(dungeonLevelsToTest, levelGen);
 
             SpawnItemsFlatline(dungeonLevelsToTest, levelGen);
+
+            SpawnObjectivesFlatline(dungeonLevelsToTest, levelGen);
         }
 
         private static void AddStandardEntryExitTriggers(Dungeon dungeon, MapGeneratorBSP hallsGen, int levelNo)
@@ -2166,6 +2218,32 @@ namespace RogueBasin
                         SpawnCreaturesLevel2(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                 }
+
+            }
+        }
+
+        private void SpawnObjectivesFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators)
+        {
+
+            LogFile.Log.LogEntry("Generating objectives...");
+
+            Dungeon dungeon = Game.Dungeon;
+
+            foreach (int level in dungeonLevelsToTest)
+            {
+                MapGenerator mapGen = mapGenerators[level];
+
+                int noOfNodes = 2 + Game.Random.Next(3);
+
+                List<Monster> nodes = new List<Monster>();
+
+                //Add a few computer nodes
+                for (int i = 0; i < noOfNodes; i++)
+                {
+                    nodes.Add(new Creatures.ComputerNode());
+                }
+
+                AddMonstersEqualDistribution(nodes, level, mapGen);
 
             }
         }

@@ -61,5 +61,16 @@ namespace RogueBasin
         {
            
         }
+
+        public override bool OnPatrol()
+        {
+            return true;
+            //always
+        }
+
+        public override bool ShowHeading()
+        {
+            return false;
+        }
     }
 }

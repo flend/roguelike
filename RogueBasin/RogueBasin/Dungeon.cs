@@ -72,10 +72,13 @@ namespace RogueBasin
 
         public bool LevelObjectiveComplete { get; set; }
 
+        public bool LevelObjectiveKillAllMonstersComplete { get; set; }
+
         public DungeonProfile()
         {
             PlayerLeftDock = false;
             LevelObjectiveComplete = false;
+            LevelObjectiveKillAllMonstersComplete = false;
         }
     }
 
@@ -2392,27 +2395,33 @@ namespace RogueBasin
 
             if (!dungeonInfo.LastMission && monster.Unique)
             {
-                //We killed a unique. Add it to the list
-                
-                //What level are we on
-                int levelType = player.LocationLevel - 2;
-                int levelMod = levelType % 4;
-                
-                if (levelMod == 1)
+                //We killed an objective
+                bool a = monsters[0] is Creatures.ComputerNode;
+
+                //Check if there are any living computer nodes on the level
+                Monster livingNode = monsters.Find( x => x is Creatures.ComputerNode && x.Alive && x.LocationLevel == player.LocationLevel);
+                if (livingNode == null)
                 {
-                    //Don't do anything
+                    //Set objective complete
+                    dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete = true;
+
+                    Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete!");
+                    LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " primary objective complete", LogDebugLevel.Medium);
                 }
-                if (levelMod == 2)
-                {
-                    dungeonInfo.SetL3UniqueDead(player.CurrentDungeon);
-                }
-                else if(levelMod == 3) {
-                    dungeonInfo.SetL4UniqueDead(player.CurrentDungeon);
-                }
-                else {
-                    //Problem
-                    LogFile.Log.LogEntryDebug("Error setting unique dead", LogDebugLevel.High);
-                }
+
+            }
+
+            //No monsters left on level?
+
+            Monster livingMonster = monsters.Find(x => x.Alive && x.LocationLevel == player.LocationLevel);
+
+            if (livingMonster == null)
+            {
+                //Set secondary objective complete
+                dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete = true;
+
+                Game.MessageQueue.AddMessage("All defenses disabled. Secondary objective complete!");
+                LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " secondary objective complete", LogDebugLevel.Medium);
             }
 
             if(dungeonInfo.LastMission && monster.Unique) {
@@ -5183,7 +5192,24 @@ namespace RogueBasin
 
         public void MissionComplete()
         {
-            Screen.Instance.PlayMovie("missioncomplete", true);
+            if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete)
+            {
+                //With secondary
+                if (Game.Dungeon.Player.PlayItemMovies)
+                {
+                    Screen.Instance.PlayMovie("missioncompletewithsecondary", true);
+                }
+                Game.MessageQueue.AddMessage("Mission complete (primary + secondary objectives)");
+            }
+            else
+            {
+                //Primary only
+                if (Game.Dungeon.Player.PlayItemMovies)
+                {
+                    Screen.Instance.PlayMovie("missioncomplete", true);
+                }
+                Game.MessageQueue.AddMessage("Mission complete (primary objectives)");
+            }
             MoveToNextMission();
         }
 
@@ -5192,7 +5218,11 @@ namespace RogueBasin
             if (DungeonInfo.NoAborts == DungeonInfo.MaxAborts)
             {
                 //No more aborts allowed
-                Screen.Instance.PlayMovie("nomoreaborts", true);
+                if (Game.Dungeon.Player.PlayItemMovies)
+                {
+                    Screen.Instance.PlayMovie("nomoreaborts", true);
+                }
+                Game.MessageQueue.AddMessage("No more aborts permitted");
                 return false;
 
             }
@@ -5201,7 +5231,11 @@ namespace RogueBasin
 
             DungeonInfo.NoAborts++;
 
-            Screen.Instance.PlayMovie("missionaborted", true);
+            if (Game.Dungeon.Player.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("missionaborted", true);
+            }
+            Game.MessageQueue.AddMessage("Mission aborted");
             MoveToNextMission();
 
             return true;
@@ -5217,7 +5251,7 @@ namespace RogueBasin
             if (newMissionLevel == Levels.Count)
             {
                 //Completed the game
-
+                EndOfGame();
                 return;
             }
 

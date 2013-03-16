@@ -71,6 +71,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.AlertBot))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.PerimeterBot))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Swarmer))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.ComputerNode))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>
@@ -745,6 +746,10 @@ namespace RogueBasin
         virtual public bool OnPatrol()
         {
             return false;
+        }
+
+        public virtual bool ShowHeading() {
+            return true;
         }
     }
 }

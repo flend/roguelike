@@ -44,6 +44,7 @@
   -->
   <ItemGroup>
     <Compile Include="Creatures\AlertBot.cs" />
+    <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
     <Compile Include="Creatures\Ferret.cs">
       <SubType>Code</SubType>
@@ -629,5 +630,8 @@
     <EmbeddedResource Include="bin\Debug\movies\missionaborted0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\missioncomplete0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\nomoreaborts0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\missioncompletewithsecondary0.amf" />
   </ItemGroup>
 </Project>

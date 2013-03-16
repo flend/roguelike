@@ -2475,27 +2475,31 @@ namespace RogueBasin {
                     continue;
 
                 //Heading
-                List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 3);
 
-                foreach (Point headingLoc in headingMarkers)
+                if (creature.ShowHeading())
                 {
-                    //Check heading is drawable
+                    List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 3);
 
-                    Map map = Game.Dungeon.Levels[creature.LocationLevel];
-
-                    //LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
-
-                    if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
-                        && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)// && Game.Dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(headingLoc.x, headingLoc.y))
+                    foreach (Point headingLoc in headingMarkers)
                     {
-                        //Draw as an coloring on the current icon
-                        char charToOverwrite = rootConsole.GetChar(headingLoc.x, headingLoc.y);
-                        //Dot is too hard to see
-                        if (charToOverwrite == '.')
-                            charToOverwrite = '\x9';
-                        rootConsole.ForegroundColor = creature.RepresentationColor();
+                        //Check heading is drawable
 
-                        rootConsole.PutChar(headingLoc.x, headingLoc.y, charToOverwrite);
+                        Map map = Game.Dungeon.Levels[creature.LocationLevel];
+
+                        //LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
+
+                        if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
+                            && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)// && Game.Dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(headingLoc.x, headingLoc.y))
+                        {
+                            //Draw as an coloring on the current icon
+                            char charToOverwrite = rootConsole.GetChar(headingLoc.x, headingLoc.y);
+                            //Dot is too hard to see
+                            if (charToOverwrite == '.')
+                                charToOverwrite = '\x9';
+                            rootConsole.ForegroundColor = creature.RepresentationColor();
+
+                            rootConsole.PutChar(headingLoc.x, headingLoc.y, charToOverwrite);
+                        }
                     }
                 }
             }
