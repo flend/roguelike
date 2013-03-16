@@ -1359,7 +1359,7 @@ namespace RogueBasin
                     return false;
                 }
 
-                //DON'T PLACE UNDER PLAYER OR MONSTER FOR FLATLINE
+                //DON'T PLACE UNDER MONSTER FOR FLATLINE
 
                 //Check square has nothing else on it
                 SquareContents contents = MapSquareContents(level, location);
@@ -1369,13 +1369,6 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
                     return false;
                 }
-
-                if (contents.player != null)
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
-                    return false;
-                }
-
 
                 //Otherwise OK
                 item.LocationLevel = level;

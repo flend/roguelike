@@ -38,10 +38,9 @@ namespace RogueBasin
             Game.Dungeon.Difficulty = difficulty;
 
             SetupPlayer();
-
-            SetupMapsFlatline();
-
             
+            //Player start location must be set in here
+            SetupMapsFlatline();
 
             //SetupMaps();
 
@@ -1045,6 +1044,27 @@ namespace RogueBasin
             }
 
             LogFile.Log.LogEntryDebug("Item " + item.Representation + " placed at: " + location.ToString(), LogDebugLevel.High);
+
+            return true;
+
+        }
+
+            /// <summary>
+        /// Tries to add an item close to a location, puts it anywhere if that's not possible
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        private bool AddItemAtLocation(Item item, int level, Point location)
+        {
+
+          Point toPlaceLoc = new Point(location);
+
+          if(!dungeon.AddItem(item, level, toPlaceLoc)) {
+
+              LogFile.Log.LogEntryDebug("Failed to place: " + item.Representation + " giving up", LogDebugLevel.High);
+              return false;
+          }
 
             return true;
         }
@@ -2221,7 +2241,8 @@ namespace RogueBasin
             List<Item> itemsToPlace = new List<Item>();
 
             //Tempt the player with the shotgun
-            AddItemCloseToLocation(new Items.Shotgun(), 0, mapGen.GetPlayerStartLocation());
+            //AddItemCloseToLocation(new Items.Shotgun(), 0, mapGen.GetPlayerStartLocation());
+            AddItemAtLocation(new Items.Shotgun(), 0, mapGen.GetPlayerStartLocation());
 
             //Vibroblade is a better choice
             itemsToPlace.Add(new Items.Vibroblade());
