@@ -76,6 +76,7 @@ namespace RogueBasin {
         Color passiveBackground = ColorPresets.DarkMagenta;
         Color uniqueBackground = ColorPresets.DarkCyan;
         Color stunnedBackground = ColorPresets.DarkCyan;
+        Color aggressiveBackground = ColorPresets.DarkRed;
         Color normalBackground = ColorPresets.Black;
         Color normalForeground = ColorPresets.White;
 
@@ -2561,6 +2562,8 @@ namespace RogueBasin {
                         rootConsole.BackgroundColor = passiveBackground;
                     else if (creature.StunnedTurns > 0)
                         rootConsole.BackgroundColor = stunnedBackground;
+                    else if (!creature.OnPatrol())
+                        rootConsole.BackgroundColor = aggressiveBackground;
                     else if (creature.Unique)
                         rootConsole.BackgroundColor = uniqueBackground;
                     else

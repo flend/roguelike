@@ -720,8 +720,11 @@ namespace RogueBasin
 
                         if (nextStep.x == -1 && nextStep.y == -1)
                         {
-                            //Not routeable - should never happen
-                            LogFile.Log.LogEntryDebug(this.Representation + " Can't patrol - unrouteable waypoint", LogDebugLevel.High);
+                            //Pick a random waypoint to continue to
+                            CurrentWaypoint = Game.Random.Next(Waypoints.Count);
+
+                            //This sometimes happen if we add walls after putting waypoints
+                            LogFile.Log.LogEntryDebug(this.Representation + " unrouteable waypoint - picking new waypoint", LogDebugLevel.High);
                             return;
                         }
 
@@ -1360,6 +1363,11 @@ namespace RogueBasin
         public virtual bool HasSquarePatrol()
         {
             return true;
+        }
+
+        public override bool OnPatrol()
+        {
+            return AIState == SimpleAIStates.Patrol;
         }
     }
 }

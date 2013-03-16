@@ -60,7 +60,8 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public Point ThrowItem(Point target)
         {
-            Point dest = Pistol.ThrowItemGeneric(this, target, 0);
+            //Stun for 0 rounds
+            Point dest = Pistol.ThrowItemGeneric(this, target, 0, true);
             Game.MessageQueue.AddMessage("The siren grenade explodes!");
             return dest;
         }
@@ -253,6 +254,15 @@ namespace RogueBasin.Items
         public bool DestroyedOnThrow()
         {
             return true;
+        }
+
+        /// <summary>
+        /// How much damage we do
+        /// </summary>
+        /// <returns></returns>
+        public int MeleeDamage()
+        {
+            return 0;
         }
 
     }

@@ -470,6 +470,10 @@ namespace RogueBasin
 
         protected virtual int AttackCreatureWithModifiers(Creature creature, int hitMod, int damBase, int damMod, int ACmod)
         {
+            //Just do damage base
+            return damageBase;
+
+            /*
             int attackToHit = hitModifier + hitMod;
             int attackDamageMod = damageModifier + damMod;
 
@@ -492,7 +496,9 @@ namespace RogueBasin
             }
 
             //Miss
-            return 0;
+            return 0;*/
+
+
         }
 
         protected abstract string HitsPlayerCombatString();
@@ -728,6 +734,15 @@ namespace RogueBasin
         internal void WakeCreature()
         {
             Sleeping = false;
+        }
+
+        /// <summary>
+        /// Are we on patrol (i.e. not attacking?) ? Highlight on the map
+        /// </summary>
+        /// <returns></returns>
+        virtual public bool OnPatrol()
+        {
+            return false;
         }
     }
 }

@@ -61,7 +61,7 @@ namespace RogueBasin.Items
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    player.ApplyDamageToMonster(squareContents.monster, damage, false, false);
+                    player.AttackMonsterRanged(squareContents.monster, damage);
                 }
             }
 
@@ -124,7 +124,8 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public Point ThrowItem(Point target)
         {
-            return Pistol.ThrowItemGeneric(this, target, 3);
+            //Stun for 3 turns
+            return Pistol.ThrowItemGeneric(this, target, 3, true);
         }
 
         /// <summary>
@@ -301,6 +302,15 @@ namespace RogueBasin.Items
         public bool DestroyedOnThrow()
         {
             return false;
+        }
+
+        /// <summary>
+        /// How much damage we do
+        /// </summary>
+        /// <returns></returns>
+        public int MeleeDamage()
+        {
+            return 0;
         }
 
     }

@@ -257,13 +257,13 @@ namespace RogueBasin.Items
 
             //Damage monster
             
-            int damageBase = 2;
+            int damageBase = 3;
 
             string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 2";
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Apply damage
-            player.ApplyDamageToMonster(monster, damageBase, false, false);
+            player.AttackMonsterRanged(monster, damageBase);
 
             return true;
         }
@@ -277,7 +277,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public Point ThrowItem(Point target)
         {
-            return Pistol.ThrowItemGeneric(this, target, 3);
+            return Pistol.ThrowItemGeneric(this, target, 3, true);
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace RogueBasin.Items
         /// <param name="item"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        public static Point ThrowItemGeneric(IEquippableItem item, Point target, int stunTurns)
+        public static Point ThrowItemGeneric(IEquippableItem item, Point target, int damageOrStunTurns, bool stunDamage)
         {
             Item itemAsItem = item as Item;
 
@@ -321,10 +321,19 @@ namespace RogueBasin.Items
             //Draw throw
             Screen.Instance.DrawShotgunMissileAttack(targetSquares);
 
-            //Stun enemy for 3 rounds
-            if (monster != null && stunTurns > 0)
+            if (stunDamage)
             {
-                player.ApplyStunDamageToMonster(monster, stunTurns);
+                if (monster != null && damageOrStunTurns > 0)
+                {
+                    player.ApplyStunDamageToMonster(monster, damageOrStunTurns);
+                }
+            }
+            else
+            {
+                if (monster != null && damageOrStunTurns > 0)
+                {
+                    player.AttackMonsterThrown(monster, damageOrStunTurns);
+                }
             }
 
             return destination;
@@ -397,6 +406,15 @@ namespace RogueBasin.Items
         public bool DestroyedOnThrow()
         {
             return false;
+        }
+
+        /// <summary>
+        /// How much damage we do
+        /// </summary>
+        /// <returns></returns>
+        public int MeleeDamage()
+        {
+            return 0;
         }
 
     }

@@ -553,6 +553,21 @@ namespace RogueBasin
 
         private int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
         {
+            //Flatline has a rather simple combat system
+            IEquippableItem item = GetEquippedWeapon();
+
+            int baseDamage = 2;
+
+            if (item.HasMeleeAction())
+            {
+                baseDamage = item.MeleeDamage();
+            }
+
+            string combatResultsMsg = "PvM " + monster.Representation + " = " + baseDamage;
+
+            return baseDamage;
+
+            /*
             int attackToHit = hitModifier + hitMod;
             int attackDamageMod = damageModifier + damMod;
             
@@ -576,10 +591,10 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                 return totalDamage;
-            }
+            }*/
 
             //Miss
-            return 0;
+            //return 0;
         }
 
         public bool CastSpell(Spell toCast, Point target)
@@ -659,6 +674,40 @@ namespace RogueBasin
             int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
 
             return ApplyDamageToMonster(monster, damage, false, specialMoveUsed);
+        }
+
+        public CombatResults AttackMonsterRanged(Monster monster, int damage)
+        {
+            string combatResultsMsg = "PvM (ranged) " + monster.Representation + " = " + damage;
+            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+            return ApplyDamageToMonster(monster, damage, false, false);
+        }
+
+        public CombatResults AttackMonsterThrown(Monster monster, int damage)
+        {
+            string combatResultsMsg = "PvM (thrown) " + monster.Representation + " = " + damage;
+            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+            return ApplyDamageToMonster(monster, damage, false, false);
+        }
+
+        public CombatResults AttackMonsterMelee(Monster monster)
+        {
+            //Flatline has a rather simple combat system
+            IEquippableItem item = GetEquippedWeapon();
+
+            int baseDamage = 2;
+
+            if (item != null && item.HasMeleeAction())
+            {
+                baseDamage = item.MeleeDamage();
+            }
+
+            string combatResultsMsg = "PvM (melee) " + monster.Representation + " = " + baseDamage;
+            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+            return ApplyDamageToMonster(monster, baseDamage, false, false);
         }
 
         /// <summary>

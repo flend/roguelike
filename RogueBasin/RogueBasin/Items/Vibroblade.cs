@@ -53,6 +53,19 @@ namespace RogueBasin.Items
         }
 
         /// <summary>
+        /// Throws the item. Can use generic, it's just 
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public Point ThrowItem(Point target)
+        {
+            //Damage for 5 pts
+            Point dest = Pistol.ThrowItemGeneric(this, target, 5, false);
+            return dest;
+        }
+
+        /// <summary>
         /// not used in this game
         /// </summary>
         /// <param name="user"></param>
@@ -166,16 +179,6 @@ namespace RogueBasin.Items
             return false;
         }
 
-        /// <summary>
-        /// Throws the item - check if we can't pull this out
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public Point ThrowItem(Point target)
-        {
-            return null;
-        }
 
         /// <summary>
         /// Operates the item - definitely a method
@@ -251,5 +254,13 @@ namespace RogueBasin.Items
             return false;
         }
 
+        /// <summary>
+        /// How much damage we do
+        /// </summary>
+        /// <returns></returns>
+        public int MeleeDamage()
+        {
+            return 3;
+        }
     }
 }

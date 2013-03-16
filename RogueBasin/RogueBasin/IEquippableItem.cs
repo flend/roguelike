@@ -158,5 +158,11 @@ namespace RogueBasin
         /// <returns></returns>
         bool DestroyedOnThrow();
 
+        /// <summary>
+        /// Items that have MeleeAction override this
+        /// </summary>
+        /// <returns></returns>
+        int MeleeDamage();
+
     }
 }

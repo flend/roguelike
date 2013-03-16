@@ -39,7 +39,7 @@ namespace RogueBasin
 
             SetupPlayer();
 
-            SetupMapsDebug();
+            SetupMapsFlatline();
 
             
 
@@ -830,65 +830,6 @@ namespace RogueBasin
             SetLightLevelUniversal(dungeonStartLevel, dungeonEndLevel, 0);
         }
 
-        private void SpawnCreaturesDebug(MapGeneratorBSP mapGenerator)
-        {
-
-            LogFile.Log.LogEntry("Generating creatures...");
-
-            Dungeon dungeon = Game.Dungeon;
-
-            //Debug monsters
-
-            List<Monster> monstersToAdd = new List<Monster>();
-            /*
-            monstersToAdd.Add(new Creatures.RotatingTurret());
-            monstersToAdd.Add(new Creatures.RotatingTurret());
-            monstersToAdd.Add(new Creatures.Goblin());*/
-           // monstersToAdd.Add(new Creatures.Goblin());
-            //monstersToAdd.Add(new Creatures.Drone());
-            //monstersToAdd.Add(new Creatures.Drone());
-
-          
-            //  monstersToAdd.Add(new Creatures.Goblin());
-//monstersToAdd.Add(new Creatures.Goblin());
-
-          /*  for (int i = 0; i < 2; i++)
-            {
-                Monster goblin = new Creatures.Goblin();
-                AddMonsterRandomWalkablePoint(goblin, 0);
-            }*/
-
-            /*
-            for (int i = 0; i < 4; i++)
-            {
-                Creatures.RotatingTurret rot = new Creatures.RotatingTurret();
-                AddMonsterRandomWalkablePoint(rot, 0);
-            }*/
-
-            for (int i = 0; i < 4; i++)
-            {
-                Creatures.PerimeterBot patrolBot = new Creatures.PerimeterBot();
-                AddMonsterSquarePatrol(patrolBot, 0, mapGenerator);
-            }
-
-            for (int i = 0; i < 12; i++)
-            {
-                Creatures.PerimeterBotLinear patrolBot = new Creatures.PerimeterBotLinear();
-                AddMonsterLinearPatrol(patrolBot, 0, mapGenerator);
-            }
-
-            /*
-            for (int i = 0; i < 4; i++)
-            {
-                Creatures.AlertBot patrolBot = new Creatures.AlertBot();
-                AddMonsterRandomPatrol(patrolBot, 0, mapGenerator);
-            }
-            */
-            SetLightLevelUniversal(0, 0, 10);
-
-            
-
-        }
 
         /// <summary>
         /// Add a monster with a random patrol. Needs the mapgenerator of the level in question
@@ -1764,7 +1705,7 @@ namespace RogueBasin
         /// <summary>
         /// Adds levels and interconnecting staircases
         /// </summary>
-        private void SetupMapsDebug()
+        private void SetupMapsFlatline()
         {
             Dungeon dungeon = Game.Dungeon;
 
@@ -1780,41 +1721,88 @@ namespace RogueBasin
 
             MapGeneratorCave caveGen = new MapGeneratorCave();
             MapGeneratorBSPCave ruinedGen = new MapGeneratorBSPCave();
-            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+            
 
-            //Set width height of all maps to 80 / 25
+            //Set width height of all maps to 60 / 25
             caveGen.Width = 60;
             caveGen.Height = 25;
 
             ruinedGen.Width = 60;
             ruinedGen.Height = 25;
 
-            hallsGen.Width = 60;
-            hallsGen.Height = 25;
+           
+
+            Dictionary<int, MapGenerator> levelGen = new Dictionary<int,MapGenerator>();
 
             //DUNGEON 1 - levels 1
 
+            int levelToTest = 0;
 
-            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
-            int levelNo = dungeon.AddMap(hallMap);
+            switch(levelToTest) {
 
-            hallsGen.AddUpStaircaseOnly(levelNo);
-            hallsGen.AddExitStaircaseOnly(levelNo);
+                case 0:
 
-            //PC starts at start location
-            dungeon.Player.LocationLevel = 0;
-            dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
+                    //Make level 0 rather small
+
+                    MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+                    hallsGen.Width = 40;
+                    hallsGen.Height = 25;
+
+                    Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+                    int levelNo = dungeon.AddMap(hallMap);
+
+                    //Store the hallGen so we can use it for monsters
+                    levelGen.Add(0, hallsGen);
+
+                    //Add exit trigger at entry location.
+                    //Different wall type for extraction area
+
+                    //PC starts at start location
+                    dungeon.Player.LocationLevel = 0;
+                    dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
+
+                    break;
+            }
 
             //Build TCOD maps
             //Necessary so connectivity checks on items and monsters can work
             //Only place where this happens now
             CalculateWalkableAndTCOD();
 
-            //Place monsters in level
-            SpawnCreaturesDebug(hallsGen);
+            //Place monsters in levels
+            SpawnCreaturesFlatline(levelGen);
 
             SpawnItemsDebug();
         }
+
+        
+        private void SpawnCreaturesFlatline(Dictionary<int, MapGenerator> mapGenerators)
+        {
+
+            LogFile.Log.LogEntry("Generating creatures...");
+
+            Dungeon dungeon = Game.Dungeon;
+
+            SpawnCreaturesLevel0(mapGenerators[0] as MapGeneratorBSP);
+
+        }
+
+        private void SpawnCreaturesLevel0(MapGeneratorBSP mapGen)
+        {
+
+            //Level 0 could be just Area Patrol Bots
+
+            for (int i = 0; i < 6; i++)
+            {
+                Creatures.PatrolBotArea patrolBot = new Creatures.PatrolBotArea();
+                AddMonsterSquarePatrol(patrolBot, 0, mapGen);
+            }
+
+            //This sets light level in the creatures
+            SetLightLevelUniversal(0, 0, 10);
+        }
+
 
 
         private void SpawnItemsDebug()

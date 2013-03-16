@@ -2200,7 +2200,7 @@ namespace RogueBasin
                     else if (monster.Passive)
                     {
                         //Attack the passive creature.
-                        CombatResults results = player.AttackMonster(contents.monster);
+                        CombatResults results = player.AttackMonsterMelee(contents.monster);
                         Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
                         if (results == CombatResults.DefenderDied)
                         {
@@ -2212,7 +2212,7 @@ namespace RogueBasin
                     {
                         //Monster hostile 
 
-                        CombatResults results = player.AttackMonster(contents.monster);
+                        CombatResults results = player.AttackMonsterMelee(contents.monster);
                         Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
                         if (results == CombatResults.DefenderDied)
                         {

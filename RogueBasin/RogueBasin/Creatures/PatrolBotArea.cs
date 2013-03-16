@@ -6,15 +6,15 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Patrolling Robot. Linear patrol.
-    /// Won't chase. Attack at medium range.
+    /// Patrolling Robot. Square patrol.
+    /// Will chase and attack at short range.
     /// Doesn't respond to sounds
     /// </summary>
-    public class PatrolBot : MonsterThrowAndRunAI
+    public class PatrolBotArea : MonsterThrowAndRunAI
     {
         bool rotationClockwise = true;
 
-        public PatrolBot()
+        public PatrolBotArea()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -28,11 +28,6 @@ namespace RogueBasin.Creatures
         }
 
         protected override int ClassMaxHitpoints()
-        {
-            return 2;
-        }
-
-        public override int DamageBase()
         {
             return 2;
         }
@@ -57,14 +52,9 @@ namespace RogueBasin.Creatures
             return false;
         }
 
-        protected override bool WillPursue()
-        {
-            return false;
-        }
-
         protected override double GetMissileRange()
         {
-            return 5.0;
+            return 3.0;
         }
 
         protected override int GetChanceToBackAway()
@@ -75,6 +65,11 @@ namespace RogueBasin.Creatures
         protected override string GetWeaponName()
         {
             return "fires a carbine";
+        }
+
+        public override bool HasSquarePatrol()
+        {
+            return true;
         }
 
         /// <summary>
@@ -120,7 +115,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new PatrolBot();
+            return new PatrolBotArea();
         }
 
         public override Color RepresentationColor()
@@ -153,7 +148,13 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        
+        /// <summary>
+        /// Creature 1dn damage.  Set by type of creature.
+        /// </summary>
+        public override int DamageBase()
+        {
+            return 2;
+        }
 
         public override void InventoryDrop()
         {

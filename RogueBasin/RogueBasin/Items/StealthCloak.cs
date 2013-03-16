@@ -252,5 +252,14 @@ namespace RogueBasin.Items
             return false;
         }
 
+        /// <summary>
+        /// How much damage we do
+        /// </summary>
+        /// <returns></returns>
+        public int MeleeDamage()
+        {
+            return 0;
+        }
+
     }
 }

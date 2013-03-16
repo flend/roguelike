@@ -54,6 +54,7 @@
     <Compile Include="Creatures\PatrolBot.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\PatrolBotArea.cs" />
     <Compile Include="Creatures\PerimeterBot.cs">
       <SubType>Code</SubType>
     </Compile>
