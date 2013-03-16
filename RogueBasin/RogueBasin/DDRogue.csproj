@@ -63,8 +63,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\PerimeterBotLinear.cs" />
+    <Compile Include="Creatures\RollingBomb.cs" />
     <Compile Include="Creatures\RotatingTurret.cs" />
-    <Compile Include="Creatures\Swarmer.cs" />
+    <Compile Include="Creatures\Swarmer.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />
     <Compile Include="Creature.cs" />
@@ -355,7 +358,10 @@
     <Compile Include="Triggers\Mission3Entry.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\Mission4Entry.cs" />
+    <Compile Include="Triggers\Mission4Entry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\Mission5Entry.cs" />
     <Compile Include="Triggers\PrinceInABox.cs" />
     <Compile Include="Triggers\SchoolEntryTrigger.cs" />
     <Compile Include="Triggers\SeeCorpses.cs">
@@ -660,5 +666,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\mission40.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission50.amf" />
   </ItemGroup>
 </Project>

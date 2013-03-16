@@ -2092,6 +2092,7 @@ namespace RogueBasin
             dungeonLevelsToTest.Add(2);
             dungeonLevelsToTest.Add(3);
             dungeonLevelsToTest.Add(4);
+            dungeonLevelsToTest.Add(5);
 
             foreach (int level in dungeonLevelsToTest)
             {
@@ -2217,6 +2218,28 @@ namespace RogueBasin
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission4Entry());
                         }
                         break;
+                    case 5:
+                        {
+                            //Make level 5 rather small
+
+                            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+                            hallsGen.Width = 40;
+                            hallsGen.Height = 25;
+
+                            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+                            int levelNo = Game.Dungeon.AddMap(hallMap);
+
+                            //Store the hallGen so we can use it for monsters
+                            levelGen.Add(level, hallsGen);
+
+                            //Add standard dock triggers
+                            AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+
+                            //Add level entry trigger
+                            Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission5Entry());
+                        }
+                        break;
                 }
 
             }
@@ -2278,6 +2301,10 @@ namespace RogueBasin
                     
                     case 4:
                         SpawnCreaturesLevel4(level, mapGenerators[level] as MapGeneratorBSP);
+                        break;
+
+                    case 5:
+                        SpawnCreaturesLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                 }
 
@@ -2401,6 +2428,37 @@ namespace RogueBasin
             SetLightLevelUniversal(level, level, 5);
         }
 
+        private void SpawnCreaturesLevel5(int level, MapGeneratorBSP mapGen)
+        {
+
+            //Level 2 just Swarmers (but lots of them)
+            List<Monster> monstersToPlace = new List<Monster>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                Creatures.Swarmer patrolBot = new Creatures.Swarmer();
+                monstersToPlace.Add(patrolBot);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                Creatures.PatrolBot patrolBot = new Creatures.PatrolBot();
+                AddMonsterLinearPatrol(patrolBot, level, mapGen);
+
+
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                Creatures.RollingBomb patrolBot = new Creatures.RollingBomb();
+                monstersToPlace.Add(patrolBot);
+            }
+
+            AddMonstersEqualDistribution(monstersToPlace, level, mapGen);
+
+            //This sets light level in the creatures
+            SetLightLevelUniversal(level, level, 5);
+        }
+
 
 
         private void SpawnItemsFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators)
@@ -2426,6 +2484,9 @@ namespace RogueBasin
                         break;
                     case 4:
                         SpawnItemsLevel4(level, mapGenerators[level] as MapGeneratorBSP);
+                        break;
+                    case 5:
+                        SpawnItemsLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
 
@@ -2483,11 +2544,13 @@ namespace RogueBasin
 
             List<RoomCoords> allRooms = mapGen.GetAllRooms();
 
+            //Pistol at start location
+            AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
+
             //Spawn some items
 
             List<Item> itemsToPlace = new List<Item>();
 
-            itemsToPlace.Add(new Items.Pistol());
             itemsToPlace.Add(new Items.Pistol());
             itemsToPlace.Add(new Items.Pistol());
 
@@ -2499,18 +2562,39 @@ namespace RogueBasin
 
             List<RoomCoords> allRooms = mapGen.GetAllRooms();
 
+            //Pistol at start location
+            AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
+
+            //Spawn some items
+
+            List<Item> itemsToPlace = new List<Item>();
+
+            itemsToPlace.Add(new Items.SoundGrenade());
+            itemsToPlace.Add(new Items.SoundGrenade());
+            itemsToPlace.Add(new Items.FragGrenade());
+            itemsToPlace.Add(new Items.FragGrenade());
+
+            itemsToPlace.Add(new Items.NanoRepair());
+
+            AddItemsEqualDistribution(itemsToPlace, levelIndex, mapGen);
+        }
+
+        private void SpawnItemsLevel5(int levelIndex, MapGeneratorBSP mapGen)
+        {
+
+            List<RoomCoords> allRooms = mapGen.GetAllRooms();
+
+            //Pistol at start location
+            AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
+
             //Spawn some items
 
             List<Item> itemsToPlace = new List<Item>();
 
             AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
-            AddItemAtLocation(new Items.NanoRepair(), levelIndex, mapGen.GetPlayerStartLocation());
-            //temp above
-
-            itemsToPlace.Add(new Items.SoundGrenade());
-            itemsToPlace.Add(new Items.SoundGrenade());
-            itemsToPlace.Add(new Items.FragGrenade());
-            itemsToPlace.Add(new Items.FragGrenade());
+            
+            itemsToPlace.Add(new Items.Pistol());
+            itemsToPlace.Add(new Items.Pistol());
 
             itemsToPlace.Add(new Items.NanoRepair());
 

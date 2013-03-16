@@ -76,6 +76,7 @@ namespace RogueBasin {
         Color passiveBackground = ColorPresets.DarkMagenta;
         Color uniqueBackground = ColorPresets.DarkCyan;
         Color inRangeBackground = ColorPresets.DeepSkyBlue;
+        Color inRangeAndAggressiveBackground = ColorPresets.Purple;
         Color stunnedBackground = ColorPresets.DarkCyan;
         Color aggressiveBackground = ColorPresets.DarkRed;
         Color normalBackground = ColorPresets.Black;
@@ -2625,6 +2626,12 @@ namespace RogueBasin {
                                     rootConsole.BackgroundColor = inRangeBackground;
                                     newBackground = true;
                                 }
+                            }
+
+                            //Also agressive
+                            if (newBackground == true && !creature.OnPatrol())
+                            {
+                                rootConsole.BackgroundColor = inRangeAndAggressiveBackground;
                             }
                         }
                     }

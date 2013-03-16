@@ -114,9 +114,6 @@ namespace RogueBasin.Items
             //Draw attack
             Screen.Instance.DrawAreaAttack(grenadeAffects);
 
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
             //Attack all monsters in the area
 
             foreach (Point sq in grenadeAffects)

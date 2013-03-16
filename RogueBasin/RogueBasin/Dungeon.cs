@@ -2394,7 +2394,7 @@ namespace RogueBasin
             //Deal with special death effects, but not on an autokill
             if (!autoKill)
             {
-                
+                monster.OnKilledSpecialEffects();
 
                 if (!dungeonInfo.LastMission && monster.Unique)
                 {
