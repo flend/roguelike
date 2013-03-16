@@ -37,6 +37,15 @@ namespace RogueBasin
             this.roomFreeArea = (roomHeight - 2) * (roomWidth - 2);
         }
 
+        public RoomCoords(PointInRoom room)
+        {
+            this.RoomX = room.RoomX;
+            this.RoomY = room.RoomY;
+            this.RoomWidth = room.RoomWidth;
+            this.RoomHeight = room.RoomHeight;
+
+        }
+
         public Point RandomPointInRoom()
         {
             int randX = RoomX + 1 + Game.Random.Next(RoomWidth - 2);
@@ -90,12 +99,14 @@ namespace RogueBasin
     public class CreaturePatrol
     {
         public Point StartPos { get; set; }
+        public RoomCoords StartRoom { get; set; }
         public List<Point> Waypoints { get; set; }
 
-        public CreaturePatrol(Point startPos, List<Point> waypoints)
+        public CreaturePatrol(Point startPos, RoomCoords roomCoords, List<Point> waypoints)
         {
             this.StartPos = startPos;
             this.Waypoints = waypoints;
+            this.StartRoom = roomCoords;
         }
 
     }

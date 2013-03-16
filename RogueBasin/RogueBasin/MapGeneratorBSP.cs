@@ -1402,7 +1402,7 @@ namespace RogueBasin
                 }
             }
 
-            return new CreaturePatrol(startLoc.Value, waypointsReordered);
+            return new CreaturePatrol(startLoc.Value, new RoomCoords(room), waypointsReordered);
 
         }
 
@@ -1567,12 +1567,22 @@ namespace RogueBasin
 
             //Sort by relevant value
             allWaypointsIndices.Sort((a, b) => a.coord.CompareTo(b.coord));
-
-            List<Point> allWaypoints = new List<Point>();
-
             Point lastPoint = null;
 
-            //Remove duplicates
+            List<Point> allWaypoints = new List<Point>();
+            List<RoomCoords> allRooms = new List<RoomCoords>();
+            foreach (toSort s in allWaypointsIndices)
+            {
+                allWaypoints.Add(new Point(s.index.RoomX + s.index.RoomWidth / 2, s.index.RoomY + s.index.RoomHeight / 2));
+                allRooms.Add(new RoomCoords(s.index));
+            }
+
+            return new CreaturePatrol(allWaypoints[0], allRooms[0], allWaypoints);
+
+
+
+            /*
+            //Remove duplicates (useful if fully random points are used
 
             for (int i = 0; i < allWaypointsIndices.Count; i++)
             {
@@ -1586,6 +1596,9 @@ namespace RogueBasin
                 allWaypoints.Add(newWaypoint);
                 lastPoint = newWaypoint;
             }
+            */
+
+
 
             /*
 
@@ -1595,7 +1608,7 @@ namespace RogueBasin
                 allWaypoints.Add(new Point(s.index.RoomX + s.index.RoomWidth / 2, s.index.RoomY + s.index.RoomHeight / 2));
             }*/
 
-            return new CreaturePatrol(allWaypoints[0], allWaypoints);
+            //return new CreaturePatrol(allWaypoints[0], allWaypoints);
 
         }
 

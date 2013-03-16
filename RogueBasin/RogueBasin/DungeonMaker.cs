@@ -846,6 +846,8 @@ namespace RogueBasin
             int loops = 0;
             int maxLoops = 50;
 
+            bool success = false;
+
             do
             {
                 CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypointsSisterRooms(monster.GetPatrolRotationClockwise(), 3);
@@ -853,7 +855,15 @@ namespace RogueBasin
                 startLocation = patrol.StartPos;
 
                 loops++;
-            } while (!dungeon.AddMonster(monster, level, startLocation) && loops < maxLoops);
+
+                success = dungeon.AddMonster(monster, level, startLocation);
+
+                //Linear patrols start from the centre of rooms so monsters often overlap in small number of room levels
+                //Try with a random point
+                if(!success)
+                    success = dungeon.AddMonster(monster, level, patrol.StartRoom.RandomPointInRoom());
+
+            } while (!success && loops < maxLoops);
 
             if (loops == maxLoops)
             {
