@@ -1773,7 +1773,7 @@ namespace RogueBasin
             //Place monsters in levels
             SpawnCreaturesFlatline(levelGen);
 
-            SpawnItemsDebug();
+            SpawnItemsFlatline(levelGen);
         }
 
         
@@ -1805,13 +1805,19 @@ namespace RogueBasin
 
 
 
-        private void SpawnItemsDebug()
+        private void SpawnItemsFlatline(Dictionary<int, MapGenerator> mapGenerators)
         {
+            SpawnItemsLevel0(mapGenerators[0] as MapGeneratorBSP);
+
+        }
+
+        private void SpawnItemsLevel0(MapGeneratorBSP mapGen) {
+
+            List<RoomCoords> allRooms = mapGen.GetAllRooms();
+
             //Spawn some items
 
-            dungeon.AddItemNoChecks(new Items.Shotgun(), 0, dungeon.Player.LocationMap);
-            dungeon.AddItemNoChecks(new Items.Pistol(), 0, new Point(dungeon.Player.LocationMap.x+1,dungeon.Player.LocationMap.y));
-            dungeon.AddItemNoChecks(new Items.SoundGrenade(), 0, new Point(dungeon.Player.LocationMap.x + 2, dungeon.Player.LocationMap.y));
+            dungeon.AddItemNoChecks(new Items.Vibroblade(), 0, allRooms[0].RandomPointInRoom());
 
         }
 

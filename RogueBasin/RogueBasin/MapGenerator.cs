@@ -37,6 +37,15 @@ namespace RogueBasin
             this.roomFreeArea = (roomHeight - 2) * (roomWidth - 2);
         }
 
+        public Point RandomPointInRoom()
+        {
+            int randX = RoomX + 1 + Game.Random.Next(RoomWidth - 2);
+            int randY = RoomY + 1 + Game.Random.Next(RoomHeight - 2);
+
+            return new Point(randX, randY);
+        }
+
+
     }
 
 
