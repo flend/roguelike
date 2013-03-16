@@ -901,6 +901,265 @@ namespace RogueBasin
             }
         }
 
+        private void AddMonstersEqualDistribution(List<Monster> monster, int level, MapGenerator mapGen)
+        {
+            //Get the number of rooms
+            List<RoomCoords> rooms = mapGen.GetAllRooms();
+
+            int noMonsters = monster.Count;
+            int noRooms = rooms.Count;
+
+            LogFile.Log.LogEntryDebug("No rooms: " + noRooms + " Total monsters to place (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
+
+            //Distribution amongst rooms, mostly evenly
+            //(better to use a norm dist here)
+
+            double[] roomMonsterRatio = new double[noRooms];
+
+            for (int i = 0; i < noRooms; i++)
+            {
+                roomMonsterRatio[i] = Math.Max(0, Gaussian.BoxMuller(5, 1));
+            }
+
+            double totalMonsterRatio = 0.0;
+
+            for (int i = 0; i < noRooms; i++)
+            {
+                totalMonsterRatio += roomMonsterRatio[i];
+            }
+            
+            double ratioToTotalMonsterBudget = noMonsters / totalMonsterRatio;
+
+            int[] monstersPerRoom = new int[noRooms];
+            double remainder = 0.0;
+   
+            for (int i = 0; i < noRooms; i++)
+            {
+
+                //In monster levels. A level 3 monster will cost 3 of these.
+                double monsterBudget = roomMonsterRatio[i] * ratioToTotalMonsterBudget + remainder;
+
+                double actualMonstersToPlace = Math.Floor(monsterBudget);
+                //This is a historic bug - should be actualMonstersToPlace not monstersOfThisLevel. Still, the game is now balanced to this so I can't change it!
+                double levelBudgetSpent = actualMonstersToPlace;
+
+                double levelBudgetLeftOver = monsterBudget - levelBudgetSpent;
+
+                monstersPerRoom[i] = (int)actualMonstersToPlace;
+                remainder = levelBudgetLeftOver;
+
+                //Any left over monster ratio gets added to the next level up
+            }
+
+            //Calculate actual number of monster levels placed
+
+            int totalMonsters = 0;
+            for (int i = 0; i < noRooms; i++)
+            {
+                totalMonsters += monstersPerRoom[i];
+            }
+            
+            LogFile.Log.LogEntryDebug("Total monsters actually placed (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
+
+            //Place monsters in rooms
+
+            Dungeon dungeon = Game.Dungeon;
+
+            int monsterPos = 0;
+            int maxLoops = 10;
+
+            for (int r = 0; r < noRooms; r++)
+            {
+
+                int monstersToPlaceInRoom = monstersPerRoom[r];
+
+                int loops = 0;
+                for (int m = 0; m < monstersToPlaceInRoom; m++)
+                {
+                    if(monsterPos >= monster.Count) {
+                        LogFile.Log.LogEntryDebug("Trying to place too many monsters", LogDebugLevel.High);
+                        monsterPos++;
+                        continue;
+                    }
+
+                    Monster mon = monster[monsterPos];
+
+                    Point location;
+                    do
+                    {
+                        location = rooms[r].RandomPointInRoom();
+                        loops++;
+                    } while (!dungeon.AddMonster(mon, level, location) && loops < maxLoops);
+
+                    monsterPos++;
+
+                    if (loops == maxLoops)
+                    {
+                        LogFile.Log.LogEntryDebug("Failed to place: " + mon.Representation, LogDebugLevel.High);
+                    }
+                }
+            }
+            
+        }
+
+        /// <summary>
+        /// Tries to add an item close to a location, puts it anywhere if that's not possible
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        private bool AddItemCloseToLocation(Item item, int level, Point location)
+        {
+
+            //Offset location
+
+            int maxLoops = 50;
+            int loops = 0;
+
+            Point toPlaceLoc = new Point(location);
+
+            do
+            {
+                toPlaceLoc.x = location.x + (int)Gaussian.BoxMuller(2, 2);
+                toPlaceLoc.y = location.y + (int)Gaussian.BoxMuller(2, 2);
+
+                loops++;
+
+            } while (!dungeon.AddItem(item, level, toPlaceLoc) && loops < maxLoops);
+
+            if (loops == maxLoops)
+            {
+                LogFile.Log.LogEntryDebug("Failed to place: " + item.Representation + " close to: " + location + " reverting to random placement", LogDebugLevel.Medium);
+
+                loops = 0;
+
+                do
+                {
+                    toPlaceLoc = Game.Dungeon.RandomWalkablePointInLevel(level);
+                    loops++;
+
+                } while (!dungeon.AddItem(item, level, toPlaceLoc) && loops < maxLoops);
+
+                LogFile.Log.LogEntryDebug("Failed to place: " + item.Representation + " giving up", LogDebugLevel.High);
+                return false;
+            }
+
+            LogFile.Log.LogEntryDebug("Item " + item.Representation + " placed at: " + location.ToString(), LogDebugLevel.High);
+
+            return true;
+        }
+
+        //Copy of monster one
+        private void AddItemsEqualDistribution(List<Item> monster, int level, MapGenerator mapGen)
+        {
+            //Get the number of rooms
+            List<RoomCoords> rooms = mapGen.GetAllRooms();
+
+            int noMonsters = monster.Count;
+            int noRooms = rooms.Count;
+
+            LogFile.Log.LogEntryDebug("No rooms: " + noRooms + " Total items to place (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
+
+            //Distribution amongst rooms, mostly evenly
+            //(better to use a norm dist here)
+
+            double[] roomMonsterRatio = new double[noRooms];
+
+            for (int i = 0; i < noRooms; i++)
+            {
+                roomMonsterRatio[i] = Math.Max(0, Gaussian.BoxMuller(5, 1));
+            }
+
+            double totalMonsterRatio = 0.0;
+
+            for (int i = 0; i < noRooms; i++)
+            {
+                totalMonsterRatio += roomMonsterRatio[i];
+            }
+
+            double ratioToTotalMonsterBudget = noMonsters / totalMonsterRatio;
+
+            int[] monstersPerRoom = new int[noRooms];
+            double remainder = 0.0;
+
+            for (int i = 0; i < noRooms; i++)
+            {
+
+                //In monster levels. A level 3 monster will cost 3 of these.
+                double monsterBudget = roomMonsterRatio[i] * ratioToTotalMonsterBudget + remainder;
+
+                double actualMonstersToPlace = Math.Floor(monsterBudget);
+                //This is a historic bug - should be actualMonstersToPlace not monstersOfThisLevel. Still, the game is now balanced to this so I can't change it!
+                double levelBudgetSpent = actualMonstersToPlace;
+
+                double levelBudgetLeftOver = monsterBudget - levelBudgetSpent;
+
+                monstersPerRoom[i] = (int)actualMonstersToPlace;
+                remainder = levelBudgetLeftOver;
+
+                //Any left over monster ratio gets added to the next level up
+            }
+
+            //Calculate actual number of monster levels placed
+
+            int totalMonsters = 0;
+            for (int i = 0; i < noRooms; i++)
+            {
+                totalMonsters += monstersPerRoom[i];
+            }
+
+            LogFile.Log.LogEntryDebug("Total items actually placed (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
+
+            if (totalMonsters < noMonsters)
+            {
+                monstersPerRoom[0] += noMonsters - totalMonsters;
+                LogFile.Log.LogEntryDebug("Compensating (level: " + level + "): " + (noMonsters - totalMonsters) + " extra items", LogDebugLevel.Medium);
+            }
+
+            //Place monsters in rooms
+
+            Dungeon dungeon = Game.Dungeon;
+
+            int monsterPos = 0;
+            int maxLoops = 10;
+
+            for (int r = 0; r < noRooms; r++)
+            {
+
+                int monstersToPlaceInRoom = monstersPerRoom[r];
+
+                int loops = 0;
+                for (int m = 0; m < monstersToPlaceInRoom; m++)
+                {
+                    if (monsterPos >= monster.Count)
+                    {
+                        LogFile.Log.LogEntryDebug("Trying to place too many items", LogDebugLevel.High);
+                        monsterPos++;
+                        continue;
+                    }
+
+                    Item mon = monster[monsterPos];
+
+                    Point location;
+                    do
+                    {
+                        location = rooms[r].RandomPointInRoom();
+                        LogFile.Log.LogEntryDebug("Item " + mon.Representation + " at: " + location.ToString(), LogDebugLevel.Medium);
+
+                        loops++;
+                    } while (!dungeon.AddItem(mon, level, location) && loops < maxLoops);
+
+                    monsterPos++;
+
+                    if (loops == maxLoops)
+                    {
+                        LogFile.Log.LogEntryDebug("Failed to place: " + mon.Representation, LogDebugLevel.High);
+                    }
+                }
+            }
+
+        }
+
         /// <summary>
         /// Add a monster at a random walkable point in the dungeon
         /// Queries the dungeon for walkable places
@@ -1798,6 +2057,30 @@ namespace RogueBasin
                         dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
                     }
                     break;
+
+                case 2:
+                    {
+                        //Make level 2 rather small
+
+                        MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+                        hallsGen.Width = 40;
+                        hallsGen.Height = 25;
+
+                        Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+                        int levelNo = dungeon.AddMap(hallMap);
+
+                        //Store the hallGen so we can use it for monsters
+                        levelGen.Add(0, hallsGen);
+
+                        //Add exit trigger at entry location.
+                        //Different wall type for extraction area
+
+                        //PC starts at start location
+                        dungeon.Player.LocationLevel = 0;
+                        dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
+                    }
+                    break;
             }
 
             //Build TCOD maps
@@ -1819,7 +2102,7 @@ namespace RogueBasin
 
             Dungeon dungeon = Game.Dungeon;
 
-            int levelToTest = 1;
+            int levelToTest = 2;
 
             switch (levelToTest)
             {
@@ -1829,6 +2112,10 @@ namespace RogueBasin
 
                 case 1:
                     SpawnCreaturesLevel1(mapGenerators[0] as MapGeneratorBSP);
+                    break;
+
+                case 2:
+                    SpawnCreaturesLevel2(mapGenerators[0] as MapGeneratorBSP);
                     break;
             }
 
@@ -1865,11 +2152,29 @@ namespace RogueBasin
             SetLightLevelUniversal(0, 0, 10);
         }
 
+        private void SpawnCreaturesLevel2(MapGeneratorBSP mapGen)
+        {
+
+            //Level 2 just Swarmers (but lots of them)
+            List<Monster> monstersToPlace = new List<Monster>();
+
+            for (int i = 0; i < 15; i++)
+            {
+                Creatures.Swarmer patrolBot = new Creatures.Swarmer();
+                monstersToPlace.Add(patrolBot);
+            }
+
+            AddMonstersEqualDistribution(monstersToPlace, 0, mapGen);
+
+            //This sets light level in the creatures
+            SetLightLevelUniversal(0, 0, 10);
+        }
+
 
 
         private void SpawnItemsFlatline(Dictionary<int, MapGenerator> mapGenerators)
         {
-            int levelToTest = 1;
+            int levelToTest = 2;
 
             switch (levelToTest)
             {
@@ -1878,6 +2183,9 @@ namespace RogueBasin
                     break;
                 case 1:
                     SpawnItemsLevel1(mapGenerators[0] as MapGeneratorBSP);
+                    break;
+                case 2:
+                    SpawnItemsLevel2(mapGenerators[0] as MapGeneratorBSP);
                     break;
             }
         }
@@ -1901,6 +2209,24 @@ namespace RogueBasin
 
             dungeon.AddItemNoChecks(new Items.Pistol(), 0, allRooms[0].RandomPointInRoom());
 
+        }
+
+        private void SpawnItemsLevel2(MapGeneratorBSP mapGen)
+        {
+
+            List<RoomCoords> allRooms = mapGen.GetAllRooms();
+
+            //Spawn some items
+
+            List<Item> itemsToPlace = new List<Item>();
+
+            //Tempt the player with the shotgun
+            AddItemCloseToLocation(new Items.Shotgun(), 0, mapGen.GetPlayerStartLocation());
+
+            //Vibroblade is a better choice
+            itemsToPlace.Add(new Items.Vibroblade());
+
+            AddItemsEqualDistribution(itemsToPlace, 0, mapGen);
         }
 
         /// <summary>

@@ -52,6 +52,11 @@ namespace RogueBasin.Creatures
             return false;
         }
 
+        protected override bool WillPursue()
+        {
+            return false;
+        }
+
         protected override double GetMissileRange()
         {
             return 3.0;

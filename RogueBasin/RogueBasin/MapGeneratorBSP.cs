@@ -41,9 +41,9 @@ namespace RogueBasin
 
         //Smaller numbers make larger areas more likely
         //Numbers 5 or below make a significant difference
-        const int noSplitChance = 1;
+        int noSplitChance = 1;
         //Multiple of BSPwidth above which we must split
-        const int mustSplitSize = 3;
+        int mustSplitSize = 3;
 
         //How the BSP squares are split as a ratio
         const double minimumSplit = 0.4;
@@ -921,7 +921,7 @@ namespace RogueBasin
                 int roomWidth = 3;
                 int roomHeight = 3;
 
-                side = 3;
+                side = Game.Random.Next(4);
 
                 Point doorLoc = new Point(0, 0);
                 Point playerLoc = new Point(0, 0);
@@ -1097,8 +1097,6 @@ namespace RogueBasin
                     }
                 }
 
-
-
                 //Draw entry room
                 baseMap.mapSquares[doorLoc.x, doorLoc.y].Terrain = MapTerrain.ClosedDoor;
 
@@ -1120,7 +1118,7 @@ namespace RogueBasin
         private void AddDoors()
         {
             int doorChanceMax = 5;
-            int closedDoorChance = 5;
+            int closedDoorChance = 3;
 
             for (int i = 0; i < width; i++)
             {

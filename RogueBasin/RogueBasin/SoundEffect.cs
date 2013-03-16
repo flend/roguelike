@@ -23,7 +23,7 @@ namespace RogueBasin
         /// <summary>
         /// For 1.0 magnitude sounds
         /// </summary>
-        public const double soundMaxRadius = 15.0;
+        public const double soundMaxRadius = 25.0;
 
         public SoundEffect(int id, Dungeon eventReceiver, long soundTime, double soundMagnitude, int soundLevel, Point soundLocation)
         {
@@ -122,8 +122,11 @@ namespace RogueBasin
             while (!endPoint);
 
             //Attenuate by 25% for each wall crossing
+            //(for a single wall crossing)
+            //if (noWallsCrossed > 1)
+            //    noWallsCrossed = 1;
             double decayedMagnitude = this.SoundMagnitude - 0.25 * this.SoundMagnitude * noWallsCrossed;
-
+             
             return Math.Max(0.0, decayedMagnitude);
         }
 

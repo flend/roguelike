@@ -386,6 +386,9 @@ namespace RogueBasin
                     //Normal fighting behaviour
 
                     //Optional: check next move and open any doors if possible. This gives us a chance to shoot lurking PCs
+                    //Removed this while closing doors is not possible - avoids repeated abuse
+                    
+                    /*
                     if (CanOpenDoors() && (AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound))
                     {
 
@@ -402,7 +405,7 @@ namespace RogueBasin
                                 Game.Dungeon.OpenDoor(this.LocationLevel, p);
                             }
                         }
-                    }
+                    }*/
 
                     //Find creatures & PC in FOV
                     CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);

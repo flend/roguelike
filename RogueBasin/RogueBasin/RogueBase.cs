@@ -303,6 +303,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                    /*
                                 case 'c':
                                 case 'C':
                                     //Close door
@@ -312,6 +313,8 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
+                                    */
+                                    //Repeatidly closing doors and lurking behind them was kind of abusive
 
                                 case 'f':
                                 //case 'Z':

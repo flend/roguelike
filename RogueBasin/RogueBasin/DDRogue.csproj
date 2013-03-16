@@ -51,6 +51,9 @@
     <Compile Include="Creatures\Goblin.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\Orc.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Creatures\PatrolBot.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -60,6 +63,7 @@
     </Compile>
     <Compile Include="Creatures\PerimeterBotLinear.cs" />
     <Compile Include="Creatures\RotatingTurret.cs" />
+    <Compile Include="Creatures\Swarmer.cs" />
     <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />
     <Compile Include="Creature.cs" />
@@ -120,9 +124,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\OgreUnique.cs" />
-    <Compile Include="Creatures\Orc.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Creatures\OrcShaman.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -175,6 +176,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GameIntro.cs" />
+    <Compile Include="Gaussian.cs" />
     <Compile Include="IEquippableItem.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\StaircaseDown.cs" />
