@@ -15,6 +15,8 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
+
+            NormalSightRadius = 10;
         }
 
         public override void InventoryDrop()
@@ -108,6 +110,15 @@ namespace RogueBasin.Creatures
         protected override int GetPatrolRotationSpeed()
         {
             return 1;
+        }
+
+        /// <summary>
+        /// Set to false to ignore sounds. Can't move already ignore sounds
+        /// </summary>
+        /// <returns></returns>
+        protected override bool WillInvestigateSounds()
+        {
+            return false;
         }
 
         protected override string GetWeaponName()

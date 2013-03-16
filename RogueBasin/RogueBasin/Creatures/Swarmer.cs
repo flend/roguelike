@@ -16,8 +16,8 @@ namespace RogueBasin.Creatures
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
-            //Long sight radius
-            SightRadius = 10;
+            //More fun to move these guys around with a lower radius
+            NormalSightRadius = 4;
         }
 
         public override void InventoryDrop()

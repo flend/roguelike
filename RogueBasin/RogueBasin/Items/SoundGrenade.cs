@@ -100,12 +100,12 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return 'o';
+            return '\x15';
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Azure;
+            return ColorPresets.Orchid;
         }
 
         public int ArmourClassModifier()
@@ -217,7 +217,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 5;
+            return 15;
         }
 
         /// <summary>

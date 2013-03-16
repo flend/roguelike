@@ -344,6 +344,24 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                case 'U':
+                                    //Use utility
+                                    timeAdvances = UseUtility();
+                                    if (!timeAdvances)
+                                        Screen.Instance.Update();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
+                                case 'u':
+                                    //Use weapon
+                                    timeAdvances = UseWeapon();
+                                    if (!timeAdvances)
+                                        Screen.Instance.Update();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
                                     /*
                                 case 'x':
                                 case 'X':
@@ -1440,6 +1458,58 @@ namespace RogueBasin
         private bool ThrowWeapon()
         {
             return ThrowWeaponOrUtility(true);
+        }
+
+        private bool UseUtility() {
+            return UseUtilityOrWeapon(true);
+        }
+
+        private bool UseWeapon()
+        {
+            return UseUtilityOrWeapon(false);
+        }
+
+        /// <summary>
+        /// Use a utility
+        /// </summary>
+        private bool UseUtilityOrWeapon(bool isUtility) {
+
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            //Check we have a useable item
+
+            IEquippableItem toUse = null;
+            Item toUseItem = null;
+
+            if (isUtility)
+            {
+                toUse = player.GetEquippedUtility();
+                toUseItem = player.GetEquippedUtilityAsItem();
+            }
+            else
+            {
+                toUse = player.GetEquippedWeapon();
+                toUseItem = player.GetEquippedWeaponAsItem();
+            }
+
+            if (toUse == null || !toUse.HasOperateAction())
+            {
+                Game.MessageQueue.AddMessage("Need an item that can be operated.");
+                LogFile.Log.LogEntryDebug("Can't use " + toUseItem.SingleItemDescription, LogDebugLevel.Medium);
+                return false;
+            }
+
+            //Use the item
+            LogFile.Log.LogEntryDebug("Using " + toUseItem.SingleItemDescription, LogDebugLevel.Medium);
+            bool success = toUse.OperateItem();
+
+            if(success)
+                //Destroy the item
+                player.UnequipAndDestroyItem(toUseItem);
+
+            return success;
+            
         }
 
         /// <summary>

@@ -5,71 +5,8 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Shotgun : Item, IEquippableItem
+    public class FragGrenade : Item, IEquippableItem
     {
-        public int Ammo { get; set; }
-
-        public Shotgun()
-        {
-            Ammo = MaxAmmo();
-        }
-
-        /// <summary>
-        /// Fires the item - probably should be a method
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public bool FireItem(Point target)
-        {
-            //Should be guaranteed in range by caller
-
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-
-            LogFile.Log.LogEntryDebug("Firing shotgun", LogDebugLevel.Medium);
-
-            //The shotgun fires towards its target and does less damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, RangeFire(), ShotgunSpreadAngle());
-            
-            //Draw attack
-            Screen.Instance.DrawAreaAttack(targetSquares);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Dungeon.GetDistanceBetween(player.LocationMap, m.LocationMap));
-                    int damage = 10 - rangeToMonster;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
-
-            //Remove 1 ammo
-            Ammo--;
-
-            return true;
-        }
  
         /// <summary>
         /// Equipment slots where we can be equipped
@@ -79,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -87,7 +24,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("FragGrenade equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -109,24 +46,109 @@ namespace RogueBasin.Items
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
             //Screen.Instance.PlayMovie("multiattack", false);
 
-            //Add any equipped (actually permanent) effects
+            //Add any equipped (actually permanent) effectsf
             //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
 
-
         /// <summary>
-        /// Throws the item
+        /// Throws the item. Can use generic, it's just 
         /// </summary>
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
         public Point ThrowItem(Point target)
         {
-            //Stun for 3 turns
-            return Pistol.ThrowItemGeneric(this, target, 3, true);
+            //Stun for 0 rounds
+            Point dest = FragGrenade.ThrowItemGrenadeLike(this, target, 4, 4);
+            Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
+            return dest;
         }
+
+        
+         /// <summary>
+        /// Generic throw method for most grenade items
+        /// Should sync with above method
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static Point ThrowItemGrenadeLike(IEquippableItem item, Point target, double size, int damage) {
+
+            Item itemAsItem = item as Item;
+
+            LogFile.Log.LogEntryDebug("Throwing " + itemAsItem.SingleItemDescription, LogDebugLevel.Medium);
+
+            Player player = Game.Dungeon.Player;
+
+            //Find target
+
+            List<Point> targetSquares = RogueBasin.Items.Pistol.CalculateTrajectory(target);
+            Monster monster = RogueBasin.Items.Pistol.FirstMonsterInTrajectory(targetSquares);
+
+            //Find where it landed
+
+            //Destination will be the last square in trajectory
+            Point destination;
+            if (targetSquares.Count > 0)
+                destination = targetSquares[targetSquares.Count - 1];
+            else
+                //Threw it on themselves!
+                destination = player.LocationMap;
+           
+             
+            //Stopped by a monster
+            if (monster != null)
+            {
+                destination = monster.LocationMap;
+            }
+
+            //Make throwing sound AT target location
+            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), Game.Dungeon.Player.LocationLevel, destination);
+
+            //Work out grenade splash and damage
+            
+            List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, size);
+            
+            //Draw attack
+            Screen.Instance.DrawAreaAttack(grenadeAffects);
+
+            //Make firing sound
+            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in grenadeAffects)
+            {
+                SquareContents squareContents = Game.Dungeon.MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Grenade: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    player.AttackMonsterRanged(squareContents.monster, damage);
+                }
+            }
+
+            //And the player
+
+            if (grenadeAffects.Find(p => p.x == player.LocationMap.x && p.y == player.LocationMap.y) != null)
+            {
+                //Apply damage
+                player.AttackPlayer(damage);
+            }
+            
+            return(destination);
+
+        }
+
+
 
         /// <summary>
         /// not used in this game
@@ -135,7 +157,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Frag Grenade unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -148,7 +170,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "shotgun"; }
+            get { return "frag grenade"; }
         }
 
         /// <summary>
@@ -156,17 +178,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "shotguns"; }
+            get { return "frag grenades"; }
         }
 
         protected override char GetRepresentation()
         {
-            return '{';
+            return '\x15';
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return ColorPresets.Red;
         }
 
         public int ArmourClassModifier()
@@ -190,16 +212,16 @@ namespace RogueBasin.Items
             return 0;
         }
 
+        public bool HasFireAction()
+        {
+            return false;
+        }
+
         public bool HasMeleeAction()
         {
             return false;
         }
 
-
-        public bool HasFireAction()
-        {
-            return true;
-        }
 
         /// <summary>
         /// Can be thrown
@@ -220,15 +242,28 @@ namespace RogueBasin.Items
             return false;
         }
 
-        public int MaxAmmo()
-        {
-            return 2;
-        }
-
         public int RemainingAmmo()
         {
-            return Ammo;
+
+            return 0;
         }
+
+        public int MaxAmmo()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// Fires the item - probably should be a method
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public bool FireItem(Point target)
+        {
+            return false;
+        }
+
 
         /// <summary>
         /// Operates the item - definitely a method
@@ -256,12 +291,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public virtual TargettingType TargetTypeFire()
         {
-            return TargettingType.Shotgun;
-        }
-
-        public virtual double ShotgunSpreadAngle()
-        {
-            return Math.PI / 4;
+            return TargettingType.Line;
         }
 
         /// <summary>
@@ -270,7 +300,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 3;
+            return 10;
         }
 
         /// <summary>
@@ -279,7 +309,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 10;
+            return 5;
         }
 
         /// <summary>
@@ -288,7 +318,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double FireSoundMagnitude()
         {
-            return 1.0;
+            return 0.0;
         }
 
         /// <summary>
@@ -297,7 +327,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double ThrowSoundMagnitude()
         {
-            return 0.3;
+            return 1;
         }
 
         /// <summary>
@@ -306,7 +336,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool DestroyedOnThrow()
         {
-            return false;
+            return true;
         }
 
         /// <summary>
@@ -316,6 +346,15 @@ namespace RogueBasin.Items
         public int MeleeDamage()
         {
             return 0;
+        }
+
+        /// <summary>
+        /// Spread for shotgun target
+        /// </summary>
+        /// <returns></returns>
+        public virtual double ShotgunSpreadAngle()
+        {
+            return 0.0;
         }
 
     }

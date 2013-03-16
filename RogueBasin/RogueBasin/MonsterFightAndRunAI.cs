@@ -146,6 +146,13 @@ namespace RogueBasin
             else
             {
                 currentSound = Game.Dungeon.GetSoundByID(CurrentSoundID);
+
+                if (currentSound == null)
+                {
+                    ResetFollowingSound();
+                    AIState = SimpleAIStates.Patrol;
+                    LogFile.Log.LogEntryDebug("Error restoring sound, resetting", LogDebugLevel.High);
+                }
             }
 
             //Stunned creatures miss turns

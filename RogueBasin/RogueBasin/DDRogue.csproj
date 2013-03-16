@@ -185,9 +185,11 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="Items\FragGrenade.cs" />
     <Compile Include="Items\HealingPotion.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Items\NanoRepair.cs" />
     <Compile Include="Items\Pistol.cs" />
     <Compile Include="Items\Potion.cs">
       <SubType>Code</SubType>
@@ -208,8 +210,12 @@
     <Compile Include="Items\Shotgun.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Items\SoundGrenade.cs" />
-    <Compile Include="Items\StealthCloak.cs" />
+    <Compile Include="Items\SoundGrenade.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Items\StealthCloak.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Items\Vibroblade.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />
@@ -346,6 +352,10 @@
     <Compile Include="Triggers\Mission2Entry.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Triggers\Mission3Entry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\Mission4Entry.cs" />
     <Compile Include="Triggers\PrinceInABox.cs" />
     <Compile Include="Triggers\SchoolEntryTrigger.cs" />
     <Compile Include="Triggers\SeeCorpses.cs">
@@ -644,5 +654,11 @@
     <EmbeddedResource Include="bin\Debug\movies\mission01.amf" />
     <EmbeddedResource Include="bin\Debug\movies\mission10.amf" />
     <EmbeddedResource Include="bin\Debug\movies\mission20.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission30.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission40.amf" />
   </ItemGroup>
 </Project>

@@ -253,7 +253,7 @@ namespace RogueBasin.Items
 
             //Draw attack
 
-            Screen.Instance.DrawShotgunMissileAttack(targetSquares);
+            Screen.Instance.DrawAreaAttack(targetSquares);
 
             //Damage monster
             
@@ -294,7 +294,7 @@ namespace RogueBasin.Items
 
             Player player = Game.Dungeon.Player;
 
-            //Find monster target
+            //Find target
 
             List<Point> targetSquares = Pistol.CalculateTrajectory(target);
             Monster monster = Pistol.FirstMonsterInTrajectory(targetSquares);
@@ -319,7 +319,7 @@ namespace RogueBasin.Items
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), player.LocationLevel, destination);
 
             //Draw throw
-            Screen.Instance.DrawShotgunMissileAttack(targetSquares);
+            Screen.Instance.DrawAreaAttack(targetSquares);
 
             if (stunDamage)
             {
@@ -339,6 +339,9 @@ namespace RogueBasin.Items
             return destination;
         }
 
+        
+        
+       
         /// <summary>
         /// Operates the item - definitely a method
         /// </summary>
@@ -388,7 +391,7 @@ namespace RogueBasin.Items
 
         public double FireSoundMagnitude()
         {
-            return 0.66;
+            return 0.33;
         }
 
         /// <summary>

@@ -841,60 +841,66 @@ namespace RogueBasin
         {
             LogFile.Log.LogEntry(String.Format("Generating BSP dungeon"));
 
-            baseMap = new Map(width, height);
-
-            //BSP is always connected
-            baseMap.GuaranteedConnected = true;
-
-            //Make a BSP tree for the rooms
-
-            rootNode = new MapNode(0, 0, width, height);
-            rootNode.Split();
-            
-            //Draw a room in each BSP leaf
-            rootNode.DrawRoomAtLeaf(baseMap);
-
-            //debug
-            //Screen.Instance.DrawMapDebug(baseMap);
-
-            //Draw connecting corridors
-            rootNode.DrawCorridorConnectingChildren(baseMap);
-
-            //Add any extra connecting corridors as specified
-
-            for (int i = 0; i < extraConnections; i++)
-            {
-                rootNode.AddRandomConnection(baseMap);
-            }
-
-            //Add doors where single corridors terminate into rooms
-            AddDoors();
-
-            //Turn corridors into normal squares and surround with walls
-            CorridorsIntoRooms();
-
-            //Work out where the staircases will be
-            
-            //We just want 2 places that aren't too close to each other. The map is guaranteed connected
-            double RequiredStairDistance = (width * 0.5);
-            double stairDistance;
-
             do
             {
-                upStaircase = RandomWalkablePoint();
-                downStaircase = RandomWalkablePoint();
+                baseMap = new Map(width, height);
 
-                stairDistance = Math.Sqrt(Math.Pow(upStaircase.x - downStaircase.x, 2) + Math.Pow(upStaircase.y - downStaircase.y, 2));
+                //BSP is always connected
+                baseMap.GuaranteedConnected = true;
 
-            } while (stairDistance < RequiredStairDistance);
+                //Make a BSP tree for the rooms
+
+                rootNode = new MapNode(0, 0, width, height);
+                rootNode.Split();
+
+                //Draw a room in each BSP leaf
+                rootNode.DrawRoomAtLeaf(baseMap);
+
+                //debug
+                //Screen.Instance.DrawMapDebug(baseMap);
+
+                //Draw connecting corridors
+                rootNode.DrawCorridorConnectingChildren(baseMap);
+
+                //Add any extra connecting corridors as specified
+
+                for (int i = 0; i < extraConnections; i++)
+                {
+                    rootNode.AddRandomConnection(baseMap);
+                }
+
+                //Add doors where single corridors terminate into rooms
+                AddDoors();
+
+                //Turn corridors into normal squares and surround with walls
+                CorridorsIntoRooms();
+
+                //Work out where the staircases will be
+
+                //We just want 2 places that aren't too close to each other. The map is guaranteed connected
+                double RequiredStairDistance = (width * 0.5);
+                double stairDistance;
+
+                do
+                {
+                    upStaircase = RandomWalkablePoint();
+                    downStaircase = RandomWalkablePoint();
+
+                    stairDistance = Math.Sqrt(Math.Pow(upStaircase.x - downStaircase.x, 2) + Math.Pow(upStaircase.y - downStaircase.y, 2));
+
+                } while (stairDistance < RequiredStairDistance);
 
 
-            //Set which squares are light blocking
-            //Now done during creation
-            //SetLightBlocking(baseMap);
+                //Set which squares are light blocking
+                //Now done during creation
+                //SetLightBlocking(baseMap);
 
-            //Set the PC start location in a random room
-            baseMap.PCStartLocation = AddEntryRoomForPlayer();
+                //Set the PC start location in a random room
+                baseMap.PCStartLocation = AddEntryRoomForPlayer();
+
+                //Sometimes this call fails so we loop on this
+
+            } while (baseMap.PCStartLocation.x == -1);
 
             return baseMap.Clone();
         }
@@ -913,9 +919,16 @@ namespace RogueBasin
         private Point AddEntryRoomForPlayer()
         {
             bool stillTrying = true;
-
+            int noOfLoops = 0;
+            int maxLoops = 100;
             do
             {
+                noOfLoops++;
+                if (noOfLoops == maxLoops)
+                {
+                    //No room need to recreate level
+                    return new Point(-1, -1);
+                }
 
                 //Cast a ray from a side of the map.
                 int side = Game.Random.Next(4);

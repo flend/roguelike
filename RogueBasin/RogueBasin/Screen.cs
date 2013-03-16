@@ -983,7 +983,7 @@ namespace RogueBasin {
         /// <param name="origin"></param>
         /// <param name="target"></param>
         /// <param name="size"></param>
-        public void DrawShotgunMissileAttack(List <Point> targetSquares)
+        public void DrawAreaAttack(List <Point> targetSquares)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
@@ -2151,7 +2151,7 @@ namespace RogueBasin {
             hitpointsOffset = new Point(0, 5);
             Point weaponOffset = new Point(0, 8);
             Point utilityOffset = new Point(0, 15);
-            Point gameDataOffset = new Point(0, 15);
+            Point gameDataOffset = new Point(0, 20);
 
             //Draw HP Status
 
@@ -2240,7 +2240,7 @@ namespace RogueBasin {
 
                 if (weaponE.HasOperateAction())
                 {
-                    uses += "(U)se";
+                    uses += "(u)se";
                 }
 
                 rootConsole.PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
@@ -2271,7 +2271,7 @@ namespace RogueBasin {
                 
                 if (utilityE.HasOperateAction())
                 {
-                    uses += "(u)se";
+                    uses += "(U)se";
                 }
 
                 if (utilityE.HasThrowAction())

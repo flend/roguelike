@@ -30,6 +30,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.DockDoor))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.LeaveByDock))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.FirstLevelEntry))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission3Entry))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission2Entry))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission1Entry))]
 

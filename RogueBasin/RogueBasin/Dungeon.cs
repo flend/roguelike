@@ -1455,7 +1455,7 @@ namespace RogueBasin
 
                 if (contents.monster != null)
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddItem failure: Monster at this square", LogDebugLevel.Low);
                     return false;
                 }
 
@@ -2360,9 +2360,10 @@ namespace RogueBasin
 
         /// <summary>
         /// Kill a monster. This monster won't get any further turns.
+        /// If autokill is set to true, this is a dungeon respawn or similar. Don't count towards achievements
         /// </summary>
         /// <param name="monster"></param>
-        public void KillMonster(Monster monster, bool noCorpses)
+        public void KillMonster(Monster monster, bool autoKill)
         {
             //We can't take the monster out of the collection directly since we might still be iterating through them
             //Instead set a flag on the monster and remove it after all turns are complete
@@ -2379,7 +2380,7 @@ namespace RogueBasin
 
             //Drop any insta-create treasure
             //Not used at present
-            if(!noCorpses)
+            if (!autoKill)
                 monster.InventoryDrop();
 
             //If the creature was charmed, delete 1 charmed creature from the player total
@@ -2387,66 +2388,70 @@ namespace RogueBasin
                 Game.Dungeon.Player.RemoveCharmedCreature();
 
             //Leave a corpse
-            if (!noCorpses)
+            if (!autoKill)
                  AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
 
-            //Deal with special monsters (bit rubbish programming)
-            //Move to AI classes?
-
-            if (!dungeonInfo.LastMission && monster.Unique)
+            //Deal with special death effects, but not on an autokill
+            if (!autoKill)
             {
-                //We killed an objective
-                bool a = monsters[0] is Creatures.ComputerNode;
-
-                //Check if there are any living computer nodes on the level
-                Monster livingNode = monsters.Find( x => x is Creatures.ComputerNode && x.Alive && x.LocationLevel == player.LocationLevel);
-                if (livingNode == null)
-                {
-                    //Set objective complete
-                    dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete = true;
-
-                    Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete!");
-                    LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " primary objective complete", LogDebugLevel.Medium);
-                }
-
-            }
-
-            //No monsters left on level?
-
-            Monster livingMonster = monsters.Find(x => x.Alive && x.LocationLevel == player.LocationLevel);
-
-            if (livingMonster == null)
-            {
-                //Set secondary objective complete
-                dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete = true;
-
-                Game.MessageQueue.AddMessage("All defenses disabled. Secondary objective complete!");
-                LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " secondary objective complete", LogDebugLevel.Medium);
-            }
-
-            if(dungeonInfo.LastMission && monster.Unique) {
-
-                //OK we killed the dragon!
-
-                //Kill all the monsters on this level
-                foreach (Monster m in monsters)
-                {
-                    //But not itself
-                   
-                    //Creatures.DragonUnique drag = m as Creatures.DragonUnique;
-
-                    if (m.LocationLevel == player.LocationLevel)
-                    {
-                        Creatures.DragonUnique drag = m as Creatures.DragonUnique;
-                        Creatures.Friend friend = m as Creatures.Friend;
-                        if(m != drag && m != friend)
-                            KillMonster(m, true);
-                    }
-                }
-
-                Screen.Instance.PlayMovie("dragondead", true);
                 
-                dungeonInfo.DragonDead = true;
+
+                if (!dungeonInfo.LastMission && monster.Unique)
+                {
+                    //We killed an objective
+                    bool a = monsters[0] is Creatures.ComputerNode;
+
+                    //Check if there are any living computer nodes on the level
+                    Monster livingNode = monsters.Find(x => x is Creatures.ComputerNode && x.Alive && x.LocationLevel == player.LocationLevel);
+                    if (livingNode == null)
+                    {
+                        //Set objective complete
+                        dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete = true;
+
+                        Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete!");
+                        LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " primary objective complete", LogDebugLevel.Medium);
+                    }
+
+                }
+
+                //No monsters left on level?
+
+                Monster livingMonster = monsters.Find(x => x.Alive && x.LocationLevel == player.LocationLevel);
+
+                if (livingMonster == null)
+                {
+                    //Set secondary objective complete
+                    dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete = true;
+
+                    Game.MessageQueue.AddMessage("All defenses disabled. Secondary objective complete!");
+                    LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " secondary objective complete", LogDebugLevel.Medium);
+                }
+
+                if (dungeonInfo.LastMission && monster.Unique)
+                {
+
+                    //OK we killed the dragon!
+
+                    //Kill all the monsters on this level
+                    foreach (Monster m in monsters)
+                    {
+                        //But not itself
+
+                        //Creatures.DragonUnique drag = m as Creatures.DragonUnique;
+
+                        if (m.LocationLevel == player.LocationLevel)
+                        {
+                            Creatures.DragonUnique drag = m as Creatures.DragonUnique;
+                            Creatures.Friend friend = m as Creatures.Friend;
+                            if (m != drag && m != friend)
+                                KillMonster(m, true);
+                        }
+                    }
+
+                    Screen.Instance.PlayMovie("dragondead", true);
+
+                    dungeonInfo.DragonDead = true;
+                }
             }
         }
 
@@ -4038,6 +4043,37 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Returns points in grenade template. Includes walls and everything.
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public List<Point> GetPointsForGrenadeTemplate(Point location, int level, double size)
+        {
+            List<Point> splashSquares = new List<Point>();
+
+            int sizeI = (int)Math.Ceiling(size) + 1;
+
+            for (int i = location.x - sizeI; i < location.x + sizeI; i++)
+            {
+                for (int j = location.y - sizeI; j < location.y + sizeI; j++)
+                {
+                    if (i >= 0 && i < levels[level].width && j >= 0 && j < levels[level].height)
+                    {
+                        if (Math.Pow(i - location.x, 2) + Math.Pow(j - location.y, 2) < Math.Pow(size, 2) + 0.1)
+                        {
+                            splashSquares.Add(new Point(i, j));
+                        }
+                    }
+                }
+            }
+
+            return splashSquares;
+        }
+
+
+
+        /// <summary>
         /// The player learns a new spell. Right now doesn't use the parameter (except as a reference) and just updates the Known parameter
         /// </summary>
         internal void LearnSpell(Spell moveToLearn)
@@ -4067,6 +4103,7 @@ namespace RogueBasin
 
             Triggers.Add(trigger);
         }
+
 
         /// <summary>
         /// Victory! - THIS DOESN@T HAPPEN IN PRINCESSRL
@@ -4539,6 +4576,7 @@ namespace RogueBasin
             RemoveAllMonsterEffects();
 
             PlayerActionsBetweenMissions();
+            DungeonActionsBetweenMissions();
             
 
             //Run a normal turn to set off any triggers
@@ -5255,6 +5293,7 @@ namespace RogueBasin
             }
 
             PlayerActionsBetweenMissions();
+            DungeonActionsBetweenMissions();
 
             //Move player to new level
 
@@ -5273,6 +5312,20 @@ namespace RogueBasin
 
             //Remove items
             player.UnequipAndDestoryAllItems();
+        }
+
+        private void ResetSounds()
+        {
+            effects.Clear();
+            nextUniqueSoundID = 0;
+
+        }
+
+        public void DungeonActionsBetweenMissions()
+        {
+            //For going to a new level this is no big deal, but it is important if we are respawning
+            ResetSounds();
+            
         }
 
         /// <summary>

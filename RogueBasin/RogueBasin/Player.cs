@@ -1303,7 +1303,7 @@ namespace RogueBasin
 
             //Message the user
             LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
-            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped in " + StringEquivalent.EquipmentSlots[matchingEquipSlots[0].slotType]);
+            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped");
 
             return true;
         }
@@ -1410,7 +1410,7 @@ namespace RogueBasin
                 //Sanity check
                 if (oldItemEquippable == null)
                 {
-                    LogFile.Log.LogEntry("Old item did not equist: " + oldItem.SingleItemDescription);
+                    LogFile.Log.LogEntry("Old item did not equip: " + oldItem.SingleItemDescription);
                     return false;
                 }
 
@@ -1435,7 +1435,7 @@ namespace RogueBasin
 
             //Message the user
             LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
-            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped in " + StringEquivalent.EquipmentSlots[matchingEquipSlots[0].slotType]);
+            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped");
 
             return true;
         }
@@ -1819,6 +1819,69 @@ namespace RogueBasin
         internal void StartGameSetup()
         {
             CalculateCombatStats();
+        }
+
+        /// <summary>
+        /// Important to keep this the only place where the player injures themselves
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public virtual CombatResults AttackPlayer(int damage)
+        {
+            //Do we hit the player?
+            if (damage > 0)
+            {
+                int monsterOrigHP = Hitpoints;
+
+                Hitpoints -= damage;
+
+                //Is the player dead, if so kill it?
+                if (Hitpoints <= 0)
+                {
+
+                    //Message queue string
+                    string combatResultsMsg = "PvP Dam: " + damage + " HP: " + monsterOrigHP + "->" + Hitpoints + " killed";
+
+                    //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
+                    string playerMsg = "You knock yourself out!";
+                    Game.MessageQueue.AddMessage(playerMsg);
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    Game.Dungeon.SetPlayerDeath("was knocked out by themselves");
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Debug string
+                string combatResultsMsg3 = "PvP Dam: " + damage + " HP: " + monsterOrigHP + "->" + Hitpoints + " injured";
+                //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
+                Game.MessageQueue.AddMessage("You damage yourself.");
+                LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
+
+                return CombatResults.DefenderDamaged;
+            }
+
+            //Miss
+            string combatResultsMsg2 = "PvP Dam: " + damage + " HP: " + Hitpoints + "->" + Hitpoints + " miss";
+            //string playerMsg2 = "The " + this.SingleDescription + " misses you.";
+            string playerMsg2 = "You don't damage yourself.";
+            Game.MessageQueue.AddMessage(playerMsg2);
+            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
+
+            return CombatResults.DefenderUnhurt;
+        }
+
+        /// <summary>
+        /// Heal the player by a quantity. Won't exceed max HP.
+        /// </summary>
+        /// <param name="healingQuantity"></param>
+        public void HealPlayer(int healingQuantity)
+        {
+            Hitpoints += healingQuantity;
+
+            if (Hitpoints > MaxHitpoints)
+                Hitpoints = MaxHitpoints;
+
         }
     }
 }

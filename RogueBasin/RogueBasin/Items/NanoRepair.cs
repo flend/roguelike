@@ -5,71 +5,8 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Shotgun : Item, IEquippableItem
+    public class NanoRepair : Item, IEquippableItem
     {
-        public int Ammo { get; set; }
-
-        public Shotgun()
-        {
-            Ammo = MaxAmmo();
-        }
-
-        /// <summary>
-        /// Fires the item - probably should be a method
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public bool FireItem(Point target)
-        {
-            //Should be guaranteed in range by caller
-
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-
-            LogFile.Log.LogEntryDebug("Firing shotgun", LogDebugLevel.Medium);
-
-            //The shotgun fires towards its target and does less damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, RangeFire(), ShotgunSpreadAngle());
-            
-            //Draw attack
-            Screen.Instance.DrawAreaAttack(targetSquares);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Dungeon.GetDistanceBetween(player.LocationMap, m.LocationMap));
-                    int damage = 10 - rangeToMonster;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
-
-            //Remove 1 ammo
-            Ammo--;
-
-            return true;
-        }
  
         /// <summary>
         /// Equipment slots where we can be equipped
@@ -79,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -87,7 +24,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Stealth cloak equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -115,19 +52,6 @@ namespace RogueBasin.Items
             return true;
         }
 
-
-        /// <summary>
-        /// Throws the item
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public Point ThrowItem(Point target)
-        {
-            //Stun for 3 turns
-            return Pistol.ThrowItemGeneric(this, target, 3, true);
-        }
-
         /// <summary>
         /// not used in this game
         /// </summary>
@@ -135,7 +59,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Shotgun unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Stealth cloak unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -148,7 +72,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "shotgun"; }
+            get { return "nano-repair kit"; }
         }
 
         /// <summary>
@@ -156,17 +80,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "shotguns"; }
+            get { return "nano-repair kits"; }
         }
 
         protected override char GetRepresentation()
         {
-            return '{';
+            return '\x6';
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return ColorPresets.LightSteelBlue;
         }
 
         public int ArmourClassModifier()
@@ -190,15 +114,15 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public bool HasMeleeAction()
+        public bool HasFireAction()
         {
             return false;
         }
 
-
-        public bool HasFireAction()
+        public bool HasMeleeAction()
         {
-            return true;
+
+            return false;
         }
 
         /// <summary>
@@ -208,7 +132,7 @@ namespace RogueBasin.Items
         public bool HasThrowAction()
         {
 
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -217,17 +141,41 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool HasOperateAction()
         {
-            return false;
-        }
-
-        public int MaxAmmo()
-        {
-            return 2;
+            return true;
         }
 
         public int RemainingAmmo()
         {
-            return Ammo;
+
+            return 0;
+        }
+        
+        public int MaxAmmo()
+        {
+            return 0;
+        }
+
+
+        /// <summary>
+        /// Fires the item - probably should be a method
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public bool FireItem(Point target)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Throws the item - check if we can't pull this out
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public Point ThrowItem(Point target)
+        {
+            return null;
         }
 
         /// <summary>
@@ -238,7 +186,21 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool OperateItem()
         {
-            return false;
+            //Repair some damage
+            
+            if (Game.Dungeon.Player.Hitpoints < Game.Dungeon.Player.MaxHitpoints)
+            {
+                LogFile.Log.LogEntryDebug("Using nano-repair", LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("The nano-bots swarm over your droid, repairing damage.");
+                Game.Dungeon.Player.HealPlayer(10);
+                return true;
+            }
+            else
+            {
+                LogFile.Log.LogEntryDebug("Not using nano-repair", LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("No damage to repair. The nano-bots return to the kit.");
+                return false;
+            }
         }
 
         /// <summary>
@@ -256,12 +218,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public virtual TargettingType TargetTypeFire()
         {
-            return TargettingType.Shotgun;
-        }
-
-        public virtual double ShotgunSpreadAngle()
-        {
-            return Math.PI / 4;
+            return TargettingType.Line;
         }
 
         /// <summary>
@@ -270,7 +227,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 3;
+            return 5;
         }
 
         /// <summary>
@@ -279,7 +236,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 10;
+            return 5;
         }
 
         /// <summary>
@@ -288,7 +245,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double FireSoundMagnitude()
         {
-            return 1.0;
+            return 0.0;
         }
 
         /// <summary>
@@ -297,7 +254,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double ThrowSoundMagnitude()
         {
-            return 0.3;
+            return 0.05;
         }
 
         /// <summary>
@@ -316,6 +273,15 @@ namespace RogueBasin.Items
         public int MeleeDamage()
         {
             return 0;
+        }
+
+        /// <summary>
+        /// Spread for shotgun target
+        /// </summary>
+        /// <returns></returns>
+        public virtual double ShotgunSpreadAngle()
+        {
+            return 0.0;
         }
 
     }
