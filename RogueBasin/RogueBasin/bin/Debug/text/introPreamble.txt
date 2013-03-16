@@ -1,7 +1,7 @@
-Welcome to PrincessRL v1.04e! A 7DRL by flend.
+Welcome to FlatlineRL v1.0! 7DRL 2013 (flend)
 
 
-Please enter a name for your character below.
+Please enter a name for your Soldier below.
 
 (This will load a saved game of that name.)
 (No unusual characters please!)

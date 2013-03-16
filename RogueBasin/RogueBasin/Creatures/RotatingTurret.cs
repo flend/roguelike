@@ -163,7 +163,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.DarkGreen;
+            return ColorPresets.OrangeRed;
         }
 
         public override int GetMagicXP()

@@ -166,7 +166,7 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return ColorPresets.Cyan;
         }
 
         public int ArmourClassModifier()

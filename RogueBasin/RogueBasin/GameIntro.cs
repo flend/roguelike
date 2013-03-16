@@ -57,7 +57,7 @@ namespace RogueBasin
             int nameYCoord = 5 + preamble.Count + 2;
             Point nameIntro = new Point(5, nameYCoord);
             do {
-                PlayerName = Screen.Instance.GetUserString("Name: Princess ", nameIntro, 20);
+                PlayerName = Screen.Instance.GetUserString("Name: Private ", nameIntro, 20);
                 LogFile.Log.LogEntry("Player name: " + PlayerName);
             } while(PlayerName.Contains(" ") || PlayerName == "");
 
@@ -109,9 +109,10 @@ namespace RogueBasin
             //Draw title
 
             titleCentre = new Point(screen.Width / 2, screen.Height / 2);
-            rootConsole.PrintLineRect("Welcome to PrincessRL!", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("Welcome to FlatlineRL!", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
 
-            rootConsole.PrintLineRect("A 7DRL by flend", titleCentre.x, titleCentre.y + 2, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("7DRL Competition 2013", titleCentre.x, titleCentre.y + 2, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("by: flend", titleCentre.x, titleCentre.y + 4, screen.Width, 1, LineAlignment.Center);
 
             //Any key to continue
 

@@ -67,7 +67,7 @@ namespace RogueBasin
         {
             Player player = Game.Dungeon.Player;
 
-            player.Representation = '@';
+            //player.Representation = '@';
 
             //player.CalculateCombatStats();
             //5player.Hitpoints = player.MaxHitpoints;

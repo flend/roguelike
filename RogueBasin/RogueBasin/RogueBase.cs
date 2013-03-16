@@ -293,6 +293,8 @@ namespace RogueBasin
                                     rootConsole.Flush();
                                     break;
 
+                                    //No longer needed
+                                    /*
                                 case 'o':
                                 case 'O':
                                     //Open door
@@ -302,7 +304,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-
+                                    */
                                     /*
                                 case 'c':
                                 case 'C':

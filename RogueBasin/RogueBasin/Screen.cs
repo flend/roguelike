@@ -82,6 +82,7 @@ namespace RogueBasin {
         Color pursuitBackground = ColorPresets.DarkRed;
         Color normalBackground = ColorPresets.Black;
         Color normalForeground = ColorPresets.White;
+        Color targettedBackground = ColorPresets.DarkGray;
 
         Color targetBackground = ColorPresets.White;
         Color targetForeground = ColorPresets.Black;
@@ -245,7 +246,7 @@ namespace RogueBasin {
             CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
             RootConsole.Width = Width;
             RootConsole.Height = Height;
-            RootConsole.WindowTitle = "PrincessRL";
+            RootConsole.WindowTitle = "FlatlineRL";
             RootConsole.Fullscreen = false;
             RootConsole.Font = fontReq;
             /*
@@ -2305,7 +2306,7 @@ namespace RogueBasin {
             string viewStr = "Target: ";
             rootConsole.PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
 
-            if (CreatureToView != null)
+            if (CreatureToView != null && CreatureToView.Alive == true)
             {
                 String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
                 rootConsole.ForegroundColor = CreatureToView.RepresentationColor();
@@ -2338,7 +2339,7 @@ namespace RogueBasin {
             else if (ItemToView != null)
             {
                 String nameStr = ItemToView.SingleItemDescription;// +"(" + ItemToView.Representation + ")";
-                rootConsole.ForegroundColor = ItemToView.RepresentationColor();
+                rootConsole.ForegroundColor = ItemToView.GetColour();
                 rootConsole.PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
                 rootConsole.ForegroundColor = statsColor;
 
@@ -2675,6 +2676,12 @@ namespace RogueBasin {
                     else if (creature.Passive)
                     {
                         rootConsole.BackgroundColor = passiveBackground;
+                        newBackground = true;
+                    }
+                    else if (creature == CreatureToView)
+                    {
+                        //targetted
+                        rootConsole.BackgroundColor = targettedBackground;
                         newBackground = true;
                     }
                     else if (creature.StunnedTurns > 0)

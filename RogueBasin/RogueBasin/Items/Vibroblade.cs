@@ -103,7 +103,7 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Green;
+            return ColorPresets.LawnGreen;
         }
 
         public int ArmourClassModifier()

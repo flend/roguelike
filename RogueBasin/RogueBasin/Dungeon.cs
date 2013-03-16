@@ -2283,8 +2283,17 @@ namespace RogueBasin
                 //Moving into void not allowed (but should never happen)
                 if (!MapSquareIsWalkable(player.LocationLevel, newPCLocation))
                 {
-                    //This now costs time since it could be part of a special move
-                    return true;
+                    //Is there a closed door? This is a move, so return
+                    if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedDoor)
+                    {
+                        OpenDoor(player.LocationLevel, newPCLocation);
+                        return true;
+                    }
+                    else
+                    {
+                        //This now costs time since it could be part of a special move
+                        return true;
+                    }
                 }
 
                 //Check for monsters in the square
@@ -2314,6 +2323,8 @@ namespace RogueBasin
                     {
                         //Attack the passive creature.
                         CombatResults results = player.AttackMonsterMelee(contents.monster);
+                        Screen.Instance.CreatureToView = contents.monster;
+
                         Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
                         if (results == CombatResults.DefenderDied)
                         {
@@ -2327,6 +2338,8 @@ namespace RogueBasin
 
                         CombatResults results = player.AttackMonsterMelee(contents.monster);
                         Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
+                        Screen.Instance.CreatureToView = contents.monster;
+
                         if (results == CombatResults.DefenderDied)
                         {
                             okToMoveIntoSquare = false;

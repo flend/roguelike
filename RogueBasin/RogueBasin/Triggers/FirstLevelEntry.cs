@@ -36,6 +36,7 @@ namespace RogueBasin.Triggers
             if (Game.Dungeon.Player.PlayItemMovies)
             {
                 Screen.Instance.PlayMovie("helpkeys", true);
+                Screen.Instance.PlayMovie("helpnewuser", true);
             }
 
             Screen.Instance.PlayMovie("mission0", true);

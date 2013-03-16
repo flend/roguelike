@@ -141,7 +141,7 @@ namespace RogueBasin
 
             Level = 1;
 
-            Representation = '@';
+            //Representation = '\xd7';
 
             MaxCharmedCreatures = 0;
             CurrentCharmedCreatures = 0;
@@ -1220,7 +1220,7 @@ namespace RogueBasin
 
         protected override char GetRepresentation()
         {
-            return '@';
+            return '\x15';
         }
 
         /// <summary>

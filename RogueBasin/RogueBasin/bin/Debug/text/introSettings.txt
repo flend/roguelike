@@ -1,4 +1,4 @@
-PrincessRL contains help screens for new players. It's recommended
+FlatlineRL contains help screens for new players. It's recommended
 that you leave these on for your first play through.
 
 In game, press '?' for keys.
