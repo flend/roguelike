@@ -114,6 +114,8 @@ namespace RogueBasin
     /// <summary>
     /// All random generators in FlatlineRL should return this, so that we can intelligently place creatures etc.
     /// </summary>
+    [System.Xml.Serialization.XmlInclude(typeof(MapGeneratorBSP))]
+    [System.Xml.Serialization.XmlInclude(typeof(MapGeneratorBSPCave))]
     public abstract class MapGenerator
     {
         /// <summary>
@@ -142,10 +144,18 @@ namespace RogueBasin
 
         public abstract Point GetPlayerStartLocation();
 
+        public abstract Point GetEntryDoor();
+
         /// <summary>
         /// Return coords of all rooms, for sensible / gauranteed distribution of creatures
         /// </summary>
         /// <returns></returns>
         public abstract List<RoomCoords> GetAllRooms();
+
+        /// <summary>
+        /// Returns a copy of the original map
+        /// </summary>
+        public abstract Map GetOriginalMap();
+
     }
 }

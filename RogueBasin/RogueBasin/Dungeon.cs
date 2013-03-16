@@ -90,6 +90,26 @@ namespace RogueBasin
 
         public bool DragonDead { get; set; }
 
+        /// <summary>
+        /// No of times the player has died
+        /// </summary>
+        public int NoDeaths { get; set; }
+
+        /// <summary>
+        /// No of times the player has aborted a mission
+        /// </summary>
+        public int NoAborts { get; set; }
+
+        /// <summary>
+        /// Max deaths before the real end
+        /// </summary>
+        public int MaxDeaths { get; set; }
+
+        /// <summary>
+        /// Max aborts until the real end
+        /// </summary>
+        public int MaxAborts { get; set; }
+
         //public List<bool> level3UniqueStatus;
         //public List<bool> level4UniqueStatus;
 
@@ -128,7 +148,20 @@ namespace RogueBasin
             LastMission = false;
             //CurrentDungeon = -1;
             DragonDead = false;
-            
+
+
+            MaxAborts = 5;
+            MaxDeaths = 5;
+        }
+
+        /// <summary>
+        /// Flatline - each level has its own info.
+        /// This add a new profile so must be called each level
+        /// </summary>
+        public void SetupLevelInfo()
+        {
+            DungeonProfile thisDung = new DungeonProfile();
+            dungeons.Add(thisDung);
         }
 
         /// <summary>
@@ -399,6 +432,8 @@ namespace RogueBasin
         List<SoundEffect> effects;
 
         Color defaultPCColor = ColorPresets.White;
+
+        public DungeonMaker DungeonMaker { get; set; }
 
         public Dungeon()
         {
@@ -950,6 +985,7 @@ namespace RogueBasin
                 saveGameInfo.nextUniqueSoundID = this.nextUniqueSoundID;
                 saveGameInfo.messageLog = Game.MessageQueue.GetMessageHistoryAsList();
                 saveGameInfo.effects = this.Effects;
+                saveGameInfo.dungeonMaker = this.DungeonMaker;
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -1004,11 +1040,30 @@ namespace RogueBasin
         {
             levels.Add(mapToAdd);
 
+            //Add to dungeoninfo
+            dungeonInfo.SetupLevelInfo();
+
             //Add TCOD version
             levelTCODMaps.Add(new TCODFov(mapToAdd.width, mapToAdd.height));
             levelTCODMapsIgnoringClosedDoors.Add(new TCODFov(mapToAdd.width, mapToAdd.height));
 
             return levels.Count - 1;
+        }
+
+        /// <summary>
+        /// Replace a map in memory. Not that much stuff actually caches map so this is probably OK
+        /// </summary>
+        /// <param name="mapToAdd"></param>
+        /// <returns></returns>
+        public int ReplaceMap(int level, Map newMap)
+        {
+            levels[level] = newMap;
+
+            //Add TCOD version
+            levelTCODMaps[level] = new TCODFov(newMap.width, newMap.height);
+            levelTCODMapsIgnoringClosedDoors[level] = new TCODFov(newMap.width, newMap.height);
+
+            return level;
         }
 
         /// <summary>
@@ -3778,32 +3833,43 @@ namespace RogueBasin
             if (PlayerImmortal && !verb.Contains("quit"))
                 return;
 
-            //In PrincessRL death is not permanent, but quitting is!
+            //In FlatlineRL death is not permanent, but quitting is!
 
-            //Knocked out, go back to school
             if(!verb.Contains("quit")) {
 
                 //Reset vars
                 PlayerDeathString = "";
                 PlayerDeathOccured = false;
 
-                LogFile.Log.LogEntryDebug("Player knocked out", LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Player killed", LogDebugLevel.Medium);
 
-                Game.MessageQueue.AddMessage("You get taken back to school by the guards.");
-                Game.MessageQueue.RequireKeypress = true;
+                DungeonInfo.NoDeaths++;
 
-                Screen.Instance.Update();
+                if (DungeonInfo.NoDeaths == DungeonInfo.MaxDeaths)
+                {
+                    //This is true death
+                    EndOfGame();
+                }
+                else
+                {
 
-                Screen.Instance.PlayMovie("knockedout", false);
+                    //We get another try
+                    
+                    //Is level complete? Move onto next
+                    if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete)
+                    {
+                        Screen.Instance.PlayMovie("deadbutnextmission", true);
+                        MoveToNextMission();
+                        return;
+                    }
 
-                //Up date counter
-                player.NumDeaths++;
+                    //If not, reset mission with different seed
+                    Screen.Instance.PlayMovie("deadretrymission", true);
+                    ResetCurrentMission(false);
 
-                //Game.MessageQueue.ClearList(); //If want to lose the last message, fit it in calling function
-                
-                PlayerLeavesDungeon();
-
-                return;
+                    return;
+                }
+ 
             }
 
             //Right now, only seen on a quit (will be changed too)
@@ -4436,6 +4502,39 @@ namespace RogueBasin
             Screen.Instance.ShowXPScreen = false;
 
             ResetPlayerXPCounters();
+
+        }
+
+        /// <summary>
+        /// Respawn the current dungeon. New seed on abort. Same seed on death
+        /// </summary>
+        /// <param name="respawnWithSameSeed"></param>
+        public void ResetCurrentMission(bool respawnWithSameSeed) {
+
+            //Leave seed for another time
+
+            //Reset starting location
+
+            player.LocationLevel = Player.LocationLevel;
+            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
+
+            //Always do new seed for now
+            //Respawn the last dungeon the player was in
+            RespawnDungeon(Player.LocationLevel);
+
+            //Reset dungeon level state
+            Game.Dungeon.DungeonInfo.Dungeons[Player.LocationLevel].PlayerLeftDock = false;
+            Game.Dungeon.DungeonInfo.Dungeons[Player.LocationLevel].LevelObjectiveComplete = false;
+            
+            //End any events on any remaining monsters
+            RemoveAllMonsterEffects();
+
+            //Heal player
+            player.Hitpoints = player.MaxHitpoints;
+            
+
+            //Run a normal turn to set off any triggers
+            Game.Dungeon.PCMove(0, 0);
 
         }
 
@@ -5082,12 +5181,48 @@ namespace RogueBasin
             player.CharmXP = 0;
         }
 
+        public void MissionComplete()
+        {
+            Screen.Instance.PlayMovie("missioncomplete", true);
+            MoveToNextMission();
+        }
+
+        public bool MissionAborted()
+        {
+            if (DungeonInfo.NoAborts == DungeonInfo.MaxAborts)
+            {
+                //No more aborts allowed
+                Screen.Instance.PlayMovie("nomoreaborts", true);
+                return false;
+
+            }
+
+            //Otherwise OK
+
+            DungeonInfo.NoAborts++;
+
+            Screen.Instance.PlayMovie("missionaborted", true);
+            MoveToNextMission();
+
+            return true;
+        }
+
         /// <summary>
         /// Move player to next mission
         /// </summary>
         public void MoveToNextMission()
         {
             int newMissionLevel = Game.Dungeon.player.LocationLevel + 1;
+
+            if (newMissionLevel == Levels.Count)
+            {
+                //Completed the game
+
+                return;
+            }
+
+            //Heal the player
+            player.AddEffect(new PlayerEffects.Healing(player.MaxHitpoints));
 
             //Move player to new level
 
@@ -5103,7 +5238,7 @@ namespace RogueBasin
         /// </summary>
         public void MoveToFirstMission()
         {
-            int newMissionLevel = Game.Dungeon.player.LocationLevel + 1;
+            int newMissionLevel = 0;
 
             //Move player to new level
 
@@ -5178,9 +5313,7 @@ namespace RogueBasin
         internal void RespawnDungeon(int dungeonID)
         {
             //A bit wasteful
-            DungeonMaker maker = new DungeonMaker(Difficulty);
-            maker.dungeon = this; //hack
-            maker.ReSpawnDungeon(dungeonID);
+            DungeonMaker.ReSpawnDungeon(dungeonID);
 
             LogFile.Log.LogEntryDebug("Respawning dungeon level " + dungeonID, LogDebugLevel.Medium);
         }

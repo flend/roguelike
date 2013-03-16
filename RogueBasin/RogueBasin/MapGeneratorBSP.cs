@@ -896,7 +896,11 @@ namespace RogueBasin
             //Set the PC start location in a random room
             baseMap.PCStartLocation = AddEntryRoomForPlayer();
 
-            return baseMap;
+            return baseMap.Clone();
+        }
+
+        public override Map GetOriginalMap() {
+            return baseMap.Clone();
         }
 
         public override Point GetPlayerStartLocation()
@@ -904,7 +908,7 @@ namespace RogueBasin
             return baseMap.PCStartLocation;
         }
 
-
+        private Point EntryDoorLocation { get; set; }
 
         private Point AddEntryRoomForPlayer()
         {
@@ -1100,6 +1104,9 @@ namespace RogueBasin
                 //Draw entry room
                 baseMap.mapSquares[doorLoc.x, doorLoc.y].Terrain = MapTerrain.ClosedDoor;
 
+                //Returned to set triggers
+                EntryDoorLocation = doorLoc;
+
                 //Draw player space
                 baseMap.mapSquares[playerLoc.x, playerLoc.y].Terrain = MapTerrain.Empty;
                 baseMap.mapSquares[playerLoc.x, playerLoc.y].SetOpen();
@@ -1109,6 +1116,11 @@ namespace RogueBasin
             } while (stillTrying);
 
             return null;
+        }
+
+        public override Point GetEntryDoor()
+        {
+            return EntryDoorLocation;
         }
 
         /// <summary>

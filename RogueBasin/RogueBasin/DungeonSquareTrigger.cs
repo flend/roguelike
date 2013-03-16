@@ -27,6 +27,11 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.BackToSchool))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.PrinceInABox))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.SchoolEntryTrigger))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.DockDoor))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.LeaveByDock))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.FirstLevelEntry))]
+
+
     public abstract class DungeonSquareTrigger
     {
         public int Level { get; set; }

@@ -2150,6 +2150,7 @@ namespace RogueBasin {
             hitpointsOffset = new Point(0, 5);
             Point weaponOffset = new Point(0, 8);
             Point utilityOffset = new Point(0, 15);
+            Point gameDataOffset = new Point(0, 15);
 
             //Draw HP Status
 
@@ -2286,6 +2287,10 @@ namespace RogueBasin {
                 rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
             }
 
+            //Game data
+            rootConsole.ForegroundColor = statsColor;
+            rootConsole.PrintLine("Deaths: " + Game.Dungeon.DungeonInfo.NoDeaths, statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
+            rootConsole.PrintLine("Aborts: " + Game.Dungeon.DungeonInfo.NoAborts, statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y + 1, LineAlignment.Left);
 
             //Restore to normal colour - not nice
             rootConsole.ForegroundColor = ColorPresets.White;

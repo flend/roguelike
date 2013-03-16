@@ -275,6 +275,7 @@
     <Compile Include="RogueBase.cs" />
     <Compile Include="SaveGameInfo.cs" />
     <Compile Include="Screen.cs" />
+    <Compile Include="SerializableDictionary.cs" />
     <Compile Include="SoundEffect.cs" />
     <Compile Include="SpecialMove.cs">
       <SubType>Code</SubType>
@@ -324,13 +325,17 @@
     <Compile Include="Triggers\BackToSchool.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Triggers\DockDoor.cs" />
     <Compile Include="Triggers\DungeonEntranceTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Triggers\FirstLevelEntry.cs" />
     <Compile Include="Triggers\HelpFriend.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\LeaveByDock.cs" />
+    <Compile Include="Triggers\LeaveByDock.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\LichBattle.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -606,5 +611,23 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\helpkeys0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\helpwilderness0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\enterflatline0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\enterflatline1.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission00.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\deadbutnextmission0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\deadretrymission0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\missionaborted0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\missioncomplete0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\nomoreaborts0.amf" />
   </ItemGroup>
 </Project>

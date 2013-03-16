@@ -110,5 +110,6 @@ namespace RogueBasin
         public List<SoundEffect> effects;
 
         public DungeonInfo dungeonInfo;
+        public DungeonMaker dungeonMaker;
     }
 }

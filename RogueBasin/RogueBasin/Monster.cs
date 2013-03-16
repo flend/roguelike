@@ -67,8 +67,10 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Drone))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.RotatingTurret))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.PatrolBot))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.PatrolBotArea))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.AlertBot))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.PerimeterBot))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Swarmer))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>

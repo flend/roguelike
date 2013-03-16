@@ -140,6 +140,10 @@ namespace RogueBasin
         /// </summary>
         bool inMonsterFOV = false;
 
+        public MapSquare Clone() {
+
+            return this.MemberwiseClone() as MapSquare;
+        }
 
         public MapTerrain Terrain
         {
@@ -295,6 +299,24 @@ namespace RogueBasin
         {
             //LightLevel = 1.0;
         }
+
+        public Map Clone() {
+
+            Map newMap = new Map(width, height);
+            newMap.PCStartLocation = PCStartLocation;
+            newMap.GuaranteedConnected = GuaranteedConnected;
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    newMap.mapSquares[i, j] = mapSquares[i, j].Clone();
+                }
+            }
+
+            return newMap;
+        }
+
 
         public Map(int width, int height)
         {
