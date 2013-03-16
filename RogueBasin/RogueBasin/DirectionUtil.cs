@@ -161,12 +161,12 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Find the square adjacent to start at the angle specified
+        /// Find the square adjacent to start at the angle specified. Checked up to 3 points
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="start"></param>
         /// <returns></returns>
-        public static List<Point> SurroundingPointsFromDirection(double angle, Point start)
+        public static List<Point> SurroundingPointsFromDirection(double angle, Point start, int noOfPoints)
         {
 
             Vector3 unitVector = new Vector3(Math.Cos(angle), Math.Sin(angle), 0);
@@ -203,12 +203,14 @@ namespace RogueBasin
             //Top 3 in dictionary ought to be the closest adjacent points to that direction
             List<Point> retPoints = new List<Point>();
 
-            retPoints.Add(start + myList[0].Value);
-            retPoints.Add(start + myList[1].Value);
-            retPoints.Add(start + myList[2].Value);
-
+            for (int i = 0; i < noOfPoints; i++)
+            {
+                retPoints.Add(start + myList[i].Value);
+            }
             return retPoints;
         }
+
+
 
         /// <summary>
         /// Rotate heading, ensuring we keep within the - pi / 2 -> 3 pi / 2 angular range used for headings.

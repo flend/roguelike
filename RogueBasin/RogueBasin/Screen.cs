@@ -2461,7 +2461,7 @@ namespace RogueBasin {
                     continue;
 
                 //Heading
-                List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY));
+                List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 3);
 
                 foreach (Point headingLoc in headingMarkers)
                 {

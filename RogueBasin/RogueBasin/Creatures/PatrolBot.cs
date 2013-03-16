@@ -64,7 +64,7 @@ namespace RogueBasin.Creatures
 
         protected override double GetMissileRange()
         {
-            return 5.0;
+            return 3.0;
         }
 
         protected override int GetChanceToBackAway()
@@ -75,6 +75,11 @@ namespace RogueBasin.Creatures
         protected override string GetWeaponName()
         {
             return "fires a carbine";
+        }
+
+        public override bool CanOpenDoors()
+        {
+            return true;
         }
 
         /// <summary>

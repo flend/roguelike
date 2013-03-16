@@ -385,6 +385,25 @@ namespace RogueBasin
                 {
                     //Normal fighting behaviour
 
+                    //Optional: check next move and open any doors if possible. This gives us a chance to shoot lurking PCs
+                    if (CanOpenDoors() && (AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound))
+                    {
+
+                        //Very simple version, monsters open any doors they are facing
+                        List<Point> directedAhead = DirectionUtil.SurroundingPointsFromDirection(Heading, LocationMap, 3);
+
+                        foreach (Point p in directedAhead)
+                        {
+                            MapTerrain doorTerrain = Game.Dungeon.GetTerrainAtPoint(this.LocationLevel, p);
+
+                            if (doorTerrain == MapTerrain.ClosedDoor)
+                            {
+                                LogFile.Log.LogEntryDebug(this.Representation + " : door detected ahead, opening", LogDebugLevel.Medium);
+                                Game.Dungeon.OpenDoor(this.LocationLevel, p);
+                            }
+                        }
+                    }
+
                     //Find creatures & PC in FOV
                     CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
@@ -440,6 +459,8 @@ namespace RogueBasin
                             }
                         }
                     }
+
+
 
                     //Check if we can see the PC and pursue them
 

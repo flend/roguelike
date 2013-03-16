@@ -1741,27 +1741,52 @@ namespace RogueBasin
             switch(levelToTest) {
 
                 case 0:
+                    {
 
-                    //Make level 0 rather small
+                        //Make level 0 rather small
 
-                    MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+                        MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
-                    hallsGen.Width = 40;
-                    hallsGen.Height = 25;
+                        hallsGen.Width = 40;
+                        hallsGen.Height = 25;
 
-                    Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
-                    int levelNo = dungeon.AddMap(hallMap);
+                        Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+                        int levelNo = dungeon.AddMap(hallMap);
 
-                    //Store the hallGen so we can use it for monsters
-                    levelGen.Add(0, hallsGen);
+                        //Store the hallGen so we can use it for monsters
+                        levelGen.Add(0, hallsGen);
 
-                    //Add exit trigger at entry location.
-                    //Different wall type for extraction area
+                        //Add exit trigger at entry location.
+                        //Different wall type for extraction area
 
-                    //PC starts at start location
-                    dungeon.Player.LocationLevel = 0;
-                    dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
+                        //PC starts at start location
+                        dungeon.Player.LocationLevel = 0;
+                        dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
+                    }
+                    break;
 
+                case 1:
+                    {
+                        //Make level 1 rather small
+
+                        MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+                        hallsGen.Width = 40;
+                        hallsGen.Height = 25;
+
+                        Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+                        int levelNo = dungeon.AddMap(hallMap);
+
+                        //Store the hallGen so we can use it for monsters
+                        levelGen.Add(0, hallsGen);
+
+                        //Add exit trigger at entry location.
+                        //Different wall type for extraction area
+
+                        //PC starts at start location
+                        dungeon.Player.LocationLevel = 0;
+                        dungeon.Player.LocationMap = hallsGen.GetPlayerStartLocation();
+                    }
                     break;
             }
 
@@ -1784,14 +1809,26 @@ namespace RogueBasin
 
             Dungeon dungeon = Game.Dungeon;
 
-            SpawnCreaturesLevel0(mapGenerators[0] as MapGeneratorBSP);
+            int levelToTest = 1;
+
+            switch (levelToTest)
+            {
+                case 0:
+                    SpawnCreaturesLevel0(mapGenerators[0] as MapGeneratorBSP);
+                    break;
+
+                case 1:
+                    SpawnCreaturesLevel1(mapGenerators[0] as MapGeneratorBSP);
+                    break;
+            }
+
 
         }
 
         private void SpawnCreaturesLevel0(MapGeneratorBSP mapGen)
         {
 
-            //Level 0 could be just Area Patrol Bots
+            //Level 0 just Area Patrol Bots
 
             for (int i = 0; i < 6; i++)
             {
@@ -1803,12 +1840,36 @@ namespace RogueBasin
             SetLightLevelUniversal(0, 0, 10);
         }
 
+        private void SpawnCreaturesLevel1(MapGeneratorBSP mapGen)
+        {
+
+            //Level 1 just Linear Patrol Bots
+
+            for (int i = 0; i < 6; i++)
+            {
+                Creatures.PatrolBot patrolBot = new Creatures.PatrolBot();
+                AddMonsterLinearPatrol(patrolBot, 0, mapGen);
+            }
+
+            //This sets light level in the creatures
+            SetLightLevelUniversal(0, 0, 10);
+        }
+
 
 
         private void SpawnItemsFlatline(Dictionary<int, MapGenerator> mapGenerators)
         {
-            SpawnItemsLevel0(mapGenerators[0] as MapGeneratorBSP);
+            int levelToTest = 1;
 
+            switch (levelToTest)
+            {
+                case 0:
+                    SpawnItemsLevel0(mapGenerators[0] as MapGeneratorBSP);
+                    break;
+                case 1:
+                    SpawnItemsLevel1(mapGenerators[0] as MapGeneratorBSP);
+                    break;
+            }
         }
 
         private void SpawnItemsLevel0(MapGeneratorBSP mapGen) {
@@ -1818,6 +1879,17 @@ namespace RogueBasin
             //Spawn some items
 
             dungeon.AddItemNoChecks(new Items.Vibroblade(), 0, allRooms[0].RandomPointInRoom());
+
+        }
+
+        private void SpawnItemsLevel1(MapGeneratorBSP mapGen)
+        {
+
+            List<RoomCoords> allRooms = mapGen.GetAllRooms();
+
+            //Spawn some items
+
+            dungeon.AddItemNoChecks(new Items.Pistol(), 0, allRooms[0].RandomPointInRoom());
 
         }
 
