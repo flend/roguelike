@@ -1391,7 +1391,7 @@ namespace RogueBasin
                 int range = toCast.GetRange();
                 TargettingType targetType = toCast.TargetType();
 
-                targettingSuccess = TargetAttack(out target, range, targetType, 'z');
+                targettingSuccess = TargetAttack(out target, range, targetType, 0, 'z');
             }
 
             //User exited
@@ -1485,8 +1485,9 @@ namespace RogueBasin
             //Find spell range
             int range = toThrow.RangeThrow();
             TargettingType targetType = toThrow.TargetTypeThrow();
+            double angle = 0.0; //no shotgun angle for line targets
 
-            targettingSuccess = TargetAttack(out target, range, targetType, confirmChar);
+            targettingSuccess = TargetAttack(out target, range, targetType, angle, confirmChar);
 
             //User exited
             if (!targettingSuccess)
@@ -1564,8 +1565,9 @@ namespace RogueBasin
             //Find spell range
             int range = weapon.RangeFire();
             TargettingType targetType = weapon.TargetTypeFire();
+            double spreadAngle = weapon.ShotgunSpreadAngle();
 
-            targettingSuccess = TargetAttack(out target, range, targetType, 'f');
+            targettingSuccess = TargetAttack(out target, range, targetType, spreadAngle, 'f');
 
             //User exited
             if (!targettingSuccess)
@@ -1784,7 +1786,7 @@ namespace RogueBasin
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private bool TargetAttack(out Point target, int range, TargettingType targetType, char confirmChar)
+        private bool TargetAttack(out Point target, int range, TargettingType targetType, double spreadAngle, char confirmChar)
         {
             Player player = Game.Dungeon.Player;
 
@@ -1825,7 +1827,7 @@ namespace RogueBasin
             */
             //Get the desired target from the player
 
-            return GetTargetFromPlayer(startPoint, out target, targetType, range, confirmChar);
+            return GetTargetFromPlayer(startPoint, out target, targetType, range, spreadAngle, confirmChar);
         }
 
         /// <summary>
@@ -1833,12 +1835,14 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range, char confirmChar)
+        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range, double spreadAngle, char confirmChar)
         {
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
             Screen.Instance.Target = start;
             Screen.Instance.TargetType = type;
+            Screen.Instance.TargetRange = range;
+            Screen.Instance.TargetPermissiveAngle = spreadAngle;
 
             if (Dungeon.GetDistanceBetween(start, Game.Dungeon.Player.LocationMap) > range)
             {

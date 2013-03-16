@@ -265,5 +265,14 @@ namespace RogueBasin.Items
             return 0;
         }
 
+        /// <summary>
+        /// Spread for shotgun target
+        /// </summary>
+        /// <returns></returns>
+        public virtual double ShotgunSpreadAngle()
+        {
+            return 0.0;
+        }
+
     }
 }

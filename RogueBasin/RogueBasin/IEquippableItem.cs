@@ -164,5 +164,10 @@ namespace RogueBasin
         /// <returns></returns>
         int MeleeDamage();
 
+        /// <summary>
+        /// For the shotgun targets, what's the half-spread angle
+        /// </summary>
+        /// <returns></returns>
+        double ShotgunSpreadAngle();
     }
 }

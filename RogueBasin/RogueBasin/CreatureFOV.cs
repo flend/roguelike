@@ -60,7 +60,7 @@ namespace RogueBasin
                     break;
 
                 case CreatureFOVType.Triangular:
-                    gameFOVPass = TriangularFOV(origin, creature.Heading, creature.SightRadius, x, y);
+                    gameFOVPass = TriangularFOV(origin, creature.Heading, creature.SightRadius, x, y, Math.PI / 3.6);
                     break;
             }
 
@@ -73,12 +73,13 @@ namespace RogueBasin
 
         /// <summary>
         /// Check a triangular FOV around the creature
+        /// fovAngle is the permissiveAngle on both sides
         /// </summary>
         /// <param name="point"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public static bool TriangularFOV(Point origin, double direction, int range, int testPointX, int testPointY)
+        public static bool TriangularFOV(Point origin, double direction, int range, int testPointX, int testPointY, double fovAngle)
         {
             //To avoid problems normalizing 0 length vectors
             if (origin.x == testPointX && origin.y == testPointY)
@@ -95,7 +96,7 @@ namespace RogueBasin
             double dirAngle = Vector3.Angle(testPointVec, directionVector);
             
             //Is angle less than 50 deg? (more permissive than 45)
-            if (Math.Abs(dirAngle) > Math.PI / 3.6)
+            if (Math.Abs(dirAngle) > fovAngle)
                 return false;
 
             //Also fail if it's behind us. Extra check seems to be necessary
@@ -125,11 +126,12 @@ namespace RogueBasin
         /// <summary>
         /// Returns the points in a triangular target (i.e. shotgun weapon) from origin to target.
         /// Only returns points within FOV. Moral: If you can see it, you can shoot it.
+        /// fovAngle = spread of target
         /// </summary>
         /// <param name="location"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public List<Point> GetPointsForTriangularTargetInFOV(Point origin, Point target, int range)
+        public List<Point> GetPointsForTriangularTargetInFOV(Point origin, Point target, int range, double fovAngle)
         {
             List<Point> triangularPoints = new List<Point>();
 
@@ -141,7 +143,7 @@ namespace RogueBasin
                 {
                     //Check for creature's FOV
                     //If OK, check to see if it falls within a TriangularFOV (blast radius)
-                    if (CheckTileFOV(i, j) && CreatureFOV.TriangularFOV(origin, angle, range, i, j))
+                    if (CheckTileFOV(i, j) && CreatureFOV.TriangularFOV(origin, angle, range, i, j, fovAngle))
                     {
                         triangularPoints.Add(new Point(i, j));
                     }

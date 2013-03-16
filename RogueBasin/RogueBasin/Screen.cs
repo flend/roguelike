@@ -161,6 +161,9 @@ namespace RogueBasin {
 
         public TargettingType TargetType { get; set; }
 
+        public int TargetRange { get; set; }
+        public double TargetPermissiveAngle { get; set; }
+
         //Current movie
         List <MovieFrame> movieFrames;
 
@@ -250,7 +253,7 @@ namespace RogueBasin {
 
         
 
-        public void DrawTriangularTarget(Point origin, Point target, int range, Color foregroundColor, Color backgroundColor, char drawChar)
+        public void DrawTriangularTarget(Point origin, Point target, int range, double spreadAngle, Color foregroundColor, Color backgroundColor, char drawChar)
         {
 
             //Get screen handle
@@ -259,7 +262,7 @@ namespace RogueBasin {
             rootConsole.ForegroundColor = foregroundColor;
             rootConsole.BackgroundColor = backgroundColor;
 
-            List<Point> splashSquares = GetPointsForTriangularTarget(origin, target, range);
+            List<Point> splashSquares = GetPointsForTriangularTarget(origin, target, range, spreadAngle);
             foreach (Point p in splashSquares)
             {
                 rootConsole.PutChar(p.x, p.y, drawChar);
@@ -331,7 +334,7 @@ namespace RogueBasin {
         /// <param name="location"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public List<Point> GetPointsForTriangularTarget(Point origin, Point target, int range)
+        public List<Point> GetPointsForTriangularTarget(Point origin, Point target, int range, double fovAngle)
         {
             List<Point> triangularPoints = new List<Point>();
 
@@ -343,7 +346,7 @@ namespace RogueBasin {
                 {
                     if (i >= 0 && i < this.Width && j >= 0 && j < this.Height)
                     {
-                        if (CreatureFOV.TriangularFOV(origin, angle, range, i, j))
+                        if (CreatureFOV.TriangularFOV(origin, angle, range, i, j, fovAngle))
                         {
                             triangularPoints.Add(new Point(i, j));
                         }
@@ -1102,14 +1105,15 @@ namespace RogueBasin {
 
                 case TargettingType.Shotgun:
                     {
-                        int size = 5;
+                        int size = TargetRange;
+                        double spreadAngle = TargetPermissiveAngle;
 
                         //Cache original contents
                         //List<Point> splashSquares = GetPointsForTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size);
                         
                         //Using FOV-modified version for extra accuracy!
                         CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-                        List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, size);
+                        List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, size, spreadAngle);
                         //offset
                         foreach(Point p in splashSquares) {
                             p.x += mapTopLeft.x;
@@ -1123,7 +1127,7 @@ namespace RogueBasin {
                         }
 
                         //Triangle target on the player
-                        DrawTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size, ColorPresets.Red, targetBackground, '*');
+                        DrawTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size, spreadAngle, ColorPresets.Red, targetBackground, '*');
                         
                         rootConsole.BackgroundColor = targetBackground;
                         rootConsole.ForegroundColor = ColorPresets.Red;
