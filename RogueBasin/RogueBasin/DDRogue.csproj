@@ -321,13 +321,16 @@
     <Compile Include="TownGeneratorFromASCIIFile.cs" />
     <Compile Include="TrainStats.cs" />
     <Compile Include="Triggers\ApproachingTheDragon.cs" />
-    <Compile Include="Triggers\BackToSchool.cs" />
+    <Compile Include="Triggers\BackToSchool.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\DungeonEntranceTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Triggers\HelpFriend.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Triggers\LeaveByDock.cs" />
     <Compile Include="Triggers\LichBattle.cs">
       <SubType>Code</SubType>
     </Compile>

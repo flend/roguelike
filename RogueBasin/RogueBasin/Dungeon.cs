@@ -67,10 +67,20 @@ namespace RogueBasin
 
         public bool visited = false;
         public bool open = false;
+
+        public bool PlayerLeftDock { get; set; }
+
+        public bool LevelObjectiveComplete { get; set; }
+
+        public DungeonProfile()
+        {
+            PlayerLeftDock = false;
+            LevelObjectiveComplete = false;
+        }
     }
 
     /// <summary>
-    /// Information about the dungeons in princessRL
+    /// Information about the state of dungeons in princessRL
     /// </summary>
     public class DungeonInfo
     {
@@ -277,6 +287,24 @@ namespace RogueBasin
                 return 0;
             }
         }
+
+        internal static string LookupMissionName(int level)
+        {
+            switch (level)
+            {
+                case 0:
+                    return "Outer hanger";
+
+                case 1:
+                    return "Inner hanger";
+
+                case 2:
+                    return "Cargo";
+
+                default:
+                    return "Default";
+            }
+        }
     }
 
     /// <summary>
@@ -441,11 +469,14 @@ namespace RogueBasin
             }
         }
 
-        public DungeonInfo DungeonInfo { 
-            get {
-        return dungeonInfo;
-        }
-            set{
+        public DungeonInfo DungeonInfo
+        {
+            get
+            {
+                return dungeonInfo;
+            }
+            set
+            {
                 dungeonInfo = value;
             }
         }
@@ -5050,6 +5081,39 @@ namespace RogueBasin
             player.MagicXP = 0;
             player.CharmXP = 0;
         }
+
+        /// <summary>
+        /// Move player to next mission
+        /// </summary>
+        public void MoveToNextMission()
+        {
+            int newMissionLevel = Game.Dungeon.player.LocationLevel + 1;
+
+            //Move player to new level
+
+            player.LocationLevel = newMissionLevel;
+            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
+
+            //Run a normal turn to set off any triggers
+            Game.Dungeon.PCMove(0, 0);
+        }
+
+        /// <summary>
+        /// Player starts the game
+        /// </summary>
+        public void MoveToFirstMission()
+        {
+            int newMissionLevel = Game.Dungeon.player.LocationLevel + 1;
+
+            //Move player to new level
+
+            player.LocationLevel = newMissionLevel;
+            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
+
+            //Run a normal turn to set off any triggers
+            Game.Dungeon.PCMove(0, 0);
+        }
+
 
         /// <summary>
         /// Player leaves school and enters wilderness

@@ -2142,6 +2142,11 @@ namespace RogueBasin {
             //Blank stats area
             rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
 
+            //Mission
+            Point missionOffset = new Point(0, 3);
+            rootConsole.PrintLine("Location: " + player.LocationLevel.ToString(), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
+            rootConsole.PrintLine(DungeonInfo.LookupMissionName(player.LocationLevel), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
+                
             hitpointsOffset = new Point(0, 5);
             Point weaponOffset = new Point(0, 8);
             Point utilityOffset = new Point(0, 15);
@@ -2316,7 +2321,7 @@ namespace RogueBasin {
 
                 bool drawItem = true;
 
-                if (itemSquare.InPlayerFOV || Game.Dungeon.Player.LocationLevel == 0)
+                if (itemSquare.InPlayerFOV || SeeAllMap)
                 {
                    
                 }
@@ -2374,7 +2379,7 @@ namespace RogueBasin {
 
                 bool drawFeature = true;
 
-                if (featureSquare.InPlayerFOV)
+                if (featureSquare.InPlayerFOV || SeeAllMap)
                 {
                     //In FOV
                     //rootConsole.ForegroundColor = inFOVTerrainColor;
@@ -2751,6 +2756,7 @@ namespace RogueBasin {
                     int screenY = mapTopLeft.y + j;
 
                     char screenChar;
+                    Color baseDrawColor;
                     Color drawColor;
 
                     //Exception for literals
@@ -2758,27 +2764,28 @@ namespace RogueBasin {
                     {
                         screenChar = map.mapSquares[i, j].terrainLiteral;
                         if (screenChar >= 'A' && screenChar <= 'Z')
-                            drawColor = literalTextColor;
+                            baseDrawColor = literalTextColor;
                         else if (screenChar >= 'a' && screenChar <= 'z')
-                            drawColor = literalTextColor;
+                            baseDrawColor = literalTextColor;
                         else
-                            drawColor = literalColor;
+                            baseDrawColor = literalColor;
                     }
                     else
                     {
                         screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
-                        drawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
+                        baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
                     }
-                   
-                    if (map.mapSquares[i, j].InPlayerFOV || Game.Dungeon.Player.LocationLevel == 0)
+
+                    //In FlatlineRL you can normally see the whole map
+                    if (map.mapSquares[i, j].InPlayerFOV || SeeAllMap)
                     {
                         //In FOV or in town
-                        //rootConsole.ForegroundColor = drawColor;
+                        drawColor = baseDrawColor;
                     }
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.4);
+                        drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Black, 0.4);
 
                         //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                     }
@@ -2786,7 +2793,7 @@ namespace RogueBasin {
                     {
                         //Never in FOV
                         if (DebugMode)
-                            drawColor = Color.Interpolate(drawColor, ColorPresets.Black, 0.6);
+                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Black, 0.6);
                         else
                             drawColor = hiddenColor;
                     }
@@ -2797,27 +2804,21 @@ namespace RogueBasin {
                         //Draw player FOV explicitally
                         if (map.mapSquares[i, j].InPlayerFOV)
                         {
-                            drawColor = Color.Interpolate(drawColor, ColorPresets.Blue, 0.6);
+                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Blue, 0.6);
                         }
 
 
                         //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
-                            drawColor = Color.Interpolate(drawColor, ColorPresets.Red, 0.6);
+                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Red, 0.6);
                         }
 
                         //Draw sounds
                         if (map.mapSquares[i, j].SoundMag > 0.0001)
                         {
-                            drawColor = Color.Interpolate(drawColor, ColorPresets.Yellow, map.mapSquares[i, j].SoundMag);
+                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Yellow, map.mapSquares[i, j].SoundMag);
                         }
-                    }
-
-                    //In FlatlineRL you can normally see the whole map
-                    if (SeeAllMap)
-                    {
-                        rootConsole.ForegroundColor = drawColor;
                     }
 
                     rootConsole.ForegroundColor = drawColor;

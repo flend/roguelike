@@ -2315,7 +2315,7 @@ namespace RogueBasin
                 Game.Dungeon.Player.StartGameSetup();
 
                 //Move the player to the start location, triggering any triggers etc.
-                Game.Dungeon.PCMove(0, 0);
+                Game.Dungeon.MoveToFirstMission();
 
                 //Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
 
