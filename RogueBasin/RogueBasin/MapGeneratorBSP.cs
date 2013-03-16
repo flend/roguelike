@@ -190,6 +190,40 @@ namespace RogueBasin
             return retPoint;
         }
 
+        public List<RoomCoords> FindAllRooms()
+        {
+            return FindAllRoomsRecurse(new List<RoomCoords>());
+        }
+
+        private List<RoomCoords> FindAllRoomsRecurse(List<RoomCoords> allRooms)
+        {
+            //Go down the tree to a random left. When there find a random point in the room and return it
+            Random rand = MapGeneratorBSP.rand;
+
+            PointInRoom retPoint = null;
+
+            if (childLeft != null)
+            {
+                allRooms = childLeft.FindAllRoomsRecurse(allRooms);
+            }
+
+            if (childRight != null)
+            {
+                allRooms = childRight.FindAllRoomsRecurse(allRooms);
+            }
+
+            if (childRight == null && childLeft == null)
+            {
+                //We are leaf
+                allRooms.Add(new RoomCoords(roomX, roomY, roomWidth, roomHeight));
+            }
+
+            return allRooms;
+
+        }
+
+
+
         public void Split() {
 
             Random rand = MapGeneratorBSP.rand;
@@ -869,6 +903,8 @@ namespace RogueBasin
         {
             return baseMap.PCStartLocation;
         }
+
+
 
         private Point AddEntryRoomForPlayer()
         {
@@ -1620,6 +1656,11 @@ namespace RogueBasin
         internal void AddExitStaircaseOnly(int levelNo)
         {
             Game.Dungeon.AddFeature(new Features.StaircaseExit(levelNo), levelNo, upStaircase);
+        }
+
+        public override List<RoomCoords> GetAllRooms()
+        {
+            return rootNode.FindAllRooms();
         }
     }
 }

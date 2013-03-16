@@ -1030,6 +1030,15 @@ namespace RogueBasin
                 }
             }
 
+            //If we are permanently blocked, return to patrol state
+            if (nextStep.x == -1 && nextStep.y == -1)
+            {
+                LogFile.Log.LogEntryDebug(this.Representation + " permanently blocked (door), returning to patrol ", LogDebugLevel.Medium);
+                AIState = SimpleAIStates.Patrol;
+                return;
+
+            }
+
             //Otherwise (or if the creature died), move towards it (or its corpse)
             if(WillPursue()) {
                 
@@ -1060,6 +1069,14 @@ namespace RogueBasin
 
             //Find location of next step on the path towards them
             Point nextStep = Game.Dungeon.GetPathTo(this, player);
+
+            if (nextStep.x == -1 || nextStep.y == -1)
+            {
+                //No path
+                //Need to check this really
+                AIState = SimpleAIStates.Patrol;
+                return;
+            }
 
             bool moveIntoSquare = true;
 

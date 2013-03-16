@@ -260,7 +260,11 @@ namespace RogueBasin
             }
              
             //Find location of next step on the path towards them
-            Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+            Point nextStep;
+            if (!CanOpenDoors())
+                nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+            else
+                nextStep = Game.Dungeon.GetPathToOpenedDoors(this, newTarget);
 
             bool moveIntoSquare = true;
 
@@ -294,6 +298,15 @@ namespace RogueBasin
                     //Missile animation
                     Screen.Instance.DrawMissileAttack(this, newTarget, result, GetWeaponColor());
                 }
+            }
+
+            //If we are permanently blocked, return to patrol state
+            if (nextStep.x == -1 && nextStep.y == -1)
+            {
+                LogFile.Log.LogEntryDebug(this.Representation + " permanently blocked (door), returning to patrol ", LogDebugLevel.Medium);
+                AIState = SimpleAIStates.Patrol;
+                return;
+
             }
 
             //Otherwise (or if the creature died), move towards it (or its corpse)

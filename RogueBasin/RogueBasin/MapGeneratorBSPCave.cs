@@ -668,5 +668,10 @@ namespace RogueBasin
         {
             Game.Dungeon.AddFeature(new Features.StaircaseExit(levelNo), levelNo, upStaircase);
         }
+
+        public override List<RoomCoords> GetAllRooms()
+        {
+            return rootNode.FindAllRooms();
+        }
     }
 }

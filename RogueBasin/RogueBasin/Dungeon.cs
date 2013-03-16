@@ -2762,8 +2762,8 @@ namespace RogueBasin
                     if (!pathBlockedByCreature)
                     {
                         //This gets thrown a lot mainly when you cheat
-                        LogFile.Log.LogEntry("Path blocked in connected dungeon!");
-                        return originCreature.LocationMap;
+                        LogFile.Log.LogEntryDebug("Blocked path blocked detected!", LogDebugLevel.Low);
+                        return new Point(-1, -1);
                         //throw new ApplicationException("Path blocked in connected dungeon!");
                         
                         /*
@@ -3617,6 +3617,45 @@ namespace RogueBasin
                 //Open the door
                 levels[level].mapSquares[doorLocation.x, doorLocation.y].Terrain = MapTerrain.OpenDoor;
                 levels[level].mapSquares[doorLocation.x, doorLocation.y].SetOpen();
+
+                //This is very inefficient since it resets the whole level. Could just do the door
+                //RefreshTCODMap(level);
+
+                //More efficient version
+                levelTCODMaps[level].SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
+
+
+                return true;
+            }
+            catch (ApplicationException)
+            {
+                //Not a valid location - should not occur
+                LogFile.Log.LogEntry("Non-valid location for door requested");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Close the door at the requested location. Returns true if the door was successfully opened
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="doorLocation"></param>
+        /// <returns></returns>
+        internal bool CloseDoor(int level, Point doorLocation)
+        {
+            try
+            {
+                //Check there is a door here                
+                MapTerrain doorTerrain = GetTerrainAtPoint(player.LocationLevel, doorLocation);
+
+                if (doorTerrain != MapTerrain.OpenDoor)
+                {
+                    return false;
+                }
+
+                //Open the door
+                levels[level].mapSquares[doorLocation.x, doorLocation.y].Terrain = MapTerrain.ClosedDoor;
+                levels[level].mapSquares[doorLocation.x, doorLocation.y].SetBlocking();
 
                 //This is very inefficient since it resets the whole level. Could just do the door
                 //RefreshTCODMap(level);

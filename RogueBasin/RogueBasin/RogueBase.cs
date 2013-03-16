@@ -303,6 +303,16 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                case 'c':
+                                case 'C':
+                                    //Close door
+                                    timeAdvances = PlayerCloseDoor();
+                                    if (!timeAdvances)
+                                        Screen.Instance.Update();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
                                 case 'f':
                                 //case 'Z':
                                     //Fire weapon
@@ -342,6 +352,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                    /*
                                 case 'c':
                                 case 'C':
                                     //Charm creature
@@ -351,7 +362,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-
+                                    */
 
                                 case ',':
                                 case 'g':
@@ -1144,6 +1155,36 @@ namespace RogueBasin
             if (!success)
             {
                 Game.MessageQueue.AddMessage("Not a closed door!");
+                return false;
+            }
+            return true;
+        }
+
+        private bool PlayerCloseDoor()
+        {
+            //Ask user for a direction
+            Game.MessageQueue.AddMessage("Select a direction:");
+            Screen.Instance.Update();
+
+            //Get direction
+            Point direction = new Point(0, 0);
+            bool gotDirection = GetDirectionKeypress(out direction);
+
+            if (!gotDirection)
+            {
+                Game.MessageQueue.AddMessage("No direction");
+                return false;
+            }
+
+            //Check there is a door here
+
+            Player player = Game.Dungeon.Player;
+            Point doorLocation = new Point(direction.x + player.LocationMap.x, direction.y + player.LocationMap.y);
+            bool success = Game.Dungeon.CloseDoor(player.LocationLevel, doorLocation);
+
+            if (!success)
+            {
+                Game.MessageQueue.AddMessage("Not an open door!");
                 return false;
             }
             return true;

@@ -4,6 +4,41 @@ using System.Text;
 
 namespace RogueBasin
 {
+    public class RoomCoords
+    {
+        public int RoomX { get; set; }
+        public int RoomY { get; set; }
+        public int RoomWidth { get; set; }
+        public int RoomHeight { get; set; }
+
+        protected int roomFreeArea;
+
+        /// <summary>
+        /// How much free space is in the room
+        /// </summary>
+        public int RoomFreeArea { get { return roomFreeArea; } }
+
+        /// <summary>
+        /// roomX, roomY should be TL wall, roomX + roomWidth, roomY + roomHeight should be BR wall
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="roomX"></param>
+        /// <param name="roomY"></param>
+        /// <param name="roomWidth"></param>
+        /// <param name="roomHeight"></param>
+        public RoomCoords(int roomX, int roomY, int roomWidth, int roomHeight) {
+
+            this.RoomX = roomX;
+            this.RoomY = roomY;
+            this.RoomWidth = roomWidth;
+            this.RoomHeight = roomHeight;
+
+            this.roomFreeArea = (roomHeight - 2) * (roomWidth - 2);
+        }
+
+    }
+
 
     public class PointInRoom {
 
@@ -86,5 +121,11 @@ namespace RogueBasin
         public abstract CreaturePatrol CreatureStartPosAndWaypointsSisterRooms(bool clockwisePatrol, int numberOfWayPoints);
 
         public abstract Point GetPlayerStartLocation();
+
+        /// <summary>
+        /// Return coords of all rooms, for sensible / gauranteed distribution of creatures
+        /// </summary>
+        /// <returns></returns>
+        public abstract List<RoomCoords> GetAllRooms();
     }
 }
