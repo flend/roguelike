@@ -72,7 +72,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "nano-repair kit"; }
+            get { return "Nano-repair kit"; }
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "nano-repair kits"; }
+            get { return "Nano-repair kits"; }
         }
 
         protected override char GetRepresentation()

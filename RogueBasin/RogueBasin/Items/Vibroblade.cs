@@ -85,7 +85,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "vibroblade"; }
+            get { return "Vibroblade"; }
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "vibroblades"; }
+            get { return "Vibroblades"; }
         }
 
         protected override char GetRepresentation()

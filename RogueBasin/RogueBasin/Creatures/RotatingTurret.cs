@@ -130,12 +130,12 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "rotating turret"; } }
+        public override string SingleDescription { get { return "Rotating turret"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "rotating turrets"; } }
+        public override string GroupDescription { get { return "Rotating turrets"; } }
 
         protected override char GetRepresentation()
         {

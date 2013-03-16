@@ -362,6 +362,15 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
+                                case 'x':
+                                    //Examine
+                                    timeAdvances = Examine();
+                                    if (!timeAdvances)
+                                        Screen.Instance.Update();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
+
                                     /*
                                 case 'x':
                                 case 'X':
@@ -1615,6 +1624,23 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Examine using the target. Returns if time passes.
+        /// </summary>
+        /// <returns></returns>
+        private bool Examine()
+        {
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+            Point target = new Point();
+            bool targettingSuccess = true;
+
+            targettingSuccess = TargetAttack(out target, 0, TargettingType.Line, 0, 'x', currentFOV);
+
+            return false;
+        }
+
+
+        /// <summary>
         /// Fire weapon. Returns if time passes.
         /// </summary>
         /// <returns></returns>
@@ -1990,6 +2016,15 @@ namespace RogueBasin
                     }
                     else
                         Screen.Instance.SetTargetInRange = false;
+
+                    //Update the last creature looked at
+                    SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
+                    Screen.Instance.CreatureToView = sqC.monster;
+                    if(sqC.items.Count > 0)
+                        Screen.Instance.ItemToView = sqC.items[0];
+                    else
+                        Screen.Instance.ItemToView = null;
+                    // (may reset to null)
 
                     //Update screen
                     Screen.Instance.Target = newPoint;

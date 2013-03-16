@@ -749,6 +749,15 @@ namespace RogueBasin
             return false;
         }
 
+        /// <summary>
+        /// Are we on patrol (i.e. not attacking?) ? Highlight on the map
+        /// </summary>
+        /// <returns></returns>
+        virtual public bool InPursuit()
+        {
+            return false;
+        }
+
         public virtual bool ShowHeading() {
             return true;
         }

@@ -41,10 +41,16 @@ namespace RogueBasin
             GameDifficultyString.Add(GameDifficulty.Hard, "Hard");
         }
 
+        public static void OverrideTerrainChar(MapTerrain terrain, char c)
+        {
+            TerrainChars[terrain] = c;
+        }
+
         private static void SetupTerrainChars()
         {
             TerrainChars.Add(MapTerrain.Empty, '.');
             TerrainChars.Add(MapTerrain.Wall, '#');
+            
             TerrainChars.Add(MapTerrain.HellWall, '#');
             TerrainChars.Add(MapTerrain.SkeletonWall, '8');
             TerrainChars.Add(MapTerrain.SkeletonWallWhite, '8');

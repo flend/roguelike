@@ -148,7 +148,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "shotgun"; }
+            get { return "Shotgun"; }
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "shotguns"; }
+            get { return "Shotguns"; }
         }
 
         protected override char GetRepresentation()

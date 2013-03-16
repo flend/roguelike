@@ -45,6 +45,8 @@ namespace RogueBasin
         /// </summary>
         public Player player = null;
 
+        public List<Item> items = new List<Item>();
+
         /// <summary>
         /// Set if no monster or player
         /// </summary>
@@ -1680,6 +1682,17 @@ namespace RogueBasin
                     creature.LocationMap.x == location.x && creature.LocationMap.y == location.y)
                 {
                     contents.monster = creature;
+                    break;
+                }
+            }
+
+            //Check creature that be blocking
+            foreach (Item item in items)
+            {
+                if (item.LocationLevel == level &&
+                    item.LocationMap.x == location.x && item.LocationMap.y == location.y && item.InInventory == false)
+                {
+                    contents.items.Add(item);
                     break;
                 }
             }
@@ -5295,6 +5308,8 @@ namespace RogueBasin
             PlayerActionsBetweenMissions();
             DungeonActionsBetweenMissions();
 
+            SelectTilesetForMission(newMissionLevel);
+
             //Move player to new level
 
             player.LocationLevel = newMissionLevel;
@@ -5302,6 +5317,46 @@ namespace RogueBasin
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0);
+        }
+
+        /// <summary>
+        /// Bit of a hack, override the tileset per level
+        /// </summary>
+        private void SelectTilesetForMission(int level)
+        {
+
+            /*
+            switch (level)
+            {
+                case 0:
+                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\x08');
+                    break;
+                case 1:
+                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xa');
+                    break;
+
+                case 2:
+                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xdb');
+                    break;
+
+                    //quite like this one
+                case 3:
+                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb0');
+                    break;
+
+                case 4:
+                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb1');
+                    break;
+
+                case 5:
+                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb2');
+                    break;
+
+                default:
+                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '#');
+                    break;
+            }
+             */
         }
 
         public void PlayerActionsBetweenMissions()
@@ -5325,7 +5380,7 @@ namespace RogueBasin
         {
             //For going to a new level this is no big deal, but it is important if we are respawning
             ResetSounds();
-            
+           
         }
 
         /// <summary>

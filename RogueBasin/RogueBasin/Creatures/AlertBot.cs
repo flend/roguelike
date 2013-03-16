@@ -102,12 +102,12 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "alert bot"; } }
+        public override string SingleDescription { get { return "Alert bot"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "alert bots"; } }
+        public override string GroupDescription { get { return "Alert bots"; } }
 
         protected override char GetRepresentation()
         {

@@ -1426,5 +1426,10 @@ namespace RogueBasin
         {
             return AIState == SimpleAIStates.Patrol;
         }
+
+        public override bool InPursuit()
+        {
+            return AIState == SimpleAIStates.Pursuit;
+        }
     }
 }

@@ -78,7 +78,8 @@ namespace RogueBasin {
         Color inRangeBackground = ColorPresets.DeepSkyBlue;
         Color inRangeAndAggressiveBackground = ColorPresets.Purple;
         Color stunnedBackground = ColorPresets.DarkCyan;
-        Color aggressiveBackground = ColorPresets.DarkRed;
+        Color investigateBackground = ColorPresets.DarkGreen;
+        Color pursuitBackground = ColorPresets.DarkRed;
         Color normalBackground = ColorPresets.Black;
         Color normalForeground = ColorPresets.White;
 
@@ -106,6 +107,10 @@ namespace RogueBasin {
         Point trainingTL;
         Point trainingTR;
         Point trainingBL;
+
+        //For examining
+        public Monster CreatureToView { get; set; }
+        public Item ItemToView { get; set; }
 
         bool displayInventory;
 
@@ -2151,19 +2156,23 @@ namespace RogueBasin {
                 
             hitpointsOffset = new Point(0, 5);
             Point weaponOffset = new Point(0, 8);
-            Point utilityOffset = new Point(0, 15);
-            Point gameDataOffset = new Point(0, 20);
+            Point utilityOffset = new Point(0, 13);
+            Point viewOffset = new Point(0, 18);
 
+            Point gameDataOffset = new Point(0, 23);
             //Draw HP Status
 
-            int hpBarLength = 11;
+            int hpBarLength = 10;
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            int hpBarEntries = (int)Math.Ceiling(hpBarLength * playerHPRatio) - 1;
+            int hpBarEntries = (int)Math.Ceiling(hpBarLength * playerHPRatio);
+            
+            //It's easy for the player - make sure we're exact
+            hpBarEntries = player.Hitpoints;
 
             rootConsole.ForegroundColor = statsColor;
             rootConsole.PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
-            
-            for (int i = 0; i < hpBarEntries; i++)
+
+            for (int i = 0; i < hpBarLength; i++)
             {
                 if (i < hpBarEntries)
                 {
@@ -2172,7 +2181,7 @@ namespace RogueBasin {
                 }
                 else
                 {
-                    rootConsole.ForegroundColor = ColorPresets.Red;
+                    rootConsole.ForegroundColor = ColorPresets.Gray;
                     rootConsole.PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*');
                 }
             }
@@ -2200,11 +2209,11 @@ namespace RogueBasin {
                     rootConsole.PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
         
                     //TODO infinite ammo?
-                    int ammoBarLength = 11;
+                    int ammoBarLength = 10;
                     double weaponAmmoRatio = weaponE.RemainingAmmo() / (double) weaponE.MaxAmmo();
-                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio) - 1;
+                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
 
-                    for (int i = 0; i < ammoBarEntries; i++)
+                    for (int i = 0; i < ammoBarLength; i++)
                     {
                         if (i < ammoBarEntries)
                         {
@@ -2287,6 +2296,62 @@ namespace RogueBasin {
             {
                 utilityStr = "Nothing";
                 rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
+            }
+
+            //Draw what we can see
+            
+            //Creature takes precidence
+
+            string viewStr = "Target: ";
+            rootConsole.PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
+
+            if (CreatureToView != null)
+            {
+                String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
+                rootConsole.ForegroundColor = CreatureToView.RepresentationColor();
+                rootConsole.PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+                rootConsole.ForegroundColor = statsColor;
+
+                //Monster hp
+
+                int mhpBarLength = 10;
+                double mplayerHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
+                int mhpBarEntries = (int)Math.Ceiling(mhpBarLength * mplayerHPRatio);
+
+                rootConsole.ForegroundColor = statsColor;
+                rootConsole.PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+
+                for (int i = 0; i < mhpBarLength; i++)
+                {
+                    if (i < mhpBarEntries)
+                    {
+                        rootConsole.ForegroundColor = ColorPresets.Red;
+                        rootConsole.PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*');
+                    }
+                    else
+                    {
+                        rootConsole.ForegroundColor = ColorPresets.Gray;
+                        rootConsole.PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*');
+                    }
+                }
+            }
+            else if (ItemToView != null)
+            {
+                String nameStr = ItemToView.SingleItemDescription;// +"(" + ItemToView.Representation + ")";
+                rootConsole.ForegroundColor = ItemToView.RepresentationColor();
+                rootConsole.PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                rootConsole.ForegroundColor = statsColor;
+
+                IEquippableItem itemE = ItemToView as IEquippableItem;
+                if (itemE != null)
+                {
+                    EquipmentSlot weaponSlot = itemE.EquipmentSlots.Find(x => x == EquipmentSlot.Weapon);
+                    if(weaponSlot != null) {
+                        rootConsole.PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
+                    }
+                    else
+                        rootConsole.PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
+                }
             }
 
             //Game data
@@ -2488,7 +2553,21 @@ namespace RogueBasin {
 
                 if (creature.ShowHeading())
                 {
-                    List<Point> headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 3);
+                    List<Point> headingMarkers;
+
+                    if (creature.FOVType() == CreatureFOV.CreatureFOVType.Triangular)
+                    {
+                        headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 3);
+                    }
+                    else
+                    {
+                        //Base
+                        headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 1);
+                        
+                        //Reverse first one
+                        Point oppositeMarker = new Point(monsterX - (headingMarkers[0].x - monsterX), monsterY - (headingMarkers[0].y - monsterY));
+                        headingMarkers.Add(oppositeMarker);
+                    }
 
                     foreach (Point headingLoc in headingMarkers)
                     {
@@ -2629,7 +2708,7 @@ namespace RogueBasin {
                             }
 
                             //Also agressive
-                            if (newBackground == true && !creature.OnPatrol())
+                            if (newBackground == true && creature.InPursuit())
                             {
                                 rootConsole.BackgroundColor = inRangeAndAggressiveBackground;
                             }
@@ -2638,9 +2717,14 @@ namespace RogueBasin {
 
                     if (newBackground == false)
                     {
-                        if (!creature.OnPatrol())
+                        if (creature.InPursuit())
                         {
-                            rootConsole.BackgroundColor = aggressiveBackground;
+                            rootConsole.BackgroundColor = pursuitBackground;
+                            newBackground = true;
+                        }
+                        else if (!creature.OnPatrol())
+                        {
+                            rootConsole.BackgroundColor = investigateBackground;
                             newBackground = true;
                         }
                         else if (creature.Unique)
