@@ -37,7 +37,7 @@ namespace RogueBasin
 
         public static double NextGaussianDouble()
         {
-            double U, u, v, S;
+            double u, v, S;
 
             do
             {

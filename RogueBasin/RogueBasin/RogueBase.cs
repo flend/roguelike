@@ -344,7 +344,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-
+                                    /*
                                 case 'x':
                                 case 'X':
                                     //Recast last spells
@@ -353,7 +353,7 @@ namespace RogueBasin
                                         Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
-                                    break;
+                                    break;*/
 
                                     /*
                                 case 'c':
@@ -382,7 +382,7 @@ namespace RogueBasin
                                     // Do nothing
                                     timeAdvances = DoNothing();
                                     break;
-
+                                    
                                 case '>':
                                 case '<':
                                     //Interact with feature
@@ -394,15 +394,15 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
 
                                     break;
-
+                                    /*
                                 case 'd':
                                 case 'D':
                                     //Drop items if in town
                                     //DropItems();
                                     Screen.Instance.Update();
                                     timeAdvances = false;
-                                    break;
-
+                                    break;*/
+                                    /*
                                 case 'i':
                                 case 'I':
                                     //Use an inventory item
@@ -447,7 +447,7 @@ namespace RogueBasin
                                     DisableSpecialMoveMovieScreen();
                                     Screen.Instance.Update();
                                     timeAdvances = false;
-                                    break;
+                                    break;*/
 
                                 case 'M':
                                     SetMsgHistoryScreen();
@@ -516,9 +516,8 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     break;
                                 case 'y':
-                                    //teleport to stairs
-                                    TeleportToUpStairs();
-                                    Screen.Instance.Update();
+                                    //next mission
+                                    Game.Dungeon.MoveToNextMission();
                                     break;
 
                                 case 'Y':
@@ -1391,8 +1390,9 @@ namespace RogueBasin
                 //Find spell range
                 int range = toCast.GetRange();
                 TargettingType targetType = toCast.TargetType();
-
-                targettingSuccess = TargetAttack(out target, range, targetType, 0, 'z');
+                //Calculate FOV
+                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+                targettingSuccess = TargetAttack(out target, range, targetType, 0, 'z', currentFOV);
             }
 
             //User exited
@@ -1488,17 +1488,20 @@ namespace RogueBasin
             TargettingType targetType = toThrow.TargetTypeThrow();
             double angle = 0.0; //no shotgun angle for line targets
 
-            targettingSuccess = TargetAttack(out target, range, targetType, angle, confirmChar);
+            //Calculate FOV
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+            targettingSuccess = TargetAttack(out target, range, targetType, angle, confirmChar, currentFOV);
 
             //User exited
             if (!targettingSuccess)
                 return false;
 
             //Check we are in range of target (not done above)
-            if (Dungeon.GetDistanceBetween(player.LocationMap, target) > range)
+            if (!Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
             {
                 Game.MessageQueue.AddMessage("Out of range!");
-                LogFile.Log.LogEntryDebug("Out of range (throw) for " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Out of range for " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
 
                 return false;
             }
@@ -1563,12 +1566,15 @@ namespace RogueBasin
             Point target = new Point();
             bool targettingSuccess = true;
 
-            //Find spell range
+            //Find weapon range
             int range = weapon.RangeFire();
             TargettingType targetType = weapon.TargetTypeFire();
             double spreadAngle = weapon.ShotgunSpreadAngle();
 
-            targettingSuccess = TargetAttack(out target, range, targetType, spreadAngle, 'f');
+            //Calculate FOV
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+            targettingSuccess = TargetAttack(out target, range, targetType, spreadAngle, 'f', currentFOV);
 
             //User exited
             if (!targettingSuccess)
@@ -1584,7 +1590,7 @@ namespace RogueBasin
             }
 
             //Check we are in range of target (not done above)
-            if (Dungeon.GetDistanceBetween(player.LocationMap, target) > range)
+            if (!Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
             {
                 Game.MessageQueue.AddMessage("Out of range!");
                 LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
@@ -1787,7 +1793,7 @@ namespace RogueBasin
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private bool TargetAttack(out Point target, int range, TargettingType targetType, double spreadAngle, char confirmChar)
+        private bool TargetAttack(out Point target, int range, TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
             Player player = Game.Dungeon.Player;
 
@@ -1800,7 +1806,7 @@ namespace RogueBasin
 
             Point startPoint;
 
-            if (Game.Dungeon.GetDistanceBetween(player, closeCreature) < range)
+            if (Dungeon.TestRange(Game.Dungeon.Player, closeCreature, range))
             {
                 startPoint = new Point(closeCreature.LocationMap.x, closeCreature.LocationMap.y);
             }
@@ -1828,7 +1834,7 @@ namespace RogueBasin
             */
             //Get the desired target from the player
 
-            return GetTargetFromPlayer(startPoint, out target, targetType, range, spreadAngle, confirmChar);
+            return GetTargetFromPlayer(startPoint, out target, targetType, range, spreadAngle, confirmChar, currentFOV);
         }
 
         /// <summary>
@@ -1836,7 +1842,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range, double spreadAngle, char confirmChar)
+        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
@@ -1845,12 +1851,12 @@ namespace RogueBasin
             Screen.Instance.TargetRange = range;
             Screen.Instance.TargetPermissiveAngle = spreadAngle;
 
-            if (Dungeon.GetDistanceBetween(start, Game.Dungeon.Player.LocationMap) > range)
+            if (Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
             {
-                Screen.Instance.SetTargetInRange = false;
+                Screen.Instance.SetTargetInRange = true;
             }
             else
-                Screen.Instance.SetTargetInRange = true;
+                Screen.Instance.SetTargetInRange = false;
 
             Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
             Screen.Instance.Update();
@@ -1908,12 +1914,12 @@ namespace RogueBasin
                     //Otherwise OK
                     target = newPoint;
 
-                    if (Dungeon.GetDistanceBetween(newPoint, Game.Dungeon.Player.LocationMap) > range)
+                    if (Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, range, currentFOV))
                     {
-                        Screen.Instance.SetTargetInRange = false;
+                        Screen.Instance.SetTargetInRange = true;
                     }
                     else
-                        Screen.Instance.SetTargetInRange = true;
+                        Screen.Instance.SetTargetInRange = false;
 
                     //Update screen
                     Screen.Instance.Target = newPoint;

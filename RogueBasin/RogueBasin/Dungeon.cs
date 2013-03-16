@@ -4538,8 +4538,7 @@ namespace RogueBasin
             //End any events on any remaining monsters
             RemoveAllMonsterEffects();
 
-            //Heal player
-            player.Hitpoints = player.MaxHitpoints;
+            PlayerActionsBetweenMissions();
             
 
             //Run a normal turn to set off any triggers
@@ -5255,8 +5254,7 @@ namespace RogueBasin
                 return;
             }
 
-            //Heal the player
-            player.AddEffect(new PlayerEffects.Healing(player.MaxHitpoints));
+            PlayerActionsBetweenMissions();
 
             //Move player to new level
 
@@ -5265,6 +5263,16 @@ namespace RogueBasin
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0);
+        }
+
+        public void PlayerActionsBetweenMissions()
+        {
+
+            //Heal the player
+            player.AddEffect(new PlayerEffects.Healing(player.MaxHitpoints));
+
+            //Remove items
+            player.UnequipAndDestoryAllItems();
         }
 
         /// <summary>
@@ -5402,6 +5410,85 @@ namespace RogueBasin
             }
 
             return adjacentSqFree;
+        }
+
+        /// <summary>
+        /// Range test for consistency
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="start"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        internal static bool TestRange(Point x1, Point x2, double range)
+        {
+            if (Dungeon.GetDistanceBetween(x1, x2) > range + 0.1)
+            {
+                return false;
+            }
+            else
+                return true;
+
+        }
+
+        internal static bool TestRange(Point x1, Point x2, int range)
+        {
+            return TestRange(x1, x2, (double)range);
+
+        }
+
+        internal static bool TestRange(MapObject x1, MapObject x2, int range)
+        {
+            return TestRange(x1, x2, (double)range);
+
+        }
+        
+        internal static bool TestRange(MapObject x1, MapObject x2, double range)
+        {
+            if (Dungeon.GetDistanceBetween(x1.LocationMap, x2.LocationMap) > range + 0.1)
+            {
+                return false;
+            }
+            else
+                return true;
+
+        }
+
+        /// <summary>
+        /// Test if target is in range of shooter and in FOV (normal gun check). Needs a calculated fov for shooter
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="x2"></param>
+        /// <param name="range"></param>
+        /// <param name="fov"></param>
+        /// <returns></returns>
+        internal static bool TestRangeFOVForWeapon(MapObject shooter, MapObject target, double range, CreatureFOV fov)
+        {
+            //Check range
+            if(!Dungeon.TestRange(shooter, target, range)) {
+                return false;
+            }
+            //Check FOV
+            return fov.CheckTileFOV(target.LocationMap.x, target.LocationMap.y);
+                
+        }
+
+        /// <summary>
+        /// Test if target is in range of shooter and in FOV (normal gun check). Needs a calculated fov for shooter
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="x2"></param>
+        /// <param name="range"></param>
+        /// <param name="fov"></param>
+        /// <returns></returns>
+        internal static bool TestRangeFOVForWeapon(MapObject shooter, Point target, double range, CreatureFOV fov)
+        {
+            //Check range
+            if(!Dungeon.TestRange(shooter.LocationMap, target, range)) {
+                return false;
+            }
+            //Check FOV
+            return fov.CheckTileFOV(target.x, target.y);
+                
         }
     }
 }

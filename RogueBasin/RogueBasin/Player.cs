@@ -855,8 +855,9 @@ namespace RogueBasin
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
    
+                    //No XP in flatline
                     //Add XP
-                    AddXPPlayerAttack(monster, magicUse);
+                    //AddXPPlayerAttack(monster, magicUse);
 
                     return CombatResults.DefenderDied;
                 }
@@ -1472,11 +1473,23 @@ namespace RogueBasin
 
         }
 
+        public void UnequipAndDestoryAllItems()
+        {
+            foreach (EquipmentSlotInfo es in EquipmentSlots)
+            {
+                UnequipAndDestroyItem(es.equippedItem);
+            }
+        }
+
         /// <summary>
         /// FlatlineRL - unequip item and remove it from the game
         /// </summary>
         public void UnequipAndDestroyItem(Item item)
         {
+            if (item == null)
+                return;
+
+
             //Run unequip routine
             IEquippableItem equipItem = item as IEquippableItem;
             equipItem.UnEquip(this);

@@ -177,7 +177,7 @@ namespace RogueBasin
             }
 
             //Close enough to fire. Not backing away (either far enough away or chose not to)
-            else if (range < GetMissileRange() + 0.005 && WillAttack())
+            else if (Dungeon.TestRange(this, newTarget, GetMissileRange()) && WillAttack())
             {
                 //In range
 

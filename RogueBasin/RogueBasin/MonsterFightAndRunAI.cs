@@ -79,6 +79,11 @@ namespace RogueBasin
         /// </summary>
         protected bool waypointsInc = true;
 
+        /// <summary>
+        /// If heading it set to sound, don't patrol (even if you're on always patrol), this give you one chance to shoot
+        /// </summary>
+        protected bool headingSetToSound = false;
+
         public MonsterFightAndRunAI()
         {
             AIState = SimpleAIStates.Patrol;
@@ -564,12 +569,15 @@ namespace RogueBasin
 
             //If nothing else happened, do the Patrol action
             //Don't if we moved in response to a sound
-            if ((AIState == SimpleAIStates.Patrol && !moveFollowingSound) || WillAlwaysPatrol())
+            if ((AIState == SimpleAIStates.Patrol && !moveFollowingSound) || (WillAlwaysPatrol() && !headingSetToSound))
             {
                 //We haven't got anything to do and we can't see the PC
                 //Do normal movement
                 DoPatrol();
             }
+
+            //Reset the skip-patrol if we looked at sound flag
+            headingSetToSound = false;
         }
 
         /// <summary>
@@ -628,6 +636,7 @@ namespace RogueBasin
                 SetHeadingToMapSquare(nextStep);
                 LogFile.Log.LogEntryDebug(this.Representation + " (non-pursue) changing heading only for sound " + currentSound, LogDebugLevel.Medium);
                 ResetFollowingSound();
+                headingSetToSound = true;
                 AIState = SimpleAIStates.Patrol;
 
                 return true;

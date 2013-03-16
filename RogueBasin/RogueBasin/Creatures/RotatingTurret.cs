@@ -10,8 +10,6 @@ namespace RogueBasin.Creatures
     /// </summary>
     public class RotatingTurret : MonsterThrowAndRunAI
     {
-        const int classDeltaHitpoints = 5;
-        const int classMinHitpoints = 5;
 
         public RotatingTurret()
         {
@@ -33,7 +31,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return classMinHitpoints + Game.Random.Next(classDeltaHitpoints) + 1;
+            return 5;
         }
 
         /// <summary>
@@ -67,7 +65,7 @@ namespace RogueBasin.Creatures
 
         protected override double GetMissileRange()
         {
-            return 5.0;
+            return 8.0;
         }
 
         protected override int GetChanceToBackAway()

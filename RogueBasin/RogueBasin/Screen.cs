@@ -75,6 +75,7 @@ namespace RogueBasin {
         Color charmBackground = ColorPresets.DarkKhaki;
         Color passiveBackground = ColorPresets.DarkMagenta;
         Color uniqueBackground = ColorPresets.DarkCyan;
+        Color inRangeBackground = ColorPresets.DeepSkyBlue;
         Color stunnedBackground = ColorPresets.DarkCyan;
         Color aggressiveBackground = ColorPresets.DarkRed;
         Color normalBackground = ColorPresets.Black;
@@ -2322,6 +2323,14 @@ namespace RogueBasin {
                 //Use the item's colour if it has one
                 Color itemColorToUse = item.GetColour();
 
+                IEquippableItem equipItem = item as IEquippableItem;
+                if (equipItem != null)
+                {
+                    //Show no ammo items in a neutral colour
+                    if (equipItem.HasFireAction() && equipItem.RemainingAmmo() == 0)
+                        itemColorToUse = ColorPresets.Gray;
+                }
+
                 //Color itemColorToUse = itemColor;
 
                 bool drawItem = true;
@@ -2517,6 +2526,9 @@ namespace RogueBasin {
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
                 Color creatureColor = creature.RepresentationColor();
 
+                //Shouldn't really do this here but see if we can get away with it
+                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
                 bool drawCreature = true;
 
                 if (creatureSquare.InPlayerFOV)
@@ -2529,14 +2541,14 @@ namespace RogueBasin {
                     //Not in FOV but seen
                     if (!DebugMode)
                         drawCreature = false;
-                        //creatureColor = hiddenColor;
+                    //creatureColor = hiddenColor;
                 }
                 else
                 {
                     //Never in FOV
-                    if(!DebugMode)
+                    if (!DebugMode)
                         drawCreature = false;
-                    
+
                 }
 
                 //In many levels in FlatlineRL, we can see all the monsters
@@ -2573,19 +2585,62 @@ namespace RogueBasin {
                 if (drawCreature)
                 {
                     rootConsole.ForegroundColor = creatureColor;
+                    bool newBackground = false;
                     //Set background depending on status
                     if (creature.Charmed)
+                    {
                         rootConsole.BackgroundColor = charmBackground;
+                        newBackground = true;
+                    }
                     else if (creature.Passive)
+                    {
                         rootConsole.BackgroundColor = passiveBackground;
+                        newBackground = true;
+                    }
                     else if (creature.StunnedTurns > 0)
+                    {
                         rootConsole.BackgroundColor = stunnedBackground;
-                    else if (!creature.OnPatrol())
-                        rootConsole.BackgroundColor = aggressiveBackground;
-                    else if (creature.Unique)
-                        rootConsole.BackgroundColor = uniqueBackground;
-                    else
-                        rootConsole.BackgroundColor = normalBackground;
+                        newBackground = true;
+                    }
+
+                    if (newBackground == false)
+                    {
+
+                        IEquippableItem weapon = Game.Dungeon.Player.GetEquippedWeapon();
+
+                        if (weapon != null)
+                        {
+
+                            //In range firing
+                            if (weapon.HasFireAction() && Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
+                            {
+                                rootConsole.BackgroundColor = inRangeBackground;
+                                newBackground = true;
+                            }
+                            else
+                            {
+                                //In throwing range
+                                if (weapon.HasThrowAction() && Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
+                                {
+                                    rootConsole.BackgroundColor = inRangeBackground;
+                                    newBackground = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (newBackground == false)
+                    {
+                        if (!creature.OnPatrol())
+                        {
+                            rootConsole.BackgroundColor = aggressiveBackground;
+                            newBackground = true;
+                        }
+                        else if (creature.Unique)
+                            rootConsole.BackgroundColor = uniqueBackground;
+                        else
+                            rootConsole.BackgroundColor = normalBackground;
+                    }
 
                     //Creature
                     int monsterX = mapTopLeft.x + creature.LocationMap.x;
@@ -2593,7 +2648,7 @@ namespace RogueBasin {
 
                     rootConsole.PutChar(monsterX, monsterY, creature.Representation);
 
-                    
+
                 }
             }
 

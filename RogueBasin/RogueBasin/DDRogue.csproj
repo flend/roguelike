@@ -330,7 +330,9 @@
     <Compile Include="Triggers\DungeonEntranceTrigger.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\FirstLevelEntry.cs" />
+    <Compile Include="Triggers\FirstLevelEntry.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\HelpFriend.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -338,6 +340,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Triggers\LichBattle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\Mission1Entry.cs" />
+    <Compile Include="Triggers\Mission2Entry.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Triggers\PrinceInABox.cs" />
@@ -633,5 +639,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\missioncompletewithsecondary0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission01.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\mission10.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\mission20.amf" />
   </ItemGroup>
 </Project>

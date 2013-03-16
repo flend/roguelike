@@ -100,7 +100,7 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Gainsboro;
+            return ColorPresets.HotPink;
         }
 
         public int ArmourClassModifier()
@@ -374,7 +374,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 8;
+            return 5;
         }
 
         /// <summary>

@@ -270,7 +270,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 5;
+            return 3;
         }
 
         /// <summary>
