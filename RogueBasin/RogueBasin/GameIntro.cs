@@ -111,7 +111,7 @@ namespace RogueBasin
             titleCentre = new Point(screen.Width / 2, screen.Height / 2);
             rootConsole.PrintLineRect("Welcome to FlatlineRL!", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
 
-            rootConsole.PrintLineRect("7DRL Competition 2013", titleCentre.x, titleCentre.y + 2, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("7DRL Challenge 2013", titleCentre.x, titleCentre.y + 2, screen.Width, 1, LineAlignment.Center);
             rootConsole.PrintLineRect("by: flend", titleCentre.x, titleCentre.y + 4, screen.Width, 1, LineAlignment.Center);
 
             //Any key to continue

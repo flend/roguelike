@@ -1,5 +1,5 @@
-		      DDRogue - a 7DRL by flend
-		      -------------------------
+                     FlatlineRL - a 7DRL by flend
+                     ----------------------------
 
 Requirements
 ------------
@@ -9,33 +9,29 @@ Microsoft .net v3.5
 Controls
 --------
 
-Movement: Arrow, numpad or vi keys
+        Arrow Keys       -       Move
+           vi Keys
+       . [dot] / 5       -       Do nothing
+        
+            f            -       Fire Weapon
+            U            -       Use Utility Item
 
-.	  Wait
+     Weapon / Utility
+          t / T          -       Throw
 
-Commands
---------
+            x            -       Examine / target
+        
+            F            -       Full screen mode
+            S            -       Save the game
+            Q            -       Quit the game [deletes save]
+            
+            ?            -       Help
 
-,	- pick up item
-<>	- go up or down a staircase
-o	- open door
-
-i	- look at your inventory
-e	- look at your special equipment
-d	- drink a potion
-r	- rename an item (potion)
-
-F	- fullscreen mode switch
-S	- save game
-Q	- quit without saving
 
 Notes
 -----
 
-As is standard in a roguelike, saving your game also quits. When you
-start the game again and give the name of your rogue the save game
-will be loaded. Dying or quitting will delete the save game. You have
-been warned :)
+Look before you laser!
 
 Acknowledgements
 ----------------
@@ -46,6 +42,4 @@ Chris et al - libtcod-net
 Release History
 ---------------
 
-08/03/2009 23:57 Development announced
-
-15/03/2009 23:00 Version 1.0 released
+17/03/2013 23:late Version 1.0 released
