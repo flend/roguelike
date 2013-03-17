@@ -42,6 +42,13 @@ namespace RogueBasin
 
         public long LastCheckedSounds { get; set; }
 
+        public int BlockedOnSoundTurns { get; set; }
+
+        /// <summary>
+        /// How many turns we can stay in the same place until we give up when chasing a sound
+        /// </summary>
+        const int MaxBlockOnSoundTurns = 5;
+
         /// <summary>
         /// Which waypoint are we headed towards next?
         /// </summary>
@@ -53,6 +60,8 @@ namespace RogueBasin
         /// </summary>
         [XmlIgnore]
         protected SoundEffect currentSound;
+
+        
 
         /// <summary>
         /// Longest distance charmed creature will go away from the PC
@@ -603,6 +612,8 @@ namespace RogueBasin
             CurrentSoundInterestScore = interest;
             currentSound = sound;
 
+            BlockedOnSoundTurns = 0;
+
         }
 
         /// <summary>
@@ -627,6 +638,25 @@ namespace RogueBasin
                 AIState = SimpleAIStates.Patrol;
 
                 return false;
+            }
+
+            if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
+            {
+                //Temporarily blocked
+                BlockedOnSoundTurns++;
+                LogFile.Log.LogEntryDebug(this.Representation + " temp blocked on sound " + currentSound + "turns: " + BlockedOnSoundTurns, LogDebugLevel.Low);
+
+                if (BlockedOnSoundTurns > MaxBlockOnSoundTurns)
+                {
+                    //Go back to patrol
+                    LogFile.Log.LogEntryDebug(this.Representation + " blocked for too long on " + currentSound + ". Returning to patrol", LogDebugLevel.Low);
+                    ResetFollowingSound();
+                    AIState = SimpleAIStates.Patrol;
+                    
+                }
+
+                return true;
+
             }
 
             //(if temporarily blocked will just attempt to move onto their own square)
