@@ -4091,46 +4091,67 @@ namespace RogueBasin
 
             //Right now, only seen on a quit (will be changed too)
 
-            //PrincessRL quit screen
+            int noDeaths = this.DungeonInfo.NoDeaths;
+            int noAborts = this.DungeonInfo.TotalAborts;
 
-            //Set up the death screen
+            int totalLevels = 15;
 
-            //Death preamble
+            //How many levels completed?
+            int secondaryObjectives = 0;
+            int primaryObjectives = 0;
+
+            foreach (DungeonProfile profile in this.DungeonInfo.Dungeons)
+            {
+                if (profile.LevelObjectiveComplete)
+                    primaryObjectives++;
+
+                if (profile.LevelObjectiveKillAllMonstersComplete)
+                    secondaryObjectives++;
+            }
+
+            //testable
+            bool wonGame = this.DungeonInfo.Dungeons[totalLevels - 1].LevelObjectiveComplete;
+
+            int primaryObjectiveScore = primaryObjectives * 100;
+            int secondaryObjectiveScore = secondaryObjectives * 100;
+            int killScore = (GetKillRecord().killScore);
             List<string> finalScreen = new List<string>();
 
-            //How many dungeons cleared out
-            int dungeonsCleared = GetTotalDungeonsCleared();
+            finalScreen.Add("Private " + Game.Dungeon.player.Name + " turned tail and ran from Space Hulk OE1x1!");
+            finalScreen.Add("Woe betide him when the sergeant catches up!");
 
-            int dungeonsExplored = GetTotalDungeonsExplored();
-
-
-            finalScreen.Add("Princess " + Game.Dungeon.player.Name + " dropped out of Princess School before graduating.");
             finalScreen.Add("");
 
-            string careerStr = "Who knows what became of her after that?";
-            finalScreen.Add(careerStr);
+            finalScreen.Add("Primary objectives " + primaryObjectives + "/" + totalLevels + ": " + primaryObjectiveScore + " pts");
+            finalScreen.Add("Secondary objectives " + secondaryObjectives + "/" + totalLevels + ": " + secondaryObjectiveScore + " pts");
 
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
             finalScreen.Add("");
 
-            finalScreen.Add("She explored " + dungeonsExplored + " out of 7 dungeons.");
-            finalScreen.Add("She cleared " + dungeonsCleared + " out of 7 dungeons.");
-
+            finalScreen.Add("Robots destroyed: " + killRecord.killCount + ": " + killScore + " pts");
             finalScreen.Add("");
-            finalScreen.Add("She knocked out " + killRecord.killCount + " creatures.");
+
+            finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") + " pts");
 
             finalScreen.Add("");
             finalScreen.Add("Thanks for playing! -flend");
 
             Screen.Instance.DrawEndOfGameInfo(finalScreen);
 
-            finalScreen.Add("");
-            finalScreen.Add("Creatures defeated:");
-            finalScreen.Add("");
+            //Compose the obituary
 
-            SaveObituary(finalScreen, killRecord.killStrings);
+            List<string> obString = new List<string>();
+
+            obString.AddRange(finalScreen);
+            obString.Add("");
+            obString.Add("Robots destroyed: " + killRecord.killCount);
+            obString.Add("");
+            obString.Add("Creatures defeated:");
+            obString.Add("");
+
+            SaveObituary(obString, killRecord.killStrings);
 
             if (!Game.Dungeon.SaveScumming)
             {
@@ -4142,6 +4163,7 @@ namespace RogueBasin
 
             //Stop the main loop
             RunMainLoop = false;
+
             
         }
 
@@ -4800,7 +4822,7 @@ namespace RogueBasin
             DungeonActionsBetweenMissions();
 
             string fmt = "00";
-            Game.MessageQueue.AddMessage("Re-entering ZONE " + Player.LocationLevel.ToString(fmt) + " : " + DungeonInfo.LookupMissionName(Player.LocationLevel) +".");
+            Game.MessageQueue.AddMessage("Re-entering ZONE " + (Player.LocationLevel + 1).ToString(fmt) + " : " + DungeonInfo.LookupMissionName(Player.LocationLevel) +".");
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0);

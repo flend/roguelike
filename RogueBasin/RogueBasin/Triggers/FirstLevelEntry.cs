@@ -26,7 +26,7 @@ namespace RogueBasin.Triggers
 
             //Have we triggered already?
 
-            if (Triggered)
+            if (Triggered || Game.Dungeon.DungeonInfo.Dungeons[0].PlayerLeftDock)
                 return false;
 
             //Initial game entry
