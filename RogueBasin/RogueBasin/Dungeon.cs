@@ -154,8 +154,9 @@ namespace RogueBasin
             //CurrentDungeon = -1;
             DragonDead = false;
 
-
-            MaxAborts = 5;
+            //Per mission respawns
+            MaxAborts = 2;
+            //Deaths in the game
             MaxDeaths = 5;
         }
 
@@ -5275,7 +5276,7 @@ namespace RogueBasin
                 {
                     Screen.Instance.PlayMovie("missioncompletewithsecondary", true);
                 }
-                Game.MessageQueue.AddMessage("Mission complete (primary + secondary objectives)");
+                Game.MessageQueue.AddMessage("Mission COMPLETE (primary + secondary objectives)!");
             }
             else
             {
@@ -5284,7 +5285,7 @@ namespace RogueBasin
                 {
                     Screen.Instance.PlayMovie("missioncomplete", true);
                 }
-                Game.MessageQueue.AddMessage("Mission complete (primary objectives)");
+                Game.MessageQueue.AddMessage("Mission COMPLETE (primary objectives)!");
             }
             MoveToNextMission();
         }
@@ -5298,7 +5299,7 @@ namespace RogueBasin
                 {
                     Screen.Instance.PlayMovie("nomoreaborts", true);
                 }
-                Game.MessageQueue.AddMessage("No more aborts permitted");
+                Game.MessageQueue.AddMessage("No more aborts permitted.");
                 return false;
 
             }
@@ -5311,8 +5312,8 @@ namespace RogueBasin
             {
                 Screen.Instance.PlayMovie("missionaborted", true);
             }
-            Game.MessageQueue.AddMessage("Mission aborted");
-            MoveToNextMission();
+            Game.MessageQueue.AddMessage("Mission ABORTED.");
+            ResetCurrentMission(false);
 
             return true;
         }
@@ -5330,6 +5331,9 @@ namespace RogueBasin
                 EndOfGame();
                 return;
             }
+
+            //Reset no of aborts
+            DungeonInfo.NoAborts = 0;
 
             PlayerActionsBetweenMissions();
             DungeonActionsBetweenMissions();

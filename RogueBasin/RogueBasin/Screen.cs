@@ -28,15 +28,22 @@ namespace RogueBasin {
         public bool SetTargetInRange = false;
 
         //Top left coord to start drawing the map at
+        //Set by DrawMap
         Point mapTopLeft;
+        Point mapBotRight;
+
+        Point mapTopLeftBase;
+        Point mapBotRightBase;
 
         /// <summary>
         /// Dimensions of message display area
         /// </summary>
         Point msgDisplayTopLeft;
+        Point msgDisplayBotRight;
         public int msgDisplayNumLines;
 
         Point statsDisplayTopLeft;
+        Point statsDisplayBotRight;
         Point princessStatsTopLeft;
 
         Point hitpointsOffset;
@@ -65,6 +72,7 @@ namespace RogueBasin {
 
 
         Color statsColor = ColorPresets.White;
+        Color nothingColor = ColorPresets.Gray;
 
         Color creatureColor = ColorPresets.White;
         Color itemColor = ColorPresets.Red ;
@@ -83,6 +91,8 @@ namespace RogueBasin {
         Color normalBackground = ColorPresets.Black;
         Color normalForeground = ColorPresets.White;
         Color targettedBackground = ColorPresets.DarkGray;
+
+        Color frameColor = ColorPresets.Gray;
 
         Color targetBackground = ColorPresets.White;
         Color targetForeground = ColorPresets.Black;
@@ -199,10 +209,19 @@ namespace RogueBasin {
             DebugMode = false;
             CombatAnimations = true;
 
-            mapTopLeft = new Point(5, 5);
+            msgDisplayTopLeft = new Point(2, 1);
+            msgDisplayBotRight = new Point(87, 3);
 
-            msgDisplayTopLeft = new Point(0, 1);
             msgDisplayNumLines = 3;
+
+            //Max 60 * 25 map
+
+            mapTopLeftBase = new Point(2, 6);
+            mapBotRightBase = new Point(61, 32);
+
+            statsDisplayTopLeft = new Point(64, 6);
+            statsDisplayBotRight = new Point(87, 32);
+                      
 
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(85, 5);
@@ -211,8 +230,6 @@ namespace RogueBasin {
             trainingTL = new Point(15, 10);
             trainingTR = new Point(75, 10);
             trainingBL = new Point(15, 25);
-
-            princessStatsTopLeft = new Point(7, 32);
 
             MsgLogWrapWidth = inventoryTR.x - inventoryTL.x - 4;
 
@@ -925,7 +942,7 @@ namespace RogueBasin {
 
             //Draw the map screen
 
-            //Draw terrain
+            //Draw terrain (must be done first since sets some params)
             DrawMap(dungeon.PCMap);
 
             //Draw fixed features
@@ -2140,27 +2157,31 @@ namespace RogueBasin {
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
-
+            
             //Are we in town or the wilderness? Don't show stats
             //if (player.LocationLevel < 2)
             //    return;
 
-            statsDisplayTopLeft = new Point(66, 1);
+            
 
             //Blank stats area
-            rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
+            //rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
+            rootConsole.ForegroundColor = frameColor;
+            rootConsole.DrawFrame(statsDisplayTopLeft.x - 1, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 3, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false);
+
+            rootConsole.ForegroundColor = statsColor;
 
             //Mission
-            Point missionOffset = new Point(0, 3);
+            Point missionOffset = new Point(2, 1);
+            hitpointsOffset = new Point(2, 5);
+            Point weaponOffset = new Point(2, 8);
+            Point utilityOffset = new Point(2, 13);
+            Point viewOffset = new Point(2, 18);
+
             rootConsole.PrintLine("Location: " + player.LocationLevel.ToString(), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
             rootConsole.PrintLine(DungeonInfo.LookupMissionName(player.LocationLevel), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
-                
-            hitpointsOffset = new Point(0, 5);
-            Point weaponOffset = new Point(0, 8);
-            Point utilityOffset = new Point(0, 13);
-            Point viewOffset = new Point(0, 18);
-
-            Point gameDataOffset = new Point(0, 23);
+            
+            Point gameDataOffset = new Point(2, 23);
             //Draw HP Status
 
             int hpBarLength = 10;
@@ -2202,7 +2223,9 @@ namespace RogueBasin {
                 IEquippableItem weaponE = weapon as IEquippableItem;
                 
                 weaponStr = weapon.SingleItemDescription;
+                rootConsole.ForegroundColor = weapon.GetColour();
                 rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left);
+                rootConsole.ForegroundColor = statsColor;
 
                 //Ammo
                 if (weaponE.HasFireAction())
@@ -2258,12 +2281,15 @@ namespace RogueBasin {
             }
             else
             {
-                weaponStr = "Nothing";
+                weaponStr = "None";
+                rootConsole.ForegroundColor = nothingColor;
                 rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left);
             }
             
 
             //Draw equipped utility
+
+            rootConsole.ForegroundColor = statsColor;
 
             Item utility = Game.Dungeon.Player.GetEquippedUtilityAsItem();
 
@@ -2273,8 +2299,9 @@ namespace RogueBasin {
             if (utility != null)
             {
                 utilityStr = utility.SingleItemDescription;
-         
+                rootConsole.ForegroundColor = utility.GetColour();
                 rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
+                rootConsole.ForegroundColor = statsColor;
 
                 IEquippableItem utilityE = utility as IEquippableItem;
 
@@ -2296,12 +2323,15 @@ namespace RogueBasin {
             else
             {
                 utilityStr = "Nothing";
+                rootConsole.ForegroundColor = nothingColor;
                 rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
             }
 
             //Draw what we can see
             
             //Creature takes precidence
+
+            rootConsole.ForegroundColor = statsColor;
 
             string viewStr = "Target: ";
             rootConsole.PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
@@ -2335,12 +2365,17 @@ namespace RogueBasin {
                         rootConsole.PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*');
                     }
                 }
-
+                
 
                 //Behaviour
                 rootConsole.ForegroundColor = statsColor;
 
-                if (CreatureToView.InPursuit())
+                if (CreatureToView.StunnedTurns > 0)
+                {
+                    rootConsole.ForegroundColor = stunnedBackground;
+                    rootConsole.PrintLine("(Stunned: " + CreatureToView.StunnedTurns + ")", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                }
+                else if (CreatureToView.InPursuit())
                 {
                     rootConsole.ForegroundColor = pursuitBackground;
                     rootConsole.PrintLine("(In Pursuit)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
@@ -2350,8 +2385,7 @@ namespace RogueBasin {
                     rootConsole.ForegroundColor = investigateBackground;
                     rootConsole.PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
                 }
-                else
-                {
+                else {
                     rootConsole.ForegroundColor = statsColor;
                     rootConsole.PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
                 }
@@ -2374,11 +2408,35 @@ namespace RogueBasin {
                         rootConsole.PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
                 }
             }
+            else
+            {
+                utilityStr = "None";
+                rootConsole.ForegroundColor = nothingColor;
+                rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+            }
 
             //Game data
             rootConsole.ForegroundColor = statsColor;
-            rootConsole.PrintLine("Deaths: " + Game.Dungeon.DungeonInfo.NoDeaths, statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
-            rootConsole.PrintLine("Aborts: " + Game.Dungeon.DungeonInfo.NoAborts, statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y + 1, LineAlignment.Left);
+
+            rootConsole.PrintLine("Droids:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
+
+            int noDroids = Game.Dungeon.DungeonInfo.MaxDeaths - Game.Dungeon.DungeonInfo.NoDeaths;
+
+            for (int i = 0; i < noDroids; i++)
+            {
+                rootConsole.ForegroundColor = Game.Dungeon.Player.RepresentationColor();
+                rootConsole.PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y, Game.Dungeon.Player.Representation);
+            }
+
+            rootConsole.PrintLine("Aborts:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y + 1, LineAlignment.Left);
+
+            int noAborts = Game.Dungeon.DungeonInfo.MaxAborts - Game.Dungeon.DungeonInfo.NoAborts;
+
+            for (int i = 0; i < noAborts; i++)
+            {
+                rootConsole.ForegroundColor = ColorPresets.Red;
+                rootConsole.PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X');
+            }
 
             //Restore to normal colour - not nice
             rootConsole.ForegroundColor = ColorPresets.White;
@@ -2930,6 +2988,24 @@ namespace RogueBasin {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
+            //Calculate where to draw the map
+
+            int width = map.width;
+            int height = map.height;
+
+            int widthAvail = mapBotRightBase.x - mapTopLeftBase.x;
+            int heightAvail = mapBotRightBase.y - mapTopLeftBase.y;
+
+            //Draw frame
+            rootConsole.ForegroundColor = frameColor;
+            rootConsole.DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false);
+
+            //Draw frame for msg here too
+            rootConsole.DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false);
+
+            //Put the map in the centre
+            mapTopLeft = new Point(mapTopLeftBase.x + (widthAvail - width) / 2, mapTopLeftBase.y + (heightAvail - height) / 2);
+
             for (int i = 0; i < map.width; i++)
             {
                 for (int j = 0; j < map.height; j++)
@@ -3046,11 +3122,14 @@ namespace RogueBasin {
             lastMessage = message;
 
             //Clear message bar
-            ClearMessageBar();
+            //ClearMessageBar();
+
+            //Draw frame
+            //Done earlier
 
             //Display new message
             rootConsole.ForegroundColor = color;
-            rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, Width - msgDisplayTopLeft.x, msgDisplayNumLines, LineAlignment.Left);
+            rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x + 1, msgDisplayNumLines, LineAlignment.Left);
         }
 
         /// <summary>
@@ -3077,7 +3156,7 @@ namespace RogueBasin {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
-            rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, Width - msgDisplayTopLeft.x, msgDisplayNumLines, true);
+            rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1, true);
         }
 
         private void ResetOverlayScreens() {
@@ -3668,12 +3747,15 @@ namespace RogueBasin {
 
             bool finishedPath = false;
 
+            int deltaX;
+            int deltaY;
+
             do
             {
                 finishedPath = path.WalkPath(ref x, ref y, false);
 
-                int deltaX = x - lastX;
-                int deltaY = y - lastY;
+                deltaX = x - lastX;
+                deltaY = y - lastY;
 
                 char drawChar = '-';
 
@@ -3695,7 +3777,7 @@ namespace RogueBasin {
                 lastX = x;
                 lastY = y;
 
-            } while (x != targetX || y != targetY && x != lastX && y != lastY);
+            } while (!(x == targetX && y == targetY) || !(deltaX == 0 && deltaY == 0));
 
             path.Dispose();
 

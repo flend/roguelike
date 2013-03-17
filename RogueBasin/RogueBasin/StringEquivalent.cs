@@ -69,6 +69,7 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Forest, '%');
             TerrainChars.Add(MapTerrain.Gravestone, '+');
             TerrainChars.Add(MapTerrain.BarDoor, '|');
+            TerrainChars.Add(MapTerrain.DockWall, '\x08');
         }
 
         private static void SetupTerrainColors()
@@ -93,6 +94,7 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.Forest, ColorPresets.DarkSeaGreen);
             TerrainColors.Add(MapTerrain.Gravestone, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.BarDoor, ColorPresets.Gray);
+            TerrainColors.Add(MapTerrain.DockWall, ColorPresets.DarkSlateGray);
         }
 
         private static void SetupEquipmentSlots()

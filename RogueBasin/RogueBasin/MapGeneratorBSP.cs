@@ -1109,7 +1109,7 @@ namespace RogueBasin
                 {
                     for (int j = roomY; j < roomY + roomHeight; j++)
                     {
-                        baseMap.mapSquares[i, j].Terrain = MapTerrain.Wall;
+                        baseMap.mapSquares[i, j].Terrain = MapTerrain.DockWall;
                         baseMap.mapSquares[i, j].SetBlocking();
                     }
                 }

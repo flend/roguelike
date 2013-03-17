@@ -44,8 +44,7 @@ namespace RogueBasin.Triggers
                 //Go back to town
                 LogFile.Log.LogEntryDebug("Player Aborting level: " + level, LogDebugLevel.Medium);
 
-                Game.MessageQueue.AddMessage("Mission ABORTED!");
-
+                
                 Game.Dungeon.MissionAborted();
 
                 return true;
@@ -64,8 +63,6 @@ namespace RogueBasin.Triggers
 
                 //Go back to town
                 LogFile.Log.LogEntryDebug("Player Completing level: " + level, LogDebugLevel.Medium);
-
-                Game.MessageQueue.AddMessage("Mission COMPLETE!");
 
                 Game.Dungeon.MissionComplete();
 

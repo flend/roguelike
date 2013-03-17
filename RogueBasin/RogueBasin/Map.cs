@@ -101,7 +101,8 @@ namespace RogueBasin
         Rubble, //walkable
         Forest, //not walkable
         BarDoor,//not walkable
-        HellWall//not walkable
+        HellWall,//not walkable
+        DockWall//not walkable
      }
 
     public class MapSquare
