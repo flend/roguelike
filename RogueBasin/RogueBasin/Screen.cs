@@ -2335,12 +2335,32 @@ namespace RogueBasin {
                         rootConsole.PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*');
                     }
                 }
+
+
+                //Behaviour
+                rootConsole.ForegroundColor = statsColor;
+
+                if (CreatureToView.InPursuit())
+                {
+                    rootConsole.ForegroundColor = pursuitBackground;
+                    rootConsole.PrintLine("(In Pursuit)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                }
+                else if (!CreatureToView.OnPatrol())
+                {
+                    rootConsole.ForegroundColor = investigateBackground;
+                    rootConsole.PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                }
+                else
+                {
+                    rootConsole.ForegroundColor = statsColor;
+                    rootConsole.PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                }
             }
             else if (ItemToView != null)
             {
                 String nameStr = ItemToView.SingleItemDescription;// +"(" + ItemToView.Representation + ")";
                 rootConsole.ForegroundColor = ItemToView.GetColour();
-                rootConsole.PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                rootConsole.PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
                 rootConsole.ForegroundColor = statsColor;
 
                 IEquippableItem itemE = ItemToView as IEquippableItem;
@@ -2348,10 +2368,10 @@ namespace RogueBasin {
                 {
                     EquipmentSlot weaponSlot = itemE.EquipmentSlots.Find(x => x == EquipmentSlot.Weapon);
                     if(weaponSlot != null) {
-                        rootConsole.PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
+                        rootConsole.PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
                     }
                     else
-                        rootConsole.PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
+                        rootConsole.PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
                 }
             }
 
