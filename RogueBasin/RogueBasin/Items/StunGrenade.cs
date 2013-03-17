@@ -63,7 +63,7 @@ namespace RogueBasin.Items
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The stun grenade explodes!");
            
-            Point dest = StunGrenade.ThrowItemGrenadeLikeStun(this, target, 4, 4);
+            Point dest = StunGrenade.ThrowItemGrenadeLikeStun(this, target, 4, 6);
             
             return dest;
         }
@@ -355,6 +355,16 @@ namespace RogueBasin.Items
         {
             return 10;
         }
+
+        /// <summary>
+        /// Destroyed on use
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnUse()
+        {
+            return false;
+        }
+
 
     }
 }

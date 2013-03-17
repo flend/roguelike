@@ -72,7 +72,7 @@ namespace RogueBasin
         private void SetupPlayer()
         {
             Player player = Game.Dungeon.Player;
-
+            player.LocationLevel = 0;
             //player.Representation = '@';
 
             //player.CalculateCombatStats();
@@ -242,20 +242,25 @@ namespace RogueBasin
                 Game.Dungeon.Triggers.Clear();
                 SetupMapsFlatline();
 
+                //Otherwise respawn
+                Game.Dungeon.ReplaceMap(missionLevel, levelGen[missionLevel].GetOriginalMap());
 
+                //Recalculate walkable
+                CalculateWalkableAndTCOD();
             }
+            else
+            {
+                //Otherwise respawn
+                Game.Dungeon.ReplaceMap(missionLevel, levelGen[missionLevel].GetOriginalMap());
 
-            //Otherwise respawn
-            Game.Dungeon.ReplaceMap(missionLevel, levelGen[missionLevel].GetOriginalMap());
+                //Recalculate walkable
+                CalculateWalkableAndTCOD();
 
-            //Recalculate walkable
-            CalculateWalkableAndTCOD();
-
-            //Respawn the creatures, items and unique followers
-            levelToRespawn.Add(missionLevel);
-            SpawnCreaturesFlatline(levelToRespawn, levelGen, useOldSeed);
-            SpawnItemsFlatline(levelToRespawn, levelGen, useOldSeed);
-            SpawnObjectivesFlatline(levelToRespawn, levelGen, useOldSeed);
+                //Respawn the creatures, items and unique followers
+                SpawnCreaturesFlatline(levelToRespawn, levelGen, useOldSeed);
+                SpawnItemsFlatline(levelToRespawn, levelGen, useOldSeed);
+                SpawnObjectivesFlatline(levelToRespawn, levelGen, useOldSeed);
+            }
         }
 
         //Spawning shared variables
@@ -2138,15 +2143,11 @@ namespace RogueBasin
         private List<int> RebuildAllMaps()
         {
             List<int> dungeonLevelsToTest = new List<int>();
-            dungeonLevelsToTest.Add(0);
-            dungeonLevelsToTest.Add(1);
-            dungeonLevelsToTest.Add(2);
-            dungeonLevelsToTest.Add(3);
-            dungeonLevelsToTest.Add(4);
-            dungeonLevelsToTest.Add(5);
-            dungeonLevelsToTest.Add(6);
-            dungeonLevelsToTest.Add(7);
-            dungeonLevelsToTest.Add(8);
+
+            for (int i = 0; i < 15; i++)
+            {
+                dungeonLevelsToTest.Add(i);
+            }
 
             SpawnMapFlatline(dungeonLevelsToTest, false);
 
@@ -2324,28 +2325,26 @@ namespace RogueBasin
                             AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
 
                             //Add level entry trigger
-                            //Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission5Entry());
+                            Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission6Entry());
                         }
+                        break;
+
+                    case 11:
+                        SpawnRandomMap(dungeon, level);
+                        //Add level entry trigger
+                        Game.Dungeon.AddTrigger(level, Game.Dungeon.Levels[level].PCStartLocation, new Triggers.Mission11Entry());
+                        break;
+
+                    case 14:
+                        SpawnRandomMap(dungeon, level);
+                        //Add level entry trigger
+                        Game.Dungeon.AddTrigger(level, Game.Dungeon.Levels[level].PCStartLocation, new Triggers.Mission14Entry());
                         break;
 
                     default:
                         //Use random dungeon generator
                         {
-                            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
-
-                            //Clip to 60
-                            hallsGen.Width = (int)Math.Min(40 + Game.Random.Next(25), 60);
-                            hallsGen.Height = 25;
-
-                            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
-                            int levelNo = Game.Dungeon.AddMap(hallMap);
-
-                            //Store the hallGen
-                            //Will get sorted in level order
-                            levelGen.Add(level, hallsGen);
-
-                            //Add standard dock triggers (allows map abortion & completion)
-                            AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+                            SpawnRandomMap(dungeon, level);
                         }
 
                         break;
@@ -2358,6 +2357,25 @@ namespace RogueBasin
             //Only place where this happens now
             CalculateWalkableAndTCOD();
 }
+
+        private void SpawnRandomMap(Dungeon dungeon, int level)
+        {
+            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+            //Clip to 60
+            hallsGen.Width = (int)Math.Min(40 + Game.Random.Next(25), 60);
+            hallsGen.Height = 25;
+
+            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+            int levelNo = Game.Dungeon.AddMap(hallMap);
+
+            //Store the hallGen
+            //Will get sorted in level order
+            levelGen.Add(level, hallsGen);
+
+            //Add standard dock triggers (allows map abortion & completion)
+            AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+        }
 
         private void SaveRandomCreatureSeed()
         {
@@ -2409,9 +2427,7 @@ namespace RogueBasin
 
             LogFile.Log.LogEntry("Generating creatures...");
 
-            Dungeon dungeon = Game.Dungeon;
-
-
+            Dungeon dungeon = Game.Dungeon;            
 
             foreach (int level in dungeonLevelsToTest)
             {
@@ -2480,7 +2496,7 @@ namespace RogueBasin
 
                 MapGenerator mapGen = mapGenerators[level];
 
-                int noOfNodes = 2 + Game.Random.Next(3);
+                int noOfNodes = 3 + Game.Random.Next(3);
 
                 List<Monster> nodes = new List<Monster>();
 
@@ -2623,11 +2639,21 @@ namespace RogueBasin
             //Level 2 just Swarmers (but lots of them)
             List<Monster> monstersToPlace = new List<Monster>();
 
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 5; i++)
             {
-                Creatures.Swarmer patrolBot = new Creatures.Swarmer();
+                Creatures.CombatBot patrolBot = new Creatures.CombatBot();
                 monstersToPlace.Add(patrolBot);
             }
+
+            for (int i = 0; i < 6; i++)
+            {
+                Creatures.PatrolBotArea patrolBot = new Creatures.PatrolBotArea();
+                AddMonsterSquarePatrol(patrolBot, level, mapGen);
+            }
+
+            monstersToPlace.Add(new Creatures.AlertBot());
+ 
+           // AddMonsterLinearPatrol(new Creatures.Juggernaut(), level, mapGen);
 
             AddMonstersEqualDistribution(monstersToPlace, level, mapGen);
 
@@ -2694,6 +2720,7 @@ namespace RogueBasin
 
             List<KeyValuePair<Monster, int>> meleeMonsters = new List<KeyValuePair<Monster, int>>();
             meleeMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.Swarmer(), 6));
+            meleeMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.Juggernaut(), 1));
 
             //Patrolling catalogue
 
@@ -2701,10 +2728,11 @@ namespace RogueBasin
             patrolMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.PatrolBot(), 3));
             patrolMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.PatrolBotArea(), 3));
 
-            //Static catalogue
+            //Rotating catalogue
 
             List<KeyValuePair<Monster, int>> staticMonsters = new List<KeyValuePair<Monster, int>>();
             staticMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.RotatingTurret(), 2));
+            staticMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.CombatBot(), 3));
 
             //Special monsters
             List<KeyValuePair<Monster, int>> specialMonsters = new List<KeyValuePair<Monster, int>>();
@@ -2740,7 +2768,8 @@ namespace RogueBasin
             //Try to spend 2/3 of our budget on one type
             //(+3 was too much at present)
 
-            budgetRatios[Game.Random.Next(budgetRatios.Count)] += 1.5;
+            //exclude special
+            budgetRatios[Game.Random.Next(budgetRatios.Count - 1)] += 1.5;
 
             //Calculate budget split
             double totalRatio = 0.0;
@@ -2878,6 +2907,7 @@ namespace RogueBasin
 
             List<Item> healingRelatedItems = new List<Item>();
             healingRelatedItems.Add(new Items.NanoRepair());
+            healingRelatedItems.Add(new Items.TacticalOverlay());
             healingRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
             
             List<List<Item>> itemCatalogue = new List<List<Item>>();
@@ -3073,12 +3103,10 @@ namespace RogueBasin
 
             List<Item> itemsToPlace = new List<Item>();
 
-            AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
-            
             itemsToPlace.Add(new Items.Pistol());
             itemsToPlace.Add(new Items.Pistol());
 
-            itemsToPlace.Add(new Items.NanoRepair());
+            itemsToPlace.Add(new Items.TacticalOverlay());
 
             AddItemsEqualDistribution(itemsToPlace, levelIndex, mapGen);
         }
@@ -3090,19 +3118,15 @@ namespace RogueBasin
 
             //Pistol at start location
             AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
+            AddItemAtLocation(new Items.StealthCloak(), levelIndex, mapGen.GetPlayerStartLocation());
 
             //Spawn some items
 
             List<Item> itemsToPlace = new List<Item>();
 
-            itemsToPlace.Add(new Items.StunGrenade());
-            itemsToPlace.Add(new Items.StunGrenade());
-            itemsToPlace.Add(new Items.StunGrenade());
-            itemsToPlace.Add(new Items.StunGrenade());
-            itemsToPlace.Add(new Items.FragGrenade());
-            itemsToPlace.Add(new Items.FragGrenade());
+            itemsToPlace.Add(new Items.TacticalOverlay());
+            itemsToPlace.Add(new Items.StealthCloak());
 
-            itemsToPlace.Add(new Items.NanoRepair());
 
             AddItemsEqualDistribution(itemsToPlace, levelIndex, mapGen);
         }

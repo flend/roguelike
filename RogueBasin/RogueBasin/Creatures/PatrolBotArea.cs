@@ -125,7 +125,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.DeepSkyBlue;
+            return ColorPresets.SlateBlue;
         }
 
         public override int GetCombatXP()

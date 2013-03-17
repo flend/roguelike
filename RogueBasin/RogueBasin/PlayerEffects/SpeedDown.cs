@@ -48,7 +48,7 @@ namespace RogueBasin.PlayerEffects
             return -speedDownAmount;
         }
 
-        protected override int GetDuration()
+        public override int GetDuration()
         {
             return duration;
         }

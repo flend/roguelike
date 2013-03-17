@@ -288,5 +288,15 @@ namespace RogueBasin.Items
         {
             return 25;
         }
+
+        /// <summary>
+        /// Destroyed on use
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnUse()
+        {
+            return false;
+        }
+
     }
 }

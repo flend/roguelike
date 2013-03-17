@@ -43,7 +43,7 @@ namespace RogueBasin.PlayerEffects
             player.RecalculateCombatStatsRequired = true;
         }
 
-        protected override int GetDuration()
+        public override int GetDuration()
         {
             return duration;
         }

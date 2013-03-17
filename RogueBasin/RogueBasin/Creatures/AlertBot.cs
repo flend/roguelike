@@ -20,7 +20,7 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
-            NormalSightRadius = 10;
+            NormalSightRadius = 7;
         }
 
         public override int BaseSpeed()
@@ -37,7 +37,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return classMinHitpoints + Game.Random.Next(classDeltaHitpoints) + 1;
+            return 2;
         }
 
         /// <summary>
@@ -201,9 +201,12 @@ namespace RogueBasin.Creatures
             string playerMsg = "The alert bot sounds the alert!";
             Game.MessageQueue.AddMessage(playerMsg);
             
-            SoundEffect effect = Game.Dungeon.AddSoundEffect(1.0, this.LocationLevel, this.LocationMap);
+            SoundEffect effect = Game.Dungeon.AddSoundEffect(1.0, this.LocationLevel, Game.Dungeon.Player.LocationMap);
             lastAlertTime = Game.Dungeon.WorldClock;
             LogFile.Log.LogEntryDebug("Alert bot makes sound: " + effect + " at time: " + Game.Dungeon.WorldClock, LogDebugLevel.Medium);
+
+            List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(Game.Dungeon.Player.LocationMap, Game.Dungeon.Player.LocationLevel, 4);
+            Screen.Instance.DrawAreaAttack(grenadeAffects, ColorPresets.Yellow);
 
             return true;
         }

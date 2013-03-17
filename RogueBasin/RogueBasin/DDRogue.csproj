@@ -44,6 +44,7 @@
   -->
   <ItemGroup>
     <Compile Include="Creatures\AlertBot.cs" />
+    <Compile Include="Creatures\CombatBot.cs" />
     <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
     <Compile Include="Creatures\Ferret.cs">
@@ -52,6 +53,7 @@
     <Compile Include="Creatures\Goblin.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\Juggernaut.cs" />
     <Compile Include="Creatures\Orc.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -222,6 +224,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Items\StunGrenade.cs" />
+    <Compile Include="Items\TacticalOverlay.cs" />
     <Compile Include="Items\Vibroblade.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />
@@ -270,6 +273,9 @@
     <Compile Include="PlayerEffects\MPRestore.cs" />
     <Compile Include="PlayerEffects\MultiDamage.cs" />
     <Compile Include="Items\PotionSightUp.cs" />
+    <Compile Include="PlayerEffects\SeeFOV.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PlayerEffects\SightRadiusDown.cs" />
     <Compile Include="PlayerEffects\SightRadiusUp.cs">
       <SubType>Code</SubType>
@@ -278,6 +284,7 @@
     <Compile Include="PlayerEffects\SpeedUp.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PlayerEffects\StealthField.cs" />
     <Compile Include="PlayerEffects\ToHitUp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -354,6 +361,10 @@
     <Compile Include="Triggers\LichBattle.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Triggers\Mission11Entry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\Mission14Entry.cs" />
     <Compile Include="Triggers\Mission1Entry.cs" />
     <Compile Include="Triggers\Mission2Entry.cs">
       <SubType>Code</SubType>
@@ -364,7 +375,12 @@
     <Compile Include="Triggers\Mission4Entry.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\Mission5Entry.cs" />
+    <Compile Include="Triggers\Mission5Entry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Triggers\Mission6Entry.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Triggers\PrinceInABox.cs" />
     <Compile Include="Triggers\SchoolEntryTrigger.cs" />
     <Compile Include="Triggers\SeeCorpses.cs">
@@ -678,5 +694,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\mission0done0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission110.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\mission60.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission150.amf" />
   </ItemGroup>
 </Project>

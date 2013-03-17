@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin
 {
@@ -18,6 +19,8 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.SpeedDown))]
     [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.SpeedUp))]
     [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.MPRestore))]
+    [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.SeeFOV))]
+    [System.Xml.Serialization.XmlInclude(typeof(PlayerEffects.StealthField))]
     public abstract class PlayerEffect
     {
         public PlayerEffect()
@@ -63,5 +66,12 @@ namespace RogueBasin
         /// <returns></returns>
         public virtual int SightModifier() { return 0; }
 
+        public virtual string GetName() { return ""; }
+
+
+        internal virtual libtcodWrapper.Color GetColor()
+        {
+            return ColorPresets.White;
+        }
     }
 }

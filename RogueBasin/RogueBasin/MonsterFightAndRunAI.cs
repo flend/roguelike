@@ -228,7 +228,7 @@ namespace RogueBasin
 
                 //Check if we can see the player
                 if (Game.Dungeon.Player.LocationLevel == this.LocationLevel &&
-                    currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
+                    currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y) && !Game.Dungeon.Player.isStealthed())
                 {
                     //In FOV wake
                     Sleeping = false;
@@ -309,6 +309,12 @@ namespace RogueBasin
                 //Have we just become passive? Reset AI (stop chasing player)
                 else if (currentTarget == Game.Dungeon.Player && Passive)
                 {
+                    AIState = SimpleAIStates.Patrol;
+                }
+                //Has the player stealthed?
+                else if (currentTarget == Game.Dungeon.Player && Game.Dungeon.Player.isStealthed())
+                {
+                    LogFile.Log.LogEntryDebug(this.Representation + " stop chasing. Player went stealthed", LogDebugLevel.Medium);
                     AIState = SimpleAIStates.Patrol;
                 }
                 //Have we just been attacked by a new enemy?
@@ -455,7 +461,7 @@ namespace RogueBasin
 
                     if (Game.Dungeon.Player.LocationLevel == this.LocationLevel)
                     {
-                        if (currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y))
+                        if (currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y) && !Game.Dungeon.Player.isStealthed())
                         {
                             monstersInFOV.Add(Game.Dungeon.Player);
                             LogFile.Log.LogEntryDebug(this.Representation + " spots " + Game.Dungeon.Player.Representation, LogDebugLevel.Low);
@@ -490,7 +496,7 @@ namespace RogueBasin
 
                     //If we are not currently pursuing anything and we see the PC, pursue if seen
                     //Technically, go into pursuit mode, which may not involve actual movement
-                    if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && monstersInFOV.Contains(Game.Dungeon.Player))
+                    if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && monstersInFOV.Contains(Game.Dungeon.Player) && !Game.Dungeon.Player.isStealthed())
                     {
                         Creature closestCreature = Game.Dungeon.Player;
                         //Start chasing this creature
@@ -1449,7 +1455,7 @@ namespace RogueBasin
         /// <returns></returns>
         public virtual bool HasSquarePatrol()
         {
-            return true;
+            return false;
         }
 
         public override bool OnPatrol()

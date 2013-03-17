@@ -53,7 +53,7 @@ namespace RogueBasin.PlayerEffects
             Game.MessageQueue.AddMessage("The shadows grow longer.");
         }
 
-        protected override int GetDuration()
+        public override int GetDuration()
         {
             return duration;
         }

@@ -6,15 +6,13 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
     /// <summary>
-    /// Patrolling Robot. Linear patrol.
-    /// Won't chase. Attack at medium range.
-    /// Doesn't respond to sounds
+    /// Rotating then pursuing ranged bot
     /// </summary>
-    public class PatrolBot : MonsterThrowAndRunAI
+    public class CombatBot : MonsterThrowAndRunAI
     {
         bool rotationClockwise = true;
 
-        public PatrolBot()
+        public CombatBot()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -29,7 +27,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 2;
+            return 3;
         }
 
         public override int DamageBase()
@@ -44,7 +42,7 @@ namespace RogueBasin.Creatures
 
         public override PatrolType GetPatrolType()
         {
-            return PatrolType.Waypoints;
+            return PatrolType.Rotate;
         }
 
         public override bool GetPatrolRotationClockwise()
@@ -52,19 +50,29 @@ namespace RogueBasin.Creatures
             return rotationClockwise;
         }
 
+        protected override double GetPatrolRotationAngle()
+        {
+            return Math.PI / 2;
+        }
+
+        protected override int GetPatrolRotationSpeed()
+        {
+            return 1;
+        }
+
         protected override bool WillInvestigateSounds()
         {
-            return false;
+            return true;
         }
 
         protected override bool WillPursue()
         {
-            return false;
+            return true;
         }
 
         protected override double GetMissileRange()
         {
-            return 3.0;
+            return 4.0;
         }
 
         protected override int GetChanceToBackAway()
@@ -74,7 +82,7 @@ namespace RogueBasin.Creatures
 
         protected override string GetWeaponName()
         {
-            return "fires a carbine";
+            return "fires a high-velocity round";
         }
 
         public override bool CanOpenDoors()
@@ -86,16 +94,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Patrol Bot"; } }
+        public override string SingleDescription { get { return "Combat Bot"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Patrol Bots"; } }
+        public override string GroupDescription { get { return "Combat Bots"; } }
 
         protected override char GetRepresentation()
         {
-            return 'P';
+            return 'C';
         }
 
         protected override int GetChanceToRecover()
@@ -115,7 +123,7 @@ namespace RogueBasin.Creatures
 
         public override int CreatureCost()
         {
-            return 10;
+            return 20;
         }
 
         public override int CreatureLevel()
@@ -125,12 +133,12 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new PatrolBot();
+            return new CombatBot();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.SlateBlue;
+            return ColorPresets.DarkOrange;
         }
 
         public override int GetCombatXP()

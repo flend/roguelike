@@ -1303,7 +1303,7 @@ namespace RogueBasin
 
             //Message the user
             LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
-            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped");
+            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped.");
 
             return true;
         }
@@ -1435,7 +1435,7 @@ namespace RogueBasin
 
             //Message the user
             LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
-            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped");
+            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped.");
 
             return true;
         }
@@ -1881,6 +1881,32 @@ namespace RogueBasin
 
             if (Hitpoints > MaxHitpoints)
                 Hitpoints = MaxHitpoints;
+
+        }
+
+        internal bool isStealthed()
+        {
+            if (IsEffectActive(typeof(PlayerEffects.StealthField)))
+                return true;
+
+            return false;
+        }
+
+        internal void RemoveEffect(Type effectType)
+        {
+
+            //Increment time on events and remove finished ones
+            List<PlayerEffect> finishedEffects = effects.FindAll(x => x.GetType() == effectType);
+
+            //Remove these effects
+            
+            foreach (PlayerEffect effect in finishedEffects)
+            {
+                if(!effect.HasEnded())
+                    effect.OnEnd(this);
+
+                effects.Remove(effect);
+            }
 
         }
     }

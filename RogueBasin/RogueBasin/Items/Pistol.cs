@@ -396,7 +396,7 @@ namespace RogueBasin.Items
 
         public double FireSoundMagnitude()
         {
-            return 0.33;
+            return 0.4;
         }
 
         /// <summary>
@@ -433,6 +433,16 @@ namespace RogueBasin.Items
         {
             return 0.0;
         }
+
+        /// <summary>
+        /// Destroyed on use
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnUse()
+        {
+            return false;
+        }
+
 
     }
 }

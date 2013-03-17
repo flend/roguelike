@@ -1591,6 +1591,9 @@ namespace RogueBasin
             //Actually do throwing action
             Point destinationSq = toThrow.ThrowItem(target);
 
+            //Remove stealth
+            player.RemoveEffect(typeof(PlayerEffects.StealthField));
+            
             //Destroy it if required
             if (toThrow.DestroyedOnThrow())
             {
@@ -1699,6 +1702,11 @@ namespace RogueBasin
 
             //Actually do firing action
             bool success = weapon.FireItem(target);
+
+            if (success)
+            {
+                player.RemoveEffect(typeof(PlayerEffects.StealthField));
+            }
 
             //Store details for a recast
 
@@ -1957,6 +1965,16 @@ namespace RogueBasin
             else
                 Screen.Instance.SetTargetInRange = false;
 
+            //Update the last creature looked at
+            //initial start square
+            SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, start);
+            Screen.Instance.CreatureToView = sqC.monster;
+            if (sqC.items.Count > 0)
+                Screen.Instance.ItemToView = sqC.items[0];
+            else
+                Screen.Instance.ItemToView = null;
+            // (may reset to null)
+
             Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
             Screen.Instance.Update();
 
@@ -2021,7 +2039,7 @@ namespace RogueBasin
                         Screen.Instance.SetTargetInRange = false;
 
                     //Update the last creature looked at
-                    SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
+                    sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
                     Screen.Instance.CreatureToView = sqC.monster;
                     if(sqC.items.Count > 0)
                         Screen.Instance.ItemToView = sqC.items[0];

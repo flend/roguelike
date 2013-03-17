@@ -2172,21 +2172,22 @@ namespace RogueBasin {
             //Blank stats area
             //rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
             rootConsole.ForegroundColor = frameColor;
-            rootConsole.DrawFrame(statsDisplayTopLeft.x - 1, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 3, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false);
+            rootConsole.DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false);
 
             rootConsole.ForegroundColor = statsColor;
 
             //Mission
-            Point missionOffset = new Point(2, 1);
-            hitpointsOffset = new Point(2, 5);
-            Point weaponOffset = new Point(2, 8);
-            Point utilityOffset = new Point(2, 13);
-            Point viewOffset = new Point(2, 18);
+            Point missionOffset = new Point(4, 1);
+            hitpointsOffset = new Point(4, 4);
+            Point weaponOffset = new Point(4, 6);
+            Point utilityOffset = new Point(4, 11);
+            Point viewOffset = new Point(4, 19);
+            Point gameDataOffset = new Point(4, 24);
 
-            rootConsole.PrintLine("Location: " + player.LocationLevel.ToString(), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
+            rootConsole.PrintLine("ZONE: " + (player.LocationLevel + 1).ToString("00"), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
             rootConsole.PrintLine(DungeonInfo.LookupMissionName(player.LocationLevel), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
             
-            Point gameDataOffset = new Point(2, 23);
+            
             //Draw HP Status
 
             int hpBarLength = 10;
@@ -2330,6 +2331,55 @@ namespace RogueBasin {
                 utilityStr = "Nothing";
                 rootConsole.ForegroundColor = nothingColor;
                 rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
+            }
+
+            //Effect active (add ors)
+            if (player.effects.Count > 0)
+            {
+                PlayerEffect thisEffect = player.effects[0];
+
+                if(thisEffect is PlayerEffectSimpleDuration) {
+
+                    PlayerEffectSimpleDuration durationEffect = thisEffect as PlayerEffectSimpleDuration;
+
+                    string effectName = thisEffect.GetName();
+                    int effectRemainingDuration = durationEffect.GetRemainingDuration();
+                    int effectTotalDuration = durationEffect.GetDuration();
+                    Color effectColor = thisEffect.GetColor();
+
+                    //Effect name
+
+                    rootConsole.ForegroundColor = statsColor;
+
+                    rootConsole.PrintLine("Effect: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 3, LineAlignment.Left);
+
+                    rootConsole.ForegroundColor = effectColor;
+                    rootConsole.PrintLine(effectName, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 4, LineAlignment.Left);
+                    rootConsole.ForegroundColor = statsColor;
+
+                    //Duration
+
+                    rootConsole.PrintLine("Tm: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 5, LineAlignment.Left);
+
+                    int ammoBarLength = 10;
+                    double weaponAmmoRatio = effectRemainingDuration / (double) effectTotalDuration;
+                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
+
+                    for (int i = 0; i < ammoBarLength; i++)
+                    {
+                        if (i < ammoBarEntries)
+                        {
+                            rootConsole.ForegroundColor = ColorPresets.Gold;
+                            rootConsole.PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*');
+                        }
+                        else
+                        {
+                            rootConsole.ForegroundColor = ColorPresets.Gray;
+                            rootConsole.PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*');
+                        }
+                    }
+                }
+
             }
 
             //Draw what we can see
@@ -3082,6 +3132,11 @@ namespace RogueBasin {
                         {
                             drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Yellow, map.mapSquares[i, j].SoundMag);
                         }
+                    }
+
+                    if (Game.Dungeon.Player.IsEffectActive(typeof(PlayerEffects.SeeFOV)) && map.mapSquares[i, j].InMonsterFOV)
+                    {
+                        drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Green, 0.7);
                     }
 
                     rootConsole.ForegroundColor = drawColor;

@@ -75,7 +75,7 @@ namespace RogueBasin.PlayerEffects
             Game.MessageQueue.AddMessage("Everything is clear again.");
         }
 
-        protected override int GetDuration()
+        public override int GetDuration()
         {
             return duration;
         }

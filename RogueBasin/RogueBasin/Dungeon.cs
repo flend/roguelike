@@ -327,6 +327,11 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Names for the areas
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
         internal static string LookupMissionName(int level)
         {
             switch (level)
@@ -338,7 +343,45 @@ namespace RogueBasin
                     return "Inner hanger";
 
                 case 2:
-                    return "Cargo";
+                    return "Cargo storage";
+
+                case 3:
+                    return "Upper cargo";
+
+                case 4:
+                    return "Maintenance";
+
+                case 5:
+                    return "Clean storage";
+
+
+                case 6:
+                    return "Recreation";
+
+                case 7:
+                    return "Residential";
+
+                case 8:
+                    return "Research";
+
+                case 9:
+                    return "Engineering";
+
+                case 10:
+                    return "Security";
+                    
+
+                case 11:
+                    return "Medical";
+                    
+                case 12:
+                    return "Battle bridge";
+
+                case 13:
+                    return "Bridge";
+
+                case 14:
+                    return "Computer Core";
 
                 default:
                     return "Default";
@@ -1956,11 +1999,24 @@ namespace RogueBasin
         /// <returns></returns>
         internal bool MovePCAbsolute(int level, int x, int y)
         {
+            return MovePCAbsolute(level, x, y, false);
+        }
+
+        /// <summary>
+        /// Move PC to an absolute square (doesn't check the contents). Runs triggers.
+        /// Doesn't do any checking at the mo, should return false if there's a problem.
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        internal bool MovePCAbsolute(int level, int x, int y, bool runTriggersAlways)
+        {
             player.LocationLevel = level;
 
             //Don't run triggers if we haven't moved
 
-            if (player.LocationMap.x == x && player.LocationMap.y == y)
+            if (player.LocationMap.x == x && player.LocationMap.y == y && !runTriggersAlways)
             {
                 return true;
             }
@@ -1994,9 +2050,20 @@ namespace RogueBasin
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        internal bool MovePCAbsoluteSameLevel(int x, int y) {
+        internal bool MovePCAbsoluteSameLevel(int x, int y)
+        {
+            return MovePCAbsoluteSameLevel(x, y, false);
+        }
 
-            MovePCAbsolute(player.LocationLevel, x, y);
+        /// <summary>
+        /// Move PC to another square on the same level. Doesn't do any checking at the mo
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        internal bool MovePCAbsoluteSameLevel(int x, int y, bool runTriggersAlways) {
+
+            MovePCAbsolute(player.LocationLevel, x, y, runTriggersAlways);
 
             return true;
         }
@@ -2059,6 +2126,17 @@ namespace RogueBasin
         /// <param name="y"></param>
         /// <returns></returns>
         internal bool PCMove(int x, int y)
+        {
+            return PCMove(x, y, false);
+        }
+
+        /// <summary>
+        /// Process a relative PC move, from a keypress
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        internal bool PCMove(int x, int y, bool runTriggersAlways)
         {
             Point newPCLocation = new Point(Player.LocationMap.x + x, Player.LocationMap.y + y);
 
@@ -2338,6 +2416,7 @@ namespace RogueBasin
                         {
                             okToMoveIntoSquare = false;
                         }
+                        player.RemoveEffect(typeof(PlayerEffects.StealthField));
 
                     }
                     else
@@ -2352,6 +2431,7 @@ namespace RogueBasin
                         {
                             okToMoveIntoSquare = false;
                         }
+                        player.RemoveEffect(typeof(PlayerEffects.StealthField));
                     }
                 }
 
@@ -2359,7 +2439,7 @@ namespace RogueBasin
                 if (!okToMoveIntoSquare)
                     return true;
 
-                MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y);
+                MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y, runTriggersAlways);
 
                 //Auto-pick up any items
                 if (contents.items.Count > 0)
@@ -3934,13 +4014,20 @@ namespace RogueBasin
                     //Is level complete? Move onto next
                     if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete)
                     {
-                        Screen.Instance.PlayMovie("deadbutnextmission", true);
+                        if(Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeathButCompleted) {
+                            Screen.Instance.PlayMovie("deadbutnextmission", true);
+                            PlayedMissionFailedDeathButCompleted = true;
+                        }
                         MoveToNextMission();
                         return;
                     }
 
                     //If not, reset mission with different seed
-                    Screen.Instance.PlayMovie("deadretrymission", true);
+                    if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeath)
+                    {
+                        Screen.Instance.PlayMovie("deadretrymission", true);
+                        PlayedMissionFailedDeath = true;
+                    }
                     ResetCurrentMission(true);
 
                     return;
@@ -4633,7 +4720,6 @@ namespace RogueBasin
 
             //Reset starting location
 
-            player.LocationLevel = Player.LocationLevel;
             player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
 
             //Always do new seed for now
@@ -4642,7 +4728,6 @@ namespace RogueBasin
 
             //Reset starting location (in case the level changed)
 
-            player.LocationLevel = Player.LocationLevel;
             player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
 
 
@@ -4655,7 +4740,9 @@ namespace RogueBasin
 
             PlayerActionsBetweenMissions();
             DungeonActionsBetweenMissions();
-            
+
+            string fmt = "00";
+            Game.MessageQueue.AddMessage("Re-entering ZONE " + Player.LocationLevel.ToString(fmt) + " : " + DungeonInfo.LookupMissionName(Player.LocationLevel) +".");
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0);
@@ -5310,32 +5397,44 @@ namespace RogueBasin
             if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete)
             {
                 //With secondary
-                if (Game.Dungeon.Player.PlayItemMovies)
+                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionCompleteWithSecondary)
                 {
                     Screen.Instance.PlayMovie("missioncompletewithsecondary", true);
+                    PlayedMissionCompleteWithSecondary = true;
                 }
                 Game.MessageQueue.AddMessage("Mission COMPLETE (primary + secondary objectives)!");
             }
             else
             {
                 //Primary only
-                if (Game.Dungeon.Player.PlayItemMovies)
+                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionComplete)
                 {
                     Screen.Instance.PlayMovie("missioncomplete", true);
+                    PlayedMissionComplete = true;
                 }
                 Game.MessageQueue.AddMessage("Mission COMPLETE (primary objectives)!");
             }
             MoveToNextMission();
         }
 
+        public bool PlayedMissionAborted {get; set;}
+        public bool PlayedMissionNoMoreAborts { get; set; }
+        public bool PlayedMissionDeath {get; set;}
+        public bool PlayedMissionComplete { get; set; }
+        public bool PlayedMissionCompleteWithSecondary { get; set; }
+        public bool PlayedMissionFailedDeath { get; set; }
+        public bool PlayedMissionFailedDeathButCompleted { get; set; }
+
+
         public bool MissionAborted()
         {
             if (DungeonInfo.NoAborts == DungeonInfo.MaxAborts)
             {
                 //No more aborts allowed
-                if (Game.Dungeon.Player.PlayItemMovies)
+                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionNoMoreAborts)
                 {
                     Screen.Instance.PlayMovie("nomoreaborts", true);
+                    PlayedMissionNoMoreAborts = true;
                 }
                 Game.MessageQueue.AddMessage("No more aborts permitted.");
                 return false;
@@ -5346,9 +5445,10 @@ namespace RogueBasin
 
             DungeonInfo.NoAborts++;
 
-            if (Game.Dungeon.Player.PlayItemMovies)
+            if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionAborted)
             {
                 Screen.Instance.PlayMovie("missionaborted", true);
+                PlayedMissionAborted = true;
             }
             Game.MessageQueue.AddMessage("Mission ABORTED.");
             ResetCurrentMission(false);
@@ -5378,13 +5478,23 @@ namespace RogueBasin
 
             SelectTilesetForMission(newMissionLevel);
 
+            //Specials
+            if (newMissionLevel == 11)
+            {
+                //Bonus units
+                DungeonInfo.MaxDeaths += 5;
+            }
+
             //Move player to new level
 
             player.LocationLevel = newMissionLevel;
             player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
 
+            string fmt = "00";
+            Game.MessageQueue.AddMessage("Entering ZONE " + newMissionLevel.ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
+
             //Run a normal turn to set off any triggers
-            Game.Dungeon.PCMove(0, 0);
+            Game.Dungeon.PCMove(0, 0, true);
         }
 
         /// <summary>
@@ -5392,10 +5502,28 @@ namespace RogueBasin
         /// </summary>
         private void SelectTilesetForMission(int level)
         {
+            //Tutorial levels
+
+            if(level < 6) {
+                StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '#');
+            }
+
+            else if (level < 11)
+            {
+                StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb0');
+            }
+            
+            else
+            {
+                StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb2');
+            }
 
             /*
+            
             switch (level)
             {
+
+
                 case 0:
                     StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\x08');
                     break;
@@ -5423,8 +5551,8 @@ namespace RogueBasin
                 default:
                     StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '#');
                     break;
-            }
-             */
+            }*/
+             
         }
 
         public void PlayerActionsBetweenMissions()
@@ -5432,6 +5560,9 @@ namespace RogueBasin
 
             //Heal the player
             player.AddEffect(new PlayerEffects.Healing(player.MaxHitpoints));
+
+            //Remove all effects
+            player.RemoveAllEffects();
 
             //Remove items
             player.UnequipAndDestoryAllItems();
@@ -5463,8 +5594,13 @@ namespace RogueBasin
             player.LocationLevel = newMissionLevel;
             player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
 
+            //Message
+
+            string fmt = "00";
+            Game.MessageQueue.AddMessage("Entering ZONE " + newMissionLevel.ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
+
             //Run a normal turn to set off any triggers
-            Game.Dungeon.PCMove(0, 0);
+            Game.Dungeon.PCMove(0, 0, true);
         }
 
 

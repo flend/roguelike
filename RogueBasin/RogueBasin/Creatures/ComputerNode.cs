@@ -18,7 +18,7 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
-            NormalSightRadius = 4;
+            NormalSightRadius = 0;
 
             //Randomize which way we rotate (should be serialized)
             if (Game.Random.Next(2) > 0)

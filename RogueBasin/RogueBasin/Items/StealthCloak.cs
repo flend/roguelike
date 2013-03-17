@@ -72,7 +72,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "stealth cloak"; }
+            get { return "Stealth emitter"; }
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "stealth cloaks"; }
+            get { return "Stealth emitters"; }
         }
 
         protected override char GetRepresentation()
@@ -90,7 +90,7 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Gray;
+            return ColorPresets.BlanchedAlmond;
         }
 
         public int ArmourClassModifier()
@@ -186,7 +186,11 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool OperateItem()
         {
-            return false;
+            //Add see FOV effect
+            Game.Dungeon.Player.AddEffect(new PlayerEffects.StealthField());
+
+            //Destroyed on use
+            return true;
         }
 
         /// <summary>
@@ -248,6 +252,15 @@ namespace RogueBasin.Items
         /// </summary>
         /// <returns></returns>
         public bool DestroyedOnThrow()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Destroyed on use
+        /// </summary>
+        /// <returns></returns>
+        public bool DestroyedOnUse()
         {
             return false;
         }

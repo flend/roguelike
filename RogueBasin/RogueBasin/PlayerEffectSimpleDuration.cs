@@ -23,7 +23,7 @@ namespace RogueBasin
         /// Returns the duration in world ticks. Implement in derived classes
         /// </summary>
         /// <returns></returns>
-        protected abstract int GetDuration();
+        public abstract int GetDuration();
 
         /// <summary>
         /// Increment time - if we have exceeded the duration, call OnExit() and then mark as finished
@@ -42,6 +42,11 @@ namespace RogueBasin
         public override bool HasEnded()
         {
             return hasEnded;
+        }
+
+        public int GetRemainingDuration()
+        {
+            return GetDuration() - currentTicks;
         }
     }
 }

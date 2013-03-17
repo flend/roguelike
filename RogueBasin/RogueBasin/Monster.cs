@@ -73,6 +73,8 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.Swarmer))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.ComputerNode))]
     [System.Xml.Serialization.XmlInclude(typeof(Creatures.RollingBomb))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.Juggernaut))]
+    [System.Xml.Serialization.XmlInclude(typeof(Creatures.CombatBot))]
     public abstract class Monster : Creature, ITurnAI
     {
         /// <summary>
@@ -561,7 +563,7 @@ namespace RogueBasin
                     
                     
                     //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
-                    string playerMsg = HitsPlayerCombatString() + " You are knocked out.";
+                    string playerMsg = HitsPlayerCombatString() + " R. E. E. D. DESTROYED!";
                     Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 

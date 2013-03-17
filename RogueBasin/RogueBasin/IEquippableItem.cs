@@ -159,6 +159,12 @@ namespace RogueBasin
         bool DestroyedOnThrow();
 
         /// <summary>
+        /// Destroyed on throw
+        /// </summary>
+        /// <returns></returns>
+        bool DestroyedOnUse();
+
+        /// <summary>
         /// Items that have MeleeAction override this
         /// </summary>
         /// <returns></returns>

@@ -35,6 +35,10 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission1Entry))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission4Entry))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission5Entry))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission6Entry))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission11Entry))]
+    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission14Entry))]
+
 
 
     public abstract class DungeonSquareTrigger

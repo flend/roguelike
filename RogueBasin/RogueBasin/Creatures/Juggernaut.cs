@@ -10,11 +10,11 @@ namespace RogueBasin.Creatures
     /// Won't chase. Attack at medium range.
     /// Doesn't respond to sounds
     /// </summary>
-    public class PatrolBot : MonsterThrowAndRunAI
+    public class Juggernaut : MonsterThrowAndRunAI
     {
         bool rotationClockwise = true;
 
-        public PatrolBot()
+        public Juggernaut()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -29,7 +29,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 2;
+            return 15;
         }
 
         public override int DamageBase()
@@ -64,7 +64,7 @@ namespace RogueBasin.Creatures
 
         protected override double GetMissileRange()
         {
-            return 3.0;
+            return 5.0;
         }
 
         protected override int GetChanceToBackAway()
@@ -74,7 +74,7 @@ namespace RogueBasin.Creatures
 
         protected override string GetWeaponName()
         {
-            return "fires a carbine";
+            return "fires a cannon";
         }
 
         public override bool CanOpenDoors()
@@ -86,16 +86,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Patrol Bot"; } }
+        public override string SingleDescription { get { return "Juggernaut"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Patrol Bots"; } }
+        public override string GroupDescription { get { return "Juggernaut"; } }
 
         protected override char GetRepresentation()
         {
-            return 'P';
+            return 'J';
         }
 
         protected override int GetChanceToRecover()
@@ -115,7 +115,7 @@ namespace RogueBasin.Creatures
 
         public override int CreatureCost()
         {
-            return 10;
+            return 40;
         }
 
         public override int CreatureLevel()
@@ -125,12 +125,12 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new PatrolBot();
+            return new Juggernaut();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.SlateBlue;
+            return ColorPresets.Fuchsia;
         }
 
         public override int GetCombatXP()
