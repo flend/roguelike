@@ -129,6 +129,11 @@ namespace RogueBasin.Items
             return false;
         }
 
+        public override int ItemCost()
+        {
+            return 10;
+        }
+
 
         public bool HasFireAction()
         {
@@ -253,7 +258,7 @@ namespace RogueBasin.Items
 
             //Draw attack
 
-            Screen.Instance.DrawAreaAttack(targetSquares);
+            Screen.Instance.DrawAreaAttack(targetSquares, ColorPresets.Gray);
 
             //Damage monster
             
@@ -319,7 +324,7 @@ namespace RogueBasin.Items
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), player.LocationLevel, destination);
 
             //Draw throw
-            Screen.Instance.DrawAreaAttack(targetSquares);
+            Screen.Instance.DrawAreaAttack(targetSquares, ColorPresets.Gray);
 
             if (stunDamage)
             {

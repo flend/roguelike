@@ -188,7 +188,9 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
-    <Compile Include="Items\FragGrenade.cs" />
+    <Compile Include="Items\FragGrenade.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Items\HealingPotion.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -219,6 +221,7 @@
     <Compile Include="Items\StealthCloak.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Items\StunGrenade.cs" />
     <Compile Include="Items\Vibroblade.cs" />
     <Compile Include="ITurnAI.cs" />
     <Compile Include="IUseableItem.cs" />

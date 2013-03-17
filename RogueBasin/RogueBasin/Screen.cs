@@ -1012,12 +1012,12 @@ namespace RogueBasin {
         /// <param name="origin"></param>
         /// <param name="target"></param>
         /// <param name="size"></param>
-        public void DrawAreaAttack(List <Point> targetSquares)
+        public void DrawAreaAttack(List <Point> targetSquares, Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
-            
-            rootConsole.ForegroundColor = ColorPresets.Red;
+
+            rootConsole.ForegroundColor = color;
             rootConsole.BackgroundColor = ColorPresets.Black;
 
             //Clone the list since we mangle it

@@ -2104,6 +2104,7 @@ namespace RogueBasin
             dungeonLevelsToTest.Add(3);
             dungeonLevelsToTest.Add(4);
             dungeonLevelsToTest.Add(5);
+            dungeonLevelsToTest.Add(6);
 
             foreach (int level in dungeonLevelsToTest)
             {
@@ -2251,6 +2252,29 @@ namespace RogueBasin
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission5Entry());
                         }
                         break;
+
+                    case 6:
+                        {
+                            //Make level 6 test level
+
+                            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+                            hallsGen.Width = 40;
+                            hallsGen.Height = 25;
+
+                            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+                            int levelNo = Game.Dungeon.AddMap(hallMap);
+
+                            //Store the hallGen so we can use it for monsters
+                            levelGen.Add(level, hallsGen);
+
+                            //Add standard dock triggers
+                            AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+
+                            //Add level entry trigger
+                            //Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission5Entry());
+                        }
+                        break;
                 }
 
             }
@@ -2316,6 +2340,10 @@ namespace RogueBasin
 
                     case 5:
                         SpawnCreaturesLevel5(level, mapGenerators[level] as MapGeneratorBSP);
+                        break;
+
+                    case 6:
+                        SpawnCreaturesLevel6(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                 }
 
@@ -2469,7 +2497,24 @@ namespace RogueBasin
             //This sets light level in the creatures
             SetLightLevelUniversal(level, level, 5);
         }
+        
+        private void SpawnCreaturesLevel6(int level, MapGeneratorBSP mapGen)
+        {
 
+            //Level 2 just Swarmers (but lots of them)
+            List<Monster> monstersToPlace = new List<Monster>();
+
+            for (int i = 0; i < 15; i++)
+            {
+                Creatures.Swarmer patrolBot = new Creatures.Swarmer();
+                monstersToPlace.Add(patrolBot);
+            }
+
+            AddMonstersEqualDistribution(monstersToPlace, level, mapGen);
+
+            //This sets light level in the creatures
+            SetLightLevelUniversal(level, level, 5);
+        }
 
 
         private void SpawnItemsFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators)
@@ -2498,6 +2543,9 @@ namespace RogueBasin
                         break;
                     case 5:
                         SpawnItemsLevel5(level, mapGenerators[level] as MapGeneratorBSP);
+                        break;
+                    case 6:
+                        SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
 
@@ -2608,6 +2656,30 @@ namespace RogueBasin
             
             itemsToPlace.Add(new Items.Pistol());
             itemsToPlace.Add(new Items.Pistol());
+
+            itemsToPlace.Add(new Items.NanoRepair());
+
+            AddItemsEqualDistribution(itemsToPlace, levelIndex, mapGen);
+        }
+
+        private void SpawnItemsLevel6(int levelIndex, MapGeneratorBSP mapGen)
+        {
+
+            List<RoomCoords> allRooms = mapGen.GetAllRooms();
+
+            //Pistol at start location
+            AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
+
+            //Spawn some items
+
+            List<Item> itemsToPlace = new List<Item>();
+
+            itemsToPlace.Add(new Items.StunGrenade());
+            itemsToPlace.Add(new Items.StunGrenade());
+            itemsToPlace.Add(new Items.StunGrenade());
+            itemsToPlace.Add(new Items.StunGrenade());
+            itemsToPlace.Add(new Items.FragGrenade());
+            itemsToPlace.Add(new Items.FragGrenade());
 
             itemsToPlace.Add(new Items.NanoRepair());
 

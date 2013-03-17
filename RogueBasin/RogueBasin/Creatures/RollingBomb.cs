@@ -59,7 +59,7 @@ namespace RogueBasin.Creatures
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(LocationMap, LocationLevel, size);
 
             //Draw attack
-            Screen.Instance.DrawAreaAttack(grenadeAffects);
+            Screen.Instance.DrawAreaAttack(grenadeAffects, ColorPresets.Chocolate);
 
             //Attack all monsters in the area
 
@@ -197,7 +197,7 @@ namespace RogueBasin.Creatures
         }
         public override int CreatureCost()
         {
-            return 30;
+            return 20;
         }
 
         public override int CreatureLevel()

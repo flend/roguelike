@@ -2709,6 +2709,21 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Calculates the FOV for an abstract point. Uses the old TCODFov without modification
+        public TCODFov CalculateAbstractFOV(int level, Point mapLocation, int sightRadius)
+        {
+            Map currentMap = levels[level];
+            TCODFov tcodFOV = levelTCODMaps[level];
+
+            //Update FOV
+            tcodFOV.CalculateFOV(mapLocation.x, mapLocation.y, sightRadius);
+
+            return tcodFOV;
+
+        }
+
+
+        /// <summary>
         /// Show all sounds on map for debug purposes
         /// </summary>
         public void ShowSoundsOnMap()

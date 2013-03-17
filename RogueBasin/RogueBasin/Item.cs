@@ -31,9 +31,12 @@ namespace RogueBasin
 
     [System.Xml.Serialization.XmlInclude(typeof(Items.SoundGrenade))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.FragGrenade))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.StunGrenade))]
+
     [System.Xml.Serialization.XmlInclude(typeof(Items.Pistol))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Shotgun))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Vibroblade))]
+
     [System.Xml.Serialization.XmlInclude(typeof(Items.NanoRepair))]
     public abstract class Item : MapObject
     {
@@ -110,5 +113,11 @@ namespace RogueBasin
         public virtual string HiddenSuffix { get { return ""; } }
 
         public virtual Color GetColour() { return defaultItemColor; }
+
+        ///Cost of item to level gen
+        public virtual int ItemCost()
+        {
+            return 0;
+        }
     }
 }

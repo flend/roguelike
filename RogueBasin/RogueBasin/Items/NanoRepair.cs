@@ -284,5 +284,9 @@ namespace RogueBasin.Items
             return 0.0;
         }
 
+        public override int ItemCost()
+        {
+            return 25;
+        }
     }
 }

@@ -61,8 +61,9 @@ namespace RogueBasin.Items
         public Point ThrowItem(Point target)
         {
             //Stun for 0 rounds
-            Point dest = FragGrenade.ThrowItemGrenadeLike(this, target, 4, 4);
             Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
+            Point dest = FragGrenade.ThrowItemGrenadeLike(this, target, 4, 4);
+            
             return dest;
         }
 
@@ -110,14 +111,28 @@ namespace RogueBasin.Items
             //Work out grenade splash and damage
             
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, size);
-            
-            //Draw attack
-            Screen.Instance.DrawAreaAttack(grenadeAffects);
 
-            //Attack all monsters in the area
+            //Use a TCODFov to check for walls between the grenade and the target square
+            TCODFov currentFOV = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, destination, (int)size + 2);
+
+            List<Point> newGrenadeAffects = new List<Point>();
 
             foreach (Point sq in grenadeAffects)
             {
+                //We need to check for walls so the grenade doens't go through them.
+                if (!currentFOV.CheckTileFOV(sq.x, sq.y))
+                    continue;
+
+                newGrenadeAffects.Add(sq);
+            }
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttack(newGrenadeAffects, ColorPresets.Firebrick);
+
+            //Attack all monsters in the area
+            foreach (Point sq in newGrenadeAffects)
+            {
+
                 SquareContents squareContents = Game.Dungeon.MapSquareContents(player.LocationLevel, sq);
 
                 Monster m = squareContents.monster;
@@ -135,7 +150,7 @@ namespace RogueBasin.Items
 
             //And the player
 
-            if (grenadeAffects.Find(p => p.x == player.LocationMap.x && p.y == player.LocationMap.y) != null)
+            if (newGrenadeAffects.Find(p => p.x == player.LocationMap.x && p.y == player.LocationMap.y) != null)
             {
                 //Apply damage
                 player.AttackPlayer(damage);
