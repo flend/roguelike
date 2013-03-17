@@ -50,12 +50,12 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "the Computer Node"; } }
+        public override string SingleDescription { get { return "Computer Node"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "the Computer Nodes"; } }
+        public override string GroupDescription { get { return "Computer Nodes"; } }
 
         protected override char GetRepresentation()
         {

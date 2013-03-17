@@ -101,9 +101,14 @@ namespace RogueBasin
         public int NoDeaths { get; set; }
 
         /// <summary>
-        /// No of times the player has aborted a mission
+        /// No of times the player has aborted a mission (this mission)
         /// </summary>
         public int NoAborts { get; set; }
+
+        /// <summary>
+        /// No of times the player has aborted a mission (in all time)
+        /// </summary>
+        public int TotalAborts { get; set; }
 
         /// <summary>
         /// Max deaths before the real end
@@ -2507,7 +2512,7 @@ namespace RogueBasin
                         break;
                 }
 
-                KillMonster(m, true);
+                KillMonster(m, false);
 
                 Screen.Instance.DrawAreaAttack(grenadeAffects, randColor);
                 Screen.Instance.Update();
@@ -4144,6 +4149,7 @@ namespace RogueBasin
         {
             public int killCount;
             public List<string> killStrings;
+            public int killScore;
         }
         /// <summary>
         /// Generate the grouped kill record for the player
@@ -4165,10 +4171,12 @@ namespace RogueBasin
             List<KillCount> killCount = new List<KillCount>();
 
             int totalKills = 0;
+            int totalScore = 0;
 
             foreach (Monster kill in kills)
             {
                 totalKills++;
+                totalScore += kill.CreatureCost();
 
                 //Check that we are the same type (and therefore sort of item)
                 Type monsterType = kill.GetType();
@@ -4221,6 +4229,7 @@ namespace RogueBasin
             KillRecord recordS = new KillRecord();
             recordS.killStrings = killRecord;
             recordS.killCount = totalKills;
+            recordS.killScore = totalScore;
             return recordS;
         }
 
@@ -4946,20 +4955,32 @@ namespace RogueBasin
             //Check intrinsics
 
             Player player = Game.Dungeon.Player;
+            Dungeon dungeon = Game.Dungeon;
 
-            bool combatUse = player.CombatUse;
-            bool magicUse = player.MagicUse;
-            bool charmUse = player.CharmUse;
+            int noDeaths = dungeon.DungeonInfo.NoDeaths;
+            int noAborts = dungeon.DungeonInfo.TotalAborts;
 
-            int noDeaths = player.NumDeaths;
+            int totalLevels = 15;
 
-            //How many dungeons cleared out
-            int dungeonsCleared = GetTotalDungeonsCleared();
+            //How many levels completed?
+            int secondaryObjectives = 0;
+            int primaryObjectives = 0;
 
-            int dungeonsExplored = GetTotalDungeonsExplored();
+            foreach (DungeonProfile profile in dungeon.DungeonInfo.Dungeons)
+            {
+                if (profile.LevelObjectiveComplete)
+                    primaryObjectives++;
 
-            //Did we get the prince
-            bool princeGet = Game.Dungeon.dungeonInfo.DragonDead;
+                if (profile.LevelObjectiveKillAllMonstersComplete)
+                    secondaryObjectives++;
+            }
+
+            //testable
+            bool wonGame = dungeon.DungeonInfo.Dungeons[totalLevels-1].LevelObjectiveComplete;
+
+            int primaryObjectiveScore = primaryObjectives * 100;
+            int secondaryObjectiveScore = secondaryObjectives * 100;
+            int killScore = (GetKillRecord().killScore);
 
             //The last screen to display
             List<string> finalScreen = new List<string>();
@@ -4971,146 +4992,80 @@ namespace RogueBasin
 
             //CLEARANCES
 
-            Screen.Instance.PlayMovie("endactions", false);
+            //Screen.Instance.PlayMovie("endactions", false);
 
             List<string> clearList = new List<string>();
 
-            if (dungeonsCleared == 6)
+            if (wonGame)
             {
-                Screen.Instance.PlayMovie("endintrgreatheroine", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("endintrgreatheroine"));
-            }
-            else if (dungeonsCleared > 3)
-            {
-                Screen.Instance.PlayMovie("endintrheroine", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("endintrheroine"));
-            }
-            else if (dungeonsCleared > 1)
-            {
-                Screen.Instance.PlayMovie("endintradventurer", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("endintradventurer"));
-            }
-
-            //Prince
-
-            if (princeGet)
-            {
-                Screen.Instance.PlayMovie("endintrprincerescued", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("endintrprincerescued"));
+                Screen.Instance.PlayMovie("flatlinewon", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("flatlinewon"));
             }
             else
             {
-                Screen.Instance.PlayMovie("endintrprincenotrescued", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("endintrprincenotrescued"));
+                Screen.Instance.PlayMovie("flatlinenotwon", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("flatlinenotwon"));
             }
-            
 
-            //CAREER
+            //Made it to the final levels
+            if (primaryObjectiveScore >= 11)
+            {
+                Screen.Instance.PlayMovie("halfPrimary", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("halfPrimary"));
+            }
 
-            Screen.Instance.PlayMovie("endgraduation", false);
+            if (secondaryObjectives >= 14)
+            {
+                Screen.Instance.PlayMovie("allSecondary", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("allSecondary"));
+            }
 
-            string careerName;
-            string careerMovie;
-            string romanceMovie;
+            if (secondaryObjectives >= 7)
+            {
+                Screen.Instance.PlayMovie("halfSecondary", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("halfSecondary"));
+            }
 
-            GetCareerMovie(out careerName, out careerMovie, out romanceMovie, dungeonsCleared);
+            if (noAborts == 0)
+            {
+                Screen.Instance.PlayMovie("noAborts", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("noAborts"));
+            }
 
-            List<string> careerList = new List<string>();
-
-            Screen.Instance.PlayMovie(careerMovie, false);
-            careerList.AddRange(Screen.Instance.GetMovieText(careerMovie));
-
-            Screen.Instance.PlayMovie(romanceMovie, false);
-            careerList.AddRange(Screen.Instance.GetMovieText(romanceMovie));
-
-            //INSTRINICS
-
-            List<string> instricsList = new List<string>();
-
-            Screen.Instance.PlayMovie("endintrinsics", false);
 
             if (noDeaths == 0)
             {
-                Screen.Instance.PlayMovie("endintrsurvivor", false);
-                instricsList.AddRange(Screen.Instance.GetMovieText("endintrsurvivor"));
-                instricsList.Add("");
-            }
-
-            if (!combatUse)
-            {
-                Screen.Instance.PlayMovie("endintrtimid", false);
-                instricsList.AddRange(Screen.Instance.GetMovieText("endintrtimid"));
-                instricsList.Add("");
-            }
-
-            if (!magicUse)
-            {
-                Screen.Instance.PlayMovie("endintrmagicphobic", false);
-                instricsList.AddRange(Screen.Instance.GetMovieText("endintrmagicphobic"));
-                instricsList.Add("");
-            }
-
-            if (!charmUse)
-            {
-                Screen.Instance.PlayMovie("endintrcharmless", false);
-                instricsList.AddRange(Screen.Instance.GetMovieText("endintrcharmless"));
-                instricsList.Add("");
-            }
-
-            if (charmUse && magicUse && combatUse)
-            {
-                Screen.Instance.PlayMovie("endintrflexible", false);
-                instricsList.AddRange(Screen.Instance.GetMovieText("endintrflexible"));
-                instricsList.Add("");
+                Screen.Instance.PlayMovie("noDeaths", false);
+                clearList.AddRange(Screen.Instance.GetMovieText("noDeaths"));
             }
 
             //Final stats
 
             List<string> finalStats = new List<string>();
 
-
-
-            finalScreen.Add("Princess " + Game.Dungeon.player.Name + " graduated from Princess School with high honours!");
-            finalScreen.Add("");
-
-            string careerStr = "She went on to become a " + careerName;
-            finalScreen.Add(careerStr);
-
-            if(princeGet && careerName != "Great General" && careerName != "Archmage")
-                careerStr = "and to marry her Prince and to live happily ever after.";
-            else if (princeGet)
+            if (wonGame)
             {
-                careerStr = "and to love and lose but to live happily ever after.";
+                finalScreen.Add("Private " + Game.Dungeon.player.Name + " did what his Sergeant thought was impossible ");
+                finalScreen.Add("and conquered Space Hulk OE1x1!");
             }
             else
-                careerStr = "and to live happily ever after.";
+            {
+                finalScreen.Add("Private " + Game.Dungeon.player.Name + " fought bravely but was finally beaten by Space Hulk OE1x1.");
+            }
+            finalScreen.Add("");
 
-            finalScreen.Add(careerStr);
-
+            finalScreen.Add("Primary objectives " + primaryObjectives + "/" + totalLevels + ": " + primaryObjectiveScore + " pts");
+            finalScreen.Add("Secondary objectives " + secondaryObjectives + "/" + totalLevels + ": " + secondaryObjectiveScore + " pts");
+            
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
             finalScreen.Add("");
-            finalScreen.Add("She explored " + dungeonsExplored + " out of 7 dungeons.");
 
-            //Add an extra dungeon clearance for the prince
-            if(princeGet)
-                dungeonsCleared++;
-
-            finalScreen.Add("She cleared " + dungeonsCleared + " out of 7 dungeons.");
-
+            finalScreen.Add("Robots destroyed: " + killRecord.killCount + ": " + killScore + " pts");
             finalScreen.Add("");
-            finalScreen.Add("She knocked out " + killRecord.killCount + " creatures.");
 
-            finalScreen.Add("");
-            finalScreen.Add("Final stats...");
-
-            finalScreen.Add("");
-            finalScreen.Add("Health : " + player.MaxHitpointsStat);
-            finalScreen.Add("Combat Skill : " + player.AttackStat);
-            finalScreen.Add("Speed : " + player.SpeedStat);
-            finalScreen.Add("Charm : " + player.CharmStat);
-            finalScreen.Add("Magic Skill: " + player.MagicStat);
+            finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
 
             finalScreen.Add("");
             finalScreen.Add("Thanks for playing! -flend");
@@ -5125,15 +5080,7 @@ namespace RogueBasin
             obString.Add("");
             obString.Add("Adventures:");
             obString.Add("");
-            obString.AddRange(clearList);
-            obString.Add("");
-            obString.Add("Her future life:");
-            obString.Add("");
-            obString.AddRange(careerList);
-            obString.Add("");
-            obString.Add("Intrinsics:");
-            obString.AddRange(instricsList);
-            obString.Add("She defeated " + killRecord.killCount + " creatures.");
+            obString.Add("Robots destroyed: " + killRecord.killCount);
             obString.Add("");
             obString.Add("Creatures defeated:");
             obString.Add("");
@@ -5493,6 +5440,7 @@ namespace RogueBasin
             //Otherwise OK
 
             DungeonInfo.NoAborts++;
+            DungeonInfo.TotalAborts++;
 
             if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionAborted)
             {
@@ -5540,7 +5488,7 @@ namespace RogueBasin
             player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
 
             string fmt = "00";
-            Game.MessageQueue.AddMessage("Entering ZONE " + newMissionLevel.ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
+            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0, true);
@@ -5651,7 +5599,7 @@ namespace RogueBasin
             //Message
 
             string fmt = "00";
-            Game.MessageQueue.AddMessage("Entering ZONE " + newMissionLevel.ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
+            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0, true);

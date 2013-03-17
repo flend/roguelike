@@ -705,4 +705,15 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\mission140.amf" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\allSecondary0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\flatlinenotwon0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\flatlinewon0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\halfSecondary0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\noAborts0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\noDeaths0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\halfPrimary0.amf" />
+  </ItemGroup>
 </Project>
