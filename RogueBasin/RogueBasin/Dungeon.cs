@@ -4126,6 +4126,7 @@ namespace RogueBasin
                 {
                     //This is true death
                     EndOfGame();
+                    return;
                 }
                 else
                 {
