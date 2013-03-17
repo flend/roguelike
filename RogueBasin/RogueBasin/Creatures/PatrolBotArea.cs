@@ -37,7 +37,7 @@ namespace RogueBasin.Creatures
             return CreatureFOV.CreatureFOVType.Triangular;
         }
 
-        protected override PatrolType GetPatrolType()
+        public override PatrolType GetPatrolType()
         {
             return PatrolType.Waypoints;
         }

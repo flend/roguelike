@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin
 {
-    class MapNode
+    public class MapNode
     {
         //BSP tl corner in map coords
         int x;
@@ -199,8 +199,6 @@ namespace RogueBasin
         {
             //Go down the tree to a random left. When there find a random point in the room and return it
             Random rand = MapGeneratorBSP.rand;
-
-            PointInRoom retPoint = null;
 
             if (childLeft != null)
             {
@@ -811,20 +809,21 @@ namespace RogueBasin
         }
     }
 
-    class MapGeneratorBSP : MapGenerator
+    public class MapGeneratorBSP : MapGenerator
     {
         int width = 40;
         int height = 40;
 
+        //For serialization
         public static Random rand;
 
-        Map baseMap;
+        public Map baseMap;
 
-        MapNode rootNode;
+        public MapNode rootNode;
 
 
-        Point upStaircase;
-        Point downStaircase;
+        public Point upStaircase;
+        public Point downStaircase;
 
 
         public MapGeneratorBSP()
@@ -1590,7 +1589,6 @@ namespace RogueBasin
 
             //Sort by relevant value
             allWaypointsIndices.Sort((a, b) => a.coord.CompareTo(b.coord));
-            Point lastPoint = null;
 
             List<Point> allWaypoints = new List<Point>();
             List<RoomCoords> allRooms = new List<RoomCoords>();

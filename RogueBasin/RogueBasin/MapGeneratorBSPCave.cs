@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin
 {
-    class MapGeneratorBSPCave : MapGenerator
+    public class MapGeneratorBSPCave : MapGenerator
     {
         int width = 40;
         int height = 40;
@@ -13,15 +13,15 @@ namespace RogueBasin
 
         public static Random rand;
 
-        Map baseMap;
+        public Map baseMap;
 
-        MapNode rootNode;
+        public MapNode rootNode;
 
-        List<MapTerrain> rubbleType;
-        List<MapTerrain> possibleEmptyTypes;
+        public List<MapTerrain> rubbleType;
+        public List<MapTerrain> possibleEmptyTypes;
 
-        Point upStaircase;
-        Point downStaircase;
+        public Point upStaircase;
+        public Point downStaircase;
 
         /// <summary>
         /// Alternative wall types. Normal walls get converted into these in a final pass

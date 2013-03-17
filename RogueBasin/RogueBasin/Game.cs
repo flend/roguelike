@@ -54,6 +54,11 @@ namespace RogueBasin
             {
                 return rand;
             }
+
+            set
+            {
+                rand = value;
+            }
         }
     }
 }

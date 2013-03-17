@@ -74,7 +74,7 @@ namespace RogueBasin.Creatures
             return CreatureFOV.CreatureFOVType.Base;
         }
 
-        protected override PatrolType GetPatrolType()
+        public override PatrolType GetPatrolType()
         {
             return PatrolType.RandomWalk;
         }

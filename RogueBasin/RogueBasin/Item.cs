@@ -119,5 +119,14 @@ namespace RogueBasin
         {
             return 0;
         }
+
+        /// <summary>
+        /// Create a new copy of this item. Override if memberwise clone isn't good enough
+        /// </summary>
+        /// <returns></returns>
+        public virtual Item CloneItem()
+        {
+            return this.MemberwiseClone() as Item;
+        }
     }
 }

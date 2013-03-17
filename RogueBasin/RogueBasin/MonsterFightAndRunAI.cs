@@ -1350,7 +1350,7 @@ namespace RogueBasin
         /// Override to set what patrol type (default move behaviour) this creature has
         /// </summary>
         /// <returns></returns>
-        protected virtual PatrolType GetPatrolType()
+        public virtual PatrolType GetPatrolType()
         {
             //RW may be safer than static as a default
             return PatrolType.RandomWalk;

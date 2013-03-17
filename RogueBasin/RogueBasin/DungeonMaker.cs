@@ -22,8 +22,12 @@ namespace RogueBasin
         int hallsExtraCorridorDefinite = 0;
         int hallsExtraCorridorRandom = 8;
 
+        //Non-Public as can't be serialized
+        SerializableDictionary<int, MapGenerator> levelGen = new SerializableDictionary<int, MapGenerator>();
+        List<int> randomCreatureSeeds = new List<int>();
+        List<int> randomItemSeeds = new List<int>();
+        List<int> randomObjectiveSeeds = new List<int>();
 
-        Dictionary<int, MapGenerator> levelGen = new SerializableDictionary<int, MapGenerator>();
 
         public DungeonMaker()
         {
@@ -48,6 +52,8 @@ namespace RogueBasin
             
             //Player start location must be set in here
             SetupMapsFlatline();
+
+            
 
             //SetupMaps();
 
@@ -198,7 +204,7 @@ namespace RogueBasin
         /// Respawn items, monsters and unique followers
         /// </summary>
         /// <param name="dungeonID"></param>
-        public void ReSpawnDungeon(int missionLevel)
+        public void ReSpawnDungeon(int missionLevel, bool useOldSeed)
         {
             List<Monster> monsters = Game.Dungeon.Monsters;
 
@@ -206,7 +212,7 @@ namespace RogueBasin
             {
                 if (m.LocationLevel == missionLevel && m.LocationLevel == missionLevel)
                 {
-                     Game.Dungeon.KillMonster(m, true);
+                    Game.Dungeon.KillMonster(m, true);
                 }
             }
 
@@ -221,18 +227,35 @@ namespace RogueBasin
                 }
             }
 
-            //Reset map to original
+            List<int> levelToRespawn = new List<int>();
+            levelToRespawn.Add(missionLevel);
+
+            //If we've not got level gen, we need to rebuild
+            if (levelGen.Count == 0)
+            {
+                //Load / save cycle we have to completely start again
+
+                //How evil is this???
+                Game.Dungeon.Levels.Clear();
+                Game.Dungeon.Monsters.Clear();
+                Game.Dungeon.Items.Clear();
+                Game.Dungeon.Triggers.Clear();
+                SetupMapsFlatline();
+
+
+            }
+
+            //Otherwise respawn
             Game.Dungeon.ReplaceMap(missionLevel, levelGen[missionLevel].GetOriginalMap());
-            
+
             //Recalculate walkable
             CalculateWalkableAndTCOD();
 
             //Respawn the creatures, items and unique followers
-            List<int> levelToRespawn = new List<int>();
             levelToRespawn.Add(missionLevel);
-            SpawnCreaturesFlatline(levelToRespawn, levelGen);
-            SpawnItemsFlatline(levelToRespawn, levelGen);
-            SpawnObjectivesFlatline(levelToRespawn, levelGen);
+            SpawnCreaturesFlatline(levelToRespawn, levelGen, useOldSeed);
+            SpawnItemsFlatline(levelToRespawn, levelGen, useOldSeed);
+            SpawnObjectivesFlatline(levelToRespawn, levelGen, useOldSeed);
         }
 
         //Spawning shared variables
@@ -2097,6 +2120,23 @@ namespace RogueBasin
 
             //These need to start from 0 now and be continuous
 
+            List<int> dungeonLevelsToTest = RebuildAllMaps();
+
+
+            //Place the player, so monster placing can be checked against it
+            //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+
+            //Place monsters in levels
+            SpawnCreaturesFlatline(dungeonLevelsToTest, levelGen, false);
+
+            SpawnItemsFlatline(dungeonLevelsToTest, levelGen, false);
+
+            SpawnObjectivesFlatline(dungeonLevelsToTest, levelGen, false);
+        }
+
+        private List<int> RebuildAllMaps()
+        {
             List<int> dungeonLevelsToTest = new List<int>();
             dungeonLevelsToTest.Add(0);
             dungeonLevelsToTest.Add(1);
@@ -2105,8 +2145,21 @@ namespace RogueBasin
             dungeonLevelsToTest.Add(4);
             dungeonLevelsToTest.Add(5);
             dungeonLevelsToTest.Add(6);
+            dungeonLevelsToTest.Add(7);
+            dungeonLevelsToTest.Add(8);
 
-            foreach (int level in dungeonLevelsToTest)
+            SpawnMapFlatline(dungeonLevelsToTest, false);
+
+            return dungeonLevelsToTest;
+        }
+
+
+        private void SpawnMapFlatline(List<int> dungeonLevelsToSpawn, bool useOldSeed) {
+
+            Dungeon dungeon = Game.Dungeon;
+
+            //Fixed and random levels
+            foreach (int level in dungeonLevelsToSpawn)
             {
 
                 switch (level)
@@ -2211,7 +2264,6 @@ namespace RogueBasin
                     case 4:
                         {
                             //Make level 4 rather small
-
                             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
                             hallsGen.Width = 40;
@@ -2275,6 +2327,28 @@ namespace RogueBasin
                             //Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission5Entry());
                         }
                         break;
+
+                    default:
+                        //Use random dungeon generator
+                        {
+                            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+                            //Clip to 60
+                            hallsGen.Width = (int)Math.Min(40 + Game.Random.Next(25), 60);
+                            hallsGen.Height = 25;
+
+                            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+                            int levelNo = Game.Dungeon.AddMap(hallMap);
+
+                            //Store the hallGen
+                            //Will get sorted in level order
+                            levelGen.Add(level, hallsGen);
+
+                            //Add standard dock triggers (allows map abortion & completion)
+                            AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+                        }
+
+                        break;
                 }
 
             }
@@ -2283,17 +2357,42 @@ namespace RogueBasin
             //Necessary so connectivity checks on items and monsters can work
             //Only place where this happens now
             CalculateWalkableAndTCOD();
+}
 
-            //Place the player, so monster placing can be checked against it
-            Game.Dungeon.Player.LocationLevel = 0;
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[0].PCStartLocation;
+        private void SaveRandomCreatureSeed()
+        {
+            int seedToUse = Game.Random.Next();
+            Game.Random = new Random(seedToUse);
+            randomCreatureSeeds.Add(seedToUse);
+        }
 
-            //Place monsters in levels
-            SpawnCreaturesFlatline(dungeonLevelsToTest, levelGen);
+        private void SaveRandomItemSeed()
+        {
+            int seedToUse = Game.Random.Next();
+            Game.Random = new Random(seedToUse);
+            randomItemSeeds.Add(seedToUse);
+        }
 
-            SpawnItemsFlatline(dungeonLevelsToTest, levelGen);
+        private void SaveRandomObjectiveSeed()
+        {
+            int seedToUse = Game.Random.Next();
+            Game.Random = new Random(seedToUse);
+            randomObjectiveSeeds.Add(seedToUse);
+        }
 
-            SpawnObjectivesFlatline(dungeonLevelsToTest, levelGen);
+        private void RestoreRandomCreatureSeed(int level)
+        {
+            Game.Random = new Random(randomCreatureSeeds[level]);
+        }
+
+        private void RestoreRandomItemSeed(int level)
+        {
+            Game.Random = new Random(randomItemSeeds[level]);
+        }
+
+        private void RestoreRandomObjectiveSeed(int level)
+        {
+            Game.Random = new Random(randomObjectiveSeeds[level]);
         }
 
         private static void AddStandardEntryExitTriggers(Dungeon dungeon, MapGeneratorBSP hallsGen, int levelNo)
@@ -2305,12 +2404,14 @@ namespace RogueBasin
         }
 
 
-        private void SpawnCreaturesFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators)
+        private void SpawnCreaturesFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators, bool useOldSeed)
         {
 
             LogFile.Log.LogEntry("Generating creatures...");
 
             Dungeon dungeon = Game.Dungeon;
+
+
 
             foreach (int level in dungeonLevelsToTest)
             {
@@ -2319,46 +2420,64 @@ namespace RogueBasin
                 {
 
                     case 0:
+
                         SpawnCreaturesLevel0(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
                     case 1:
+
                         SpawnCreaturesLevel1(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
                     case 2:
+
                         SpawnCreaturesLevel2(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
                     case 3:
+
                         SpawnCreaturesLevel3(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                     
                     case 4:
+
                         SpawnCreaturesLevel4(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
                     case 5:
+
                         SpawnCreaturesLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
                     case 6:
+
                         SpawnCreaturesLevel6(level, mapGenerators[level] as MapGeneratorBSP);
+                        break;
+
+                    default:
+                        {
+
+                            //Use budget-based spawning
+                            SpawnCreaturesRandomly(level, mapGenerators[level] as MapGeneratorBSP);
+                        }
                         break;
                 }
 
             }
         }
 
-        private void SpawnObjectivesFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators)
+        private void SpawnObjectivesFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators, bool useOldSeed)
         {
 
             LogFile.Log.LogEntry("Generating objectives...");
 
             Dungeon dungeon = Game.Dungeon;
+            
+       
 
             foreach (int level in dungeonLevelsToTest)
             {
+
                 MapGenerator mapGen = mapGenerators[level];
 
                 int noOfNodes = 2 + Game.Random.Next(3);
@@ -2517,8 +2636,10 @@ namespace RogueBasin
         }
 
 
-        private void SpawnItemsFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators)
+        private void SpawnItemsFlatline(List<int> dungeonLevelsToTest, Dictionary<int, MapGenerator> mapGenerators, bool useOldSeed)
         {
+
+            
 
             foreach (int level in dungeonLevelsToTest)
             {
@@ -2527,33 +2648,333 @@ namespace RogueBasin
                 {
 
                     case 0:
+
                         SpawnItemsLevel0(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                     case 1:
+
                         SpawnItemsLevel1(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                     case 2:
                         SpawnItemsLevel2(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                     case 3:
+
                         SpawnItemsLevel3(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                     case 4:
+
                         SpawnItemsLevel4(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                     case 5:
                         SpawnItemsLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
                     case 6:
+
                         SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
+                    default:
+
+                        SpawnItemsRandomly(level, mapGenerators[level] as MapGeneratorBSP);
+                        break;
+
 
 
                 }
             }
         }
 
-        private void SpawnItemsLevel0(int levelIndex, MapGeneratorBSP mapGen) {
+        private void SpawnCreaturesRandomly(int levelIndex, MapGeneratorBSP mapGen)
+        {
+            //Monster catalogue
+
+            //Type of monster : typical group size
+
+            //Melee monsters
+
+            List<KeyValuePair<Monster, int>> meleeMonsters = new List<KeyValuePair<Monster, int>>();
+            meleeMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.Swarmer(), 6));
+
+            //Patrolling catalogue
+
+            List<KeyValuePair<Monster, int>> patrolMonsters = new List<KeyValuePair<Monster, int>>();
+            patrolMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.PatrolBot(), 3));
+            patrolMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.PatrolBotArea(), 3));
+
+            //Static catalogue
+
+            List<KeyValuePair<Monster, int>> staticMonsters = new List<KeyValuePair<Monster, int>>();
+            staticMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.RotatingTurret(), 2));
+
+            //Special monsters
+            List<KeyValuePair<Monster, int>> specialMonsters = new List<KeyValuePair<Monster, int>>();
+            specialMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.AlertBot(), 2));
+            specialMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.RollingBomb(), 2));
+
+            List<List<KeyValuePair<Monster, int>>> monsterCatalogue = new List<List<KeyValuePair<Monster, int>>>();
+            monsterCatalogue.Add(meleeMonsters);
+            monsterCatalogue.Add(patrolMonsters);
+            monsterCatalogue.Add(staticMonsters);
+            //Grenades go in last to suck up any left-over budget
+            monsterCatalogue.Add(specialMonsters);
+
+            //Calculate the budget we have to spend
+
+            //An 10 cost item (pistol) is good for 30 - 40 points of monster
+
+            //Item budget: 50 + (levelIndex - 5) * 10;
+
+            int creatureBudget = (50 + (levelIndex - 5) * 10) * 3;
+
+            //Divide between different types
+
+            List<double> budgetRatios = new List<double>();
+
+            //Initialize
+
+            budgetRatios.Add(Game.Random.NextDouble());
+            budgetRatios.Add(Game.Random.NextDouble());
+            budgetRatios.Add(Game.Random.NextDouble());
+            budgetRatios.Add(Game.Random.NextDouble());
+            
+            //Try to spend 2/3 of our budget on one type
+            //(+3 was too much at present)
+
+            budgetRatios[Game.Random.Next(budgetRatios.Count)] += 1.5;
+
+            //Calculate budget split
+            double totalRatio = 0.0;
+            foreach (double d in budgetRatios)
+            {
+                totalRatio += d;
+            }
+
+            double ratioToTotalBudget = creatureBudget / totalRatio;
+
+            double remainder = 0.0;
+
+            //To hold all the items to place
+            List<Monster> monstersToPlaceEvenly = new List<Monster>();
+            List<MonsterFightAndRunAI> monstersToPlaceLinearPatrol = new List<MonsterFightAndRunAI>();
+            List<MonsterFightAndRunAI> monstersToPlaceSquarePatrol = new List<MonsterFightAndRunAI>();
+
+            //Spend budget on each catalogue, depending upon ratio
+            for (int i = 0; i < monsterCatalogue.Count; i++)
+            {
+                double categoryBudget = budgetRatios[i] * ratioToTotalBudget + remainder;
+                remainder = (double)SpendMonsterBudget((int)categoryBudget, monsterCatalogue[i], monstersToPlaceEvenly, monstersToPlaceLinearPatrol, monstersToPlaceSquarePatrol);
+            }
+
+            LogFile.Log.LogEntryDebug("SpawnCreaturesRandomly: level: " + levelIndex + " total budget: " + creatureBudget + " remainder: " + remainder, LogDebugLevel.High);
+
+            //Actually add the monsters
+            List<RoomCoords> allRooms = mapGen.GetAllRooms();
+
+            AddMonstersEqualDistribution(monstersToPlaceEvenly, levelIndex, mapGen);
+            foreach (MonsterFightAndRunAI m in monstersToPlaceLinearPatrol)
+                AddMonsterLinearPatrol(m, levelIndex, mapGen);
+
+            foreach (MonsterFightAndRunAI m in monstersToPlaceSquarePatrol)
+                AddMonsterSquarePatrol(m, levelIndex, mapGen);
+
+            //This sets light level in the creatures
+            SetLightLevelUniversal(levelIndex, levelIndex, 5);
+        }
+
+        private double SpendMonsterBudget(int budget, List<KeyValuePair<Monster, int>> monsterCatelogue, List<Monster> monstersToPlace, List<MonsterFightAndRunAI> linearPatrol, List<MonsterFightAndRunAI> squarePatrol)
+        {
+            int minCostItem = monsterCatelogue[0].Key.CreatureCost();
+            int remainingBudget = budget;
+
+            //Since we can buy with 1 quantity, we should clean up the budget easily
+            while (remainingBudget >= minCostItem)
+            {
+                KeyValuePair<Monster, int> monsterToBuy = monsterCatelogue[Game.Random.Next(monsterCatelogue.Count)];
+                Monster thisMonster = monsterToBuy.Key;
+
+                //Try to buy full quantity
+                int monsterQuantity = (int)Math.Floor(monsterToBuy.Value * 0.5 + Game.Random.NextDouble());
+
+                if (monsterQuantity * thisMonster.CreatureCost() <= remainingBudget)
+                {
+                    //Buy them
+                    for (int i = 0; i < monsterQuantity; i++)
+                        PlaceMonsterInAppropriateClass(thisMonster.NewCreatureOfThisType(), monstersToPlace, linearPatrol, squarePatrol);
+
+                    remainingBudget -= monsterQuantity * thisMonster.CreatureCost();
+                }
+                else
+                {
+                    int canBuyQuantity = remainingBudget / thisMonster.CreatureCost();
+
+                    if (canBuyQuantity == 0)
+                        continue;
+
+                    //Otherwise buy this many
+                    for (int i = 0; i < canBuyQuantity; i++)
+                        PlaceMonsterInAppropriateClass(thisMonster.NewCreatureOfThisType(), monstersToPlace, linearPatrol, squarePatrol);
+
+                    remainingBudget -= canBuyQuantity * thisMonster.CreatureCost();
+
+                }
+            }
+
+            return remainingBudget;
+
+
+        }
+
+        /// <summary>
+        /// Place the monster, based on type in an appropriate bucket for adding
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="monstersToPlace"></param>
+        /// <param name="linearPatrol"></param>
+        /// <param name="squarePatrol"></param>
+        private void PlaceMonsterInAppropriateClass(Monster monster, List<Monster> monstersToPlace, List<MonsterFightAndRunAI> linearPatrol, List<MonsterFightAndRunAI> squarePatrol)
+        {
+            if (!(monster is MonsterFightAndRunAI))
+            {
+                monstersToPlace.Add(monster);
+                return;
+            }
+
+            MonsterFightAndRunAI monsterAI = monster as MonsterFightAndRunAI;
+
+            if (monsterAI.GetPatrolType() == PatrolType.Waypoints && monsterAI.HasSquarePatrol()) {
+                squarePatrol.Add(monsterAI);
+                return;
+            }
+
+            if (monsterAI.GetPatrolType() == PatrolType.Waypoints)
+            {
+                linearPatrol.Add(monsterAI);
+                return;
+            }
+
+            monstersToPlace.Add(monster);
+            return;
+        }
+
+
+        private void SpawnItemsRandomly(int levelIndex, MapGeneratorBSP mapGen)
+        {
+            //Item catalogue
+
+            List<Item> meleeRelatedItems = new List<Item>();
+            meleeRelatedItems.Add(new Items.Vibroblade());
+            meleeRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
+            
+            List<Item> rangedRelatedItems = new List<Item>();
+            rangedRelatedItems.Add(new Items.Pistol());
+            rangedRelatedItems.Add(new Items.Shotgun());
+            rangedRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
+
+            List<Item> grenadeRelatedItems = new List<Item>();
+            grenadeRelatedItems.Add(new Items.SoundGrenade());
+            grenadeRelatedItems.Add(new Items.FragGrenade());
+            grenadeRelatedItems.Add(new Items.StunGrenade());
+            grenadeRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
+
+            List<Item> healingRelatedItems = new List<Item>();
+            healingRelatedItems.Add(new Items.NanoRepair());
+            healingRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
+            
+            List<List<Item>> itemCatalogue = new List<List<Item>>();
+            itemCatalogue.Add(meleeRelatedItems);
+            itemCatalogue.Add(rangedRelatedItems);
+            itemCatalogue.Add(healingRelatedItems);
+            //Grenades go in last to suck up any left-over budget
+            itemCatalogue.Add(grenadeRelatedItems);
+
+            //Calculate the budget we have to spend
+            int itemBudget = 50 + (levelIndex - 5) * 10;
+
+            //Divide between different types
+
+            List<double> budgetRatios = new List<double>();
+
+            double meleeRelatedBudgetRatio = Game.Random.NextDouble();
+            budgetRatios.Add(meleeRelatedBudgetRatio);
+
+            double firingRelatedBudgetRatio = 1 - meleeRelatedBudgetRatio;
+            budgetRatios.Add(firingRelatedBudgetRatio);
+
+            double grenadeRelatedBudgeRadio = Game.Random.NextDouble();
+            budgetRatios.Add(grenadeRelatedBudgeRadio);
+
+            double healingRelatedBudgeRadio = Game.Random.NextDouble();
+            budgetRatios.Add(healingRelatedBudgeRadio);
+
+            //Calculate budget split
+            double totalRatio = 0.0;
+            foreach(double d in budgetRatios) {
+                totalRatio += d;
+            }
+
+            double ratioToTotalBudget = itemBudget / totalRatio;
+
+            double remainder = 0.0;
+
+            //To hold all the items to place
+            List<Item> itemsToPlace = new List<Item>();
+
+            //Spend budget on each catalogue, depending upon ratio
+            for (int i = 0; i < itemCatalogue.Count; i++)
+            {
+                double categoryBudget = budgetRatios[i] * ratioToTotalBudget + remainder;
+                remainder = (double)SpendItemBudget((int)categoryBudget, itemCatalogue[i], itemsToPlace);
+            }
+
+            LogFile.Log.LogEntryDebug("SpawnItemsRandomly: level: " + levelIndex + " total budget: " + itemBudget + " remainder: " + remainder, LogDebugLevel.High);
+
+            //Add any standard items
+                        
+            //1 healing kit
+            itemsToPlace.Add(new Items.NanoRepair());
+
+            //Actually add the items
+            List<RoomCoords> allRooms = mapGen.GetAllRooms();
+
+            AddItemsEqualDistribution(itemsToPlace, levelIndex, mapGen);
+
+            //Pistol at start location
+            AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
+
+        }
+
+
+        /// <summary>
+        /// Spent the budget randomly (but to completion) on the items in the cateogue. Returns remaining budget
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="list"></param>
+        /// <param name="itemsToPlace"></param>
+        /// <returns></returns>
+        private int SpendItemBudget(int budget, List<Item> itemCatalogue, List<Item> itemsToPlace)
+        {
+            int minCostItem = itemCatalogue[0].ItemCost();
+            int remainingBudget = budget;
+
+            while (remainingBudget >= minCostItem)
+            {
+                Item itemToBuy = itemCatalogue[Game.Random.Next(itemCatalogue.Count)];
+
+                if (itemToBuy.ItemCost() > remainingBudget)
+                    continue;
+
+                //Otherwise buy it
+                itemsToPlace.Add(itemToBuy.CloneItem());
+                remainingBudget -= itemToBuy.ItemCost();
+            }
+
+            return remainingBudget;
+
+
+        }
+        
+        
+        void SpawnItemsLevel0(int levelIndex, MapGeneratorBSP mapGen) {
 
             List<RoomCoords> allRooms = mapGen.GetAllRooms();
 

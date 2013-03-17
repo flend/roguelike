@@ -1957,8 +1957,15 @@ namespace RogueBasin
         internal bool MovePCAbsolute(int level, int x, int y)
         {
             player.LocationLevel = level;
-            player.LocationMap = new Point(x,y);
 
+            //Don't run triggers if we haven't moved
+
+            if (player.LocationMap.x == x && player.LocationMap.y == y)
+            {
+                return true;
+            }
+
+            player.LocationMap = new Point(x,y);
             RunDungeonTriggers(player.LocationLevel, player.LocationMap);
 
             return true;
@@ -3934,7 +3941,7 @@ namespace RogueBasin
 
                     //If not, reset mission with different seed
                     Screen.Instance.PlayMovie("deadretrymission", true);
-                    ResetCurrentMission(false);
+                    ResetCurrentMission(true);
 
                     return;
                 }
@@ -4144,10 +4151,20 @@ namespace RogueBasin
 
         public void RunDungeonTriggers(int level, Point mapLocation)
         {
+            List<DungeonSquareTrigger> triggersSnapshot = new List<DungeonSquareTrigger>();
+
+            //Make a copy in case the trigger adds more triggers to the global collection
+
             foreach (DungeonSquareTrigger trigger in Triggers)
             {
+                triggersSnapshot.Add(trigger);
+            }
+
+            foreach(DungeonSquareTrigger trigger in triggersSnapshot) {
                 trigger.CheckTrigger(level, mapLocation);
             }
+
+            
         }
 
         internal void AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
@@ -4621,7 +4638,13 @@ namespace RogueBasin
 
             //Always do new seed for now
             //Respawn the last dungeon the player was in
-            RespawnDungeon(Player.LocationLevel);
+            RespawnDungeon(Player.LocationLevel, respawnWithSameSeed);
+
+            //Reset starting location (in case the level changed)
+
+            player.LocationLevel = Player.LocationLevel;
+            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
+
 
             //Reset dungeon level state
             Game.Dungeon.DungeonInfo.Dungeons[Player.LocationLevel].PlayerLeftDock = false;
@@ -4653,7 +4676,7 @@ namespace RogueBasin
             if (!DungeonInfo.LastMission)
             {
                 //Respawn the last dungeon the player was in
-                RespawnDungeon(Player.CurrentDungeon);
+                RespawnDungeon(Player.CurrentDungeon, false);
 
                 //End any events on any remaining monsters
                 RemoveAllMonsterEffects();
@@ -5505,10 +5528,10 @@ namespace RogueBasin
         /// Respawn a particular dungeon after the player leaves
         /// </summary>
         /// <param name="dungeonID"></param>
-        internal void RespawnDungeon(int dungeonID)
+        internal void RespawnDungeon(int dungeonID, bool useOldSeed)
         {
             //A bit wasteful
-            DungeonMaker.ReSpawnDungeon(dungeonID);
+            DungeonMaker.ReSpawnDungeon(dungeonID, useOldSeed);
 
             LogFile.Log.LogEntryDebug("Respawning dungeon level " + dungeonID, LogDebugLevel.Medium);
         }

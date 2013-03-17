@@ -17,7 +17,7 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
             //More fun to move these guys around with a lower radius
-            NormalSightRadius = 4;
+            NormalSightRadius = 5;
         }
 
         public override void InventoryDrop()
@@ -47,7 +47,7 @@ namespace RogueBasin.Creatures
             return CreatureFOV.CreatureFOVType.Base;
         }
 
-        protected override PatrolType GetPatrolType()
+        public override PatrolType GetPatrolType()
         {
             return PatrolType.Rotate;
         }
