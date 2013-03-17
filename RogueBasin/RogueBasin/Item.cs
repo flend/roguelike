@@ -35,6 +35,7 @@ namespace RogueBasin
 
     [System.Xml.Serialization.XmlInclude(typeof(Items.Pistol))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Shotgun))]
+    [System.Xml.Serialization.XmlInclude(typeof(Items.Laser))]
     [System.Xml.Serialization.XmlInclude(typeof(Items.Vibroblade))]
 
     [System.Xml.Serialization.XmlInclude(typeof(Items.NanoRepair))]

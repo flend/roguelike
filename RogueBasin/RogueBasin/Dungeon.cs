@@ -2832,6 +2832,73 @@ namespace RogueBasin
 
         }
 
+
+        public Point GetEndOfLine(Point start, Point midPoint, int level)
+        {
+            int deltaX = midPoint.x - start.x;
+            int deltaY = midPoint.y - start.y;
+
+            Vector3 dirVector = new Vector3(deltaX, deltaY, 0);
+            dirVector.Normalize();
+
+            bool endNow = false;
+
+            Vector3 startVector = new Vector3(start.x, start.y, 0);
+
+            Vector3 lastVector = startVector;
+
+            do
+            {
+                startVector += dirVector;
+
+                if (startVector.X >= levels[level].width || startVector.X < 0 ||
+                    startVector.Y >= levels[level].height || startVector.Y < 0)
+                    endNow = true;
+                else
+                    lastVector = startVector;
+
+            } while (!endNow);
+
+            return new Point((int)Math.Floor(lastVector.X), (int)Math.Floor(lastVector.Y));
+
+        }
+
+        /// <summary>
+        /// Get points on a line in order.
+        /// /// Only returns points within FOV. Moral: If you can see it, you can shoot it.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public List<Point> GetPathLinePointsInFOV(Point start, Point end, TCODFov fov)
+        {
+            List<Point> pointsToRet = new List<Point>();
+
+            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
+            //Don't draw the first char (where the player is)
+
+            int currentX = start.x;
+            int currentY = start.y;
+
+            bool finishedLine = false;
+
+            do
+            {
+                int lastX = currentX;
+                int lastY = currentY;
+
+                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+
+                if (fov.CheckTileFOV(currentX, currentY))
+                {
+                    pointsToRet.Add(new Point(currentX, currentY));
+                }
+            } while (!finishedLine);
+
+            return pointsToRet;
+        }
+
+
         /// <summary>
         /// Calculates the FOV for a creature if it was in the location
         public CreatureFOV CalculateCreatureFOV(Creature creature, Point location)

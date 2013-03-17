@@ -1081,7 +1081,18 @@ namespace RogueBasin {
                 case TargettingType.LineThrough:
 
                     //Cache original contents
-                    List<Point> lineSquares = GetPathLinePoints(new Point(playerX, playerY), new Point(xLoc, yLoc));
+                    Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, Target, player.LocationLevel);
+
+                    TCODFov currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
+                    List<Point> lineSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
+
+                    foreach (Point p in lineSquares)
+                    {
+                        p.x += mapTopLeft.x;
+                        p.y += mapTopLeft.y;
+                    }
+
+
                     List<char> linecontents = new List<char>();
                     foreach (Point p in lineSquares)
                     {

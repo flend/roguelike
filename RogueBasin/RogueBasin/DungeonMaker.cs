@@ -2500,7 +2500,7 @@ namespace RogueBasin
 
                    // case 6:
 
-                  //      SpawnCreaturesLevel6(level, mapGenerators[level] as MapGeneratorBSP);
+                   //     SpawnCreaturesLevel6(level, mapGenerators[level] as MapGeneratorBSP);
                   //      break;
 
                     default:
@@ -2734,10 +2734,10 @@ namespace RogueBasin
                     case 5:
                         SpawnItemsLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
-                  //  case 6:
+                    case 6:
 
-                    //    SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
-                     //   break;
+                        SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
+                        break;
                     default:
 
                         SpawnItemsRandomly(level, mapGenerators[level] as MapGeneratorBSP);
@@ -2931,11 +2931,12 @@ namespace RogueBasin
 
             List<Item> meleeRelatedItems = new List<Item>();
             meleeRelatedItems.Add(new Items.Vibroblade());
+            meleeRelatedItems.Add(new Items.Pistol());
             meleeRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
             
             List<Item> rangedRelatedItems = new List<Item>();
-            rangedRelatedItems.Add(new Items.Pistol());
             rangedRelatedItems.Add(new Items.Shotgun());
+            rangedRelatedItems.Add(new Items.Laser());
             rangedRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
 
             List<Item> grenadeRelatedItems = new List<Item>();
@@ -3157,7 +3158,7 @@ namespace RogueBasin
             List<RoomCoords> allRooms = mapGen.GetAllRooms();
 
             //Pistol at start location
-            AddItemAtLocation(new Items.Pistol(), levelIndex, mapGen.GetPlayerStartLocation());
+            AddItemAtLocation(new Items.Laser(), levelIndex, mapGen.GetPlayerStartLocation());
             AddItemAtLocation(new Items.StealthCloak(), levelIndex, mapGen.GetPlayerStartLocation());
 
             //Spawn some items
