@@ -1683,6 +1683,13 @@ namespace RogueBasin
             if (!targettingSuccess)
                 return false;
 
+            if (target.x == player.LocationMap.x && target.y == player.LocationMap.y)
+            {
+                Game.MessageQueue.AddMessage("Can't target self with " + weaponI.SingleItemDescription + ".");
+                LogFile.Log.LogEntryDebug("Can't target self with " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+                return false;
+            }
+
             //Check ammo
             if (weapon.RemainingAmmo() < 1)
             {
