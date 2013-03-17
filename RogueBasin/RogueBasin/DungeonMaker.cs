@@ -2960,7 +2960,7 @@ namespace RogueBasin
             itemCatalogue.Add(grenadeRelatedItems);
 
             //Calculate the budget we have to spend
-            int itemBudget = 55 + (levelIndex - 5) * 10;
+            int itemBudget = 60 + (levelIndex - 5) * 10;
 
             //Divide between different types
 
