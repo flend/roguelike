@@ -4197,12 +4197,20 @@ namespace RogueBasin
 
             finalScreen.Add("");
 
-            finalScreen.Add("Robots destroyed: " + killRecord.killCount + ": " + killScore + " pts");
+            finalScreen.Add("Robots destroyed " + killRecord.killCount + ": " + killScore + " pts");
             finalScreen.Add("");
 
             finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") + " pts");
 
             finalScreen.Add("");
+
+            finalScreen.Add("Aborted Missions: " + noAborts);
+            finalScreen.Add("");
+
+            finalScreen.Add("R. E. E. D.s lost: " + noDeaths);
+
+            finalScreen.Add("");
+
             finalScreen.Add("Thanks for playing! -flend");
 
             Screen.Instance.DrawEndOfGameInfo(finalScreen);
@@ -5150,10 +5158,17 @@ namespace RogueBasin
 
             finalScreen.Add("");
 
-            finalScreen.Add("Robots destroyed: " + killRecord.killCount + ": " + killScore + " pts");
+            finalScreen.Add("Robots destroyed " + killRecord.killCount + ": " + killScore + " pts");
             finalScreen.Add("");
 
             finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
+
+            finalScreen.Add("");
+
+            finalScreen.Add("Aborted Missions: " + noAborts);
+            finalScreen.Add("");
+
+            finalScreen.Add("R. E. E. D.s lost: " + noDeaths);
 
             finalScreen.Add("");
             finalScreen.Add("Thanks for playing! -flend");
@@ -5166,9 +5181,7 @@ namespace RogueBasin
 
             obString.AddRange(finalScreen);
             obString.Add("");
-            obString.Add("Robots destroyed: " + killRecord.killCount);
-            obString.Add("");
-            obString.Add("Creatures defeated:");
+            obString.Add("Robots destroyed:");
             obString.Add("");
 
             SaveObituary(obString, killRecord.killStrings);
