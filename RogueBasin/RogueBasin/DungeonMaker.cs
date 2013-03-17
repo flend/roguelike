@@ -2734,10 +2734,10 @@ namespace RogueBasin
                     case 5:
                         SpawnItemsLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
-                    case 6:
+                    //case 6:
 
-                        SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
-                        break;
+                        //SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
+                       // break;
                     default:
 
                         SpawnItemsRandomly(level, mapGenerators[level] as MapGeneratorBSP);
@@ -2937,6 +2937,7 @@ namespace RogueBasin
             List<Item> rangedRelatedItems = new List<Item>();
             rangedRelatedItems.Add(new Items.Shotgun());
             rangedRelatedItems.Add(new Items.Laser());
+            rangedRelatedItems.Add(new Items.Pistol());
             rangedRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
 
             List<Item> grenadeRelatedItems = new List<Item>();
@@ -2959,7 +2960,7 @@ namespace RogueBasin
             itemCatalogue.Add(grenadeRelatedItems);
 
             //Calculate the budget we have to spend
-            int itemBudget = 50 + (levelIndex - 5) * 10;
+            int itemBudget = 55 + (levelIndex - 5) * 10;
 
             //Divide between different types
 

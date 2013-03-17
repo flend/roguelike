@@ -496,7 +496,7 @@ namespace RogueBasin
 
                                     
                                 //Debug events
-                                    
+                                    /*
                                     
                                 //Stats up. Use in town
                                 case 'w':
@@ -571,7 +571,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(healing);
                                     Screen.Instance.Update();
                                     break;
-                               
+                               */
                                 /*
                             case 'k':
                                 //Display the inventory
