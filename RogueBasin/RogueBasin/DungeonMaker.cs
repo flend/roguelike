@@ -1194,7 +1194,18 @@ namespace RogueBasin
 
             if (totalMonsters < noMonsters)
             {
-                monstersPerRoom[0] += noMonsters - totalMonsters;
+                //find room with no items
+                int i = 0;
+                for (; i < noRooms; i++)
+                {
+                    if (monstersPerRoom[i] == 0)
+                        break;
+                }
+
+                if(i == noRooms)
+                    monstersPerRoom[0] += noMonsters - totalMonsters;
+                else
+                    monstersPerRoom[i] += noMonsters - totalMonsters;
                 LogFile.Log.LogEntryDebug("Compensating (level: " + level + "): " + (noMonsters - totalMonsters) + " extra items", LogDebugLevel.Medium);
             }
 
@@ -2569,6 +2580,8 @@ namespace RogueBasin
 
             List<Item> itemsToPlace = new List<Item>();
 
+            itemsToPlace.Add(new Items.SoundGrenade());
+            itemsToPlace.Add(new Items.SoundGrenade());
             itemsToPlace.Add(new Items.SoundGrenade());
             itemsToPlace.Add(new Items.SoundGrenade());
             itemsToPlace.Add(new Items.FragGrenade());

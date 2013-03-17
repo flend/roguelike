@@ -2352,6 +2352,14 @@ namespace RogueBasin
                     return true;
 
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y);
+
+                //Auto-pick up any items
+                if (contents.items.Count > 0)
+                {
+                    //Pick up first item only
+                    //Might help if the player makes a massive pile
+                    RogueBase.PickUpItem();
+                }
             }
 
             //Run any entering square messages
@@ -2434,7 +2442,12 @@ namespace RogueBasin
                         //Set objective complete
                         dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete = true;
 
-                        Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete!");
+                        if (player.LocationLevel == 0)
+                        {
+                            Screen.Instance.PlayMovie("mission0done", true);
+                        }
+
+                        Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete! Return to docking bay.");
                         LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " primary objective complete", LogDebugLevel.Medium);
                     }
 
@@ -2449,7 +2462,7 @@ namespace RogueBasin
                     //Set secondary objective complete
                     dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete = true;
 
-                    Game.MessageQueue.AddMessage("All defenses disabled. Secondary objective complete!");
+                    Game.MessageQueue.AddMessage("All defenses disabled. Secondary objective complete! Return to docking bay.");
                     LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " secondary objective complete", LogDebugLevel.Medium);
                 }
 

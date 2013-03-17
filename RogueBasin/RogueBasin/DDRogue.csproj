@@ -673,4 +673,7 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\helpnewuser0.amf" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\movies\mission0done0.amf" />
+  </ItemGroup>
 </Project>

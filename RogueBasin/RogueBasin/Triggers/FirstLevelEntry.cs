@@ -39,7 +39,7 @@ namespace RogueBasin.Triggers
                 Screen.Instance.PlayMovie("helpnewuser", true);
             }
 
-            Screen.Instance.PlayMovie("mission0", true);
+            //Screen.Instance.PlayMovie("mission0", true);
 
             Triggered = true;
 

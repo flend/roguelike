@@ -396,6 +396,7 @@ namespace RogueBasin
                                     break;
                                     */
 
+                                    /*
                                 case ',':
                                 case 'g':
                                     //Pick up item
@@ -405,7 +406,7 @@ namespace RogueBasin
                                         Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
-                                    break;
+                                    break;*/
 
                                 case '.':
                                     // Do nothing
@@ -2112,7 +2113,7 @@ namespace RogueBasin
         /// Pick up an item if there is one in this square
         /// </summary>
         /// <returns></returns>
-        private bool PickUpItem()
+        static public bool PickUpItem()
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
