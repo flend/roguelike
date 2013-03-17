@@ -872,7 +872,7 @@ namespace RogueBasin
                 string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
                 LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
 
-                return CombatResults.NeitherDied;
+                return CombatResults.DefenderDamaged;
             }
 
             //Miss

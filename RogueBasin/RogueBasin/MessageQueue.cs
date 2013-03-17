@@ -181,7 +181,7 @@ namespace RogueBasin
             List<string> wrappedMsgs = new List<string>();
             do
             {
-                string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", 83);
+                string trimmedMsg = Utility.SubstringWordCut(allMsgs, "", Screen.Instance.MessageQueueWidth);
                 int charsUsed = trimmedMsg.Length;
                 wrappedMsgs.Add(trimmedMsg.Trim());
 

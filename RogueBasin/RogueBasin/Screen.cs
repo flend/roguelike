@@ -190,6 +190,9 @@ namespace RogueBasin {
         public bool SeeAllMonsters { get; set; }
         public bool SeeAllMap { get; set; }
 
+
+        public uint MessageQueueWidth { get; private set; }
+
         public static Screen Instance
         {
             get
@@ -211,6 +214,8 @@ namespace RogueBasin {
 
             msgDisplayTopLeft = new Point(2, 1);
             msgDisplayBotRight = new Point(87, 3);
+
+            MessageQueueWidth = (uint)(msgDisplayBotRight.y - msgDisplayBotRight.x);
 
             msgDisplayNumLines = 3;
 
