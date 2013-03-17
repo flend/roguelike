@@ -5078,8 +5078,6 @@ namespace RogueBasin
 
             obString.AddRange(finalScreen);
             obString.Add("");
-            obString.Add("Adventures:");
-            obString.Add("");
             obString.Add("Robots destroyed: " + killRecord.killCount);
             obString.Add("");
             obString.Add("Creatures defeated:");

@@ -847,8 +847,7 @@ namespace RogueBasin
 
                     //Message string
                     string playerMsg = "You destroyed ";
-                    if(!monster.Unique)
-                        playerMsg += "the ";
+                    playerMsg += "the ";
                     playerMsg += monster.SingleDescription + ".";
                     Game.MessageQueue.AddMessage(playerMsg);
 
@@ -864,8 +863,7 @@ namespace RogueBasin
 
                 //Message string
                 string playerMsg2 = "You hit ";
-                if(!monster.Unique)
-                    playerMsg2 += "the ";
+                playerMsg2 += "the ";
                 playerMsg2 += monster.SingleDescription + ".";
                 Game.MessageQueue.AddMessage(playerMsg2);
                 

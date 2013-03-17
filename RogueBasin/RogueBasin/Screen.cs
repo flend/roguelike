@@ -687,21 +687,21 @@ namespace RogueBasin {
                     return;
                 }
 
-                //Use the width and height of the first frame to centre the movie
-                //Unlikely to be any control codes on the first line
-                int width = movieFrames[0].width;
-                int height = movieFrames[0].height;
-
-                int xOffset = (movieWidth - width) / 2;
-                int yOffset = (movieHeight - height) / 2;
-
-                Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
+                
                 
                 int frameNo = 0;
 
                 //Draw each frame of the movie
                 foreach (MovieFrame frame in movieFrames)
                 {
+                    //Flatline - centre on each frame
+                    int width = frame.width;
+                    int height = frame.height;
+
+                    int xOffset = (movieWidth - width) / 2;
+                    int yOffset = (movieHeight - height) / 2;
+
+                    Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
 
                     //Draw frame
                     rootConsole.DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
