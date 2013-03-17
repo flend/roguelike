@@ -1111,14 +1111,10 @@ namespace RogueBasin
                 {
                     for (int j = roomY; j < roomY + roomHeight; j++)
                     {
-                        if (!(i == playerLoc.x && j == playerLoc.y))
-                            dockSurround.Add(new Point(i, j));
-
-                        //Only block out existing walls to avoid making unrouteable maps
+                        
                         if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Void || baseMap.mapSquares[i, j].Terrain == MapTerrain.Wall)
                         {
-                            baseMap.mapSquares[i, j].Terrain = MapTerrain.DockWall;
-                            baseMap.mapSquares[i, j].SetBlocking();
+
                         }
                         else
                         {
@@ -1131,6 +1127,24 @@ namespace RogueBasin
                 //Yucky hack to avoid weird positions
                 if (notAllWall)
                     continue;
+
+                for (int i = roomX; i < roomX + roomWidth; i++)
+                {
+                    for (int j = roomY; j < roomY + roomHeight; j++)
+                    {
+                        if (!(i == playerLoc.x && j == playerLoc.y))
+                            dockSurround.Add(new Point(i, j));
+
+                        //Only block out existing walls to avoid making unrouteable maps
+                        if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Void || baseMap.mapSquares[i, j].Terrain == MapTerrain.Wall)
+                        {
+                            baseMap.mapSquares[i, j].Terrain = MapTerrain.DockWall;
+                            baseMap.mapSquares[i, j].SetBlocking();
+                        }
+                    }
+                }
+
+                
 
                 //Draw entry room
                 baseMap.mapSquares[doorLoc.x, doorLoc.y].Terrain = MapTerrain.ClosedDoor;

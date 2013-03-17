@@ -354,7 +354,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-
+                                    /*
                                 case 'u':
                                     //Use weapon
                                     timeAdvances = UseWeapon();
@@ -362,7 +362,7 @@ namespace RogueBasin
                                         Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
-                                    break;
+                                    break;*/
 
                                 case 'x':
                                     //Examine
@@ -412,7 +412,7 @@ namespace RogueBasin
                                     // Do nothing
                                     timeAdvances = DoNothing();
                                     break;
-                                    
+                                    /*
                                 case '>':
                                 case '<':
                                     //Interact with feature
@@ -423,7 +423,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
 
-                                    break;
+                                    break;*/
                                     /*
                                 case 'd':
                                 case 'D':
@@ -494,7 +494,7 @@ namespace RogueBasin
 
                                     
                                 //Debug events
-
+                                    /*
                                     
                                 //Stats up. Use in town
                                 case 'w':
@@ -524,13 +524,7 @@ namespace RogueBasin
 
                                 case 'z':
                                     Game.Dungeon.ExplodeAllMonsters();
-                                /*//Learn all moves
-                                    Game.Dungeon.PlayerLearnsAllMoves();
-                                    Game.MessageQueue.AddMessage("Learnt all moves.");
-                                    Game.Dungeon.PlayerLearnsAllSpells();
-                                    Game.MessageQueue.AddMessage("Learnt all spells.");
-                                    Screen.Instance.Update();
-                                    timeAdvances = false;*/
+         
                                     break;
 
                                 
@@ -575,7 +569,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(healing);
                                     Screen.Instance.Update();
                                     break;
-                                
+                                */
                                 /*
                             case 'k':
                                 //Display the inventory
@@ -1641,7 +1635,16 @@ namespace RogueBasin
             Point target = new Point();
             bool targettingSuccess = true;
 
+            Monster oldTargetCreature = Screen.Instance.CreatureToView;
+            Item oldTargetItem = Screen.Instance.ItemToView;
+
             targettingSuccess = TargetAttack(out target, 0, TargettingType.Line, 0, 'x', currentFOV);
+
+            if (!targettingSuccess)
+            {
+                Screen.Instance.CreatureToView = oldTargetCreature;
+                Screen.Instance.ItemToView = oldTargetItem;
+            }
 
             return false;
         }

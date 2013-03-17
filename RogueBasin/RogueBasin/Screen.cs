@@ -1207,7 +1207,7 @@ namespace RogueBasin {
             rootConsole.DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
 
             //Draw title
-            rootConsole.PrintLineRect("End of game summary...", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
 
             //Draw preamble
             int count = 0;
