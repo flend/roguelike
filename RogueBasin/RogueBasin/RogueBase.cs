@@ -155,9 +155,7 @@ namespace RogueBasin
                         {
                             LogFile.Log.LogEntry("Exception thrown" + e.Message);
                         }
-                        //Remove dead players!
-                        if (Game.Dungeon.PlayerDeathOccured)
-                            Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
+                        
                     }
                     
                     //PC turn
@@ -168,6 +166,10 @@ namespace RogueBasin
                         //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
                         if (Game.Dungeon.Player.IncrementTurnTime())
                         {
+                            //Remove dead players! Restart mission. Do this here so we don't get healed then beaten up again in our old state
+                            if (Game.Dungeon.PlayerDeathOccured)
+                                Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
+
                             ProfileEntry("Pre PC POV");
 
                             //Calculate the player's FOV
@@ -494,7 +496,7 @@ namespace RogueBasin
 
                                     
                                 //Debug events
-                                    /*
+                                    
                                     
                                 //Stats up. Use in town
                                 case 'w':
@@ -569,7 +571,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(healing);
                                     Screen.Instance.Update();
                                     break;
-                                */
+                               
                                 /*
                             case 'k':
                                 //Display the inventory

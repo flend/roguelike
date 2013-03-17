@@ -2498,10 +2498,10 @@ namespace RogueBasin
                         SpawnCreaturesLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
 
-                    case 6:
+                   // case 6:
 
-                        SpawnCreaturesLevel6(level, mapGenerators[level] as MapGeneratorBSP);
-                        break;
+                  //      SpawnCreaturesLevel6(level, mapGenerators[level] as MapGeneratorBSP);
+                  //      break;
 
                     default:
                         {
@@ -2734,10 +2734,10 @@ namespace RogueBasin
                     case 5:
                         SpawnItemsLevel5(level, mapGenerators[level] as MapGeneratorBSP);
                         break;
-                    case 6:
+                  //  case 6:
 
-                        SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
-                        break;
+                    //    SpawnItemsLevel6(level, mapGenerators[level] as MapGeneratorBSP);
+                     //   break;
                     default:
 
                         SpawnItemsRandomly(level, mapGenerators[level] as MapGeneratorBSP);
@@ -2947,6 +2947,7 @@ namespace RogueBasin
             List<Item> healingRelatedItems = new List<Item>();
             healingRelatedItems.Add(new Items.NanoRepair());
             healingRelatedItems.Add(new Items.TacticalOverlay());
+            healingRelatedItems.Add(new Items.StealthCloak());
             healingRelatedItems.Sort((x,y) => x.ItemCost().CompareTo(y.ItemCost()));
             
             List<List<Item>> itemCatalogue = new List<List<Item>>();
