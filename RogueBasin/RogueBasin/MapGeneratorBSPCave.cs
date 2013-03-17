@@ -361,7 +361,7 @@ namespace RogueBasin
             }
         }
 
-        private Point EntryDoorLocation { get; set; }
+        private List<Point> EntryDoorLocation { get; set; }
 
         private Point AddEntryRoomForPlayer()
         {
@@ -558,7 +558,8 @@ namespace RogueBasin
                 baseMap.mapSquares[doorLoc.x, doorLoc.y].Terrain = MapTerrain.ClosedDoor;
 
                 //Returned to set triggers
-                EntryDoorLocation = doorLoc;
+                EntryDoorLocation = new List<Point>();
+                EntryDoorLocation.Add(doorLoc);
 
                 //Draw player space
                 baseMap.mapSquares[playerLoc.x, playerLoc.y].Terrain = MapTerrain.Empty;
@@ -571,7 +572,7 @@ namespace RogueBasin
             return null;
         }
 
-        public override Point GetEntryDoor()
+        public override List<Point> GetEntryDoor()
         {
             return EntryDoorLocation;
         }

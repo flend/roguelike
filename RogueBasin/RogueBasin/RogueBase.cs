@@ -523,13 +523,14 @@ namespace RogueBasin
                                     break;
 
                                 case 'z':
-                                    //Learn all moves
+                                    Game.Dungeon.ExplodeAllMonsters();
+                                /*//Learn all moves
                                     Game.Dungeon.PlayerLearnsAllMoves();
                                     Game.MessageQueue.AddMessage("Learnt all moves.");
                                     Game.Dungeon.PlayerLearnsAllSpells();
                                     Game.MessageQueue.AddMessage("Learnt all spells.");
                                     Screen.Instance.Update();
-                                    timeAdvances = false;
+                                    timeAdvances = false;*/
                                     break;
 
                                 

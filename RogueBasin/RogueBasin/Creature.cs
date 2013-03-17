@@ -63,7 +63,7 @@ namespace RogueBasin
         /// <summary>
         /// How much the turn clock has to reach to process
         /// </summary>
-        protected const int turnClockLimit = 1000;
+        protected const int turnClockLimit = 400;
 
         /// <summary>
         /// Number of ticks (calls to IncrementTime from the main loop) that occur between each a creature's turns. Used to calculate durations etc.

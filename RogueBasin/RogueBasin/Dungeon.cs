@@ -2478,7 +2478,41 @@ namespace RogueBasin
             return true;
         }
 
-        
+        public void ExplodeAllMonsters()
+        {
+            List<Monster> livingMonstersOnLevel = monsters.FindAll(x => x.Alive && x.LocationLevel == player.LocationLevel);
+
+            foreach (Monster m in livingMonstersOnLevel)
+            {
+                List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(m.LocationMap, Game.Dungeon.Player.LocationLevel, 4 + Game.Random.Next(3));
+                
+                Color randColor = ColorPresets.Red;
+                int randInt = Game.Random.Next(5);
+
+                switch(randInt) {
+                    case 0:
+                        randColor = ColorPresets.Red;
+                        break;
+                    case 1:
+                        randColor = ColorPresets.Orange;
+                        break;
+                    case 2:
+                        randColor = ColorPresets.Yellow;
+                        break;
+                    case 3:
+                        randColor = ColorPresets.OrangeRed;
+                        break;
+                    case 4:
+                        randColor = ColorPresets.DarkRed;
+                        break;
+                }
+
+                KillMonster(m, true);
+
+                Screen.Instance.DrawAreaAttack(grenadeAffects, randColor);
+                Screen.Instance.Update();
+            }
+        }
 
         /// <summary>
         /// Kill a monster. This monster won't get any further turns.
@@ -2518,7 +2552,7 @@ namespace RogueBasin
             {
                 monster.OnKilledSpecialEffects();
 
-                if (!dungeonInfo.LastMission && monster.Unique)
+                if (monster.Unique)
                 {
                     //We killed an objective
                     bool a = monsters[0] is Creatures.ComputerNode;
@@ -2535,8 +2569,23 @@ namespace RogueBasin
                             Screen.Instance.PlayMovie("mission0done", true);
                         }
 
-                        Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete! Return to docking bay.");
-                        LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " primary objective complete", LogDebugLevel.Medium);
+                        if (player.LocationLevel == 14)
+                        {
+                            //Last level
+
+                            //All remaining monsters explode
+                            ExplodeAllMonsters();
+
+                            Game.MessageQueue.AddMessage("It's done. The Space Hulk is yours. Fly back home a VICTOR!");
+                            dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete = true;
+                            dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete = true;
+                        }
+                        else
+                        {
+                            Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete! Return to docking bay.");
+                            LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " primary objective complete", LogDebugLevel.Medium);
+                        }
+                        
                     }
 
                 }
@@ -5513,6 +5562,11 @@ namespace RogueBasin
                 StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb0');
             }
             
+            else if(level == 14)
+            {
+                StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xdb');
+            }
+
             else
             {
                 StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb2');

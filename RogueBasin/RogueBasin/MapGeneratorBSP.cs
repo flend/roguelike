@@ -913,7 +913,7 @@ namespace RogueBasin
             return baseMap.PCStartLocation;
         }
 
-        private Point EntryDoorLocation { get; set; }
+        private List<Point> EntryDoorLocation { get; set; }
 
         private Point AddEntryRoomForPlayer()
         {
@@ -1100,24 +1100,43 @@ namespace RogueBasin
                 //    enoughRoom = false;
                 //    continue;
                 //}
-                //It's almost impossible that we will block off an area, and this check fails for maps with rooms close to the edge
-
 
                 //Draw room 
+
+                List<Point> dockSurround = new List<Point>();
+
+                bool notAllWall = false;
+
                 for (int i = roomX; i < roomX + roomWidth; i++)
                 {
                     for (int j = roomY; j < roomY + roomHeight; j++)
                     {
-                        baseMap.mapSquares[i, j].Terrain = MapTerrain.DockWall;
-                        baseMap.mapSquares[i, j].SetBlocking();
+                        if (!(i == playerLoc.x && j == playerLoc.y))
+                            dockSurround.Add(new Point(i, j));
+
+                        //Only block out existing walls to avoid making unrouteable maps
+                        if (baseMap.mapSquares[i, j].Terrain == MapTerrain.Void || baseMap.mapSquares[i, j].Terrain == MapTerrain.Wall)
+                        {
+                            baseMap.mapSquares[i, j].Terrain = MapTerrain.DockWall;
+                            baseMap.mapSquares[i, j].SetBlocking();
+                        }
+                        else
+                        {
+
+                            notAllWall = true;
+                        }
                     }
                 }
+
+                //Yucky hack to avoid weird positions
+                if (notAllWall)
+                    continue;
 
                 //Draw entry room
                 baseMap.mapSquares[doorLoc.x, doorLoc.y].Terrain = MapTerrain.ClosedDoor;
 
                 //Returned to set triggers
-                EntryDoorLocation = doorLoc;
+                EntryDoorLocation = dockSurround;
 
                 //Draw player space
                 baseMap.mapSquares[playerLoc.x, playerLoc.y].Terrain = MapTerrain.Empty;
@@ -1130,7 +1149,7 @@ namespace RogueBasin
             return null;
         }
 
-        public override Point GetEntryDoor()
+        public override List<Point> GetEntryDoor()
         {
             return EntryDoorLocation;
         }

@@ -144,7 +144,7 @@ namespace RogueBasin
 
         public abstract Point GetPlayerStartLocation();
 
-        public abstract Point GetEntryDoor();
+        public abstract List<Point> GetEntryDoor();
 
         /// <summary>
         /// Return coords of all rooms, for sensible / gauranteed distribution of creatures

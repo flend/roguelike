@@ -2186,6 +2186,9 @@ namespace RogueBasin
 
                             //Add first level entry trigger
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.FirstLevelEntry());
+                            
+                            //Place dock bay feature at PC startloc
+                            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
 
                         }
                         break;
@@ -2211,6 +2214,9 @@ namespace RogueBasin
                             //Add level entry trigger
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission1Entry());
 
+                            //Place dock bay feature at PC startloc
+                            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
                         }
                         break;
 
@@ -2234,6 +2240,9 @@ namespace RogueBasin
 
                             //Add level entry trigger
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission2Entry());
+
+                            //Place dock bay feature at PC startloc
+                            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
 
                         }
                         break;
@@ -2259,6 +2268,9 @@ namespace RogueBasin
                             //Add level entry trigger
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission3Entry());
 
+                            //Place dock bay feature at PC startloc
+                            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
                         }
                         break;
 
@@ -2281,6 +2293,10 @@ namespace RogueBasin
 
                             //Add level entry trigger
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission4Entry());
+
+                            //Place dock bay feature at PC startloc
+                            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
                         }
                         break;
                     case 5:
@@ -2303,6 +2319,10 @@ namespace RogueBasin
 
                             //Add level entry trigger
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission5Entry());
+
+                            //Place dock bay feature at PC startloc
+                            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
                         }
                         break;
 
@@ -2326,6 +2346,10 @@ namespace RogueBasin
 
                             //Add level entry trigger
                             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.Mission6Entry());
+
+                            //Place dock bay feature at PC startloc
+                            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
                         }
                         break;
 
@@ -2333,6 +2357,7 @@ namespace RogueBasin
                         SpawnRandomMap(dungeon, level);
                         //Add level entry trigger
                         Game.Dungeon.AddTrigger(level, Game.Dungeon.Levels[level].PCStartLocation, new Triggers.Mission11Entry());
+
                         break;
 
                     case 14:
@@ -2351,6 +2376,7 @@ namespace RogueBasin
                 }
 
             }
+
 
             //Build TCOD maps
             //Necessary so connectivity checks on items and monsters can work
@@ -2375,6 +2401,10 @@ namespace RogueBasin
 
             //Add standard dock triggers (allows map abortion & completion)
             AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+
+            //Place dock bay feature at PC startloc
+            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
         }
 
         private void SaveRandomCreatureSeed()
@@ -2415,7 +2445,9 @@ namespace RogueBasin
 
         private static void AddStandardEntryExitTriggers(Dungeon dungeon, MapGeneratorBSP hallsGen, int levelNo)
         {
-            Game.Dungeon.AddTrigger(levelNo, hallsGen.GetEntryDoor(), new Triggers.DockDoor());
+            List<Point> surroundingDock = hallsGen.GetEntryDoor();
+            foreach(Point p in surroundingDock)
+                Game.Dungeon.AddTrigger(levelNo, p, new Triggers.DockDoor());
 
             //Add exit trigger
             Game.Dungeon.AddTrigger(levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation, new Triggers.LeaveByDock());
@@ -2497,6 +2529,12 @@ namespace RogueBasin
                 MapGenerator mapGen = mapGenerators[level];
 
                 int noOfNodes = 3 + Game.Random.Next(3);
+
+                if (level == 14)
+                {
+                    //Last level, lots of nodes
+                    noOfNodes = 8;
+                }
 
                 List<Monster> nodes = new List<Monster>();
 

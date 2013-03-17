@@ -173,7 +173,10 @@
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
-    <Compile Include="Features\Corpse.cs" />
+    <Compile Include="Features\Corpse.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Features\DockBay.cs" />
     <Compile Include="Features\StaircaseEntry.cs" />
     <Compile Include="Features\StaircaseExit.cs">
       <SubType>Code</SubType>
@@ -700,6 +703,6 @@
     <EmbeddedResource Include="bin\Debug\movies\mission60.amf" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="bin\Debug\movies\mission150.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\mission140.amf" />
   </ItemGroup>
 </Project>

@@ -94,16 +94,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Combat Bot"; } }
+        public override string SingleDescription { get { return "Assault Bot"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Combat Bots"; } }
+        public override string GroupDescription { get { return "Assault Bots"; } }
 
         protected override char GetRepresentation()
         {
-            return 'C';
+            return 'A';
         }
 
         protected override int GetChanceToRecover()
