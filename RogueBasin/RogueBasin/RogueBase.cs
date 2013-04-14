@@ -2416,7 +2416,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 2;
+            LogFile.Log.DebugLevel = 0;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
