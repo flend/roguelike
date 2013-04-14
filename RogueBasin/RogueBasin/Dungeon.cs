@@ -5106,7 +5106,7 @@ namespace RogueBasin
             }
 
             //Made it to the final levels
-            if (!wonGame && primaryObjectiveScore >= 11)
+            if (!wonGame && primaryObjectives >= 11)
             {
                 Screen.Instance.PlayMovie("halfPrimary", false);
                 clearList.AddRange(Screen.Instance.GetMovieText("halfPrimary"));
