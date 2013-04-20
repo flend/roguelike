@@ -2671,15 +2671,15 @@ namespace RogueBasin {
 
                     if (creature.FOVType() == CreatureFOV.CreatureFOVType.Triangular)
                     {
-                        headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 3);
+                        headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, creature.LocationMap, 3);
                     }
                     else
                     {
                         //Base
-                        headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, new Point(monsterX, monsterY), 1);
+                        headingMarkers = DirectionUtil.SurroundingPointsFromDirection(creature.Heading, creature.LocationMap, 1);
                         
                         //Reverse first one
-                        Point oppositeMarker = new Point(monsterX - (headingMarkers[0].x - monsterX), monsterY - (headingMarkers[0].y - monsterY));
+                        Point oppositeMarker = new Point(creature.LocationMap.x - (headingMarkers[0].x - creature.LocationMap.x), creature.LocationMap.y - (headingMarkers[0].y - creature.LocationMap.y));
                         headingMarkers.Add(oppositeMarker);
                     }
 
@@ -2691,23 +2691,23 @@ namespace RogueBasin {
 
                         //LogFile.Log.LogEntryDebug("heading: " + creature.Representation + " loc: x: " + headingLoc.x.ToString() + " y: " + headingLoc.y.ToString(), LogDebugLevel.Low);
 
-                        if (headingLoc.x > 0 && headingLoc.x < mapTopLeft.x + map.width
-                            && headingLoc.y > 0 && headingLoc.y < mapTopLeft.y + map.height)// && Game.Dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(headingLoc.x, headingLoc.y))
+                        if (headingLoc.x >= 0 && headingLoc.x < map.width
+                            && headingLoc.y >= 0 && headingLoc.y < map.height)// && Game.Dungeon.MapSquareIsWalkable(creature.LocationLevel, new Point(headingLoc.x, headingLoc.y))
                         {
-                            //Draw as an coloring on the current icon
-                            char charToOverwrite = rootConsole.GetChar(headingLoc.x, headingLoc.y);
-                            //Dot is too hard to see
-                            if (charToOverwrite == '.')
-                                charToOverwrite = '\x9';
-                            
-                            //rootConsole.ForegroundColor = creature.RepresentationColor();
+                            //Draw as a colouring on terrain
 
-                            //rootConsole.PutChar(headingLoc.x, headingLoc.y, charToOverwrite);
+                            int terrainChar = tileMapLayer(TileLevel.Terrain).Rows[headingLoc.y].Columns[headingLoc.x].TileID;
 
-                            //We can nicely refactor this to remove the map topleft offset
+                            if (terrainChar != -1)
+                            {
+                                char charToOverwrite = (char)terrainChar;
+                                //Dot is too hard to see
+                                if (charToOverwrite == '.')
+                                    charToOverwrite = '\x9';
 
-                            tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y - mapTopLeft.y].Columns[headingLoc.x - mapTopLeft.x] = new TileEngine.TileCell(charToOverwrite);
-                            tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y - mapTopLeft.y].Columns[headingLoc.x - mapTopLeft.x].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
+                                tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y].Columns[headingLoc.x] = new TileEngine.TileCell(charToOverwrite);
+                                tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y].Columns[headingLoc.x].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
+                            }
                         }
                     }
                 }
