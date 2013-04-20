@@ -429,49 +429,6 @@ namespace RogueBasin {
             return splashSquares;
         }
 
-        /// <summary>
-        /// Get points on a line in order.
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public List<Point> GetPathLinePoints(Point start, Point end)
-        {
-            List<Point> pointsToRet = new List<Point>();
-
-            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
-            //Don't draw the first char (where the player is)
-
-            int currentX = start.x;
-            int currentY = start.y;
-
-            bool finishedLine = false;
-
-            do
-            {
-                int lastX = currentX;
-                int lastY = currentY;
-
-                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
-
-                if (currentX >= 0 && currentX < Width && currentY >= 0 && currentY < Height)
-                    pointsToRet.Add(new Point(currentX, currentY));
-            } while (!finishedLine);
-
-            return pointsToRet;
-        }
-
-        /// <summary>
-        /// Draw a flash effect of a line
-        /// Start is the origin (line is not drawn here, but origin used to calculate shape of line)
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <param name="color"></param>
-        public void DrawFlashLine(Point start, Point end, Color color)
-        {
-            DrawFlashLine(start, end, color, 200, true);
-        }
 
         protected char LineChar(int deltaX, int deltaY) {
 
@@ -541,70 +498,6 @@ namespace RogueBasin {
         }
 
 
-        public void DrawFlashLine(Point start, Point end, Color color, int timeMS, bool screenUpdate) {
-
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw the screen as normal
-            Draw();
-
-            //Draw the line overlay
-
-            //Cast a line between the start and end
-            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
-
-            int currentX = start.x;
-            int currentY = start.y;
-
-            bool finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
-            
-            int deltaX = end.x - start.x;
-            int deltaY = end.y - start.y;
-
-            char drawChar = '-';
-
-            if(deltaX < 0 && deltaY < 0)
-                drawChar = '\\';
-            else if(deltaX < 0 && deltaY > 0)
-                drawChar = '/';
-            else if(deltaX > 0 && deltaY < 0)
-                drawChar = '/';
-            else if(deltaX > 0 && deltaY > 0)
-                drawChar = '\\';
-            else if(deltaY == 0)
-                drawChar = '-';
-            else if(deltaX == 0)
-                drawChar = '|';
-
-            rootConsole.ForegroundColor = color;
-
-            while(!finishedLine) {
-
-                rootConsole.PutChar(mapTopLeft.x + currentX, mapTopLeft.y + currentY, drawChar);
-                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
-
-            }
-
-            rootConsole.ForegroundColor = normalForeground;
-
-            //For screenshots only
-            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-            //Redraw
-            if (screenUpdate)
-            {
-                //Draw line overlay
-                FlushConsole();
-
-                //Wait
-                TCODSystem.Sleep((uint)timeMS);
-
-                //Draw normally
-                Draw();
-                FlushConsole();
-            }
-        }
 
         /// <summary>
         /// Call after all drawing is complete to output onto screen
@@ -959,26 +852,16 @@ namespace RogueBasin {
         }
 
 
-        //Draw the current dungeon map and objects
-        private void Draw()
+        /// <summary>
+        /// Fully rebuild the layered, tiled map. All levels, excluding animations
+        /// </summary>
+        private void BuildTiledMap()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
-            //Clear screen
-            rootConsole.Clear();
-
-            //Build a tile map to display the screen
-            //In future, we probably don't want to pull this down each time
-
-            //Either use a dirty tile system, or simply have a flag to not change typical levels
-            //E.g. an animation only changes anim, targetting only changes targetting
-
             tileMap = new TileEngine.TileMap(7, dungeon.PCMap.height, dungeon.PCMap.width);
-            
+
             //Draw the map screen
 
             //Draw terrain (must be done first since sets some params)
@@ -1001,7 +884,30 @@ namespace RogueBasin {
             if (targettingMode)
                 DrawTargettingCursor();
 
-            //Test - draw to screen
+        }
+
+        //Draw the current dungeon map and objects
+        private void Draw()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
+            //Clear screen
+            rootConsole.Clear();
+
+            //Build a tile map to display the screen
+            //In future, we probably don't want to pull this down each time
+
+            //Either use a dirty tile system, or simply have a flag to not change typical levels
+            //E.g. an animation only changes anim, targetting only changes targetting
+
+            //Build the full tiled map representation
+            BuildTiledMap();
+            
+            //Render tiled map to screen
             MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
             rootConsole.ForegroundColor = ColorPresets.White;
@@ -1031,12 +937,12 @@ namespace RogueBasin {
         }
 
         /// <summary>
-        /// Draw a shotgun blast. Pass in the actual damage sqs, since they are calculated in the OnFire()
+        /// Draws an animated attack. This a top level function which is used instead of Draw() as an entry to screen
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="target"></param>
         /// <param name="size"></param>
-        public void DrawAreaAttack(List <Point> targetSquares, Color color)
+        public void DrawAreaAttackAnimation(List <Point> targetSquares, Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
@@ -1051,26 +957,32 @@ namespace RogueBasin {
                 mangledPoints.Add(new Point(p));
             }
 
-            //Offset origin and target onto map
+            //Don't rebuild the static map (items, creatures etc.) since it hasn't changed
+            
+            //Clear targetting
+            tileMap.ClearLayer((int)TileLevel.TargettingUI);
+
+            //Add animation points into the animation layer
+
             foreach (Point p in mangledPoints)
             {
-                p.x += mapTopLeft.x;
-                p.y += mapTopLeft.y;
-
-                rootConsole.PutChar(p.x, p.y, '*');
+                tileMapLayer(TileLevel.Animations).Rows[p.y].Columns[p.x] = new TileEngine.TileCell('*');
+                tileMapLayer(TileLevel.Animations).Rows[p.y].Columns[p.x].TileFlag = new LibtcodColorFlags(color, ColorPresets.Black);
             }
 
-            rootConsole.ForegroundColor = normalForeground;
-
-            //Draw line overlay
+            //Render the full layered map (with these animations) on screen
+            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
 
             //Wait
             TCODSystem.Sleep(missileDelay);
 
-            //Draw normally
-            Draw();
-            FlushConsole(); 
+            //Wipe the animation layer
+            tileMap.ClearLayer((int)TileLevel.Animations);
+
+            //Draw again without animations
+            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            FlushConsole();
         }
 
 

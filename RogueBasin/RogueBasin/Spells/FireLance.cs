@@ -93,7 +93,7 @@ namespace RogueBasin.Spells
                 unitX = 1;
                 unitY = 0;
             }*/
-
+            /*
             //Extend this line until it hits an edge
             int finalX = player.LocationMap.x;
             int finalY = player.LocationMap.y;
@@ -226,7 +226,7 @@ namespace RogueBasin.Spells
 
 
             Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(lastX, lastY), ColorPresets.Yellow);
-
+            */
             return true;
             
             }

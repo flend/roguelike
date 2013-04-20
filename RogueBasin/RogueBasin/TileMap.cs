@@ -156,5 +156,14 @@ namespace TileEngine
                 layers[index] = value;
             }
         }
+
+        /// <summary>
+        /// Wipes a layer completely. Used for animations etc.
+        /// </summary>
+        /// <param name="layerIndex"></param>
+        public void ClearLayer(int layerIndex)
+        {
+            layers[layerIndex] = new TileLayer(numRows, numColumns);
+        }
     }
 }

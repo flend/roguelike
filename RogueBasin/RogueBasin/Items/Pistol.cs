@@ -258,7 +258,7 @@ namespace RogueBasin.Items
 
             //Draw attack
 
-            Screen.Instance.DrawAreaAttack(targetSquares, ColorPresets.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
 
             //Damage monster
             
@@ -324,7 +324,7 @@ namespace RogueBasin.Items
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), player.LocationLevel, destination);
 
             //Draw throw
-            Screen.Instance.DrawAreaAttack(targetSquares, ColorPresets.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
 
             if (stunDamage)
             {

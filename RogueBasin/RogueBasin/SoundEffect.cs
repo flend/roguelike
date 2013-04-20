@@ -104,22 +104,15 @@ namespace RogueBasin
             int xSource = this.MapLocation.x;
             int ySource = this.MapLocation.y;
 
-            TCODLineDrawing.InitLine(xSource, ySource, mapLocation.x, mapLocation.y);
-
             int noWallsCrossed = 0;
 
-            bool endPoint = false;
-            do
-            {
-                endPoint = TCODLineDrawing.StepLine(ref xSource, ref ySource);
-
+            foreach(Point p in Utility.GetPointsOnLine(xSource, ySource, mapLocation.x, mapLocation.y)) {
                 //Check if this square is in wall (for now, is non-walkable
-                if (!Game.Dungeon.MapSquareIsWalkable(levelLocation, new Point(xSource, ySource)))
+                if (!Game.Dungeon.MapSquareIsWalkable(levelLocation, p))
                 {
                     noWallsCrossed++;
                 }
             }
-            while (!endPoint);
 
             //Attenuate by 25% for each wall crossing
             //(for a single wall crossing)

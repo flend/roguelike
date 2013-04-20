@@ -167,26 +167,13 @@ namespace RogueBasin
         {
             List<Point> pointsToRet = new List<Point>();
 
-            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
-            //Don't draw the first char (where the player is)
-
-            int currentX = start.x;
-            int currentY = start.y;
-
-            bool finishedLine = false;
-
-            do
+            foreach (Point p in Utility.GetPointsOnLine(start.x, start.y, end.x, end.y))
             {
-                int lastX = currentX;
-                int lastY = currentY;
-
-                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
-
-                if (CheckTileFOV(currentX, currentY))
+                if (CheckTileFOV(p.x, p.y))
                 {
-                    pointsToRet.Add(new Point(currentX, currentY));
+                    pointsToRet.Add(p);
                 }
-            } while (!finishedLine);
+            }           
 
             return pointsToRet;
         }

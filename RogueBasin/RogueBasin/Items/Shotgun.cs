@@ -37,7 +37,7 @@ namespace RogueBasin.Items
             List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, dungeon.PCMap, RangeFire(), ShotgunSpreadAngle());
             
             //Draw attack
-            Screen.Instance.DrawAreaAttack(targetSquares, ColorPresets.Chocolate);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Chocolate);
 
             //Make firing sound
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);

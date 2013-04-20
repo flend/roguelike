@@ -331,15 +331,14 @@ namespace RogueBasin
 
             //If not, open a path between the staircases
 
-            TCODLineDrawing.InitLine(upStairsPoint.x, upStairsPoint.y, downStairsPoint.x, downStairsPoint.y);
-
-            int nextX = upStairsPoint.x;
-            int nextY = upStairsPoint.y;
-
-            Random rand = Game.Random;
-
-            do
+            foreach (Point p in Utility.GetPointsOnLine(upStairsPoint.x, upStairsPoint.y, downStairsPoint.x, downStairsPoint.y))
             {
+
+                int nextX = p.x;
+                int nextY = p.y;
+
+                Random rand = Game.Random;
+
                 SetSquareOpen(nextX, nextY);
 
                 //Chance surrounding squares also get done
@@ -408,7 +407,7 @@ namespace RogueBasin
                     }
                 }
 
-            } while (!TCODLineDrawing.StepLine(ref nextX, ref nextY));
+            }
 
         }
     

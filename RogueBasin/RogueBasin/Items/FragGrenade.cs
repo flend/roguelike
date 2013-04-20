@@ -127,7 +127,7 @@ namespace RogueBasin.Items
             }
 
             //Draw attack
-            Screen.Instance.DrawAreaAttack(newGrenadeAffects, ColorPresets.Firebrick);
+            Screen.Instance.DrawAreaAttackAnimation(newGrenadeAffects, ColorPresets.Firebrick);
 
             //Attack all monsters in the area
             foreach (Point sq in newGrenadeAffects)
