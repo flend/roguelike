@@ -5,7 +5,7 @@ using libtcodWrapper;
 namespace RogueBasin
 {
     //Represents a point
-    //This should be immutable
+    //This should be immutable (make x and y readonly)
     public class Point {
         public int x;
         public int y;
@@ -75,7 +75,7 @@ namespace RogueBasin
 
         public override string ToString()
         {
-            return "(x: " + this.x + ",y: " + this.y + ")";
+            return "(x: " + this.x + ", y: " + this.y + ")";
         }
     }
     
