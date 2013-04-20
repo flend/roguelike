@@ -516,30 +516,28 @@ namespace RogueBasin {
             //Draw the line overlay
 
             //Cast a line between the start and end
-            TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
-            //Don't draw the first char (where the player is)
 
-            int currentX = start.x;
-            int currentY = start.y;
+            int lastX = start.x;
+            int lastY = start.y;
 
-            bool finishedLine = false;
+            foreach(Point p in Utility.GetPointsOnLine(start.x, start.y, end.x, end.y)) {
 
-            do {
-                int lastX = currentX;
-                int lastY = currentY;
-
-                finishedLine = TCODLineDrawing.StepLine(ref currentX, ref currentY);
+                //Don't draw the first char (where the player is)
+                if(p == start)
+                    continue;
 
                 char c;
                 if (drawChar == 0)
-                    c = LineChar(currentX - lastX, currentY - lastY);
+                    c = LineChar(p.x - lastX, p.y - lastY);
                 else
                     c = drawChar;
 
-                tileMapLayer(layerNo).Rows[currentY].Columns[currentX] = new TileEngine.TileCell(drawChar);
-                tileMapLayer(layerNo).Rows[currentY].Columns[currentX].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
-            } while (!finishedLine);
-                        
+                lastX = p.x;
+                lastY = p.y;
+
+                tileMapLayer(layerNo).Rows[p.y].Columns[p.x] = new TileEngine.TileCell(c);
+                tileMapLayer(layerNo).Rows[p.y].Columns[p.x].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+            }           
         }
 
 
@@ -1140,7 +1138,7 @@ namespace RogueBasin {
 
             if (SetTargetInRange)
             {
-                backgroundColor = ColorPresets.Yellow;
+                backgroundColor = ColorPresets.White;
             }
 
             char toDraw = '.';
@@ -1150,7 +1148,7 @@ namespace RogueBasin {
                 toDraw = (char)monsterIdInSquare;
 
             tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x] = new TileEngine.TileCell(toDraw);
-            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x].TileFlag = new LibtcodColorFlags(ColorPresets.Yellow, ColorPresets.Black);
+            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x].TileFlag = new LibtcodColorFlags(ColorPresets.Red, backgroundColor);
             
         }
 
