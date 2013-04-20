@@ -50,15 +50,28 @@ namespace RogueBasin
                     {
                         TileEngine.TileCell thisCell = layer.Rows[y].Columns[x];
 
+                        if (thisCell.TileID == -1)
+                            continue;
+
                         //Flags is a color for libtcod
                         LibtcodColorFlags colorFlags = thisCell.TileFlag as LibtcodColorFlags;
                         if (colorFlags == null)
                         {
                             rootConsole.ForegroundColor = ColorPresets.White;
+                            rootConsole.BackgroundColor = ColorPresets.Black;
                         }
                         else
                         {
-                            rootConsole.ForegroundColor = colorFlags.Color;
+                            if (colorFlags.BackgroundColor == null)
+                            {
+                                rootConsole.BackgroundColor = ColorPresets.Black;
+                            }
+                            else
+                            {
+                                rootConsole.BackgroundColor = colorFlags.BackgroundColor;
+                            }
+
+                            rootConsole.ForegroundColor = colorFlags.ForegroundColor;
                         }
 
                         //Id is the char

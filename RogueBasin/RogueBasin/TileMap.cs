@@ -16,6 +16,11 @@ namespace TileEngine
         public TileRow(int numColumns)
         {
             columns = new List<TileCell>(numColumns);
+
+            for (int i = 0; i < numColumns; i++)
+            {
+                columns.Add(new TileCell());
+            }
         }
 
         public List<TileCell> Columns
@@ -100,7 +105,7 @@ namespace TileEngine
         /// <summary>
         /// Build a map of numLayers layers, each of numRows x numColumns
         /// </summary>
-        TileMap(int numLayers, int numRows, int numColumns)
+        public TileMap(int numLayers, int numRows, int numColumns)
         {
             this.numLayers = numLayers;
             this.numRows = numRows;

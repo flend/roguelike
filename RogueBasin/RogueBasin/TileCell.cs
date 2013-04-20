@@ -15,7 +15,10 @@ namespace TileEngine
 
     class TileCell
     {
-        int tileID;
+        /// <summary>
+        /// -1 signifies empty
+        /// </summary>
+        int tileID = -1;
         TileFlags flags;
 
         public int TileID
@@ -36,6 +39,10 @@ namespace TileEngine
             }
         }
 
+        public TileCell()
+        {
+            //-1 default id
+        }
 
         public TileCell(int tileID)
         {

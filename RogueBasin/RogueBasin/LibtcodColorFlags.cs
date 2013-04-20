@@ -8,15 +8,34 @@ namespace RogueBasin
 {
     class LibtcodColorFlags : TileEngine.TileFlags
     {
-        Color thisColor;
+        Color foregroundColor;
+        Color backgroundColor;
 
-        public LibtcodColorFlags(Color color)
+        /// <summary>
+        /// Foreground color only
+        /// </summary>
+        /// <param name="foregroundColor"></param>
+        public LibtcodColorFlags(Color foregroundColor)
         {
-            thisColor = color;
+            this.foregroundColor = foregroundColor;
         }
 
-        public Color Color {
-           get { return thisColor; }
+        /// <summary>
+        /// Background color only
+        /// </summary>
+        public LibtcodColorFlags(Color foregroundColor, Color backgroundColor)
+        {
+            this.foregroundColor = foregroundColor;
+            this.backgroundColor = backgroundColor;
+        }
+
+        public Color ForegroundColor {
+            get { return foregroundColor; }
+        }
+
+        public Color BackgroundColor
+        {
+            get { return backgroundColor; }
         }
 
     }

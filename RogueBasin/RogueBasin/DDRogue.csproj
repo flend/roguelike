@@ -254,9 +254,10 @@
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />
     <Compile Include="LastMapGeneratorFromASCIIFile.cs" />
+    <Compile Include="LibtcodColorFlags.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />
-    <Compile Include="MapCell.cs" />
+    <Compile Include="TileCell.cs" />
     <Compile Include="MapGenerator.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
     <Compile Include="MapGeneratorBSPCave.cs" />

@@ -12,6 +12,16 @@ namespace RogueBasin {
     //Represents our screen
     public class Screen
     {
+        public enum TileLevel {
+            Terrain = 0,
+            Features = 1,
+            Items = 2,
+            CreatureDecoration = 3,
+            Creatures = 4,
+            Animations = 5,
+            TargettingUI = 6
+        }
+
         static Screen instance = null;
 
         //Console/screen size
@@ -203,6 +213,10 @@ namespace RogueBasin {
             }
         }
 
+        /// <summary>
+        /// Master tile map for displaying the screen
+        /// </summary>
+        TileEngine.TileMap tileMap;
 
         Screen()
         {
@@ -480,36 +494,30 @@ namespace RogueBasin {
         }
 
         /// <summary>
-        /// Draw a line following a path on the console.
+        /// Draw a line following a path on a tile layer.
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(Point start, Point end, Color foregroundColor, Color backgroundColor)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor)
         {
-            DrawPathLine(start, end, foregroundColor, backgroundColor, (char)0);
+            DrawPathLine(layerNo, start, end, foregroundColor, backgroundColor, (char)0);
         }
 
         /// <summary>
-        /// Draw a line following a path on the console. Override default line drawing
+        /// Draw a line following a path on a tile layer. Override default line drawing
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(Point start, Point end, Color foregroundColor, Color backgroundColor, char drawChar)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor, char drawChar)
         {
-
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
             //Draw the line overlay
 
             //Cast a line between the start and end
             TCODLineDrawing.InitLine(start.x, start.y, end.x, end.y);
             //Don't draw the first char (where the player is)
-
-            rootConsole.ForegroundColor = foregroundColor;
-            rootConsole.BackgroundColor = backgroundColor;
 
             int currentX = start.x;
             int currentY = start.y;
@@ -528,11 +536,10 @@ namespace RogueBasin {
                 else
                     c = drawChar;
 
-                rootConsole.PutChar(currentX, currentY, c);
+                tileMapLayer(layerNo).Rows[currentY].Columns[currentX] = new TileEngine.TileCell(drawChar);
+                tileMapLayer(layerNo).Rows[currentY].Columns[currentX].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
             } while (!finishedLine);
                         
-            rootConsole.ForegroundColor = normalForeground;
-            rootConsole.BackgroundColor = normalBackground;
         }
 
 
@@ -933,6 +940,27 @@ namespace RogueBasin {
             Screen.Instance.FlushConsole();
         }
 
+        private void DrawPC(Player player)
+        {
+         
+            Point PClocation = player.LocationMap;
+            Color PCDrawColor = PCColor;
+
+            if (DebugMode)
+            {
+                MapSquare pcSquare = Game.Dungeon.Levels[player.LocationLevel].mapSquares[player.LocationMap.x, player.LocationMap.y];
+
+                if (pcSquare.InMonsterFOV)
+                {
+                    PCDrawColor = Color.Interpolate(PCDrawColor, ColorPresets.Red, 0.4);
+                }
+            }
+
+            tileMapLayer(TileLevel.Creatures).Rows[player.LocationMap.y].Columns[player.LocationMap.x] = new TileEngine.TileCell(player.Representation);
+            tileMapLayer(TileLevel.Creatures).Rows[player.LocationMap.y].Columns[player.LocationMap.x].TileFlag = new LibtcodColorFlags(PCDrawColor);
+        }
+
+
         //Draw the current dungeon map and objects
         private void Draw()
         {
@@ -945,9 +973,18 @@ namespace RogueBasin {
             //Clear screen
             rootConsole.Clear();
 
+            //Build a tile map to display the screen
+            //In future, we probably don't want to pull this down each time
+
+            //Either use a dirty tile system, or simply have a flag to not change typical levels
+            //E.g. an animation only changes anim, targetting only changes targetting
+
+            tileMap = new TileEngine.TileMap(7, dungeon.PCMap.height, dungeon.PCMap.width);
+            
             //Draw the map screen
 
             //Draw terrain (must be done first since sets some params)
+            //First level in tileMap
             DrawMap(dungeon.PCMap);
 
             //Draw fixed features
@@ -960,31 +997,20 @@ namespace RogueBasin {
             DrawCreatures(dungeon.Monsters);
 
             //Draw PC
-
-            Point PClocation = player.LocationMap;
-            Color PCDrawColor = PCColor;
-            
-
-            if (DebugMode)
-            {
-                MapSquare pcSquare = Game.Dungeon.Levels[player.LocationLevel].mapSquares[player.LocationMap.x, player.LocationMap.y];
-
-                if (pcSquare.InMonsterFOV)
-                {
-                    PCDrawColor = Color.Interpolate(PCDrawColor, ColorPresets.Red, 0.4);
-                }
-            }
-
-            rootConsole.ForegroundColor = PCDrawColor;
-            rootConsole.PutChar(mapTopLeft.x + PClocation.x, mapTopLeft.y + PClocation.y, player.Representation);
-            rootConsole.ForegroundColor = ColorPresets.White;
-
-            //Draw Stats
-            DrawStats(dungeon.Player);
+            DrawPC(player);
 
             //Draw targetting cursor
             if (targettingMode)
                 DrawTargettingCursor();
+
+            //Test - draw to screen
+            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+
+            rootConsole.ForegroundColor = ColorPresets.White;
+            rootConsole.BackgroundColor = ColorPresets.Black;
+
+            //Draw Stats
+            DrawStats(dungeon.Player);
 
             //Draw any overlay screens
             if (displayInventory)
@@ -1073,74 +1099,37 @@ namespace RogueBasin {
             {
                 case TargettingType.Line:
 
-  
                     //Draw a line up to the target
-                    DrawPathLine(new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
+                    DrawPathLine(TileLevel.TargettingUI, new Point(player.LocationMap.x, player.LocationMap.y), new Point(Target.x, Target.y), targetForeground, targetBackground);
+                    //Should improve the getlinesquare function to give nicer output so we could use it here too
+
                     break;
 
                 case TargettingType.LineThrough:
 
-                    //Cache original contents
+                    //Cast a line which terminates on the edge of the map
                     Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, Target, player.LocationLevel);
 
+                    //Get the in-FOV points up to that end point
                     TCODFov currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
                     List<Point> lineSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
 
-                    foreach (Point p in lineSquares)
-                    {
-                        p.x += mapTopLeft.x;
-                        p.y += mapTopLeft.y;
-                    }
+                    DrawExplosionOverSquaresAndCreatures(lineSquares);      
 
-
-                    List<char> linecontents = new List<char>();
-                    foreach (Point p in lineSquares)
-                    {
-                        linecontents.Add(rootConsole.GetChar(p.x, p.y));
-                    }
-
-                    //Draw a line up to the target
-                    DrawPathLine(new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
-
-                    rootConsole.BackgroundColor = targetBackground;
-                    rootConsole.ForegroundColor = ColorPresets.Red;
-
-                    //Draw original contents back
-                    int index = 0;
-                    foreach (Point p in lineSquares)
-                    {
-                        rootConsole.PutChar(p.x, p.y, linecontents[index]);
-                        index++;
-                    }
                     break;
-
+                    
                 case TargettingType.Rocket:
                     {
+                        //Get potention explosion points
                         int size = 2;
 
-                        //Cache original contents
-                        List<Point> splashSquares = GetPointsForCircularTarget(new Point(xLoc, yLoc), size);
-                        List<char> contents = new List<char>();
-                        foreach (Point p in splashSquares)
-                        {
-                            contents.Add(rootConsole.GetChar(p.x, p.y));
-                        }
+                        List<Point> splashSquares = GetPointsForCircularTarget(Target, size);
 
-                        //Draw a line up to the target
-                        DrawPathLine(new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
-                        //Circular target on the target
-                        DrawCircularTarget(new Point(xLoc, yLoc), ColorPresets.Red, targetBackground, size, '*');
+                        //Draw a line up to the target square
+                        DrawPathLine(TileLevel.TargettingUI, new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
 
-                        rootConsole.BackgroundColor = targetBackground;
-                        rootConsole.ForegroundColor = ColorPresets.Red;
+                        DrawExplosionOverSquaresAndCreatures(splashSquares); 
 
-                        //Draw original contents back
-                        int index2 = 0;
-                        foreach (Point p in splashSquares)
-                        {
-                            rootConsole.PutChar(p.x, p.y, contents[index2]);
-                            index2++;
-                        }
                     }
                     break;
 
@@ -1149,57 +1138,49 @@ namespace RogueBasin {
                         int size = TargetRange;
                         double spreadAngle = TargetPermissiveAngle;
 
-                        //Cache original contents
-                        //List<Point> splashSquares = GetPointsForTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size);
-                        
-                        //Using FOV-modified version for extra accuracy!
                         CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
                         List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, size, spreadAngle);
-                        //offset
-                        foreach(Point p in splashSquares) {
-                            p.x += mapTopLeft.x;
-                            p.y += mapTopLeft.y;
-                        }
 
-                        List<char> contents = new List<char>();
-                        foreach (Point p in splashSquares)
-                        {
-                            contents.Add(rootConsole.GetChar(p.x, p.y));
-                        }
-
-                        //Triangle target on the player
-                        DrawTriangularTarget(new Point(playerX, playerY), new Point(xLoc, yLoc), size, spreadAngle, ColorPresets.Red, targetBackground, '*');
-                        
-                        rootConsole.BackgroundColor = targetBackground;
-                        rootConsole.ForegroundColor = ColorPresets.Red;
-
-                        //Draw original contents back
-                        int index2 = 0;
-                        foreach (Point p in splashSquares)
-                        {
-                            rootConsole.PutChar(p.x, p.y, contents[index2]);
-                            index2++;
-                        }
+                        DrawExplosionOverSquaresAndCreatures(splashSquares);
                     }
                     break;
             }
 
+            //Highlight target if in range
+
+            Color backgroundColor = targetBackground;
+
             if (SetTargetInRange)
             {
-                rootConsole.BackgroundColor = ColorPresets.Yellow;
-                rootConsole.ForegroundColor = targetForeground;
+                backgroundColor = ColorPresets.Yellow;
             }
-            else
+
+            char toDraw = '.';
+            int monsterIdInSquare = (char)tileMapLayer(TileLevel.Creatures).Rows[Target.y].Columns[Target.x].TileID;
+
+            if (monsterIdInSquare != -1)
+                toDraw = (char)monsterIdInSquare;
+
+            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x] = new TileEngine.TileCell(toDraw);
+            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x].TileFlag = new LibtcodColorFlags(targetForeground, backgroundColor);
+
+        }
+
+        private void DrawExplosionOverSquaresAndCreatures(List<Point> splashSquares)
+        {
+            //Draw each point as targetted
+            foreach (Point p in splashSquares)
             {
-                rootConsole.BackgroundColor = targetBackground;
-                rootConsole.ForegroundColor = targetForeground;
+                //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
+                char toDraw = '*';
+                int monsterIdInSquare = (char)tileMapLayer(TileLevel.Creatures).Rows[p.y].Columns[p.x].TileID;
+
+                if (monsterIdInSquare != -1)
+                    toDraw = (char)monsterIdInSquare;
+
+                tileMapLayer(TileLevel.TargettingUI).Rows[p.y].Columns[p.x] = new TileEngine.TileCell(toDraw);
+                tileMapLayer(TileLevel.TargettingUI).Rows[p.y].Columns[p.x].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
             }
-
-            rootConsole.PutChar(xLoc, yLoc, charAtPoint);
-
-            rootConsole.BackgroundColor = normalBackground;
-            rootConsole.ForegroundColor = normalForeground;
-
         }
 
 
@@ -2572,8 +2553,8 @@ namespace RogueBasin {
 
                 if (drawItem)
                 {
-                    rootConsole.ForegroundColor = itemColorToUse;
-                    rootConsole.PutChar(mapTopLeft.x + item.LocationMap.x, mapTopLeft.y + item.LocationMap.y, item.Representation);
+                    tileMapLayer(TileLevel.Items).Rows[item.LocationMap.y].Columns[item.LocationMap.x] = new TileEngine.TileCell(item.Representation);
+                    tileMapLayer(TileLevel.Items).Rows[item.LocationMap.y].Columns[item.LocationMap.x].TileFlag = new LibtcodColorFlags(itemColorToUse);
                 }
                 //rootConsole.Flush();
                 //KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -2632,8 +2613,8 @@ namespace RogueBasin {
 
                 if (drawFeature)
                 {
-                    rootConsole.ForegroundColor = featureColor;
-                    rootConsole.PutChar(mapTopLeft.x + feature.LocationMap.x, mapTopLeft.y + feature.LocationMap.y, feature.Representation);
+                    tileMapLayer(TileLevel.Features).Rows[feature.LocationMap.y].Columns[feature.LocationMap.x] = new TileEngine.TileCell(feature.Representation);
+                    tileMapLayer(TileLevel.Features).Rows[feature.LocationMap.y].Columns[feature.LocationMap.x].TileFlag = new LibtcodColorFlags(featureColor);
                 }
             }
 
@@ -2730,9 +2711,15 @@ namespace RogueBasin {
                             //Dot is too hard to see
                             if (charToOverwrite == '.')
                                 charToOverwrite = '\x9';
-                            rootConsole.ForegroundColor = creature.RepresentationColor();
+                            
+                            //rootConsole.ForegroundColor = creature.RepresentationColor();
 
-                            rootConsole.PutChar(headingLoc.x, headingLoc.y, charToOverwrite);
+                            //rootConsole.PutChar(headingLoc.x, headingLoc.y, charToOverwrite);
+
+                            //We can nicely refactor this to remove the map topleft offset
+
+                            tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y - mapTopLeft.y].Columns[headingLoc.x - mapTopLeft.x] = new TileEngine.TileCell(charToOverwrite);
+                            tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y - mapTopLeft.y].Columns[headingLoc.x - mapTopLeft.x].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
                         }
                     }
                 }
@@ -2750,6 +2737,9 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
                 Color creatureColor = creature.RepresentationColor();
+
+                Color foregroundColor;
+                Color backgroundColor;
 
                 //Shouldn't really do this here but see if we can get away with it
                 CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
@@ -2809,28 +2799,30 @@ namespace RogueBasin {
 
                 if (drawCreature)
                 {
-                    rootConsole.ForegroundColor = creatureColor;
+                    foregroundColor = creatureColor;
+                    backgroundColor = ColorPresets.Black;
+
                     bool newBackground = false;
                     //Set background depending on status
                     if (creature.Charmed)
                     {
-                        rootConsole.BackgroundColor = charmBackground;
+                        backgroundColor = charmBackground;
                         newBackground = true;
                     }
                     else if (creature.Passive)
                     {
-                        rootConsole.BackgroundColor = passiveBackground;
+                        backgroundColor = passiveBackground;
                         newBackground = true;
                     }
                     else if (creature == CreatureToView)
                     {
                         //targetted
-                        rootConsole.BackgroundColor = targettedBackground;
+                        backgroundColor = targettedBackground;
                         newBackground = true;
                     }
                     else if (creature.StunnedTurns > 0)
                     {
-                        rootConsole.BackgroundColor = stunnedBackground;
+                        backgroundColor = stunnedBackground;
                         newBackground = true;
                     }
 
@@ -2845,7 +2837,7 @@ namespace RogueBasin {
                             //In range firing
                             if (weapon.HasFireAction() && Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                             {
-                                rootConsole.BackgroundColor = inRangeBackground;
+                                backgroundColor = inRangeBackground;
                                 newBackground = true;
                             }
                             else
@@ -2853,7 +2845,7 @@ namespace RogueBasin {
                                 //In throwing range
                                 if (weapon.HasThrowAction() && Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                                 {
-                                    rootConsole.BackgroundColor = inRangeBackground;
+                                    backgroundColor = inRangeBackground;
                                     newBackground = true;
                                 }
                             }
@@ -2861,7 +2853,7 @@ namespace RogueBasin {
                             //Also agressive
                             if (newBackground == true && creature.InPursuit())
                             {
-                                rootConsole.BackgroundColor = inRangeAndAggressiveBackground;
+                                backgroundColor = inRangeAndAggressiveBackground;
                             }
                         }
                     }
@@ -2870,18 +2862,18 @@ namespace RogueBasin {
                     {
                         if (creature.InPursuit())
                         {
-                            rootConsole.BackgroundColor = pursuitBackground;
+                            backgroundColor = pursuitBackground;
                             newBackground = true;
                         }
                         else if (!creature.OnPatrol())
                         {
-                            rootConsole.BackgroundColor = investigateBackground;
+                            backgroundColor = investigateBackground;
                             newBackground = true;
                         }
                         else if (creature.Unique)
-                            rootConsole.BackgroundColor = uniqueBackground;
+                            backgroundColor = uniqueBackground;
                         else
-                            rootConsole.BackgroundColor = normalBackground;
+                            backgroundColor = normalBackground;
                     }
 
                     //Creature
@@ -2890,6 +2882,8 @@ namespace RogueBasin {
 
                     rootConsole.PutChar(monsterX, monsterY, creature.Representation);
 
+                    tileMapLayer(TileLevel.Creatures).Rows[creature.LocationMap.y].Columns[creature.LocationMap.x] = new TileEngine.TileCell(creature.Representation);
+                    tileMapLayer(TileLevel.Creatures).Rows[creature.LocationMap.y].Columns[creature.LocationMap.x].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
 
                 }
             }
@@ -3150,12 +3144,26 @@ namespace RogueBasin {
                         drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Green, 0.7);
                     }
 
-                    rootConsole.ForegroundColor = drawColor;
-                    rootConsole.PutChar(screenX, screenY, screenChar);
+                    tileMapLayer(TileLevel.Terrain).Rows[j].Columns[i] = new TileEngine.TileCell(screenChar);
+                    tileMapLayer(TileLevel.Terrain).Rows[j].Columns[i].TileFlag = new LibtcodColorFlags(drawColor);
+
+                    //rootConsole.ForegroundColor = drawColor;
+                    //rootConsole.PutChar(screenX, screenY, screenChar);
                 }
             }
 
         }
+
+        /// <summary>
+        /// Returns the requested tile layer for the master map
+        /// </summary>
+        /// <param name="levelId"></param>
+        /// <returns></returns>
+        internal TileEngine.TileLayer tileMapLayer(TileLevel levelId)
+        {
+            return tileMap.Layer[(int)levelId];
+        }
+
         internal void ConsoleLine(string datedEntry)
         {
             Console.WriteLine(datedEntry);
