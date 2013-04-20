@@ -34,7 +34,7 @@ namespace RogueBasin.Items
             //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
 
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, RangeFire(), ShotgunSpreadAngle());
+            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, dungeon.PCMap, RangeFire(), ShotgunSpreadAngle());
             
             //Draw attack
             Screen.Instance.DrawAreaAttack(targetSquares, ColorPresets.Chocolate);

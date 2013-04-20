@@ -131,7 +131,7 @@ namespace RogueBasin
         /// <param name="location"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public List<Point> GetPointsForTriangularTargetInFOV(Point origin, Point target, int range, double fovAngle)
+        public List<Point> GetPointsForTriangularTargetInFOV(Point origin, Point target, Map mapLevel, int range, double fovAngle)
         {
             List<Point> triangularPoints = new List<Point>();
 
@@ -145,7 +145,10 @@ namespace RogueBasin
                     //If OK, check to see if it falls within a TriangularFOV (blast radius)
                     if (CheckTileFOV(i, j) && CreatureFOV.TriangularFOV(origin, angle, range, i, j, fovAngle))
                     {
-                        triangularPoints.Add(new Point(i, j));
+                        if (i >= 0 && i < mapLevel.width && j >= 0 && j < mapLevel.height)
+                        {
+                            triangularPoints.Add(new Point(i, j));
+                        }
                     }
                 }
             }

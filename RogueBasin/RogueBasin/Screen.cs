@@ -1078,20 +1078,7 @@ namespace RogueBasin {
 
         private void DrawTargettingCursor()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             Player player = Game.Dungeon.Player;
-
-            int playerX = mapTopLeft.x + player.LocationMap.x;
-            int playerY = mapTopLeft.y + player.LocationMap.y;
-
-            int xLoc = mapTopLeft.x + Target.x;
-            int yLoc = mapTopLeft.y + Target.y;
-
-            //Draw the target
-
-            char charAtPoint = rootConsole.GetChar(xLoc, yLoc);
 
             //Draw the area of effect
 
@@ -1126,7 +1113,7 @@ namespace RogueBasin {
                         List<Point> splashSquares = GetPointsForCircularTarget(Target, size);
 
                         //Draw a line up to the target square
-                        DrawPathLine(TileLevel.TargettingUI, new Point(playerX, playerY), new Point(xLoc, yLoc), targetForeground, targetBackground);
+                        DrawPathLine(TileLevel.TargettingUI, new Point(player.LocationMap.x, player.LocationMap.y), new Point(Target.x, Target.y), targetForeground, targetBackground);
 
                         DrawExplosionOverSquaresAndCreatures(splashSquares); 
 
@@ -1139,7 +1126,7 @@ namespace RogueBasin {
                         double spreadAngle = TargetPermissiveAngle;
 
                         CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-                        List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, size, spreadAngle);
+                        List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, Game.Dungeon.Levels[player.LocationLevel], size, spreadAngle);
 
                         DrawExplosionOverSquaresAndCreatures(splashSquares);
                     }
@@ -1147,8 +1134,9 @@ namespace RogueBasin {
             }
 
             //Highlight target if in range
-
+            
             Color backgroundColor = targetBackground;
+            Color foregroundColor = targetForeground;
 
             if (SetTargetInRange)
             {
@@ -1156,14 +1144,14 @@ namespace RogueBasin {
             }
 
             char toDraw = '.';
-            int monsterIdInSquare = (char)tileMapLayer(TileLevel.Creatures).Rows[Target.y].Columns[Target.x].TileID;
+            int monsterIdInSquare = tileMapLayer(TileLevel.Creatures).Rows[Target.y].Columns[Target.x].TileID;
 
             if (monsterIdInSquare != -1)
                 toDraw = (char)monsterIdInSquare;
 
             tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x] = new TileEngine.TileCell(toDraw);
-            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x].TileFlag = new LibtcodColorFlags(targetForeground, backgroundColor);
-
+            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x].TileFlag = new LibtcodColorFlags(ColorPresets.Yellow, ColorPresets.Black);
+            
         }
 
         private void DrawExplosionOverSquaresAndCreatures(List<Point> splashSquares)
@@ -1173,7 +1161,7 @@ namespace RogueBasin {
             {
                 //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
                 char toDraw = '*';
-                int monsterIdInSquare = (char)tileMapLayer(TileLevel.Creatures).Rows[p.y].Columns[p.x].TileID;
+                int monsterIdInSquare = tileMapLayer(TileLevel.Creatures).Rows[p.y].Columns[p.x].TileID;
 
                 if (monsterIdInSquare != -1)
                     toDraw = (char)monsterIdInSquare;
