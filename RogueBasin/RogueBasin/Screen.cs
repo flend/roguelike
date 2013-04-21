@@ -429,7 +429,12 @@ namespace RogueBasin {
             return splashSquares;
         }
 
-
+        /// <summary>
+        /// ASCII line character for a direction
+        /// </summary>
+        /// <param name="deltaX"></param>
+        /// <param name="deltaY"></param>
+        /// <returns></returns>
         protected char LineChar(int deltaX, int deltaY) {
 
             char drawChar = '-';
@@ -469,7 +474,6 @@ namespace RogueBasin {
         /// <param name="color"></param>
         protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor, char drawChar)
         {
-
             //Draw the line overlay
 
             //Cast a line between the start and end
@@ -3686,21 +3690,9 @@ namespace RogueBasin {
             if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
                 return;
             
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //We need to path find a flash line so it doesn't go through any walls
-
-            //To do: cache the map
-
-            //Generate path object
-            TCODPathFinding path = new TCODPathFinding(Game.Dungeon.FOVs[originCreature.LocationLevel], 1.0);
-            path.ComputePath(originCreature.LocationMap.x, originCreature.LocationMap.y, target.LocationMap.x, target.LocationMap.y);
-
-            //Draw a flash line
-
             //Draw the screen as normal
             Draw();
+            FlushConsole();
 
             //Flash the attacker
             /*
@@ -3710,82 +3702,44 @@ namespace RogueBasin {
                 rootConsole.PutChar(mapTopLeft.x + originCreature.LocationMap.x, mapTopLeft.y + originCreature.LocationMap.y, originCreature.Representation);
             }*/
 
+            //Draw animation to animation layer
+
             //Calculate and draw the line overlay
-
-            int x, y;
-            int lastX, lastY;
-            int targetX = target.LocationMap.x;
-            int targetY = target.LocationMap.y;
-
-            path.GetPathOrigin(out x, out y);
-            lastX = x; lastY = y;
-
-            rootConsole.ForegroundColor = color;
-
-            bool finishedPath = false;
-
-            int deltaX;
-            int deltaY;
-
-            do
-            {
-                finishedPath = path.WalkPath(ref x, ref y, false);
-
-                deltaX = x - lastX;
-                deltaY = y - lastY;
-
-                char drawChar = '-';
-
-                if (deltaX < 0 && deltaY < 0)
-                    drawChar = '\\';
-                else if (deltaX < 0 && deltaY > 0)
-                    drawChar = '/';
-                else if (deltaX > 0 && deltaY < 0)
-                    drawChar = '/';
-                else if (deltaX > 0 && deltaY > 0)
-                    drawChar = '\\';
-                else if (deltaY == 0)
-                    drawChar = '-';
-                else if (deltaX == 0)
-                    drawChar = '|';
-
-                rootConsole.PutChar(mapTopLeft.x + x, mapTopLeft.y + y, drawChar);
-
-                lastX = x;
-                lastY = y;
-
-            } while (!(x == targetX && y == targetY) || !(deltaX == 0 && deltaY == 0));
-
-            path.Dispose();
+            DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, ColorPresets.Black);
 
             //Flash the target if they were damaged
             //Draw them in either case so that we overwrite the missile animation on the target square with the creature
 
             if (targetSquare.InPlayerFOV)
             {
+                Color colorToDraw = ColorPresets.Red;
+
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
-                    rootConsole.ForegroundColor = ColorPresets.Red;
-                    rootConsole.PutChar(mapTopLeft.x + target.LocationMap.x, mapTopLeft.y + target.LocationMap.y, target.Representation);
+                    
                 }
                 else
                 {
-                    rootConsole.ForegroundColor = target.RepresentationColor();
-                    rootConsole.PutChar(mapTopLeft.x + target.LocationMap.x, mapTopLeft.y + target.LocationMap.y, target.Representation);
+                    colorToDraw = target.RepresentationColor();
                 }
+
+                tileMapLayer(TileLevel.Animations).Rows[target.LocationMap.y].Columns[target.LocationMap.x] = new TileEngine.TileCell(target.Representation);
+                tileMapLayer(TileLevel.Animations).Rows[target.LocationMap.y].Columns[target.LocationMap.x].TileFlag = new LibtcodColorFlags(colorToDraw);
             }
 
-            rootConsole.ForegroundColor = normalForeground;
-
-            //Draw line overlay
+            //Render the full layered map (with these animations) on screen
+            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
 
             //Wait
             TCODSystem.Sleep(missileDelay);
 
-            //Draw normally
-            Draw();
-            FlushConsole();          
+            //Wipe the animation layer
+            tileMap.ClearLayer((int)TileLevel.Animations);
+
+            //Draw the map normally
+            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            FlushConsole();  
         }
 
         /// <summary>
@@ -3806,9 +3760,6 @@ namespace RogueBasin {
             if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
                 return;
 
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             //Draw screen normally
             //Necessary since on a player move, his old position will show unless we do this
             Draw();
@@ -3824,29 +3775,31 @@ namespace RogueBasin {
                 rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
             }
             */
-            //Flash the attached creature
+
+            //Flash the attacked creature
+            //Add flash to animation layer
 
             if (targetSquare.InPlayerFOV)
             {
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
-                    rootConsole.ForegroundColor = ColorPresets.Red;
-                    rootConsole.PutChar(mapTopLeft.x + newTarget.LocationMap.x, mapTopLeft.y + newTarget.LocationMap.y, newTarget.Representation);
+                    tileMapLayer(TileLevel.Animations).Rows[newTarget.LocationMap.y].Columns[newTarget.LocationMap.x] = new TileEngine.TileCell('*');
+                    tileMapLayer(TileLevel.Animations).Rows[newTarget.LocationMap.y].Columns[newTarget.LocationMap.x].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
                 }
             }
 
-
-
-            //Update the screen
-
-            //Draw flash
+            //Render the full layered map (with these animations) on screen
+            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
 
             //Wait
             TCODSystem.Sleep(meleeDelay);
 
-            //Draw screen normally
-            Draw();
+            //Wipe the animation layer
+            tileMap.ClearLayer((int)TileLevel.Animations);
+                        
+            //Draw the map normally
+            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
         }
     }
