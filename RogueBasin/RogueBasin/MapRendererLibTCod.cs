@@ -85,6 +85,9 @@ namespace RogueBasin
                 }
             }
 
+            //Reset colors - this matters for systems that don't use the tile renderer
+            rootConsole.ForegroundColor = ColorPresets.White;
+            rootConsole.BackgroundColor = ColorPresets.Black;
         }
     }
 }

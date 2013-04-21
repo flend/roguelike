@@ -9,7 +9,11 @@ using System.Reflection;
 
 namespace RogueBasin {
 
-    //Represents our screen
+    /// <summary>
+    /// Contains code that renders to the screen and some utility functions.
+    /// Is not serialized, so should not contain any game state.
+    /// Contains a bit of state about overlay screens etc.
+    /// </summary>
     public class Screen
     {
         public enum TileLevel {
@@ -40,7 +44,6 @@ namespace RogueBasin {
         //Top left coord to start drawing the map at
         //Set by DrawMap
         Point mapTopLeft;
-        Point mapBotRight;
 
         Point mapTopLeftBase;
         Point mapBotRightBase;
@@ -54,26 +57,8 @@ namespace RogueBasin {
 
         Point statsDisplayTopLeft;
         Point statsDisplayBotRight;
-        Point princessStatsTopLeft;
 
-        Point hitpointsOffset;
-        Point maxHitpointsOffset;
-        Point overdriveHitpointsOffset;
-        Point speedOffset;
-        Point worldTickOffset;
-        Point levelOffset;
-
-        Point armourOffset;
-        Point damageOffset;
-        Point playerLevelOffset;
-
-       
-
-        Point specialMoveStatusLine;
-        Point spellStatusLine;
-        Point trainStatsLine;
-
-        Point calendarOffset;
+        Point hitpointsOffset;     
 
         Color inFOVTerrainColor = ColorPresets.White;
         Color seenNotInFOVTerrainColor = ColorPresets.Gray;
@@ -133,27 +118,9 @@ namespace RogueBasin {
         public Monster CreatureToView { get; set; }
         public Item ItemToView { get; set; }
 
-        bool displayInventory;
-
         const int missileDelay = 250;
         const int meleeDelay = 100;
         
-        /// <summary>
-        /// Equipment screen is displayed
-        /// </summary>
-        bool displayEquipment;
-
-        /// <summary>
-        /// Select new equipment screen is displayed
-        /// </summary>
-        bool displayEquipmentSelect;
-
-        bool displaySpecialMoveMovies;
-
-        bool displaySpells;
-
-        bool displayTrainingUI;
-
         public int MsgLogWrapWidth { get; set; }
 
         //Death members
@@ -163,14 +130,6 @@ namespace RogueBasin {
         Point DeathTL { get; set; }
         int DeathWidth { get; set; }
         int DeathHeight { get; set; }
-
-        int selectedInventoryIndex;
-        int topInventoryIndex;
-
-        Inventory currentInventory;
-        List<EquipmentSlotInfo> currentEquipment;
-        string inventoryTitle;
-        string inventoryInstructions;
 
         Point movieTL = new Point(5, 5);
         int movieWidth = 80;
@@ -252,12 +211,6 @@ namespace RogueBasin {
 
             MsgLogWrapWidth = inventoryTR.x - inventoryTL.x - 4;
 
-            calendarOffset = new Point(20, 0);
-
-            specialMoveStatusLine = new Point(7, 33);
-            spellStatusLine = new Point(7, 34);
-            trainStatsLine = new Point(7, 30);
-           
             //Colors
             neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
 
@@ -497,9 +450,6 @@ namespace RogueBasin {
                 //Draw the basis of the screen
                 Draw();
 
-                //Get screen handle
-                RootConsole rootConsole = RootConsole.GetInstance();
-
                 //Load whole movie
                 bool loadSuccess = LoadMovie(filenameRoot);
 
@@ -526,7 +476,7 @@ namespace RogueBasin {
                     Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
 
                     //Draw frame
-                    rootConsole.DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
+                    DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
 
                     //Draw content
                     List<string> scanLines = frame.scanLines;
@@ -547,7 +497,7 @@ namespace RogueBasin {
                         //Don't ask for a key press if it's the last frame, one will happen below automatically
                         if (frameNo != movieFrames.Count - 1)
                         {
-                            rootConsole.PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                            PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
                             Screen.Instance.FlushConsole();
                             KeyPress userKey = Keyboard.WaitForKeyPress(true);
                         }
@@ -564,7 +514,7 @@ namespace RogueBasin {
                 }
 
                 //Print press any key
-                rootConsole.PrintLineRect("Press ENTER to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                PrintLineRect("Press ENTER to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
 
                 Screen.Instance.FlushConsole();
 
@@ -605,9 +555,6 @@ namespace RogueBasin {
         /// <param name="flashOn"></param>
         private bool DrawMovieFrame(List<string> scanLines, Point frameTL, int width, bool flashOn)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             int offset = 0;
 
             bool flashingChars = false;
@@ -624,6 +571,8 @@ namespace RogueBasin {
                     //Print char by char
                     int coffset = 0;
                     bool nextCharFlash = false;
+                    Color flashColor = normalMovieColor;
+
                     foreach (char c in line)
                     {
                         if (c == flashChar)
@@ -638,25 +587,23 @@ namespace RogueBasin {
 
                         if (nextCharFlash)
                         {
-                            rootConsole.ForegroundColor = flashMovieColor;
+                            flashColor = flashMovieColor;
                             nextCharFlash = false;
                         }
                         else
                         {
-                            rootConsole.ForegroundColor = normalMovieColor;
+                            flashColor = normalMovieColor;
                         }
 
-                        rootConsole.PutChar(frameTL.x + coffset, frameTL.y + offset, c);
+                        PutChar(frameTL.x + coffset, frameTL.y + offset, c, flashColor);
                         coffset++;
                     }
 
-                    //Reset flash color at the end of the line
-                    rootConsole.ForegroundColor = normalMovieColor;
                 }
                 else
                 {
                     //Print whole line
-                    rootConsole.PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left);
+                    PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left);
                 }
                 offset++;
             }
@@ -813,14 +760,12 @@ namespace RogueBasin {
         //Draw the current dungeon map and objects
         private void Draw()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
             //Clear screen
-            rootConsole.Clear();
+            ClearScreen();
 
             //Build a tile map to display the screen
             //In future, we probably don't want to pull this down each time
@@ -833,9 +778,6 @@ namespace RogueBasin {
             
             //Render tiled map to screen
             MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-            rootConsole.BackgroundColor = ColorPresets.Black;
 
             //Draw Stats
             DrawStats(dungeon.Player);
@@ -853,12 +795,6 @@ namespace RogueBasin {
         /// <param name="size"></param>
         public void DrawAreaAttackAnimation(List <Point> targetSquares, Color color)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.ForegroundColor = color;
-            rootConsole.BackgroundColor = ColorPresets.Black;
-
             //Clone the list since we mangle it
             List<Point> mangledPoints = new List<Point>();
             foreach (Point p in targetSquares)
@@ -996,74 +932,32 @@ namespace RogueBasin {
         /// </summary>
         public void DrawEndOfGameInfo(List<string> stuffToDisplay)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             //Clear screen
-            rootConsole.Clear();
+            ClearScreen();
 
             //Draw frame
-            rootConsole.DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
+            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
 
             //Draw title
-            rootConsole.PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
 
             //Draw preamble
             int count = 0;
             foreach (string s in stuffToDisplay)
             {
-                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
                 count++;
             }
 
             //Draw instructions
 
-            rootConsole.PrintLineRect("Press ENTER to continue...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
-            Screen.Instance.FlushConsole();
+            PrintLineRect("Press ENTER to continue...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
+            FlushConsole();
 
             WaitForEnterKey();
         }
 
 
-        /// <summary>
-        /// Screen for player death
-        /// </summary>
-        public void DrawDeathScreen()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Clear screen
-            rootConsole.Clear();
-
-            //Draw frame
-            rootConsole.DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
-
-            //Draw title
-            rootConsole.PrintLineRect("And it was all going so well...", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
-
-            //Draw preamble
-            int count = 0;
-            foreach (string s in DeathPreamble)
-            {
-                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
-                count++;
-            }
-
-            //Draw kills
-
-            rootConsole.PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center);
-
-            foreach (string s in TotalKills)
-            {
-                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left);
-                count++;
-            }
-
-            //Draw instructions
-
-            rootConsole.PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
-        }
 
         /// <summary>
         /// Screen for player victory
@@ -1101,256 +995,6 @@ namespace RogueBasin {
             //Draw instructions
 
             PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
-        }
-
-
-        /// <summary>
-        /// Draw a stats box overlay
-        /// </summary>
-        private void DrawStatsBox()
-        {
-
-            Point statsBoxTL = new Point(58, 18);
-            Point statsBoxBR = new Point(81, 27);
-
-            Point statTitleOffset = new Point(3, 2);
-            Point statDataOffset = new Point(17, 2);
-
-            Color statNumberColor = ColorPresets.CadetBlue;
-
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame
-            rootConsole.DrawFrame(statsBoxTL.x, statsBoxTL.y, statsBoxBR.x - statsBoxTL.x + 1, statsBoxBR.y - statsBoxTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect("Statistics", (statsBoxTL.x + statsBoxBR.x) / 2, statsBoxTL.y, statsBoxBR.x - statsBoxTL.x, 1, LineAlignment.Center);
-
-            //Draw PrincessRL training stats
-
-            Player player = Game.Dungeon.Player;
-
-            string trainHitpointsString = player.HitpointsStat.ToString();
-            string trainMaxHitpointsString = player.MaxHitpointsStat.ToString();
-            string trainAttackString = player.AttackStat.ToString();
-            string trainSpeedString = player.SpeedStat.ToString();
-            string trainCharmString = player.CharmStat.ToString();
-            string trainMagicString = player.MagicStat.ToString();
-
-            rootConsole.PrintLine("Stamina:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 0, LineAlignment.Left);
-            rootConsole.PrintLine("Health:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 1, LineAlignment.Left);
-            rootConsole.PrintLine("Combat Skill:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 2, LineAlignment.Left);
-            rootConsole.PrintLine("Speed:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 3, LineAlignment.Left);
-            rootConsole.PrintLine("Charm:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 4, LineAlignment.Left);
-            rootConsole.PrintLine("Magic Skill:", statsBoxTL.x + statTitleOffset.x, statsBoxTL.y + statTitleOffset.y + 5, LineAlignment.Left);
-
-            rootConsole.ForegroundColor = statNumberColor;
-
-            rootConsole.PrintLine(trainHitpointsString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 0, LineAlignment.Left);
-            rootConsole.PrintLine(trainMaxHitpointsString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 1, LineAlignment.Left);
-            rootConsole.PrintLine(trainAttackString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 2, LineAlignment.Left);
-            rootConsole.PrintLine(trainSpeedString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 3, LineAlignment.Left);
-            rootConsole.PrintLine(trainCharmString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 4, LineAlignment.Left);
-            rootConsole.PrintLine(trainMagicString, statsBoxTL.x + statDataOffset.x, statsBoxTL.y + statDataOffset.y + 5, LineAlignment.Left);
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-        }
-
-        /// <summary>
-        /// Display equipment select overview
-        /// </summary>
-        private void DrawEquipmentSelect()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame
-            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //List the inventory
-
-            //Inventory area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            List<InventoryListing> inventoryList = currentInventory.InventoryListing;
-
-            for (int i = 0; i < inventoryListH; i++)
-            {
-                int inventoryIndex = topInventoryIndex + i;
-
-                //End of inventory
-                if (inventoryIndex == inventoryList.Count)
-                    break;
-
-                //Create entry string
-                char selectionChar = (char)((int)'a' + i);
-                string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description;
-
-                //Add equipped status
-                //Only consider the first item in a stack, since equipped items can't stack
-                Item firstItemInStack = currentInventory.Items[inventoryList[inventoryIndex].ItemIndex[0]];
-
-                EquipmentSlotInfo equippedInSlot = currentEquipment.Find(x => x.equippedItem == firstItemInStack);
-
-                if (equippedInSlot != null)
-                {
-                    entryString += " (equipped: " + StringEquivalent.EquipmentSlots[equippedInSlot.slotType] + ")";
-                }
-
-                //Print entry
-                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
-            }
-        }
-
-        /// <summary>
-        /// Display movie screen overlay
-        /// </summary>
-        private void DrawMovieOverlay()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect("Special moves and spells known", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect("Select move to replay movie or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //List the special moves known
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            int moveIndex = 0;
-            List<SpecialMove> knownMoves = new List<SpecialMove>();
-
-            foreach (SpecialMove move in Game.Dungeon.SpecialMoves) {
-
-                //Run out of room - won't happen as written
-                if (moveIndex == inventoryListH)
-                    break;
-
-                //Don't list unknown moves
-                if (!move.Known)
-                    continue;
-
-                knownMoves.Add(move);
-
-                char selectionChar = (char)((int)'a' + moveIndex);
-                string entryString = "(" + selectionChar.ToString() + ") " + move.MoveName(); //+" (equipped)";
-
-                //Print entry
-                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + moveIndex, inventoryListW, 1, LineAlignment.Left);
-
-                moveIndex++;
-            }
-
-            List<Spell> knownSpells = new List<Spell>();
-
-            foreach (Spell move in Game.Dungeon.Spells)
-            {
-
-                //Run out of room - won't happen as written
-                if (moveIndex == inventoryListH)
-                    break;
-
-                //Don't list unknown moves
-                if (!move.Known)
-                    continue;
-
-                knownSpells.Add(move);
-
-                char selectionChar = (char)((int)'a' + moveIndex);
-                string entryString = "(" + selectionChar.ToString() + ") " + move.SpellName(); //+" (equipped)";
-
-                //Print entry
-                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + moveIndex, inventoryListW, 1, LineAlignment.Left);
-
-                moveIndex++;
-            }
-        }
-
-        /// <summary>
-        /// Display spell screen overlay
-        /// </summary>
-        private void DrawSpellOverlay()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect("Spells known", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect("Select a spell to cast or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //List the special moves known
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            int spellIndex = 0;
-            List<Spell> knownSpells = new List<Spell>();
-
-            foreach (Spell spell in Game.Dungeon.Spells)
-            {
-
-                //Run out of room - won't happen as written
-                if (spellIndex == inventoryListH)
-                    break;
-
-                //Don't list unknown moves
-                if (!spell.Known)
-                    continue;
-
-                knownSpells.Add(spell);
-
-                char selectionChar = (char)((int)'a' + spellIndex);
-                string entryString = "(" + selectionChar.ToString() + ") " + spell.SpellName() + " MP: " + spell.MPCost().ToString(); //+" (equipped)";
-
-                //Print entry
-                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + spellIndex, inventoryListW, 1, LineAlignment.Left);
-
-                spellIndex++;
-            }
-        }
-
-        public string TrainingTypeString { get; set; }
-
-        bool trainingPause = true;
-
-        public bool TrainingPause
-        {
-            get
-            {
-                return trainingPause;
-            }
-            set
-            {
-                trainingPause = value;
-            }
         }
 
 
@@ -1417,6 +1061,19 @@ namespace RogueBasin {
             RootConsole rootConsole = RootConsole.GetInstance();
 
             rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
+        }
+
+        /// <summary>
+        /// Print a string in a rectangle
+        /// </summary>
+        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.ForegroundColor = color;
+            rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
+            rootConsole.ForegroundColor = ColorPresets.White;
         }
 
         /// <summary>
@@ -2268,50 +1925,6 @@ namespace RogueBasin {
             rootConsole.BackgroundColor = normalBackground;
         }
 
-        public void DrawFOVDebug(int levelNo)
-        {
-            Map map = Game.Dungeon.Levels[levelNo];
-            TCODFov fov = Game.Dungeon.FOVs[levelNo];
-
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Clear screen
-            rootConsole.Clear();
-
-            for (int i = 0; i < map.width; i++)
-            {
-                for (int j = 0; j < map.height; j++)
-                {
-                    int screenX = mapTopLeft.x + i;
-                    int screenY = mapTopLeft.y + j;
-
-                    bool trans;
-                    bool walkable;
-
-                    fov.GetCell(i, j, out trans, out walkable);
-
-                    Color drawColor = inFOVTerrainColor;
-
-                    if (walkable)
-                    {
-                        drawColor = inFOVTerrainColor;
-                    }
-                    else
-                    {
-                        drawColor = inMonsterFOVTerrainColor;
-                    }
-
-                    rootConsole.ForegroundColor = drawColor;
-                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
-                    screenChar = '#';
-                    rootConsole.PutChar(screenX, screenY, screenChar);
-
-                    rootConsole.Flush();
-                }
-            }
-
-        }
         public void SaveCurrentLevelToDisk()
         {
             Map map = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel];
@@ -2332,92 +1945,6 @@ namespace RogueBasin {
         }
 
 
-        //Draw a map only (useful for debugging)
-        public void DrawMapDebug(Map map)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Clear screen
-            rootConsole.Clear();
-
-            for (int i = 0; i < map.width; i++)
-            {
-                for (int j = 0; j < map.height; j++)
-                {
-                    int screenX = mapTopLeft.x + i;
-                    int screenY = mapTopLeft.y + j;
-
-                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
-
-                    Color drawColor = inFOVTerrainColor;
-
-                    if (!map.mapSquares[i, j].BlocksLight)
-                    {
-                        //In FOV
-                        rootConsole.ForegroundColor = inFOVTerrainColor;
-                    }
-                    else
-                    {
-                        //Not in FOV but seen
-                        rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
-                    }
-                    rootConsole.PutChar(screenX, screenY, screenChar);
-                }
-            }
-            
-            //Flush the console
-            rootConsole.Flush();
-        }
-
-        //Draw a map only (useful for debugging)
-        public void DrawMapDebugHighlight(Map map, int x1, int y1, int x2, int y2)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Clear screen
-            rootConsole.Clear();
-
-            for (int i = 0; i < map.width; i++)
-            {
-                for (int j = 0; j < map.height; j++)
-                {
-                    int screenX = mapTopLeft.x + i;
-                    int screenY = mapTopLeft.y + j;
-
-                    char screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
-
-                    Color drawColor = inFOVTerrainColor;
-
-                    if (i == x1 && j == y1)
-                    {
-                        drawColor = ColorPresets.Red;
-                    }
-
-                    if (i == x2 && j == y2)
-                    {
-                        drawColor = ColorPresets.Red;
-                    }
-                    rootConsole.ForegroundColor = drawColor;
-                    /*
-                    if (!map.mapSquares[i, j].BlocksLight)
-                    {
-                        //In FOV
-                        rootConsole.ForegroundColor = inFOVTerrainColor;
-                    }
-                    else
-                    {
-                        //Not in FOV but seen
-                        rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
-                    }*/
-                    rootConsole.PutChar(screenX, screenY, screenChar);
-                }
-            }
-
-            //Flush the console
-            rootConsole.Flush();
-        }
 
         private void DrawMap(Map map)
         {
@@ -2547,9 +2074,6 @@ namespace RogueBasin {
 
         internal void ClearMessageLine()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             lastMessage = null;
 
             ClearMessageBar();
@@ -2570,21 +2094,11 @@ namespace RogueBasin {
         /// <param name="message"></param>
         internal void PrintMessage(string message, Color color)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             //Update state
             lastMessage = message;
 
-            //Clear message bar
-            //ClearMessageBar();
-
-            //Draw frame
-            //Done earlier
-
             //Display new message
-            rootConsole.ForegroundColor = color;
-            rootConsole.PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x + 1, msgDisplayNumLines, LineAlignment.Left);
+            PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x + 1, msgDisplayNumLines, LineAlignment.Left, color);
         }
 
         /// <summary>
@@ -2593,165 +2107,23 @@ namespace RogueBasin {
         /// <param name="message"></param>
         internal void PrintMessage(string message, Point topLeft, int width)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
             //Update state
             lastMessage = message;
 
             //Clear message bar
-            rootConsole.DrawRect(topLeft.x, topLeft.y, width, 1, true);
+            DrawRect(topLeft.x, topLeft.y, width, 1, true);
 
             //Display new message
-            rootConsole.PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left);
+            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left);
         }
 
         void ClearMessageBar()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
-            rootConsole.DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1, true);
+            DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1, true);
         }
 
-        private void ResetOverlayScreens() {
-            displayEquipment = false;
-            displayEquipmentSelect = false;
-            displayInventory = false;
-            displaySpecialMoveMovies = false;
-            displaySpells = false;
-            displayTrainingUI = false;
-        }
-
-        public bool DisplayTrainingUI
-        {
-            set
-            {
-                if (value == true)
-                {
-                    ResetOverlayScreens();
-                }
-
-                displayTrainingUI = value;
-            }
-        }
-
-        public bool DisplayInventory
-        {
-            set
-            {
-                if (value == true)
-                {
-                    ResetOverlayScreens();
-                }
-                
-                displayInventory = value;
-            }
-        }
-
-        public bool DisplayEquipment
-        {
-            set
-            {
-                if (value == true)
-                {
-                   ResetOverlayScreens();
-                }
-
-                displayEquipment = value;
-            }
-        }
-
-        public bool DisplayEquipmentSelect
-        {
-            set
-            {
-                if (value == true)
-                {
-                    ResetOverlayScreens();
-                }
-
-                displayEquipmentSelect = value;
-            }
-        }
-
-        public bool DisplaySpecialMoveMovies
-        {
-            set
-            {
-                if (value == true)
-                {
-                    ResetOverlayScreens();
-                }
-                displaySpecialMoveMovies = value;
-            }
-        }
-
-        public bool DisplaySpells
-        {
-            set
-            {
-                if (value == true)
-                {
-                    ResetOverlayScreens();
-                }
-                displaySpells = value;
-            }
-        }
-
-        public int SelectedInventoryIndex
-        {
-            set
-            {
-                selectedInventoryIndex = value;
-            }
-        }
-
-        public int TopInventoryIndex
-        {
-            set
-            {
-                topInventoryIndex = value;
-            }
-        }
-
-        public Inventory CurrentInventory
-        {
-            set
-            {
-                currentInventory = value;
-            }
-        }
-
-        public List<EquipmentSlotInfo> CurrentEquipment
-        {
-            set
-            {
-                currentEquipment = value;
-            }
-        }
-
-        /// <summary>
-        /// String displayed at the top of the inventory
-        /// </summary>
-        public string InventoryTitle
-        {
-            set
-            {
-                inventoryTitle = value;
-            }
-        }
-
-        /// <summary>
-        /// String displayed at the bottom of the inventory
-        /// </summary>
-        public string InventoryInstructions
-        {
-            set
-            {
-                inventoryInstructions = value;
-            }
-        }
 
         /// <summary>
         /// Get a string from the user. Uses the message bar
@@ -3086,46 +2458,6 @@ namespace RogueBasin {
                     }
                 }
             } while (true);
-        }
-
-        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //ClearMessageLine();
-
-            PrintMessage(introMessage + " (e / m / h)", topLeft, introMessage.Length + 14);
-            FlushConsole();
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                   char keyCode = (char)userKey.Character;
-                   switch (keyCode)
-                   {
-                       case 'e':
-                           ClearMessageLine();
-                           return GameDifficulty.Easy;
-                           
-                       case 'm':
-                           ClearMessageLine();
-                           return GameDifficulty.Medium;
-
-                       case 'h':
-                           ClearMessageLine();
-                           return GameDifficulty.Hard;
-                           
-                   }
-                }
-            } while(true);
         }
 
         /// <summary>

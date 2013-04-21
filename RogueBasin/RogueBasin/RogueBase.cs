@@ -737,7 +737,7 @@ namespace RogueBasin
                             if (keyCode == 'x')
                             {
                                 inputState = InputState.MapMovement;
-                                DisablePlayerInventoryScreen();
+                                
                                 Screen.Instance.Update();
                                 timeAdvances = false;
                             }
@@ -1266,57 +1266,6 @@ namespace RogueBasin
         }
 
 
-        private static void DisablePlayerInventoryScreen()
-        {
-            Screen.Instance.DisplayInventory = false;
-            Screen.Instance.CurrentInventory = null;
-        }
-
-        private static void SetPlayerInventoryScreen()
-        {
-            Screen.Instance.DisplayInventory = true;
-            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
-            Screen.Instance.InventoryTitle = "Inventory";
-            Screen.Instance.InventoryInstructions = "Press (x) to exit";
-        }
-
-        private void SetPlayerInventorySelectScreen()
-        {
-            Screen.Instance.DisplayInventory = true;
-            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
-            Screen.Instance.InventoryTitle = "Inventory";
-            Screen.Instance.InventoryInstructions = "Press the letter of an item to select or (x) to exit";
-        }
-
-        private void SetPlayerEquippedItemsSelectScreen()
-        {
-            Screen.Instance.DisplayEquipmentSelect = true;
-            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
-            Screen.Instance.CurrentEquipment = Game.Dungeon.Player.EquipmentSlots;
-            Screen.Instance.InventoryTitle = "Equip Item";
-            Screen.Instance.InventoryInstructions = "Press the letter of an item to equip or (x) to exit";
-        }
-
-        /// <summary>
-        /// Set state to display equipped items
-        /// </summary>
-        private void SetPlayerEquippedItemsScreen()
-        {
-            Screen.Instance.DisplayEquipment = true;
-            Screen.Instance.CurrentEquipment = Game.Dungeon.Player.EquipmentSlots;
-            Screen.Instance.CurrentInventory = Game.Dungeon.Player.Inventory;
-            Screen.Instance.InventoryTitle = "Equipped Items";
-            Screen.Instance.InventoryInstructions = "Press the letter of an item to use (if useable) or (x) to exit";
-        }
-
-        /// <summary>
-        /// Set state as movie screen
-        /// </summary>
-        private void SetSpecialMoveMovieScreen()
-        {
-            Screen.Instance.DisplaySpecialMoveMovies = true;
-        }
-
         /// <summary>
         /// Set state as movie screen
         /// </summary>
@@ -1333,32 +1282,6 @@ namespace RogueBasin
             Screen.Instance.ShowMsgHistory = false;
         }
 
-        /// <summary>
-        /// Disable movie overlay
-        /// </summary>
-        private void DisableSpecialMoveMovieScreen()
-        {
-            Screen.Instance.DisplaySpecialMoveMovies = false;
-        }
-
-        /// <summary>
-        /// Disable equipped items overlay
-        /// </summary>
-        private void DisablePlayerEquippedItemsScreen()
-        {
-            Screen.Instance.DisplayEquipment = false;
-            Screen.Instance.CurrentEquipment = null;
-        }
-
-        /// <summary>
-        /// Disable equipment select overlay. Really want to make these setup functions methods in Screen
-        /// </summary>
-        private void DisablePlayerEquippedItemsSelectScreen()
-        {
-            Screen.Instance.DisplayEquipmentSelect = false;
-            Screen.Instance.CurrentEquipment = null;
-            Screen.Instance.CurrentInventory = null;
-        }
 
         private bool InteractWithFeature()
         {
@@ -1857,7 +1780,6 @@ namespace RogueBasin
         {
             //Select a spell to cast
 
-            Screen.Instance.DisplaySpells = true;
             Screen.Instance.Update();
 
             //Player presses a key from a-w to select a spell
@@ -1900,7 +1822,6 @@ namespace RogueBasin
 
             //Select a spell to cast
 
-            Screen.Instance.DisplaySpells = false;
             Screen.Instance.Update();
 
             if (selectedSpell == -1)
