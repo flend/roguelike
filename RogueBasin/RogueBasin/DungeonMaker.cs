@@ -3172,7 +3172,8 @@ namespace RogueBasin
 
             AddItemsEqualDistribution(itemsToPlace, levelIndex, mapGen);
         }
-
+        
+        /*
         /// <summary>
         /// Adds levels and interconnecting staircases
         /// </summary>
@@ -3526,7 +3527,7 @@ namespace RogueBasin
             //Only place where this happens now
             CalculateWalkableAndTCOD();
 
-        }
+        }*/
 
         private void CalculateWalkableAndTCOD() {
 

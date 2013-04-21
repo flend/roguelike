@@ -347,7 +347,6 @@
     <Compile Include="TargettingType.cs" />
     <Compile Include="TileCell.cs" />
     <Compile Include="TileMap.cs" />
-    <Compile Include="TownGeneratorFromASCIIFile.cs" />
     <Compile Include="TrainStats.cs" />
     <Compile Include="Triggers\ApproachingTheDragon.cs" />
     <Compile Include="Triggers\BackToSchool.cs">
@@ -397,32 +396,6 @@
     <Compile Include="Triggers\SpotFriend.cs" />
     <Compile Include="Triggers\TerrainFlipTrigger.cs" />
     <Compile Include="Triggers\TownToWilderness.cs" />
-    <Compile Include="Triggers\TrainAthleticsTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\TrainCharmTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\TrainCombatTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\TrainGeographyLibraryTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\TrainLeaveSchoolTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\TrainMagicLibraryTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\TrainMagicTrigger.cs" />
-    <Compile Include="Triggers\TrainMasterTrigger.cs" />
-    <Compile Include="Triggers\TrainRestTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\TrainTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Triggers\TreasureRoom.cs">
       <SubType>Code</SubType>
     </Compile>

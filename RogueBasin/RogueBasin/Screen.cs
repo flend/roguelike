@@ -269,8 +269,6 @@ namespace RogueBasin {
 
             PCColor = ColorPresets.White;
 
-            trainingStatsRecord = new List<TrainStats>();
-
             SeeAllMonsters = true;
             SeeAllMap = true;
         }
@@ -293,83 +291,6 @@ namespace RogueBasin {
             */
             Console.WriteLine("debug test message.");
 
-        }
-
-        
-
-        public void DrawTriangularTarget(Point origin, Point target, int range, double spreadAngle, Color foregroundColor, Color backgroundColor, char drawChar)
-        {
-
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.ForegroundColor = foregroundColor;
-            rootConsole.BackgroundColor = backgroundColor;
-
-            List<Point> splashSquares = GetPointsForTriangularTarget(origin, target, range, spreadAngle);
-            foreach (Point p in splashSquares)
-            {
-                rootConsole.PutChar(p.x, p.y, drawChar);
-            }
-
-            rootConsole.ForegroundColor = normalForeground;
-            rootConsole.BackgroundColor = normalBackground;
-
-        }
-
-
-        public void DrawCircularTarget(Point location, Color foregroundColor, Color backgroundColor, int size, char drawChar)
-        {
-
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.ForegroundColor = foregroundColor;
-            rootConsole.BackgroundColor = backgroundColor;
-
-            List<Point> splashSquares = GetPointsForCircularTarget(location, size);
-            foreach (Point p in splashSquares)
-            {
-                rootConsole.PutChar(p.x, p.y, drawChar);
-            }
-
-            rootConsole.ForegroundColor = normalForeground;
-            rootConsole.BackgroundColor = normalBackground;
-
-        }
-
-
-        /// <summary>
-        /// Draw a fireball effect
-        /// </summary>
-        /// <param name="sqs"></param>
-        /// <param name="color"></param>
-        public void DrawFlashSquares(List<Point> sqs, Color color)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw the screen as normal
-            Draw();
-
-            //Draw the flash overlay
-
-            foreach (Point sq in sqs)
-            {
-                rootConsole.ForegroundColor = color;
-                rootConsole.PutChar(mapTopLeft.x + sq.x, mapTopLeft.y + sq.y, '*');
-            }
-
-            rootConsole.ForegroundColor = normalForeground;
-
-            FlushConsole();
-
-            //Wait
-            TCODSystem.Sleep(200);
-
-            //Redraw
-            Draw();
-            FlushConsole();
         }
 
         /// <summary>
@@ -514,7 +435,6 @@ namespace RogueBasin {
             rootConsole.Flush();
         }
 
-        
 
         public void TargettingModeOn() {
             targettingMode = true;
@@ -920,22 +840,7 @@ namespace RogueBasin {
             //Draw Stats
             DrawStats(dungeon.Player);
 
-            //Draw any overlay screens
-            if (displayInventory)
-                DrawInventory();
-            else if (displayEquipment)
-                DrawEquipment();
-            else if (displayEquipmentSelect)
-                DrawEquipmentSelect();
-            else if (displaySpecialMoveMovies)
-                DrawMovieOverlay();
-            else if (displaySpells)
-                DrawSpellOverlay();
-            else if (displayTrainingUI)
-                DrawTrainingOverlay();
-            else if (ShowXPScreen)
-                DrawXPOverlay();
-            else if (ShowMsgHistory)
+            if (ShowMsgHistory)
                 DrawMsgHistory();
 
         }
@@ -1165,135 +1070,39 @@ namespace RogueBasin {
         /// </summary>
         public void DrawVictoryScreen()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
+         
             //Clear screen
-            rootConsole.Clear();
+            ClearScreen();
 
             //Draw frame
-            rootConsole.DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
+            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
 
             //Draw title
-            rootConsole.PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
 
             //Draw preamble
             int count = 0;
             foreach (string s in DeathPreamble)
             {
-                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
                 count++;
             }
 
             //Draw kills
 
-            rootConsole.PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center);
 
             foreach (string s in TotalKills)
             {
-                rootConsole.PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left);
                 count++;
             }
 
             //Draw instructions
 
-            rootConsole.PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
         }
 
-        /// <summary>
-        /// Display inventory overlay
-        /// </summary>
-        private void DrawInventory()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame
-            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //List the inventory
-            
-            //Inventory area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            List<InventoryListing> inventoryList = currentInventory.InventoryListing;
-
-            for (int i = 0; i < inventoryListH; i++)
-            {
-                int inventoryIndex = topInventoryIndex + i;
-
-                //End of inventory
-                if (inventoryIndex == inventoryList.Count)
-                    break;
-
-                //Create entry string
-                char selectionChar = (char)((int)'a' + i);
-                string entryString = "(" + selectionChar.ToString() + ") " + inventoryList[inventoryIndex].Description;
-
-                //Print entry
-                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
-            }
-        }
-
-        /// <summary>
-        /// Draw a calendar overlay
-        /// </summary>
-        private void DrawCalendar()
-        {
-
-            Point calendarTL = new Point(58, 6);
-            Point calendarBR = new Point(81, 16);
-
-
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame
-            rootConsole.DrawFrame(calendarTL.x, calendarTL.y, calendarBR.x - calendarTL.x + 1, calendarBR.y - calendarTL.y + 1, true);
-
-            //Draw title
-            //rootConsole.PrintLineRect("Calendar", (calendarTL.x + calendarBR.x) / 2, calendarTL.y, calendarBR.x - calendarTL.x, 1, LineAlignment.Center);
-
-            //Draw calendar
-
-            int monthNo = Game.Dungeon.GetDateMonth();
-            int dayNo = Game.Dungeon.GetDateDay();
-
-            //Draw month name
-            string [] monthNames = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
-            rootConsole.PrintLineRect(monthNames[monthNo - 1], (calendarTL.x + calendarBR.x) / 2, calendarTL.y, calendarBR.x - calendarTL.x, 1, LineAlignment.Center);
-
-            Point calendarOffset = new Point(2, 2);
-
-            Color selectedDayColor = ColorPresets.Red;
-            Color normalDayColor = ColorPresets.White;
-
-            //Draw days
-            for (int j = 0; j < 4; j++)
-            {
-                for (int i = 0; i < 7; i++)
-                {
-                    int thisDay = (j * 7 + i) + 1;
-
-                    if (thisDay == dayNo)
-                    {
-                        rootConsole.ForegroundColor = selectedDayColor;
-                    }
-
-                    rootConsole.PrintLine(thisDay.ToString(), (calendarTL.x + calendarOffset.x + i * 3), calendarTL.y + calendarOffset.y + 2 * j, LineAlignment.Left);
-                    rootConsole.ForegroundColor = normalDayColor;
-                }
-            }
-        }
 
         /// <summary>
         /// Draw a stats box overlay
@@ -1397,63 +1206,6 @@ namespace RogueBasin {
                 {
                     entryString += " (equipped: " + StringEquivalent.EquipmentSlots[equippedInSlot.slotType] + ")";
                 }
-
-                //Print entry
-                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
-            }
-        }
-
-        /// <summary>
-        /// Display equipment select overview
-        /// </summary>
-        private void DrawEquipment()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame
-            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //List the inventory
-
-            //Inventory area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            List<InventoryListing> inventoryList = currentInventory.EquipmentListing;
-
-            for (int i = 0; i < inventoryListH; i++)
-            {
-                int inventoryIndex = topInventoryIndex + i;
-
-                //End of inventory
-                if (inventoryIndex == inventoryList.Count)
-                    break;
-
-
-                //Add equipped status
-                //Only consider the first item in a stack, since equipped items can't stack
-                Item firstItemInStack = currentInventory.Items[inventoryList[inventoryIndex].ItemIndex[0]];
-
-
-                //Create entry string
-                char selectionChar = (char)((int)'a' + i);
-                string entryString = "(" + selectionChar.ToString() + ") " + firstItemInStack.SingleItemDescription; //+" (equipped)";
-
-                //EquipmentSlotInfo equippedInSlot = currentEquipment.Find(x => x.equippedItem == firstItemInStack);
-
-                //if (equippedInSlot != null)
-                //{
-                 //   entryString += " (equipped: " + StringEquivalent.EquipmentSlots[equippedInSlot.slotType] + ")";
-                //}
 
                 //Print entry
                 rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
@@ -1601,242 +1353,120 @@ namespace RogueBasin {
             }
         }
 
-        List<TrainStats> trainingStatsRecord;
-
-        public void ClearTrainingStatsRecord()
-        {
-            trainingStatsRecord.Clear();
-        }
-
-        public void AddTrainingStatsRecord(TrainStats newStats)
-        {
-            trainingStatsRecord.Add(newStats);
-        }
-
-        int trainingXTemp;
-        int trainingYTemp;
-
-        /// <summary>
-        /// Display training overlay. Just put up the border and write some text. Calls from the caller will add info.
-        /// </summary>
-        private void DrawTrainingOverlay()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            Point statsHeaderOffset = new Point(10, 0);
-            Point statsModOffset = new Point(15, 0);
-            Point statsDayOffset = new Point(2, 0);
-
-            Point fitnessOffset = new Point(0, 0);
-            Point healthOffset = new Point(8, 0);
-            Point speedOffset = new Point(16, 0);
-            Point combatOffset = new Point(23, 0);
-            Point charmOffset = new Point(30, 0);
-            Point magicOffset = new Point(36, 0);
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(trainingTL.x, trainingTL.y, trainingTR.x - trainingTL.x + 1, trainingBL.y - trainingTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect("Training!", (trainingTL.x + trainingTR.x) / 2, trainingTL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect("Press (x) to exit", (trainingTL.x + trainingTR.x) / 2, trainingBL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw headings
-            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw stats
-            /*
-            int headerY = trainingTL.y + 4;
-
-            rootConsole.PrintLine("Stamina", trainingTL.x + statsHeaderOffset.x + fitnessOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Health", trainingTL.x + statsHeaderOffset.x + healthOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Speed", trainingTL.x + statsHeaderOffset.x + speedOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Combat", trainingTL.x + statsHeaderOffset.x + combatOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Charm", trainingTL.x + statsHeaderOffset.x + charmOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Magic", trainingTL.x + statsHeaderOffset.x + magicOffset.x, headerY, LineAlignment.Left);
-            */
-            //Work out the start day
-            List<string> dayNames = new List<string>();
-            
-            if(Game.Dungeon.IsWeekday()) {
-                dayNames.Add("Monday");
-                dayNames.Add("Tuesday");
-                dayNames.Add("Wednesday");
-                dayNames.Add("Thursday");
-                dayNames.Add("Friday");
-            }
-            else {
-                dayNames.Add("Saturday");
-                dayNames.Add("Sunday");
-            }
-
-            //Draw all updates
-            int lineCount = 0;
-
-            foreach (TrainStats stats in trainingStatsRecord)
-            {
-                //Pause
-                if (trainingPause)
-                    TCODSystem.Sleep(400);
-
-                FlushConsole();
-
-                string dayName;
-                if (lineCount < dayNames.Count)
-                    dayName = dayNames[lineCount];
-                else
-                {
-                    dayName = "";
-                    LogFile.Log.LogEntryDebug("Error - couldn't find right day name in training", LogDebugLevel.High);
-                }
-
-
-
-                trainingYTemp = trainingTL.y + 6 + lineCount;
-
-                //Concatenate display string
-                trainingXTemp = statsModOffset.x;
-
-                rootConsole.ForegroundColor = ColorPresets.White;
-                rootConsole.PrintLine(dayName + " : ", trainingTL.x + statsDayOffset.x, trainingYTemp, LineAlignment.Left);
-
-                ProcessDelta("Stamina", stats.HitpointsStatDelta);
-                ProcessDelta("Health", stats.MaxHitpointsStatDelta);
-                ProcessDelta("Combat", stats.AttackStatDelta);
-                ProcessDelta("Speed", stats.SpeedStatDelta);
-                ProcessDelta("Charm", stats.CharmStatDelta);
-                ProcessDelta("Magic", stats.MagicStatDelta);
-
-                //No change
-                if (trainingXTemp == statsModOffset.x)
-                {
-                    rootConsole.ForegroundColor = ColorPresets.White;
-                    rootConsole.PrintLine("No change!", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
-                }
-
-                lineCount++;
-                
-            }
-
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-           
-        }
-
-
-        public int MagicInc { get; set; }
-        public int CombatInc { get; set; }
-        public int CharmInc { get; set; }
-
-        public bool ShowXPScreen { get; set; }
-
-        /// <summary>
-        /// Display XP boost overlay
-        /// </summary>
-        private void DrawXPOverlay()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            Point statsHeaderOffset = new Point(10, 0);
-            Point statsModOffset = new Point(15, 0);
-            Point statsDayOffset = new Point(2, 0);
-
-            Point fitnessOffset = new Point(0, 0);
-            Point healthOffset = new Point(8, 0);
-            Point speedOffset = new Point(16, 0);
-            Point combatOffset = new Point(23, 0);
-            Point charmOffset = new Point(30, 0);
-            Point magicOffset = new Point(36, 0);
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(trainingTL.x, trainingTL.y, trainingTR.x - trainingTL.x + 1, trainingBL.y - trainingTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect("Your adventuring paid off!", (trainingTL.x + trainingTR.x) / 2, trainingTL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect("Press (ENTER) to exit", (trainingTL.x + trainingTR.x) / 2, trainingBL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw headings
-            //rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw stats
-            /*
-            int headerY = trainingTL.y + 4;
-
-            rootConsole.PrintLine("Stamina", trainingTL.x + statsHeaderOffset.x + fitnessOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Health", trainingTL.x + statsHeaderOffset.x + healthOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Speed", trainingTL.x + statsHeaderOffset.x + speedOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Combat", trainingTL.x + statsHeaderOffset.x + combatOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Charm", trainingTL.x + statsHeaderOffset.x + charmOffset.x, headerY, LineAlignment.Left);
-            rootConsole.PrintLine("Magic", trainingTL.x + statsHeaderOffset.x + magicOffset.x, headerY, LineAlignment.Left);
-            */
-
-
-
-            //Draw all updates
-            int lineCount = 0;
-
-            trainingYTemp = trainingTL.y + 6 + lineCount;
-
-            trainingYTemp = trainingTL.y + 4 + lineCount;
-            trainingXTemp = statsModOffset.x;
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-
-            if (CombatInc > 0 || CharmInc > 0 || MagicInc > 0)
-            {
-                rootConsole.PrintLine("These stats increased:", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
-            }
-            else
-            {
-                rootConsole.PrintLine("No stats increased this adventure!", trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
-            }
-
-            trainingYTemp = trainingTL.y + 6 + lineCount;
-
-            //Concatenate display string
-            trainingXTemp = statsModOffset.x;
-
-            ProcessDelta("Combat", CombatInc);
-            trainingXTemp = statsModOffset.x;
-            trainingYTemp++;
-            ProcessDelta("Charm", CharmInc);
-            trainingXTemp = statsModOffset.x;
-            trainingYTemp++;
-            ProcessDelta("Magic", MagicInc);
-
-            FlushConsole();
-            WaitForEnterKey();
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-
-        }
 
         public bool ShowMsgHistory { get; set; }
 
         enum Direction { up, down, none };
+
+        void ClearScreen()
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.Clear();
+        }
+
+        /// <summary>
+        /// Draws a frame on the screen
+        /// </summary>
+        void DrawFrame(int x, int y, int width, int height, bool clear)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(x, y, width, height, clear);
+        }
+
+        /// <summary>
+        /// Draws a frame on the screen in a particular color
+        /// </summary>
+        void DrawFrame(int x, int y, int width, int height, bool clear, Color color)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.ForegroundColor = color;
+
+            //Draw frame - same as inventory
+            rootConsole.DrawFrame(x, y, width, height, clear);
+
+            rootConsole.ForegroundColor = ColorPresets.White;
+        }
+
+        /// <summary>
+        /// Character-based drawing. Kept only for stats etc. in transitional period. All map stuff now works in the tile layer
+        /// </summary>
+        void PutChar(int x, int y, char c, Color color)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+            rootConsole.ForegroundColor = color;
+
+            rootConsole.PutChar(x, y, c);
+
+            rootConsole.ForegroundColor = ColorPresets.White;
+        }
+
+        /// <summary>
+        /// Print a string in a rectangle
+        /// </summary>
+        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
+        }
+
+        /// <summary>
+        /// Print a string at a location
+        /// </summary>
+        void PrintLine(string msg, int x, int y, LineAlignment alignment)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.PrintLine(msg, x, y, alignment);
+        }
+
+        /// <summary>
+        /// Print a string at a location
+        /// </summary>
+        void PrintLine(string msg, int x, int y, LineAlignment alignment, Color color)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+            rootConsole.ForegroundColor = color;
+
+            rootConsole.PrintLine(msg, x, y, alignment);
+            rootConsole.ForegroundColor = ColorPresets.White;
+        }
+
+        /// <summary>
+        /// Draw rectangle
+        /// </summary>
+        void DrawRect(int x, int y, int width, int height, bool clear)
+        {
+            //Get screen handle
+            RootConsole rootConsole = RootConsole.GetInstance();
+
+            rootConsole.DrawRect(x, y, width, height, clear);
+        }
 
         /// <summary>
         /// Draw the msg history and allow the player to scroll
         /// </summary>
         private void DrawMsgHistory()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
             //Draw frame - same as inventory
-            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
 
             //Draw title
-            rootConsole.PrintLineRect("Message History", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Message History", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
 
             //Draw instructions
-            rootConsole.PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
 
             //Active area is slightly reduced from frame
             int inventoryListX = inventoryTL.x + 2;
@@ -1866,7 +1496,7 @@ namespace RogueBasin {
                 displayedMsg = topLineDisplayed;
                 for (int i = 0; i < inventoryListH; i++)
                 {
-                    rootConsole.PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+                    PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
                     displayedMsg = displayedMsg.Next;
                     if (displayedMsg == null)
                         break;
@@ -1934,13 +1564,13 @@ namespace RogueBasin {
                     }
 
                     //Clear the rectangle
-                    rootConsole.DrawRect(inventoryTL.x + 1, inventoryTL.y + 1, inventoryTR.x - inventoryTL.x - 1, inventoryBL.y - inventoryTL.y - 1, true);
+                    DrawRect(inventoryTL.x + 1, inventoryTL.y + 1, inventoryTR.x - inventoryTL.x - 1, inventoryBL.y - inventoryTL.y - 1, true);
 
                     //Display the message log
                     displayedMsg = topLineDisplayed;
                     for (int i = 0; i < inventoryListH; i++)
                     {
-                        rootConsole.PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+                        PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
                         displayedMsg = displayedMsg.Next;
                         if (displayedMsg == null)
                             break;
@@ -1951,124 +1581,13 @@ namespace RogueBasin {
             } while (keepLooping);
         }
 
-        private void ProcessDelta(string statName, int delta)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            string outString;
-            Color colorToPrint;
-
-            if (delta == 0)
-                return;
-
-            if (delta > 0)
-            {
-                outString = statName+ "(+" + delta.ToString() + ")";
-                colorToPrint = ColorPresets.Green;
-            }
-            else
-            {
-                outString = statName + "(" + delta.ToString() + ")";
-                colorToPrint = ColorPresets.Red;
-            }
-            rootConsole.ForegroundColor = colorToPrint;
-            rootConsole.PrintLine(outString, trainingTL.x + trainingXTemp, trainingYTemp, LineAlignment.Left);
-
-            trainingXTemp += outString.Length + 1;
-        }
-        /*
-        /// <summary>
-        /// Display training overlay. Just put up the border and write some text. Calls from the caller will add info.
-        /// </summary>
-        private void DrawTrainingOverlay()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(trainingTL.x, trainingTL.y, trainingTR.x - trainingTL.x + 1, trainingBL.y - trainingTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect("Training!", (trainingTL.x + trainingTR.x) / 2, trainingTL.y, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw headings
-            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 2, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-
-            //Draw stats
-            string statsRow = "Fitness  Health  Speed  Combat  Charm  Magic";
-
-            rootConsole.PrintLineRect(TrainingTypeString, (trainingTL.x + trainingTR.x) / 2, trainingTL.y + 4, trainingTR.x - trainingTL.x, 1, LineAlignment.Center);
-        }*/
-
-
-        /// <summary>
-        /// Display equipment overlay
-        /// </summary>
-        private void DrawEquipmentOld()
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Use frame and strings from inventory for now
-
-            //Draw frame
-            rootConsole.DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
-
-            //Draw title
-            rootConsole.PrintLineRect(inventoryTitle, (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //Draw instructions
-            rootConsole.PrintLineRect(inventoryInstructions, (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
-
-            //List current slots & items if filled
-
-            //Equipment area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            for (int i = 0; i < inventoryListH; i++)
-            {
-                int inventoryIndex = topInventoryIndex + i;
-
-                //End of inventory
-                if (inventoryIndex == currentEquipment.Count)
-                    break;
-
-                //Create entry string
-                EquipmentSlotInfo currentSlot = currentEquipment[inventoryIndex];
-
-                char selectionChar = (char)((int)'a' + i);
-                string entryString = "(" + selectionChar.ToString() + ") " + StringEquivalent.EquipmentSlots[currentSlot.slotType] + ": ";
-                if (currentSlot.equippedItem == null)
-                    entryString += "Empty";
-                else
-                    entryString += currentSlot.equippedItem.SingleItemDescription;
-
-                //Print entry
-                rootConsole.PrintLineRect(entryString, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
-            }
-        }
 
         private void DrawStats(Player player)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-            
-            //Are we in town or the wilderness? Don't show stats
-            //if (player.LocationLevel < 2)
-            //    return;
-
-            
 
             //Blank stats area
             //rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
-            rootConsole.ForegroundColor = frameColor;
-            rootConsole.DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false);
-
-            rootConsole.ForegroundColor = statsColor;
+            DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false, frameColor);
 
             //Mission
             Point missionOffset = new Point(4, 1);
@@ -2078,8 +1597,8 @@ namespace RogueBasin {
             Point viewOffset = new Point(4, 19);
             Point gameDataOffset = new Point(4, 24);
 
-            rootConsole.PrintLine("ZONE: " + (player.LocationLevel + 1).ToString("00"), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
-            rootConsole.PrintLine(DungeonInfo.LookupMissionName(player.LocationLevel), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
+            PrintLine("ZONE: " + (player.LocationLevel + 1).ToString("00"), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
+            PrintLine(DungeonInfo.LookupMissionName(player.LocationLevel), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
             
             
             //Draw HP Status
@@ -2091,24 +1610,19 @@ namespace RogueBasin {
             //It's easy for the player - make sure we're exact
             hpBarEntries = player.Hitpoints;
 
-            rootConsole.ForegroundColor = statsColor;
-            rootConsole.PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
+            PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
 
             for (int i = 0; i < hpBarLength; i++)
             {
                 if (i < hpBarEntries)
                 {
-                    rootConsole.ForegroundColor = ColorPresets.Green;
-                    rootConsole.PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*');
+                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*', ColorPresets.Green);
                 }
                 else
                 {
-                    rootConsole.ForegroundColor = ColorPresets.Gray;
-                    rootConsole.PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*');
+                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*', ColorPresets.Gray);
                 }
             }
-
-            rootConsole.ForegroundColor = statsColor;
 
             //Draw equipped weapon
 
@@ -2116,21 +1630,19 @@ namespace RogueBasin {
 
             string weaponStr = "Weapon: ";
 
-            rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left);
+            PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left);
 
             if (weapon != null)
             {
                 IEquippableItem weaponE = weapon as IEquippableItem;
                 
                 weaponStr = weapon.SingleItemDescription;
-                rootConsole.ForegroundColor = weapon.GetColour();
-                rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left);
-                rootConsole.ForegroundColor = statsColor;
+                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left, weapon.GetColour());
 
                 //Ammo
                 if (weaponE.HasFireAction())
                 {
-                    rootConsole.PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
         
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -2141,19 +1653,15 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            rootConsole.ForegroundColor = ColorPresets.Blue;
-                            rootConsole.PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*');
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*', ColorPresets.Blue);
                         }
                         else
                         {
-                            rootConsole.ForegroundColor = ColorPresets.Gray;
-                            rootConsole.PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*');
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*', ColorPresets.Gray);
                         }
                     }
                 }
 
-                rootConsole.ForegroundColor = statsColor;
-             
                 //Uses
 
                 string uses = "";
@@ -2177,31 +1685,26 @@ namespace RogueBasin {
                     uses += "(u)se";
                 }
 
-                rootConsole.PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
+                PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
             }
             else
             {
                 weaponStr = "None";
-                rootConsole.ForegroundColor = nothingColor;
-                rootConsole.PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left);
+                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left, nothingColor);
             }
             
 
             //Draw equipped utility
 
-            rootConsole.ForegroundColor = statsColor;
-
             Item utility = Game.Dungeon.Player.GetEquippedUtilityAsItem();
 
             string utilityStr = "Utility: ";
-            rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left);
+            PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left);
 
             if (utility != null)
             {
                 utilityStr = utility.SingleItemDescription;
-                rootConsole.ForegroundColor = utility.GetColour();
-                rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
-                rootConsole.ForegroundColor = statsColor;
+                PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left, utility.GetColour());
 
                 IEquippableItem utilityE = utility as IEquippableItem;
 
@@ -2217,14 +1720,13 @@ namespace RogueBasin {
                     uses += "(T)hrow ";
                 }
 
-                rootConsole.PrintLine(uses, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
+                PrintLine(uses, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
             }
              
             else
             {
                 utilityStr = "Nothing";
-                rootConsole.ForegroundColor = nothingColor;
-                rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left);
+                PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left, nothingColor);
             }
 
             //Effect active (add ors)
@@ -2243,17 +1745,12 @@ namespace RogueBasin {
 
                     //Effect name
 
-                    rootConsole.ForegroundColor = statsColor;
+                    PrintLine("Effect: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 3, LineAlignment.Left);
 
-                    rootConsole.PrintLine("Effect: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 3, LineAlignment.Left);
-
-                    rootConsole.ForegroundColor = effectColor;
-                    rootConsole.PrintLine(effectName, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 4, LineAlignment.Left);
-                    rootConsole.ForegroundColor = statsColor;
-
+                    PrintLine(effectName, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 4, LineAlignment.Left, effectColor);
                     //Duration
 
-                    rootConsole.PrintLine("Tm: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 5, LineAlignment.Left);
+                    PrintLine("Tm: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 5, LineAlignment.Left);
 
                     int ammoBarLength = 10;
                     double weaponAmmoRatio = effectRemainingDuration / (double) effectTotalDuration;
@@ -2263,13 +1760,11 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            rootConsole.ForegroundColor = ColorPresets.Gold;
-                            rootConsole.PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*');
+                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*', ColorPresets.Gold);
                         }
                         else
                         {
-                            rootConsole.ForegroundColor = ColorPresets.Gray;
-                            rootConsole.PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*');
+                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*', ColorPresets.Gray);
                         }
                     }
                 }
@@ -2280,17 +1775,14 @@ namespace RogueBasin {
             
             //Creature takes precidence
 
-            rootConsole.ForegroundColor = statsColor;
 
             string viewStr = "Target: ";
-            rootConsole.PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
+            PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
 
             if (CreatureToView != null && CreatureToView.Alive == true)
             {
                 String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
-                rootConsole.ForegroundColor = CreatureToView.RepresentationColor();
-                rootConsole.PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
-                rootConsole.ForegroundColor = statsColor;
+                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
 
                 //Monster hp
 
@@ -2298,97 +1790,79 @@ namespace RogueBasin {
                 double mplayerHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
                 int mhpBarEntries = (int)Math.Ceiling(mhpBarLength * mplayerHPRatio);
 
-                rootConsole.ForegroundColor = statsColor;
-                rootConsole.PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
 
                 for (int i = 0; i < mhpBarLength; i++)
                 {
                     if (i < mhpBarEntries)
                     {
-                        rootConsole.ForegroundColor = ColorPresets.Red;
-                        rootConsole.PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*');
+                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*', ColorPresets.Red);
                     }
                     else
                     {
-                        rootConsole.ForegroundColor = ColorPresets.Gray;
-                        rootConsole.PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*');
+                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*', ColorPresets.Gray);
                     }
                 }
                 
 
                 //Behaviour
-                rootConsole.ForegroundColor = statsColor;
 
                 if (CreatureToView.StunnedTurns > 0)
                 {
-                    rootConsole.ForegroundColor = stunnedBackground;
-                    rootConsole.PrintLine("(Stunned: " + CreatureToView.StunnedTurns + ")", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                    PrintLine("(Stunned: " + CreatureToView.StunnedTurns + ")", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, stunnedBackground);
                 }
                 else if (CreatureToView.InPursuit())
                 {
-                    rootConsole.ForegroundColor = pursuitBackground;
-                    rootConsole.PrintLine("(In Pursuit)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                    PrintLine("(In Pursuit)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, pursuitBackground);
                 }
                 else if (!CreatureToView.OnPatrol())
                 {
-                    rootConsole.ForegroundColor = investigateBackground;
-                    rootConsole.PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                    PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, investigateBackground);
                 }
                 else {
-                    rootConsole.ForegroundColor = statsColor;
-                    rootConsole.PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                    PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
                 }
             }
             else if (ItemToView != null)
             {
                 String nameStr = ItemToView.SingleItemDescription;// +"(" + ItemToView.Representation + ")";
-                rootConsole.ForegroundColor = ItemToView.GetColour();
-                rootConsole.PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
-                rootConsole.ForegroundColor = statsColor;
+                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, ItemToView.GetColour());
 
                 IEquippableItem itemE = ItemToView as IEquippableItem;
                 if (itemE != null)
                 {
                     EquipmentSlot weaponSlot = itemE.EquipmentSlots.Find(x => x == EquipmentSlot.Weapon);
                     if(weaponSlot != null) {
-                        rootConsole.PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                        PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
                     }
                     else
-                        rootConsole.PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                        PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
                 }
             }
             else
             {
                 utilityStr = "None";
-                rootConsole.ForegroundColor = nothingColor;
-                rootConsole.PrintLine(utilityStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+                PrintLine(utilityStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, nothingColor);
             }
 
             //Game data
-            rootConsole.ForegroundColor = statsColor;
-
-            rootConsole.PrintLine("Droids:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
+            PrintLine("Droids:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
 
             int noDroids = Game.Dungeon.DungeonInfo.MaxDeaths - Game.Dungeon.DungeonInfo.NoDeaths;
 
             for (int i = 0; i < noDroids; i++)
             {
-                rootConsole.ForegroundColor = Game.Dungeon.Player.RepresentationColor();
-                rootConsole.PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y, Game.Dungeon.Player.Representation);
+                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y, Game.Dungeon.Player.Representation, Game.Dungeon.Player.RepresentationColor());
             }
 
-            rootConsole.PrintLine("Aborts:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y + 1, LineAlignment.Left);
+            PrintLine("Aborts:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y + 1, LineAlignment.Left);
 
             int noAborts = Game.Dungeon.DungeonInfo.MaxAborts - Game.Dungeon.DungeonInfo.NoAborts;
 
             for (int i = 0; i < noAborts; i++)
             {
-                rootConsole.ForegroundColor = ColorPresets.Red;
-                rootConsole.PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X');
+                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X',ColorPresets.Red);
             }
-
-            //Restore to normal colour - not nice
-            rootConsole.ForegroundColor = ColorPresets.White;
         }
 
         private void DrawItems(List<Item> itemList)

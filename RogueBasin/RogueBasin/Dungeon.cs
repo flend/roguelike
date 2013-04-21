@@ -4826,34 +4826,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Turn the player's XP counters into stats
-        /// </summary>
-        void ProcessPlayerXP()
-        {
-            //Could cheat and put some limiting in here
-            int magicInc = (int)Math.Ceiling(player.MagicXP / 5.0);
-            int combatInc = (int)Math.Ceiling(player.CombatXP / 5.0);
-            int charmInc = (int)Math.Ceiling(player.CharmXP / 5.0);
-
-            player.MagicStat += magicInc;
-            player.CharmStat += charmInc;
-            player.AttackStat += combatInc;
-
-            //Show player the increases
-
-            Screen.Instance.ShowXPScreen = true;
-            Screen.Instance.MagicInc = magicInc;
-            Screen.Instance.CombatInc = combatInc;
-            Screen.Instance.CharmInc = charmInc;
-
-            Screen.Instance.UpdateNoMsgQueue();
-            Screen.Instance.ShowXPScreen = false;
-
-            ResetPlayerXPCounters();
-
-        }
-
-        /// <summary>
         /// Respawn the current dungeon. New seed on abort. Same seed on death
         /// </summary>
         /// <param name="respawnWithSameSeed"></param>
@@ -4913,9 +4885,6 @@ namespace RogueBasin
 
                 //Wipe the player's FOV of the last dungeon
                 WipeThisRunFOV(Player.CurrentDungeon);
-
-                //Increase player's stats
-                ProcessPlayerXP();
 
                 //Cancel any effect
                 player.RemoveAllEffects();
