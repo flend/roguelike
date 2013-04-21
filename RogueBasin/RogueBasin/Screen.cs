@@ -1524,11 +1524,6 @@ namespace RogueBasin {
 
         private void DrawItems(List<Item> itemList)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Set default colour
-            rootConsole.ForegroundColor = itemColor;
 
             //Could consider storing here and sorting to give an accurate representation of multiple objects
 
@@ -1597,11 +1592,6 @@ namespace RogueBasin {
 
         private void DrawFeatures(List<Feature> featureList)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Set default colour
-            //rootConsole.ForegroundColor = featureColor;
 
             //Could consider storing here and sorting to give an accurate representation of multiple objects
 
@@ -1655,12 +1645,6 @@ namespace RogueBasin {
 
         private void DrawCreatures(List<Monster> creatureList)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Set default colour
-            //rootConsole.ForegroundColor = creatureColor;
-
             //Draw stuff about creatures which should be overwritten by other creatures
             foreach (Monster creature in creatureList)
             {
@@ -1674,7 +1658,6 @@ namespace RogueBasin {
                 int monsterY = mapTopLeft.y + creature.LocationMap.y;
 
                 Color creatureColor = creature.RepresentationColor();
-                rootConsole.ForegroundColor = creatureColor;
 
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
                 bool drawCreature = true;
@@ -1824,7 +1807,10 @@ namespace RogueBasin {
                             int wpX = mapTopLeft.x + wp.x;
                             int wpY = mapTopLeft.y + wp.y;
 
-                            rootConsole.PutChar(wpX, wpY, wpNo.ToString()[0]);
+                            tileMapLayer(TileLevel.Creatures).Rows[wp.y].Columns[wp.x] = new TileEngine.TileCell(wpNo.ToString()[0]);
+                            tileMapLayer(TileLevel.Creatures).Rows[wp.y].Columns[wp.x].TileFlag = new LibtcodColorFlags(monsterWithWP.RepresentationColor());
+
+
                             wpNo++;
                         }
                     }
@@ -1910,19 +1896,12 @@ namespace RogueBasin {
                     }
 
                     //Creature
-                    int monsterX = mapTopLeft.x + creature.LocationMap.x;
-                    int monsterY = mapTopLeft.y + creature.LocationMap.y;
-
-                    rootConsole.PutChar(monsterX, monsterY, creature.Representation);
 
                     tileMapLayer(TileLevel.Creatures).Rows[creature.LocationMap.y].Columns[creature.LocationMap.x] = new TileEngine.TileCell(creature.Representation);
                     tileMapLayer(TileLevel.Creatures).Rows[creature.LocationMap.y].Columns[creature.LocationMap.x].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
 
                 }
             }
-
-            //Reset the background
-            rootConsole.BackgroundColor = normalBackground;
         }
 
         public void SaveCurrentLevelToDisk()
@@ -1948,8 +1927,6 @@ namespace RogueBasin {
 
         private void DrawMap(Map map)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
             //Calculate where to draw the map
 
@@ -1960,11 +1937,10 @@ namespace RogueBasin {
             int heightAvail = mapBotRightBase.y - mapTopLeftBase.y;
 
             //Draw frame
-            rootConsole.ForegroundColor = frameColor;
-            rootConsole.DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false);
+            DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, frameColor);
 
             //Draw frame for msg here too
-            rootConsole.DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false);
+            DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false);
 
             //Put the map in the centre
             mapTopLeft = new Point(mapTopLeftBase.x + (widthAvail - width) / 2, mapTopLeftBase.y + (heightAvail - height) / 2);
@@ -2132,8 +2108,6 @@ namespace RogueBasin {
        
         internal string GetUserString(string introMessage)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
             ClearMessageLine();
 
@@ -2265,8 +2239,6 @@ namespace RogueBasin {
 
         internal string GetUserString(string introMessage, Point topLeft, int maxChars)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
             ClearMessageLine();
 
@@ -2390,11 +2362,7 @@ namespace RogueBasin {
 
         internal bool YesNoQuestion(string introMessage, Point topLeft)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //ClearMessageLine();
-
+            
             PrintMessage(introMessage + " (y / n):", topLeft, introMessage.Length + 8);
             FlushConsole();
 
@@ -2426,8 +2394,6 @@ namespace RogueBasin {
 
         internal bool YesNoQuestion(string introMessage)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
 
             ClearMessageLine();
 
