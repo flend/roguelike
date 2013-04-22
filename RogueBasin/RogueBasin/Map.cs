@@ -286,6 +286,12 @@ namespace RogueBasin
         public int height;
 
         /// <summary>
+        /// Only public for serialization. Pathing maps (always next power of 2)
+        /// </summary>
+        public uint pathWidth;
+        public uint pathHeight;
+
+        /// <summary>
         /// Byte array representation for pathing
         /// </summary>
         public byte[,] pathRepresentation;
@@ -350,8 +356,12 @@ namespace RogueBasin
 
             GuaranteedConnected = false;
 
-            pathRepresentation = new byte[width, height];
-            pathRepresentationNoClosedDoors = new byte[width, height];
+            //Pad path representations out to nearest power of 2
+            pathWidth = Utility.nextPowerOf2(Convert.ToUInt32(width));
+            pathHeight = Utility.nextPowerOf2(Convert.ToUInt32(height));
+
+            pathRepresentation = new byte[pathWidth, pathHeight];
+            pathRepresentationNoClosedDoors = new byte[pathWidth, pathHeight];
 
             Clear();
         }
@@ -392,6 +402,15 @@ namespace RogueBasin
                 }
             }
 
+            //Add 0 padding
+            for (int j = width; j < pathWidth; j++)
+            {
+                for (int k = height; k < pathHeight; k++)
+                {
+                    pathRepresentation[j, k] = 0;
+                }
+            }
+
             //Ignoring closed doors
 
             for (int j = 0; j < width; j++)
@@ -401,6 +420,15 @@ namespace RogueBasin
                     MapTerrain terrainHere = mapSquares[j, k].Terrain;
 
                     pathRepresentationNoClosedDoors[j, k] = mapSquares[j, k].Walkable || terrainHere == MapTerrain.ClosedDoor ? (byte)1 : (byte)0;
+                }
+            }
+
+            //Add 0 padding
+            for (int j = width; j < pathWidth; j++)
+            {
+                for (int k = height; k < pathHeight; k++)
+                {
+                    pathRepresentationNoClosedDoors[j, k] = 0;
                 }
             }
 

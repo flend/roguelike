@@ -242,6 +242,22 @@ namespace RogueBasin
             }
             yield break;
         }
+
+        /// <summary>
+        /// See http://stackoverflow.com/questions/1322510/given-an-integer-how-do-i-find-the-next-largest-power-of-two-using-bit-twiddlin
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static uint nextPowerOf2(uint n) {
+
+            n--;
+            n |= n >> 1;   // Divide by 2^k for consecutive doublings of k up to 32,
+            n |= n >> 2;   // and then or the results.
+            n |= n >> 4;
+            n |= n >> 8;
+            n |= n >> 16;
+            return ++n;        
+        }
     
 
     }
