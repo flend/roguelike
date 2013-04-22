@@ -192,6 +192,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
+    <Compile Include="AStar\IPathFinder.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Items\FragGrenade.cs">
       <SubType>Code</SubType>
@@ -263,6 +264,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MovieFrame.cs" />
+    <Compile Include="AStar\PathFinder.cs" />
+    <Compile Include="AStar\PathFinderFast.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerEffect.cs" />
     <Compile Include="PlayerEffectInstant.cs" />
@@ -292,6 +295,7 @@
     </Compile>
     <Compile Include="PlayerEffects\StealthField.cs" />
     <Compile Include="PlayerEffects\ToHitUp.cs" />
+    <Compile Include="AStar\PriorityQueueB.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

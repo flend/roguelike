@@ -634,7 +634,7 @@ namespace RogueBasin
             if(!CanOpenDoors())
                 nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
             else
-                nextStep = Game.Dungeon.GetPathFromCreatureToPointOpenedDoors(this.LocationLevel, this, currentSound.MapLocation);
+                nextStep = Game.Dungeon.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, currentSound.MapLocation);
 
             if (nextStep.x == -1 && nextStep.y == -1)
             {
@@ -792,7 +792,7 @@ namespace RogueBasin
                         if(!CanOpenDoors())
                             nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
                         else
-                            nextStep = Game.Dungeon.GetPathFromCreatureToPointOpenedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
+                            nextStep = Game.Dungeon.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
 
                         if (nextStep.x == -1 && nextStep.y == -1)
                         {
@@ -980,7 +980,7 @@ namespace RogueBasin
                     if(!CanOpenDoors())
                         nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
                     else
-                        nextStep = Game.Dungeon.GetPathFromCreatureToPointOpenedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        nextStep = Game.Dungeon.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
 
                     if (nextStep.x == -1 && nextStep.y == -1)
                     {
@@ -1063,9 +1063,9 @@ namespace RogueBasin
 
             Point nextStep;
             if(!CanOpenDoors())
-                nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+                nextStep = Game.Dungeon.GetPathToCreature(this, newTarget);
             else
-                nextStep = Game.Dungeon.GetPathToOpenedDoors(this, newTarget);
+                nextStep = Game.Dungeon.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
 
             bool moveIntoSquare = true;
 
@@ -1144,7 +1144,7 @@ namespace RogueBasin
                 return;
 
             //Find location of next step on the path towards them
-            Point nextStep = Game.Dungeon.GetPathTo(this, player);
+            Point nextStep = Game.Dungeon.GetPathToCreature(this, player);
 
             if (nextStep.x == -1 || nextStep.y == -1)
             {

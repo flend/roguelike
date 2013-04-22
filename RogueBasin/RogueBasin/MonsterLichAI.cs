@@ -448,7 +448,7 @@ namespace RogueBasin
                 //If not, move towards the player
 
                 //Find location of next step on the path towards them
-                Point nextStep = Game.Dungeon.GetPathTo(this, newTarget);
+                Point nextStep = Game.Dungeon.GetPathToCreature(this, newTarget);
 
                 bool moveIntoSquare = true;
 

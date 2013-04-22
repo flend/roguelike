@@ -988,7 +988,7 @@ namespace RogueBasin
                 }
 
                 //Build TCOD maps
-                newDungeon.RefreshTCODMaps();
+                newDungeon.RefreshAllLevelPathing();
 
                 //Worry about inventories generally
                 //Problem right now is that items in creature inventories will get made twice, once in dungeon and once on the player/creature

@@ -285,6 +285,15 @@ namespace RogueBasin
         public int width;
         public int height;
 
+        /// <summary>
+        /// Byte array representation for pathing
+        /// </summary>
+        public byte[,] pathRepresentation;
+
+        /// <summary>
+        /// Byte array representation for pathing. Closed doors appear open (i.e. for creatures which can open doors)
+        /// </summary>
+        public byte[,] pathRepresentationNoClosedDoors;
 
         public double LightLevel;
 
@@ -301,6 +310,10 @@ namespace RogueBasin
             //LightLevel = 1.0;
         }
 
+        /// <summary>
+        /// Clone map. Does not clone pathing representation, so this should be refreshed manually.
+        /// </summary>
+        /// <returns></returns>
         public Map Clone() {
 
             Map newMap = new Map(width, height);
@@ -337,6 +350,9 @@ namespace RogueBasin
 
             GuaranteedConnected = false;
 
+            pathRepresentation = new byte[width, height];
+            pathRepresentationNoClosedDoors = new byte[width, height];
+
             Clear();
         }
 
@@ -351,6 +367,69 @@ namespace RogueBasin
             }
         }
 
+        public byte[,] PathRepresentation
+        {
+            get { return pathRepresentation; }
+        }
+
+
+        public byte[,] PathRepresentationNoClosedDoors
+        {
+            get { return pathRepresentationNoClosedDoors; }
+        }
+
+
+        /// <summary>
+        /// Recalculates the representation of the map used for pathing
+        /// </summary>
+        public void RecalculatePathingRepresentation()
+        {
+            for (int j = 0; j < width; j++)
+            {
+                for (int k = 0; k < height; k++)
+                {
+                    pathRepresentation[j, k] = mapSquares[j, k].Walkable ? (byte)1 : (byte)0;
+                }
+            }
+
+            //Ignoring closed doors
+
+            for (int j = 0; j < width; j++)
+            {
+                for (int k = 0; k < height; k++)
+                {
+                    MapTerrain terrainHere = mapSquares[j, k].Terrain;
+
+                    pathRepresentationNoClosedDoors[j, k] = mapSquares[j, k].Walkable || terrainHere == MapTerrain.ClosedDoor ? (byte)1 : (byte)0;
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Set walkable flag on map squares. Must be called before RecalculatePathingRepresentation()
+        /// </summary>
+        public void RecalculateWalkable()
+        {
+
+            for (int j = 0; j < width; j++)
+            {
+                for (int k = 0; k < height; k++)
+                {
+
+                    //Terrain
+
+                    bool walkable = true;
+
+                    //Use new function
+
+                    if (!Dungeon.IsTerrainWalkable(mapSquares[j, k].Terrain))
+                        walkable = false;
+
+                    mapSquares[j, k].Walkable = walkable;
+                }
+            }
+        }
         
     }
 }

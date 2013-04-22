@@ -3534,7 +3534,7 @@ namespace RogueBasin
             Game.Dungeon.RecalculateWalkable();
 
             //TCOD routine uses Walkable flag set above
-            Game.Dungeon.RefreshTCODMaps();
+            Game.Dungeon.RefreshAllLevelPathing();
         }
     }
 }
