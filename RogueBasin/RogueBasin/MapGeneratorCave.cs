@@ -291,36 +291,22 @@ namespace RogueBasin
 
         private bool ArePointsConnected(Point firstPoint, Point secondPoint)
         {
-            //Build tcodmap
-            TCODFov tcodMap = new TCODFov(Width, Height);
+            //Build map representations
+            byte[,] byteMap = new byte[Width, Height];
             for (int i = 0; i < Width; i++)
             {
                 for (int j = 0; j < Height; j++)
                 {
-                    tcodMap.SetCell(i, j, !baseMap.mapSquares[i, j].BlocksLight, baseMap.mapSquares[i, j].Walkable);
+                    byteMap[i,j] = baseMap.mapSquares[i, j].Walkable ? (byte)1 : (byte)0;
                 }
             }
 
-            //Try to walk the path between the 2 staircases
-            TCODPathFinding path = new TCODPathFinding(tcodMap, 1.0);
-            path.ComputePath(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y);
+            //Try to walk a path between the 2 staircases
+            Algorithms.PathFinder pathFinder = new Algorithms.PathFinder(byteMap);
+            List<Algorithms.PathFinderNode> pathNodes = pathFinder.FindPath(new System.Drawing.Point(firstPoint.x, firstPoint.y), new System.Drawing.Point(secondPoint.x, secondPoint.y));
 
-            //Find the first step. We need to load x and y with the origin of the path
-            int x = firstPoint.x;
-            int y = firstPoint.y;
-
-            bool obstacleHit = false;
-
-            //If there's no routeable path
-            if (path.IsPathEmpty())
-            {
-                obstacleHit = true;
-            }
-
-            path.Dispose();
-            tcodMap.Dispose();
-
-            return (!obstacleHit);
+            //If not connected, pathNodes == null
+            return pathNodes != null;
         }
 
         private void ConnectPoints(Point upStairsPoint, Point downStairsPoint)

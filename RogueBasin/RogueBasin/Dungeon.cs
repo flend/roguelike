@@ -1443,37 +1443,22 @@ namespace RogueBasin
             return false;
         }
 
+        /// <summary>
+        /// Are these points connected, considering only terrain (not monsters)
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="firstPoint"></param>
+        /// <param name="secondPoint"></param>
+        /// <returns></returns>
         public bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)
         {
+            //Try to walk a path between the 2 staircases
+            Algorithms.PathFinder pathFinder = new Algorithms.PathFinder(levels[level].PathRepresentation);
+            List<Algorithms.PathFinderNode> pathNodes = pathFinder.FindPath(new System.Drawing.Point(firstPoint.x, firstPoint.y), new System.Drawing.Point(secondPoint.x, secondPoint.y));
 
-            //Build tcodmap
-            int Width = levels[level].width;
-            int Height = levels[level].height;
-
-            TCODFov tcodMap = levelTCODMaps[level];
-
-            //Try to walk the path between the 2 staircases
-            TCODPathFinding path = new TCODPathFinding(tcodMap, 1.0);
-            path.ComputePath(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y);
-
-            //Find the first step. We need to load x and y with the origin of the path
-            int x = firstPoint.x;
-            int y = firstPoint.y;
-
-            bool obstacleHit = false;
-
-            //If there's no routeable path
-            if (path.IsPathEmpty())
-            {
-                obstacleHit = true;
-            }
-
-            path.Dispose();
-
-            return (!obstacleHit);
+            //If not connected, pathNodes == null
+            return pathNodes != null;
         }
-
-       
 
         /// <summary>
         /// Add an item to the dungeon. May fail if location is invalid or unwalkable
@@ -3079,9 +3064,7 @@ namespace RogueBasin
             do
             {
                 //Generate path object
-                //TCODPathFinding path = new TCODPathFinding(levelTCODMaps[originCreature.LocationLevel], 1.0);
-                //path.ComputePath(originCreature.LocationMap.x, originCreature.LocationMap.y, destCreature.LocationMap.x, destCreature.LocationMap.y);
-
+                //TODO: Big speed up. Pad maps to factor of 2 and use FastPathFinder.
                 Algorithms.PathFinder pathFinder = new Algorithms.PathFinder(pathingMapToUse);
                 List<Algorithms.PathFinderNode> pathNodes = pathFinder.FindPath(new System.Drawing.Point(origin.x, origin.y), new System.Drawing.Point(dest.x, dest.y));
 
@@ -3152,15 +3135,10 @@ namespace RogueBasin
                     //Otherwise, there's a blocking creature. Make his square unwalkable temporarily and try to reroute
                     pathBlockedByCreature = true;
                     
-                    int blockingLevel = blockingCreature.LocationLevel;
-                    int blockingX = blockingCreature.LocationMap.x;
-                    int blockingY = blockingCreature.LocationMap.y;
-                    
-                    levelTCODMaps[blockingLevel].SetCell(blockingX, blockingY, !levels[blockingLevel].mapSquares[blockingX, blockingY].BlocksLight, false);
                     pathingMapToUse[x, y] = 0;
 
                     //Add this square to a list of squares to put back
-                    blockedSquares.Add(new Point(blockingX, blockingY));
+                    blockedSquares.Add(new Point(x, y));
 
                     //We will try again
                 }
@@ -3169,7 +3147,6 @@ namespace RogueBasin
             //Put back any squares we made unwalkable
             foreach (Point sq in blockedSquares)
             {
-                levelTCODMaps[level].SetCell(sq.x, sq.y, !levels[level].mapSquares[sq.x, sq.y].BlocksLight, true);
                 levels[level].PathRepresentation[sq.x, sq.y] = 1;
             }
 
