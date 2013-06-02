@@ -48,7 +48,7 @@ namespace RogueBasin
 
         //Smaller numbers make larger areas more likely
         //Numbers 5 or below make a significant difference
-        int noSplitChance = 1;
+        int noSplitChance = 3;
         //Multiple of BSPwidth above which we must split
         int mustSplitSize = 3;
 
@@ -936,7 +936,7 @@ namespace RogueBasin
             MapModel mapModel = new MapModel(g, baseMap.roomIdMap[baseMap.PCStartLocation.x, baseMap.PCStartLocation.y]);
             mapModel.EliminateCyclesInMap();
 
-            GraphvizExport.OutputUndirectedGraph(g, "bsptree-nocycles");
+            GraphvizExport.OutputUndirectedGraph(mapModel.GraphNoCycles, "bsptree-nocycles");
 
             return baseMap.Clone();
         }

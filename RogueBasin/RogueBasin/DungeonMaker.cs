@@ -2149,10 +2149,10 @@ namespace RogueBasin
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
             //Clip to 60
-            hallsGen.Width = (int)Math.Min(40 + Game.Random.Next(25), 60);
+            hallsGen.Width = 60;
             hallsGen.Height = 25;
 
-            Map hallMap = hallsGen.GenerateMap(0);
+            Map hallMap = hallsGen.GenerateMap(1);
             int levelNo = Game.Dungeon.AddMap(hallMap);
 
             //Run graphviz to png the output then display
