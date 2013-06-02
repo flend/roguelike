@@ -2350,12 +2350,12 @@ namespace RogueBasin
             //Intro screen pre-game (must come after screen)
             
             
-            GameIntro intro = new GameIntro();
-            intro.ShowIntroScreen();
+          //  GameIntro intro = new GameIntro();
+          //  intro.ShowIntroScreen();
 
-            string playerName = intro.PlayerName;
-            bool showMovies = intro.ShowMovies;
-            GameDifficulty diff = intro.Difficulty;
+            string playerName = "Dave";
+            bool showMovies = false;
+            GameDifficulty diff = GameDifficulty.Easy;
             /*
 
             string playerName = "Dave";
@@ -2366,12 +2366,12 @@ namespace RogueBasin
             //Setup dungeon
 
             //Is there a save game to load?
-            if (Utility.DoesSaveGameExist(playerName))
-            {
-                LoadGame(playerName);
-                return true;
-            }
-            else {
+         //   if (Utility.DoesSaveGameExist(playerName))
+        //    {
+       //         LoadGame(playerName);
+       //         return true;
+        //    }
+        //    else {
 
                 //If not, make a new dungeon for the new player
                 //Dungeon really contains all the state, so also sets up player etc.
@@ -2392,7 +2392,7 @@ namespace RogueBasin
                 //Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
 
                 return false;
-            }
+      //      }
 
             //Fall into the main loop
         }

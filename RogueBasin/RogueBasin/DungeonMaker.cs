@@ -51,9 +51,9 @@ namespace RogueBasin
             SetupPlayer();
             
             //Player start location must be set in here
-            SetupMapsFlatline();
+            //SetupMapsFlatline();
 
-            
+            SetupMapsGraphingDemo();
 
             //SetupMaps();
 
@@ -2093,6 +2093,37 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Adds levels and interconnecting staircases
+        /// </summary>
+        private void SetupMapsGraphingDemo()
+        {
+            Dungeon dungeon = Game.Dungeon;
+
+            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+            //Clip to 60
+            hallsGen.Width = (int)Math.Min(40 + Game.Random.Next(25), 60);
+            hallsGen.Height = 25;
+
+            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+            int levelNo = Game.Dungeon.AddMap(hallMap);
+
+            //Store the hallGen
+            //Will get sorted in level order
+            levelGen.Add(0, hallsGen);
+
+            //Add standard dock triggers (allows map abortion & completion)
+            AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+
+            //Place dock bay feature at PC startloc
+            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
+            //Place the player, so monster placing can be checked against it
+            //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+
+        }
 
 
         /// <summary>

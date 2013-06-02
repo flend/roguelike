@@ -3636,7 +3636,7 @@ namespace RogueBasin
             int noDeaths = this.DungeonInfo.NoDeaths;
             int noAborts = this.DungeonInfo.TotalAborts;
 
-            int totalLevels = 15;
+            int totalLevels = 1;
 
             //How many levels completed?
             int secondaryObjectives = 0;
