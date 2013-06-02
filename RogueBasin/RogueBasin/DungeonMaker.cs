@@ -2125,6 +2125,21 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Launches a new form to display the png. No extension in parameter.
+        /// </summary>
+        /// <param name="filename"></param>
+        private void DisplayPNGInChildWindow(string filename)
+        {
+            string pngFilename = filename + ".png";
+
+            ImageDisplay displayForm = new ImageDisplay();
+            displayForm.AssignImage(pngFilename);
+            displayForm.Text = pngFilename;
+
+            displayForm.Show();
+        }
+
+        /// <summary>
         /// Adds levels and interconnecting staircases
         /// </summary>
         private void SetupMapsGraphingDemo()
@@ -2143,6 +2158,9 @@ namespace RogueBasin
             //Run graphviz to png the output then display
             RunGraphVizPNG("bsptree-base");
             RunGraphVizPNG("bsptree-nocycles");
+
+            DisplayPNGInChildWindow("bsptree-base");
+            DisplayPNGInChildWindow("bsptree-nocycles");
 
             //Store the hallGen
             //Will get sorted in level order
