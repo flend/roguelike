@@ -55,8 +55,21 @@ namespace RogueBasin
             //Player start location must be set in here
             //SetupMapsFlatline();
 
-            SetupMapsGraphingDemo();
+            bool decision = Screen.Instance.YesNoQuestion("Locks?");
 
+            if (decision)
+                SetupMapsGraphingDemo(true);
+
+            else
+            {
+                bool decision2 = Screen.Instance.YesNoQuestion("Cycles?");
+
+                if (decision2)
+                    SetupMapsGraphingDemoCycles();
+                else
+                    SetupMapsGraphingDemo(false);
+
+            }
             //SetupMaps();
 
             //Uniques must be spawned before creatures (and followers)
@@ -2143,40 +2156,50 @@ namespace RogueBasin
         /// <summary>
         /// Adds levels and interconnecting staircases
         /// </summary>
-        private void SetupMapsGraphingDemo()
+        private void SetupMapsGraphingDemo(bool doLocks)
         {
             Dungeon dungeon = Game.Dungeon;
 
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
-
+            hallsGen.NoSplitChance = 3;
             //Clip to 60
-            hallsGen.Width = 60;
+            hallsGen.Width = 40;
+            if(doLocks)
+                hallsGen.Width = 50;
             hallsGen.Height = 25;
 
             Map hallMap = hallsGen.GenerateMap(0);
-            
-            //Optionally add door locks
 
-            //Firstly find the node in the reduced map that corresponds to the player start location
-            var connectivityModel = hallsGen.GraphModel;
+            MapModel connectivityModel = null;
 
-            int startNode = connectivityModel.GetReducedVertexMapping(hallMap.PCStartRoomId);
-            connectivityModel.StartVertex = startNode;
-            LogFile.Log.LogEntryDebug("PC start vertex: " + startNode, LogDebugLevel.High);
-
-            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "red");
-            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "green");
-            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "blue");
-
-            DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
-            visualiser.OutputUndirectedGraph("bsptree-door");
-            visualiser.OutputDoorDependencyGraph("bsptree-dep");
-
-            //Find the doors corresponding to locked connections and lock them
-            foreach (var door in connectivityModel.DoorMap)
+            if (doLocks)
             {
-                var edge = door.Value.DoorEdge;
-                hallsGen.LockConnection(edge, door.Value.Id);
+                //Optionally add door locks
+
+                //Firstly find the node in the reduced map that corresponds to the player start location
+                connectivityModel = hallsGen.GraphModel;
+
+                int startNode = connectivityModel.GetReducedVertexMapping(hallMap.PCStartRoomId);
+                connectivityModel.StartVertex = startNode;
+                LogFile.Log.LogEntryDebug("PC start vertex: " + startNode, LogDebugLevel.High);
+
+                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "red");
+                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "green");
+                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "blue");
+                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "yellow");
+
+                DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
+                visualiser.OutputUndirectedGraph("bsptree-door");
+                visualiser.OutputDoorDependencyGraph("bsptree-dep");
+
+                //Find the doors corresponding to locked connections and lock them
+                foreach (var door in connectivityModel.DoorMap)
+                {
+                    var edge = door.Value.DoorEdge;
+                    //This won't work at the mo with reduced graphs because it will look for edges which have been newly created by reducing
+                    //the graph and therefore won't be here
+                    hallsGen.LockConnection(edge, door.Value.Id);
+                }
             }
 
             //We've altered the map now, so get a new copy before we store it
@@ -2191,35 +2214,38 @@ namespace RogueBasin
             //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
             //needs to be done before placing items
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
-
-            //Find a random room corresponding to a vertex with a clue and place a clue there
-            foreach (var cluesAtVertex in connectivityModel.ClueMap)
+            if (doLocks)
             {
-                foreach(var clue in cluesAtVertex.Value) {
+                //Find a random room corresponding to a vertex with a clue and place a clue there
+                foreach (var cluesAtVertex in connectivityModel.ClueMap)
+                {
+                    foreach (var clue in cluesAtVertex.Value)
+                    {
 
-                    var clueVertexInReducedMap = cluesAtVertex.Key;
-                    //Should turn this into a random room which maps to that vertex
-                    var lockId = connectivityModel.GetDoorByIndex(clue.DoorIndex).Id;
+                        var clueVertexInReducedMap = cluesAtVertex.Key;
+                        //Should turn this into a random room which maps to that vertex
+                        var lockId = connectivityModel.GetDoorByIndex(clue.DoorIndex).Id;
 
-                    var pointInRoom = hallsGen.RandomPointInRoomById(clueVertexInReducedMap);
+                        var pointInRoom = hallsGen.RandomPointInRoomById(clueVertexInReducedMap);
 
-                    Game.Dungeon.AddItem(new Items.Clue(lockId), 0, pointInRoom.GetPointInRoomOnly());
+                        Game.Dungeon.AddItem(new Items.Clue(lockId), 0, pointInRoom.GetPointInRoomOnly());
+                    }
+
                 }
-
             }
-            
 
             //Run graphviz to png the output then display
             RunGraphVizPNG("bsptree-base");
-            RunGraphVizPNG("bsptree-nocycles");
-            RunGraphVizPNG("bsptree-door");
-            RunGraphVizPNG("bsptree-dep");
 
             DisplayPNGInChildWindow("bsptree-base");
-            DisplayPNGInChildWindow("bsptree-nocycles");
-            DisplayPNGInChildWindow("bsptree-door");
-            DisplayPNGInChildWindow("bsptree-dep");
 
+            if (doLocks)
+            {
+                RunGraphVizPNG("bsptree-door");
+                RunGraphVizPNG("bsptree-dep");
+                DisplayPNGInChildWindow("bsptree-door");
+                DisplayPNGInChildWindow("bsptree-dep");
+            }
 
             //Add standard dock triggers (allows map abortion & completion)
             //AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
@@ -2230,6 +2256,67 @@ namespace RogueBasin
 
         }
 
+        /// <summary>
+        /// Adds levels and interconnecting staircases
+        /// </summary>
+        private void SetupMapsGraphingDemoCycles()
+        {
+            Dungeon dungeon = Game.Dungeon;
+
+            MapGeneratorBSP hallsGen = new MapGeneratorBSP();
+
+            //Clip to 60
+            hallsGen.Width = 40;
+            hallsGen.Height = 25;
+
+            hallsGen.NoSplitChance = 0;
+            Map hallMap = hallsGen.GenerateMap(3);
+
+            //Optionally add door locks
+
+            //Firstly find the node in the reduced map that corresponds to the player start location
+            var connectivityModel = hallsGen.GraphModel;
+
+            int startNode = connectivityModel.GetReducedVertexMapping(hallMap.PCStartRoomId);
+            connectivityModel.StartVertex = startNode;
+            LogFile.Log.LogEntryDebug("PC start vertex: " + startNode, LogDebugLevel.High);
+
+            DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
+            visualiser.OutputUndirectedGraph("bsptree-door");
+            visualiser.OutputDoorDependencyGraph("bsptree-dep");
+
+            
+            //We've altered the map now, so get a new copy before we store it
+            hallMap = hallsGen.GetOriginalMap();
+            int levelNo = Game.Dungeon.AddMap(hallMap);
+
+            //Store the hallGen
+            //Will get sorted in level order
+            levelGen.Add(0, hallsGen);
+
+            //Place the player, so monster placing can be checked against it
+            //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
+            //needs to be done before placing items
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+
+
+            //Run graphviz to png the output then display
+            RunGraphVizPNG("bsptree-base");
+            RunGraphVizPNG("bsptree-nocycles");
+
+            DisplayPNGInChildWindow("bsptree-base");
+            DisplayPNGInChildWindow("bsptree-nocycles");
+
+
+
+            //Add standard dock triggers (allows map abortion & completion)
+            //AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+
+            //Place dock bay feature at PC startloc
+            Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
+
+
+        }
 
         /// <summary>
         /// Adds levels and interconnecting staircases

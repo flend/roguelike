@@ -308,6 +308,11 @@ namespace graphtestc
 
             int edgeToGet;
 
+            //Check if all edges are locked, if so just return a random locked edge
+            if (gReduced.EdgeCount <= doorMap.Count)
+                return gReduced.Edges.ElementAt(r.Next(gReduced.EdgeCount));
+
+            //If there are unlocked edges, return one of these
             do
             {
                 edgeToGet = r.Next(gReduced.EdgeCount);

@@ -72,6 +72,7 @@ namespace RogueBasin
         public MapNode(MapGeneratorBSP parentGen, int x, int y, int width, int height)
         {
             this.parentGenerator = parentGen;
+            noSplitChance = parentGen.NoSplitChance;
             this.x = x;
             this.y = y;
             this.width = width;
@@ -475,7 +476,7 @@ namespace RogueBasin
                 //If we haven't made a connection yet there's a chance we will connect our children
 
                 if (newConnectionMade == false &&
-                MapGeneratorBSP.rand.Next(treeDepth) < 1)
+                MapGeneratorBSP.rand.Next(10) < 5)
                 {
                     newConnectionMade = true;
 
@@ -1943,6 +1944,8 @@ namespace RogueBasin
             }
         }
 
-        
+
+        //Passed to mapnode
+        public int NoSplitChance { get; set; }
     }
 }

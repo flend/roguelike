@@ -10,12 +10,14 @@ namespace RogueBasin.Items
         bool usedUp;
 
         Color color;
+        string id;
 
         public Clue(string id)
         {
             usedUp = false;
 
             color = ColorPresets.Magenta;
+            this.id = id;
 
             //Map id to color
             switch (id)
@@ -73,12 +75,12 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "green berry"; }
+            get { return id + " key"; }
         }
 
         public override string GroupItemDescription
         {
-            get { return "green berries"; }
+            get { return id + " key"; }
         }
 
         public override libtcodWrapper.Color GetColour()
