@@ -1,4 +1,5 @@
-﻿using QuickGraph;
+﻿using graphtestc;
+using QuickGraph;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -852,7 +853,8 @@ namespace RogueBasin
 
         public MapGeneratorBSP()
         {
-
+            //0 is the default in the array, so good to distinguish
+            NextRoomId = 1;
         }
 
         static MapGeneratorBSP()
@@ -925,6 +927,16 @@ namespace RogueBasin
                 //Sometimes this call fails so we loop on this
 
             } while (baseMap.PCStartLocation.x == -1);
+
+            //Save out the graph
+            GraphvizExport.OutputUndirectedGraph(g, "bsptree-base");
+
+            //Save out a copy of the graph with no cycles
+
+            MapModel mapModel = new MapModel(g, baseMap.roomIdMap[baseMap.PCStartLocation.x, baseMap.PCStartLocation.y]);
+            mapModel.EliminateCyclesInMap();
+
+            GraphvizExport.OutputUndirectedGraph(g, "bsptree-nocycles");
 
             return baseMap.Clone();
         }

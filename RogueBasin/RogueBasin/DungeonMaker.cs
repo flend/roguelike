@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace RogueBasin
@@ -2094,6 +2095,36 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Uses graphviz to make a png from a dot. No filename extension on parameter
+        /// </summary>
+        /// <param name="filename"></param>
+        private void RunGraphVizPNG(string filename)
+        {
+
+            // Use ProcessStartInfo class
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = false;
+            startInfo.FileName = "c:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe";
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.Arguments = filename + ".dot -Tpng -o " + filename + ".png";
+
+            try
+            {
+                // Start the process with the info we specified.
+                // Call WaitForExit and then the using statement will close.
+                using (Process exeProcess = Process.Start(startInfo))
+                {
+                    exeProcess.WaitForExit();
+                }
+            }
+            catch
+            {
+                // Log error.
+            }
+        }
+
+        /// <summary>
         /// Adds levels and interconnecting staircases
         /// </summary>
         private void SetupMapsGraphingDemo()
@@ -2106,8 +2137,12 @@ namespace RogueBasin
             hallsGen.Width = (int)Math.Min(40 + Game.Random.Next(25), 60);
             hallsGen.Height = 25;
 
-            Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
+            Map hallMap = hallsGen.GenerateMap(0);
             int levelNo = Game.Dungeon.AddMap(hallMap);
+
+            //Run graphviz to png the output then display
+            RunGraphVizPNG("bsptree-base");
+            RunGraphVizPNG("bsptree-nocycles");
 
             //Store the hallGen
             //Will get sorted in level order

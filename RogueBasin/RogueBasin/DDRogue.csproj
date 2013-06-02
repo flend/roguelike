@@ -202,6 +202,12 @@
     <Compile Include="Feature.cs" />
     <Compile Include="Features\StaircaseDown.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="ImageDisplay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImageDisplay.Designer.cs">
+      <DependentUpon>ImageDisplay.cs</DependentUpon>
+    </Compile>
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
     <Compile Include="AStar\IPathFinder.cs" />
@@ -438,6 +444,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ImageDisplay.resx">
+      <DependentUpon>ImageDisplay.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
