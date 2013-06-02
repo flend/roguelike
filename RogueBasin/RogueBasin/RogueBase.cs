@@ -534,7 +534,11 @@ namespace RogueBasin
          
                                     break;
 
-                                
+                                case 'N':
+                                    //screen numbering
+                                    Screen.Instance.ShowRoomNumbering = !Screen.Instance.ShowRoomNumbering;
+                                    Screen.Instance.Update();
+                                    break;
 
                                 case 'W':
                                     //screen debug mode

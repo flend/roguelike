@@ -39,6 +39,8 @@ namespace RogueBasin {
         /// </summary>
         public bool CombatAnimations { get; set; }
 
+        public bool ShowRoomNumbering { get; set; }
+
         public bool SetTargetInRange = false;
 
         //Top left coord to start drawing the map at
@@ -1967,7 +1969,7 @@ namespace RogueBasin {
                         else
                             baseDrawColor = literalColor;
                     }
-                    else if (map.mapSquares[i, j].Terrain == MapTerrain.Empty)
+                    else if (ShowRoomNumbering && map.mapSquares[i, j].Terrain == MapTerrain.Empty)
                     {
                         //Draw the room id for empty areas
 
