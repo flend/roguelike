@@ -252,7 +252,6 @@
     <Compile Include="Map.cs" />
     <Compile Include="MapGenerator.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
-    <Compile Include="MapGeneratorBSPCave.cs" />
     <Compile Include="MapGeneratorCave.cs" />
     <Compile Include="MapGeneratorFromASCIIFile.cs">
       <SubType>Code</SubType>

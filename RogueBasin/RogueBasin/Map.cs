@@ -280,6 +280,7 @@ namespace RogueBasin
     public class Map
     {
         public MapSquare[,] mapSquares;
+        public int[,] roomIdMap;
         public Point PCStartLocation;
 
         public int width;
@@ -331,6 +332,7 @@ namespace RogueBasin
                 for (int j = 0; j < height; j++)
                 {
                     newMap.mapSquares[i, j] = mapSquares[i, j].Clone();
+                    newMap.roomIdMap[i, j] = roomIdMap[i, j];
                 }
             }
 
@@ -353,6 +355,8 @@ namespace RogueBasin
                     mapSquares[i, j] = new MapSquare();
                 }
             }
+
+            roomIdMap = new int[width, height];
 
             GuaranteedConnected = false;
 

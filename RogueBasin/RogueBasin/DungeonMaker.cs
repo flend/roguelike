@@ -2141,19 +2141,6 @@ namespace RogueBasin
 
             //Game.Dungeon.DungeonInfo.SetupDungeonStartAndEndDebug();
 
-            //Make the generators
-
-            MapGeneratorCave caveGen = new MapGeneratorCave();
-            MapGeneratorBSPCave ruinedGen = new MapGeneratorBSPCave();
-            
-
-            //Set width height of all maps to 60 / 25
-            caveGen.Width = 60;
-            caveGen.Height = 25;
-
-            ruinedGen.Width = 60;
-            ruinedGen.Height = 25;
-
 
             //These need to start from 0 now and be continuous
 

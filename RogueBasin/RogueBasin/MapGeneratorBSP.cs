@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QuickGraph;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +7,11 @@ namespace RogueBasin
 {
     public class MapNode
     {
+        //unique room id
+        public int Id {
+            get; set;
+        }
+
         //BSP tl corner in map coords
         int x;
         int y;
@@ -59,8 +65,12 @@ namespace RogueBasin
         int treeDepth;
         bool newConnectionMade;
 
-        public MapNode(int x, int y, int width, int height)
+        //Reference to the MapGeneratorBSP which stores the room numbering
+        MapGeneratorBSP parentGenerator;
+
+        public MapNode(MapGeneratorBSP parentGen, int x, int y, int width, int height)
         {
+            this.parentGenerator = parentGen;
             this.x = x;
             this.y = y;
             this.width = width;
@@ -256,7 +266,7 @@ namespace RogueBasin
                 }
                 else
                 {
-                    childLeft = new MapNode(x, y, actualSplit, height);
+                    childLeft = new MapNode(parentGenerator, x, y, actualSplit, height);
                     childLeft.Split();
                 }
 
@@ -266,7 +276,7 @@ namespace RogueBasin
                 }
                 else
                 {
-                    childRight = new MapNode(x + actualSplit, y, width - actualSplit, height);
+                    childRight = new MapNode(parentGenerator, x + actualSplit, y, width - actualSplit, height);
                     childRight.Split();
                 }
             }
@@ -294,7 +304,7 @@ namespace RogueBasin
                 }
                 else
                 {
-                    childLeft = new MapNode(x, y, width, actualSplit);
+                    childLeft = new MapNode(parentGenerator, x, y, width, actualSplit);
                     childLeft.Split();
                 }
 
@@ -304,7 +314,7 @@ namespace RogueBasin
                 }
                 else
                 {
-                    childRight = new MapNode(x, y + actualSplit, width, height - actualSplit);
+                    childRight = new MapNode(parentGenerator, x, y + actualSplit, width, height - actualSplit);
                     childRight.Split();
                 }
             }
@@ -327,6 +337,11 @@ namespace RogueBasin
             
         public void DrawRoom(Map baseMap) {
             
+            //Associate this area with a new room id
+            Id = parentGenerator.GetNextRoomIdAndIncrease();
+
+            parentGenerator.AssociateAreaWithId(Id, x, y, width, height);
+
             Random rand = MapGeneratorBSP.rand;
             //Width and height are reduced by 1 from max filling to ensure there is always a free column / row for an L-shaped corridor
             roomWidth = (int)(width * minFill + rand.Next((int) ( (width * maxFill) - (width * minFill)) ));
@@ -559,6 +574,9 @@ namespace RogueBasin
                 //Now route a L corridor from (leftX, leftY) to (rightX, rightY)
                 //The L bend can occur within X: leftSafeX -> rightSafeX
 
+                //Inform the generator of this corridor, so it can build the graph representation
+                parentGenerator.AddConnection(leftX, leftY, rightX, rightY);
+
                 List<Point> corridorRoute = new List<Point>(rightX - leftX + Math.Abs(rightY - leftY));
                 bool notValidPath = false;
 
@@ -732,6 +750,9 @@ namespace RogueBasin
                 //Now route a L corridor from (leftX, leftY) to (rightX, rightY)
                 //The L bend can occur within X: leftSafeX -> rightSafeX
 
+                //Inform the generator of this corridor, so it can build the graph representation
+                parentGenerator.AddConnection(leftX, leftY, rightX, rightY);
+
                 List<Point> corridorRoute = new List<Point>(Math.Abs(rightX - leftX) + rightY - leftY);
                 bool notValidPath = false;
 
@@ -814,6 +835,9 @@ namespace RogueBasin
         int width = 40;
         int height = 40;
 
+        //Room Ids
+        public int NextRoomId { get; set; }
+
         //For serialization
         public static Random rand;
 
@@ -843,13 +867,14 @@ namespace RogueBasin
             do
             {
                 baseMap = new Map(width, height);
+                g = new UndirectedGraph<int, TaggedEdge<int, string>>();
 
                 //BSP is always connected
                 baseMap.GuaranteedConnected = true;
 
                 //Make a BSP tree for the rooms
 
-                rootNode = new MapNode(0, 0, width, height);
+                rootNode = new MapNode(this, 0, 0, width, height);
                 rootNode.Split();
 
                 //Draw a room in each BSP leaf
@@ -911,6 +936,13 @@ namespace RogueBasin
         public override Point GetPlayerStartLocation()
         {
             return baseMap.PCStartLocation;
+        }
+
+        public int GetNextRoomIdAndIncrease()
+        {
+            int nextId = NextRoomId;
+            NextRoomId++;
+            return nextId;
         }
 
         private List<Point> EntryDoorLocation { get; set; }
@@ -1728,6 +1760,52 @@ namespace RogueBasin
         public override List<RoomCoords> GetAllRooms()
         {
             return rootNode.FindAllRooms();
+        }
+
+        /// <summary>
+        /// Associate this area with a room id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        internal void AssociateAreaWithId(int id, int x, int y, int width, int height)
+        {
+            for (int i = x; i < x + width; i++)
+            {
+                for (int j = y; j < y + height; j++)
+                {
+                    //Should be no overlaps
+                    if (baseMap.roomIdMap[i, j] != 0)
+                    {
+                        LogFile.Log.LogEntryDebug("Error, area already associated with room", LogDebugLevel.High);
+                    }
+
+                    baseMap.roomIdMap[i, j] = id;
+                }
+            }
+        }
+
+        /// <summary>
+        /// There is a connecting corridor between these two points on the map. Add this as an edge on the graph
+        /// </summary>
+        /// <param name="leftX"></param>
+        /// <param name="leftY"></param>
+        /// <param name="rightX"></param>
+        /// <param name="rightY"></param>
+
+        private UndirectedGraph<int, TaggedEdge<int, string>> g;
+
+        internal void AddConnection(int leftX, int leftY, int rightX, int rightY)
+        {
+            //Lookup the room ids for the origin and dest
+            int originId = baseMap.roomIdMap[leftX, leftY];
+            int destId = baseMap.roomIdMap[rightX, rightY];
+
+            LogFile.Log.LogEntryDebug("From room: " + originId + " to room: " + destId, LogDebugLevel.High);
+
+            g.AddVerticesAndEdge(new TaggedEdge<int, string>(originId, destId, ""));
         }
     }
 }

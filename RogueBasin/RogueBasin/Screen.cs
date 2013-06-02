@@ -1967,6 +1967,27 @@ namespace RogueBasin {
                         else
                             baseDrawColor = literalColor;
                     }
+                    else if (map.mapSquares[i, j].Terrain == MapTerrain.Empty)
+                    {
+                        //Draw the room id for empty areas
+
+                        int roomId = map.roomIdMap[i, j];
+
+                        if (roomId < 10)
+                        {
+                            string roomIdS = roomId.ToString();
+                            char r = Convert.ToChar(roomIdS.Substring(0, 1));
+                            screenChar = r;
+                            baseDrawColor = ColorPresets.Gray;
+                        }
+                        else
+                        {
+                            string roomIdS = roomId.ToString();
+                            char r = Convert.ToChar(roomIdS.Substring(1, 1));
+                            screenChar = r;
+                            baseDrawColor = ColorPresets.LightGray;
+                        }
+                    }
                     else
                     {
                         screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];

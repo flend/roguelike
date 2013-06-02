@@ -115,7 +115,6 @@ namespace RogueBasin
     /// All random generators in FlatlineRL should return this, so that we can intelligently place creatures etc.
     /// </summary>
     [System.Xml.Serialization.XmlInclude(typeof(MapGeneratorBSP))]
-    [System.Xml.Serialization.XmlInclude(typeof(MapGeneratorBSPCave))]
     public abstract class MapGenerator
     {
         /// <summary>

@@ -76,7 +76,7 @@ namespace RogueBasin
 
             //Make a BSP tree for the rooms
 
-            rootNode = new MapNode(0, 0, width, height);
+            rootNode = new MapNode(this, 0, 0, width, height);
             rootNode.Split();
             
             //Draw a room in each BSP leaf

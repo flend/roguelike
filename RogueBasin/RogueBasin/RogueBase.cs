@@ -40,8 +40,8 @@ namespace RogueBasin
         public int Run(string[] args)
         {
             //Try to run the graph example
-            var example7 = new graphtestc.Example7();
-            example7.OutputGraph();
+            //var example7 = new graphtestc.Example7();
+            //example7.OutputGraph();
 
 
             bool loadedGame = SetupGame();
@@ -2342,7 +2342,7 @@ namespace RogueBasin
             }
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 0;
+            LogFile.Log.DebugLevel = 4;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
