@@ -1990,6 +1990,36 @@ namespace RogueBasin {
                             baseDrawColor = ColorPresets.LightGray;
                         }
                     }
+                    else if (map.mapSquares[i, j].Terrain == MapTerrain.ClosedDoor || map.mapSquares[i, j].Terrain == MapTerrain.OpenDoor)
+                    {
+                        //Apply colours based on locks
+                        screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
+                        baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
+
+                        if (map.mapSquareLocks[i, j] != null)
+                        {
+                            //Set color to lock
+                            switch (map.mapSquareLocks[i, j])
+                            {
+                                case "red":
+                                    baseDrawColor = ColorPresets.Red;
+                                    break;
+                                case "green":
+                                    baseDrawColor = ColorPresets.Green;
+                                    break;
+                                case "blue":
+                                    baseDrawColor = ColorPresets.Blue;
+                                    break;
+                                case "yellow":
+                                    baseDrawColor = ColorPresets.Yellow;
+                                    break;
+
+                            }
+
+                        }
+                        //Otherwise not locked
+
+                    }
                     else
                     {
                         screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];

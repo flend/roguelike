@@ -66,6 +66,7 @@ namespace RogueBasin
         public int RoomY { get; set; }
         public int RoomWidth { get; set; }
         public int RoomHeight { get; set; }
+        public int RoomId { get; set; }
 
         /// <summary>
         /// roomX, roomY should be TL wall, roomX + roomWidth, roomY + roomHeight should be BR wall
@@ -76,7 +77,7 @@ namespace RogueBasin
         /// <param name="roomY"></param>
         /// <param name="roomWidth"></param>
         /// <param name="roomHeight"></param>
-        public PointInRoom(int x, int y, int roomX, int roomY, int roomWidth, int roomHeight)
+        public PointInRoom(int x, int y, int roomX, int roomY, int roomWidth, int roomHeight, int roomId)
         {
             this.X = x;
             this.Y = y;
@@ -84,6 +85,7 @@ namespace RogueBasin
             this.RoomY = roomY;
             this.RoomWidth = roomWidth;
             this.RoomHeight = roomHeight;
+            this.RoomId = roomId;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using graphtestc;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -2152,22 +2153,57 @@ namespace RogueBasin
             hallsGen.Width = 60;
             hallsGen.Height = 25;
 
-            Map hallMap = hallsGen.GenerateMap(1);
-            int levelNo = Game.Dungeon.AddMap(hallMap);
+            Map hallMap = hallsGen.GenerateMap(0);
+            
+
+            //Optionally add door locks
+
+            //Firstly find the node in the reduced map that corresponds to the player start location
+            var connectivityModel = hallsGen.GraphModel;
+
+            int startNode = connectivityModel.GetReducedVertexMapping(hallMap.PCStartRoomId);
+            connectivityModel.StartVertex = startNode;
+
+            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomEdgeInReducedGraph(), "red");
+            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomEdgeInReducedGraph(), "green");
+            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomEdgeInReducedGraph(), "blue");
+
+            DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
+            visualiser.OutputUndirectedGraph("bsptree-door");
+            visualiser.OutputDoorDependencyGraph("bsptree-dep");
+
+            //Find the doors corresponding to locked connections and lock them
+            foreach (var door in connectivityModel.DoorMap)
+            {
+                var edge = door.Value.DoorEdge;
+                hallsGen.LockConnection(edge, door.Value.Id);
+            }
+
+            //Find a random room corresponding to a vertex with a clue and place a clue there
+
+            
 
             //Run graphviz to png the output then display
             RunGraphVizPNG("bsptree-base");
             RunGraphVizPNG("bsptree-nocycles");
+            RunGraphVizPNG("bsptree-door");
+            RunGraphVizPNG("bsptree-dep");
 
             DisplayPNGInChildWindow("bsptree-base");
             DisplayPNGInChildWindow("bsptree-nocycles");
+            DisplayPNGInChildWindow("bsptree-door");
+            DisplayPNGInChildWindow("bsptree-dep");
+
+            //We've altered the map now, so get a new copy before we store it
+            hallMap = hallsGen.GetOriginalMap();
+            int levelNo = Game.Dungeon.AddMap(hallMap);
 
             //Store the hallGen
             //Will get sorted in level order
             levelGen.Add(0, hallsGen);
 
             //Add standard dock triggers (allows map abortion & completion)
-            AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
+            //AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
 
             //Place dock bay feature at PC startloc
             Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);

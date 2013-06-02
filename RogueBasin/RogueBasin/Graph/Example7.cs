@@ -38,7 +38,8 @@ namespace graphtestc
                 Console.WriteLine("===EXAMPLE 7===");
 
                 //Build acyclic version of map
-                MapModel mapModel = new MapModel(g, 1);
+                MapModel mapModel = new MapModel(g);
+                mapModel.StartVertex = 1;
 
  
                 /* 

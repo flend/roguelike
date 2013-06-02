@@ -144,7 +144,7 @@ namespace RogueBasin
                 int x = roomX + 1 + rand.Next(roomWidth - 2);
                 int y = roomY + 1 + rand.Next(roomHeight - 2);
 
-                sisterRoomPoints.Add(new PointInRoom(x, y, roomX, roomY, roomWidth, roomHeight));
+                sisterRoomPoints.Add(new PointInRoom(x, y, roomX, roomY, roomWidth, roomHeight, Id));
             }
           
             return sisterRoomPoints;
@@ -195,7 +195,7 @@ namespace RogueBasin
                 int x = roomX + 1 + rand.Next(roomWidth - 2);
                 int y = roomY + 1 + rand.Next(roomHeight - 2);
 
-                return new PointInRoom(x, y, roomX, roomY, roomWidth, roomHeight);
+                return new PointInRoom(x, y, roomX, roomY, roomWidth, roomHeight, Id);
             }
 
             return retPoint;
@@ -869,7 +869,7 @@ namespace RogueBasin
             do
             {
                 baseMap = new Map(width, height);
-                g = new UndirectedGraph<int, TaggedEdge<int, string>>();
+                connectivityGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
 
                 //BSP is always connected
                 baseMap.GuaranteedConnected = true;
@@ -896,7 +896,7 @@ namespace RogueBasin
                 }
 
                 //Add doors where single corridors terminate into rooms
-                AddDoors();
+                AddDoorsGraph();
 
                 //Turn corridors into normal squares and surround with walls
                 CorridorsIntoRooms();
@@ -922,21 +922,29 @@ namespace RogueBasin
                 //SetLightBlocking(baseMap);
 
                 //Set the PC start location in a random room
-                baseMap.PCStartLocation = AddEntryRoomForPlayer();
+                //baseMap.PCStartLocation = AddEntryRoomForPlayer();
 
-                //Sometimes this call fails so we loop on this
-
-            } while (baseMap.PCStartLocation.x == -1);
+                
+            } while (false); //legacy 
 
             //Save out the graph
-            GraphvizExport.OutputUndirectedGraph(g, "bsptree-base");
+            GraphvizExport.OutputUndirectedGraph(connectivityGraph, "bsptree-base");
 
+            //Build the map model for the graph, based on the PC's true starting position (useful for locking doors)
+            
+            graphModel = new MapModel(connectivityGraph);
+            graphModel.EliminateCyclesInMap();
+
+            //Decide on a player start location 
+            PointInRoom randomRoom = RandomPointInRoom();
+            baseMap.PCStartLocation = randomRoom.GetPointInRoomOnly();
+            baseMap.PCStartRoomId = randomRoom.RoomId;
+
+            //Need to 
+            
             //Save out a copy of the graph with no cycles
 
-            MapModel mapModel = new MapModel(g, baseMap.roomIdMap[baseMap.PCStartLocation.x, baseMap.PCStartLocation.y]);
-            mapModel.EliminateCyclesInMap();
-
-            GraphvizExport.OutputUndirectedGraph(mapModel.GraphNoCycles, "bsptree-nocycles");
+            GraphvizExport.OutputUndirectedGraph(graphModel.GraphNoCycles, "bsptree-nocycles");
 
             return baseMap.Clone();
         }
@@ -1210,6 +1218,21 @@ namespace RogueBasin
         public override List<Point> GetEntryDoor()
         {
             return EntryDoorLocation;
+        }
+
+        /// <summary>
+        /// Add doors based on the connectivity graph stored when the rooms were made
+        /// </summary>
+        private void AddDoorsGraph()
+        {
+            foreach (var connectionInfo in edgeInfo.Values)
+            {
+                baseMap.mapSquares[connectionInfo.LeftX, connectionInfo.LeftY].Terrain = MapTerrain.ClosedDoor;
+                baseMap.mapSquares[connectionInfo.LeftX, connectionInfo.LeftY].SetBlocking();
+
+                baseMap.mapSquares[connectionInfo.RightX, connectionInfo.RightY].Terrain = MapTerrain.ClosedDoor;
+                baseMap.mapSquares[connectionInfo.RightX, connectionInfo.RightY].SetBlocking();
+            }
         }
 
         /// <summary>
@@ -1807,8 +1830,27 @@ namespace RogueBasin
         /// <param name="rightX"></param>
         /// <param name="rightY"></param>
 
-        private UndirectedGraph<int, TaggedEdge<int, string>> g;
+        ///Information about what the edge looks like on the map. Could / should be stored in the TaggedEdge itself
+        public class ConnectionInfo
+        {
+            public int LeftX { get; set; }
+            public int LeftY { get; set; }
+            public int RightX { get; set; }
+            public int RightY { get; set; }
 
+            public ConnectionInfo(int leftX, int leftY, int rightX, int rightY)
+            {
+                LeftX = leftX;
+                LeftY = leftY;
+                RightX = rightX;
+                RightY = rightY;
+            }
+        }
+
+        private UndirectedGraph<int, TaggedEdge<int, string>> connectivityGraph;
+        private MapModel graphModel;
+        private Dictionary<TaggedEdge<int, string>, ConnectionInfo> edgeInfo = new Dictionary<TaggedEdge<int, string>, ConnectionInfo>();
+        
         internal void AddConnection(int leftX, int leftY, int rightX, int rightY)
         {
             //Lookup the room ids for the origin and dest
@@ -1817,7 +1859,42 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("From room: " + originId + " to room: " + destId, LogDebugLevel.High);
 
-            g.AddVerticesAndEdge(new TaggedEdge<int, string>(originId, destId, ""));
+            var newGraphEdge = new TaggedEdge<int, string>(originId, destId, "");
+
+            connectivityGraph.AddVerticesAndEdge(newGraphEdge);
+
+            //Add the door locations to the edge lookup
+            edgeInfo.Add(newGraphEdge, new ConnectionInfo(leftX, leftY, rightX, rightY));
         }
+
+        /// <summary>
+        /// Lock a connection (set its doors to locked with a particular id)
+        /// </summary>
+        /// <param name="edge"></param>
+        internal void LockConnection(TaggedEdge<int, string> edge, string lockId)
+        {
+            ConnectionInfo connectionInfo = edgeInfo[edge];
+
+            baseMap.mapSquareLocks[connectionInfo.LeftX, connectionInfo.LeftY] = lockId;
+            baseMap.mapSquareLocks[connectionInfo.RightX, connectionInfo.RightY] = lockId;
+        }
+
+        public UndirectedGraph<int, TaggedEdge<int, string>> ConnectivityGraph
+        {
+            get
+            {
+                return connectivityGraph;
+            }
+        }
+
+        public MapModel GraphModel
+        {
+            get
+            {
+                return graphModel;
+            }
+        }
+
+        
     }
 }

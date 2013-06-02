@@ -12,7 +12,7 @@ using System.Windows.Forms;
 namespace graphtestc
 {
     /** Provides */
-    class MapModel
+    public class MapModel
     {
 
         /** A clue to open a locked door */
@@ -158,7 +158,7 @@ namespace graphtestc
         /// </summary>
         private int nextDoorIndex = 0;
 
-        public MapModel(UndirectedGraph<int, TaggedEdge<int, string>> inputGraph, int startVertex)
+        public MapModel(UndirectedGraph<int, TaggedEdge<int, string>> inputGraph)
         {
             baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
             clueMap = new Dictionary<int, List<Clue>>();
@@ -168,8 +168,31 @@ namespace graphtestc
             //Clone the input graph (edges only)
             baseGraph.AddVerticesAndEdgeRange(inputGraph.Edges);
 
-            this.startVertex = startVertex;
         }
+
+        public Dictionary<int, Door> DoorMap
+        {
+            get
+            {
+                return doorMap;
+            }
+        }
+
+        /// <summary>
+        /// Set the player's start vertex. Must be called before locking doors etc.
+        /// </summary>
+        public int StartVertex
+        {
+            get
+            {
+                return startVertex;
+            }
+            set
+            {
+                startVertex = value;
+            }
+        }
+
 
         public AdjacencyGraph<int, Edge<int>> DoorDependencyGraph
         {
@@ -265,6 +288,18 @@ namespace graphtestc
                 }
             }
             return -1;
+        }
+
+        /// <summary>
+        /// Return a random edge in the reduced graph
+        /// </summary>
+        /// <returns></returns>
+        public TaggedEdge<int, string> GetRandomEdgeInReducedGraph()
+        {
+            Random r = new Random();
+            var edgeToGet = r.Next(gReduced.EdgeCount);
+            return gReduced.Edges.ElementAt(edgeToGet);
+
         }
 
         /// <summary>
@@ -661,6 +696,16 @@ namespace graphtestc
         public Door GetDoorByIndex(int doorIndex)
         {
             return doorMap[doorIndex];
+        }
+
+        /// <summary>
+        /// Return the node in the reduced graph that the vertex in the original graph maps to
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        internal int GetReducedVertexMapping(int originalVertex)
+        {
+            return VertexMapping[originalVertex];
         }
     }
 }

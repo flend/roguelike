@@ -281,6 +281,7 @@ namespace RogueBasin
     {
         public MapSquare[,] mapSquares;
         public int[,] roomIdMap;
+        public string[,] mapSquareLocks;
         public Point PCStartLocation;
 
         public int width;
@@ -325,6 +326,7 @@ namespace RogueBasin
 
             Map newMap = new Map(width, height);
             newMap.PCStartLocation = PCStartLocation;
+            newMap.PCStartRoomId = PCStartRoomId;
             newMap.GuaranteedConnected = GuaranteedConnected;
 
             for (int i = 0; i < width; i++)
@@ -333,6 +335,8 @@ namespace RogueBasin
                 {
                     newMap.mapSquares[i, j] = mapSquares[i, j].Clone();
                     newMap.roomIdMap[i, j] = roomIdMap[i, j];
+                    if(mapSquareLocks[i, j] != null)
+                        newMap.mapSquareLocks[i, j] = (string)mapSquareLocks[i, j].Clone();
                 }
             }
 
@@ -357,6 +361,7 @@ namespace RogueBasin
             }
 
             roomIdMap = new int[width, height];
+            mapSquareLocks = new string[width, height];
 
             GuaranteedConnected = false;
 
@@ -462,6 +467,10 @@ namespace RogueBasin
                 }
             }
         }
-        
+
+        /// <summary>
+        /// The room id for the player start location
+        /// </summary>
+        public int PCStartRoomId { get; set; }
     }
 }
