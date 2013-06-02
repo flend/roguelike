@@ -178,6 +178,14 @@ namespace graphtestc
             }
         }
 
+        public Dictionary<int, List<Clue>> ClueMap
+        {
+            get
+            {
+                return clueMap;
+            }
+        }
+
         /// <summary>
         /// Set the player's start vertex. Must be called before locking doors etc.
         /// </summary>
@@ -294,12 +302,19 @@ namespace graphtestc
         /// Return a random edge in the reduced graph
         /// </summary>
         /// <returns></returns>
-        public TaggedEdge<int, string> GetRandomEdgeInReducedGraph()
+        public TaggedEdge<int, string> GetRandomUnlockedEdgeInReducedGraph()
         {
             Random r = new Random();
-            var edgeToGet = r.Next(gReduced.EdgeCount);
-            return gReduced.Edges.ElementAt(edgeToGet);
 
+            int edgeToGet;
+
+            do
+            {
+                edgeToGet = r.Next(gReduced.EdgeCount);
+
+            } while (GetDoorForEdge(gReduced.Edges.ElementAt(edgeToGet)) != null);
+
+            return gReduced.Edges.ElementAt(edgeToGet);
         }
 
         /// <summary>

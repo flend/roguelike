@@ -2155,7 +2155,6 @@ namespace RogueBasin
 
             Map hallMap = hallsGen.GenerateMap(0);
             
-
             //Optionally add door locks
 
             //Firstly find the node in the reduced map that corresponds to the player start location
@@ -2163,10 +2162,11 @@ namespace RogueBasin
 
             int startNode = connectivityModel.GetReducedVertexMapping(hallMap.PCStartRoomId);
             connectivityModel.StartVertex = startNode;
+            LogFile.Log.LogEntryDebug("PC start vertex: " + startNode, LogDebugLevel.High);
 
-            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomEdgeInReducedGraph(), "red");
-            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomEdgeInReducedGraph(), "green");
-            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomEdgeInReducedGraph(), "blue");
+            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "red");
+            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "green");
+            connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "blue");
 
             DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
             visualiser.OutputUndirectedGraph("bsptree-door");
@@ -2179,8 +2179,34 @@ namespace RogueBasin
                 hallsGen.LockConnection(edge, door.Value.Id);
             }
 
-            //Find a random room corresponding to a vertex with a clue and place a clue there
+            //We've altered the map now, so get a new copy before we store it
+            hallMap = hallsGen.GetOriginalMap();
+            int levelNo = Game.Dungeon.AddMap(hallMap);
 
+            //Store the hallGen
+            //Will get sorted in level order
+            levelGen.Add(0, hallsGen);
+
+            //Place the player, so monster placing can be checked against it
+            //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
+            //needs to be done before placing items
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+
+            //Find a random room corresponding to a vertex with a clue and place a clue there
+            foreach (var cluesAtVertex in connectivityModel.ClueMap)
+            {
+                foreach(var clue in cluesAtVertex.Value) {
+
+                    var clueVertexInReducedMap = cluesAtVertex.Key;
+                    //Should turn this into a random room which maps to that vertex
+                    var lockId = connectivityModel.GetDoorByIndex(clue.DoorIndex).Id;
+
+                    var pointInRoom = hallsGen.RandomPointInRoomById(clueVertexInReducedMap);
+
+                    Game.Dungeon.AddItem(new Items.Clue(lockId), 0, pointInRoom.GetPointInRoomOnly());
+                }
+
+            }
             
 
             //Run graphviz to png the output then display
@@ -2194,13 +2220,6 @@ namespace RogueBasin
             DisplayPNGInChildWindow("bsptree-door");
             DisplayPNGInChildWindow("bsptree-dep");
 
-            //We've altered the map now, so get a new copy before we store it
-            hallMap = hallsGen.GetOriginalMap();
-            int levelNo = Game.Dungeon.AddMap(hallMap);
-
-            //Store the hallGen
-            //Will get sorted in level order
-            levelGen.Add(0, hallsGen);
 
             //Add standard dock triggers (allows map abortion & completion)
             //AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
@@ -2208,9 +2227,6 @@ namespace RogueBasin
             //Place dock bay feature at PC startloc
             Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
 
-            //Place the player, so monster placing can be checked against it
-            //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
         }
 

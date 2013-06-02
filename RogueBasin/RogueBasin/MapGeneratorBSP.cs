@@ -201,6 +201,45 @@ namespace RogueBasin
             return retPoint;
         }
 
+        /// <summary>
+        /// Find a random point in a room by Id.
+        /// DFS all nodes until we find the right one by id
+        /// </summary>
+        /// <returns></returns>
+        public PointInRoom FindRandomRoomPointById(int destId)
+        {
+            //Go down the tree to a random left. When there find a random point in the room and return it
+            Random rand = MapGeneratorBSP.rand;
+
+            PointInRoom retPoint = null;
+
+            if (childLeft != null)
+            {
+                retPoint = childLeft.FindRandomRoomPointById(destId);
+            }
+
+            //Avoid overwriting the real answer
+            if (childRight != null && retPoint == null)
+            {
+                retPoint = childRight.FindRandomRoomPointById(destId);
+            }
+
+            //If it's a leaf, check the Id. Find a random point in this room
+
+            //If it's the first leaf we've come to 
+            //Find point in the room
+            if (childLeft == null && childRight == null && Id == destId)
+            {
+
+                int x = roomX + 1 + rand.Next(roomWidth - 2);
+                int y = roomY + 1 + rand.Next(roomHeight - 2);
+
+                return new PointInRoom(x, y, roomX, roomY, roomWidth, roomHeight, Id);
+            }
+
+            return retPoint;
+        }
+
         public List<RoomCoords> FindAllRooms()
         {
             return FindAllRoomsRecurse(new List<RoomCoords>());
@@ -1432,6 +1471,15 @@ namespace RogueBasin
         public override PointInRoom RandomPointInRoom()
         {
             return rootNode.RandomRoomPoint();
+        }
+
+        /// <summary>
+        /// Returns only points in rooms (not corridors) by id of room
+        /// </summary>
+        /// <returns></returns>
+        public PointInRoom RandomPointInRoomById(int destId)
+        {
+            return rootNode.FindRandomRoomPointById(destId);
         }
 
         /// <summary>

@@ -212,6 +212,7 @@
     <Compile Include="InventoryListing.cs" />
     <Compile Include="AStar\IPathFinder.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="Items\Clue.cs" />
     <Compile Include="Items\FragGrenade.cs">
       <SubType>Code</SubType>
     </Compile>
