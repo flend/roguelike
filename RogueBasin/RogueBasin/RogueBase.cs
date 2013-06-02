@@ -39,6 +39,11 @@ namespace RogueBasin
 
         public int Run(string[] args)
         {
+            //Try to run the graph example
+            var example7 = new graphtestc.Example7();
+            example7.OutputGraph();
+
+
             bool loadedGame = SetupGame();
 
             MainLoop(loadedGame);

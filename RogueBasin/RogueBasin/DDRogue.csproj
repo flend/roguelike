@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,10 +10,15 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RogueBasin</RootNamespace>
     <AssemblyName>RogueBasin</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -184,8 +189,15 @@
     <Compile Include="Features\StaircaseUp.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FOV\MRPAS.cs" />
     <Compile Include="GameIntro.cs" />
     <Compile Include="Gaussian.cs" />
+    <Compile Include="Graph\DoorClueGraphvizExport.cs" />
+    <Compile Include="Graph\Example7.cs" />
+    <Compile Include="Graph\FileDotEngine.cs" />
+    <Compile Include="Graph\FileDotEngineUndirected.cs" />
+    <Compile Include="Graph\GraphvizExport.cs" />
+    <Compile Include="Graph\MapModel.cs" />
     <Compile Include="IEquippableItem.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\StaircaseDown.cs" />
@@ -408,6 +420,12 @@
     <Compile Include="Vector3.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\..\My Documents\Visual Studio 2012\Projects\graphgleetest\quickgraph\Release\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz">
+      <HintPath>..\..\..\My Documents\Visual Studio 2012\Projects\graphgleetest\quickgraph\Release\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />

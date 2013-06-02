@@ -1452,13 +1452,15 @@ namespace RogueBasin
         /// <returns></returns>
         public bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)
         {
-            //Try to walk a path between the 2 staircases
+            //Try to walk the path between the 2 staircases
             Algorithms.PathFinder pathFinder = new Algorithms.PathFinder(levels[level].PathRepresentation);
             List<Algorithms.PathFinderNode> pathNodes = pathFinder.FindPath(new System.Drawing.Point(firstPoint.x, firstPoint.y), new System.Drawing.Point(secondPoint.x, secondPoint.y));
 
             //If not connected, pathNodes == null
             return pathNodes != null;
         }
+
+       
 
         /// <summary>
         /// Add an item to the dungeon. May fail if location is invalid or unwalkable
