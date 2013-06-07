@@ -58,8 +58,15 @@ namespace RogueBasin
             bool decision = Screen.Instance.YesNoQuestion("Locks?");
 
             if (decision)
-                SetupMapsGraphingDemo(true);
+            {
 
+                bool decision2 = Screen.Instance.YesNoQuestion("Multiple?");
+
+                if (decision2)
+                    SetupMapsGraphingDemo(true, 4);
+                else
+                    SetupMapsGraphingDemo(true, 1);
+            }
             else
             {
                 bool decision2 = Screen.Instance.YesNoQuestion("Cycles?");
@@ -67,7 +74,7 @@ namespace RogueBasin
                 if (decision2)
                     SetupMapsGraphingDemoCycles();
                 else
-                    SetupMapsGraphingDemo(false);
+                    SetupMapsGraphingDemo(false, 0);
 
             }
             //SetupMaps();
@@ -2156,7 +2163,7 @@ namespace RogueBasin
         /// <summary>
         /// Adds levels and interconnecting staircases
         /// </summary>
-        private void SetupMapsGraphingDemo(bool doLocks)
+        private void SetupMapsGraphingDemo(bool doLocks, int noLocks)
         {
             Dungeon dungeon = Game.Dungeon;
 
@@ -2183,10 +2190,15 @@ namespace RogueBasin
                 connectivityModel.StartVertex = startNode;
                 LogFile.Log.LogEntryDebug("PC start vertex: " + startNode, LogDebugLevel.High);
 
+                
                 connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "red");
-                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "green");
-                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "blue");
-                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "yellow");
+
+                if (noLocks > 1)
+                {
+                    connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "green");
+                    connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "blue");
+                    connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "yellow");
+                }
 
                 DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
                 visualiser.OutputUndirectedGraph("bsptree-door");
@@ -2266,10 +2278,10 @@ namespace RogueBasin
             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
             //Clip to 60
-            hallsGen.Width = 40;
+            hallsGen.Width = 50;
             hallsGen.Height = 25;
 
-            hallsGen.NoSplitChance = 0;
+            hallsGen.NoSplitChance = 3;
             Map hallMap = hallsGen.GenerateMap(3);
 
             //Optionally add door locks
