@@ -403,7 +403,7 @@ namespace RogueBasin
         List<TCODFov> levelTCODMaps;
         List<TCODFov> levelTCODMapsIgnoringClosedDoors;
 
-
+        LibTCOD.TCODPathFindingWrapper pathingFinding;
 
         List<Monster> monsters;
         List<Item> items;
@@ -500,6 +500,8 @@ namespace RogueBasin
             features = new List<Feature>();
             levelTCODMaps = new List<TCODFov>();
             levelTCODMapsIgnoringClosedDoors = new List<TCODFov>();
+
+            pathingFinding = new LibTCOD.TCODPathFindingWrapper();
 
             ///DungeonEffects are indexed by the time that they occur
             effects = new List<SoundEffect>();
@@ -1452,12 +1454,13 @@ namespace RogueBasin
         /// <returns></returns>
         public bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)
         {
-            //Try to walk the path between the 2 staircases
-            Algorithms.PathFinder pathFinder = new Algorithms.PathFinder(levels[level].PathRepresentation);
-            List<Algorithms.PathFinderNode> pathNodes = pathFinder.FindPath(new System.Drawing.Point(firstPoint.x, firstPoint.y), new System.Drawing.Point(secondPoint.x, secondPoint.y));
+            if (firstPoint == secondPoint)
+                return true;
 
-            //If not connected, pathNodes == null
-            return pathNodes != null;
+            //Try to walk the path between the 2 staircases
+            List<Point> pathNodes = pathingFinding.pathNodes(level, firstPoint, secondPoint, false);
+
+            return pathNodes.Count > 1;
         }
 
        
@@ -2700,6 +2703,9 @@ namespace RogueBasin
 
                 //New pathing representation
                 levels[i].RecalculatePathingRepresentation();
+
+                //Notify abstract path finding lib
+                pathingFinding.updateMap(i, levels[i].PathRepresentation);
             }
         }
 
@@ -3042,11 +3048,6 @@ namespace RogueBasin
         /// <returns></returns>
         internal Point GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen) {
 
-            byte[,] pathingMapToUse = levels[level].PathRepresentation;
-
-            if (allDoorsAsOpen)
-                pathingMapToUse = levels[level].PathRepresentationNoClosedDoors;
-
             //Try to walk the path
             //If we fail, check if this square occupied by a creature
             //If so, make that square temporarily unwalkable and try to re-route
@@ -3057,22 +3058,21 @@ namespace RogueBasin
             Point nextStep = new Point(-1, -1);
 
             //Check for pathing to own square - return blocked but not terminally
-            if (origin.x == dest.x && origin.y == dest.y)
+            if (origin == dest)
             {
                 LogFile.Log.LogEntryDebug("Monster trying to path to monster on same square", LogDebugLevel.High);
-                return new Point(origin.x, dest.y);
+                return origin;
             }
 
             do
             {
+
                 //Generate path object
-                //TODO: Big speed up. Pad maps to factor of 2 and use FastPathFinder.
-                Algorithms.PathFinder pathFinder = new Algorithms.PathFinder(pathingMapToUse);
-                List<Algorithms.PathFinderNode> pathNodes = pathFinder.FindPath(new System.Drawing.Point(origin.x, origin.y), new System.Drawing.Point(dest.x, dest.y));
-
-                //If null, there is no path
-
-                if (pathNodes == null)
+                //We actually only need the next point here
+                List<Point> pathNodes = pathingFinding.pathNodes(level, origin, dest, allDoorsAsOpen);
+                
+                //No path
+                if (pathNodes.Count == 1)
                 {
                     //If there was no blocking creature then there is no possible route (hopefully impossible in a fully connected dungeon)
                     if (!pathBlockedByCreature)
@@ -3084,7 +3084,7 @@ namespace RogueBasin
                     else
                     {
                         //All paths are blocked by creatures, we will return the origin creature's location
-                        nextStep = new Point(origin.x, origin.y);
+                        nextStep = origin;
                         goodPath = true;
                         //Exits loop and allows cleanup
                         continue;
@@ -3092,8 +3092,7 @@ namespace RogueBasin
                 }
 
                 //Non-null, find next step (0th index is origin)
-                int x = pathNodes[1].X;
-                int y = pathNodes[1].Y;
+                Point theNextStep = pathNodes[1];
 
                 //Check if that square is occupied
                 Creature blockingCreature = null;
@@ -3104,11 +3103,11 @@ namespace RogueBasin
                         continue;
 
                     //Is it at the destination? If so, that's the target creature and it is our goal.
-                    if (creature.LocationMap.x == dest.x && creature.LocationMap.y == dest.y)
+                    if (creature.LocationMap == dest)
                         continue;
 
                     //Another creature is blocking
-                    if (creature.LocationMap.x == x && creature.LocationMap.y == y)
+                    if (creature.LocationMap == theNextStep)
                     {
                         blockingCreature = creature;
                     }
@@ -3117,10 +3116,9 @@ namespace RogueBasin
                 //Do the same for the player (if the creature is chasing another creature around the player)
                 //Ignore if the player is the target - that's a valid move
 
-                if (!(Player.LocationMap.x == dest.x && Player.LocationMap.y == dest.y))
+                if (!(Player.LocationMap == dest))
                 {
-                    if (Player.LocationLevel == level &&
-                        Player.LocationMap.x == x && Player.LocationMap.y == y)
+                    if (Player.LocationLevel == level && Player.LocationMap == theNextStep)
                     {
                         blockingCreature = Player;
                     }
@@ -3130,17 +3128,17 @@ namespace RogueBasin
                 if (blockingCreature == null)
                 {
                     goodPath = true;
-                    nextStep = new Point(x, y);
+                    nextStep = theNextStep;
                 }
                 else
                 {
                     //Otherwise, there's a blocking creature. Make his square unwalkable temporarily and try to reroute
                     pathBlockedByCreature = true;
-                    
-                    pathingMapToUse[x, y] = 0;
+
+                    pathingFinding.updateMap(level, theNextStep, PathingTerrain.Unwalkable);
 
                     //Add this square to a list of squares to put back
-                    blockedSquares.Add(new Point(x, y));
+                    blockedSquares.Add(theNextStep);
 
                     //We will try again
                 }
@@ -3149,7 +3147,7 @@ namespace RogueBasin
             //Put back any squares we made unwalkable
             foreach (Point sq in blockedSquares)
             {
-                levels[level].PathRepresentation[sq.x, sq.y] = 1;
+                pathingFinding.updateMap(level, sq, PathingTerrain.Walkable);
             }
 
             return nextStep;

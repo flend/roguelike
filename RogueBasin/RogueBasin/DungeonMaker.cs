@@ -53,8 +53,9 @@ namespace RogueBasin
             SetupPlayer();
             
             //Player start location must be set in here
-            //SetupMapsFlatline();
+            SetupMapsFlatline();
 
+            /*
             bool decision = Screen.Instance.YesNoQuestion("Locks?");
 
             //bool decision = false;
@@ -80,16 +81,19 @@ namespace RogueBasin
                     SetupMapsGraphingDemo(false, 0);
 
             }
-            //SetupMaps();
+             * */
+
+            /*
+            SetupMaps();
 
             //Uniques must be spawned before creatures (and followers)
-            //SpawnUniques();
+            SpawnUniques();
 
-            //SpawnCreaturesAndItems();
+            SpawnCreaturesAndItems();
 
             //Debug only
             //SpawnItems();
-
+            */
             return Game.Dungeon;
         }
 

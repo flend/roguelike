@@ -105,6 +105,13 @@ namespace RogueBasin
         DockWall//not walkable
      }
 
+    public enum PathingTerrain
+    {
+        Walkable,
+        ClosedDoor,
+        Unwalkable
+    }
+
     public class MapSquare
     {
         MapTerrain terrain = MapTerrain.Empty;
@@ -151,10 +158,6 @@ namespace RogueBasin
             set
             {
                 terrain = value;
-                /*if (terrain == MapTerrain.Wall)
-                    walkable = false;
-                else
-                    walkable = true;*/
             }
             get
             {
@@ -277,6 +280,31 @@ namespace RogueBasin
         }
     }
 
+    public class PathingMap
+    {
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
+        PathingTerrain[,] pathingMap;
+
+        public PathingMap(int width, int height)
+        {
+            pathingMap = new PathingTerrain[width, height];
+            Width = width;
+            Height = height;
+        }
+
+        public PathingTerrain getCell(int x, int y)
+        {
+            return pathingMap[x, y];
+        }
+
+        public void setCell(int x, int y, PathingTerrain terrain)
+        {
+            pathingMap[x, y] = terrain;
+        }
+    }
+
     public class Map
     {
         public MapSquare[,] mapSquares;
@@ -294,14 +322,9 @@ namespace RogueBasin
         public uint pathHeight;
 
         /// <summary>
-        /// Byte array representation for pathing
+        /// Pathing representation for pathing algorithms
         /// </summary>
-        public byte[,] pathRepresentation;
-
-        /// <summary>
-        /// Byte array representation for pathing. Closed doors appear open (i.e. for creatures which can open doors)
-        /// </summary>
-        public byte[,] pathRepresentationNoClosedDoors;
+        public PathingMap pathRepresentation;
 
         public double LightLevel;
 
@@ -315,7 +338,7 @@ namespace RogueBasin
         /// </summary>
         Map()
         {
-            //LightLevel = 1.0;
+
         }
 
         /// <summary>
@@ -365,12 +388,7 @@ namespace RogueBasin
 
             GuaranteedConnected = false;
 
-            //Pad path representations out to nearest power of 2
-            pathWidth = Utility.nextPowerOf2(Convert.ToUInt32(width));
-            pathHeight = Utility.nextPowerOf2(Convert.ToUInt32(height));
-
-            pathRepresentation = new byte[pathWidth, pathHeight];
-            pathRepresentationNoClosedDoors = new byte[pathWidth, pathHeight];
+            pathRepresentation = new PathingMap (width, height);
 
             Clear();
         }
@@ -386,17 +404,10 @@ namespace RogueBasin
             }
         }
 
-        public byte[,] PathRepresentation
+        public PathingMap PathRepresentation
         {
             get { return pathRepresentation; }
         }
-
-
-        public byte[,] PathRepresentationNoClosedDoors
-        {
-            get { return pathRepresentationNoClosedDoors; }
-        }
-
 
         /// <summary>
         /// Recalculates the representation of the map used for pathing
@@ -407,40 +418,15 @@ namespace RogueBasin
             {
                 for (int k = 0; k < height; k++)
                 {
-                    pathRepresentation[j, k] = mapSquares[j, k].Walkable ? (byte)1 : (byte)0;
-                }
-            }
-
-            //Add 0 padding
-            for (int j = width; j < pathWidth; j++)
-            {
-                for (int k = height; k < pathHeight; k++)
-                {
-                    pathRepresentation[j, k] = 0;
-                }
-            }
-
-            //Ignoring closed doors
-
-            for (int j = 0; j < width; j++)
-            {
-                for (int k = 0; k < height; k++)
-                {
                     MapTerrain terrainHere = mapSquares[j, k].Terrain;
-
-                    pathRepresentationNoClosedDoors[j, k] = mapSquares[j, k].Walkable || terrainHere == MapTerrain.ClosedDoor ? (byte)1 : (byte)0;
+                    pathRepresentation.setCell(j, k, PathingTerrain.Unwalkable);
+                    
+                    if(terrainHere == MapTerrain.ClosedDoor) 
+                        pathRepresentation.setCell(j, k, PathingTerrain.ClosedDoor);
+                    else if(Dungeon.IsTerrainWalkable(terrainHere))
+                        pathRepresentation.setCell(j, k, PathingTerrain.Walkable);      
                 }
             }
-
-            //Add 0 padding
-            for (int j = width; j < pathWidth; j++)
-            {
-                for (int k = height; k < pathHeight; k++)
-                {
-                    pathRepresentationNoClosedDoors[j, k] = 0;
-                }
-            }
-
         }
 
         /// <summary>

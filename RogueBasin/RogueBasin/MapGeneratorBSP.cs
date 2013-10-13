@@ -999,7 +999,7 @@ namespace RogueBasin
                 //SetLightBlocking(baseMap);
 
                 //Set the PC start location in a random room
-                //baseMap.PCStartLocation = AddEntryRoomForPlayer();
+                baseMap.PCStartLocation = AddEntryRoomForPlayer();
 
                 
             } while (false); //legacy 
