@@ -45,12 +45,12 @@ namespace RogueBasin
         const int minBSPSquareHeight = 5;
 
         //Minimum room sizes. Below 3 will break the algorithm (and make unwalkable rooms)
-        const int minRoomWidth = 4;
-        const int minRoomHeight = 4;
+        const int minRoomWidth = 3;
+        const int minRoomHeight = 3;
 
         //Smaller numbers make larger areas more likely
         //Numbers 5 or below make a significant difference
-        int noSplitChance = 1;
+        int noSplitChance = 3;
         //Multiple of BSPwidth above which we must split
         int mustSplitSize = 4;
 
@@ -516,12 +516,20 @@ namespace RogueBasin
             DrawConnectingCorriderBetweenChildren(baseMap);
         }
 
+        /// <summary>
+        /// This function builds connections between rooms and is responsible for building the connectivity graph
+        /// </summary>
+        /// <param name="baseMap"></param>
         private void DrawConnectingCorriderBetweenChildren(Map baseMap)
         {
             Random rand = MapGeneratorBSP.rand;
 
             //Route of the corridor
             List<Point> corridorRoute;
+
+            //Calculate an L-shaped corridor between two rooms
+            //One room is in a leaf node BSP child of this room
+            //The other may any room in the BSP tree other child of this room
 
             if (split == SplitType.Horizontal)
             {
@@ -681,23 +689,6 @@ namespace RogueBasin
                     }
                 } while (notValidPath);
 
-                //We now have a valid path so draw it
-                foreach (Point sq in corridorRoute)
-                {
-                    baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
-                    baseMap.mapSquares[sq.x, sq.y].SetOpen();
-
-                    //Try 2 width
-                    //No longer supported
-                    if (twoWideCorridor)
-                    {
-                        if (sq.y - 1 > 0 && sq.y - 1 < height)
-                        {
-                            baseMap.mapSquares[sq.x, sq.y - 1].Terrain = MapTerrain.Corridor;
-                            baseMap.mapSquares[sq.x, sq.y - 1].SetOpen();
-                        }
-                    }
-                }
             }
             else
             {
@@ -856,32 +847,12 @@ namespace RogueBasin
                     }
                 } while (notValidPath);
 
-                //We now have a valid path so draw it
-                foreach (Point sq in corridorRoute)
-                {
-                    baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
-                    baseMap.mapSquares[sq.x, sq.y].SetOpen();
-
-                    //Try 2 width
-                    if (twoWideCorridor)
-                    {
-                        if (sq.x - 1 > 0 && sq.x - 1 < width)
-                        {
-                            baseMap.mapSquares[sq.x - 1, sq.y].Terrain = MapTerrain.Corridor;
-                            baseMap.mapSquares[sq.x - 1, sq.y].SetOpen();
-                        }
-                    }
-                }
-
-
             }
 
             //Add corridor to connection graph
 
             //Now we'll actually going to make this corridor a new 'room' in its own right. However, parts of it may be shared with other rooms.
             //That's OK, it will have a unidirectional connection to any corridors that cross it
-
-            //TODO: function in parentGenerator to make a new corridor and track it
 
             //Create a room id for the corridor
             int corridorId = parentGenerator.GetNextRoomIdAndIncrease();
@@ -894,8 +865,10 @@ namespace RogueBasin
             //we need to look it up from the bitmap
             //We have already set the bitmap to the current corridor id
 
-            //Build the doored connection from the origin room
-            parentGenerator.AddDoorConnection(corridorRoute[0].x, corridorRoute[0].y, corridorRoute[1].x, corridorRoute[1].y, MapGeneratorBSP.ConnectionInfo.DoorPos.Left);
+            //Add the left and right rooms. If any extent terminated in a corridor, then don't add a door (can be got around diagonally!)
+
+            if (baseMap.mapSquares[corridorRoute[0].x, corridorRoute[0].y].Terrain != MapTerrain.Corridor)
+                parentGenerator.AddDoorConnection(corridorRoute[0].x, corridorRoute[0].y, corridorRoute[1].x, corridorRoute[1].y, MapGeneratorBSP.ConnectionInfo.DoorPos.Left);
 
             //Build the doored connection to the dest room, unless we terminated in a corridor, in which case make an undoored connection automatically
             int lastPoint = corridorRoute.Count - 1;
@@ -921,7 +894,22 @@ namespace RogueBasin
                     parentGenerator.AddNonDoorConnector(corridorId, roomId);
             }
 
-        
+            //Commit the corridor path to the terrain bitmap
+            foreach (Point sq in corridorRoute)
+            {
+                baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
+                baseMap.mapSquares[sq.x, sq.y].SetOpen();
+
+                //Try 2 width
+                if (twoWideCorridor)
+                {
+                    if (sq.x - 1 > 0 && sq.x - 1 < width)
+                    {
+                        baseMap.mapSquares[sq.x - 1, sq.y].Terrain = MapTerrain.Corridor;
+                        baseMap.mapSquares[sq.x - 1, sq.y].SetOpen();
+                    }
+                }
+            }
         }
     }
 
