@@ -899,17 +899,12 @@ namespace RogueBasin
             {
                 baseMap.mapSquares[sq.x, sq.y].Terrain = MapTerrain.Corridor;
                 baseMap.mapSquares[sq.x, sq.y].SetOpen();
-
-                //Try 2 width
-                if (twoWideCorridor)
-                {
-                    if (sq.x - 1 > 0 && sq.x - 1 < width)
-                    {
-                        baseMap.mapSquares[sq.x - 1, sq.y].Terrain = MapTerrain.Corridor;
-                        baseMap.mapSquares[sq.x - 1, sq.y].SetOpen();
-                    }
-                }
             }
+
+            //If we wanted a general way of checking for connectivity, we could look at all the squares surrounding the corridor
+            //check if any were walkable and then add these connections
+            //Not necessary at the moment, since the algorithm guarantees that the only connections will be between the start and terminus of the path
+            //(all in-between walls cause recalculation)
         }
     }
 

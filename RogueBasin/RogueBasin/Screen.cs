@@ -1988,7 +1988,7 @@ namespace RogueBasin {
                         else
                             baseDrawColor = literalColor;
                     }
-                    else if (ShowRoomNumbering > 0)
+                    else if (ShowRoomNumbering > 0 && (map.mapSquares[i, j].Terrain == MapTerrain.Empty || map.mapSquares[i,j].Terrain == MapTerrain.Void))
                     {
                         //Draw room ids as an overlay
 
