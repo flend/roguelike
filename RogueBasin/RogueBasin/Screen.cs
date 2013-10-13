@@ -39,7 +39,11 @@ namespace RogueBasin {
         /// </summary>
         public bool CombatAnimations { get; set; }
 
-        public bool ShowRoomNumbering { get; set; }
+        int ShowRoomNumbering { get; set; }
+        /// <summary>
+        /// Total modes available for show room numbering
+        /// </summary>
+        int MaxShowRoomNumbering = 2;
 
         public bool SetTargetInRange = false;
 
@@ -246,6 +250,17 @@ namespace RogueBasin {
             */
             Console.WriteLine("debug test message.");
 
+        }
+
+        /// <summary>
+        /// Cycle the room number display between different modes
+        /// </summary>
+        public void CycleRoomNumbering() {
+
+            ShowRoomNumbering++;
+
+            if(ShowRoomNumbering > MaxShowRoomNumbering)
+                ShowRoomNumbering = 0;
         }
 
         /// <summary>
@@ -1958,6 +1973,10 @@ namespace RogueBasin {
                     Color baseDrawColor;
                     Color drawColor;
 
+                    //Defaults
+                    screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
+                    baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
+
                     //Exception for literals
                     if (map.mapSquares[i, j].Terrain == MapTerrain.Literal)
                     {
@@ -1969,25 +1988,31 @@ namespace RogueBasin {
                         else
                             baseDrawColor = literalColor;
                     }
-                    else if (ShowRoomNumbering && map.mapSquares[i, j].Terrain == MapTerrain.Empty)
+                    else if (ShowRoomNumbering > 0)
                     {
-                        //Draw the room id for empty areas
+                        //Draw room ids as an overlay
 
-                        int roomId = map.roomIdMap[i, j];
+                        if ((ShowRoomNumbering == 1 && map.mapSquares[i, j].Terrain == MapTerrain.Empty)
+                            || ShowRoomNumbering == 2)
+                        {
+                            //Draw the room id (in empty areas only for SRN==1)
 
-                        if (roomId < 10)
-                        {
-                            string roomIdS = roomId.ToString();
-                            char r = Convert.ToChar(roomIdS.Substring(0, 1));
-                            screenChar = r;
-                            baseDrawColor = ColorPresets.Gray;
-                        }
-                        else
-                        {
-                            string roomIdS = roomId.ToString();
-                            char r = Convert.ToChar(roomIdS.Substring(1, 1));
-                            screenChar = r;
-                            baseDrawColor = ColorPresets.LightGray;
+                            int roomId = map.roomIdMap[i, j];
+
+                            if (roomId < 10)
+                            {
+                                string roomIdS = roomId.ToString();
+                                char r = Convert.ToChar(roomIdS.Substring(0, 1));
+                                screenChar = r;
+                                baseDrawColor = ColorPresets.Yellow;
+                            }
+                            else
+                            {
+                                string roomIdS = roomId.ToString();
+                                char r = Convert.ToChar(roomIdS.Substring(1, 1));
+                                screenChar = r;
+                                baseDrawColor = ColorPresets.Green;
+                            }
                         }
                     }
                     else if (map.mapSquares[i, j].Terrain == MapTerrain.ClosedDoor || map.mapSquares[i, j].Terrain == MapTerrain.OpenDoor)
@@ -2020,12 +2045,7 @@ namespace RogueBasin {
                         //Otherwise not locked
 
                     }
-                    else
-                    {
-                        screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
-                        baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
-                    }
-
+ 
                     //In FlatlineRL you can normally see the whole map
                     if (map.mapSquares[i, j].InPlayerFOV || SeeAllMap)
                     {

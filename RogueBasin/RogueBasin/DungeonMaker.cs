@@ -55,7 +55,9 @@ namespace RogueBasin
             //Player start location must be set in here
             //SetupMapsFlatline();
 
-            bool decision = Screen.Instance.YesNoQuestion("Locks?");
+            //bool decision = Screen.Instance.YesNoQuestion("Locks?");
+
+            bool decision = false;
 
             if (decision)
             {
@@ -69,7 +71,8 @@ namespace RogueBasin
             }
             else
             {
-                bool decision2 = Screen.Instance.YesNoQuestion("Cycles?");
+                bool decision2 = false;
+                //bool decision2 = Screen.Instance.YesNoQuestion("Cycles?");
 
                 if (decision2)
                     SetupMapsGraphingDemoCycles();

@@ -8,7 +8,9 @@ namespace RogueBasin
 {
     public class MapNode
     {
-        //unique room id
+        /// <summary>
+        /// Unique Room ID. All squares of leaf nodes are initially set to this Id
+        /// </summary>
         public int Id {
             get; set;
         }
@@ -48,9 +50,9 @@ namespace RogueBasin
 
         //Smaller numbers make larger areas more likely
         //Numbers 5 or below make a significant difference
-        int noSplitChance = 3;
+        int noSplitChance = 1;
         //Multiple of BSPwidth above which we must split
-        int mustSplitSize = 3;
+        int mustSplitSize = 4;
 
         //How the BSP squares are split as a ratio
         const double minimumSplit = 0.4;
@@ -407,8 +409,11 @@ namespace RogueBasin
             if (roomHeight < MapGeneratorBSP.minimumRoomSize)
                 roomHeight = MapGeneratorBSP.minimumRoomSize;*/
 
+            //At least 1 column free on left
             roomX = x + 1 + rand.Next(width - roomWidth);
+            //At least 1 column free on right (because roomWidth is at least 1 smaller than width)
             int rx = roomX + roomWidth - 1;
+            //Likewise for top and bottom
             roomY = y + 1 + rand.Next(height - roomHeight);
             int by = roomY + roomHeight - 1;
 
@@ -515,6 +520,9 @@ namespace RogueBasin
         {
             Random rand = MapGeneratorBSP.rand;
 
+            //Route of the corridor
+            List<Point> corridorRoute;
+
             if (split == SplitType.Horizontal)
             {
                 //We are guaranteed that rays from the split into the left and right child will not hit an obstruction
@@ -530,6 +538,7 @@ namespace RogueBasin
                 int leftX = -1;
                 do
                 {
+
                     //Random y coord
                     leftY = y + rand.Next(height);
 
@@ -615,10 +624,7 @@ namespace RogueBasin
                 //Now route a L corridor from (leftX, leftY) to (rightX, rightY)
                 //The L bend can occur within X: leftSafeX -> rightSafeX
 
-                //Inform the generator of this corridor, so it can build the graph representation
-                parentGenerator.AddConnection(leftX, leftY, rightX, rightY);
-
-                List<Point> corridorRoute = new List<Point>(rightX - leftX + Math.Abs(rightY - leftY));
+                corridorRoute = new List<Point>(rightX - leftX + Math.Abs(rightY - leftY));
                 bool notValidPath = false;
 
                 //Keep trying until we get a valid path (at least one is guaranteed)
@@ -626,6 +632,7 @@ namespace RogueBasin
                 do
                 {
                     corridorRoute.Clear();
+
                     notValidPath = false;
 
                     //L bend set randonly
@@ -665,6 +672,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
+
                         if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain == MapTerrain.Wall)
                         {
                             notValidPath = true;
@@ -680,6 +688,7 @@ namespace RogueBasin
                     baseMap.mapSquares[sq.x, sq.y].SetOpen();
 
                     //Try 2 width
+                    //No longer supported
                     if (twoWideCorridor)
                     {
                         if (sq.y - 1 > 0 && sq.y - 1 < height)
@@ -791,10 +800,7 @@ namespace RogueBasin
                 //Now route a L corridor from (leftX, leftY) to (rightX, rightY)
                 //The L bend can occur within X: leftSafeX -> rightSafeX
 
-                //Inform the generator of this corridor, so it can build the graph representation
-                parentGenerator.AddConnection(leftX, leftY, rightX, rightY);
-
-                List<Point> corridorRoute = new List<Point>(Math.Abs(rightX - leftX) + rightY - leftY);
+                corridorRoute = new List<Point>(Math.Abs(rightX - leftX) + rightY - leftY);
                 bool notValidPath = false;
 
                 //Keep trying until we get a valid path (at least one is guaranteed)
@@ -841,6 +847,7 @@ namespace RogueBasin
                     //Look for walls but ignore the first and last squares
                     for (int i = 1; i < corridorRoute.Count - 1; i++)
                     {
+
                         if (baseMap.mapSquares[corridorRoute[i].x, corridorRoute[i].y].Terrain == MapTerrain.Wall)
                         {
                             notValidPath = true;
@@ -868,6 +875,53 @@ namespace RogueBasin
 
 
             }
+
+            //Add corridor to connection graph
+
+            //Now we'll actually going to make this corridor a new 'room' in its own right. However, parts of it may be shared with other rooms.
+            //That's OK, it will have a unidirectional connection to any corridors that cross it
+
+            //TODO: function in parentGenerator to make a new corridor and track it
+
+            //Create a room id for the corridor
+            int corridorId = parentGenerator.GetNextRoomIdAndIncrease();
+
+            //Associate the corridor (not terminals squares in the rooms) path with the new ID
+            List<Point> corridorOnlyPath = corridorRoute.GetRange(1, corridorRoute.Count - 2);
+            parentGenerator.AssociatePathWithId(corridorId, corridorOnlyPath);
+
+            //Because this BSP node's children may have children of their own (we actually only have 1 leaf node child), we don't actually know the id of the room we're going to hit,
+            //we need to look it up from the bitmap
+            //We have already set the bitmap to the current corridor id
+
+            //Build the doored connection from the origin room
+            parentGenerator.AddDoorConnection(corridorRoute[0].x, corridorRoute[0].y, corridorRoute[1].x, corridorRoute[1].y, MapGeneratorBSP.ConnectionInfo.DoorPos.Left);
+
+            //Build the doored connection to the dest room, unless we terminated in a corridor, in which case make an undoored connection automatically
+            int lastPoint = corridorRoute.Count - 1;
+            int secondLastPoint = corridorRoute.Count - 2;
+
+            if (baseMap.mapSquares[corridorRoute[lastPoint].x, corridorRoute[lastPoint].y].Terrain != MapTerrain.Corridor)
+                parentGenerator.AddDoorConnection(corridorRoute[lastPoint].x, corridorRoute[lastPoint].y, corridorRoute[secondLastPoint].x, corridorRoute[secondLastPoint].y, MapGeneratorBSP.ConnectionInfo.DoorPos.Left);
+
+            //Find a list of all the rooms that this corridor connects to (e.g. it may run over another corridor)
+            //Include the start and end rooms, in case we haven't set doored connections above
+            HashSet<int> connectedTo = new HashSet<int>();
+
+            foreach (Point p in corridorRoute)
+            {
+                connectedTo.Add(baseMap.roomIdMap[p.x, p.y]);
+            }
+
+            //Add all non-doored connections to other things we have run into
+            foreach (var roomId in connectedTo)
+            {
+                //The base map contains 0s for any unallocated areas in the map - these aren't real rooms, so we don't add
+                if (roomId > 0 && roomId != corridorId)
+                    parentGenerator.AddNonDoorConnector(corridorId, roomId);
+            }
+
+        
         }
     }
 
@@ -1261,17 +1315,26 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Add doors based on the connectivity graph stored when the rooms were made
+        /// For all edges that have doored-connections, add doors to the map
         /// </summary>
         private void AddDoorsGraph()
         {
             foreach (var connectionInfo in edgeInfo.Values)
             {
-                baseMap.mapSquares[connectionInfo.LeftX, connectionInfo.LeftY].Terrain = MapTerrain.ClosedDoor;
-                baseMap.mapSquares[connectionInfo.LeftX, connectionInfo.LeftY].SetBlocking();
+                if (connectionInfo.HasDoor)
+                {
+                    if (connectionInfo.DoorPosition == ConnectionInfo.DoorPos.Left)
+                    {
 
-                baseMap.mapSquares[connectionInfo.RightX, connectionInfo.RightY].Terrain = MapTerrain.ClosedDoor;
-                baseMap.mapSquares[connectionInfo.RightX, connectionInfo.RightY].SetBlocking();
+                        baseMap.mapSquares[connectionInfo.LeftX, connectionInfo.LeftY].Terrain = MapTerrain.ClosedDoor;
+                        baseMap.mapSquares[connectionInfo.LeftX, connectionInfo.LeftY].SetBlocking();
+                    }
+                    else
+                    {
+                        baseMap.mapSquares[connectionInfo.RightX, connectionInfo.RightY].Terrain = MapTerrain.ClosedDoor;
+                        baseMap.mapSquares[connectionInfo.RightX, connectionInfo.RightY].SetBlocking();
+                    }
+                }
             }
         }
 
@@ -1847,7 +1910,8 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Associate this area with a room id
+        /// Associate this area on the room bitmap with the room
+        /// TODO: make this layered, a container of rooms rather than a bitmap
         /// </summary>
         /// <param name="id"></param>
         /// <param name="x"></param>
@@ -1871,6 +1935,14 @@ namespace RogueBasin
             }
         }
 
+        internal void AssociatePathWithId(int corridorId, List<Point> corridorRoute)
+        {
+            foreach (var newPoint in corridorRoute)
+            {
+                baseMap.roomIdMap[newPoint.x, newPoint.y] = corridorId;
+            }
+        }
+
         /// <summary>
         /// There is a connecting corridor between these two points on the map. Add this as an edge on the graph
         /// </summary>
@@ -1879,7 +1951,11 @@ namespace RogueBasin
         /// <param name="rightX"></param>
         /// <param name="rightY"></param>
 
-        ///Information about what the edge looks like on the map. Could / should be stored in the TaggedEdge itself
+        /** Information about the connection between two rooms
+         *  Rooms either have no defined point of contact (i.e. 2 large overlapping corridors)
+         *  or 2 adjacent squares 
+         */
+        
         public class ConnectionInfo
         {
             public int LeftX { get; set; }
@@ -1887,34 +1963,111 @@ namespace RogueBasin
             public int RightX { get; set; }
             public int RightY { get; set; }
 
-            public ConnectionInfo(int leftX, int leftY, int rightX, int rightY)
+            //If this is true, there is a lockable connections between the rooms
+            //(false - there is no single point of connection between the rooms (may be overlapping))
+            public bool HasDoor { get; set; }
+
+            //If we build a door, it should be in one of the two contact points
+            public enum DoorPos { Left, Right }
+
+            public DoorPos DoorPosition { get; set; }
+
+            //A connection with 
+            public ConnectionInfo(int leftX, int leftY, int rightX, int rightY, DoorPos doorPos)
             {
                 LeftX = leftX;
                 LeftY = leftY;
                 RightX = rightX;
                 RightY = rightY;
+                HasDoor = true;
+                DoorPosition = doorPos;
+            }
+
+            //A connection without a single point of connection
+            public ConnectionInfo()
+            {
+                HasDoor = false;
             }
         }
 
         private UndirectedGraph<int, TaggedEdge<int, string>> connectivityGraph;
         private MapModel graphModel;
         private Dictionary<TaggedEdge<int, string>, ConnectionInfo> edgeInfo = new Dictionary<TaggedEdge<int, string>, ConnectionInfo>();
+
         
-        internal void AddConnection(int leftX, int leftY, int rightX, int rightY)
+        /// <summary>
+        /// Add a non-doored connection between two rooms (suitable for overlapping corridors)
+        /// </summary>
+        internal void AddNonDoorConnector(int originRoomId, int destRoomId)
         {
-            //Lookup the room ids for the origin and dest
-            int originId = baseMap.roomIdMap[leftX, leftY];
-            int destId = baseMap.roomIdMap[rightX, rightY];
+            //Add the rooms to the graph
+            AddRoomToGraphIfNotExists(originRoomId);
+            AddRoomToGraphIfNotExists(destRoomId);
 
-            LogFile.Log.LogEntryDebug("From room: " + originId + " to room: " + destId, LogDebugLevel.High);
+            //Add the connection if not already existing
 
-            var newGraphEdge = new TaggedEdge<int, string>(originId, destId, "");
+            var newGraphEdge = new TaggedEdge<int, string>(originRoomId, destRoomId, "");
 
-            connectivityGraph.AddVerticesAndEdge(newGraphEdge);
+            if (connectivityGraph.ContainsEdge(originRoomId, destRoomId))
+            {
+                LogFile.Log.LogEntryDebug("Repeat NonDoor Connection - from room: " + originRoomId + " to room: " + destRoomId + "not including", LogDebugLevel.High);
+                return;
+            }
+    
+            //Otherwise it's a new connection
+
+            connectivityGraph.AddEdge(newGraphEdge);
+
+            LogFile.Log.LogEntryDebug("NonDoor Connection - from room: " + originRoomId + " to room: " + destRoomId, LogDebugLevel.High);
+
+            //Register that there are no door connections
+            edgeInfo.Add(newGraphEdge, new ConnectionInfo());
+        }
+
+        /// <summary>
+        /// Add a connection between originRoom and destRoom.
+        /// Specify if this is a blockable (1 square) connection [hasDoor] and which of the two rooms the door should lie in
+        /// </summary>
+        internal void AddDoorConnection(int leftX, int leftY, int rightX, int rightY, ConnectionInfo.DoorPos doorPosition)
+        {
+            //Look up the rooms from the room bitmap
+            int originRoomId = baseMap.roomIdMap[leftX, leftY];
+            int destRoomId = baseMap.roomIdMap[rightX, rightY];
+
+            //Add to the connectivity graph as vertices
+            AddRoomToGraphIfNotExists(originRoomId);
+            AddRoomToGraphIfNotExists(destRoomId);
+
+            //Add the connection edge if not already existing
+            if (connectivityGraph.ContainsEdge(originRoomId, destRoomId))
+            {
+                LogFile.Log.LogEntryDebug("Repeat Door Connection - from room: " + originRoomId + " to room: " + destRoomId + "not including", LogDebugLevel.High);
+                return;
+            }
+
+            var newGraphEdge = new TaggedEdge<int, string>(originRoomId, destRoomId, "");
+
+            LogFile.Log.LogEntryDebug("Door Connection - from room: " + originRoomId + " to room: " + destRoomId, LogDebugLevel.High);
+
+            connectivityGraph.AddEdge(newGraphEdge);
 
             //Add the door locations to the edge lookup
-            edgeInfo.Add(newGraphEdge, new ConnectionInfo(leftX, leftY, rightX, rightY));
+            edgeInfo.Add(newGraphEdge, new ConnectionInfo(leftX, leftY, rightX, rightY, doorPosition));
         }
+
+        /// <summary>
+        /// Add a room to the graph representation. Safe to be called multiple times
+        /// </summary>
+        /// <param name="roomId"></param>
+        internal void AddRoomToGraphIfNotExists(int roomId)
+        {
+            if (!connectivityGraph.ContainsVertex(roomId))
+            {
+                connectivityGraph.AddVertex(roomId);
+            }
+        }
+
+
 
         /// <summary>
         /// Lock a connection (set its doors to locked with a particular id)
@@ -1947,5 +2100,7 @@ namespace RogueBasin
 
         //Passed to mapnode
         public int NoSplitChance { get; set; }
+
+        
     }
 }
