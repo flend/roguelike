@@ -292,25 +292,19 @@ namespace RogueBasin
         private bool ArePointsConnected(Point firstPoint, Point secondPoint)
         {
             //Build map representations
-            byte[,] byteMap = new byte[Width, Height];
+            PathingMap map = new PathingMap(Width, Height);
             for (int i = 0; i < Width; i++)
             {
                 for (int j = 0; j < Height; j++)
                 {
-                    byteMap[i,j] = baseMap.mapSquares[i, j].Walkable ? (byte)1 : (byte)0;
+                    map.setCell(i, j, baseMap.mapSquares[i, j].Walkable ? PathingTerrain.Walkable : PathingTerrain.Unwalkable);
                 }
             }
 
             //Try to walk a path between the 2 staircases
-            //Algorithms.IPathFinder pathFinder = new Algorithms.IPathFinder(byteMap);
-            //List<Algorithms.PathFinderNode> pathNodes = pathFinder.FindPath(new System.Drawing.Point(firstPoint.x, firstPoint.y), new System.Drawing.Point(secondPoint.x, secondPoint.y));
-
-            //If not connected, pathNodes == null
-            //return pathNodes != null;
-
-            //TODO: reimplement
-
-            return true;
+            LibTCOD.TCODPathFindingWrapper pathFinder = new LibTCOD.TCODPathFindingWrapper();
+            pathFinder.updateMap(0, map);
+            return pathFinder.arePointsConnected(0, firstPoint, secondPoint, false);
         }
 
         private void ConnectPoints(Point upStairsPoint, Point downStairsPoint)

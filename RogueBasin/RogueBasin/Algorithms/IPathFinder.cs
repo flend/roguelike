@@ -27,5 +27,14 @@ namespace RogueBasin.Algorithms
         /// Update internal map representation, point by point
         /// </summary>
         void updateMap(int level, Point point, PathingTerrain newTerrain);
+
+        /// <summary>
+        /// Are these points connected?
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="origin"></param>
+        /// <param name="dest"></param>
+        /// <param name="openAllDoors"></param>
+        bool arePointsConnected(int level, Point origin, Point dest, bool openAllDoors);
     }
 }

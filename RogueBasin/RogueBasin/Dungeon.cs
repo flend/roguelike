@@ -1457,14 +1457,10 @@ namespace RogueBasin
             if (firstPoint == secondPoint)
                 return true;
 
-            //Try to walk the path between the 2 staircases
-            List<Point> pathNodes = pathingFinding.pathNodes(level, firstPoint, secondPoint, false);
-
-            return pathNodes.Count > 1;
+            return pathingFinding.arePointsConnected(level, firstPoint, secondPoint, false);
         }
 
        
-
         /// <summary>
         /// Add an item to the dungeon. May fail if location is invalid or unwalkable
         /// </summary>
