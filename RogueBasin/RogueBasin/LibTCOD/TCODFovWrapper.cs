@@ -7,18 +7,13 @@ using libtcodWrapper;
 
 namespace RogueBasin.LibTCOD
 {
-    public class TCODFovWrapper
+    public class TCODFovWrapper : Algorithms.IFieldOfView
     {
         Dictionary<int, TCODFov> levelTCODMaps;
 
         public TCODFovWrapper()
         {
             levelTCODMaps = new Dictionary<int, TCODFov>();
-        }
-
-        public TCODFov getMap(int level)
-        {
-            return levelTCODMaps[level];
         }
 
         public void updateFovMap(int level, FovMap fovMap)
@@ -37,6 +32,11 @@ namespace RogueBasin.LibTCOD
             }
 
             levelTCODMaps[level] = tcodLevel;
+        }
+
+        public void updateFovMap(int level, Point point, FOVTerrain newTerrain)
+        {
+            levelTCODMaps[level].SetCell(point.x, point.y, newTerrain != FOVTerrain.Blocking, false);
         }
 
         public bool CheckTileFOV(int level, Point pointToCheck)

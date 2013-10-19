@@ -1026,8 +1026,6 @@ namespace RogueBasin
                 saveGameInfo.effects = this.effects;
                 saveGameInfo.features = this.features;
                 saveGameInfo.items = this.items;
-                //saveGameInfo.levels = this.levels;
-                //saveGameInfo.levelTCODMaps = this.levelTCODMaps; //If this doens't work, we could easily recalculate them
                 saveGameInfo.monsters = this.monsters;
                 saveGameInfo.player = this.player;
                 saveGameInfo.specialMoves = this.specialMoves;
@@ -3401,8 +3399,8 @@ namespace RogueBasin
                 //RefreshTCODMap(level);
 
                 //More efficient version
-                fov.getMap(level).SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
-
+                fov.updateFovMap(level, doorLocation, FOVTerrain.NonBlocking);
+                pathingFinding.updateMap(level, doorLocation, PathingTerrain.Walkable);
 
                 return true;
             }
@@ -3440,8 +3438,8 @@ namespace RogueBasin
                 //RefreshTCODMap(level);
 
                 //More efficient version
-                fov.getMap(level).SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
-
+                fov.updateFovMap(level, doorLocation, FOVTerrain.Blocking);
+                pathingFinding.updateMap(level, doorLocation, PathingTerrain.ClosedDoor);
 
                 return true;
             }
