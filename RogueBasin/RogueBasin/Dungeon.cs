@@ -2764,13 +2764,13 @@ namespace RogueBasin
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
-        public List<Point> GetPathLinePointsInFOV(Point start, Point end, TCODFov fov)
+        public List<Point> GetPathLinePointsInFOV(int level, Point start, Point end, WrappedFOV fov)
         {
             List<Point> pointsToRet = new List<Point>();
 
             foreach (Point p in Utility.GetPointsOnLine(start.x, start.y, end.x, end.y))
             {
-                if (fov.CheckTileFOV(p.x, p.y))
+                if (fov.CheckTileFOV(level, p))
                 {
                     pointsToRet.Add(p);
                 }
@@ -2785,10 +2785,9 @@ namespace RogueBasin
         public CreatureFOV CalculateCreatureFOV(Creature creature, Point location)
         {
             Map currentMap = levels[creature.LocationLevel];
-            TCODFov tcodFOV = fov.getMap(creature.LocationLevel);
 
             //Update FOV
-            tcodFOV.CalculateFOV(location.x, location.y, creature.SightRadius);
+            fov.CalculateFOV(creature.LocationLevel, location, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
             CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(fov), creature.FOVType(), location);
@@ -2799,16 +2798,14 @@ namespace RogueBasin
 
         /// <summary>
         /// Calculates the FOV for an abstract point. Uses the old TCODFov without modification
-        public TCODFov CalculateAbstractFOV(int level, Point mapLocation, int sightRadius)
+        public WrappedFOV CalculateAbstractFOV(int level, Point mapLocation, int sightRadius)
         {
             Map currentMap = levels[level];
-            TCODFov tcodFOV = fov.getMap(level);
 
             //Update FOV
-            tcodFOV.CalculateFOV(mapLocation.x, mapLocation.y, sightRadius);
+            fov.CalculateFOV(level, mapLocation, sightRadius);
 
-            return tcodFOV;
-
+            return new WrappedFOV(fov);
         }
 
 

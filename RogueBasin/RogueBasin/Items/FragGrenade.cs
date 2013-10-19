@@ -113,14 +113,14 @@ namespace RogueBasin.Items
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, size);
 
             //Use a TCODFov to check for walls between the grenade and the target square
-            TCODFov currentFOV = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, destination, (int)size + 2);
+            WrappedFOV currentFOV = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, destination, (int)size + 2);
 
             List<Point> newGrenadeAffects = new List<Point>();
 
             foreach (Point sq in grenadeAffects)
             {
                 //We need to check for walls so the grenade doens't go through them.
-                if (!currentFOV.CheckTileFOV(sq.x, sq.y))
+                if (!currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationLevel, sq))
                     continue;
 
                 newGrenadeAffects.Add(sq);
