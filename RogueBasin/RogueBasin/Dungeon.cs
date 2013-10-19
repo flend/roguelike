@@ -1101,7 +1101,7 @@ namespace RogueBasin
             dungeonInfo.SetupLevelInfo();
 
             //Add TCOD version
-            fov.addMap(levels.Count - 1, mapToAdd.width, mapToAdd.height);
+            fov.updateFovMap(levels.Count - 1, mapToAdd.FovRepresentaton);
 
             return levels.Count - 1;
         }
@@ -1116,7 +1116,7 @@ namespace RogueBasin
             levels[level] = newMap;
 
             //Add TCOD version
-            fov.addMap(level, newMap.width, newMap.height);
+            fov.updateFovMap(level, newMap.FovRepresentaton);
 
             return level;
         }
@@ -2721,10 +2721,9 @@ namespace RogueBasin
             tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
-            CreatureFOV wrappedFOV = new CreatureFOV(creature, new TCODFOVWrapper(tcodFOV), creature.FOVType());
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(tcodFOV), creature.FOVType());
 
             return wrappedFOV;
-
         }
 
 
@@ -2792,7 +2791,7 @@ namespace RogueBasin
             tcodFOV.CalculateFOV(location.x, location.y, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
-            CreatureFOV wrappedFOV = new CreatureFOV(creature, new TCODFOVWrapper(tcodFOV), creature.FOVType(), location);
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(tcodFOV), creature.FOVType(), location);
 
             return wrappedFOV;
 

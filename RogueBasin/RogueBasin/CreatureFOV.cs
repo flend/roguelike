@@ -5,12 +5,12 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public class TCODFOVWrapper
+    /** Lightweight wrapper - stops classes uses Fov from altering the map */
+    public class WrappedFOV
     {
-
         TCODFov fov;
 
-        public TCODFOVWrapper(TCODFov fov)
+        public WrappedFOV(TCODFov fov)
         {
             this.fov = fov;
         }
@@ -30,12 +30,12 @@ namespace RogueBasin
             Base, Triangular
         }
 
-        TCODFOVWrapper tcodFOV;
+        WrappedFOV tcodFOV;
         CreatureFOVType type;
         Creature creature;
         Point overrideLocation = null;
 
-        public CreatureFOV(Creature creature, TCODFOVWrapper fov, CreatureFOVType creatureFOVType)
+        public CreatureFOV(Creature creature, WrappedFOV fov, CreatureFOVType creatureFOVType)
         {
             this.tcodFOV = fov;
             this.type = creatureFOVType;
@@ -50,7 +50,7 @@ namespace RogueBasin
         /// <param name="creatureFOVType"></param>
         /// <param name="locationX"></param>
         /// <param name="locationY"></param>
-        public CreatureFOV(Creature creature, TCODFOVWrapper fov, CreatureFOVType creatureFOVType, Point overrideLocation)
+        public CreatureFOV(Creature creature, WrappedFOV fov, CreatureFOVType creatureFOVType, Point overrideLocation)
         {
             this.tcodFOV = fov;
             this.type = creatureFOVType;

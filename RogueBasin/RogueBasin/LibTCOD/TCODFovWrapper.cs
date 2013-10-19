@@ -44,5 +44,15 @@ namespace RogueBasin.LibTCOD
             levelTCODMaps[level] = tcodLevel;
         }
 
+        public bool CheckTileFOV(int level, Point pointToCheck)
+        {
+            return levelTCODMaps[level].CheckTileFOV(pointToCheck.x, pointToCheck.y);
+        }
+
+        public void CalculateFOV(int level, Point origin, int sightRange)
+        {
+            levelTCODMaps[level].CalculateFOV(origin.x, origin.y, sightRange);
+        }
+
     }
 }
