@@ -400,10 +400,9 @@ namespace RogueBasin
     public class Dungeon
     {
         List<Map> levels;
-        List<TCODFov> levelTCODMaps;
-        List<TCODFov> levelTCODMapsIgnoringClosedDoors;
 
         LibTCOD.TCODPathFindingWrapper pathingFinding;
+        LibTCOD.TCODFovWrapper fov;
 
         List<Monster> monsters;
         List<Item> items;
@@ -498,10 +497,9 @@ namespace RogueBasin
             monsters = new List<Monster>();
             items = new List<Item>();
             features = new List<Feature>();
-            levelTCODMaps = new List<TCODFov>();
-            levelTCODMapsIgnoringClosedDoors = new List<TCODFov>();
-
+            
             pathingFinding = new LibTCOD.TCODPathFindingWrapper();
+            fov = new LibTCOD.TCODFovWrapper();
 
             ///DungeonEffects are indexed by the time that they occur
             effects = new List<SoundEffect>();
@@ -1103,8 +1101,7 @@ namespace RogueBasin
             dungeonInfo.SetupLevelInfo();
 
             //Add TCOD version
-            levelTCODMaps.Add(new TCODFov(mapToAdd.width, mapToAdd.height));
-            levelTCODMapsIgnoringClosedDoors.Add(new TCODFov(mapToAdd.width, mapToAdd.height));
+            fov.addMap(levels.Count - 1, mapToAdd.width, mapToAdd.height);
 
             return levels.Count - 1;
         }
@@ -1119,8 +1116,7 @@ namespace RogueBasin
             levels[level] = newMap;
 
             //Add TCOD version
-            levelTCODMaps[level] = new TCODFov(newMap.width, newMap.height);
-            levelTCODMapsIgnoringClosedDoors[level] = new TCODFov(newMap.width, newMap.height);
+            fov.addMap(level, newMap.width, newMap.height);
 
             return level;
         }
@@ -1863,21 +1859,6 @@ namespace RogueBasin
             }
         }
 
-        public List<TCODFov> FOVs
-        {
-            get
-            {
-                return levelTCODMaps;
-            }
-        }
-
-        public List<TCODFov> FOVsDoorsOpened
-        {
-            get
-            {
-                return levelTCODMapsIgnoringClosedDoors;
-            }
-        }
 
         /// <summary>
         /// For serialization only
@@ -2719,25 +2700,13 @@ namespace RogueBasin
             }
 
             Map level = levels[levelToRefresh];
-            TCODFov tcodLevel = levelTCODMaps[levelToRefresh];
+            TCODFov tcodLevel = fov.getMap(levelToRefresh);
 
             for (int j = 0; j < level.width; j++)
             {
                 for (int k = 0; k < level.height; k++)
                 {
                     tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
-                }
-            }
-            //Ignoring closed doors
-
-            tcodLevel = levelTCODMapsIgnoringClosedDoors[levelToRefresh];
-            for (int j = 0; j < level.width; j++)
-            {
-                for (int k = 0; k < level.height; k++)
-                {
-                    MapTerrain terrainHere = level.mapSquares[j, k].Terrain;
-
-                    tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable || terrainHere == MapTerrain.ClosedDoor);
                 }
             }
 
@@ -2773,13 +2742,13 @@ namespace RogueBasin
         public CreatureFOV CalculateCreatureFOV(Creature creature)
         {
             Map currentMap = levels[creature.LocationLevel];
-            TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
+            TCODFov tcodFOV = fov.getMap(creature.LocationLevel);
 
             //Update FOV
             tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
-            CreatureFOV wrappedFOV = new CreatureFOV(creature, tcodFOV, creature.FOVType());
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new TCODFOVWrapper(tcodFOV), creature.FOVType());
 
             return wrappedFOV;
 
@@ -2844,13 +2813,13 @@ namespace RogueBasin
         public CreatureFOV CalculateCreatureFOV(Creature creature, Point location)
         {
             Map currentMap = levels[creature.LocationLevel];
-            TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
+            TCODFov tcodFOV = fov.getMap(creature.LocationLevel);
 
             //Update FOV
             tcodFOV.CalculateFOV(location.x, location.y, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
-            CreatureFOV wrappedFOV = new CreatureFOV(creature, tcodFOV, creature.FOVType(), location);
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new TCODFOVWrapper(tcodFOV), creature.FOVType(), location);
 
             return wrappedFOV;
 
@@ -2861,7 +2830,7 @@ namespace RogueBasin
         public TCODFov CalculateAbstractFOV(int level, Point mapLocation, int sightRadius)
         {
             Map currentMap = levels[level];
-            TCODFov tcodFOV = levelTCODMaps[level];
+            TCODFov tcodFOV = fov.getMap(level);
 
             //Update FOV
             tcodFOV.CalculateFOV(mapLocation.x, mapLocation.y, sightRadius);
@@ -3464,7 +3433,7 @@ namespace RogueBasin
                 //RefreshTCODMap(level);
 
                 //More efficient version
-                levelTCODMaps[level].SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
+                fov.getMap(level).SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
 
 
                 return true;
@@ -3503,7 +3472,7 @@ namespace RogueBasin
                 //RefreshTCODMap(level);
 
                 //More efficient version
-                levelTCODMaps[level].SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
+                fov.getMap(level).SetCell(doorLocation.x, doorLocation.y, !levels[level].mapSquares[doorLocation.x, doorLocation.y].BlocksLight, levels[level].mapSquares[doorLocation.x, doorLocation.y].Walkable);
 
 
                 return true;

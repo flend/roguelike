@@ -255,6 +255,7 @@
     <Compile Include="KeyValue.cs" />
     <Compile Include="LastMapGeneratorFromASCIIFile.cs" />
     <Compile Include="LibtcodColorFlags.cs" />
+    <Compile Include="LibTCOD\TCODFovWrapper.cs" />
     <Compile Include="LibTCOD\TCODPathFindingWrapper.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />

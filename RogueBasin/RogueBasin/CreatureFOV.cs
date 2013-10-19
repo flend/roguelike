@@ -5,6 +5,23 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
+    public class TCODFOVWrapper
+    {
+
+        TCODFov fov;
+
+        public TCODFOVWrapper(TCODFov fov)
+        {
+            this.fov = fov;
+        }
+
+        public bool CheckTileFOV(int x, int y) {
+
+            return fov.CheckTileFOV(x, y);
+        }
+    }
+
+
     /** FOV for querying. No guarantees about keeping state, so just obtain from Dungeon, use, then dispose.
      *  Not serializable */
     public class CreatureFOV
@@ -13,12 +30,12 @@ namespace RogueBasin
             Base, Triangular
         }
 
-        TCODFov tcodFOV;
+        TCODFOVWrapper tcodFOV;
         CreatureFOVType type;
         Creature creature;
         Point overrideLocation = null;
 
-        public CreatureFOV(Creature creature, TCODFov fov, CreatureFOVType creatureFOVType)
+        public CreatureFOV(Creature creature, TCODFOVWrapper fov, CreatureFOVType creatureFOVType)
         {
             this.tcodFOV = fov;
             this.type = creatureFOVType;
@@ -33,7 +50,7 @@ namespace RogueBasin
         /// <param name="creatureFOVType"></param>
         /// <param name="locationX"></param>
         /// <param name="locationY"></param>
-        public CreatureFOV(Creature creature, TCODFov fov, CreatureFOVType creatureFOVType, Point overrideLocation)
+        public CreatureFOV(Creature creature, TCODFOVWrapper fov, CreatureFOVType creatureFOVType, Point overrideLocation)
         {
             this.tcodFOV = fov;
             this.type = creatureFOVType;
