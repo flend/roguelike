@@ -16,11 +16,6 @@ namespace RogueBasin.LibTCOD
             levelTCODMaps = new Dictionary<int, TCODFov>();
         }
 
-        public void addMap(int level, int width, int height)
-        {
-            levelTCODMaps[level] = new TCODFov(width, height);
-        }
-
         public TCODFov getMap(int level)
         {
             return levelTCODMaps[level];
