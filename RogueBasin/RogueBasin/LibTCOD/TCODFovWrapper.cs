@@ -25,5 +25,24 @@ namespace RogueBasin.LibTCOD
         {
             return levelTCODMaps[level];
         }
+
+        public void updateFovMap(int level, FovMap fovMap)
+        {
+            TCODFov tcodLevel = new TCODFov(fovMap.Width, fovMap.Height);
+
+            for (int j = 0; j < fovMap.Width; j++)
+            {
+                for (int k = 0; k < fovMap.Height; k++)
+                {
+                    if (fovMap.getCell(j, k) != FOVTerrain.Blocking)
+                        tcodLevel.SetCell(j, k, true, false);
+                    else
+                        tcodLevel.SetCell(j, k, false, false);
+                }
+            }
+
+            levelTCODMaps[level] = tcodLevel;
+        }
+
     }
 }

@@ -112,6 +112,13 @@ namespace RogueBasin
         Unwalkable
     }
 
+
+    public enum FOVTerrain
+    {
+        NonBlocking,
+        Blocking
+    }
+
     public class MapSquare
     {
         MapTerrain terrain = MapTerrain.Empty;
@@ -280,30 +287,52 @@ namespace RogueBasin
         }
     }
 
-    public class PathingMap
+    public class FieldMap<T>
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        PathingTerrain[,] pathingMap;
+        T[,] pathingMap;
 
-        public PathingMap(int width, int height)
+        public FieldMap(int width, int height)
         {
-            pathingMap = new PathingTerrain[width, height];
+            pathingMap = new T[width, height];
             Width = width;
             Height = height;
         }
 
-        public PathingTerrain getCell(int x, int y)
+        public T getCell(int x, int y)
         {
             return pathingMap[x, y];
         }
 
-        public void setCell(int x, int y, PathingTerrain terrain)
+        public void setCell(int x, int y, T terrain)
         {
             pathingMap[x, y] = terrain;
         }
     }
+
+    /** Map of enums that indicate pathing information */
+    public class PathingMap : FieldMap<PathingTerrain>
+    {
+
+        public PathingMap(int width, int height)
+            : base(width, height)
+        {
+
+        }
+    };
+
+    /** Map of enums that indicate fov information */
+    public class FovMap : FieldMap<FOVTerrain>
+    {
+
+        public FovMap(int width, int height)
+            : base(width, height)
+        {
+
+        }
+    };
 
     public class Map
     {
@@ -320,11 +349,6 @@ namespace RogueBasin
         /// </summary>
         public uint pathWidth;
         public uint pathHeight;
-
-        /// <summary>
-        /// Pathing representation for pathing algorithms
-        /// </summary>
-        public PathingMap pathRepresentation;
 
         public double LightLevel;
 
@@ -388,8 +412,6 @@ namespace RogueBasin
 
             GuaranteedConnected = false;
 
-            pathRepresentation = new PathingMap (width, height);
-
             Clear();
         }
 
@@ -406,28 +428,47 @@ namespace RogueBasin
 
         public PathingMap PathRepresentation
         {
-            get { return pathRepresentation; }
-        }
-
-        /// <summary>
-        /// Recalculates the representation of the map used for pathing
-        /// </summary>
-        public void RecalculatePathingRepresentation()
-        {
-            for (int j = 0; j < width; j++)
+            get
             {
-                for (int k = 0; k < height; k++)
+                PathingMap pathRepresentation = new PathingMap(width, height);
+
+                for (int j = 0; j < width; j++)
                 {
-                    MapTerrain terrainHere = mapSquares[j, k].Terrain;
-                    pathRepresentation.setCell(j, k, PathingTerrain.Unwalkable);
-                    
-                    if(terrainHere == MapTerrain.ClosedDoor) 
-                        pathRepresentation.setCell(j, k, PathingTerrain.ClosedDoor);
-                    else if(Dungeon.IsTerrainWalkable(terrainHere))
-                        pathRepresentation.setCell(j, k, PathingTerrain.Walkable);      
+                    for (int k = 0; k < height; k++)
+                    {
+                        MapTerrain terrainHere = mapSquares[j, k].Terrain;
+                        pathRepresentation.setCell(j, k, PathingTerrain.Unwalkable);
+
+                        if (terrainHere == MapTerrain.ClosedDoor)
+                            pathRepresentation.setCell(j, k, PathingTerrain.ClosedDoor);
+                        else if (Dungeon.IsTerrainWalkable(terrainHere))
+                            pathRepresentation.setCell(j, k, PathingTerrain.Walkable);
+                    }
                 }
+                
+                return pathRepresentation;
             }
         }
+
+        public FovMap FovRepresentaton
+        {
+            get
+            {
+                FovMap newMap = new FovMap(width, height);
+
+                for (int j = 0; j < width; j++)
+                {
+                    for (int k = 0; k < height; k++)
+                    {
+                        newMap.setCell(j, k, mapSquares[j, k].BlocksLight ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
+                        //tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
+                    }
+                }
+
+                return newMap;
+            }
+        }
+
 
         /// <summary>
         /// Set walkable flag on map squares. Must be called before RecalculatePathingRepresentation()

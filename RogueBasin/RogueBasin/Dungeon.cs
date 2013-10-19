@@ -2674,43 +2674,16 @@ namespace RogueBasin
         internal void RefreshAllLevelPathing()
         {
             //Set the properties on the TCODMaps from our Maps
-            for (int i = 0; i < levels.Count; i++)
-            {
-                RefreshTCODMap(i);
+            for (int i = 0; i < levels.Count; i++) {
 
-                //New pathing representation
-                levels[i].RecalculatePathingRepresentation();
+                //New fov representation
+                fov.updateFovMap(i, levels[i].FovRepresentaton);
 
                 //Notify abstract path finding lib
                 pathingFinding.updateMap(i, levels[i].PathRepresentation);
             }
         }
 
-        /// <summary>
-        /// Refresh the TCOD maps used for FOV and pathfinding
-        /// Unoptimised at present
-        /// </summary>
-        internal void RefreshTCODMap(int levelToRefresh)
-        {
-            //Fail if we have been asked for an invalid level
-            if (levelToRefresh < 0 || levelToRefresh > levels.Count)
-            {
-                LogFile.Log.LogEntry("RefreshTCODMap: Level " + levelToRefresh + " does not exist");
-                return;
-            }
-
-            Map level = levels[levelToRefresh];
-            TCODFov tcodLevel = fov.getMap(levelToRefresh);
-
-            for (int j = 0; j < level.width; j++)
-            {
-                for (int k = 0; k < level.height; k++)
-                {
-                    tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
-                }
-            }
-
-        }
 
         /// <summary>
         /// 
