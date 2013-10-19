@@ -4,35 +4,210 @@
         <name>libtcodWrapper</name>
     </assembly>
     <members>
-        <member name="T:libtcodWrapper.BackgroundFlag">
+        <member name="T:libtcodWrapper.KeyPress">
             <summary>
-            Blending mode flags for the background object.
+            Keystroke structure returned from Keyboard methods.
             </summary>
         </member>
-        <member name="T:libtcodWrapper.KeyCode">
+        <member name="P:libtcodWrapper.KeyPress.KeyCode">
             <summary>
-            Types of "special" keycodes"
+            Key code for the current button press.
             </summary>
         </member>
-        <member name="T:libtcodWrapper.KeyPressType">
+        <member name="P:libtcodWrapper.KeyPress.Character">
             <summary>
-            Is event returned when key is pressed, release, or both?
+            The textual character of this keypress. Set iff
+            KeyCode == KeyCode.TCODK_CHAR, otherwise zero.
             </summary>
         </member>
-        <member name="T:libtcodWrapper.LineAlignment">
+        <member name="P:libtcodWrapper.KeyPress.Pressed">
             <summary>
-            Types of alignment for printing of strings
+            Any key has been pressed.
             </summary>
         </member>
-        <member name="T:libtcodWrapper.SpecialCharacter">
+        <member name="P:libtcodWrapper.KeyPress.Alt">
             <summary>
-            "Special" ascii characters such as arrows and lines
+            Modified by the press of either alt key.
             </summary>
         </member>
-        <member name="T:libtcodWrapper.CustomFontRequestFontTypes">
+        <member name="P:libtcodWrapper.KeyPress.Control">
             <summary>
-            Flags using for CustomFontRequest
+            Modified by the press of either control key.
             </summary>
+        </member>
+        <member name="P:libtcodWrapper.KeyPress.LeftAlt">
+            <summary>
+            Modified by the press of the left alt key.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.KeyPress.LeftControl">
+            <summary>
+            Modified by the press of the left control key.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.KeyPress.RightAlt">
+            <summary>
+            Modified by the press of the rightt alt key.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.KeyPress.RightControl">
+            <summary>
+            Modified by the press of the right control key.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.KeyPress.Shift">
+            <summary>
+            Modified by the press of either shift key.
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.Keyboard">
+            <summary>
+            Holds static methods for interacting with keyboard
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.Keyboard.WaitForKeyPress(System.Boolean)">
+            <summary>
+            Block until user presses key
+            </summary>
+            <param name="flushInputBuffer">Flush all outstanding keystrokes and wait for next stroke</param>
+            <returns>Keypress</returns>
+        </member>
+        <member name="M:libtcodWrapper.Keyboard.CheckForKeypress(libtcodWrapper.KeyPressType)">
+            <summary>
+            Non-blockingly check for user key press
+            </summary>
+            <param name="pressFlags">Determines what type of events are returned</param>
+            <returns>Keypress</returns>
+        </member>
+        <member name="M:libtcodWrapper.Keyboard.IsKeyPressed(libtcodWrapper.KeyCode)">
+            <summary>
+            Determine if a given key is currently being pressed
+            </summary>
+            <param name="key">Key in question</param>
+            <returns>Is Key Pressed?</returns>
+        </member>
+        <member name="M:libtcodWrapper.Keyboard.SetRepeat(System.Int32,System.Int32)">
+            <summary>
+            Set repeat rate of keyboard
+            </summary>
+            <param name="initialDelay">How long before repeating</param>
+            <param name="interval">How often afterwards to repeat</param>
+        </member>
+        <member name="M:libtcodWrapper.Keyboard.DisableRepeat">
+            <summary>
+            Disable all repeating of keystrokes
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.Image">
+            <summary>
+            Represents an image loaded from disk or created in memory
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.Image.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Creates a new image of a given side with root's background color (or black if none exists)
+            </summary>
+            <param name="width">Width of new image</param>
+            <param name="height">Height of new image</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.#ctor(System.String)">
+            <summary>
+            Loads a .bmp image from disk
+            </summary>
+            <param name="filename">Filename or path</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.#ctor(libtcodWrapper.Console)">
+            <summary>
+            Create image from current console state
+            </summary>
+            <param name="console">Console to take image of</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.Dispose">
+            <summary>
+            Destory unmanaged image resource
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.Image.Clear(libtcodWrapper.Color)">
+            <summary>
+            Clear an image to a specific background color
+            </summary>
+            <param name="color">Color to clear to</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.SaveImageToDisc(System.String)">
+            <summary>
+            Write image to disk as .bmp file
+            </summary>
+            <param name="filename">Filename to create</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.GetSize(System.Int32@,System.Int32@)">
+            <summary>
+            Get the current image's size
+            </summary>
+            <param name="w">Width</param>
+            <param name="h">Height</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.GetPixel(System.Int32,System.Int32)">
+            <summary>
+            Get color of specific pixel in image
+            </summary>
+            <param name="x">Width</param>
+            <param name="y">Height</param>
+            <returns></returns>
+        </member>
+        <member name="M:libtcodWrapper.Image.GetPixelTransparency(System.Int32,System.Int32)">
+            <summary>
+            Is current pixel "transparent", key color
+            </summary>
+            <param name="x">x coord</param>
+            <param name="y">y coord</param>
+            <returns>Is Transparent?</returns>
+        </member>
+        <member name="M:libtcodWrapper.Image.AverageColorOfRegion(System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Use mipmaps to get average color of a region
+            </summary>
+            <param name="x0">Upper left corner x coord</param>
+            <param name="y0">Upper left corner y coord</param>
+            <param name="x1">Lower right corner x coord</param>
+            <param name="y1">Lower right corner y coord</param>
+            <returns></returns>
+        </member>
+        <member name="M:libtcodWrapper.Image.PutPixel(System.Int32,System.Int32,libtcodWrapper.Color)">
+            <summary>
+            Change color of given pixel
+            </summary>
+            <param name="x">x coord of pixel</param>
+            <param name="y">y coord of pixel</param>
+            <param name="col">Color to change pixel to</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.SetKeyColor(libtcodWrapper.Color)">
+            <summary>
+            Set "Key Color", the transparent color of an image
+            </summary>
+            <param name="keyColor">Key Color</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.Blit(libtcodWrapper.Console,System.Single,System.Single,libtcodWrapper.Background,System.Double,System.Double,System.Double)">
+            <summary>
+            Blit entire image onto console
+            </summary>
+            <param name="console">Console target</param>
+            <param name="x">x coord of center of image on console</param>
+            <param name="y">y coord of center of image on console</param>
+            <param name="background">How image affects background color</param>
+            <param name="scalex">Width scaling factor</param>
+            <param name="scaley">Height scaling factor</param>
+            <param name="angle">Rotation angle in radians</param>
+        </member>
+        <member name="M:libtcodWrapper.Image.BlitRect(libtcodWrapper.Console,System.Int32,System.Int32,System.Int32,System.Int32,libtcodWrapper.Background)">
+            <summary>
+            Blit part of a image to the console
+            </summary>
+            <param name="console">Console target</param>
+            <param name="x">x coord of upper left of image on console</param>
+            <param name="y">y coord of upper right of image on console</param>
+            <param name="w">Width of part of image to blit</param>
+            <param name="h">Height of part of image to blit</param>
+            <param name="background">How image affects background color</param>
         </member>
         <member name="T:libtcodWrapper.Color">
             <summary>
@@ -1020,6 +1195,730 @@
             The color DarkPurple; RGB (51, 0, 51)
             </summary>
         </member>
+        <member name="T:libtcodWrapper.Mouse">
+            <summary>
+            Constains information about current mouse status
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.Mouse.ShowCursor(System.Boolean)">
+            <summary>
+            Changes visiblity of mouse while in our window(s)
+            </summary>
+            <param name="visible">Is mouse visible?</param>
+        </member>
+        <member name="M:libtcodWrapper.Mouse.MoveMouse(System.Int32,System.Int32)">
+            <summary>
+            Move user's mouse to that location
+            </summary>
+            <param name="x">Pixel x location</param>
+            <param name="y">Pixel y location</param>
+        </member>
+        <member name="M:libtcodWrapper.Mouse.GetStatus">
+            <summary>
+            Get current mouse status
+            </summary>
+            <returns>Mouse struct with location, movement, and buttom presses</returns>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.PixelX">
+            <summary>
+            Position in x direction in pixels
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.PixelY">
+            <summary>
+            Position in y direction in pixels
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.PixelLocation">
+            <summary>
+            Position of the mouse cursor.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.PixelVelocityX">
+            <summary>
+            Mouse velocity in x direction in pixels
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.PixelVelocityY">
+            <summary>
+            Mouse velocity in y direction in pixels
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.CellX">
+            <summary>
+            Position in x directory in character sized blocks
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.CellY">
+            <summary>
+            Position in Y directory in character sized blocks
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.CellLocation">
+            <summary>
+            Position of the mouse cursor character sized blocks
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.CellVelocityX">
+            <summary>
+            Mouse velocity in x direction in character sized blocks
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.CellVelocityY">
+            <summary>
+            Mouse velocity in y direction in character sized blocks
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Mouse.IsVisible">
+            <summary>
+            Return if cursor is visible
+            </summary>
+            <returns>Is Visible?</returns>
+        </member>
+        <member name="T:libtcodWrapper.TCODPathCallback">
+            <summary>
+            Callback made from pathfinding engine to determine cell pathfinding information
+            </summary>
+            <param name="xFrom">staring x coord</param>
+            <param name="yFrom">starting y coord</param>
+            <param name="xTo">ending x coord</param>
+            <param name="yTo">ending y coord</param>
+            <returns>"Cost" to pass through cell</returns>
+        </member>
+        <member name="T:libtcodWrapper.TCODPathFinding">
+            <summary>
+            Calculates paths in maps using djikstra's algorithms
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.#ctor(System.Int32,System.Int32,System.Double,libtcodWrapper.TCODPathCallback)">
+            <summary>
+            Create a new TCODPathFinding with a callback to determine cell information
+            </summary>
+            <param name="width">Map Width</param>
+            <param name="height">Map Height</param>
+            <param name="diagonalCost">Factor diagonal moves cost more</param>
+            <param name="callback">Callback from path finder</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.#ctor(libtcodWrapper.TCODFov,System.Double)">
+            <summary>
+            Create new TCODPathFinding using map from TCODFov instance
+            </summary>
+            <param name="fovMap">Existing map</param>
+            <param name="diagonalCost">Factor diagonal moves cost more</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.ComputePath(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Compute a path from source to destination. 
+            </summary>
+            <param name="origX">Starting point x coord</param>
+            <param name="origY">Starting point y coord</param>
+            <param name="destX">Destination point x coord</param>
+            <param name="destY">Destination point y coord</param>
+            <returns>IsPathFound?</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.WalkPath(System.Int32@,System.Int32@,System.Boolean)">
+            <summary>
+            Walk along a path. Fill x and y with previous step's coord to get next point.
+            </summary>
+            <param name="x">x coord</param>
+            <param name="y">y coord</param>
+            <param name="recalculateWhenNeeded">If path comes to abrupt end, can we spend time looking for route?</param>
+            <returns>MoreToWalkAlong?</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.GetPointOnPath(System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Query individual point on path
+            </summary>
+            <param name="index">0-based index of points in path list</param>
+            <param name="x">x coord of point</param>
+            <param name="y">y coord of point</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.IsPathEmpty">
+            <summary>
+            Returns if path is empty of points
+            </summary>
+            <returns>IsEmpty?</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.GetPathSize">
+            <summary>
+            Get remainding points on path
+            </summary>
+            <returns>Path Size</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.GetPathOrigin(System.Int32@,System.Int32@)">
+            <summary>
+            Get the origin of the path
+            </summary>
+            <param name="x">x coord of origin</param>
+            <param name="y">y coord of origin</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.GetPathDestination(System.Int32@,System.Int32@)">
+            <summary>
+            Get the destination of the path
+            </summary>
+            <param name="x">x coord of destination</param>
+            <param name="y">y coord of destination</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODPathFinding.Dispose">
+            <summary>
+            Destory unmanaged pathfinding resource.
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.TCODNoise">
+            <summary>
+            Generates various types of "noise" using libtcod perlin.
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultHurst">
+            <summary>
+            Default hurst value for noise generator
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultLacunarity">
+            <summary>
+            Default Lacunarity value for noise generator
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32)">
+            <summary>
+            Create noise object.
+            </summary>
+            <param name="dimensions">Number of dimensions, for perlin and simplex value should be >0 and less than or equal to 4, and less than or equal to 3 for wavelet</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32,libtcodWrapper.TCODRandom)">
+            <summary>
+            Create noise object.
+            </summary>
+            <param name="dimensions">Number of dimensions</param>
+            <param name="random">Random Generator</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32,System.Double,System.Double)">
+            <summary>
+            Create noise object.
+            </summary>
+            <param name="dimensions">Number of dimensions</param>
+            <param name="hurst">Hurst</param>
+            <param name="lacunarity">Lacunarity</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32,System.Double,System.Double,libtcodWrapper.TCODRandom)">
+            <summary>
+            Create noise object.
+            </summary>
+            <param name="dimensions">Number of dimensions</param>
+            <param name="hurst">Hurst</param>
+            <param name="lacunarity">Lacunarity</param>
+            <param name="random">Random Generator</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetPerlinNoise(System.Single[])">
+            <summary>
+            Get Perlin Noise
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <returns>Perlin noise for that point (-1.0 - 1.0) </returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetPerlinBrownianMotion(System.Single[],System.Single)">
+            <summary>
+            Get Perlin fractional Brownian Motion
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <param name="octaves">Number of iterations. (0-127)</param>
+            <returns>Browian motion for that point (-1.0 - 1.0)</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetPerlinTurbulence(System.Single[],System.Single)">
+            <summary>
+            Get Perlin Turbulence
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <param name="octaves">Number of iterations. (0-127)</param>
+            <returns>Turbulence for that point (-1.0 - 1.0)</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetSimplexNoise(System.Single[])">
+            <summary>
+            Get Simplex Noise
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <returns>Perlin noise for that point (-1.0 - 1.0) </returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetSimplexBrownianMotion(System.Single[],System.Single)">
+            <summary>
+            Get Simplex fractional Brownian Motion
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <param name="octaves">Number of iterations. (0-127)</param>
+            <returns>Browian motion for that point (-1.0 - 1.0)</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetSimplexTurbulence(System.Single[],System.Single)">
+            <summary>
+            Get Simplex Turbulence
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <param name="octaves">Number of iterations. (0-127)</param>
+            <returns>Turbulence for that point (-1.0 - 1.0)</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetWaveletNoise(System.Single[])">
+            <summary>
+            Get Wavelet Noise
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <returns>Perlin noise for that point (-1.0 - 1.0) </returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetWaveletBrownianMotion(System.Single[],System.Single)">
+            <summary>
+            Get Wavelet fractional Brownian Motion
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <param name="octaves">Number of iterations. (0-127)</param>
+            <returns>Browian motion for that point (-1.0 - 1.0)</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.GetWaveletTurbulence(System.Single[],System.Single)">
+            <summary>
+            Get Wavelet Turbulence
+            </summary>
+            <param name="f">An array of coordinates</param>
+            <param name="octaves">Number of iterations. (0-127)</param>
+            <returns>Turbulence for that point (-1.0 - 1.0)</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODNoise.Dispose">
+            <summary>
+            Destory unmanaged noice generator.
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.TCODRandom">
+            <summary>
+            Produces random numbers from the Mersenne Twister
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODRandom.#ctor">
+            <summary>
+            Create a new instance of a random number generator.
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODRandom.#ctor(System.UInt32)">
+            <summary>
+            Create new instance of a random number generator with a starting seed.
+            </summary>
+            <param name="seed">Intial Seed</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODRandom.Dispose">
+            <summary>
+            Destroy unmanaged random number generator
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODRandom.GetRandomInt(System.Int32,System.Int32)">
+            <summary>
+            Obtain a random integer in a given range
+            </summary>
+            <param name="min">Minimum number to generate</param>
+            <param name="max">Maximum number to generate</param>
+            <returns>Random Number</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODRandom.GetRandomFloat(System.Double,System.Double)">
+            <summary>
+            Obtain a random floating point number in a given range
+            </summary>
+            <param name="min">Minimum number to generate</param>
+            <param name="max">Maximum number to generate</param>
+            <returns>Random Number</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODRandom.GetRandomFloat(System.Single,System.Single)">
+            <summary>
+            Obtain a random floating point number in a given range
+            </summary>
+            <param name="min">Minimum number to generate</param>
+            <param name="max">Maximum number to generate</param>
+            <returns>Random Number</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODRandom.GetIntFromByteArray(System.Int32,System.Int32,System.String)">
+            <summary>
+            Deterministly obtain a random number based upon a string seed
+            </summary>
+            <param name="min">Minimum number to generate</param>
+            <param name="max">Maximum number to generate</param>
+            <param name="data">String to be a seed</param>
+            <returns>Random Number</returns>
+        </member>
+        <member name="T:libtcodWrapper.TCODException">
+            <summary>
+            Base exception class for libtcod-net.
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODException.#ctor(System.String)">
+            <summary>
+            Constructor. Wraps System.Exception's constructor.
+            </summary>
+            <param name="message">
+            Message to include in the exception.
+            </param>
+        </member>
+        <member name="T:libtcodWrapper.BackgroundFlag">
+            <summary>
+            Blending mode flags for the background object.
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.KeyCode">
+            <summary>
+            Types of "special" keycodes"
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.KeyPressType">
+            <summary>
+            Is event returned when key is pressed, release, or both?
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.LineAlignment">
+            <summary>
+            Types of alignment for printing of strings
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.SpecialCharacter">
+            <summary>
+            "Special" ascii characters such as arrows and lines
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.CustomFontRequestFontTypes">
+            <summary>
+            Flags using for CustomFontRequest
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.TCODSystem">
+            <summary>
+            Represents System Level Functions
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODSystem.Sleep(System.UInt32)">
+            <summary>
+            Stop program execution for specified amount of time
+            </summary>
+            <param name="milliseconds">Milliseconds to sleep</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODSystem.SaveScreenshot(System.String)">
+            <summary>
+            Save a screenshot of the root console to disk
+            </summary>
+            <param name="fileName">Filename to save image to</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODSystem.ForceFullscrenResolution(System.Int32,System.Int32)">
+            <summary>
+            Force specific resolution in fullscreen
+            </summary>
+            <param name="width">Fullscreen Width</param>
+            <param name="height">Fullscreen Height</param>
+        </member>
+        <member name="P:libtcodWrapper.TCODSystem.ElapsedMilliseconds">
+            <summary>
+            Obtain number of milliseconds since the program started
+            </summary>
+            <returns>Milliseconds since the program started</returns>
+        </member>
+        <member name="P:libtcodWrapper.TCODSystem.ElapsedSeconds">
+            <summary>
+            Obtain number of seconds since the program started
+            </summary>
+            <returns>Seconds since the program started</returns>
+        </member>
+        <member name="P:libtcodWrapper.TCODSystem.CurrentResolution">
+            <summary>
+            The current screen resolution.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.TCODSystem.LastFrameLength">
+            <summary>
+            Return the length in seconds of the last rendered frame.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.TCODSystem.FPS">
+            <summary>
+            Get or set the current value of frames per second that
+            the library will attempt to render.
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.TCODValueType">
+            <summary>
+            Types of values parsed from config file
+            </summary>
+        </member>
+        <member name="T:libtcodWrapper.TCODValue">
+            <summary>
+            "Union" that holds value obtained from config file
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODValue.GetStringFromFieldS">
+            <summary>
+            Marshal a string from the fixed field 's'
+            </summary>
+            <returns>String</returns>
+        </member>
+        <member name="T:libtcodWrapper.TCODDice">
+            <summary>
+            Hold dice-type ranges: [multiplier x] nb_dices d nb_faces [(+|-) addsub]
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODDice.nb_dices">
+            <summary>
+            Number of Dices
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODDice.nb_faces">
+            <summary>
+            Number of faces per side
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODDice.multiplier">
+            <summary>
+            Multiplier attached to dice roll
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODDice.addsub">
+            <summary>
+            Constant to add/subtract to dice roll
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODDice.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Create a new TCODDice
+            </summary>
+            <param name="dices">Number of dice</param>
+            <param name="faces">Number of face per dice</param>
+            <param name="mult">Multiplier to roll</param>
+            <param name="constant">Constant to add/subtract</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODDice.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Create a new TCODDice
+            </summary>
+            <param name="dices">Number of dice</param>
+            <param name="faces">Number of face per dice</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODDice.#ctor(libtcodWrapper.TCODDice)">
+            <summary>
+            Create Copy of TCODDIce
+            </summary>
+            <param name="d">Dice to copy</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODDice.Equals(System.Object)">
+            <summary>
+            Compare two TCODDice
+            </summary>
+            <param name="obj">Other object</param>
+            <returns>Are Equal?</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODDice.GetHashCode">
+            <summary>
+            Calculate Hash Value of a TCODDice
+            </summary>
+            <returns>Hash Value</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODDice.op_Equality(libtcodWrapper.TCODDice,libtcodWrapper.TCODDice)">
+            <summary>
+            Determine if two TCODDice are equal.
+            </summary>
+            <param name="lhs">Left Hand Side</param>
+            <param name="rhs">Right Hand Side</param>
+            <returns>Are Equal?</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODDice.op_Inequality(libtcodWrapper.TCODDice,libtcodWrapper.TCODDice)">
+            <summary>
+            Determine if two TCODDice are not equal.
+            </summary>
+            <param name="lhs">Left Hand Side</param>
+            <param name="rhs">Right Hand Side</param>
+            <returns>Are Not Equal?</returns>
+        </member>
+        <member name="T:libtcodWrapper.NewStructureCallback">
+            <summary>
+            Callback from parser when new structure is found
+            </summary>
+            <param name="str">New Structure</param>
+            <param name="name">Structure Name</param>
+            <returns>Return true if parsing is successful. False causes abort()</returns>
+        </member>
+        <member name="T:libtcodWrapper.NewFlagCallback">
+            <summary>
+            Callback from parser when new flag is found
+            </summary>
+            <param name="name">Name of flag</param>
+            <returns>Return true if parsing is successful. False causes abort()</returns>
+        </member>
+        <member name="T:libtcodWrapper.NewPropertyCallback">
+            <summary>
+            Callback from parser when new property is found
+            </summary>
+            <param name="name">Name of new property</param>
+            <param name="type">Type of new property</param>
+            <param name="v">Value of new property</param>
+            <returns>Return true if parsing is successful. False causes abort()</returns>
+        </member>
+        <member name="T:libtcodWrapper.EndStructureCallback">
+            <summary>
+            Callback from parser when end of structure is found
+            </summary>
+            <param name="str">Structure which end is found</param>
+            <param name="name">Name of structure which end is found</param>
+            <returns>Return true if parsing is successful. False causes abort()</returns>
+        </member>
+        <member name="T:libtcodWrapper.ErrorCallback">
+            <summary>
+            Callback from parser when parsing error occurs
+            </summary>
+            <param name="msg">Error message from parser</param>
+        </member>
+        <member name="T:libtcodWrapper.TCODParserCallbackStruct">
+            <summary>
+            Holds onto callbacks the parser uses to communicate.
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserCallbackStruct.#ctor(libtcodWrapper.NewStructureCallback,libtcodWrapper.NewFlagCallback,libtcodWrapper.NewPropertyCallback,libtcodWrapper.EndStructureCallback,libtcodWrapper.ErrorCallback)">
+            <summary>
+            Create CallbackStruct which passes callbacks to parser
+            </summary>
+            <param name="newStruct">Callback when new structure is found</param>
+            <param name="newFlag">Callback when new flag is found</param>
+            <param name="newProp">Callback when new property is found</param>
+            <param name="endStruct">Callback when new of structure is found</param>
+            <param name="error">Callback when parser comes across error</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserCallbackStruct.ReturnErrorToParser(System.String)">
+            <summary>
+            If called in delegate handing parser events, will return string to be outputted along with position and abort the parsing.
+            </summary>
+            <param name="error">String explaining error</param>
+        </member>
+        <member name="T:libtcodWrapper.TCODFileParser">
+            <summary>
+            Parses configuration file
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.#ctor">
+            <summary>
+            Create new parser
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.Dispose">
+            <summary>
+            Destory unmanaged parser resource
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.Run(System.String,libtcodWrapper.TCODParserCallbackStruct@)">
+            <summary>
+            Run the parser with custom callbacks
+            </summary>
+            <param name="filename">Filename of configuration file</param>
+            <param name="listener">Callbacks from parser</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.Run(System.String)">
+            <summary>
+            Run the parser with the default parser listener
+            </summary>
+            <param name="filename">Filename of configuration file</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.RegisterNewStructure(System.String)">
+            <summary>
+            Register a new structure with the parser
+            </summary>
+            <param name="name">Structure Name</param>
+            <returns></returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.GetBoolProperty(System.String)">
+            <summary>
+            Get a boolean property from the default parser listener
+            </summary>
+            <param name="name">Property Name</param>
+            <remarks>Use only if you use the default parser listener</remarks>
+            <returns>Boolean Value of Property</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.GetIntProperty(System.String)">
+            <summary>
+            Get a integer property from the default parser listener
+            </summary>
+            <param name="name">Property Name</param>
+            /// <remarks>Use only if you use the default parser listener</remarks>
+            <returns>Int Value of Property</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.GetFloatProperty(System.String)">
+            <summary>
+            Get a float property from the default parser listener
+            </summary>
+            <param name="name">Property Name</param>
+            /// <remarks>Use only if you use the default parser listener</remarks>
+            <returns>Float Value of Property</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.GetStringProperty(System.String)">
+            <summary>
+            Get a string property from the default parser listener
+            </summary>
+            <param name="name">Property Name</param>
+            /// <remarks>Use only if you use the default parser listener</remarks>
+            <returns>String Value of Property</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.GetColorProperty(System.String)">
+            <summary>
+            Get a color property from the default parser listener
+            </summary>
+            <param name="name">Property Name</param>
+            /// <remarks>Use only if you use the default parser listener</remarks>
+            <returns>Color Value of Property</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODFileParser.GetDiceProperty(System.String)">
+            <summary>
+            Get the dice property from the default parser listener
+            </summary>
+            <param name="name">Property Name</param>
+            /// <remarks>Use only if you use the default parser listener</remarks>
+            <returns>Dice Value of Property</returns>
+        </member>
+        <member name="T:libtcodWrapper.TCODParserStructure">
+            <summary>
+            Created by RegisterNewStructure and represents one valid "structure in the config file"
+            </summary>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserStructure.AddFlag(System.String)">
+            <summary>
+            Add flag to structure
+            </summary>
+            <param name="name">Flag Name</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserStructure.AddProperty(System.String,libtcodWrapper.TCODValueType,System.Boolean)">
+            <summary>
+            Add new property to structure
+            </summary>
+            <param name="name">Name of Property</param>
+            <param name="type">Property Type</param>
+            <param name="mandatory">Is Mandatory?</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserStructure.AddValueList(System.String,System.String[],System.Boolean)">
+            <summary>
+            Add new "value list", set of possible string values
+            </summary>
+            <param name="name">Name of List</param>
+            <param name="list">Possible Values</param>
+            <param name="mandatory">Is Mandatory?</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserStructure.AddSubStructure(libtcodWrapper.TCODParserStructure)">
+            <summary>
+            Add substructure to structure
+            </summary>
+            <param name="substructure">New Substructure to add</param>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserStructure.GetName">
+            <summary>
+            Get Name of Structure
+            </summary>
+            <returns>Name</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserStructure.IsMandatory(System.String)">
+            <summary>
+            Returns if structure is a mandatory value
+            </summary>
+            <param name="name">Name of Structure</param>
+            <returns>Is Mandatory?</returns>
+        </member>
+        <member name="M:libtcodWrapper.TCODParserStructure.GetType(System.String)">
+            <summary>
+            Get Value's type of structure
+            </summary>
+            <param name="name">Property's Name</param>
+            <returns>Type</returns>
+        </member>
         <member name="F:libtcodWrapper.DLLName.name">
             <summary>
             Defines the name of the DLL we look for on disk. The runtime adds {.dll,.so} to the end
@@ -1482,305 +2381,30 @@
             Font data for a font other than the default "terminal.bmp".
             </summary>
         </member>
-        <member name="T:libtcodWrapper.TCODException">
+        <member name="T:libtcodWrapper.TCODLineDrawing">
             <summary>
-            Base exception class for libtcod-net.
+            Plots points of a line using Bresenham algorithm
             </summary>
+            <remarks>This class is not thread safe, nor is it safe to use more than one "instance" at the same time</remarks>
         </member>
-        <member name="M:libtcodWrapper.TCODException.#ctor(System.String)">
+        <member name="M:libtcodWrapper.TCODLineDrawing.InitLine(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
-            Constructor. Wraps System.Exception's constructor.
+            Initalize line drawing toolkit with beginning and end point
             </summary>
-            <param name="message">
-            Message to include in the exception.
-            </param>
+            <param name="xFrom">Beginning x coord</param>
+            <param name="yFrom">Beginning y coord</param>
+            <param name="xTo">Ending x coord</param>
+            <param name="yTo">Ending y coord</param>
         </member>
-        <member name="T:libtcodWrapper.TCODValueType">
+        <member name="M:libtcodWrapper.TCODLineDrawing.StepLine(System.Int32@,System.Int32@)">
             <summary>
-            Types of values parsed from config file
+            Step to the next point on the line
             </summary>
-        </member>
-        <member name="T:libtcodWrapper.TCODValue">
-            <summary>
-            "Union" that holds value obtained from config file
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODValue.GetStringFromFieldS">
-            <summary>
-            Marshal a string from the fixed field 's'
-            </summary>
-            <returns>String</returns>
-        </member>
-        <member name="T:libtcodWrapper.TCODDice">
-            <summary>
-            Hold dice-type ranges: [multiplier x] nb_dices d nb_faces [(+|-) addsub]
-            </summary>
-        </member>
-        <member name="F:libtcodWrapper.TCODDice.nb_dices">
-            <summary>
-            Number of Dices
-            </summary>
-        </member>
-        <member name="F:libtcodWrapper.TCODDice.nb_faces">
-            <summary>
-            Number of faces per side
-            </summary>
-        </member>
-        <member name="F:libtcodWrapper.TCODDice.multiplier">
-            <summary>
-            Multiplier attached to dice roll
-            </summary>
-        </member>
-        <member name="F:libtcodWrapper.TCODDice.addsub">
-            <summary>
-            Constant to add/subtract to dice roll
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODDice.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Create a new TCODDice
-            </summary>
-            <param name="dices">Number of dice</param>
-            <param name="faces">Number of face per dice</param>
-            <param name="mult">Multiplier to roll</param>
-            <param name="constant">Constant to add/subtract</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODDice.#ctor(System.Int32,System.Int32)">
-            <summary>
-            Create a new TCODDice
-            </summary>
-            <param name="dices">Number of dice</param>
-            <param name="faces">Number of face per dice</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODDice.#ctor(libtcodWrapper.TCODDice)">
-            <summary>
-            Create Copy of TCODDIce
-            </summary>
-            <param name="d">Dice to copy</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODDice.Equals(System.Object)">
-            <summary>
-            Compare two TCODDice
-            </summary>
-            <param name="obj">Other object</param>
-            <returns>Are Equal?</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODDice.GetHashCode">
-            <summary>
-            Calculate Hash Value of a TCODDice
-            </summary>
-            <returns>Hash Value</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODDice.op_Equality(libtcodWrapper.TCODDice,libtcodWrapper.TCODDice)">
-            <summary>
-            Determine if two TCODDice are equal.
-            </summary>
-            <param name="lhs">Left Hand Side</param>
-            <param name="rhs">Right Hand Side</param>
-            <returns>Are Equal?</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODDice.op_Inequality(libtcodWrapper.TCODDice,libtcodWrapper.TCODDice)">
-            <summary>
-            Determine if two TCODDice are not equal.
-            </summary>
-            <param name="lhs">Left Hand Side</param>
-            <param name="rhs">Right Hand Side</param>
-            <returns>Are Not Equal?</returns>
-        </member>
-        <member name="T:libtcodWrapper.NewStructureCallback">
-            <summary>
-            Callback from parser when new structure is found
-            </summary>
-            <param name="str">New Structure</param>
-            <param name="name">Structure Name</param>
-            <returns>Return true if parsing is successful. False causes abort()</returns>
-        </member>
-        <member name="T:libtcodWrapper.NewFlagCallback">
-            <summary>
-            Callback from parser when new flag is found
-            </summary>
-            <param name="name">Name of flag</param>
-            <returns>Return true if parsing is successful. False causes abort()</returns>
-        </member>
-        <member name="T:libtcodWrapper.NewPropertyCallback">
-            <summary>
-            Callback from parser when new property is found
-            </summary>
-            <param name="name">Name of new property</param>
-            <param name="type">Type of new property</param>
-            <param name="v">Value of new property</param>
-            <returns>Return true if parsing is successful. False causes abort()</returns>
-        </member>
-        <member name="T:libtcodWrapper.EndStructureCallback">
-            <summary>
-            Callback from parser when end of structure is found
-            </summary>
-            <param name="str">Structure which end is found</param>
-            <param name="name">Name of structure which end is found</param>
-            <returns>Return true if parsing is successful. False causes abort()</returns>
-        </member>
-        <member name="T:libtcodWrapper.ErrorCallback">
-            <summary>
-            Callback from parser when parsing error occurs
-            </summary>
-            <param name="msg">Error message from parser</param>
-        </member>
-        <member name="T:libtcodWrapper.TCODParserCallbackStruct">
-            <summary>
-            Holds onto callbacks the parser uses to communicate.
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserCallbackStruct.#ctor(libtcodWrapper.NewStructureCallback,libtcodWrapper.NewFlagCallback,libtcodWrapper.NewPropertyCallback,libtcodWrapper.EndStructureCallback,libtcodWrapper.ErrorCallback)">
-            <summary>
-            Create CallbackStruct which passes callbacks to parser
-            </summary>
-            <param name="newStruct">Callback when new structure is found</param>
-            <param name="newFlag">Callback when new flag is found</param>
-            <param name="newProp">Callback when new property is found</param>
-            <param name="endStruct">Callback when new of structure is found</param>
-            <param name="error">Callback when parser comes across error</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserCallbackStruct.ReturnErrorToParser(System.String)">
-            <summary>
-            If called in delegate handing parser events, will return string to be outputted along with position and abort the parsing.
-            </summary>
-            <param name="error">String explaining error</param>
-        </member>
-        <member name="T:libtcodWrapper.TCODFileParser">
-            <summary>
-            Parses configuration file
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.#ctor">
-            <summary>
-            Create new parser
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.Dispose">
-            <summary>
-            Destory unmanaged parser resource
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.Run(System.String,libtcodWrapper.TCODParserCallbackStruct@)">
-            <summary>
-            Run the parser with custom callbacks
-            </summary>
-            <param name="filename">Filename of configuration file</param>
-            <param name="listener">Callbacks from parser</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.Run(System.String)">
-            <summary>
-            Run the parser with the default parser listener
-            </summary>
-            <param name="filename">Filename of configuration file</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.RegisterNewStructure(System.String)">
-            <summary>
-            Register a new structure with the parser
-            </summary>
-            <param name="name">Structure Name</param>
-            <returns></returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.GetBoolProperty(System.String)">
-            <summary>
-            Get a boolean property from the default parser listener
-            </summary>
-            <param name="name">Property Name</param>
-            <remarks>Use only if you use the default parser listener</remarks>
-            <returns>Boolean Value of Property</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.GetIntProperty(System.String)">
-            <summary>
-            Get a integer property from the default parser listener
-            </summary>
-            <param name="name">Property Name</param>
-            /// <remarks>Use only if you use the default parser listener</remarks>
-            <returns>Int Value of Property</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.GetFloatProperty(System.String)">
-            <summary>
-            Get a float property from the default parser listener
-            </summary>
-            <param name="name">Property Name</param>
-            /// <remarks>Use only if you use the default parser listener</remarks>
-            <returns>Float Value of Property</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.GetStringProperty(System.String)">
-            <summary>
-            Get a string property from the default parser listener
-            </summary>
-            <param name="name">Property Name</param>
-            /// <remarks>Use only if you use the default parser listener</remarks>
-            <returns>String Value of Property</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.GetColorProperty(System.String)">
-            <summary>
-            Get a color property from the default parser listener
-            </summary>
-            <param name="name">Property Name</param>
-            /// <remarks>Use only if you use the default parser listener</remarks>
-            <returns>Color Value of Property</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODFileParser.GetDiceProperty(System.String)">
-            <summary>
-            Get the dice property from the default parser listener
-            </summary>
-            <param name="name">Property Name</param>
-            /// <remarks>Use only if you use the default parser listener</remarks>
-            <returns>Dice Value of Property</returns>
-        </member>
-        <member name="T:libtcodWrapper.TCODParserStructure">
-            <summary>
-            Created by RegisterNewStructure and represents one valid "structure in the config file"
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserStructure.AddFlag(System.String)">
-            <summary>
-            Add flag to structure
-            </summary>
-            <param name="name">Flag Name</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserStructure.AddProperty(System.String,libtcodWrapper.TCODValueType,System.Boolean)">
-            <summary>
-            Add new property to structure
-            </summary>
-            <param name="name">Name of Property</param>
-            <param name="type">Property Type</param>
-            <param name="mandatory">Is Mandatory?</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserStructure.AddValueList(System.String,System.String[],System.Boolean)">
-            <summary>
-            Add new "value list", set of possible string values
-            </summary>
-            <param name="name">Name of List</param>
-            <param name="list">Possible Values</param>
-            <param name="mandatory">Is Mandatory?</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserStructure.AddSubStructure(libtcodWrapper.TCODParserStructure)">
-            <summary>
-            Add substructure to structure
-            </summary>
-            <param name="substructure">New Substructure to add</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserStructure.GetName">
-            <summary>
-            Get Name of Structure
-            </summary>
-            <returns>Name</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserStructure.IsMandatory(System.String)">
-            <summary>
-            Returns if structure is a mandatory value
-            </summary>
-            <param name="name">Name of Structure</param>
-            <returns>Is Mandatory?</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODParserStructure.GetType(System.String)">
-            <summary>
-            Get Value's type of structure
-            </summary>
-            <param name="name">Property's Name</param>
-            <returns>Type</returns>
+            <param name="xCur">x Coord of next point of line</param>
+            <param name="yCur">y Coord of next point of line</param>
+            <returns>True if endpoint reached</returns>
+            <remarks>Note: xCur and yCur must be initialized to the point previous to the one you want 
+            on the line. See TCOD documentation for more details.</remarks>
         </member>
         <member name="T:libtcodWrapper.TCODFov">
             <summary>
@@ -1837,630 +2461,6 @@
             <param name="x">x coord of cell</param>
             <param name="y">y coord of cell</param>
             <returns>Is visible?</returns>
-        </member>
-        <member name="T:libtcodWrapper.Image">
-            <summary>
-            Represents an image loaded from disk or created in memory
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.Image.#ctor(System.Int32,System.Int32)">
-            <summary>
-            Creates a new image of a given side with root's background color (or black if none exists)
-            </summary>
-            <param name="width">Width of new image</param>
-            <param name="height">Height of new image</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.#ctor(System.String)">
-            <summary>
-            Loads a .bmp image from disk
-            </summary>
-            <param name="filename">Filename or path</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.#ctor(libtcodWrapper.Console)">
-            <summary>
-            Create image from current console state
-            </summary>
-            <param name="console">Console to take image of</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.Dispose">
-            <summary>
-            Destory unmanaged image resource
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.Image.Clear(libtcodWrapper.Color)">
-            <summary>
-            Clear an image to a specific background color
-            </summary>
-            <param name="color">Color to clear to</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.SaveImageToDisc(System.String)">
-            <summary>
-            Write image to disk as .bmp file
-            </summary>
-            <param name="filename">Filename to create</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.GetSize(System.Int32@,System.Int32@)">
-            <summary>
-            Get the current image's size
-            </summary>
-            <param name="w">Width</param>
-            <param name="h">Height</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.GetPixel(System.Int32,System.Int32)">
-            <summary>
-            Get color of specific pixel in image
-            </summary>
-            <param name="x">Width</param>
-            <param name="y">Height</param>
-            <returns></returns>
-        </member>
-        <member name="M:libtcodWrapper.Image.GetPixelTransparency(System.Int32,System.Int32)">
-            <summary>
-            Is current pixel "transparent", key color
-            </summary>
-            <param name="x">x coord</param>
-            <param name="y">y coord</param>
-            <returns>Is Transparent?</returns>
-        </member>
-        <member name="M:libtcodWrapper.Image.AverageColorOfRegion(System.Single,System.Single,System.Single,System.Single)">
-            <summary>
-            Use mipmaps to get average color of a region
-            </summary>
-            <param name="x0">Upper left corner x coord</param>
-            <param name="y0">Upper left corner y coord</param>
-            <param name="x1">Lower right corner x coord</param>
-            <param name="y1">Lower right corner y coord</param>
-            <returns></returns>
-        </member>
-        <member name="M:libtcodWrapper.Image.PutPixel(System.Int32,System.Int32,libtcodWrapper.Color)">
-            <summary>
-            Change color of given pixel
-            </summary>
-            <param name="x">x coord of pixel</param>
-            <param name="y">y coord of pixel</param>
-            <param name="col">Color to change pixel to</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.SetKeyColor(libtcodWrapper.Color)">
-            <summary>
-            Set "Key Color", the transparent color of an image
-            </summary>
-            <param name="keyColor">Key Color</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.Blit(libtcodWrapper.Console,System.Single,System.Single,libtcodWrapper.Background,System.Double,System.Double,System.Double)">
-            <summary>
-            Blit entire image onto console
-            </summary>
-            <param name="console">Console target</param>
-            <param name="x">x coord of center of image on console</param>
-            <param name="y">y coord of center of image on console</param>
-            <param name="background">How image affects background color</param>
-            <param name="scalex">Width scaling factor</param>
-            <param name="scaley">Height scaling factor</param>
-            <param name="angle">Rotation angle in radians</param>
-        </member>
-        <member name="M:libtcodWrapper.Image.BlitRect(libtcodWrapper.Console,System.Int32,System.Int32,System.Int32,System.Int32,libtcodWrapper.Background)">
-            <summary>
-            Blit part of a image to the console
-            </summary>
-            <param name="console">Console target</param>
-            <param name="x">x coord of upper left of image on console</param>
-            <param name="y">y coord of upper right of image on console</param>
-            <param name="w">Width of part of image to blit</param>
-            <param name="h">Height of part of image to blit</param>
-            <param name="background">How image affects background color</param>
-        </member>
-        <member name="T:libtcodWrapper.KeyPress">
-            <summary>
-            Keystroke structure returned from Keyboard methods.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.KeyCode">
-            <summary>
-            Key code for the current button press.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.Character">
-            <summary>
-            The textual character of this keypress. Set iff
-            KeyCode == KeyCode.TCODK_CHAR, otherwise zero.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.Pressed">
-            <summary>
-            Any key has been pressed.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.Alt">
-            <summary>
-            Modified by the press of either alt key.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.Control">
-            <summary>
-            Modified by the press of either control key.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.LeftAlt">
-            <summary>
-            Modified by the press of the left alt key.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.LeftControl">
-            <summary>
-            Modified by the press of the left control key.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.RightAlt">
-            <summary>
-            Modified by the press of the rightt alt key.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.RightControl">
-            <summary>
-            Modified by the press of the right control key.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.KeyPress.Shift">
-            <summary>
-            Modified by the press of either shift key.
-            </summary>
-        </member>
-        <member name="T:libtcodWrapper.Keyboard">
-            <summary>
-            Holds static methods for interacting with keyboard
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.Keyboard.WaitForKeyPress(System.Boolean)">
-            <summary>
-            Block until user presses key
-            </summary>
-            <param name="flushInputBuffer">Flush all outstanding keystrokes and wait for next stroke</param>
-            <returns>Keypress</returns>
-        </member>
-        <member name="M:libtcodWrapper.Keyboard.CheckForKeypress(libtcodWrapper.KeyPressType)">
-            <summary>
-            Non-blockingly check for user key press
-            </summary>
-            <param name="pressFlags">Determines what type of events are returned</param>
-            <returns>Keypress</returns>
-        </member>
-        <member name="M:libtcodWrapper.Keyboard.IsKeyPressed(libtcodWrapper.KeyCode)">
-            <summary>
-            Determine if a given key is currently being pressed
-            </summary>
-            <param name="key">Key in question</param>
-            <returns>Is Key Pressed?</returns>
-        </member>
-        <member name="M:libtcodWrapper.Keyboard.SetRepeat(System.Int32,System.Int32)">
-            <summary>
-            Set repeat rate of keyboard
-            </summary>
-            <param name="initialDelay">How long before repeating</param>
-            <param name="interval">How often afterwards to repeat</param>
-        </member>
-        <member name="M:libtcodWrapper.Keyboard.DisableRepeat">
-            <summary>
-            Disable all repeating of keystrokes
-            </summary>
-        </member>
-        <member name="T:libtcodWrapper.TCODLineDrawing">
-            <summary>
-            Plots points of a line using Bresenham algorithm
-            </summary>
-            <remarks>This class is not thread safe, nor is it safe to use more than one "instance" at the same time</remarks>
-        </member>
-        <member name="M:libtcodWrapper.TCODLineDrawing.InitLine(System.Int32,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Initalize line drawing toolkit with beginning and end point
-            </summary>
-            <param name="xFrom">Beginning x coord</param>
-            <param name="yFrom">Beginning y coord</param>
-            <param name="xTo">Ending x coord</param>
-            <param name="yTo">Ending y coord</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODLineDrawing.StepLine(System.Int32@,System.Int32@)">
-            <summary>
-            Step to the next point on the line
-            </summary>
-            <param name="xCur">x Coord of next point of line</param>
-            <param name="yCur">y Coord of next point of line</param>
-            <returns>True if endpoint reached</returns>
-            <remarks>Note: xCur and yCur must be initialized to the point previous to the one you want 
-            on the line. See TCOD documentation for more details.</remarks>
-        </member>
-        <member name="T:libtcodWrapper.TCODNoise">
-            <summary>
-            Generates various types of "noise" using libtcod perlin.
-            </summary>
-        </member>
-        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultHurst">
-            <summary>
-            Default hurst value for noise generator
-            </summary>
-        </member>
-        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultLacunarity">
-            <summary>
-            Default Lacunarity value for noise generator
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32)">
-            <summary>
-            Create noise object.
-            </summary>
-            <param name="dimensions">Number of dimensions, for perlin and simplex value should be >0 and less than or equal to 4, and less than or equal to 3 for wavelet</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32,libtcodWrapper.TCODRandom)">
-            <summary>
-            Create noise object.
-            </summary>
-            <param name="dimensions">Number of dimensions</param>
-            <param name="random">Random Generator</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32,System.Double,System.Double)">
-            <summary>
-            Create noise object.
-            </summary>
-            <param name="dimensions">Number of dimensions</param>
-            <param name="hurst">Hurst</param>
-            <param name="lacunarity">Lacunarity</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32,System.Double,System.Double,libtcodWrapper.TCODRandom)">
-            <summary>
-            Create noise object.
-            </summary>
-            <param name="dimensions">Number of dimensions</param>
-            <param name="hurst">Hurst</param>
-            <param name="lacunarity">Lacunarity</param>
-            <param name="random">Random Generator</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetPerlinNoise(System.Single[])">
-            <summary>
-            Get Perlin Noise
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <returns>Perlin noise for that point (-1.0 - 1.0) </returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetPerlinBrownianMotion(System.Single[],System.Single)">
-            <summary>
-            Get Perlin fractional Brownian Motion
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <param name="octaves">Number of iterations. (0-127)</param>
-            <returns>Browian motion for that point (-1.0 - 1.0)</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetPerlinTurbulence(System.Single[],System.Single)">
-            <summary>
-            Get Perlin Turbulence
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <param name="octaves">Number of iterations. (0-127)</param>
-            <returns>Turbulence for that point (-1.0 - 1.0)</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetSimplexNoise(System.Single[])">
-            <summary>
-            Get Simplex Noise
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <returns>Perlin noise for that point (-1.0 - 1.0) </returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetSimplexBrownianMotion(System.Single[],System.Single)">
-            <summary>
-            Get Simplex fractional Brownian Motion
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <param name="octaves">Number of iterations. (0-127)</param>
-            <returns>Browian motion for that point (-1.0 - 1.0)</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetSimplexTurbulence(System.Single[],System.Single)">
-            <summary>
-            Get Simplex Turbulence
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <param name="octaves">Number of iterations. (0-127)</param>
-            <returns>Turbulence for that point (-1.0 - 1.0)</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetWaveletNoise(System.Single[])">
-            <summary>
-            Get Wavelet Noise
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <returns>Perlin noise for that point (-1.0 - 1.0) </returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetWaveletBrownianMotion(System.Single[],System.Single)">
-            <summary>
-            Get Wavelet fractional Brownian Motion
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <param name="octaves">Number of iterations. (0-127)</param>
-            <returns>Browian motion for that point (-1.0 - 1.0)</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.GetWaveletTurbulence(System.Single[],System.Single)">
-            <summary>
-            Get Wavelet Turbulence
-            </summary>
-            <param name="f">An array of coordinates</param>
-            <param name="octaves">Number of iterations. (0-127)</param>
-            <returns>Turbulence for that point (-1.0 - 1.0)</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODNoise.Dispose">
-            <summary>
-            Destory unmanaged noice generator.
-            </summary>
-        </member>
-        <member name="T:libtcodWrapper.TCODPathCallback">
-            <summary>
-            Callback made from pathfinding engine to determine cell pathfinding information
-            </summary>
-            <param name="xFrom">staring x coord</param>
-            <param name="yFrom">starting y coord</param>
-            <param name="xTo">ending x coord</param>
-            <param name="yTo">ending y coord</param>
-            <returns>"Cost" to pass through cell</returns>
-        </member>
-        <member name="T:libtcodWrapper.TCODPathFinding">
-            <summary>
-            Calculates paths in maps using djikstra's algorithms
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.#ctor(System.Int32,System.Int32,System.Double,libtcodWrapper.TCODPathCallback)">
-            <summary>
-            Create a new TCODPathFinding with a callback to determine cell information
-            </summary>
-            <param name="width">Map Width</param>
-            <param name="height">Map Height</param>
-            <param name="diagonalCost">Factor diagonal moves cost more</param>
-            <param name="callback">Callback from path finder</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.#ctor(libtcodWrapper.TCODFov,System.Double)">
-            <summary>
-            Create new TCODPathFinding using map from TCODFov instance
-            </summary>
-            <param name="fovMap">Existing map</param>
-            <param name="diagonalCost">Factor diagonal moves cost more</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.ComputePath(System.Int32,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Compute a path from source to destination. 
-            </summary>
-            <param name="origX">Starting point x coord</param>
-            <param name="origY">Starting point y coord</param>
-            <param name="destX">Destination point x coord</param>
-            <param name="destY">Destination point y coord</param>
-            <returns>IsPathFound?</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.WalkPath(System.Int32@,System.Int32@,System.Boolean)">
-            <summary>
-            Walk along a path. Fill x and y with previous step's coord to get next point.
-            </summary>
-            <param name="x">x coord</param>
-            <param name="y">y coord</param>
-            <param name="recalculateWhenNeeded">If path comes to abrupt end, can we spend time looking for route?</param>
-            <returns>MoreToWalkAlong?</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.GetPointOnPath(System.Int32,System.Int32@,System.Int32@)">
-            <summary>
-            Query individual point on path
-            </summary>
-            <param name="index">0-based index of points in path list</param>
-            <param name="x">x coord of point</param>
-            <param name="y">y coord of point</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.IsPathEmpty">
-            <summary>
-            Returns if path is empty of points
-            </summary>
-            <returns>IsEmpty?</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.GetPathSize">
-            <summary>
-            Get remainding points on path
-            </summary>
-            <returns>Path Size</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.GetPathOrigin(System.Int32@,System.Int32@)">
-            <summary>
-            Get the origin of the path
-            </summary>
-            <param name="x">x coord of origin</param>
-            <param name="y">y coord of origin</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.GetPathDestination(System.Int32@,System.Int32@)">
-            <summary>
-            Get the destination of the path
-            </summary>
-            <param name="x">x coord of destination</param>
-            <param name="y">y coord of destination</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODPathFinding.Dispose">
-            <summary>
-            Destory unmanaged pathfinding resource.
-            </summary>
-        </member>
-        <member name="T:libtcodWrapper.TCODRandom">
-            <summary>
-            Produces random numbers from the Mersenne Twister
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODRandom.#ctor">
-            <summary>
-            Create a new instance of a random number generator.
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODRandom.#ctor(System.UInt32)">
-            <summary>
-            Create new instance of a random number generator with a starting seed.
-            </summary>
-            <param name="seed">Intial Seed</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODRandom.Dispose">
-            <summary>
-            Destroy unmanaged random number generator
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODRandom.GetRandomInt(System.Int32,System.Int32)">
-            <summary>
-            Obtain a random integer in a given range
-            </summary>
-            <param name="min">Minimum number to generate</param>
-            <param name="max">Maximum number to generate</param>
-            <returns>Random Number</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODRandom.GetRandomFloat(System.Double,System.Double)">
-            <summary>
-            Obtain a random floating point number in a given range
-            </summary>
-            <param name="min">Minimum number to generate</param>
-            <param name="max">Maximum number to generate</param>
-            <returns>Random Number</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODRandom.GetRandomFloat(System.Single,System.Single)">
-            <summary>
-            Obtain a random floating point number in a given range
-            </summary>
-            <param name="min">Minimum number to generate</param>
-            <param name="max">Maximum number to generate</param>
-            <returns>Random Number</returns>
-        </member>
-        <member name="M:libtcodWrapper.TCODRandom.GetIntFromByteArray(System.Int32,System.Int32,System.String)">
-            <summary>
-            Deterministly obtain a random number based upon a string seed
-            </summary>
-            <param name="min">Minimum number to generate</param>
-            <param name="max">Maximum number to generate</param>
-            <param name="data">String to be a seed</param>
-            <returns>Random Number</returns>
-        </member>
-        <member name="T:libtcodWrapper.TCODSystem">
-            <summary>
-            Represents System Level Functions
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.TCODSystem.Sleep(System.UInt32)">
-            <summary>
-            Stop program execution for specified amount of time
-            </summary>
-            <param name="milliseconds">Milliseconds to sleep</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODSystem.SaveScreenshot(System.String)">
-            <summary>
-            Save a screenshot of the root console to disk
-            </summary>
-            <param name="fileName">Filename to save image to</param>
-        </member>
-        <member name="M:libtcodWrapper.TCODSystem.ForceFullscrenResolution(System.Int32,System.Int32)">
-            <summary>
-            Force specific resolution in fullscreen
-            </summary>
-            <param name="width">Fullscreen Width</param>
-            <param name="height">Fullscreen Height</param>
-        </member>
-        <member name="P:libtcodWrapper.TCODSystem.ElapsedMilliseconds">
-            <summary>
-            Obtain number of milliseconds since the program started
-            </summary>
-            <returns>Milliseconds since the program started</returns>
-        </member>
-        <member name="P:libtcodWrapper.TCODSystem.ElapsedSeconds">
-            <summary>
-            Obtain number of seconds since the program started
-            </summary>
-            <returns>Seconds since the program started</returns>
-        </member>
-        <member name="P:libtcodWrapper.TCODSystem.CurrentResolution">
-            <summary>
-            The current screen resolution.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.TCODSystem.LastFrameLength">
-            <summary>
-            Return the length in seconds of the last rendered frame.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.TCODSystem.FPS">
-            <summary>
-            Get or set the current value of frames per second that
-            the library will attempt to render.
-            </summary>
-        </member>
-        <member name="T:libtcodWrapper.Mouse">
-            <summary>
-            Constains information about current mouse status
-            </summary>
-        </member>
-        <member name="M:libtcodWrapper.Mouse.ShowCursor(System.Boolean)">
-            <summary>
-            Changes visiblity of mouse while in our window(s)
-            </summary>
-            <param name="visible">Is mouse visible?</param>
-        </member>
-        <member name="M:libtcodWrapper.Mouse.MoveMouse(System.Int32,System.Int32)">
-            <summary>
-            Move user's mouse to that location
-            </summary>
-            <param name="x">Pixel x location</param>
-            <param name="y">Pixel y location</param>
-        </member>
-        <member name="M:libtcodWrapper.Mouse.GetStatus">
-            <summary>
-            Get current mouse status
-            </summary>
-            <returns>Mouse struct with location, movement, and buttom presses</returns>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.PixelX">
-            <summary>
-            Position in x direction in pixels
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.PixelY">
-            <summary>
-            Position in y direction in pixels
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.PixelLocation">
-            <summary>
-            Position of the mouse cursor.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.PixelVelocityX">
-            <summary>
-            Mouse velocity in x direction in pixels
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.PixelVelocityY">
-            <summary>
-            Mouse velocity in y direction in pixels
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.CellX">
-            <summary>
-            Position in x directory in character sized blocks
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.CellY">
-            <summary>
-            Position in Y directory in character sized blocks
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.CellLocation">
-            <summary>
-            Position of the mouse cursor character sized blocks
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.CellVelocityX">
-            <summary>
-            Mouse velocity in x direction in character sized blocks
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.CellVelocityY">
-            <summary>
-            Mouse velocity in y direction in character sized blocks
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Mouse.IsVisible">
-            <summary>
-            Return if cursor is visible
-            </summary>
-            <returns>Is Visible?</returns>
         </member>
     </members>
 </doc>

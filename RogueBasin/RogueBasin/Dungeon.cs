@@ -575,128 +575,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Return the calendar month, 1-12
-        /// </summary>
-        /// <returns></returns>
-        public int GetDateMonth()
-        {
-            return (int)Math.Floor(dateCounter / 28.0) + 1;
-        }
-
-        /// <summary>
-        /// Return the calendar day, 1-28
-        /// </summary>
-        /// <returns></returns>
-        public int GetDateDay()
-        {
-            int day = dateCounter % 28;
-            return day + 1;
-        }
-
-        /// <summary>
-        /// Are we at the start of the working week
-        /// </summary>
-        /// <returns></returns>
-        public bool IsWeekday()
-        {
-            return (dateCounter % 7 == 0);
-        }
-
-        /// <summary>
-        /// Are we at the start of the working week
-        /// </summary>
-        /// <returns></returns>
-        public bool IsNormalWeekend()
-        {
-            if (dateCounter % 7 != 5)
-                return false;
-
-            if (dateCounter % 28 == 26)
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// An adventure weekend
-        /// </summary>
-        /// <returns></returns>
-        public bool IsAdventureWeekend()
-        {
-            if (dateCounter == 26)
-                return true;
-
-            return false;
-
-        }
-
-        /// <summary>
-        /// Move to the next date event, be it weekend, or end of month adventure
-        /// </summary>
-        public void MoveToNextDate()
-        {
-            //Calendar
-
-            //1-5 Weekday
-            //6-7 Weekend
-            //8-12 Weekday
-            //13-14 Weekend
-            //15-19 Weekday
-            //20-21 Weekend
-            //22-26 Weekday
-            //27-28 Special Weekend
-
-            if (Game.Dungeon.DungeonInfo.LastMission)
-            {
-                LogFile.Log.LogEntryDebug("Tried to advance time beyond end", LogDebugLevel.High);
-                return;
-            }
-
-            if (dateCounter % 7 == 0)
-            {
-                dateCounter += 5;
-            }
-
-            else if (dateCounter % 7 == 5)
-            {
-                dateCounter += 2;
-            }
-            else
-            {
-                //Shouldn't get here
-                LogFile.Log.LogEntryDebug("Impossible date reached: " + dateCounter.ToString(), LogDebugLevel.High);
-            }
-
-            //Check for special dates
-            if (dateCounter == 28 * 11 + 26)
-            {
-                //Graduation day
-
-                RunGraduationStory();
-            }
-
-            return;
-        }
-
-        /// <summary>
-        /// Run the final graduation story
-        /// </summary>
-        private void RunGraduationStory()
-        {
-            //Set the last mission flag (closes off other dungeons)
-            DungeonInfo.LastMission = true;
-
-            //Open up the way (doesn't matter if these have been done before)
-            FlipTerrain("river");
-            FlipTerrain("final");
-
-            //Play the final mission movie
-            Screen.Instance.PlayMovie("princekidnapped", false);
-
-            //Return to the game. Triggers now respond to the last mission conditions
-        }
-
-        /// <summary>
         /// How much of your previous life do you remember?
         /// </summary>
         /// <returns></returns>
@@ -732,44 +610,7 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Return the distance between 2 objects on the map
-        /// -1 means they are on different levels
-        /// </summary>
-        /// <param name="obj1"></param>
-        /// <param name="obj2"></param>
-        public double GetDistanceBetween(MapObject obj1, MapObject obj2) {
-
-            if (obj1.LocationLevel != obj2.LocationLevel)
-            {
-                return -1.0;
-            }
-
-            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - obj2.LocationMap.x, 2.0) + Math.Pow(obj1.LocationMap.y - obj2.LocationMap.y, 2.0));
-            return distance;
-        }
-
-        /// <summary>
-        /// Return the distance between an objects and a point on the same level
-        /// </summary>
-        /// <param name="obj1"></param>
-        /// <param name="obj2"></param>
-        public double GetDistanceBetween(MapObject obj1, Point p2)
-        {
-            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - p2.x, 2.0) + Math.Pow(obj1.LocationMap.y - p2.y, 2.0));
-            return distance;
-        }
-
-        /// <summary>
-        /// Return the distance between an objects and a point on the same level
-        /// </summary>
-        /// <param name="obj1"></param>
-        /// <param name="obj2"></param>
-        public static double GetDistanceBetween(Point p1, Point p2)
-        {
-            double distance = Math.Sqrt(Math.Pow(p1.x - p2.x, 2.0) + Math.Pow(p1.y - p2.y, 2.0));
-            return distance;
-        }
+        
 
         /// <summary>
         /// Finds a currently alive monster by type. Returns first creature found, or null if none.
@@ -797,7 +638,7 @@ namespace RogueBasin
 
             foreach (Monster creature in monsters)
             {
-                distance = GetDistanceBetween(origin, creature);
+                distance = Utility.GetDistanceBetween(origin, creature);
 
                 if (distance > 0 && distance < closestDistance && origin != creature)
                 {
@@ -808,7 +649,7 @@ namespace RogueBasin
 
             //And check for player
 
-            distance = GetDistanceBetween(origin, Game.Dungeon.Player);
+            distance = Utility.GetDistanceBetween(origin, Game.Dungeon.Player);
 
             if (distance > 0 && distance < closestDistance && origin != Game.Dungeon.Player)
             {
@@ -837,7 +678,7 @@ namespace RogueBasin
                 if (creature.Charmed || creature.Passive)
                     continue;
 
-                distance = GetDistanceBetween(origin, creature);
+                distance = Utility.GetDistanceBetween(origin, creature);
 
                 if (distance > 0 && distance < closestDistance && origin != creature)
                 {
@@ -880,7 +721,7 @@ namespace RogueBasin
                 if (creature.Charmed || creature.Passive)
                     continue;
 
-                distance = GetDistanceBetween(origin, creature);
+                distance = Utility.GetDistanceBetween(origin, creature);
 
                 if (distance > 0 && distance < closestDistance && origin != creature)
                 {
@@ -3565,111 +3406,6 @@ namespace RogueBasin
         }
 
 
-        /// <summary>
-        /// Victory! - THIS DOESN@T HAPPEN IN PRINCESSRL
-        /// </summary>
-        /// <param name="p"></param>
-        internal void EndGame(string endPhrase)
-        {
-            //Set up the death screen
-
-            //Death preamble
-
-            List<string> deathPreamble = new List<string>();
-
-            string playerName = Game.Dungeon.player.Name;
-
-            deathPreamble.Add(playerName + " the assassin " + endPhrase);
-            deathPreamble.Add("He lasted " + Game.Dungeon.player.TurnCount + " turns.");
-            deathPreamble.Add("Difficulty: " + StringEquivalent.GameDifficultyString[Game.Dungeon.Difficulty]);
-            deathPreamble.Add("");
-            deathPreamble.Add("He found " + Game.Dungeon.Player.PlotItemsFound + " of " + Game.Dungeon.Player.TotalPlotItems + " plot items.");
-
-            //Total kills
-
-            //Make killCount list
-
-            List<Monster> kills = player.Kills;
-            List<KillCount> killCount = new List<KillCount>();
-
-            int totalKills = 0;
-
-            foreach (Monster kill in kills)
-            {
-                totalKills++;
-
-                //Check that we are the same type (and therefore sort of item)
-                Type monsterType = kill.GetType();
-                bool foundGroup = false;
-
-                foreach (KillCount record in killCount)
-                {
-                    if (record.type.GetType() == monsterType)
-                    {
-                        record.count++;
-                        foundGroup = true;
-                        break;
-                    }
-
-                }
-                //Look only at the first item in the group (stored by index). All the items in this group must have the same type
-
-
-                //If there is no group, create a new one
-                if (!foundGroup)
-                {
-                    KillCount newGroup = new KillCount();
-                    newGroup.type = kill;
-                    newGroup.count = 1;
-                    killCount.Add(newGroup);
-                }
-            }
-
-            List<string> killRecord = new List<string>();
-
-            //Turn list into strings to be displayed
-            foreach (KillCount record in killCount)
-            {
-
-                string killStr = "";
-
-                if (record.count == 1)
-                {
-                    killStr += "1 " + record.type.SingleDescription;
-                }
-                else
-                {
-                    killStr += record.count.ToString() + " " + record.type.GroupDescription;
-                }
-
-                //Add to string list
-                killRecord.Add(killStr);
-            }
-
-            deathPreamble.Add("");
-            deathPreamble.Add("He killed " + totalKills + " creatures");
-
-
-            SaveObituary(deathPreamble, killRecord);
-
-            if (!Game.Dungeon.SaveScumming)
-            {
-                DeleteSaveFile();
-            }
-
-            //Load up screen and display
-            Screen.Instance.TotalKills = killRecord;
-            Screen.Instance.DeathPreamble = deathPreamble;
-
-            Screen.Instance.DrawVictoryScreen();
-            Screen.Instance.FlushConsole();
-
-            //Wait for a keypress
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-            //Stop the main loop
-            RunMainLoop = false;
-        }
 
         /// <summary>
         /// Delete save file on player death
@@ -3970,20 +3706,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Teleport the user back to town
-        /// </summary>
-        internal void PlayerBackToTown()
-        {
-            //Move to town
-            Player.LocationLevel = 0;
-            Player.LocationMap = levels[0].PCStartLocation;
-
-            //Drop all the player's equipped items
-            //If we want to keep them I have to figure out where they get recharged
-            //PutItemsInStore();
-        }
-
-        /// <summary>
         /// Respawn the current dungeon. New seed on abort. Same seed on death
         /// </summary>
         /// <param name="respawnWithSameSeed"></param>
@@ -4051,15 +3773,15 @@ namespace RogueBasin
                 RechargeEquippableItems();
 
                 //Put found items that were too much for inventory in store
-                PutItemsNotInInventoryInStore();
+                //PutItemsNotInInventoryInStore();
 
                 //Remove all inventory items
                 RemoveInventoryItems();
 
                 LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
-                Game.Dungeon.MoveToNextDate();
-                Game.Dungeon.PlayerBackToTown();
-                SyncStatsWithTraining();
+                //Game.Dungeon.MoveToNextDate();
+                //Game.Dungeon.PlayerBackToTown();
+                //SyncStatsWithTraining();
 
                 Player.CurrentDungeon = 0;
             }
@@ -4157,7 +3879,7 @@ namespace RogueBasin
             }
         }
 
-                /// <summary>
+        /// <summary>
         /// Run the end of game. Produce and save the obituary.
         /// </summary>
         public void EndOfGame()
@@ -4315,167 +4037,6 @@ namespace RogueBasin
 
 
         /// <summary>
-        /// Determine the final career from the princess' statistics
-        /// </summary>
-        /// <param name="careerName"></param>
-        /// <returns></returns>
-        private void GetCareerMovie(out string careerName, out string careerMovie, out string romanceMovie, int noDungeonsCleared)
-        {
-            Player player = Game.Dungeon.Player;
-
-            //PMP
-            if (player.AttackStat > 50 && player.CharmStat > 50 && player.MagicStat > 50 && noDungeonsCleared > 3)
-            {
-                careerName = "Perfect Modern Princess";
-                careerMovie = "endperfectmodernprincess";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endperfectmodernprincess_prince";
-                else
-                    romanceMovie = "endperfectmodernprincess_other";
-
-                return;
-            }
-
-            //Bard
-            if (player.AttackStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 2)
-            {
-                careerName = "Bard";
-                careerMovie = "endbard";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endbard_prince";
-                else
-                    romanceMovie = "endbard_other";
-
-                return;
-            }
-
-            //Mage Diplomat
-            if (player.MagicStat > 50 && player.CharmStat > 50 && noDungeonsCleared > 2)
-            {
-                careerName = "Mage Diplomat";
-                careerMovie = "endmagediplomat";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endmagediplomat_prince";
-                else
-                    romanceMovie = "endmagediplomat_other";
-
-                return;
-            }
-
-            //Battle Mage
-            if (player.MagicStat > 50 && player.AttackStat > 50 && noDungeonsCleared > 2)
-            {
-                careerName = "Battle Mage";
-                careerMovie = "endbattlemage";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endbattlemage_prince";
-                else
-                    romanceMovie = "endbattlemage_other";
-
-                return;
-            }
-
-            //Arch Mage
-            if (player.MagicStat > 120 && noDungeonsCleared > 3)
-            {
-                careerName = "Archmage";
-                careerMovie = "endarchmage";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endarchmage_prince";
-                else
-                    romanceMovie = "endarchmage_other";
-
-                return;
-            }
-
-            //Sorcerer
-            if (player.MagicStat > 75 && noDungeonsCleared > 1)
-            {
-                careerName = "Sorcerer";
-                careerMovie = "endsorcerer";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endsorcerer_prince";
-                else
-                    romanceMovie = "endsorcerer_other";
-
-                return;
-            }
-
-            //Great General
-            if (player.AttackStat > 120 && noDungeonsCleared > 3)
-            {
-                careerName = "Great General";
-                careerMovie = "endgreatgeneral";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endgreatgeneral_prince";
-                else
-                    romanceMovie = "endgreatgeneral_other";
-
-                return;
-            }
-
-            //Warrior
-            if (player.AttackStat > 75 && noDungeonsCleared > 1)
-            {
-                careerName = "Warrior";
-                careerMovie = "endwarrior";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endwarrior_prince";
-                else
-                    romanceMovie = "endwarrior_other";
-
-                return;
-            }
-
-            //Social Goddess
-            if (player.CharmStat > 120 && noDungeonsCleared > 3)
-            {
-                careerName = "Social Goddess";
-                careerMovie = "endsocialgoddess";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endsocialgoddess_prince";
-                else
-                    romanceMovie = "endsocialgoddess_other";
-
-                return;
-            }
-
-            //Social Goddess
-            if (player.CharmStat > 75 && noDungeonsCleared > 1)
-            {
-                careerName = "Social Goddess";
-                careerMovie = "endsocialite";
-
-                if (Game.Dungeon.DungeonInfo.DragonDead)
-                    romanceMovie = "endsocialite_prince";
-                else
-                    romanceMovie = "endsocialite_other";
-
-                return;
-            }
-
-            //Father's girl
-            careerName = "Father's Girl";
-            careerMovie = "endfathersgirl";
-
-            if (Game.Dungeon.DungeonInfo.DragonDead)
-                romanceMovie = "endfathersgirl_prince";
-            else
-                romanceMovie = "endfathersgirl_other";
-
-            return;
-        }
-
-        /// <summary>
         /// Total number of dungeons where we killed both uniques
         /// </summary>
         /// <returns></returns>
@@ -4495,111 +4056,6 @@ namespace RogueBasin
             List<DungeonProfile> Cleared = DungeonInfo.Dungeons.FindAll(x => x.visited);
 
             return Cleared.Count;
-        }
-
-        Point storeTL = new Point(33, 2);
-        Point storeBR = new Point(40, 3);
-
-        /// <summary>
-        /// Put all the user's items in the store
-        /// </summary>
-        public void PutItemsInStore()
-        {
-            //Drop all the items from the player.
-            //This returns them to the master list in Dungeon
-            Game.Dungeon.player.RemoveAllItems();
-                
-            //Reset the player's appearance
-            Screen.Instance.PCColor = defaultPCColor;
-
-            //Place all the found objects in the store room
-            int xLoc = storeTL.x;
-            int yLoc = storeTL.y;
-            
-            foreach (Item item in items)
-            {
-                //Only return equippable items
-                IEquippableItem itemE = item as IEquippableItem;
-
-                if (item.IsFound && itemE != null)
-                {
-                    item.InInventory = false;
-                    item.LocationLevel = 0;
-                    item.LocationMap = new Point(xLoc, yLoc);
-
-                    xLoc++;
-
-                    if (xLoc > storeBR.x)
-                    {
-                        yLoc++;
-                        xLoc = storeTL.x;
-                    }
-
-                    if (yLoc > storeBR.y)
-                    {
-                        //Run out of room - shouldn't happen
-                        LogFile.Log.LogEntryDebug("Run out of room in store for items!", LogDebugLevel.High);
-                        break;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Put all the user's items in the store
-        /// </summary>
-        public void PutItemsNotInInventoryInStore()
-        {
-            //Drop all the items from the player.
-            //This returns them to the master list in Dungeon
-            //Game.Dungeon.player.RemoveAllItems();
-
-            //Reset the player's appearance
-            Screen.Instance.PCColor = defaultPCColor;
-
-            //Place all the found objects in the store room
-            int xLoc = storeTL.x;
-            int yLoc = storeTL.y;
-
-            foreach (Item item in items)
-            {
-
-
-                //Only return equippable items
-                IEquippableItem itemE = item as IEquippableItem;
-
-                //Already in inventory? Don't bother
-                if (player.Inventory.ContainsItem(item))
-                    continue;
-
-                if (item.IsFound && itemE != null)
-                {
-                    item.InInventory = false;
-                    item.LocationLevel = 0;
-                    item.LocationMap = new Point(xLoc, yLoc);
-
-                    xLoc++;
-
-                    if (xLoc > storeBR.x)
-                    {
-                        yLoc++;
-                    }
-
-                    if (yLoc > storeBR.y)
-                    {
-                        //Run out of room - shouldn't happen
-                        LogFile.Log.LogEntryDebug("Run out of room in store for items!", LogDebugLevel.High);
-                        break;
-                    }
-                }
-            }
-        }
-
-        void ResetPlayerXPCounters()
-        {
-            player.CombatXP = 0;
-            player.MagicXP = 0;
-            player.CharmXP = 0;
         }
 
         public void MissionComplete()
@@ -4734,40 +4190,6 @@ namespace RogueBasin
                 StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb2');
             }
 
-            /*
-            
-            switch (level)
-            {
-
-
-                case 0:
-                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\x08');
-                    break;
-                case 1:
-                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xa');
-                    break;
-
-                case 2:
-                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xdb');
-                    break;
-
-                    //quite like this one
-                case 3:
-                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb0');
-                    break;
-
-                case 4:
-                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb1');
-                    break;
-
-                case 5:
-                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '\xb2');
-                    break;
-
-                default:
-                    StringEquivalent.OverrideTerrainChar(MapTerrain.Wall, '#');
-                    break;
-            }*/
              
         }
 
@@ -4817,63 +4239,6 @@ namespace RogueBasin
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0, true);
-        }
-
-
-        /// <summary>
-        /// Player leaves school and enters wilderness
-        /// </summary>
-        public void PlayerEnterWilderness()
-        {
-            //Update the player's stats for the adventure
-            Game.Dungeon.SyncStatsWithTraining();
-
-            //Reset the XP counters
-            ResetPlayerXPCounters();
-
-            //Teleport the player to the start location in the wilderness
-            Player player = Game.Dungeon.Player;
-
-            player.LocationLevel = 1;
-            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
-
-            //Set vision
-            player.SightRadius = 10;
-
-            //This runs any triggers
-            Game.Dungeon.MovePCAbsolute(player.LocationLevel, player.LocationMap.x, player.LocationMap.y);
-
-        }
-
-        /// <summary>
-        /// Set the player's real stats as determined by their training stats.
-        /// Done before adventuring.
-        /// </summary>
-        internal void SyncStatsWithTraining()
-        {
-            Player player = Game.Dungeon.player;
-            Inventory inv = player.Inventory;
-
-            //Set all the stats which can only be set when leaving the town
-            player.ResetTemporaryPlayerStats();
-
-            //Hitpoints
-            player.Hitpoints = player.HitpointsStat;
-            player.MaxHitpoints = player.HitpointsStat;
-
-            //Magic points
-            player.MaxMagicPoints = (int)Math.Ceiling(player.MagicStat * 2.5);
-            player.MagicPoints = (int)Math.Ceiling(player.MagicStat * 2.5);
-
-            /*
-            if (inv.ContainsItem(new Items.StaffPower()))
-            {
-                player.MaxMagicPoints = (int)Math.Ceiling(player.MagicStat * 3.5);
-                player.MagicPoints = (int)Math.Ceiling(player.MagicStat * 3.5);
-            }*/
-
-            //Set all the stats that can be set at any time
-            player.CalculateCombatStats();
         }
 
         /// <summary>
@@ -4940,83 +4305,5 @@ namespace RogueBasin
             return adjacentSqFree;
         }
 
-        /// <summary>
-        /// Range test for consistency
-        /// </summary>
-        /// <param name="point"></param>
-        /// <param name="start"></param>
-        /// <param name="range"></param>
-        /// <returns></returns>
-        internal static bool TestRange(Point x1, Point x2, double range)
-        {
-            if (Dungeon.GetDistanceBetween(x1, x2) > range + 0.1)
-            {
-                return false;
-            }
-            else
-                return true;
-
-        }
-
-        internal static bool TestRange(Point x1, Point x2, int range)
-        {
-            return TestRange(x1, x2, (double)range);
-
-        }
-
-        internal static bool TestRange(MapObject x1, MapObject x2, int range)
-        {
-            return TestRange(x1, x2, (double)range);
-
-        }
-        
-        internal static bool TestRange(MapObject x1, MapObject x2, double range)
-        {
-            if (Dungeon.GetDistanceBetween(x1.LocationMap, x2.LocationMap) > range + 0.1)
-            {
-                return false;
-            }
-            else
-                return true;
-
-        }
-
-        /// <summary>
-        /// Test if target is in range of shooter and in FOV (normal gun check). Needs a calculated fov for shooter
-        /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="x2"></param>
-        /// <param name="range"></param>
-        /// <param name="fov"></param>
-        /// <returns></returns>
-        internal static bool TestRangeFOVForWeapon(MapObject shooter, MapObject target, double range, CreatureFOV fov)
-        {
-            //Check range
-            if(!Dungeon.TestRange(shooter, target, range)) {
-                return false;
-            }
-            //Check FOV
-            return fov.CheckTileFOV(target.LocationMap.x, target.LocationMap.y);
-                
-        }
-
-        /// <summary>
-        /// Test if target is in range of shooter and in FOV (normal gun check). Needs a calculated fov for shooter
-        /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="x2"></param>
-        /// <param name="range"></param>
-        /// <param name="fov"></param>
-        /// <returns></returns>
-        internal static bool TestRangeFOVForWeapon(MapObject shooter, Point target, double range, CreatureFOV fov)
-        {
-            //Check range
-            if(!Dungeon.TestRange(shooter.LocationMap, target, range)) {
-                return false;
-            }
-            //Check FOV
-            return fov.CheckTileFOV(target.x, target.y);
-                
-        }
     }
 }

@@ -1871,7 +1871,7 @@ namespace RogueBasin {
                         {
 
                             //In range firing
-                            if (weapon.HasFireAction() && Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
+                            if (weapon.HasFireAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                             {
                                 backgroundColor = inRangeBackground;
                                 newBackground = true;
@@ -1879,7 +1879,7 @@ namespace RogueBasin {
                             else
                             {
                                 //In throwing range
-                                if (weapon.HasThrowAction() && Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
+                                if (weapon.HasThrowAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                                 {
                                     backgroundColor = inRangeBackground;
                                     newBackground = true;

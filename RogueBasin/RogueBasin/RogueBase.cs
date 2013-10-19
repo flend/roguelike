@@ -774,7 +774,7 @@ namespace RogueBasin
         {
             if (Game.Dungeon.Player.LocationLevel == 0)
             {
-                Game.Dungeon.PutItemsInStore();
+                //Game.Dungeon.PutItemsInStore();
                 Game.MessageQueue.AddMessage("You drop the items off in the store.");
                 LogFile.Log.LogEntry("Items returned to store.");
             }
@@ -1509,7 +1509,7 @@ namespace RogueBasin
                 return false;
 
             //Check we are in range of target (not done above)
-            if (!Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
+            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
             {
                 Game.MessageQueue.AddMessage("Out of range!");
                 LogFile.Log.LogEntryDebug("Out of range for " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
@@ -1637,7 +1637,7 @@ namespace RogueBasin
             }
 
             //Check we are in range of target (not done above)
-            if (!Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
+            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
             {
                 Game.MessageQueue.AddMessage("Out of range!");
                 LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
@@ -1856,7 +1856,7 @@ namespace RogueBasin
 
             Point startPoint;
 
-            if (Dungeon.TestRange(Game.Dungeon.Player, closeCreature, range))
+            if (Utility.TestRange(Game.Dungeon.Player, closeCreature, range))
             {
                 startPoint = new Point(closeCreature.LocationMap.x, closeCreature.LocationMap.y);
             }
@@ -1901,7 +1901,7 @@ namespace RogueBasin
             Screen.Instance.TargetRange = range;
             Screen.Instance.TargetPermissiveAngle = spreadAngle;
 
-            if (Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
+            if (Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
             {
                 Screen.Instance.SetTargetInRange = true;
             }
@@ -1974,7 +1974,7 @@ namespace RogueBasin
                     //Otherwise OK
                     target = newPoint;
 
-                    if (Dungeon.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, range, currentFOV))
+                    if (Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, range, currentFOV))
                     {
                         Screen.Instance.SetTargetInRange = true;
                     }

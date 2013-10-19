@@ -121,7 +121,7 @@ namespace RogueBasin
                         continue;
 
                     //Don't healed charmed monsters either
-                    if (Game.Dungeon.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005
+                    if (Utility.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005
                         && !monster.Charmed)
                     {
                         targetsInRange.Add(monster);
@@ -161,7 +161,7 @@ namespace RogueBasin
                     if (this.LocationLevel != feature.LocationLevel)
                         continue;
 
-                    if (Game.Dungeon.GetDistanceBetween(this, feature) < GetMissileRange() + 0.005)
+                    if (Utility.GetDistanceBetween(this, feature) < GetMissileRange() + 0.005)
                     {
                         if (feature is Features.Corpse)
                         {

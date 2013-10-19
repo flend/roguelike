@@ -36,7 +36,7 @@ namespace RogueBasin.Triggers
                 }
                 Triggered = true;
             }
-            Game.Dungeon.PlayerEnterWilderness();
+            //Game.Dungeon.PlayerEnterWilderness();
 
             return true;
         }

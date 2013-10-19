@@ -8,7 +8,6 @@ namespace RogueBasin
     /// Function that triggers when the PC moves into a particular square
     /// </summary>
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.DungeonEntranceTrigger))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.HelpFriend))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.SeeCorpses))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.SpotFriend))]
     [System.Xml.Serialization.XmlInclude(typeof(Triggers.TreasureRoom))]

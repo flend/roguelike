@@ -304,7 +304,7 @@ namespace RogueBasin
             AIState = SimpleAIStates.Pursuit;
 
             //If we are in range, fire
-            double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
+            double range = Utility.GetDistanceBetween(this, newTarget);
 
             if (range < GetMissileRange() / 2.0)
             {
@@ -672,7 +672,7 @@ namespace RogueBasin
                 if (monster == this)
                     continue;
 
-                if (Game.Dungeon.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005)
+                if (Utility.GetDistanceBetween(this, monster) < GetMissileRange() + 0.005)
                 {
                     targetsInRange.Add(monster);
                 }

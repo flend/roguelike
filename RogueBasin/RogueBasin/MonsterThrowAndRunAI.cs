@@ -14,7 +14,7 @@ namespace RogueBasin
         /// <param name="newTarget"></param>
         protected override void FollowAndAttack(Creature newTarget) {
             
-            double range = Game.Dungeon.GetDistanceBetween(this, newTarget);
+            double range = Utility.GetDistanceBetween(this, newTarget);
 
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
@@ -177,7 +177,7 @@ namespace RogueBasin
             }
 
             //Close enough to fire. Not backing away (either far enough away or chose not to)
-            else if (Dungeon.TestRange(this, newTarget, GetMissileRange()) && WillAttack())
+            else if (Utility.TestRange(this, newTarget, GetMissileRange()) && WillAttack())
             {
                 //In range
 

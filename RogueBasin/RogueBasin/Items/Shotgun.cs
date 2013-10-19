@@ -54,7 +54,7 @@ namespace RogueBasin.Items
                 if (m != null)
                 {
                     //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Dungeon.GetDistanceBetween(player.LocationMap, m.LocationMap));
+                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(player.LocationMap, m.LocationMap));
                     int damage = 10 - rangeToMonster;
 
                     string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;

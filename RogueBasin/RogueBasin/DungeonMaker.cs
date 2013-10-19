@@ -1462,7 +1462,7 @@ namespace RogueBasin
 
                  innerLoopCount++;
 
-                 if (Dungeon.GetDistanceBetween(centerLoc, location) > looseGroupDist && innerLoopCount < 50)
+                 if (Utility.GetDistanceBetween(centerLoc, location) > looseGroupDist && innerLoopCount < 50)
                      continue;
 
                  outerLoopCount++;
@@ -1499,7 +1499,7 @@ namespace RogueBasin
                      {
                          location = Game.Dungeon.RandomWalkablePointInLevel(i);
                          loopCount++;
-                     } while (Game.Dungeon.GetDistanceBetween(masterMonser, location) > minDistance && loopCount < maxLoopCount);
+                     } while (Utility.GetDistanceBetween(masterMonser, location) > minDistance && loopCount < maxLoopCount);
                      outerLoopCount++;
                  } while (!Game.Dungeon.AddMonster(NewMonsterOfType(monsterType), levelNo, location) && outerLoopCount < 50);
              }

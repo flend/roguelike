@@ -258,7 +258,128 @@ namespace RogueBasin
             n |= n >> 16;
             return ++n;        
         }
-    
+
+        /// <summary>
+        /// Return the distance between 2 objects on the map
+        /// -1 means they are on different levels
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        public static double GetDistanceBetween(MapObject obj1, MapObject obj2)
+        {
+
+            if (obj1.LocationLevel != obj2.LocationLevel)
+            {
+                return -1.0;
+            }
+
+            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - obj2.LocationMap.x, 2.0) + Math.Pow(obj1.LocationMap.y - obj2.LocationMap.y, 2.0));
+            return distance;
+        }
+
+        /// <summary>
+        /// Return the distance between an objects and a point on the same level
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        public static double GetDistanceBetween(MapObject obj1, Point p2)
+        {
+            double distance = Math.Sqrt(Math.Pow(obj1.LocationMap.x - p2.x, 2.0) + Math.Pow(obj1.LocationMap.y - p2.y, 2.0));
+            return distance;
+        }
+
+        /// <summary>
+        /// Return the distance between an objects and a point on the same level
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        public static double GetDistanceBetween(Point p1, Point p2)
+        {
+            double distance = Math.Sqrt(Math.Pow(p1.x - p2.x, 2.0) + Math.Pow(p1.y - p2.y, 2.0));
+            return distance;
+        }
+
+
+        /// <summary>
+        /// Range test for consistency
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="start"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        internal static bool TestRange(Point x1, Point x2, double range)
+        {
+            if (Utility.GetDistanceBetween(x1, x2) > range + 0.1)
+            {
+                return false;
+            }
+            else
+                return true;
+
+        }
+
+        internal static bool TestRange(Point x1, Point x2, int range)
+        {
+            return TestRange(x1, x2, (double)range);
+
+        }
+
+        internal static bool TestRange(MapObject x1, MapObject x2, int range)
+        {
+            return TestRange(x1, x2, (double)range);
+
+        }
+
+        internal static bool TestRange(MapObject x1, MapObject x2, double range)
+        {
+            if (Utility.GetDistanceBetween(x1.LocationMap, x2.LocationMap) > range + 0.1)
+            {
+                return false;
+            }
+            else
+                return true;
+
+        }
+
+        /// <summary>
+        /// Test if target is in range of shooter and in FOV (normal gun check). Needs a calculated fov for shooter
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="x2"></param>
+        /// <param name="range"></param>
+        /// <param name="fov"></param>
+        /// <returns></returns>
+        internal static bool TestRangeFOVForWeapon(MapObject shooter, MapObject target, double range, CreatureFOV fov)
+        {
+            //Check range
+            if (!Utility.TestRange(shooter, target, range))
+            {
+                return false;
+            }
+            //Check FOV
+            return fov.CheckTileFOV(target.LocationMap.x, target.LocationMap.y);
+
+        }
+
+        /// <summary>
+        /// Test if target is in range of shooter and in FOV (normal gun check). Needs a calculated fov for shooter
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="x2"></param>
+        /// <param name="range"></param>
+        /// <param name="fov"></param>
+        /// <returns></returns>
+        internal static bool TestRangeFOVForWeapon(MapObject shooter, Point target, double range, CreatureFOV fov)
+        {
+            //Check range
+            if (!Utility.TestRange(shooter.LocationMap, target, range))
+            {
+                return false;
+            }
+            //Check FOV
+            return fov.CheckTileFOV(target.x, target.y);
+
+        }
 
     }
 }

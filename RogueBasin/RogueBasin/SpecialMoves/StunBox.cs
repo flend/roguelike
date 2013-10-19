@@ -173,7 +173,7 @@ namespace RogueBasin.SpecialMoves
                 if (monster.LocationLevel != Game.Dungeon.Player.LocationLevel)
                     continue;
 
-                if (Game.Dungeon.GetDistanceBetween(monster, Game.Dungeon.Player) < stunRadius)
+                if (Utility.GetDistanceBetween(monster, Game.Dungeon.Player) < stunRadius)
                 {
                     targets.Add(monster);
                 }

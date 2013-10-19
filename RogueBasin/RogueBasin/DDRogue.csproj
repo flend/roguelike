@@ -382,9 +382,6 @@
     <Compile Include="Triggers\FirstLevelEntry.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Triggers\HelpFriend.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Triggers\LeaveByDock.cs">
       <SubType>Code</SubType>
     </Compile>
