@@ -2,22 +2,23 @@
 using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
+using RogueBasin.LibTCOD;
 
 namespace RogueBasin
 {
     /** Lightweight wrapper - stops classes uses Fov from altering the map */
     public class WrappedFOV
     {
-        TCODFov fov;
+        TCODFovWrapper fov;
 
-        public WrappedFOV(TCODFov fov)
+        public WrappedFOV(TCODFovWrapper fov)
         {
             this.fov = fov;
         }
 
-        public bool CheckTileFOV(int x, int y) {
+        public bool CheckTileFOV(int level, Point pointToCheck) {
 
-            return fov.CheckTileFOV(x, y);
+            return fov.CheckTileFOV(level, pointToCheck);
         }
     }
 
@@ -85,7 +86,7 @@ namespace RogueBasin
                 return false;
             
             //Check tcod FOV
-            return tcodFOV.CheckTileFOV(x, y);
+            return tcodFOV.CheckTileFOV(creature.LocationLevel, new Point(x,y));
         }
 
         /// <summary>

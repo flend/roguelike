@@ -7,7 +7,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.LibTCOD
 {
-    class TCODFovWrapper
+    public class TCODFovWrapper
     {
         Dictionary<int, TCODFov> levelTCODMaps;
 

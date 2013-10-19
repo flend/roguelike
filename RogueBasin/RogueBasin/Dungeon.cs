@@ -2721,7 +2721,7 @@ namespace RogueBasin
             tcodFOV.CalculateFOV(creature.LocationMap.x, creature.LocationMap.y, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
-            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(tcodFOV), creature.FOVType());
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(fov), creature.FOVType());
 
             return wrappedFOV;
         }
@@ -2791,7 +2791,7 @@ namespace RogueBasin
             tcodFOV.CalculateFOV(location.x, location.y, creature.SightRadius);
 
             //Wrapper with game-specific FOV layer
-            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(tcodFOV), creature.FOVType(), location);
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(fov), creature.FOVType(), location);
 
             return wrappedFOV;
 
