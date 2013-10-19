@@ -51,7 +51,7 @@ namespace RogueBasin.Spells
                     continue;
 
                 //Connected?
-                if (!dungeon.CheckInConnectedPartOfMap(player.LocationLevel, new Point(x, y)))
+                if (!dungeon.Pathing.CheckInConnectedPartOfMap(player.LocationLevel, new Point(x, y)))
                 {
                     LogFile.Log.LogEntryDebug("Blink square failure - not connected", LogDebugLevel.Medium);
                     continue;

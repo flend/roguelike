@@ -64,9 +64,9 @@ namespace RogueBasin
 
                     //Find the square to move to
                     if(!CanOpenDoors())
-                        nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
                     else
-                        nextStep = Game.Dungeon.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
 
                     //Check the square is pathable to
                     if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
@@ -262,9 +262,9 @@ namespace RogueBasin
             //Find location of next step on the path towards them
             Point nextStep;
             if (!CanOpenDoors())
-                nextStep = Game.Dungeon.GetPathToCreature(this, newTarget);
+                nextStep = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
             else
-                nextStep = Game.Dungeon.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
+                nextStep = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
 
             bool moveIntoSquare = true;
 

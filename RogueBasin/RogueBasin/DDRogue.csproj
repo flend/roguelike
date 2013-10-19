@@ -285,6 +285,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MovieFrame.cs" />
+    <Compile Include="Pathing.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerEffect.cs" />
     <Compile Include="PlayerEffectInstant.cs" />

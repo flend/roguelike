@@ -380,7 +380,7 @@ namespace RogueBasin
                     }
 
                     //Check the square is pathable to
-                    nextStep = Game.Dungeon.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                    nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
 
                     if (nextStep.x == -1 && nextStep.y == -1)
                     {
@@ -448,7 +448,7 @@ namespace RogueBasin
                 //If not, move towards the player
 
                 //Find location of next step on the path towards them
-                Point nextStep = Game.Dungeon.GetPathToCreature(this, newTarget);
+                Point nextStep = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
 
                 bool moveIntoSquare = true;
 

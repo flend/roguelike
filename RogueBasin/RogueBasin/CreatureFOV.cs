@@ -31,14 +31,14 @@ namespace RogueBasin
             Base, Triangular
         }
 
-        WrappedFOV tcodFOV;
+        WrappedFOV fov;
         CreatureFOVType type;
         Creature creature;
         Point overrideLocation = null;
 
         public CreatureFOV(Creature creature, WrappedFOV fov, CreatureFOVType creatureFOVType)
         {
-            this.tcodFOV = fov;
+            this.fov = fov;
             this.type = creatureFOVType;
             this.creature = creature;
         }
@@ -53,7 +53,7 @@ namespace RogueBasin
         /// <param name="locationY"></param>
         public CreatureFOV(Creature creature, WrappedFOV fov, CreatureFOVType creatureFOVType, Point overrideLocation)
         {
-            this.tcodFOV = fov;
+            this.fov = fov;
             this.type = creatureFOVType;
             this.creature = creature;
             this.overrideLocation = overrideLocation;
@@ -86,7 +86,7 @@ namespace RogueBasin
                 return false;
             
             //Check tcod FOV
-            return tcodFOV.CheckTileFOV(creature.LocationLevel, new Point(x,y));
+            return fov.CheckTileFOV(creature.LocationLevel, new Point(x,y));
         }
 
         /// <summary>
