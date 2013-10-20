@@ -183,10 +183,19 @@ namespace RogueBasin {
         /// </summary>
         TileEngine.TileMap tileMap;
 
+        /// <summary>
+        /// Viewable area TL offset
+        /// </summary>
+        Point viewTL = new Point(0, 0);
+        Point viewBR = new Point(0, 0);
+
         Screen()
         {
             Width = 90;
             Height = 35;
+
+            viewTL = new Point(0, 0);
+            viewBR = new Point(89, 34);
 
             DebugMode = false;
             CombatAnimations = true;
@@ -378,6 +387,9 @@ namespace RogueBasin {
                 if(p == start)
                     continue;
 
+                if (!isViewVisible(p))
+                    continue;
+
                 char c;
                 if (drawChar == 0)
                     c = LineChar(p.x - lastX, p.y - lastY);
@@ -387,8 +399,8 @@ namespace RogueBasin {
                 lastX = p.x;
                 lastY = p.y;
 
-                tileMapLayer(layerNo).Rows[p.y].Columns[p.x] = new TileEngine.TileCell(c);
-                tileMapLayer(layerNo).Rows[p.y].Columns[p.x].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+                tileMapLayer(layerNo)[ViewRelative(p)] = new TileEngine.TileCell(c);
+                tileMapLayer(layerNo)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
             }           
         }
 
@@ -719,6 +731,32 @@ namespace RogueBasin {
             Screen.Instance.FlushConsole();
         }
 
+        /// <summary>
+        /// Return the view area coords from map coords
+        /// </summary>
+        /// <param name="absolutePoint"></param>
+        /// <returns></returns>
+        private Point ViewRelative(Point absolutePoint)
+        {
+            return absolutePoint - viewTL;
+        }
+
+        /// <summary>
+        /// Is this map coord visible in the view space?
+        /// </summary>
+        /// <param name="absolutePoint"></param>
+        /// <returns></returns>
+        private bool isViewVisible(Point absolutePoint)
+        {
+            Point viewLocation = ViewRelative(absolutePoint);
+
+            if (viewLocation.x >= 0 && viewLocation.y >= 0
+                && viewLocation.x <= viewBR.x && viewLocation.y <= viewBR.y)
+                return true;
+
+            return false;
+        }
+
         private void DrawPC(Player player)
         {
          
@@ -735,8 +773,13 @@ namespace RogueBasin {
                 }
             }
 
-            tileMapLayer(TileLevel.Creatures).Rows[player.LocationMap.y].Columns[player.LocationMap.x] = new TileEngine.TileCell(player.Representation);
-            tileMapLayer(TileLevel.Creatures).Rows[player.LocationMap.y].Columns[player.LocationMap.x].TileFlag = new LibtcodColorFlags(PCDrawColor);
+            if (!isViewVisible(PClocation))
+                return;
+
+            Point viewLoc = ViewRelative(PClocation);
+
+            tileMapLayer(TileLevel.Creatures)[viewLoc] = new TileEngine.TileCell(player.Representation);
+            tileMapLayer(TileLevel.Creatures)[viewLoc].TileFlag = new LibtcodColorFlags(PCDrawColor);
         }
 
 
@@ -828,8 +871,8 @@ namespace RogueBasin {
 
             foreach (Point p in mangledPoints)
             {
-                tileMapLayer(TileLevel.Animations).Rows[p.y].Columns[p.x] = new TileEngine.TileCell('*');
-                tileMapLayer(TileLevel.Animations).Rows[p.y].Columns[p.x].TileFlag = new LibtcodColorFlags(color, ColorPresets.Black);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell('*');
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, ColorPresets.Black);
             }
 
             //Render the full layered map (with these animations) on screen
@@ -859,7 +902,7 @@ namespace RogueBasin {
                 case TargettingType.Line:
 
                     //Draw a line up to the target
-                    DrawPathLine(TileLevel.TargettingUI, new Point(player.LocationMap.x, player.LocationMap.y), new Point(Target.x, Target.y), targetForeground, targetBackground);
+                    DrawPathLine(TileLevel.TargettingUI, player.LocationMap, Target, targetForeground, targetBackground);
                     //Should improve the getlinesquare function to give nicer output so we could use it here too
 
                     break;
@@ -885,7 +928,7 @@ namespace RogueBasin {
                         List<Point> splashSquares = GetPointsForCircularTarget(Target, size);
 
                         //Draw a line up to the target square
-                        DrawPathLine(TileLevel.TargettingUI, new Point(player.LocationMap.x, player.LocationMap.y), new Point(Target.x, Target.y), targetForeground, targetBackground);
+                        DrawPathLine(TileLevel.TargettingUI, player.LocationMap, Target, targetForeground, targetBackground);
 
                         DrawExplosionOverSquaresAndCreatures(splashSquares); 
 
@@ -906,7 +949,9 @@ namespace RogueBasin {
             }
 
             //Highlight target if in range
-            
+            if (!isViewVisible(Target))
+                return;
+
             Color backgroundColor = targetBackground;
             Color foregroundColor = targetForeground;
 
@@ -916,13 +961,13 @@ namespace RogueBasin {
             }
 
             char toDraw = '.';
-            int monsterIdInSquare = tileMapLayer(TileLevel.Creatures).Rows[Target.y].Columns[Target.x].TileID;
+            int monsterIdInSquare = tileMapLayer(TileLevel.Creatures)[ViewRelative(Target)].TileID;
 
             if (monsterIdInSquare != -1)
                 toDraw = (char)monsterIdInSquare;
 
-            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x] = new TileEngine.TileCell(toDraw);
-            tileMapLayer(TileLevel.TargettingUI).Rows[Target.y].Columns[Target.x].TileFlag = new LibtcodColorFlags(ColorPresets.Red, backgroundColor);
+            tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(toDraw);
+            tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(ColorPresets.Red, backgroundColor);
             
         }
 
@@ -931,6 +976,9 @@ namespace RogueBasin {
             //Draw each point as targetted
             foreach (Point p in splashSquares)
             {
+                if (!isViewVisible(p))
+                    continue;
+
                 //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
                 char toDraw = '*';
                 int monsterIdInSquare = tileMapLayer(TileLevel.Creatures).Rows[p.y].Columns[p.x].TileID;
@@ -938,8 +986,8 @@ namespace RogueBasin {
                 if (monsterIdInSquare != -1)
                     toDraw = (char)monsterIdInSquare;
 
-                tileMapLayer(TileLevel.TargettingUI).Rows[p.y].Columns[p.x] = new TileEngine.TileCell(toDraw);
-                tileMapLayer(TileLevel.TargettingUI).Rows[p.y].Columns[p.x].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(toDraw);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
             }
         }
 
@@ -1598,8 +1646,12 @@ namespace RogueBasin {
 
                 if (drawItem)
                 {
-                    tileMapLayer(TileLevel.Items).Rows[item.LocationMap.y].Columns[item.LocationMap.x] = new TileEngine.TileCell(item.Representation);
-                    tileMapLayer(TileLevel.Items).Rows[item.LocationMap.y].Columns[item.LocationMap.x].TileFlag = new LibtcodColorFlags(itemColorToUse);
+
+                    if (!isViewVisible(item.LocationMap))
+                        return;
+
+                    tileMapLayer(TileLevel.Items)[item.LocationMap] = new TileEngine.TileCell(item.Representation);
+                    tileMapLayer(TileLevel.Items)[item.LocationMap].TileFlag = new LibtcodColorFlags(itemColorToUse);
                 }
                 //rootConsole.Flush();
                 //KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -1653,8 +1705,11 @@ namespace RogueBasin {
 
                 if (drawFeature)
                 {
-                    tileMapLayer(TileLevel.Features).Rows[feature.LocationMap.y].Columns[feature.LocationMap.x] = new TileEngine.TileCell(feature.Representation);
-                    tileMapLayer(TileLevel.Features).Rows[feature.LocationMap.y].Columns[feature.LocationMap.x].TileFlag = new LibtcodColorFlags(featureColor);
+                    if (!isViewVisible(feature.LocationMap))
+                        return;
+
+                    tileMapLayer(TileLevel.Features)[feature.LocationMap] = new TileEngine.TileCell(feature.Representation);
+                    tileMapLayer(TileLevel.Features)[feature.LocationMap].TileFlag = new LibtcodColorFlags(featureColor);
                 }
             }
 
@@ -1670,9 +1725,6 @@ namespace RogueBasin {
 
                 if (!creature.Alive)
                     continue;
-
-                int monsterX = mapTopLeft.x + creature.LocationMap.x;
-                int monsterY = mapTopLeft.y + creature.LocationMap.y;
 
                 Color creatureColor = creature.RepresentationColor();
 
@@ -1750,8 +1802,11 @@ namespace RogueBasin {
                                 if (charToOverwrite == '.')
                                     charToOverwrite = '\x9';
 
-                                tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y].Columns[headingLoc.x] = new TileEngine.TileCell(charToOverwrite);
-                                tileMapLayer(TileLevel.CreatureDecoration).Rows[headingLoc.y].Columns[headingLoc.x].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
+                                if (isViewVisible(headingLoc))
+                                {
+                                    tileMapLayer(TileLevel.CreatureDecoration)[headingLoc] = new TileEngine.TileCell(charToOverwrite);
+                                    tileMapLayer(TileLevel.CreatureDecoration)[headingLoc].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
+                                }
                             }
                         }
                     }
@@ -1824,9 +1879,11 @@ namespace RogueBasin {
                             int wpX = mapTopLeft.x + wp.x;
                             int wpY = mapTopLeft.y + wp.y;
 
-                            tileMapLayer(TileLevel.Creatures).Rows[wp.y].Columns[wp.x] = new TileEngine.TileCell(wpNo.ToString()[0]);
-                            tileMapLayer(TileLevel.Creatures).Rows[wp.y].Columns[wp.x].TileFlag = new LibtcodColorFlags(monsterWithWP.RepresentationColor());
-
+                            if (isViewVisible(wp))
+                            {
+                                tileMapLayer(TileLevel.Creatures)[wp] = new TileEngine.TileCell(wpNo.ToString()[0]);
+                                tileMapLayer(TileLevel.Creatures)[wp].TileFlag = new LibtcodColorFlags(monsterWithWP.RepresentationColor());
+                            }
 
                             wpNo++;
                         }
@@ -1914,8 +1971,11 @@ namespace RogueBasin {
 
                     //Creature
 
-                    tileMapLayer(TileLevel.Creatures).Rows[creature.LocationMap.y].Columns[creature.LocationMap.x] = new TileEngine.TileCell(creature.Representation);
-                    tileMapLayer(TileLevel.Creatures).Rows[creature.LocationMap.y].Columns[creature.LocationMap.x].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+                    if (isViewVisible(creature.LocationMap))
+                    {
+                        tileMapLayer(TileLevel.Creatures)[creature.LocationMap] = new TileEngine.TileCell(creature.Representation);
+                        tileMapLayer(TileLevel.Creatures)[creature.LocationMap].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+                    }
 
                 }
             }
@@ -2096,11 +2156,13 @@ namespace RogueBasin {
                         drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Green, 0.7);
                     }
 
-                    tileMapLayer(TileLevel.Terrain).Rows[j].Columns[i] = new TileEngine.TileCell(screenChar);
-                    tileMapLayer(TileLevel.Terrain).Rows[j].Columns[i].TileFlag = new LibtcodColorFlags(drawColor);
+                    Point mapTerrainLoc = new Point(i, j);
 
-                    //rootConsole.ForegroundColor = drawColor;
-                    //rootConsole.PutChar(screenX, screenY, screenChar);
+                    if (isViewVisible(mapTerrainLoc))
+                    {
+                        tileMapLayer(TileLevel.Terrain)[mapTerrainLoc] = new TileEngine.TileCell(screenChar);
+                        tileMapLayer(TileLevel.Terrain)[mapTerrainLoc].TileFlag = new LibtcodColorFlags(drawColor);
+                    }
                 }
             }
 
@@ -2568,8 +2630,11 @@ namespace RogueBasin {
                     colorToDraw = target.RepresentationColor();
                 }
 
-                tileMapLayer(TileLevel.Animations).Rows[target.LocationMap.y].Columns[target.LocationMap.x] = new TileEngine.TileCell(target.Representation);
-                tileMapLayer(TileLevel.Animations).Rows[target.LocationMap.y].Columns[target.LocationMap.x].TileFlag = new LibtcodColorFlags(colorToDraw);
+                if (isViewVisible(target.LocationMap))
+                {
+                    tileMapLayer(TileLevel.Animations)[target.LocationMap] = new TileEngine.TileCell(target.Representation);
+                    tileMapLayer(TileLevel.Animations)[target.LocationMap].TileFlag = new LibtcodColorFlags(colorToDraw);
+                }
             }
 
             //Render the full layered map (with these animations) on screen
@@ -2628,8 +2693,11 @@ namespace RogueBasin {
             {
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
-                    tileMapLayer(TileLevel.Animations).Rows[newTarget.LocationMap.y].Columns[newTarget.LocationMap.x] = new TileEngine.TileCell('*');
-                    tileMapLayer(TileLevel.Animations).Rows[newTarget.LocationMap.y].Columns[newTarget.LocationMap.x].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
+                    if (isViewVisible(newTarget.LocationMap))
+                    {
+                        tileMapLayer(TileLevel.Animations)[newTarget.LocationMap] = new TileEngine.TileCell('*');
+                        tileMapLayer(TileLevel.Animations)[newTarget.LocationMap].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
+                    }
                 }
             }
 

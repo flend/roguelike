@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using RogueBasin;
 
 namespace TileEngine
 {
@@ -85,6 +86,22 @@ namespace TileEngine
             set
             {
                 rows[index] = value;
+            }
+        }
+
+        /// <summary>
+        /// Indexer based on (x, y) [col, row] point
+        /// </summary>
+        public TileCell this[Point p]
+        {
+
+            get
+            {
+                return rows[p.y][p.x];
+            }
+            set
+            {
+                rows[p.y][p.x] = value;
             }
         }
     }
