@@ -2402,8 +2402,8 @@ namespace RogueBasin
 
                             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
-                            hallsGen.Width = 40;
-                            hallsGen.Height = 25;
+                            hallsGen.Width = 200;
+                            hallsGen.Height = 80;
 
                             Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
                             int levelNo = Game.Dungeon.AddMap(hallMap);

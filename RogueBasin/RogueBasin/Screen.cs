@@ -165,6 +165,7 @@ namespace RogueBasin {
         public bool SeeAllMonsters { get; set; }
         public bool SeeAllMap { get; set; }
 
+        public int ViewportScrollSpeed { get; set; }
 
         public uint MessageQueueWidth { get; private set; }
 
@@ -199,6 +200,8 @@ namespace RogueBasin {
 
             ViewableWidth = 60;
             ViewableHeight = 25;
+
+            ViewportScrollSpeed = 1;
 
             viewTL = new Point(0, 0);
             SetViewBRFromTL();
@@ -438,6 +441,15 @@ namespace RogueBasin {
             RootConsole rootConsole = RootConsole.GetInstance();
 
             rootConsole.Flush();
+        }
+
+        /// <summary>
+        /// Scroll the viewport, by the delta
+        /// </summary>
+        /// <param name="delta"></param>
+        public void ScrollViewport(Point delta) {
+
+            viewTL += delta * ViewportScrollSpeed;
         }
 
 

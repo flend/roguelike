@@ -73,6 +73,11 @@ namespace RogueBasin
             return new Point(i.x + j.x, i.y + j.y);
         }
 
+        public static Point operator *(Point i, int magnitude)
+        {
+            return new Point(i.x * magnitude, i.y * magnitude);
+        }
+
         public override string ToString()
         {
             return "(x: " + this.x + ", y: " + this.y + ")";

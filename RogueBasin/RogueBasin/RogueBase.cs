@@ -727,12 +727,21 @@ namespace RogueBasin
 
                         //Handle direction keys (both arrows and vi keys)
                         Point direction = new Point(9,9);
-                        bool wasDirection = GetDirectionFromKeypress(userKey, out direction);
+                        KeyModifier mod = KeyModifier.Arrow;
+                        bool wasDirection = GetDirectionFromKeypress(userKey, out direction, out mod);
 
-                        if (wasDirection)
+                        if (wasDirection && mod == KeyModifier.Numeric)
                         {
                             timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
                         }
+
+                        if (wasDirection && mod == KeyModifier.Arrow)
+                        {
+                            Screen.Instance.ViewportScrollSpeed = 4;
+                            Screen.Instance.ScrollViewport(direction);
+                            Screen.Instance.Update();
+                        }
+
 
                         break;
 
@@ -1056,12 +1065,12 @@ namespace RogueBasin
         /// Get a keypress and interpret it as a direction
         /// </summary>
         /// <returns></returns>
-        private bool GetDirectionKeypress(out Point direction)
+        private bool GetDirectionKeypress(out Point direction, out KeyModifier mod)
         {
             //Get direction
             KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
-            if (GetDirectionFromKeypress(userKey, out direction))
+            if (GetDirectionFromKeypress(userKey, out direction, out mod))
             {
                 return true;
             }
@@ -1069,14 +1078,22 @@ namespace RogueBasin
             return false;
         }
 
+        private enum KeyModifier {
+            Vi,
+            Numeric,
+            Arrow
+        }
+
+
         /// <summary>
         /// Get a direction from a keypress. Will return false if not valid. Otherwise in parameter.
         /// </summary>
         /// <param name="direction"></param>
         /// <returns></returns>
-        private bool GetDirectionFromKeypress(KeyPress userKey, out Point direction) {
+        private bool GetDirectionFromKeypress(KeyPress userKey, out Point direction, out KeyModifier mod) {
 
             direction = new Point(9, 9);
+            mod = KeyModifier.Arrow;
             
             //Vi keys for directions
 
@@ -1087,34 +1104,42 @@ namespace RogueBasin
                 {
                     case 'b':
                         direction = new Point(-1, 1);
+                        mod = KeyModifier.Vi;
                         break;
 
                     case 'n':
                         direction = new Point(1, 1);
+                        mod = KeyModifier.Vi;
                         break;
 
                     case 'y':
                         direction = new Point(-1, -1);
+                        mod = KeyModifier.Vi;
                         break;
 
                     case 'u':
                         direction = new Point(1, -1);
+                        mod = KeyModifier.Vi;
                         break;
 
                     case 'h':
                         direction = new Point(-1, 0);
+                        mod = KeyModifier.Vi;
                         break;
 
                     case 'l':
                         direction = new Point(1, 0);
+                        mod = KeyModifier.Vi;
                         break;
 
                     case 'k':
                         direction = new Point(0, -1);
+                        mod = KeyModifier.Vi;
                         break;
 
                     case 'j':
                         direction = new Point(0, 1);
+                        mod = KeyModifier.Vi;
                         break;
                 }
             }
@@ -1126,40 +1151,65 @@ namespace RogueBasin
                 {
                     case KeyCode.TCODK_KP1:
                         direction = new Point(-1, 1);
+                        mod = KeyModifier.Numeric;
                         break;
 
                     case KeyCode.TCODK_KP3:
                         direction = new Point(1, 1);
+                        mod = KeyModifier.Numeric;
                         break;
 
                     case KeyCode.TCODK_KPDEC:
-                    case KeyCode.TCODK_KP5:
-                        //Does nothing
                         direction = new Point(0, 0);
+                        mod = KeyModifier.Arrow;
+                        break;
+
+                    case KeyCode.TCODK_KP5:
+                        direction = new Point(0, 0);
+                        mod = KeyModifier.Numeric;
                         break;
 
                     case KeyCode.TCODK_KP7:
                         direction = new Point(-1, -1);
+                        mod = KeyModifier.Numeric;
                         break;
                     case KeyCode.TCODK_KP9:
                         direction = new Point(1, -1);
+                        mod = KeyModifier.Numeric;
                         break;
 
                     case KeyCode.TCODK_LEFT:
+                        direction = new Point(-1, 0);
+                        mod = KeyModifier.Arrow;
+                        break;
+
                     case KeyCode.TCODK_KP4:
                         direction = new Point(-1, 0);
+                        mod = KeyModifier.Numeric;
                         break;
                     case KeyCode.TCODK_RIGHT:
+                        direction = new Point(1, 0);
+                        mod = KeyModifier.Arrow;
+                        break;
                     case KeyCode.TCODK_KP6:
                         direction = new Point(1, 0);
+                        mod = KeyModifier.Numeric;
                         break;
                     case KeyCode.TCODK_UP:
+                        direction = new Point(0, -1);
+                        mod = KeyModifier.Arrow;
+                        break;
                     case KeyCode.TCODK_KP8:
                         direction = new Point(0, -1);
+                        mod = KeyModifier.Numeric;
                         break;
                     case KeyCode.TCODK_KP2:
+                        direction = new Point(0, 1);
+                        mod = KeyModifier.Numeric;
+                        break;
                     case KeyCode.TCODK_DOWN:
                         direction = new Point(0, 1);
+                        mod = KeyModifier.Arrow;
                         break;
                 }
             }
@@ -1178,7 +1228,8 @@ namespace RogueBasin
 
             //Get direction
             Point direction = new Point(0, 0);
-            bool gotDirection = GetDirectionKeypress(out direction);
+            KeyModifier mod = KeyModifier.Arrow;
+            bool gotDirection = GetDirectionKeypress(out direction, out mod);
             
             if (!gotDirection)
             {
@@ -1208,7 +1259,8 @@ namespace RogueBasin
 
             //Get direction
             Point direction = new Point(0, 0);
-            bool gotDirection = GetDirectionKeypress(out direction);
+            KeyModifier mod = KeyModifier.Arrow;
+            bool gotDirection = GetDirectionKeypress(out direction, out mod);
 
             if (!gotDirection)
             {
@@ -1238,7 +1290,8 @@ namespace RogueBasin
 
             //Get direction
             Point direction = new Point(0, 0);
-            bool gotDirection = GetDirectionKeypress(out direction);
+            KeyModifier mod = KeyModifier.Arrow;
+            bool gotDirection = GetDirectionKeypress(out direction, out mod);
 
             if (!gotDirection)
             {
@@ -1261,7 +1314,8 @@ namespace RogueBasin
 
             //Get direction
             Point direction = new Point(0, 0);
-            bool gotDirection = GetDirectionKeypress(out direction);
+            KeyModifier mod = KeyModifier.Arrow;
+            bool gotDirection = GetDirectionKeypress(out direction, out mod);
 
             if (!gotDirection)
             {
@@ -1933,11 +1987,11 @@ namespace RogueBasin
                 KeyPress userKey = Keyboard.WaitForKeyPress(true);
 
                 Point direction = new Point();
-
+                KeyModifier mod = KeyModifier.Arrow;
                 bool validDirection = false;
 
 
-                if (GetDirectionFromKeypress(userKey, out direction))
+                if (GetDirectionFromKeypress(userKey, out direction, out mod))
                 {
                     //Valid direction
                     validDirection = true;
