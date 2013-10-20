@@ -203,6 +203,7 @@ namespace RogueBasin
                             ProfileEntry("Pre Screen Update");
 
                             //Update screen just before PC's turn
+                            Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationMap);
                             Screen.Instance.Update();
 
                             ProfileEntry("Post Screen Update");
