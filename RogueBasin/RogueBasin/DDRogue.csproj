@@ -260,6 +260,7 @@
     <Compile Include="LibTCOD\TCODPathFindingWrapper.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="MapExport.cs" />
     <Compile Include="MapGenerator.cs" />
     <Compile Include="MapGeneratorBSP.cs" />
     <Compile Include="MapGeneratorCave.cs" />

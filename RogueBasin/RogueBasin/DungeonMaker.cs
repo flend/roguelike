@@ -2381,6 +2381,16 @@ namespace RogueBasin
 
             SpawnMapFlatline(dungeonLevelsToTest, false);
 
+            //Write maps to disk
+            MapExport exporter = new MapExport();
+
+            int index = 0;
+            foreach (Map map in Game.Dungeon.Levels)
+            {
+                exporter.ExportMapToTextFile(map, "map-" + index + ".txt");
+                index++;
+            }
+
             return dungeonLevelsToTest;
         }
 
