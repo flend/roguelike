@@ -871,6 +871,9 @@ namespace RogueBasin {
 
             foreach (Point p in mangledPoints)
             {
+                if (!isViewVisible(p))
+                    continue;
+
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell('*');
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, ColorPresets.Black);
             }
@@ -1427,7 +1430,6 @@ namespace RogueBasin {
             {
                 utilityStr = utility.SingleItemDescription;
                 PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left, utility.GetColour());
-
                 IEquippableItem utilityE = utility as IEquippableItem;
 
                 string uses = "";
