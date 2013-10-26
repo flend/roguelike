@@ -428,10 +428,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="QuickGraph">
-      <HintPath>..\..\..\My Documents\Visual Studio 2012\Projects\graphgleetest\quickgraph\Release\QuickGraph.dll</HintPath>
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
-      <HintPath>..\..\..\My Documents\Visual Studio 2012\Projects\graphgleetest\quickgraph\Release\QuickGraph.Graphviz.dll</HintPath>
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
