@@ -6,7 +6,7 @@ namespace RogueBasin
 {
 
     /** Immutable Point class */
-    public class Point {
+    public sealed class Point {
         public readonly int x;
         public readonly int y;
 

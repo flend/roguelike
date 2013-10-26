@@ -268,6 +268,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MapGeneratorRogue.cs" />
+    <Compile Include="MapGeneratorTemplated.cs" />
     <Compile Include="MapObject.cs" />
     <Compile Include="MapRendererLibTCod.cs" />
     <Compile Include="MessageQueue.cs" />
@@ -323,6 +324,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RogueBase.cs" />
+    <Compile Include="RoomTemplateLoader.cs" />
     <Compile Include="SaveGameInfo.cs" />
     <Compile Include="Screen.cs" />
     <Compile Include="SerializableDictionary.cs" />
@@ -723,5 +725,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\movies\halfPrimary0.amf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\vaults\vault1.room" />
   </ItemGroup>
 </Project>

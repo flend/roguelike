@@ -2360,11 +2360,11 @@ namespace RogueBasin
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
             //Place monsters in levels
-            SpawnCreaturesFlatline(dungeonLevelsToTest, levelGen, false);
+            //SpawnCreaturesFlatline(dungeonLevelsToTest, levelGen, false);
 
-            SpawnItemsFlatline(dungeonLevelsToTest, levelGen, false);
+            //SpawnItemsFlatline(dungeonLevelsToTest, levelGen, false);
 
-            SpawnObjectivesFlatline(dungeonLevelsToTest, levelGen, false);
+            //SpawnObjectivesFlatline(dungeonLevelsToTest, levelGen, false);
         }
 
         private List<int> RebuildAllMaps()
@@ -2376,7 +2376,20 @@ namespace RogueBasin
                 dungeonLevelsToTest.Add(i);
             }
 
-            SpawnMapFlatline(dungeonLevelsToTest, false);
+            bool experimentalTemplateGen = true;
+
+            if(!experimentalTemplateGen)
+                SpawnMapFlatline(dungeonLevelsToTest, false);
+            else
+            {
+                //Setup a single test level
+
+                MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
+                Map templateMap = templateGen.GenerateMap();
+                int levelNo = Game.Dungeon.AddMap(templateMap);
+
+                CalculateWalkableAndTCOD();
+            }
 
             //Write maps to disk
             MapExport exporter = new MapExport();
