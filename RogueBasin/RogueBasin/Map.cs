@@ -4,11 +4,11 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    //Represents a point
-    //This should be immutable (make x and y readonly)
+
+    /** Immutable Point class */
     public class Point {
-        public int x;
-        public int y;
+        public readonly int x;
+        public readonly int y;
 
         public Point()
         {

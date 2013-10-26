@@ -316,8 +316,10 @@ namespace RogueBasin {
         /// <param name="viewCenter"></param>
         public void CenterViewOnPoint(Point viewCenter)
         {
-            viewTL.x = viewCenter.x - (int)Math.Floor((double)ViewableWidth / 2);
-            viewTL.y = viewCenter.y - (int)Math.Floor((double)ViewableHeight / 2);
+            int viewTLx = viewCenter.x - (int)Math.Floor((double)ViewableWidth / 2);
+            int viewTLy = viewCenter.y - (int)Math.Floor((double)ViewableHeight / 2);
+
+            viewTL = new Point(viewTLx, viewTLy);
 
             SetViewBRFromTL();
         }

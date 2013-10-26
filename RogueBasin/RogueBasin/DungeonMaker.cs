@@ -959,8 +959,7 @@ namespace RogueBasin
 
             do
             {
-                toPlaceLoc.x = location.x + (int)Gaussian.BoxMuller(distance, 5);
-                toPlaceLoc.y = location.y + (int)Gaussian.BoxMuller(distance, 5);
+                toPlaceLoc = new Point(location.x + (int)Gaussian.BoxMuller(distance, 5), location.y + (int)Gaussian.BoxMuller(distance, 5));
 
                 loops++;
                 distance--;
@@ -1138,9 +1137,7 @@ namespace RogueBasin
 
             do
             {
-                toPlaceLoc.x = location.x + (int)Gaussian.BoxMuller(2, 2);
-                toPlaceLoc.y = location.y + (int)Gaussian.BoxMuller(2, 2);
-
+                toPlaceLoc = new Point(location.x + (int)Gaussian.BoxMuller(2, 2), location.y + (int)Gaussian.BoxMuller(2, 2));
                 loops++;
 
             } while (!Game.Dungeon.AddItem(item, level, toPlaceLoc) && loops < maxLoops);
