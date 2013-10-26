@@ -1,0 +1,10 @@
+*.exe
+RogueBasin/RogueBasin/bin/Debug/logs/*
+RogueBasin/RogueBasin/bin/Debug/obituary/*
+RogueBasin/RogueBasin/bin/Debug/*.png
+RogueBasin/RogueBasin/bin/Debug/*.dot
+RogueBasin/RogueBasin/bin/Debug/*.sav
+*.pdb
+*.o
+*.so
+*.suo
