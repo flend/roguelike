@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 
@@ -12,6 +11,38 @@ namespace RogueBasin
     enum TemplateRotation
     {
         Deg0, Deg90, Deg180, Deg270
+    }
+
+    sealed class TemplateRectangle
+    {
+        public readonly int Width;
+        public readonly int Height;
+        public readonly int Left;
+        public readonly int Top;
+
+        public int Bottom
+        {
+            get
+            {
+                return Top + Height - 1;
+            }
+        }
+
+        public int Right
+        {
+            get
+            {
+                return Left + Width - 1;
+            }
+        }
+
+        public TemplateRectangle(int left, int top, int width, int height)
+        {
+            Left = left;
+            Top = top;
+            Width = width;
+            Height = height;
+        }
     }
 
     class TemplatePositioned
@@ -38,9 +69,9 @@ namespace RogueBasin
         /// Return a rectangle representing the extent of the room in positioned (X, Y) coordinates
         /// </summary>
         /// <returns></returns>
-        public Rectangle Extent()
+        public TemplateRectangle Extent()
         {
-            return new Rectangle(X, Y, Room.Width, Room.Height);
+            return new TemplateRectangle(X, Y, Room.Width, Room.Height);
         }
     }
 
@@ -88,8 +119,11 @@ namespace RogueBasin
             RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("vaults.vault1.room", StandardTemplateMapping.terrainMapping);
 
             //Place room at coords
-            TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 10, room1, TemplateRotation.Deg0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
             AddPositionedTemplate(templatePos1);
+
+            TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
+            AddPositionedTemplate(templatePos2);
 
             Map masterMap = MergeTemplatesIntoMap();
 
@@ -120,7 +154,7 @@ namespace RogueBasin
             foreach (var templatePlacement in templates)
             {
                 RoomTemplate template = templatePlacement.Value.Room;
-                Rectangle roomExtent = templatePlacement.Value.Extent();
+                TemplateRectangle roomExtent = templatePlacement.Value.Extent();
 
                 //Find masterMap relative coordinates
                 int roomMapLeft = roomExtent.Left + masterMapTopLeft.x;
@@ -134,7 +168,7 @@ namespace RogueBasin
 
                         //For transparent areas, the terrain below is kept
                         if(terrainToMerge != RoomTemplateTerrain.Transparent) {
-                            masterMap.mapSquares[i, j].Terrain = terrainMapping[terrainToMerge];
+                            masterMap.mapSquares[roomMapLeft + i, roomMapTop + j].Terrain = terrainMapping[terrainToMerge];
                         }
                     }
                 }

@@ -49,13 +49,13 @@ namespace RogueBasin
         private static void SetupTerrainChars()
         {
             TerrainChars.Add(MapTerrain.Empty, '.');
+            TerrainChars.Add(MapTerrain.Void, '\xb0');
             TerrainChars.Add(MapTerrain.Wall, '#');
             
             TerrainChars.Add(MapTerrain.HellWall, '#');
             TerrainChars.Add(MapTerrain.SkeletonWall, '8');
             TerrainChars.Add(MapTerrain.SkeletonWallWhite, '8');
             TerrainChars.Add(MapTerrain.Corridor, '|');
-            TerrainChars.Add(MapTerrain.Void, ' ');
             TerrainChars.Add(MapTerrain.ClosedDoor, '+');
             TerrainChars.Add(MapTerrain.OpenDoor, '/');
             TerrainChars.Add(MapTerrain.Flooded, '=');
@@ -80,7 +80,6 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.Corridor, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.SkeletonWall, ColorPresets.BlanchedAlmond);
             TerrainColors.Add(MapTerrain.SkeletonWallWhite, ColorPresets.GhostWhite);
-            TerrainColors.Add(MapTerrain.Void, ColorPresets.Black);
             TerrainColors.Add(MapTerrain.ClosedDoor, ColorPresets.DarkGoldenrod);
             TerrainColors.Add(MapTerrain.OpenDoor, ColorPresets.DarkGoldenrod);
             TerrainColors.Add(MapTerrain.Flooded, ColorPresets.Blue);
@@ -95,6 +94,7 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.Gravestone, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.BarDoor, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.DockWall, ColorPresets.DarkSlateGray);
+            TerrainColors.Add(MapTerrain.Void, ColorPresets.Gray);
         }
 
         private static void SetupEquipmentSlots()
