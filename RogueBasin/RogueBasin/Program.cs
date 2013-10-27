@@ -11,18 +11,18 @@ namespace RogueBasin
         [STAThread]
         static int Main(string [] args)
         {
-            try
-            {
+            //try
+            //{
                 using (RogueBase d = new RogueBase())
                 {
                     return d.Run(args);
                 }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error occurred, please check the log file. Terminating. Error: " + e.Message);
-                return 1;
-            }
+           // }
+            //catch (Exception e)
+            //{
+             //   MessageBox.Show("Error occurred, please check the log file. Terminating. Error: " + e.Message);
+             //   return 1;
+            //}
         }
     }
 }
