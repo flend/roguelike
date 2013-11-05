@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,37 +14,6 @@ namespace RogueBasin
         Deg0, Deg90, Deg180, Deg270
     }
 
-    sealed class TemplateRectangle
-    {
-        public readonly int Width;
-        public readonly int Height;
-        public readonly int Left;
-        public readonly int Top;
-
-        public int Bottom
-        {
-            get
-            {
-                return Top + Height - 1;
-            }
-        }
-
-        public int Right
-        {
-            get
-            {
-                return Left + Width - 1;
-            }
-        }
-
-        public TemplateRectangle(int left, int top, int width, int height)
-        {
-            Left = left;
-            Top = top;
-            Width = width;
-            Height = height;
-        }
-    }
 
     class TemplatePositioned
     {
@@ -106,9 +76,19 @@ namespace RogueBasin
         /// </summary>
         /// <param name="z"></param>
         /// <param name="templateToAdd"></param>
-        private void AddPositionedTemplate(TemplatePositioned templateToAdd) {
+        private bool AddPositionedTemplate(TemplatePositioned templateToAdd) {
+
+            foreach(Point p in templateToAdd.Extent()) {
+                //Overlap with existing template
+                if (GetMergedTerrainAtPoint(p) != RoomTemplateTerrain.Transparent)
+                {
+                    LogFile.Log.LogEntryDebug("Overlapping terrain at " + p + " add template failed", LogDebugLevel.Medium);
+                    return false;
+                }
+            }
 
             templates.Add(templateToAdd.Z, templateToAdd);
+            return true;
         }
         
         /** Build a map using templated rooms */
@@ -125,12 +105,44 @@ namespace RogueBasin
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
             AddPositionedTemplate(templatePos2);
 
+            //should fail
+            TemplatePositioned templatePos3 = new TemplatePositioned(4, 4, 10, room1, TemplateRotation.Deg0);
+            AddPositionedTemplate(templatePos3);
+
             Map masterMap = MergeTemplatesIntoMap();
 
             masterMap.PCStartLocation = new Point(templatePos1.X - masterMapTopLeft.x + room1.Width / 2, templatePos1.Y - masterMapTopLeft.y + room1.Height / 2);
 
             return masterMap;
         }
+
+        /** Get the current terrain at the required point, calculated by flattening the templates. 
+         Any terrain overrides Transparent, but no templates should be placed that having different types of
+         terrain on the same point. e.g. 2 walls overlapping is OK but wall and floor overlapping is not.
+         Absence of a template at this point returns Transparent */
+        private RoomTemplateTerrain GetMergedTerrainAtPoint(Point point)
+        {
+            foreach (var templatePlacement in templates)
+            {
+                TemplateRectangle roomExtent = templatePlacement.Value.Extent();
+
+                Point ptRelativeToTemplate = new Point(point.x - roomExtent.Left, point.y - roomExtent.Top);
+
+                //Check for point outside of template
+
+                if (!(ptRelativeToTemplate.x >= 0 && point.x < roomExtent.Width &&
+                    point.y >= 0 && point.y < roomExtent.Height))
+                    continue;
+
+                RoomTemplateTerrain thisTerrain = templatePlacement.Value.Room.terrainMap[ptRelativeToTemplate.x, ptRelativeToTemplate.y];
+
+                if (thisTerrain != RoomTemplateTerrain.Transparent)
+                    return thisTerrain;
+            }
+
+            return RoomTemplateTerrain.Transparent;
+        }
+
 
         /// <summary>
         /// Create a playable map by merging the terrain of the templates in z-order

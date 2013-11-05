@@ -9,7 +9,7 @@ RogueBasin/RogueBasin/bin/Debug/*.sav
 RogueBasin/libtcod-net/bin/*
 RogueBasin/libtcod-net/obj/*
 RogueBasin/Roguebasin/obj/*
-RogueBasin/RogueBasin/bin/Debug/RogueBasin.vhost.exe.manifest
+RogueBasin/RogueBasin/bin/Debug/RogueBasin.vshost.exe.manifest
 RogueBasin/libtcod-net/xmlDocs.xml
 RogueBasin/RogueBasin/bin/Debug/RogueBasin.exe
 RogueBasin/RogueBasin/bin/Debug/libtcodWrapper.dll

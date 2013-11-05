@@ -12,7 +12,7 @@ namespace RogueBasin
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
-
+        
         public RoomTemplateTerrain[,] terrainMap;
 
         public RoomTemplate(RoomTemplateTerrain[,] terrain)

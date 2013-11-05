@@ -371,6 +371,7 @@
     <Compile Include="StringEquivalent.cs" />
     <Compile Include="MonsterThrowAndRunAI.cs" />
     <Compile Include="TargettingType.cs" />
+    <Compile Include="TemplateRectangle.cs" />
     <Compile Include="TileCell.cs" />
     <Compile Include="TileMap.cs" />
     <Compile Include="TrainStats.cs" />
