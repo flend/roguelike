@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 
@@ -38,6 +39,21 @@ namespace RogueBasin
             Top = top;
             Width = width;
             Height = height;
+        }
+        
+        public TemplateRectangle GetOverlapRectangle(TemplateRectangle other)
+        {
+            //Wrap rectangle calls
+
+            Rectangle thisRect = new Rectangle(this.Left, this.Top, this.Right - this.Left, this.Bottom - this.Top);
+            Rectangle otherRect = new Rectangle(other.Left, other.Top, other.Right - other.Left, other.Bottom - other.Top);
+
+            if (!thisRect.IntersectsWith(otherRect))
+                return null;
+
+            Rectangle intersectRect = Rectangle.Intersect(thisRect, otherRect);
+
+            return new TemplateRectangle(intersectRect.Left, intersectRect.Top, intersectRect.Width + 1, intersectRect.Height + 1);
         }
 
         public IEnumerator GetEnumerator()
@@ -95,6 +111,42 @@ namespace RogueBasin
                     return new Point(iter_x, iter_y);
                 }
             }
+        }
+
+        public override bool Equals(System.Object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            // If parameter cannot be cast to Point return false.
+            TemplateRectangle p = obj as TemplateRectangle;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return (Left == p.Left) && (Top == p.Top) && (Width == p.Width) && (Height == p.Height);
+        }
+
+        public bool Equals(TemplateRectangle p)
+        {
+            // If parameter is null return false:
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return (Left == p.Left) && (Top == p.Top) && (Width == p.Width) && (Height == p.Height);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Left + Top) ^ (Width + Height);
         }
     }
 }
