@@ -9,13 +9,13 @@ namespace RogueBasin
     /// <summary>
     /// Anticlockwise rotation of a template onto the map
     /// </summary>
-    enum TemplateRotation
+    public enum TemplateRotation
     {
         Deg0, Deg90, Deg180, Deg270
     }
 
 
-    class TemplatePositioned
+    public class TemplatePositioned
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -45,7 +45,7 @@ namespace RogueBasin
         }
     }
 
-    class MapGeneratorTemplated
+    public class MapGeneratorTemplated
     {
         /// <summary>
         /// Mapping from template terrain to real terrain on the map
@@ -76,7 +76,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="z"></param>
         /// <param name="templateToAdd"></param>
-        private bool AddPositionedTemplate(TemplatePositioned templateToAdd) {
+        public bool AddPositionedTemplate(TemplatePositioned templateToAdd) {
 
             foreach(Point p in templateToAdd.Extent()) {
                 //Overlap with existing template

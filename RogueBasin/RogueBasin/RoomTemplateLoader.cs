@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace RogueBasin
 {
-    class RoomTemplate
+    public class RoomTemplate
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -25,7 +25,8 @@ namespace RogueBasin
     }
 
     /** Types of terrain possible for an abstract room template */
-    enum RoomTemplateTerrain {
+    public enum RoomTemplateTerrain
+    {
         Floor,
         Wall,
         WallWithPossibleDoor,
@@ -34,7 +35,7 @@ namespace RogueBasin
     }
 
     /** Mapping for templates. Could be loaded from disk */
-    static class StandardTemplateMapping
+    public static class StandardTemplateMapping
     {
         public static readonly Dictionary<char, RoomTemplateTerrain> terrainMapping;
 
@@ -52,28 +53,13 @@ namespace RogueBasin
     }
 
     /** Loads a room / vault from disk and returns as a usuable object */
-    class RoomTemplateLoader
+    public class RoomTemplateLoader
     {
 
-        /** Loads template from file. Throws exception on failure */
-        public static RoomTemplate LoadTemplateFromFile(string filenameRoot, Dictionary<char, RoomTemplateTerrain> terrainMapping)
+        /** Loads template from a file stream. Throws exception on failure */
+        public static RoomTemplate LoadTemplateFromFile(Stream fileStream, Dictionary<char, RoomTemplateTerrain> terrainMapping)
         {
-            Assembly _assembly = Assembly.GetExecutingAssembly();
-
-            /*
-            MessageBox.Show("Showing all embedded resource names");
-
-            string[] names = _assembly.GetManifestResourceNames();
-            foreach (string name in names)
-                MessageBox.Show(name);
-            */  
-
-            string filename = "RogueBasin.bin.Debug." + filenameRoot;
-            Stream _fileStream = _assembly.GetManifestResourceStream(filename);
-
-            LogFile.Log.LogEntry("Loading room template from file: " + filename);
-
-            StreamReader reader = new StreamReader(_fileStream);
+            StreamReader reader = new StreamReader(fileStream);
             string thisLine;
 
             List<string> mapRows = new List<string>();
@@ -97,23 +83,24 @@ namespace RogueBasin
 
             if (width == 0)
             {
-                LogFile.Log.LogEntry("No data in room template file: " + filename);
-                throw new ApplicationException("No data in room template file - width is 0:");
+                LogFile.Log.LogEntry("No data in room template file stream");
+                throw new ApplicationException("No data in room template file - width is 0");
             }
-            
+
             //Build a 2d representation of the room
 
-            RoomTemplateTerrain[,]  roomMap = new RoomTemplateTerrain[width, height];
+            RoomTemplateTerrain[,] roomMap = new RoomTemplateTerrain[width, height];
 
-            for (int y = 0 ; y < mapRows.Count; y++)
+            for (int y = 0; y < mapRows.Count; y++)
             {
                 int x;
                 for (x = 0; x < mapRows[y].Length; x++)
                 {
                     char inputTerrain = mapRows[y][x];
 
-                    if(!terrainMapping.ContainsKey(inputTerrain)) {
-                        LogFile.Log.LogEntryDebug("No mapping for char : " + inputTerrain + " in file: " + filename, LogDebugLevel.High);
+                    if (!terrainMapping.ContainsKey(inputTerrain))
+                    {
+                        LogFile.Log.LogEntryDebug("No mapping for char : " + inputTerrain + " in file", LogDebugLevel.High);
                         roomMap[x, y] = RoomTemplateTerrain.Transparent;
                     }
 
@@ -128,6 +115,29 @@ namespace RogueBasin
             }
 
             return new RoomTemplate(roomMap);
+        }
+
+        /** Loads template from manifest resource file. Throws exception on failure */
+        public static RoomTemplate LoadTemplateFromFile(string filenameRoot, Dictionary<char, RoomTemplateTerrain> terrainMapping)
+        {
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+
+            /*
+            MessageBox.Show("Showing all embedded resource names");
+
+            string[] names = _assembly.GetManifestResourceNames();
+            foreach (string name in names)
+                MessageBox.Show(name);
+            */
+
+            string[] names = _assembly.GetManifestResourceNames();
+
+            string filename = filenameRoot;
+            Stream _fileStream = _assembly.GetManifestResourceStream(filename);
+
+            LogFile.Log.LogEntry("Loading room template from file: " + filename);
+
+            return LoadTemplateFromFile(_fileStream, terrainMapping);
         }
     }
 }
