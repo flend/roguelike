@@ -54,6 +54,7 @@
     <Compile Include="TemplatedMapBuilderTest.cs" />
     <Compile Include="TemplateRectangleTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoomTemplateLoaderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RogueBasin\DDRogue.csproj">
@@ -81,6 +82,27 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\expandedcorridorhoriz1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\teststandardsize.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testpotentialdoors.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testalignmentroom1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testalignmentroom2.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\test4doors.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testalignmentroom4.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testalignmentroom3.room" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

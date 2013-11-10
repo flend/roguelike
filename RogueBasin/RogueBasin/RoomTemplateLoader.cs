@@ -10,16 +10,55 @@ namespace RogueBasin
 {
     public class RoomTemplate
     {
+        public class PotentialDoor
+        {
+            public Point Location { get; private set; }
+
+            public PotentialDoor(Point location)
+            {
+                this.Location = location;
+            }
+        }
+
+        public enum DoorLocation
+        {
+            Top, Bottom, Left, Right
+        }
+
+
         public int Width { get; private set; }
         public int Height { get; private set; }
         
         public RoomTemplateTerrain[,] terrainMap;
 
+        private List<PotentialDoor> potentialDoors;
+
+        public List<PotentialDoor> PotentialDoors
+        {
+            get
+            {
+                return potentialDoors;
+            }
+        }
+
+        public RoomTemplate(RoomTemplateTerrain[,] terrain, List<PotentialDoor> potentialDoors)
+        {
+            SetMapRelatedMembers(terrain);
+            this.potentialDoors = potentialDoors; //non-clone
+        }
+
         public RoomTemplate(RoomTemplateTerrain[,] terrain)
+        {
+            SetMapRelatedMembers(terrain);
+            potentialDoors = new List<PotentialDoor>(); //empty
+        }
+
+        private void SetMapRelatedMembers(RoomTemplateTerrain[,] terrain)
         {
             this.terrainMap = (RoomTemplateTerrain[,])terrain.Clone();
             Width = terrainMap.GetLength(0);
             Height = terrainMap.GetLength(1);
+
         }
 
         public override bool Equals(System.Object obj)
@@ -108,8 +147,8 @@ namespace RogueBasin
             terrainMapping[' '] = RoomTemplateTerrain.Transparent;
             terrainMapping['#'] = RoomTemplateTerrain.Wall;
             terrainMapping['.'] = RoomTemplateTerrain.Floor;
-            terrainMapping['+'] = RoomTemplateTerrain.OpenWithPossibleDoor;
-            terrainMapping['-'] = RoomTemplateTerrain.WallWithPossibleDoor;
+            terrainMapping['-'] = RoomTemplateTerrain.OpenWithPossibleDoor;
+            terrainMapping['+'] = RoomTemplateTerrain.WallWithPossibleDoor;
         }
 
     }
@@ -191,6 +230,85 @@ namespace RogueBasin
 
             return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0);
         }
+
+        public static RoomTemplate.DoorLocation GetDoorLocation(RoomTemplate roomTemplate, int doorIndex)
+        {
+            if (roomTemplate.PotentialDoors.Count <= doorIndex)
+                throw new Exception("Door index higher than available doors");
+
+            Point doorLocation = roomTemplate.PotentialDoors[doorIndex].Location;
+
+            if (doorLocation.y == 0)
+            {
+                return RoomTemplate.DoorLocation.Top;
+            }
+            else if (doorLocation.y == roomTemplate.Height - 1)
+            {
+                return RoomTemplate.DoorLocation.Bottom;
+            }
+            else if (doorLocation.x == 0)
+            {
+                return RoomTemplate.DoorLocation.Left;
+            }
+            else if (doorLocation.x == roomTemplate.Width - 1)
+            {
+                return RoomTemplate.DoorLocation.Right;
+            }
+            else
+            {
+                throw new ApplicationException("Door is not on circumference of room, can't cope");
+            }
+        }
+
+
+        /// <summary>
+        /// Align toAlignRoomTemplate so that a straight corridor can be drawn between the doors described by the indices
+        /// </summary>
+        /// <param name="toAlignRoomTemplate"></param>
+        /// <param name="baseRoomTemplate"></param>
+        /// <param name="toAlignRoomDoorIndex"></param>
+        /// <param name="baseRoomDoorIndex"></param>
+        /// <param name="distanceApart"></param>
+        /// <returns></returns>
+        public static TemplatePositioned AlignRoomOnDoor(RoomTemplate toAlignRoomTemplate, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
+        {
+            Point toAlignDoorLocation = toAlignRoomTemplate.PotentialDoors[toAlignRoomDoorIndex].Location;
+            Point baseDoorLocation = baseRoom.Room.PotentialDoors[baseRoomDoorIndex].Location;
+
+            RoomTemplate.DoorLocation toAlignDoorLoc = GetDoorLocation(toAlignRoomTemplate, toAlignRoomDoorIndex);
+            RoomTemplate.DoorLocation baseDoorLoc = GetDoorLocation(baseRoom.Room, baseRoomDoorIndex);
+
+            if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top && baseDoorLoc != RoomTemplate.DoorLocation.Bottom ||
+                toAlignDoorLoc == RoomTemplate.DoorLocation.Bottom && baseDoorLoc != RoomTemplate.DoorLocation.Top ||
+                toAlignDoorLoc == RoomTemplate.DoorLocation.Left && baseDoorLoc != RoomTemplate.DoorLocation.Right ||
+                toAlignDoorLoc == RoomTemplate.DoorLocation.Right && baseDoorLoc != RoomTemplate.DoorLocation.Left)
+                throw new ApplicationException("Can't align these doors (not on the same edges).");
+
+            int xOffset = baseDoorLocation.x - toAlignDoorLocation.x;
+            int yOffset = baseDoorLocation.y - toAlignDoorLocation.y;
+
+            Point toAlignRoomPosition;
+
+            if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top) 
+            {
+                //Vertical alignment
+                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y + baseRoom.Room.Height + distanceApart - 1);
+            }
+            else if(toAlignDoorLoc == RoomTemplate.DoorLocation.Bottom) {
+                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y - distanceApart - (toAlignRoomTemplate.Height - 1));
+            }
+            else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
+            {
+                //Horizontal alignment
+                toAlignRoomPosition = new Point(baseRoom.X + baseRoom.Room.Width - 1 + distanceApart, baseRoom.Y + yOffset);
+            }
+            else
+            {
+                toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (toAlignRoomTemplate.Width - 1), baseRoom.Y + yOffset);
+            }
+
+            return new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, toAlignRoomTemplate, TemplateRotation.Deg0);
+        }
     }
 
     /** Loads a room / vault from disk and returns as a usuable object */
@@ -231,6 +349,7 @@ namespace RogueBasin
             //Build a 2d representation of the room
 
             RoomTemplateTerrain[,] roomMap = new RoomTemplateTerrain[width, height];
+            List<RoomTemplate.PotentialDoor> potentialDoors = new List<RoomTemplate.PotentialDoor>();
 
             for (int y = 0; y < mapRows.Count; y++)
             {
@@ -246,6 +365,12 @@ namespace RogueBasin
                     }
 
                     roomMap[x, y] = terrainMapping[inputTerrain];
+
+                    if (roomMap[x, y] == RoomTemplateTerrain.OpenWithPossibleDoor ||
+                        roomMap[x, y] == RoomTemplateTerrain.WallWithPossibleDoor)
+                    {
+                        potentialDoors.Add(new RoomTemplate.PotentialDoor(new Point(x, y)));
+                    }
                 }
 
                 //Fill all rows to width length
@@ -255,7 +380,7 @@ namespace RogueBasin
                 }
             }
 
-            return new RoomTemplate(roomMap);
+            return new RoomTemplate(roomMap, potentialDoors);
         }
 
         /** Loads template from manifest resource file. Throws exception on failure */

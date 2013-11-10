@@ -112,6 +112,73 @@ namespace DDRogueTest
             Assert.AreEqual(positionedTemplate.Room.Height, 3);
         }
 
+        [TestMethod]
+        public void TemplatesCanBeAlignedToMatchingDoorsWithoutRotationBaseBottomDoorTargetTopDoor()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+
+            Assert.AreEqual(alignedRoom.X, 3);
+            Assert.AreEqual(alignedRoom.Y, 8);
+        }
+
+        [TestMethod]
+        public void TemplatesCanBeAlignedToMatchingDoorsWithoutRotationBaseTopDoorTargetBottomDoor()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+
+            Assert.AreEqual(-3, alignedRoom.X);
+            Assert.AreEqual(-8, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void TemplatesCanBeAlignedToMatchingDoorsWithoutRotationBaseLeftDoorTargetRightDoor()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+
+            Assert.AreEqual(-12, alignedRoom.X);
+            Assert.AreEqual(1, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void TemplatesCanBeAlignedToMatchingDoorsWithoutRotationBaseRightDoorTargetLeftDoor()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+
+            Assert.AreEqual(12, alignedRoom.X);
+            Assert.AreEqual(-1, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void GetLocationOfDoorsOnCircumferenceOfRoom()
+        {
+            RoomTemplate fourDoorRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
+
+            Assert.AreEqual(RoomTemplateUtilities.GetDoorLocation(fourDoorRoomTemplate, 0), RoomTemplate.DoorLocation.Top);
+            Assert.AreEqual(RoomTemplateUtilities.GetDoorLocation(fourDoorRoomTemplate, 1), RoomTemplate.DoorLocation.Left);
+            Assert.AreEqual(RoomTemplateUtilities.GetDoorLocation(fourDoorRoomTemplate, 2), RoomTemplate.DoorLocation.Right);
+            Assert.AreEqual(RoomTemplateUtilities.GetDoorLocation(fourDoorRoomTemplate, 3), RoomTemplate.DoorLocation.Bottom);
+        }
+
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();
