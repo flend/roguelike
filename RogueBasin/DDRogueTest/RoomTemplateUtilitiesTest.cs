@@ -176,10 +176,38 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoorWithRotation(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
 
             Assert.AreEqual(1, alignedRoom.X);
             Assert.AreEqual(8, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void TemplatesCanBeAlignedToNonMatchingDoorsByRotationBaseLeftDoorTargetBotDoor()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+
+            Assert.AreEqual(-8, alignedRoom.X);
+            Assert.AreEqual(-1, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void TemplatesCanBeAlignedToNonMatchingDoorsByRotationBaseRightDoorTargetTopDoor()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+
+            Assert.AreEqual(12, alignedRoom.X);
+            Assert.AreEqual(-5, alignedRoom.Y);
         }
 
         [TestMethod]

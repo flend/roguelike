@@ -346,55 +346,10 @@ namespace RogueBasin
 
 
         /// <summary>
-        /// Align toAlignRoomTemplate so that a straight corridor can be drawn between the doors described by the indices
+        /// Align toAlignRoomTemplate so that a straight corridor can be drawn from baseRoom.
+        /// Will rotate toAlignRoomTemplate if required
         /// </summary>
-        /// <param name="toAlignRoomTemplate"></param>
-        /// <param name="baseRoomTemplate"></param>
-        /// <param name="toAlignRoomDoorIndex"></param>
-        /// <param name="baseRoomDoorIndex"></param>
-        /// <param name="distanceApart"></param>
-        /// <returns></returns>
         public static TemplatePositioned AlignRoomOnDoor(RoomTemplate toAlignRoomTemplate, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
-        {
-            Point toAlignDoorLocation = toAlignRoomTemplate.PotentialDoors[toAlignRoomDoorIndex].Location;
-            Point baseDoorLocation = baseRoom.Room.PotentialDoors[baseRoomDoorIndex].Location;
-
-            RoomTemplate.DoorLocation toAlignDoorLoc = GetDoorLocation(toAlignRoomTemplate, toAlignRoomDoorIndex);
-            RoomTemplate.DoorLocation baseDoorLoc = GetDoorLocation(baseRoom.Room, baseRoomDoorIndex);
-
-            if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top && baseDoorLoc != RoomTemplate.DoorLocation.Bottom ||
-                toAlignDoorLoc == RoomTemplate.DoorLocation.Bottom && baseDoorLoc != RoomTemplate.DoorLocation.Top ||
-                toAlignDoorLoc == RoomTemplate.DoorLocation.Left && baseDoorLoc != RoomTemplate.DoorLocation.Right ||
-                toAlignDoorLoc == RoomTemplate.DoorLocation.Right && baseDoorLoc != RoomTemplate.DoorLocation.Left)
-                throw new ApplicationException("Can't align these doors (not on the same edges).");
-
-            int xOffset = baseDoorLocation.x - toAlignDoorLocation.x;
-            int yOffset = baseDoorLocation.y - toAlignDoorLocation.y;
-
-            Point toAlignRoomPosition;
-
-            if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top) 
-            {
-                //Vertical alignment
-                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y + baseRoom.Room.Height + distanceApart - 1);
-            }
-            else if(toAlignDoorLoc == RoomTemplate.DoorLocation.Bottom) {
-                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y - distanceApart - (toAlignRoomTemplate.Height - 1));
-            }
-            else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
-            {
-                //Horizontal alignment
-                toAlignRoomPosition = new Point(baseRoom.X + baseRoom.Room.Width - 1 + distanceApart, baseRoom.Y + yOffset);
-            }
-            else
-            {
-                toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (toAlignRoomTemplate.Width - 1), baseRoom.Y + yOffset);
-            }
-
-            return new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, toAlignRoomTemplate, TemplateRotation.Deg0);
-        }
-
-        public static TemplatePositioned AlignRoomOnDoorWithRotation(RoomTemplate toAlignRoomTemplate, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
         {
             Point toAlignDoorLocation = toAlignRoomTemplate.PotentialDoors[toAlignRoomDoorIndex].Location;
             Point baseDoorLocation = baseRoom.Room.PotentialDoors[baseRoomDoorIndex].Location;
@@ -512,16 +467,16 @@ namespace RogueBasin
             }
             else if (baseDoorLoc == RoomTemplate.DoorLocation.Top)
             {
-                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y - distanceApart - (toAlignRoomTemplate.Height - 1));
+                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y - distanceApart - (rotatedTemplate.Height - 1));
             }
-            else if (baseDoorLoc == RoomTemplate.DoorLocation.Left)
+            else if (baseDoorLoc == RoomTemplate.DoorLocation.Right)
             {
                 //Horizontal alignment
                 toAlignRoomPosition = new Point(baseRoom.X + baseRoom.Room.Width - 1 + distanceApart, baseRoom.Y + yOffset);
             }
             else
             {
-                toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (toAlignRoomTemplate.Width - 1), baseRoom.Y + yOffset);
+                toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (rotatedTemplate.Width - 1), baseRoom.Y + yOffset);
             }
 
             return new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, TemplateRotation.Deg0);
