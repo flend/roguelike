@@ -40,6 +40,78 @@ namespace DDRogueTest
             RoomTemplateUtilities.ExpandCorridorTemplate(false, 2, corridorTemplate);
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CorridorsMustBeStraight()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 0), new Point(5, 1), 0, corridorTemplate);
+        }
+
+        [TestMethod]
+        public void HorizontalCorridorTemplatesShouldBeOffsetInPlacement() {
+
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 0), new Point(5, 0), 0, corridorTemplate);
+
+            Assert.AreEqual(positionedTemplate.X, 0);
+            Assert.AreEqual(positionedTemplate.Y, -1);
+        }
+
+        [TestMethod]
+        public void VerticalCorridorTemplatesShouldBeOffsetInPlacement()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 0), new Point(0, 5), 0, corridorTemplate);
+
+            Assert.AreEqual(positionedTemplate.X, -1);
+            Assert.AreEqual(positionedTemplate.Y, 0);
+        }
+
+        [TestMethod]
+        public void HorizontalCorridorsCanBeMadeRegardlessOfPointOrder()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate1 = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 0), new Point(5, 0), 0, corridorTemplate);
+            TemplatePositioned positionedTemplate2 = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(5, 0), new Point(0, 0), 0, corridorTemplate);
+
+            Assert.AreEqual(positionedTemplate1.X, positionedTemplate2.X);
+            Assert.AreEqual(positionedTemplate1.Y, positionedTemplate2.Y);
+            Assert.AreEqual(positionedTemplate1.Room, positionedTemplate2.Room);
+        }
+
+        [TestMethod]
+        public void VerticalCorridorsCanBeMadeRegardlessOfPointOrder()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate1 = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 0), new Point(0, 5), 0, corridorTemplate);
+            TemplatePositioned positionedTemplate2 = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 5), new Point(0, 0), 0, corridorTemplate);
+
+            Assert.AreEqual(positionedTemplate1.X, positionedTemplate2.X);
+            Assert.AreEqual(positionedTemplate1.Y, positionedTemplate2.Y);
+            Assert.AreEqual(positionedTemplate1.Room, positionedTemplate2.Room);
+        }
+
+        [TestMethod]
+        public void VerticalCorridorTemplatesShouldBeCorrectlySized()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 0), new Point(0, 5), 0, corridorTemplate);
+
+            Assert.AreEqual(positionedTemplate.Room.Width, 3);
+            Assert.AreEqual(positionedTemplate.Room.Height, 6);
+        }
+
+        [TestMethod]
+        public void HorizontalCorridorTemplatesShouldBeCorrectlySized()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 0), new Point(5, 0), 0, corridorTemplate);
+
+            Assert.AreEqual(positionedTemplate.Room.Width, 6);
+            Assert.AreEqual(positionedTemplate.Room.Height, 3);
+        }
+
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();

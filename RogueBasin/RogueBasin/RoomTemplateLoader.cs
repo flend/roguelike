@@ -150,6 +150,47 @@ namespace RogueBasin
 
             return new RoomTemplate(newRoom);
         }
+
+        /** Expand a corridor template (vertically aligned) into a suitable room template */
+        static public TemplatePositioned GetTemplateForCorridorBetweenPoints(Point point1, Point point2, int z, RoomTemplate corridorTemplate)
+        {
+            if (!((point1.x == point2.x) || (point1.y == point2.y)))
+            {
+                throw new ApplicationException("Corridors must be straight");
+            }
+
+            bool horizontalSwitchNeeded = false;
+            int length;
+
+            if (point1.y == point2.y)
+            {
+                horizontalSwitchNeeded = true;
+                length = Math.Abs(point1.x - point2.x) + 1;
+            }
+            else
+            {
+                length = Math.Abs(point1.y - point2.y) + 1;
+            }
+
+            RoomTemplate expandedCorridor = ExpandCorridorTemplate(horizontalSwitchNeeded, length, corridorTemplate);
+
+            int centreOfTemplateShortAxis = corridorTemplate.Width / 2;
+
+            int left = Math.Min(point1.x, point2.x);
+            int top = Math.Min(point1.y, point2.y);
+
+            //Find the TL for the template to be placed
+            if (horizontalSwitchNeeded)
+            {
+                top -= centreOfTemplateShortAxis;
+            }
+            else
+            {
+                left -= centreOfTemplateShortAxis;
+            }
+
+            return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0);
+        }
     }
 
     /** Loads a room / vault from disk and returns as a usuable object */

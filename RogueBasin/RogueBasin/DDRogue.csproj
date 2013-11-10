@@ -730,4 +730,7 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\vaults\vault1.room" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\vaults\corridortemplate3x1.room" />
+  </ItemGroup>
 </Project>

@@ -68,6 +68,7 @@ namespace RogueBasin
             
             //Load sample template
             RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             //Place room at coords
             TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
@@ -75,6 +76,12 @@ namespace RogueBasin
 
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
             mapBuilder.AddPositionedTemplate(templatePos2);
+
+            TemplatePositioned corridorToPlace = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(5, 5), new Point(8, 5), 1, corridor1);
+            mapBuilder.AddPositionedTemplate(corridorToPlace);
+
+            TemplatePositioned corridorToPlaceVertical = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 10), new Point(0, 12), 2, corridor1);
+            mapBuilder.AddPositionedTemplate(corridorToPlaceVertical);
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
@@ -117,14 +124,10 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Add template at z ordering specified in the pre-built template class
-        /// </summary>
-        /// <param name="z"></param>
-        /// <param name="templateToAdd"></param>
-        public bool AddPositionedTemplate(TemplatePositioned templateToAdd) {
-
-            foreach(Point p in templateToAdd.Extent()) {
+        private bool CanBePlacedWithoutOverlappingOtherTemplates(TemplatePositioned template)
+        {
+            foreach (Point p in template.Extent())
+            {
                 //Overlap with existing template
                 if (GetMergedTerrainAtPoint(p) != RoomTemplateTerrain.Transparent)
                 {
@@ -132,9 +135,51 @@ namespace RogueBasin
                     return false;
                 }
             }
-
-            templates.Add(templateToAdd.Z, templateToAdd);
             return true;
+        }
+
+        /// <summary>
+        /// Add template at z ordering specified in the pre-built template class. Z must be unique
+        /// </summary>
+        /// <param name="z"></param>
+        /// <param name="templateToAdd"></param>
+        public bool AddPositionedTemplate(TemplatePositioned templateToAdd) {
+
+            if (!CanBePlacedWithoutOverlappingOtherTemplates(templateToAdd))
+                return false;
+
+            try
+            {
+                templates.Add(templateToAdd.Z, templateToAdd);
+                return true;
+            }
+            catch (ArgumentException e)
+            {
+                throw new ApplicationException("Can't place two rooms at same Z " + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Add template on top of current templates. Overwrites Z value in templateToAdd
+        /// </summary>
+        /// <param name="z"></param>
+        /// <param name="templateToAdd"></param>
+        public bool AddPositionedTemplateOnTop(TemplatePositioned templateToAdd)
+        {
+            if (!CanBePlacedWithoutOverlappingOtherTemplates(templateToAdd))
+                return false;
+
+            int maxZ = templates.Keys.Max(x => x);
+
+            try
+            {
+                templates.Add(maxZ + 1, templateToAdd);
+                return true;
+            }
+            catch (ArgumentException e)
+            {
+                throw new ApplicationException("Can't place two rooms at same Z " + e.Message);
+            }
         }
 
         /** Get the current terrain at the required point, calculated by flattening the templates. 
@@ -194,8 +239,8 @@ namespace RogueBasin
                 TemplateRectangle roomExtent = templatePlacement.Value.Extent();
 
                 //Find masterMap relative coordinates
-                int roomMapLeft = roomExtent.Left + masterMapTopLeft.x;
-                int roomMapTop = roomExtent.Top + masterMapTopLeft.y;
+                int roomMapLeft = roomExtent.Left - masterMapTopLeft.x; 
+                int roomMapTop = roomExtent.Top - masterMapTopLeft.y;
 
                 for (int i = 0; i < roomExtent.Width; i++)
                 {
@@ -212,71 +257,6 @@ namespace RogueBasin
             }
 
             return masterMap;
-        }
-
-        /** Stretches a corridor template into a full sized corridor of length.
-         *  Template must be n x 1 (1 row deep).*/
-        private RoomTemplate ExpandCorridorTemplate(bool switchToHorizontal, int length, RoomTemplate corridorTemplate)
-        {
-            if (corridorTemplate.Height > 1)
-                throw new ApplicationException("Only corridor templates of height 1 supported");
-
-            RoomTemplateTerrain[,] newRoom;
-
-            if (switchToHorizontal)
-            {
-                newRoom = new RoomTemplateTerrain[length, corridorTemplate.Width];
-                for (int j = 0; j < length; j++)
-                {
-                    for (int i = 0; i < corridorTemplate.Width; i++)
-                    {
-                        newRoom[j, i] = corridorTemplate.terrainMap[i, 0];
-                    }
-                }
-            }
-            else
-            {
-                newRoom = new RoomTemplateTerrain[corridorTemplate.Width, length];
-                for (int j = 0; j < length; j++)
-                {
-                    for (int i = 0; i < corridorTemplate.Width; i++)
-                    {
-                        newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
-                    }
-                }
-            }
-
-            return new RoomTemplate(newRoom);
-        }
-
-        /** Expand the corridor template (vertically aligned) into a suitable room template and add */
-        public void AddCorridorBetweenPoints(Point point1, Point point2, int z, RoomTemplate corridorTemplate)
-        {
-            if (!((point1.x == point2.x) || (point1.y == point2.y)))
-            {
-                throw new ApplicationException("Corridors must be straight");
-            }
-
-            bool horizontalSwitchNeeded = false;
-            int length;
-
-            if(point1.y == point2.y) {
-                horizontalSwitchNeeded = true;
-                length = Math.Abs(point1.x - point2.x);
-            }
-            else {
-                length = Math.Abs(point1.y - point2.y);
-            }
-
-            RoomTemplate expandedCorridor = ExpandCorridorTemplate(horizontalSwitchNeeded, length, corridorTemplate);
-
-            int centreOfTemplateShortAxis = corridorTemplate.Width / 2;
-
-
-
-
-
-            throw new NotImplementedException();
         }
     }
 }
