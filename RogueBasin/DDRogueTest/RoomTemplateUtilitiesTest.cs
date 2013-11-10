@@ -169,6 +169,53 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void TemplatesCanBeAlignedToNonMatchingDoorsByRotationBaseBotDoorTargetBotDoor()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoorWithRotation(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+
+            Assert.AreEqual(1, alignedRoom.X);
+            Assert.AreEqual(8, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void RotatePointInRoom90Deg()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            Point doorPoint = new Point(4, 2);
+
+            Point rotatedPoint = RoomTemplateUtilities.RotateRoomPoint(baseRoomTemplate, doorPoint, TemplateRotation.Deg90);
+
+            Assert.AreEqual(new Point(1, 4), rotatedPoint);
+        }
+
+        [TestMethod]
+        public void RotatePointInRoom180Deg()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            Point doorPoint = new Point(4, 2);
+
+            Point rotatedPoint = RoomTemplateUtilities.RotateRoomPoint(baseRoomTemplate, doorPoint, TemplateRotation.Deg180);
+
+            Assert.AreEqual(new Point(3, 1), rotatedPoint);
+        }
+
+        [TestMethod]
+        public void RotatePointInRoom270Deg()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            Point doorPoint = new Point(4, 2);
+
+            Point rotatedPoint = RoomTemplateUtilities.RotateRoomPoint(baseRoomTemplate, doorPoint, TemplateRotation.Deg270);
+
+            Assert.AreEqual(new Point(2, 3), rotatedPoint);
+        }
+
+        [TestMethod]
         public void GetLocationOfDoorsOnCircumferenceOfRoom()
         {
             RoomTemplate fourDoorRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
@@ -177,6 +224,55 @@ namespace DDRogueTest
             Assert.AreEqual(RoomTemplateUtilities.GetDoorLocation(fourDoorRoomTemplate, 1), RoomTemplate.DoorLocation.Left);
             Assert.AreEqual(RoomTemplateUtilities.GetDoorLocation(fourDoorRoomTemplate, 2), RoomTemplate.DoorLocation.Right);
             Assert.AreEqual(RoomTemplateUtilities.GetDoorLocation(fourDoorRoomTemplate, 3), RoomTemplate.DoorLocation.Bottom);
+        }
+
+        [TestMethod]
+        public void RotateRoomTemplate0DegCausesNoChanges()
+        {
+            RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room");
+            RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg0);
+
+            Assert.AreEqual(rotatedTemplate, asymmetricRoomTemplate);
+        }
+
+        [TestMethod]
+        public void RotateRoomTemplate90DegHasCorrectDoorPlacement()
+        {
+            RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
+            RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg90);
+
+            //Door at 0,3 is rotated (and is now index 2)
+            Assert.AreEqual(rotatedTemplate.PotentialDoors[2].Location, new Point(6, 3));
+
+            Assert.AreEqual(7, rotatedTemplate.Width);
+            Assert.AreEqual(6, rotatedTemplate.Height);
+        }
+
+        [TestMethod]
+        public void RotateRoomTemplate180DegHasCorrectDoorPlacement()
+        {
+            RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
+            RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg180);
+
+            //Door at 0,3 is rotated (and is now index 3)
+            Assert.AreEqual(new Point(2, 6), rotatedTemplate.PotentialDoors[3].Location);
+
+            //No change to dimensions
+            Assert.AreEqual(6, rotatedTemplate.Width);
+            Assert.AreEqual(7, rotatedTemplate.Height);
+        }
+
+        [TestMethod]
+        public void RotateRoomTemplate270DegHasCorrectDoorPlacement()
+        {
+            RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
+            RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg270);
+
+            //Door at 0,3 is rotated (and is now index 1)
+            Assert.AreEqual(rotatedTemplate.PotentialDoors[1].Location, new Point(0, 2));
+
+            Assert.AreEqual(7, rotatedTemplate.Width);
+            Assert.AreEqual(6, rotatedTemplate.Height);
         }
 
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)

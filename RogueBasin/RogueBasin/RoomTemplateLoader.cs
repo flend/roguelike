@@ -31,26 +31,34 @@ namespace RogueBasin
         
         public RoomTemplateTerrain[,] terrainMap;
 
-        private List<PotentialDoor> potentialDoors;
-
+        /// <summary>
+        /// Get the potential doors. Indexed in by row then column
+        /// </summary>
         public List<PotentialDoor> PotentialDoors
         {
             get
             {
-                return potentialDoors;
-            }
-        }
+                //Calculate (could cache)
+                List<PotentialDoor> doors = new List<PotentialDoor>();
 
-        public RoomTemplate(RoomTemplateTerrain[,] terrain, List<PotentialDoor> potentialDoors)
-        {
-            SetMapRelatedMembers(terrain);
-            this.potentialDoors = potentialDoors; //non-clone
+                for (int i = 0; i < Height; i++)
+                {
+                    for (int j = 0; j < Width; j++)
+                    {
+                        if (terrainMap[j, i] == RoomTemplateTerrain.OpenWithPossibleDoor ||
+                            terrainMap[j, i] == RoomTemplateTerrain.WallWithPossibleDoor)
+                        {
+                            doors.Add(new PotentialDoor(new Point(j, i)));
+                        }
+                    }
+                }
+                return doors;
+            }
         }
 
         public RoomTemplate(RoomTemplateTerrain[,] terrain)
         {
             SetMapRelatedMembers(terrain);
-            potentialDoors = new List<PotentialDoor>(); //empty
         }
 
         private void SetMapRelatedMembers(RoomTemplateTerrain[,] terrain)
@@ -190,6 +198,82 @@ namespace RogueBasin
             return new RoomTemplate(newRoom);
         }
 
+        private static RoomTemplateTerrain[,] RotateTerrainRight(RoomTemplateTerrain[,] matrix)
+        {
+            int w = matrix.GetLength(0);
+            int h = matrix.GetLength(1);
+            RoomTemplateTerrain[,] ret = new RoomTemplateTerrain[h, w];
+            for (int i = 0; i < w; ++i)
+            {
+                for (int j = h - 1; j >= 0; j--)
+                {
+                    ret[h - 1 - j, i] = matrix[i, j];
+                }
+            }
+            return ret;
+        }
+
+        private static Point RotatePointRight(Point input, int height)
+        {
+            return new Point(height - 1 - input.y, input.x);
+        }
+
+        public static Point RotateRoomPoint(RoomTemplate templateToRotate, Point pointToRotate, TemplateRotation rotationAmount)
+        {
+            
+            if (rotationAmount == TemplateRotation.Deg0)
+                return pointToRotate;
+
+            Point rotatedPoint;
+
+            if (rotationAmount == TemplateRotation.Deg90)
+            {
+                rotatedPoint = RotatePointRight(pointToRotate, templateToRotate.Height);
+            }
+            else if (rotationAmount == TemplateRotation.Deg180)
+            {
+                rotatedPoint = RotatePointRight(pointToRotate, templateToRotate.Height);
+                rotatedPoint = RotatePointRight(rotatedPoint, templateToRotate.Width);
+            }
+            else
+            {
+                //270
+                rotatedPoint = RotatePointRight(pointToRotate, templateToRotate.Height);
+                rotatedPoint = RotatePointRight(rotatedPoint, templateToRotate.Width);
+                rotatedPoint = RotatePointRight(rotatedPoint, templateToRotate.Height);
+            }
+
+            return rotatedPoint;
+        }
+
+        public static RoomTemplate RotateRoomTemplate(RoomTemplate templateToRotate, TemplateRotation rotationAmount)
+        {
+
+            if (rotationAmount == TemplateRotation.Deg0)
+                return templateToRotate;
+
+            RoomTemplateTerrain[,] rotatedTerrain;
+
+            if (rotationAmount == TemplateRotation.Deg90)
+            {
+                rotatedTerrain = RotateTerrainRight(templateToRotate.terrainMap);
+            }
+            else if (rotationAmount == TemplateRotation.Deg180)
+            {
+                RoomTemplateTerrain[,] oneRotation = RotateTerrainRight(templateToRotate.terrainMap);
+                rotatedTerrain = RotateTerrainRight(oneRotation);
+            }
+            else
+            {
+                //270
+                rotatedTerrain = RotateTerrainRight(templateToRotate.terrainMap);
+                rotatedTerrain = RotateTerrainRight(rotatedTerrain);
+                rotatedTerrain = RotateTerrainRight(rotatedTerrain);
+            }
+
+            return new RoomTemplate(rotatedTerrain);
+        }
+
         /** Expand a corridor template (vertically aligned) into a suitable room template */
         static public TemplatePositioned GetTemplateForCorridorBetweenPoints(Point point1, Point point2, int z, RoomTemplate corridorTemplate)
         {
@@ -309,6 +393,139 @@ namespace RogueBasin
 
             return new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, toAlignRoomTemplate, TemplateRotation.Deg0);
         }
+
+        public static TemplatePositioned AlignRoomOnDoorWithRotation(RoomTemplate toAlignRoomTemplate, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
+        {
+            Point toAlignDoorLocation = toAlignRoomTemplate.PotentialDoors[toAlignRoomDoorIndex].Location;
+            Point baseDoorLocation = baseRoom.Room.PotentialDoors[baseRoomDoorIndex].Location;
+
+            RoomTemplate.DoorLocation toAlignDoorLoc = GetDoorLocation(toAlignRoomTemplate, toAlignRoomDoorIndex);
+            RoomTemplate.DoorLocation baseDoorLoc = GetDoorLocation(baseRoom.Room, baseRoomDoorIndex);
+
+            RoomTemplate rotatedTemplate;
+            Point rotatedtoAlignDoorLocation;
+
+            if (baseDoorLoc == RoomTemplate.DoorLocation.Top)
+            {
+                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
+                }
+                else
+                {
+                    rotatedTemplate = toAlignRoomTemplate;
+                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
+                }
+            }
+            else if (baseDoorLoc == RoomTemplate.DoorLocation.Right)
+            {
+                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
+                {
+                    rotatedTemplate = toAlignRoomTemplate;
+                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
+                }
+                else
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
+                }
+            }
+            else if (baseDoorLoc == RoomTemplate.DoorLocation.Left)
+            {
+                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
+                {
+                    rotatedTemplate = toAlignRoomTemplate;
+                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
+                }
+                else
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
+                }
+            }
+            else
+            {
+                //Bottom
+
+                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
+                {
+                    rotatedTemplate = toAlignRoomTemplate;
+                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
+                }
+                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
+                }
+                else
+                {
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
+                }
+            }
+
+            int xOffset = baseDoorLocation.x - rotatedtoAlignDoorLocation.x;
+            int yOffset = baseDoorLocation.y - rotatedtoAlignDoorLocation.y;
+
+            Point toAlignRoomPosition;
+
+            if (baseDoorLoc == RoomTemplate.DoorLocation.Bottom)
+            {
+                //Vertical alignment
+                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y + baseRoom.Room.Height + distanceApart - 1);
+            }
+            else if (baseDoorLoc == RoomTemplate.DoorLocation.Top)
+            {
+                toAlignRoomPosition = new Point(baseRoom.X + xOffset, baseRoom.Y - distanceApart - (toAlignRoomTemplate.Height - 1));
+            }
+            else if (baseDoorLoc == RoomTemplate.DoorLocation.Left)
+            {
+                //Horizontal alignment
+                toAlignRoomPosition = new Point(baseRoom.X + baseRoom.Room.Width - 1 + distanceApart, baseRoom.Y + yOffset);
+            }
+            else
+            {
+                toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (toAlignRoomTemplate.Width - 1), baseRoom.Y + yOffset);
+            }
+
+            return new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, TemplateRotation.Deg0);
+        }
     }
 
     /** Loads a room / vault from disk and returns as a usuable object */
@@ -365,12 +582,6 @@ namespace RogueBasin
                     }
 
                     roomMap[x, y] = terrainMapping[inputTerrain];
-
-                    if (roomMap[x, y] == RoomTemplateTerrain.OpenWithPossibleDoor ||
-                        roomMap[x, y] == RoomTemplateTerrain.WallWithPossibleDoor)
-                    {
-                        potentialDoors.Add(new RoomTemplate.PotentialDoor(new Point(x, y)));
-                    }
                 }
 
                 //Fill all rows to width length
@@ -380,7 +591,7 @@ namespace RogueBasin
                 }
             }
 
-            return new RoomTemplate(roomMap, potentialDoors);
+            return new RoomTemplate(roomMap);
         }
 
         /** Loads template from manifest resource file. Throws exception on failure */

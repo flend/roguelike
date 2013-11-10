@@ -104,6 +104,9 @@
   <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\testalignmentroom3.room" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testrotation.room" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
