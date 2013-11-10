@@ -58,6 +58,7 @@ namespace RogueBasin
             terrainMapping[RoomTemplateTerrain.Wall] = MapTerrain.Wall;
             terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
             terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
+            terrainMapping[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
         }
 
 
@@ -71,21 +72,31 @@ namespace RogueBasin
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             //Place room at coords
-            TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
-            mapBuilder.AddPositionedTemplate(templatePos1);
+            //TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
+            //mapBuilder.AddPositionedTemplate(templatePos1);
 
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
             mapBuilder.AddPositionedTemplate(templatePos2);
 
-            TemplatePositioned corridorToPlace = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(5, 5), new Point(8, 5), 1, corridor1);
+            //bug? can be placed
+            //TemplatePositioned corridorToPlace = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(5, 5), new Point(8, 5), 1, corridor1);
+            //mapBuilder.AddPositionedTemplate(corridorToPlace);
+
+            TemplatePositioned corridorToPlace = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(5, 8), new Point(8, 8), 1, corridor1);
             mapBuilder.AddPositionedTemplate(corridorToPlace);
 
             TemplatePositioned corridorToPlaceVertical = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(0, 10), new Point(0, 12), 2, corridor1);
             mapBuilder.AddPositionedTemplate(corridorToPlaceVertical);
 
+            TemplatePositioned templatePos3 = new TemplatePositioned(20, 20, 11, room1, TemplateRotation.Deg0);
+            mapBuilder.AddPositionedTemplate(templatePos3);
+
+            TemplatePositioned templatePos4 = RoomTemplateUtilities.AlignRoomOnDoor(room1, templatePos3, 3, 0, 5);
+            mapBuilder.AddPositionedTemplate(templatePos4);
+
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            masterMap.PCStartLocation = new Point(templatePos1.X - mapBuilder.MasterMapTopLeft.x + room1.Width / 2, templatePos1.Y - mapBuilder.MasterMapTopLeft.y + room1.Height / 2);
+            masterMap.PCStartLocation = new Point(templatePos4.X - mapBuilder.MasterMapTopLeft.x + room1.Width / 2, templatePos4.Y - mapBuilder.MasterMapTopLeft.y + room1.Height / 2);
 
             return masterMap;
         }
