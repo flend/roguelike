@@ -370,6 +370,14 @@ namespace RogueBasin
 
         }
 
+        public MapSquare[,] MapSquares
+        {
+            get
+            {
+                return mapSquares;
+            }
+        }
+
         /// <summary>
         /// Clone map. Does not clone pathing representation, so this should be refreshed manually.
         /// </summary>

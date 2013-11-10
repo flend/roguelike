@@ -52,6 +52,42 @@ namespace RogueBasin
         /// </summary>
         Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping;
 
+        public MapGeneratorTemplated()
+        {
+            terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
+            terrainMapping[RoomTemplateTerrain.Wall] = MapTerrain.Wall;
+            terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
+            terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
+        }
+
+
+        /** Build a map using templated rooms */
+        public Map GenerateMap()
+        {
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            
+            //Load sample template
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
+
+            //Place room at coords
+            TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
+            mapBuilder.AddPositionedTemplate(templatePos1);
+
+            TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
+            mapBuilder.AddPositionedTemplate(templatePos2);
+
+            Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+
+            masterMap.PCStartLocation = new Point(templatePos1.X - mapBuilder.MasterMapTopLeft.x + room1.Width / 2, templatePos1.Y - mapBuilder.MasterMapTopLeft.y + room1.Height / 2);
+
+            return masterMap;
+        }
+
+    }
+
+    /** Allows a map to be built up by placing templates in z-ordering **/
+    public class TemplatedMapBuilder
+    {
         /// <summary>
         /// Templates as they are placed on the map (after positions, rotations etc.).
         /// Sorted by z-ordering
@@ -59,16 +95,26 @@ namespace RogueBasin
         SortedDictionary<int, TemplatePositioned> templates = new SortedDictionary<int,TemplatePositioned>();
 
         /// <summary>
-        /// The X, Y coords of the top of the output map: all templates will be offset by this when merged
+        /// The X, Y coords of the top left of the output map: all templates will be offset by this when merged
         /// </summary>
         Point masterMapTopLeft;
 
-        public MapGeneratorTemplated()
+        /// <summary>
+        /// The X, Y coords of the bottom right of the output map
+        /// </summary>
+        Point masterMapBottomRight;
+
+        /// <summary>
+        /// Only available after MergeTemplatesIntoMap() is called
+        /// </summary>
+        public Point MasterMapTopLeft
         {
-            terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
-            terrainMapping[RoomTemplateTerrain.Wall] = MapTerrain.Wall;
-            terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
-            terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
+            get
+            {
+                //May not have been calculated yet
+                CalculateTemplatedMapExtent();
+                return masterMapTopLeft;
+            }
         }
 
         /// <summary>
@@ -89,31 +135,6 @@ namespace RogueBasin
 
             templates.Add(templateToAdd.Z, templateToAdd);
             return true;
-        }
-        
-        /** Build a map using templated rooms */
-        public Map GenerateMap()
-        {
-
-            //Load sample template
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("vaults.vault1.room", StandardTemplateMapping.terrainMapping);
-
-            //Place room at coords
-            TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
-            AddPositionedTemplate(templatePos1);
-
-            TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
-            AddPositionedTemplate(templatePos2);
-
-            //should fail
-            TemplatePositioned templatePos3 = new TemplatePositioned(4, 4, 10, room1, TemplateRotation.Deg0);
-            AddPositionedTemplate(templatePos3);
-
-            Map masterMap = MergeTemplatesIntoMap();
-
-            masterMap.PCStartLocation = new Point(templatePos1.X - masterMapTopLeft.x + room1.Width / 2, templatePos1.Y - masterMapTopLeft.y + room1.Height / 2);
-
-            return masterMap;
         }
 
         /** Get the current terrain at the required point, calculated by flattening the templates. 
@@ -144,23 +165,27 @@ namespace RogueBasin
         }
 
 
-        /// <summary>
-        /// Create a playable map by merging the terrain of the templates in z-order
-        /// </summary>
-        /// <returns></returns>
-        private Map MergeTemplatesIntoMap()
+        private void CalculateTemplatedMapExtent()
         {
-            //Calculate smallest rectangle to enclose all templates in current positions
-
             int mapLeft = templates.Min(x => x.Value.Extent().Left);
             int mapRight = templates.Max(x => x.Value.Extent().Right);
             int mapTop = templates.Min(x => x.Value.Extent().Top);
             int mapBottom = templates.Max(x => x.Value.Extent().Bottom);
 
             masterMapTopLeft = new Point(mapLeft, mapTop);
+            masterMapBottomRight = new Point(mapRight, mapBottom);
             LogFile.Log.LogEntryDebug("Map coords: TL: " + masterMapTopLeft.x + ", " + masterMapTopLeft.y + " BR: " + mapBottom + ", " + mapRight, LogDebugLevel.Medium);
+        }
 
-            Map masterMap = new Map(mapRight - mapLeft + 1, mapBottom - mapTop + 1);
+        /// <summary>
+        /// Create a playable map by merging the terrain of the templates in z-order and mapping to real terrain types
+        /// </summary>
+        /// <returns></returns>
+        public Map MergeTemplatesIntoMap(Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping)
+        {
+            //Calculate smallest rectangle to enclose all templates in current positions
+            CalculateTemplatedMapExtent();
+            Map masterMap = new Map(masterMapBottomRight.x - masterMapTopLeft.x + 1, masterMapBottomRight.y - masterMapTopLeft.y + 1);
 
             //Merge each template onto the map in z-order
             foreach (var templatePlacement in templates)
@@ -187,7 +212,71 @@ namespace RogueBasin
             }
 
             return masterMap;
+        }
 
+        /** Stretches a corridor template into a full sized corridor of length.
+         *  Template must be n x 1 (1 row deep).*/
+        private RoomTemplate ExpandCorridorTemplate(bool switchToHorizontal, int length, RoomTemplate corridorTemplate)
+        {
+            if (corridorTemplate.Height > 1)
+                throw new ApplicationException("Only corridor templates of height 1 supported");
+
+            RoomTemplateTerrain[,] newRoom;
+
+            if (switchToHorizontal)
+            {
+                newRoom = new RoomTemplateTerrain[length, corridorTemplate.Width];
+                for (int j = 0; j < length; j++)
+                {
+                    for (int i = 0; i < corridorTemplate.Width; i++)
+                    {
+                        newRoom[j, i] = corridorTemplate.terrainMap[i, 0];
+                    }
+                }
+            }
+            else
+            {
+                newRoom = new RoomTemplateTerrain[corridorTemplate.Width, length];
+                for (int j = 0; j < length; j++)
+                {
+                    for (int i = 0; i < corridorTemplate.Width; i++)
+                    {
+                        newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
+                    }
+                }
+            }
+
+            return new RoomTemplate(newRoom);
+        }
+
+        /** Expand the corridor template (vertically aligned) into a suitable room template and add */
+        public void AddCorridorBetweenPoints(Point point1, Point point2, int z, RoomTemplate corridorTemplate)
+        {
+            if (!((point1.x == point2.x) || (point1.y == point2.y)))
+            {
+                throw new ApplicationException("Corridors must be straight");
+            }
+
+            bool horizontalSwitchNeeded = false;
+            int length;
+
+            if(point1.y == point2.y) {
+                horizontalSwitchNeeded = true;
+                length = Math.Abs(point1.x - point2.x);
+            }
+            else {
+                length = Math.Abs(point1.y - point2.y);
+            }
+
+            RoomTemplate expandedCorridor = ExpandCorridorTemplate(horizontalSwitchNeeded, length, corridorTemplate);
+
+            int centreOfTemplateShortAxis = corridorTemplate.Width / 2;
+
+
+
+
+
+            throw new NotImplementedException();
         }
     }
 }

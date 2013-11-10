@@ -22,6 +22,68 @@ namespace RogueBasin
             Height = terrainMap.GetLength(1);
         }
 
+        public override bool Equals(System.Object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            RoomTemplate p = obj as RoomTemplate;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            return IsTerrainTheSame(p);
+        }
+
+        public bool Equals(RoomTemplate p)
+        {
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            return IsTerrainTheSame(p);
+        }
+
+        private bool IsTerrainTheSame(RoomTemplate p)
+        {
+            if(p.Width != this.Width)
+                return false;
+
+            if(p.Height != this.Height)
+                return false;
+
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    if (this.terrainMap[i, j] != p.terrainMap[i, j])
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCount = 0;
+
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    if (terrainMap[i, j] == RoomTemplateTerrain.Wall)
+                        hashCount++;
+                }
+            }
+
+            return Width ^ (hashCount + Height);
+        }
     }
 
     /** Types of terrain possible for an abstract room template */
@@ -50,6 +112,44 @@ namespace RogueBasin
             terrainMapping['-'] = RoomTemplateTerrain.WallWithPossibleDoor;
         }
 
+    }
+
+    public static class RoomTemplateUtilities
+    {
+        /** Stretches a corridor template into a full sized corridor of length.
+         *  Template must be n x 1 (1 row deep).*/
+        static public RoomTemplate ExpandCorridorTemplate(bool switchToHorizontal, int length, RoomTemplate corridorTemplate)
+        {
+            if (corridorTemplate.Height > 1)
+                throw new ApplicationException("Only corridor templates of height 1 supported");
+
+            RoomTemplateTerrain[,] newRoom;
+
+            if (switchToHorizontal)
+            {
+                newRoom = new RoomTemplateTerrain[length, corridorTemplate.Width];
+                for (int j = 0; j < length; j++)
+                {
+                    for (int i = 0; i < corridorTemplate.Width; i++)
+                    {
+                        newRoom[j, i] = corridorTemplate.terrainMap[i, 0];
+                    }
+                }
+            }
+            else
+            {
+                newRoom = new RoomTemplateTerrain[corridorTemplate.Width, length];
+                for (int j = 0; j < length; j++)
+                {
+                    for (int i = 0; i < corridorTemplate.Width; i++)
+                    {
+                        newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
+                    }
+                }
+            }
+
+            return new RoomTemplate(newRoom);
+        }
     }
 
     /** Loads a room / vault from disk and returns as a usuable object */

@@ -50,7 +50,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="MapGeneratorTemplatedTest.cs" />
+    <Compile Include="RoomTemplateUtilitiesTest.cs" />
+    <Compile Include="TemplatedMapBuilderTest.cs" />
     <Compile Include="TemplateRectangleTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -62,6 +63,24 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\testsolid1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testtransparent1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testdoorsouth1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testdoornorth1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testcorridor1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\expandedcorridor1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\expandedcorridorhoriz1.room" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
