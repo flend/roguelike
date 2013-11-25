@@ -94,5 +94,6 @@ namespace DDRogueTest
             Stream roomFileStream = _assembly.GetManifestResourceStream(filePath);
             return RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
         }
+
     }
 }

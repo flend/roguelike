@@ -43,6 +43,16 @@ namespace RogueBasin
         {
             return new TemplateRectangle(X, Y, Room.Width, Room.Height);
         }
+
+        /// <summary>
+        /// Return potential doors in post-positioned coordinates
+        /// </summary>
+        public IEnumerable<Point> PotentialDoors {
+            get
+            {
+                return Room.PotentialDoors.Select(x => x.Location + new Point(X, Y));
+            }
+        }
     }
 
     public class MapGeneratorTemplated
@@ -51,6 +61,11 @@ namespace RogueBasin
         /// Mapping from template terrain to real terrain on the map
         /// </summary>
         Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping;
+
+        List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
+        List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
+
+
 
         public MapGeneratorTemplated()
         {
@@ -67,9 +82,15 @@ namespace RogueBasin
         {
             TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
             
-            //Load sample template
+            //Load sample templates
             RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            //Add to stores
+            roomTemplates.Add(room1);
+            corridorTemplates.Add(corridor1);
+
+
 
             //Place room at coords
             //TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
@@ -77,10 +98,6 @@ namespace RogueBasin
 
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
             mapBuilder.AddPositionedTemplate(templatePos2);
-
-            //bug? can be placed
-            //TemplatePositioned corridorToPlace = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(5, 5), new Point(8, 5), 1, corridor1);
-            //mapBuilder.AddPositionedTemplate(corridorToPlace);
 
             TemplatePositioned corridorToPlace = RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(new Point(5, 8), new Point(8, 8), 1, corridor1);
             mapBuilder.AddPositionedTemplate(corridorToPlace);
@@ -156,18 +173,7 @@ namespace RogueBasin
         /// <param name="templateToAdd"></param>
         public bool AddPositionedTemplate(TemplatePositioned templateToAdd) {
 
-            if (!CanBePlacedWithoutOverlappingOtherTemplates(templateToAdd))
-                return false;
-
-            try
-            {
-                templates.Add(templateToAdd.Z, templateToAdd);
-                return true;
-            }
-            catch (ArgumentException e)
-            {
-                throw new ApplicationException("Can't place two rooms at same Z " + e.Message);
-            }
+            return AddPositionedTemplate(templateToAdd, templateToAdd.Z);
         }
 
         /// <summary>
@@ -177,19 +183,24 @@ namespace RogueBasin
         /// <param name="templateToAdd"></param>
         public bool AddPositionedTemplateOnTop(TemplatePositioned templateToAdd)
         {
+            int maxZ = templates.Keys.Max(x => x);
+
+            return AddPositionedTemplate(templateToAdd, maxZ + 1);
+        }
+
+        private bool AddPositionedTemplate(TemplatePositioned templateToAdd, int zToPlace)
+        {
             if (!CanBePlacedWithoutOverlappingOtherTemplates(templateToAdd))
                 return false;
 
-            int maxZ = templates.Keys.Max(x => x);
-
             try
             {
-                templates.Add(maxZ + 1, templateToAdd);
+                templates.Add(zToPlace, templateToAdd);
                 return true;
             }
             catch (ArgumentException e)
             {
-                throw new ApplicationException("Can't place two rooms at same Z " + e.Message);
+                throw new ApplicationException("Can't place room at z: " + zToPlace + e.Message);
             }
         }
 
