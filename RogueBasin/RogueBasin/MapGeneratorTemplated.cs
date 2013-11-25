@@ -57,6 +57,19 @@ namespace RogueBasin
 
     public class MapGeneratorTemplated
     {
+
+        class DoorInfo
+        {
+            public TemplatePositioned OwnerRoom { get; private set; }
+            public int DoorIndexInRoom { get; private set;  }
+
+            public DoorInfo(TemplatePositioned ownerRoom, int doorIndex)
+            {
+                OwnerRoom = ownerRoom;
+                DoorIndexInRoom = doorIndex;
+            }
+        }
+
         /// <summary>
         /// Mapping from template terrain to real terrain on the map
         /// </summary>
@@ -64,7 +77,7 @@ namespace RogueBasin
 
         List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
         List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
-
+        List<DoorInfo> potentialDoors = new List<DoorInfo>();
 
 
         public MapGeneratorTemplated()
@@ -76,6 +89,20 @@ namespace RogueBasin
             terrainMapping[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
         }
 
+        private RoomTemplate RandomRoom()
+        {
+            return roomTemplates[Game.Random.Next(roomTemplates.Count)];
+        }
+
+        private RoomTemplate RandomCorridor()
+        {
+            return corridorTemplates[Game.Random.Next(corridorTemplates.Count)];
+        }
+
+        private DoorInfo RandomDoor()
+        {
+            return potentialDoors[Game.Random.Next(potentialDoors.Count)];
+        }
 
         /** Build a map using templated rooms */
         public Map GenerateMap()
@@ -90,12 +117,61 @@ namespace RogueBasin
             roomTemplates.Add(room1);
             corridorTemplates.Add(corridor1);
 
+            int roomsToPlace = 20;
+            int maxRoomDistance = 10;
 
+            int roomsPlaced = 0;
+
+            //Terminate when all rooms placed or no more potential door sites
+            do
+            {
+                if (roomsPlaced == 0)
+                {
+                    //Place a random room at a location near the origin
+                    var positionedRoom = new TemplatePositioned(Game.Random.Next(maxRoomDistance), Game.Random.Next(maxRoomDistance), 0, RandomRoom(), TemplateRotation.Deg0);
+                    //Will always pass
+                    mapBuilder.AddPositionedTemplateOnTop(positionedRoom);
+
+                    //Store a reference to each potential door in the room
+                    int noDoors = positionedRoom.PotentialDoors.Count();
+                    for (int i = 0; i < noDoors; i++)
+                    {
+                        potentialDoors.Add(new DoorInfo(positionedRoom, i));
+                    }
+
+                    roomsPlaced++;
+                }
+                else
+                {
+                    //Find a random potential door and try to grow a random room off this
+
+                    DoorInfo randomDoor = RandomDoor();
+                    RoomTemplate roomTemplateToPlace = RandomRoom();
+                    TemplatePositioned alignedNewRoom = RoomTemplateUtilities.AlignRoomOnDoor(roomTemplateToPlace, randomDoor.OwnerRoom,
+                        Game.Random.Next(roomTemplateToPlace.PotentialDoors.Count), randomDoor.DoorIndexInRoom,
+                        Game.Random.Next(maxRoomDistance));
+
+                    if (mapBuilder.AddPositionedTemplateOnTop(alignedNewRoom))
+                    {
+                        roomsPlaced++;
+                        
+                        //Add the new potential doors
+                        int noDoors = alignedNewRoom.PotentialDoors.Count();
+                        for (int i = 0; i < noDoors; i++)
+                        {
+                            potentialDoors.Add(new DoorInfo(alignedNewRoom, i));
+                        }
+
+                        //If successful, remove the candidate door from the list
+                        potentialDoors.Remove(randomDoor);
+                    }
+                }
+            } while (roomsPlaced < roomsToPlace && potentialDoors.Count > 0);
 
             //Place room at coords
             //TemplatePositioned templatePos1 = new TemplatePositioned(10, 10, 0, room1, TemplateRotation.Deg0);
             //mapBuilder.AddPositionedTemplate(templatePos1);
-
+            /*
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0);
             mapBuilder.AddPositionedTemplate(templatePos2);
 
@@ -110,10 +186,11 @@ namespace RogueBasin
 
             TemplatePositioned templatePos4 = RoomTemplateUtilities.AlignRoomOnDoor(room1, templatePos3, 3, 0, 5);
             mapBuilder.AddPositionedTemplate(templatePos4);
-
+            */
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            masterMap.PCStartLocation = new Point(templatePos4.X - mapBuilder.MasterMapTopLeft.x + room1.Width / 2, templatePos4.Y - mapBuilder.MasterMapTopLeft.y + room1.Height / 2);
+            var firstRoom = mapBuilder.GetTemplateAtZ(0);
+            masterMap.PCStartLocation = new Point(firstRoom.X - mapBuilder.MasterMapTopLeft.x + firstRoom.Room.Width / 2, firstRoom.Y - mapBuilder.MasterMapTopLeft.y + firstRoom.Room.Height / 2);
 
             return masterMap;
         }
@@ -183,9 +260,12 @@ namespace RogueBasin
         /// <param name="templateToAdd"></param>
         public bool AddPositionedTemplateOnTop(TemplatePositioned templateToAdd)
         {
-            int maxZ = templates.Keys.Max(x => x);
+            int maxZ = 0;
 
-            return AddPositionedTemplate(templateToAdd, maxZ + 1);
+            if(templates.Count > 0)
+                maxZ = templates.Keys.Max(x => x) + 1;
+
+            return AddPositionedTemplate(templateToAdd, maxZ);
         }
 
         private bool AddPositionedTemplate(TemplatePositioned templateToAdd, int zToPlace)
@@ -204,6 +284,15 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Return the template at this z
+        /// </summary>
+        /// <param name="z"></param>
+        /// <returns></returns>
+        public TemplatePositioned GetTemplateAtZ(int z) {
+            return templates[z];
+        }
+
         /** Get the current terrain at the required point, calculated by flattening the templates. 
          Any terrain overrides Transparent, but no templates should be placed that having different types of
          terrain on the same point. e.g. 2 walls overlapping is OK but wall and floor overlapping is not.
@@ -219,7 +308,7 @@ namespace RogueBasin
                 //Check for point outside of template
 
                 if (!(ptRelativeToTemplate.x >= 0 && point.x < roomExtent.Width &&
-                    point.y >= 0 && point.y < roomExtent.Height))
+                    ptRelativeToTemplate.y >= 0 && point.y < roomExtent.Height))
                     continue;
 
                 RoomTemplateTerrain thisTerrain = templatePlacement.Value.Room.terrainMap[ptRelativeToTemplate.x, ptRelativeToTemplate.y];
@@ -250,6 +339,10 @@ namespace RogueBasin
         /// <returns></returns>
         public Map MergeTemplatesIntoMap(Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping)
         {
+
+            if (templates.Count == 0)
+                throw new ApplicationException("No templates in map");
+
             //Calculate smallest rectangle to enclose all templates in current positions
             CalculateTemplatedMapExtent();
             Map masterMap = new Map(masterMapBottomRight.x - masterMapTopLeft.x + 1, masterMapBottomRight.y - masterMapTopLeft.y + 1);
