@@ -155,7 +155,7 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void TemplatesCanBeAlignedToMatchingDoorsWithoutRotationBaseBottomDoorTargetRightDoorWithMultipleDoors()
+        public void TemplatesCanBeAlignedToMatchingDoorsWithRotationBaseBottomDoorTargetRightDoorWithMultipleDoors()
         {
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");

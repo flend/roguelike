@@ -10,7 +10,7 @@ namespace RogueBasin
     /// </summary>
     public enum TemplateRotation
     {
-        Deg0, Deg90, Deg180, Deg270
+        Deg0 = 0, Deg90 = 1, Deg180 = 2, Deg270 = 3
     }
 
 

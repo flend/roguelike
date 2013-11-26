@@ -22,7 +22,7 @@ namespace RogueBasin
 
         public enum DoorLocation
         {
-            Top, Bottom, Left, Right
+            Top = 0, Left = 1, Bottom = 2, Right = 3
         }
 
 
@@ -218,60 +218,41 @@ namespace RogueBasin
             return new Point(height - 1 - input.y, input.x);
         }
 
+        public static Point RotateRoomPoint(RoomTemplate templateToRotate, Point pointToRotate, int ninetyDegreeAntiClockwiseSteps) {
+            
+            Point rotatedPoint = pointToRotate;
+
+            for (int i = 0; i < ninetyDegreeAntiClockwiseSteps; i++) {
+
+                int dimension = i % 2 == 1 ? templateToRotate.Width : templateToRotate.Height;
+                rotatedPoint = RotatePointRight(rotatedPoint, dimension);
+            }
+           
+            return rotatedPoint;
+        }
+
+        
         public static Point RotateRoomPoint(RoomTemplate templateToRotate, Point pointToRotate, TemplateRotation rotationAmount)
         {
-            
-            if (rotationAmount == TemplateRotation.Deg0)
-                return pointToRotate;
+            return RotateRoomPoint(templateToRotate, pointToRotate, (int)rotationAmount);
+        }
 
-            Point rotatedPoint;
 
-            if (rotationAmount == TemplateRotation.Deg90)
-            {
-                rotatedPoint = RotatePointRight(pointToRotate, templateToRotate.Height);
-            }
-            else if (rotationAmount == TemplateRotation.Deg180)
-            {
-                rotatedPoint = RotatePointRight(pointToRotate, templateToRotate.Height);
-                rotatedPoint = RotatePointRight(rotatedPoint, templateToRotate.Width);
-            }
-            else
-            {
-                //270
-                rotatedPoint = RotatePointRight(pointToRotate, templateToRotate.Height);
-                rotatedPoint = RotatePointRight(rotatedPoint, templateToRotate.Width);
-                rotatedPoint = RotatePointRight(rotatedPoint, templateToRotate.Height);
+        public static RoomTemplate RotateRoomTemplate(RoomTemplate templateToRotate, int ninetyDegreeAntiClockwiseSteps)
+        {
+
+            RoomTemplateTerrain[,] rotatedTerrain = templateToRotate.terrainMap;
+
+            for (int i = 0; i < ninetyDegreeAntiClockwiseSteps; i++) { 
+                    rotatedTerrain = RotateTerrainRight(rotatedTerrain);
             }
 
-            return rotatedPoint;
+            return new RoomTemplate(rotatedTerrain);
         }
 
         public static RoomTemplate RotateRoomTemplate(RoomTemplate templateToRotate, TemplateRotation rotationAmount)
         {
-
-            if (rotationAmount == TemplateRotation.Deg0)
-                return templateToRotate;
-
-            RoomTemplateTerrain[,] rotatedTerrain;
-
-            if (rotationAmount == TemplateRotation.Deg90)
-            {
-                rotatedTerrain = RotateTerrainRight(templateToRotate.terrainMap);
-            }
-            else if (rotationAmount == TemplateRotation.Deg180)
-            {
-                RoomTemplateTerrain[,] oneRotation = RotateTerrainRight(templateToRotate.terrainMap);
-                rotatedTerrain = RotateTerrainRight(oneRotation);
-            }
-            else
-            {
-                //270
-                rotatedTerrain = RotateTerrainRight(templateToRotate.terrainMap);
-                rotatedTerrain = RotateTerrainRight(rotatedTerrain);
-                rotatedTerrain = RotateTerrainRight(rotatedTerrain);
-            }
-
-            return new RoomTemplate(rotatedTerrain);
+            return RotateRoomTemplate(templateToRotate, (int)rotationAmount);
         }
 
         /** Expand a corridor template (vertically aligned) into a suitable room template */
@@ -360,100 +341,19 @@ namespace RogueBasin
             RoomTemplate rotatedTemplate;
             Point rotatedtoAlignDoorLocation;
 
-            if (baseDoorLoc == RoomTemplate.DoorLocation.Top)
-            {
-                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
-                }
-                else
-                {
-                    rotatedTemplate = toAlignRoomTemplate;
-                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
-                }
-            }
-            else if (baseDoorLoc == RoomTemplate.DoorLocation.Right)
-            {
-                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
-                {
-                    rotatedTemplate = toAlignRoomTemplate;
-                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
-                }
-                else
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
-                }
-            }
-            else if (baseDoorLoc == RoomTemplate.DoorLocation.Left)
-            {
-                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
-                {
-                    rotatedTemplate = toAlignRoomTemplate;
-                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
-                }
-                else
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
-                }
-            }
-            else
-            {
-                //Bottom
+            //B is toAlignRoomTemplate
+            //A is baseTemplate
 
-                if (toAlignDoorLoc == RoomTemplate.DoorLocation.Top)
-                {
-                    rotatedTemplate = toAlignRoomTemplate;
-                    rotatedtoAlignDoorLocation = toAlignDoorLocation;
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
-                }
-                else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
-                }
-                else
-                {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg180);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg180);
-                }
-            }
+            //Rotate 2 + (Bi - Ai) * 90 degree steps clockwise.
+
+            int stepsToRotate = 2 + ((int)toAlignDoorLoc - (int)baseDoorLoc);
+            if (stepsToRotate < 0)
+                stepsToRotate += 4;
+            if (stepsToRotate >= 4)
+                stepsToRotate -= 4;
+
+            rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, stepsToRotate);
+            rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, stepsToRotate);
 
             int xOffset = baseDoorLocation.x - rotatedtoAlignDoorLocation.x;
             int yOffset = baseDoorLocation.y - rotatedtoAlignDoorLocation.y;
