@@ -307,8 +307,8 @@ namespace RogueBasin
 
                 //Check for point outside of template
 
-                if (!(ptRelativeToTemplate.x >= 0 && point.x < roomExtent.Width &&
-                    ptRelativeToTemplate.y >= 0 && point.y < roomExtent.Height))
+                if (!(ptRelativeToTemplate.x >= 0 && ptRelativeToTemplate.x < roomExtent.Width &&
+                    ptRelativeToTemplate.y >= 0 && ptRelativeToTemplate.y < roomExtent.Height))
                     continue;
 
                 RoomTemplateTerrain thisTerrain = templatePlacement.Value.Room.terrainMap[ptRelativeToTemplate.x, ptRelativeToTemplate.y];
