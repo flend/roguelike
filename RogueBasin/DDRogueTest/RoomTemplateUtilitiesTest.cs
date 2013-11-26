@@ -120,7 +120,7 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item1;
 
             Assert.AreEqual(alignedRoom.X, 3);
             Assert.AreEqual(alignedRoom.Y, 8);
@@ -134,7 +134,7 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item1;
 
             Assert.AreEqual(-3, alignedRoom.X);
             Assert.AreEqual(-8, alignedRoom.Y);
@@ -148,10 +148,29 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item1;
 
             Assert.AreEqual(-12, alignedRoom.X);
             Assert.AreEqual(1, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void TemplatesCanBeAlignedToMatchingDoorsWithoutRotationBaseBottomDoorTargetRightDoorWithMultipleDoors()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(-31, -8, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            var alignedRoomAndDoor = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 2, 3, 1);
+            TemplatePositioned alignedRoom = alignedRoomAndDoor.Item1;
+            Point alignedDoor = alignedRoomAndDoor.Item2;
+
+            Assert.AreEqual(-29, alignedRoom.X);
+            Assert.AreEqual(-4, alignedRoom.Y);
+
+            Assert.AreEqual(-28, alignedDoor.x);
+            Assert.AreEqual(-4, alignedDoor.y);
         }
 
         [TestMethod]
@@ -162,7 +181,7 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item1;
 
             Assert.AreEqual(12, alignedRoom.X);
             Assert.AreEqual(-1, alignedRoom.Y);
@@ -176,7 +195,7 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item1;
 
             Assert.AreEqual(1, alignedRoom.X);
             Assert.AreEqual(8, alignedRoom.Y);
@@ -190,7 +209,7 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item1;
 
             Assert.AreEqual(-8, alignedRoom.X);
             Assert.AreEqual(-1, alignedRoom.Y);
@@ -204,10 +223,24 @@ namespace DDRogueTest
 
             TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
 
-            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5);
+            TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item1;
 
             Assert.AreEqual(12, alignedRoom.X);
             Assert.AreEqual(-5, alignedRoom.Y);
+        }
+
+        [TestMethod]
+        public void TemplatesAlignedToNonMatchingDoorsByRotationReturnCorrectRotatedDoorPosition()
+        {
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0);
+
+            Point alignedDoor = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, baseRoom, 0, 0, 5).Item2;
+
+            Assert.AreEqual(12, alignedDoor.x);
+            Assert.AreEqual(1, alignedDoor.y);
         }
 
         [TestMethod]
@@ -301,6 +334,57 @@ namespace DDRogueTest
 
             Assert.AreEqual(7, rotatedTemplate.Width);
             Assert.AreEqual(6, rotatedTemplate.Height);
+        }
+
+        [TestMethod]
+        public void CorridorsBetweenVerticallyTopBottomAlignedPointShouldStart1SquareIn()
+        {
+            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
+                new Point(5, 5), new Point(5, 10));
+
+            Assert.AreEqual(new Point(5, 6), corridorPoints.Item1);
+            Assert.AreEqual(new Point(5, 9), corridorPoints.Item2);
+        }
+
+        [TestMethod]
+        public void CorridorsBetweenVerticallyBottomTopAlignedPointShouldStart1SquareIn()
+        {
+            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
+                new Point(0, -5), new Point(0, -10));
+
+            Assert.AreEqual(new Point(0, -6), corridorPoints.Item1);
+            Assert.AreEqual(new Point(0, -9), corridorPoints.Item2);
+        }
+
+        [TestMethod]
+        public void CorridorsBetweenHorizontallyLeftRightAlignedPointShouldStart1SquareIn()
+        {
+            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
+                new Point(15, 15), new Point(25, 15));
+
+            Assert.AreEqual(new Point(16, 15), corridorPoints.Item1);
+            Assert.AreEqual(new Point(24, 15), corridorPoints.Item2);
+        }
+
+        [TestMethod]
+        public void CorridorsBetweenHorizontallyRightLeftAlignedPointShouldStart1SquareIn()
+        {
+            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
+                new Point(-15, -15), new Point(-25, -15));
+
+            Assert.AreEqual(new Point(-16, -15), corridorPoints.Item1);
+            Assert.AreEqual(new Point(-24, -15), corridorPoints.Item2);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException), "Points not on cardinal directions.")]
+        public void CorridorsStartEndPointsNotInCardinalDirectionShouldThrowException()
+        {
+            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
+                new Point(-15, -14), new Point(-25, -15));
+
+            Assert.AreEqual(new Point(-16, -15), corridorPoints.Item1);
+            Assert.AreEqual(new Point(-24, -15), corridorPoints.Item2);
         }
 
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)

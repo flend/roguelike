@@ -349,7 +349,7 @@ namespace RogueBasin
         /// Align toAlignRoomTemplate so that a straight corridor can be drawn from baseRoom.
         /// Will rotate toAlignRoomTemplate if required
         /// </summary>
-        public static TemplatePositioned AlignRoomOnDoor(RoomTemplate toAlignRoomTemplate, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
+        public static Tuple<TemplatePositioned, Point> AlignRoomOnDoor(RoomTemplate toAlignRoomTemplate, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
         {
             Point toAlignDoorLocation = toAlignRoomTemplate.PotentialDoors[toAlignRoomDoorIndex].Location;
             Point baseDoorLocation = baseRoom.Room.PotentialDoors[baseRoomDoorIndex].Location;
@@ -440,13 +440,13 @@ namespace RogueBasin
                 }
                 else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Left)
                 {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
                 }
                 else if (toAlignDoorLoc == RoomTemplate.DoorLocation.Right)
                 {
-                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg90);
-                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg90);
+                    rotatedTemplate = RotateRoomTemplate(toAlignRoomTemplate, TemplateRotation.Deg270);
+                    rotatedtoAlignDoorLocation = RotateRoomPoint(toAlignRoomTemplate, toAlignDoorLocation, TemplateRotation.Deg270);
                 }
                 else
                 {
@@ -479,7 +479,47 @@ namespace RogueBasin
                 toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (rotatedTemplate.Width - 1), baseRoom.Y + yOffset);
             }
 
-            return new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, TemplateRotation.Deg0);
+            TemplatePositioned rotatedTemplatePosition = new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, TemplateRotation.Deg0);
+            Point rotatedDoorLocation = new Point(toAlignRoomPosition.x + rotatedtoAlignDoorLocation.x, toAlignRoomPosition.y + rotatedtoAlignDoorLocation.y);
+
+            return new Tuple<TemplatePositioned, Point>(rotatedTemplatePosition, rotatedDoorLocation);
+        }
+
+        public static Tuple<Point, Point> CorridorTerminalPointsBetweenDoors(Point start, Point end)
+        {
+            Point corridorStart;
+            Point corridorEnd;
+
+            if (start.x != end.x && start.y != end.y)
+                throw new ArgumentException("Start and end must be in cardinal direction");
+
+            if (start.x == end.x)
+            {
+                //vertical
+                if (start.y > end.y)
+                {
+                    corridorStart = new Point(start.x, start.y - 1);
+                    corridorEnd = new Point(end.x, end.y + 1);
+                }
+                else
+                {
+                    corridorStart = new Point(start.x, start.y + 1);
+                    corridorEnd = new Point(end.x, end.y - 1);
+                }
+            }
+            else {
+                //horizontal
+                if(start.x > end.x) {
+                    corridorStart = new Point(start.x - 1, start.y);
+                    corridorEnd = new Point(end.x + 1, start.y);
+                }
+                else {
+                    corridorStart = new Point(start.x + 1, start.y);
+                    corridorEnd = new Point(end.x - 1, start.y);
+                }
+            }
+
+            return new Tuple<Point, Point>(corridorStart, corridorEnd);
         }
     }
 
