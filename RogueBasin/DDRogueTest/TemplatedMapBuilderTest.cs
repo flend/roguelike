@@ -119,6 +119,20 @@ namespace DDRogueTest
             Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
         }
 
+        [TestMethod]
+        public void RoomsAtHighXWhichMergeShouldntOverlap()
+        {
+            RoomTemplate room1 = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testsolid1.room");
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            TemplatePositioned templatePos1 = new TemplatePositioned(20, 20, 0, room1, TemplateRotation.Deg0);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            TemplatePositioned templatePos2 = new TemplatePositioned(21, 21, 1, room1, TemplateRotation.Deg0);
+            Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
+        }
+
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();
