@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectivityMap.cs" />
+    <Compile Include="FileDotEngine.cs" />
+    <Compile Include="FileDotEngineUndirected.cs" />
+    <Compile Include="GraphvizExport.cs" />
     <Compile Include="MapModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

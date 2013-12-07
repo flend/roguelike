@@ -11,7 +11,35 @@ using System.Windows.Forms;
 
 namespace GraphMap
 {
-    /** Provides */
+    /** The public interface to the map algorithms for locking doors, adding clues etc. */
+    public class MapPuzzleLayer
+    {
+
+        private MapModel mapModel;
+
+        public MapPuzzleLayer(ConnectivityMap inputMap)
+        {
+            mapModel = new MapModel(inputMap);
+
+            //Do initial processing
+            mapModel.EliminateCyclesInMap();
+        }
+
+        /// <summary>
+        /// Dictionary of input room id -> model node
+        /// Many rooms may map to the same node, if cycles are removed
+        /// </summary>
+        public Dictionary<int, int> RoomMappingToNoCycleMap
+        {
+            get
+            {
+                return mapModel.VertexMapping;
+            }
+        }
+
+    }
+
+    /** Carries the state of a map being processed */
     public class MapModel
     {
 
@@ -250,7 +278,6 @@ namespace GraphMap
         /** Produce acyclic graph and vertex mapping. Use accessors in class */
         public void EliminateCyclesInMap()
         {
-
             CalculateSpanningTree();
             ReduceCycles();
         }
@@ -740,4 +767,61 @@ namespace GraphMap
             return VertexMapping[originalVertex];
         }
     }
+
+    /** Immutable one-method class used to split a map into locked / unlocked sections */
+    public class MapSplitter
+    {
+        readonly UndirectedGraph<int, TaggedEdge<int, string>> map;
+        readonly TaggedEdge<int, string> edgeToSplitOn;
+        readonly int originVertex;
+        readonly Dictionary<int, int> components = new Dictionary<int,int>();
+        private IEnumerable<TaggedEdge<int, string>> enumerable;
+
+        public int OriginComponentIndex { get; private set; }
+        public int NonOriginComponentIndex
+        {
+            get
+            {
+                return OriginComponentIndex == 1 ? 0 : 1;
+            }
+        }
+
+        public int RoomComponentIndex(int nodeIndex)
+        {
+            return components[nodeIndex];
+        }
+
+        public MapSplitter(IEnumerable<TaggedEdge<int, string>> edges, TaggedEdge<int, string> edgeToSplitOn, int originVertex)
+        {
+
+            this.map = new UndirectedGraph<int, TaggedEdge<int, string>>();
+            map.AddVerticesAndEdgeRange(edges);
+
+            this.edgeToSplitOn = edgeToSplitOn;
+            this.originVertex = originVertex;
+
+            Process();
+        }
+
+        private void Process()
+        {
+            //Break tree on this edge and label as unlocked (contains start vertex) and locked tree
+
+            map.RemoveEdge(edgeToSplitOn);
+
+            //We need to get the 2 subtrees created by this divide
+            //This could be done by DFS from the source and target of the edge
+            //Unfortunately, we don't have a top-level method to do that, so we get the connected components instead (may be slower)
+
+            int componentCount = map.ConnectedComponents<int, TaggedEdge<int, string>>(components);
+
+            if (componentCount != 2)
+            {
+                throw new Exception("Must be 2 connected components after breaking on requested edge");
+            }
+
+            //Which tree is the unlocked one?
+            OriginComponentIndex = components[originVertex];
+        }
+    }      
 }
