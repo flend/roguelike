@@ -12,7 +12,7 @@ using System.Windows.Forms;
 namespace GraphMap
 {
     /** The public interface to the map algorithms for locking doors, adding clues etc. */
-    public class MapPuzzleLayer
+    /*public class MapPuzzleLayer
     {
 
         private MapModel mapModel;
@@ -37,90 +37,91 @@ namespace GraphMap
             }
         }
 
+    }*/
+
+    /** A clue to open a locked door */
+    public class Clue
+    {
+        /// <summary>
+        /// Where we are located (clue map index)
+        /// </summary>
+        private int locationVertex;
+
+        /// <summary>
+        /// Which door this clue locks
+        /// </summary>
+        private int doorIndex;
+
+        /// <summary>
+        /// Construct a clue for the associated door
+        /// </summary>
+        /// <param name="doorIndex"></param>
+        public Clue(int doorIndex)
+        {
+            this.doorIndex = doorIndex;
+        }
+
+        public int DoorIndex
+        {
+            get
+            {
+                return doorIndex;
+            }
+        }
     }
+
+    /** A locked door requiring one or more clues to open */
+    public class Door
+    {
+        /// <summary>
+        /// Which edge we lock on the acyclic graph
+        /// </summary>
+        private TaggedEdge<int, string> doorEdge;
+
+        /// <summary>
+        /// Indentifying index (door map index)
+        /// </summary>
+        private int locationVertex;
+
+        /// <summary>
+        /// Door index into containing map
+        /// </summary>
+        private int index;
+
+        public Door(TaggedEdge<int, string> doorEdge, string id, int index)
+        {
+            Id = id;
+            this.doorEdge = doorEdge;
+            this.index = index;
+        }
+
+        public TaggedEdge<int, string> DoorEdge
+        {
+            get
+            {
+                return doorEdge;
+            }
+        }
+
+        public int DoorIndex
+        {
+            get
+            {
+                return index;
+            }
+        }
+
+        public string Id
+        {
+            get;
+            private set;
+        }
+    }
+
 
     /** Carries the state of a map being processed */
     public class MapModel
     {
-
-        /** A clue to open a locked door */
-        public class Clue
-        {
-            /// <summary>
-            /// Where we are located (clue map index)
-            /// </summary>
-            private int locationVertex;
-
-            /// <summary>
-            /// Which door this clue locks
-            /// </summary>
-            private int doorIndex;
-
-            /// <summary>
-            /// Construct a clue for the associated door
-            /// </summary>
-            /// <param name="doorIndex"></param>
-            public Clue(int doorIndex)
-            {
-                this.doorIndex = doorIndex;
-            }
-
-            public int DoorIndex
-            {
-                get
-                {
-                    return doorIndex;
-                }
-            }
-        }
-
-        /** A locked door requiring one or more clues to open */
-        public class Door
-        {
-            /// <summary>
-            /// Which edge we lock on the acyclic graph
-            /// </summary>
-            private TaggedEdge<int, string> doorEdge;
-
-            /// <summary>
-            /// Indentifying index (door map index)
-            /// </summary>
-            private int locationVertex;
-
-            /// <summary>
-            /// Door index into containing map
-            /// </summary>
-            private int index;
-
-            public Door(TaggedEdge<int, string> doorEdge, string id, int index)
-            {
-                Id = id;
-                this.doorEdge = doorEdge;
-                this.index = index;
-            }
-
-            public TaggedEdge<int, string> DoorEdge
-            {
-                get
-                {
-                    return doorEdge;
-                }
-            }
-
-            public int DoorIndex
-            {
-                get
-                {
-                    return index;
-                }
-            }
-
-            public string Id
-            {
-                get;
-                private set;
-            }
-        }
 
         public bool CycleDebug
         {
@@ -134,85 +135,38 @@ namespace GraphMap
         private UndirectedGraph<int, TaggedEdge<int, string>> baseGraph;
 
         /// <summary>
-        /// Minimum spanning tree for input map (internal)
-        /// </summary>
-        private UndirectedGraph<int, TaggedEdge<int, string>> mst;
-
-        /// <summary>
-        /// Edge predecessor to each vertex making up an MST (internal)
-        /// </summary>
-        private Dictionary<int, TaggedEdge<int, string>> vertexPredecessors = new Dictionary<int, TaggedEdge<int, string>>();
-
-        /// <summary>
-        /// Map with cycles removed, used to place doors etc.
-        /// </summary>
-        private UndirectedGraph<int, TaggedEdge<int, string>> gReduced;
-
-        /// <summary>
-        /// baseGraph -> reducedGraph vertex mapping
-        /// </summary>
-        private Dictionary<int, int> reducedMapping;
-
-        /// <summary>
         /// Where the player starts. This node determines the unlocked side of a locked door
         /// </summary>
         private int startVertex;
 
-        /** Door dependency graph
-         *
-         *  Directed graph.
-         *  Children of a node depend upon it (opposite to arrow direction).
-         *  All clues dependent upon a door may be found by searching children (out-edges) of vertex
-         *  
-         *  vertex number <int> = door index
-        */
-        private AdjacencyGraph<int, Edge<int>> doorDependencyGraph;
+        MapCycleReducer graphNoCycles;
 
-        /** Door map
-         * 
-         *  key = unique identifier for door
-         *  Door = information, including Edge. Only 1 door per edge.
-         */
-        private Dictionary<int, Door> doorMap;
+        MapMST graphNoCyclesMST;
 
-        /** Clue map
-          * 
-          *  key = vertex where clue is located
-          *  List<Clue> = all Clues at this vertex
-          */
-        private Dictionary<int, List<Clue>> clueMap;
+        DoorAndClueManager doorAndClueManager;
 
         /// <summary>
         /// Next available door index
         /// </summary>
         private int nextDoorIndex = 0;
 
-        public MapModel(ConnectivityMap inputMap)
+        public MapModel(ConnectivityMap inputMap, int startVertex)
         {
             baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            clueMap = new Dictionary<int, List<Clue>>();
-            doorMap = new Dictionary<int, Door>();
-            doorDependencyGraph = new AdjacencyGraph<int, Edge<int>>();
+            this.StartVertex = startVertex;
 
             //Clone the input graph (edges only)
             baseGraph.AddVerticesAndEdgeRange(inputMap.RoomConnectionGraph.Edges);
 
-        }
+            //Build cycle-free map
+            graphNoCycles = new MapCycleReducer(baseGraph.Edges);
 
-        public Dictionary<int, Door> DoorMap
-        {
-            get
-            {
-                return doorMap;
-            }
-        }
+            //Build MST
+            graphNoCyclesMST = new MapMST(graphNoCycles.mapNoCycles.Edges);
 
-        public Dictionary<int, List<Clue>> ClueMap
-        {
-            get
-            {
-                return clueMap;
-            }
+            //Build Door and Clue Manager
+            doorAndClueManager = new DoorAndClueManager(graphNoCycles.mapNoCycles, graphNoCyclesMST, startVertex);
+
         }
 
         /// <summary>
@@ -224,21 +178,13 @@ namespace GraphMap
             {
                 return startVertex;
             }
-            set
+            private set
             {
                 startVertex = value;
             }
         }
 
-
-        public AdjacencyGraph<int, Edge<int>> DoorDependencyGraph
-        {
-            get
-            {
-                return doorDependencyGraph;
-            }
-        }
-
+        /*
         public UndirectedGraph<int, TaggedEdge<int, string>> MinimumSpanningTree
         {
             get
@@ -274,65 +220,8 @@ namespace GraphMap
                 return reducedMapping;
             }
         }
-
-        /** Produce acyclic graph and vertex mapping. Use accessors in class */
-        public void EliminateCyclesInMap()
-        {
-            CalculateSpanningTree();
-            ReduceCycles();
-        }
-
-
-        /// <summary>
-        /// Get a map edge from the reduced (acyclic) tree. Returns null if fails
-        /// </summary>
-        /// <param name="startVertex"></param>
-        /// <param name="endVertex"></param>
-        /// <returns></returns>
-        public TaggedEdge<int, string> GetReducedMapEdge(int startVertex, int endVertex)
-        {
-            TaggedEdge<int, string> edgeToFind;
-            gReduced.TryGetEdge(startVertex, endVertex, out edgeToFind);
-
-            return edgeToFind;
-        }
-
-        /// <summary>
-        /// Get Door on edge, or return null. Suboptimal, should be constructed as we go if used a lot
-        /// </summary>
-        /// <param name="edgeToFind"></param>
-        /// <returns></returns>
-        public Door GetDoorForEdge(TaggedEdge<int, string> edgeToFind)
-        {
-
-            foreach (var door in doorMap)
-            {
-                if (door.Value.DoorEdge == edgeToFind)
-                {
-                    return door.Value;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Get Door on edge, or return null. Suboptimal, should be constructed as we go if used a lot
-        /// </summary>
-        /// <param name="edgeToFind"></param>
-        /// <returns></returns>
-        public int GetDoorIndexForEdge(TaggedEdge<int, string> edgeToFind)
-        {
-
-            foreach (var door in doorMap)
-            {
-                if (door.Value.DoorEdge == edgeToFind)
-                {
-                    return door.Value.DoorIndex;
-                }
-            }
-            return -1;
-        }
-
+         */
+                
         /// <summary>
         /// Return a random edge in the reduced graph
         /// </summary>
@@ -340,11 +229,12 @@ namespace GraphMap
         public TaggedEdge<int, string> GetRandomUnlockedEdgeInReducedGraph()
         {
             Random r = new Random();
+            var gReduced = graphNoCycles.mapNoCycles;
 
             int edgeToGet;
 
             //Check if all edges are locked, if so just return a random locked edge
-            if (gReduced.EdgeCount <= doorMap.Count)
+            if (gReduced.EdgeCount <= doorAndClueManager.DoorMap.Count)
                 return gReduced.Edges.ElementAt(r.Next(gReduced.EdgeCount));
 
             //If there are unlocked edges, return one of these
@@ -352,208 +242,11 @@ namespace GraphMap
             {
                 edgeToGet = r.Next(gReduced.EdgeCount);
 
-            } while (GetDoorForEdge(gReduced.Edges.ElementAt(edgeToGet)) != null);
+            } while (doorAndClueManager.GetDoorForEdge(gReduced.Edges.ElementAt(edgeToGet)) != null);
 
             return gReduced.Edges.ElementAt(edgeToGet);
         }
 
-        /// <summary>
-        /// Return door-ids corresponding to clues present at vertex or empty if none
-        /// </summary>
-        /// <param name="vertexIndex"></param>
-        /// <returns></returns>
-        public IEnumerable<string> GetClueIdForVertex(int vertexIndex)
-        {
-            List<Clue> foundClue;
-
-            clueMap.TryGetValue(vertexIndex, out foundClue);
-
-            if (foundClue == null)
-                return new List<string>();
-
-            return foundClue.Select(c => doorMap[c.DoorIndex].Id);
-        }
-
-
-        private void ReduceCycles()
-        {
-            //Find all cycles within tree
-
-            if (CycleDebug)
-                Console.WriteLine("--cycle finding--");
-
-            //Find all edges not in MST
-            var allEdges = baseGraph.Edges;
-            var edgesInMST = vertexPredecessors.Values;
-
-            var backEdges = allEdges.Except(edgesInMST);
-
-            if (CycleDebug)
-            {
-                Console.WriteLine("No of back edges: {0}", backEdges.Count());
-
-                foreach (var edge in backEdges)
-                {
-                    Console.WriteLine(edge);
-                }
-            }
-
-            //Calculate [all? - expensive?] shortest paths. Each edge has a distance of 1
-
-            var cycleList = new List<IEnumerable<TaggedEdge<int, string>>>();
-
-            //Find the shortest cycle for each back edge
-
-            foreach (var backEdge in backEdges)
-            {
-
-                int startVertex = backEdge.Source;
-                int endVertex = backEdge.Target;
-
-                var tryGetPath = mst.ShortestPathsDijkstra(x => 1, startVertex);
-
-                IEnumerable<TaggedEdge<int, string>> path;
-                if (tryGetPath(endVertex, out path))
-                {
-                    cycleList.Add(path);
-                }
-                else
-                {
-                    Console.WriteLine(String.Format("no path found for cycle, start: {0}, end: {1}", startVertex, endVertex));
-                }
-            }
-
-            //Output to console all cycles
-            if (CycleDebug)
-            {
-                foreach (var cycle in cycleList)
-                {
-                    Console.WriteLine("Cycle: ");
-
-                    foreach (var edge in cycle)
-                    {
-                        Console.Write(String.Format("{0}\t", edge));
-                    }
-
-                    Console.Write("\r\n");
-                }
-            }
-
-            //Combine any cycles that share a vertex
-            //There will be at least 2 ways of getting to each vertex
-            //Therefore these vertexes must be collasped
-
-            //make a (probably unconnected) graph of all the vertexes in the cycles
-            //(no need to add back-edges - if they are connected by this then they will be connected by 2 vertices)
-
-            var cycleGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            var allCycleEdges = cycleList.SelectMany(lst => lst);
-            cycleGraph.AddVerticesAndEdgeRange(allCycleEdges);
-
-            //find the connected components
-            //this gives us n sets of connected nodes which will be reduced to n single nodes in the final acyclic graph
-            var components = new Dictionary<int, int>();
-            int componentCount = cycleGraph.ConnectedComponents<int, TaggedEdge<int, string>>(components);
-
-            if (componentCount != 0)
-            {
-                if (CycleDebug)
-                    Console.WriteLine("Graph contains {0} strongly connected components", componentCount);
-                foreach (var kv in components)
-                {
-                    if (CycleDebug)
-                        Console.WriteLine("Vertex {0} is connected to subgraph {1}", kv.Key, kv.Value);
-                }
-            }
-
-            //Replace each connected component with a single vertex, and remember which nodes were rolled-up
-
-            //Duplicate the full graph (mutable)
-            gReduced = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            gReduced.AddVerticesAndEdgeRange(baseGraph.Edges);
-
-            //Maintain a map of vertex number mappings after cycle removal
-            //Initialise with no-change case
-            reducedMapping = new Dictionary<int, int>();
-            foreach (var vertex in baseGraph.Vertices)
-                reducedMapping[vertex] = vertex;
-
-            //For each cycle
-
-            for (int i = 0; i < componentCount; i++)
-            {
-                //Get all vertices in this cycle
-                //Get all vertices (keys) with value (cycle no)
-                var verticesInCycle = components.Where(kv => kv.Value == i).Select(kv => kv.Key);
-
-                //First vertex (to be kept)
-                //Other vertices (to be removed)
-                var sortedVertices = verticesInCycle.ToList();
-                sortedVertices.Sort();
-
-                //First vertex defined as minimum to ease repeatibility
-                var firstVertex = sortedVertices.First();
-                var verticesInCycleNotFirst = sortedVertices.Skip(1);
-
-                //Get all non-internal edges from vertices in the cycle
-
-                //Get all adjacent edges to vertices to remove in the cycle
-                var edgesFromCycle = verticesInCycleNotFirst.SelectMany(v => baseGraph.AdjacentEdges(v));
-
-                //Discard all edges between vertices
-                //(we need to maintain edges that are either sourced from the cycle or target it)
-                var exteriorEdges = edgesFromCycle.Where(edge => !verticesInCycle.Contains(edge.Source) || !verticesInCycle.Contains(edge.Target));
-
-                //Remove all cycle vertices but first from graph
-                foreach (int vertex in verticesInCycleNotFirst)
-                {
-                    //Update vertex map
-                    reducedMapping[vertex] = firstVertex;
-
-                    //Remove vertex from graph
-                    gReduced.RemoveVertex(vertex);
-                }
-
-                //Add all exterior edges onto the remaining cycle vertex
-                foreach (var edge in exteriorEdges)
-                {
-                    //Rewrite edge
-                    //Use mapped vertex indices, since those in this cycle (and other source cycles) will have been reduced
-                    gReduced.AddEdge(new TaggedEdge<int, string>(reducedMapping[edge.Source], reducedMapping[edge.Target], edge.Tag));
-                }
-            }
-            Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), gReduced.Vertices.Count(), componentCount));
-        }
-
-        private void CalculateSpanningTree()
-        {
-            //Do a depth first search
-            //Catagorize edges as tree edges or 'back/forward/inner' edges (that don't make a MST)
-
-            // create algorithm
-
-            var dfs = new UndirectedDepthFirstSearchAlgorithm<int, TaggedEdge<int, string>>(baseGraph);
-
-            dfs.TreeEdge += treeEdge;
-
-            //do the search
-            dfs.Compute();
-
-            //Build graph representation of MST for further processing
-
-            //We have a dictionary of edges, so just iterate over it and build a new graph
-            mst = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            mst.AddVerticesAndEdgeRange(vertexPredecessors.Values);
-
-        }
-
-        private void treeEdge(object sender, UndirectedEdgeEventArgs<int, TaggedEdge<int, string>> e)
-        {
-            var vertexTarget = e.Target;
-
-            //Associate vertex with predecessor edge
-            vertexPredecessors.Add(vertexTarget, e.Edge);
-        }
 
         /// <summary>
         /// Print the vertex mapping after cycle reduction
@@ -562,7 +255,7 @@ namespace GraphMap
         {
             Console.WriteLine("Vertex mapping after cycle reduction");
 
-            foreach (var map in reducedMapping.OrderBy(x => x.Key))
+            foreach (var map in graphNoCycles.roomMappingToNoCycles.OrderBy(x => x.Key))
             {
                 Console.WriteLine(map.Key.ToString() + "->" + map.Value.ToString());
             }
@@ -665,6 +358,9 @@ namespace GraphMap
          *  Therefore EliminateCyclesInMap() must be run */
         public void LockEdgeRandomClue(TaggedEdge<int, string> edge, string doorId)
         {
+
+            var gReduced = graphNoCycles.mapNoCycles;
+
             Console.WriteLine("---New door id: {0} at {1}->{2}---", doorId, edge.Source, edge.Target);
 
             //Check that edge is in reduced map
@@ -697,6 +393,9 @@ namespace GraphMap
 
             //We do this simply by finding all clues in locked tree vertices
 
+            var clueMap = doorAndClueManager.ClueMap;
+            var doorMap = doorAndClueManager.DoorMap;
+
             //Lists of all clues in vertices which are in the locked tree
             var newlyLockedCluesLists = clueMap.Where(kv => components[kv.Key] == lockedTreeIndex).Select(kv => kv.Value);
             //Flattened to one long list
@@ -711,6 +410,9 @@ namespace GraphMap
             {
                 Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
             }
+
+            //TODO: refactor - this function shouldn't be writing in this directly
+            var doorDependencyGraph = doorAndClueManager.DoorDependencyGraph;
 
             //Find all doors that depend on each of these doors
             var dfs = new DepthFirstSearchAlgorithm<int, Edge<int>>(doorDependencyGraph);
@@ -780,7 +482,7 @@ namespace GraphMap
             Random r = new Random();
             int clueVertex = candidateNodes.ElementAt(r.Next(candidateNodes.Count()));
 
-            PlaceDoorAndClue(edge, doorId, clueVertex);
+            doorAndClueManager.PlaceDoorAndClue(edge, doorId, clueVertex);
         }
 
         //On a dfs search of the dependency tree, each hit vertex calls this
@@ -789,6 +491,69 @@ namespace GraphMap
         private void dfsDependencyVertexAction(int vertex)
         {
             foundVertices.Add(vertex);
+        }
+    }
+
+    /** Manages doors and clues in a map.
+     *  Should be constructed with a map without cycles, which should not change subsequently.
+     *  Also pass in a pre-calculated MST for speed
+     */
+    public class DoorAndClueManager {
+
+        readonly UndirectedGraph<int, TaggedEdge<int, string>> baseGraph;
+        readonly MapMST minimalSpanningTree;
+        readonly int startVertex;
+
+        private int nextDoorIndex = 0;
+
+        /** Door dependency graph
+         *
+         *  Directed graph.
+         *  Children of a node depend upon it (opposite to arrow direction).
+         *  All clues dependent upon a door may be found by searching children (out-edges) of vertex
+         *  
+         *  vertex number <int> = door index
+        */
+        private AdjacencyGraph<int, Edge<int>> doorDependencyGraph;
+
+        /** Door map
+         * 
+         *  key = unique identifier for door
+         *  Door = information, including Edge. Only 1 door per edge.
+         */
+        private Dictionary<int, Door> doorMap;
+
+        /** Clue map
+          * 
+          *  key = vertex where clue is located
+          *  List<Clue> = all Clues at this vertex
+          */
+        private Dictionary<int, List<Clue>> clueMap;
+
+        public DoorAndClueManager(UndirectedGraph<int, TaggedEdge<int, string>> graphNoCycles, MapMST mapMST, int startVertex)
+        {
+            this.baseGraph = graphNoCycles;
+            this.minimalSpanningTree = mapMST;
+            this.startVertex = startVertex;
+
+            doorDependencyGraph = new AdjacencyGraph<int, Edge<int>>();
+            doorMap = new Dictionary<int, Door>();
+            clueMap = new Dictionary<int, List<Clue>>();
+        }
+
+        public Dictionary<int, List<Clue>> ClueMap
+        {
+            get { return clueMap; }
+        }
+
+        public Dictionary<int, Door> DoorMap
+        {
+            get { return doorMap; }
+        }
+
+        public AdjacencyGraph<int, Edge<int>> DoorDependencyGraph
+        {
+            get { return doorDependencyGraph; }
         }
 
         /// <summary>
@@ -818,7 +583,7 @@ namespace GraphMap
             doorMap.Add(thisDoorIndex, new Door(edgeForDoor, doorId, thisDoorIndex));
 
             //Find path on MST from start location to clue. Any doors which we traverse become doors we DEPEND on
-            var tryGetPath = mst.ShortestPathsDijkstra(x => 1, startVertex);
+            var tryGetPath = minimalSpanningTree.mst.ShortestPathsDijkstra(x => 1, startVertex);
 
             IEnumerable<TaggedEdge<int, string>> path;
             if (clueVertex != startVertex)
@@ -840,9 +605,26 @@ namespace GraphMap
                 else
                 {
                     Console.WriteLine(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
+                    throw new ApplicationException(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
                 }
             }
+        }
 
+        /// <summary>
+        /// Return door-ids corresponding to clues present at vertex or empty if none
+        /// </summary>
+        /// <param name="vertexIndex"></param>
+        /// <returns></returns>
+        public IEnumerable<string> GetClueIdForVertex(int vertexIndex)
+        {
+            List<Clue> foundClue;
+
+            clueMap.TryGetValue(vertexIndex, out foundClue);
+
+            if (foundClue == null)
+                return new List<string>();
+
+            return foundClue.Select(c => doorMap[c.DoorIndex].Id);
         }
 
         public Door GetDoorByIndex(int doorIndex)
@@ -851,15 +633,41 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Return the node in the reduced graph that the vertex in the original graph maps to
+        /// Get Door on edge, or return null. Suboptimal, should be constructed as we go if used a lot
         /// </summary>
-        /// <param name="p"></param>
+        /// <param name="edgeToFind"></param>
         /// <returns></returns>
-        internal int GetReducedVertexMapping(int originalVertex)
+        public int GetDoorIndexForEdge(TaggedEdge<int, string> edgeToFind)
         {
-            return VertexMapping[originalVertex];
+            foreach (var door in doorMap)
+            {
+                if (door.Value.DoorEdge == edgeToFind)
+                {
+                    return door.Value.DoorIndex;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Get Door on edge, or return null. Suboptimal, should be constructed as we go if used a lot
+        /// </summary>
+        /// <param name="edgeToFind"></param>
+        /// <returns></returns>
+        public Door GetDoorForEdge(TaggedEdge<int, string> edgeToFind)
+        {
+
+            foreach (var door in doorMap)
+            {
+                if (door.Value.DoorEdge == edgeToFind)
+                {
+                    return door.Value;
+                }
+            }
+            return null;
         }
     }
+
 
     /** Immutable class for finding the MST of a map */
     public class MapMST
@@ -1079,7 +887,6 @@ namespace GraphMap
             if (CycleDebug)
                 Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), mapNoCycles.Vertices.Count(), componentCount));
         }
-
     }
 
     /** Immutable one-method class used to split a map into locked / unlocked sections */

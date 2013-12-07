@@ -99,9 +99,7 @@ namespace TestGraphMap
         {
             ConnectivityMap standardMap = BuildStandardTestMap();
             
-            MapModel model = new MapModel(standardMap);
-
-
+            MapModel model = new MapModel(standardMap, 0);
         }
 
 
