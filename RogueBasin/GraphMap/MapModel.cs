@@ -282,6 +282,7 @@ namespace GraphMap
             ReduceCycles();
         }
 
+
         /// <summary>
         /// Get a map edge from the reduced (acyclic) tree. Returns null if fails
         /// </summary>
@@ -567,6 +568,98 @@ namespace GraphMap
             }
         }
 
+        /*
+        public GetValidNodesToPlaceClue(UndirectedGraph<int, TaggedEdge<int, string>> mapNoCycles, Dictionary<int, List<Clue>> thisClueMap, int startVertex, TaggedEdge<int, string> edgeToLock, AdjacencyGraph<int, Edge<int>> doorDependencyGraph) {
+
+            //Break tree on to-lock edge
+            MapSplitter mapSplitter = new MapSplitter(mapNoCycles.Edges, edgeToLock, startVertex);
+            int lockedTreeIndex = mapSplitter.NonOriginComponentIndex;
+
+            //Traverse the locked tree and find all clues that will be behind the locked door
+
+            //We do this simply by finding all clues in locked tree vertices
+
+            //Lists of all clues in vertices which are in the locked tree
+            var newlyLockedCluesLists = thisClueMap.Where(kv => mapSplitter.RoomComponentIndex(kv.Key) == lockedTreeIndex).Select(kv => kv.Value);
+            //Flattened to one long list
+            var newlyLockedClues = newlyLockedCluesLists.SelectMany(clue => clue);
+
+            //We can't traverse any of the doors that these clues open when we place the clue for this new locked door
+            //We also can't traverse any doors that depend on the doors in the first list
+            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
+
+            Console.WriteLine("Doors with clues behind this door");
+            foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
+            {
+                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
+            }
+
+            //Find all doors that depend on each of these doors
+            var dfs = new DepthFirstSearchAlgorithm<int, Edge<int>>(doorDependencyGraph);
+            dfs.DiscoverVertex += dfsDependencyVertexAction;
+
+            foundVertices = new List<int>();
+            foreach (var forbiddenDoorIndex in lockedCluesDoorIndices.Distinct())
+            {
+                //Do DFS with root being the inaccessible clue/door. This catches all dependent clue / doors
+                //This will include the inaccessible clues themselves
+                dfs.Compute(forbiddenDoorIndex);
+            }
+
+            //We now have all the doors we're not allowed to pass through when placing clues
+            var lockedClueDoorsAndDependentsIndices = foundVertices.Distinct();
+            var forbiddenDoorsList = lockedClueDoorsAndDependentsIndices.Select(ind => doorMap[ind]);
+
+            Console.WriteLine("Doors with clues behind this door AND doors dependent on them");
+            foreach (var door in forbiddenDoorsList)
+            {
+                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
+            }
+
+            //Add the new door to the door dependency graph (TODO: tie up with door adding below)
+            int thisDoorIndex = nextDoorIndex;
+            doorDependencyGraph.AddVertex(thisDoorIndex);
+            foreach (var door in lockedCluesDoorIndices)
+            {
+                //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
+                doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
+            }
+
+            //Place the new door clue in an allowed area
+
+            //Retrieve the door edges in the forbidden list
+            var forbiddenDoorEdges = forbiddenDoorsList.Select(door => door.DoorEdge);
+
+            //Break all forbidden door edges
+
+            var candidateTree = new UndirectedGraph<int, TaggedEdge<int, string>>();
+            candidateTree.AddVerticesAndEdgeRange(gReduced.Edges);
+
+            //Remove new door edge
+            candidateTree.RemoveEdge(edge);
+
+            foreach (var doorEdge in forbiddenDoorEdges)
+            {
+                candidateTree.RemoveEdge(doorEdge);
+            }
+
+            //Find the component of this broken graph that is connected to the start vertex - this is the candidate subtree
+            var candidateComponents = new Dictionary<int, int>();
+            int candidateComponentsCount = candidateTree.ConnectedComponents<int, TaggedEdge<int, string>>(candidateComponents);
+            int candidateTreeIndex = candidateComponents[startVertex];
+
+            //Get all nodes in the candidate graph
+            var candidateNodes = candidateComponents.Where(kv => kv.Value == candidateTreeIndex).Select(kv => kv.Key);
+
+            Console.WriteLine("Nodes in candidate graph");
+            foreach (var node in candidateNodes)
+            {
+                Console.Write("{0} ", node);
+            }
+            Console.WriteLine();
+
+        }*/
+
         /** Lock an edge and place a random clue.
          *  Edge must be from GraphNoCycles.
          *  Therefore EliminateCyclesInMap() must be run */
@@ -766,6 +859,227 @@ namespace GraphMap
         {
             return VertexMapping[originalVertex];
         }
+    }
+
+    /** Immutable class for finding the MST of a map */
+    public class MapMST
+    {
+        readonly UndirectedGraph<int, TaggedEdge<int, string>> baseGraph;
+
+        /// <summary>
+        /// A minimum spanning tree for the input map
+        /// </summary>
+        public readonly UndirectedGraph<int, TaggedEdge<int, string>> mst = new UndirectedGraph<int, TaggedEdge<int, string>>();
+        /// <summary>
+        /// edge predecessor to each vertex making up the MST
+        /// </summary>
+        public readonly Dictionary<int, TaggedEdge<int, string>> vertexPredecessors = new Dictionary<int, TaggedEdge<int, string>>();
+
+        public MapMST(IEnumerable<TaggedEdge<int, string>> edges)
+        {
+            this.baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
+            baseGraph.AddVerticesAndEdgeRange(edges);
+
+            Process();
+        }
+
+        void Process()
+        {
+            //Do a depth first search
+            //Catagorize edges as tree edges or 'back/forward/inner' edges (that don't make a MST)
+
+            // create algorithm
+
+            var dfs = new UndirectedDepthFirstSearchAlgorithm<int, TaggedEdge<int, string>>(baseGraph);
+
+            dfs.TreeEdge += treeEdge;
+
+            //do the search
+            dfs.Compute();
+
+            //Build graph representation of MST for further processing
+
+            //We have a dictionary of edges, so just iterate over it and build a new graph
+            mst.AddVerticesAndEdgeRange(vertexPredecessors.Values);
+        }
+
+        private void treeEdge(object sender, UndirectedEdgeEventArgs<int, TaggedEdge<int, string>> e)
+        {
+            var vertexTarget = e.Target;
+
+            //Associate vertex with predecessor edge
+            vertexPredecessors.Add(vertexTarget, e.Edge);
+        }
+    }
+
+    /** Immutable one-method class used to reduce cycles from a map */
+    public class MapCycleReducer {
+
+        readonly UndirectedGraph<int, TaggedEdge<int, string>> baseGraph;
+        public bool CycleDebug { get; set; }
+        public readonly UndirectedGraph<int, TaggedEdge<int, string>> mapNoCycles = new UndirectedGraph<int,TaggedEdge<int,string>>();
+
+        public readonly Dictionary<int, int> roomMappingToNoCycles = new Dictionary<int,int>();
+
+        public MapCycleReducer(IEnumerable<TaggedEdge<int, string>> edges)
+        {
+            this.baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
+            baseGraph.AddVerticesAndEdgeRange(edges);
+
+            Process();
+        }
+
+        private void Process()
+        {
+            //Find minimum spanning tree
+            MapMST mapMST = new MapMST(baseGraph.Edges);
+            
+            //Find all cycles within tree
+
+            if (CycleDebug)
+                Console.WriteLine("--cycle finding--");
+
+            //Find all edges not in MST
+            var allEdges = baseGraph.Edges;
+            var edgesInMST = mapMST.vertexPredecessors.Values;
+
+            var backEdges = allEdges.Except(edgesInMST);
+
+            if (CycleDebug)
+            {
+                Console.WriteLine("No of back edges: {0}", backEdges.Count());
+
+                foreach (var edge in backEdges)
+                {
+                    Console.WriteLine(edge);
+                }
+            }
+
+            //Calculate [all? - expensive?] shortest paths. Each edge has a distance of 1
+
+            var cycleList = new List<IEnumerable<TaggedEdge<int, string>>>();
+
+            //Find the shortest cycle for each back edge
+
+            foreach (var backEdge in backEdges)
+            {
+
+                int startVertex = backEdge.Source;
+                int endVertex = backEdge.Target;
+
+                var tryGetPath = mapMST.mst.ShortestPathsDijkstra(x => 1, startVertex);
+
+                IEnumerable<TaggedEdge<int, string>> path;
+                if (tryGetPath(endVertex, out path))
+                {
+                    cycleList.Add(path);
+                }
+                else
+                {
+                    Console.WriteLine(String.Format("no path found for cycle, start: {0}, end: {1}", startVertex, endVertex));
+                }
+            }
+
+            //Output to console all cycles
+            if (CycleDebug)
+            {
+                foreach (var cycle in cycleList)
+                {
+                    Console.WriteLine("Cycle: ");
+
+                    foreach (var edge in cycle)
+                    {
+                        Console.Write(String.Format("{0}\t", edge));
+                    }
+
+                    Console.Write("\r\n");
+                }
+            }
+
+            //Combine any cycles that share a vertex
+            //There will be at least 2 ways of getting to each vertex
+            //Therefore these vertexes must be collasped
+
+            //make a (probably unconnected) graph of all the vertexes in the cycles
+            //(no need to add back-edges - if they are connected by this then they will be connected by 2 vertices)
+
+            var cycleGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
+            var allCycleEdges = cycleList.SelectMany(lst => lst);
+            cycleGraph.AddVerticesAndEdgeRange(allCycleEdges);
+
+            //find the connected components
+            //this gives us n sets of connected nodes which will be reduced to n single nodes in the final acyclic graph
+            var components = new Dictionary<int, int>();
+            int componentCount = cycleGraph.ConnectedComponents<int, TaggedEdge<int, string>>(components);
+
+            if (componentCount != 0)
+            {
+                if (CycleDebug)
+                    Console.WriteLine("Graph contains {0} strongly connected components", componentCount);
+                foreach (var kv in components)
+                {
+                    if (CycleDebug)
+                        Console.WriteLine("Vertex {0} is connected to subgraph {1}", kv.Key, kv.Value);
+                }
+            }
+
+            //Replace each connected component with a single vertex, and remember which nodes were rolled-up
+
+            mapNoCycles.AddVerticesAndEdgeRange(baseGraph.Edges);
+
+            //Maintain a map of vertex number mappings after cycle removal
+            //Initialise with no-change case
+            foreach (var vertex in baseGraph.Vertices)
+                roomMappingToNoCycles[vertex] = vertex;
+
+            //For each cycle
+
+            for (int i = 0; i < componentCount; i++)
+            {
+                //Get all vertices in this cycle
+                //Get all vertices (keys) with value (cycle no)
+                var verticesInCycle = components.Where(kv => kv.Value == i).Select(kv => kv.Key);
+
+                //First vertex (to be kept)
+                //Other vertices (to be removed)
+                var sortedVertices = verticesInCycle.ToList();
+                sortedVertices.Sort();
+
+                //First vertex defined as minimum to ease repeatibility
+                var firstVertex = sortedVertices.First();
+                var verticesInCycleNotFirst = sortedVertices.Skip(1);
+
+                //Get all non-internal edges from vertices in the cycle
+
+                //Get all adjacent edges to vertices to remove in the cycle
+                var edgesFromCycle = verticesInCycleNotFirst.SelectMany(v => baseGraph.AdjacentEdges(v));
+
+                //Discard all edges between vertices
+                //(we need to maintain edges that are either sourced from the cycle or target it)
+                var exteriorEdges = edgesFromCycle.Where(edge => !verticesInCycle.Contains(edge.Source) || !verticesInCycle.Contains(edge.Target));
+
+                //Remove all cycle vertices but first from graph
+                foreach (int vertex in verticesInCycleNotFirst)
+                {
+                    //Update vertex map
+                    roomMappingToNoCycles[vertex] = firstVertex;
+
+                    //Remove vertex from graph
+                    mapNoCycles.RemoveVertex(vertex);
+                }
+
+                //Add all exterior edges onto the remaining cycle vertex
+                foreach (var edge in exteriorEdges)
+                {
+                    //Rewrite edge
+                    //Use mapped vertex indices, since those in this cycle (and other source cycles) will have been reduced
+                    mapNoCycles.AddEdge(new TaggedEdge<int, string>(roomMappingToNoCycles[edge.Source], roomMappingToNoCycles[edge.Target], edge.Tag));
+                }
+            }
+            if (CycleDebug)
+                Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), mapNoCycles.Vertices.Count(), componentCount));
+        }
+
     }
 
     /** Immutable one-method class used to split a map into locked / unlocked sections */

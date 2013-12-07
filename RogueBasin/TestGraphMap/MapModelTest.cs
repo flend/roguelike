@@ -8,7 +8,7 @@ namespace TestGraphMap
     public class MapModelTest
     {
         [TestMethod]
-        public void MapPuzzleLayerRemovesOneCycleInInputMap()
+        public void MapCycleReducerRemovesOneCycleInInputMap()
         {
             //Build a graph with one nested cycle
 
@@ -25,9 +25,9 @@ namespace TestGraphMap
             
             newMap.AddRoomConnection(5, 6);
 
-            MapPuzzleLayer puzzleLayer = new MapPuzzleLayer(newMap);
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
 
-            var roomMapping = puzzleLayer.RoomMappingToNoCycleMap;
+            var roomMapping = cycleReducer.roomMappingToNoCycles;
 
             //Confirm that all the cycle nodes are mapped to the first node
             Assert.AreEqual(roomMapping[3], 3);
@@ -65,9 +65,9 @@ namespace TestGraphMap
 
             newMap.AddRoomConnection(11, 12);
 
-            MapPuzzleLayer model = new MapPuzzleLayer(newMap);
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
 
-            var roomMapping = model.RoomMappingToNoCycleMap;
+            var roomMapping = cycleReducer.roomMappingToNoCycles;
 
             //Confirm that all the first cycle nodes are mapped to the first node in the cycle
             Assert.AreEqual(3, roomMapping[3]);
@@ -84,7 +84,7 @@ namespace TestGraphMap
         }
 
         [TestMethod]
-        public void RoomsOnSideOfOriginInSplitMapAreInSameComponent() {
+        public void RoomsOnSideOfOriginInSplitMapAreInSameComponentAndViceVersa() {
 
             ConnectivityMap standardMap = BuildStandardTestMap();
             MapSplitter splitter = new MapSplitter(standardMap.RoomConnectionGraph.Edges, standardMap.GetEdgeBetweenRooms(9, 10), 1);
@@ -93,6 +93,17 @@ namespace TestGraphMap
             Assert.AreEqual(splitter.RoomComponentIndex(10), splitter.NonOriginComponentIndex);
 
         }
+
+        [TestMethod]
+        public void CantPlaceClueOnLockedSideOfMap()
+        {
+            ConnectivityMap standardMap = BuildStandardTestMap();
+            
+            MapModel model = new MapModel(standardMap);
+
+
+        }
+
 
         private ConnectivityMap BuildStandardTestMap() {
 
