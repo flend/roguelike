@@ -122,13 +122,6 @@ namespace GraphMap
     /** Carries the state of a map being processed */
     public class MapModel
     {
-
-        public bool CycleDebug
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// Input map, may contain cycles
         /// </summary>
@@ -143,15 +136,10 @@ namespace GraphMap
 
         DoorAndClueManager doorAndClueManager;
 
-        /// <summary>
-        /// Next available door index
-        /// </summary>
-        private int nextDoorIndex = 0;
-
         public MapModel(ConnectivityMap inputMap, int startVertex)
         {
             baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            this.StartVertex = startVertex;
+            this.startVertex = startVertex;
 
             //Clone the input graph (edges only)
             baseGraph.AddVerticesAndEdgeRange(inputMap.RoomConnectionGraph.Edges);
@@ -161,62 +149,8 @@ namespace GraphMap
 
             //Build Door and Clue Manager
             doorAndClueManager = new DoorAndClueManager(graphNoCycles, startVertex);
-
         }
-
-        /// <summary>
-        /// Set the player's start vertex. Must be called before locking doors etc.
-        /// </summary>
-        public int StartVertex
-        {
-            get
-            {
-                return startVertex;
-            }
-            private set
-            {
-                startVertex = value;
-            }
-        }
-
-        /*
-        public UndirectedGraph<int, TaggedEdge<int, string>> MinimumSpanningTree
-        {
-            get
-            {
-                return mst;
-            }
-        }
-
-        public UndirectedGraph<int, TaggedEdge<int, string>> BaseGraph
-        {
-            get
-            {
-                return baseGraph;
-            }
-        }
-
-        public UndirectedGraph<int, TaggedEdge<int, string>> GraphNoCycles
-        {
-            get
-            {
-                return gReduced;
-            }
-        }
-
-        /// <summary>
-        /// Dictionary of input room id -> model node
-        /// Many rooms may map to the same node, if cycles are removed
-        /// </summary>
-        public Dictionary<int, int> VertexMapping
-        {
-            get
-            {
-                return reducedMapping;
-            }
-        }
-         */
-                
+     
         /// <summary>
         /// Return a random edge in the reduced graph
         /// </summary>
@@ -236,261 +170,32 @@ namespace GraphMap
             do
             {
                 edgeToGet = r.Next(gReduced.EdgeCount);
-
             } while (doorAndClueManager.GetDoorForEdge(gReduced.Edges.ElementAt(edgeToGet)) != null);
 
             return gReduced.Edges.ElementAt(edgeToGet);
         }
 
+        /** Lock an edge and place a random clue */
 
-        /// <summary>
-        /// Print the vertex mapping after cycle reduction
-        /// </summary>
-        public void PrintVertexMapping()
-        {
-            Console.WriteLine("Vertex mapping after cycle reduction");
-
-            foreach (var map in graphNoCycles.roomMappingToNoCycles.OrderBy(x => x.Key))
-            {
-                Console.WriteLine(map.Key.ToString() + "->" + map.Value.ToString());
-            }
-        }
-
-        /*
-        public GetValidNodesToPlaceClue(UndirectedGraph<int, TaggedEdge<int, string>> mapNoCycles, Dictionary<int, List<Clue>> thisClueMap, int startVertex, TaggedEdge<int, string> edgeToLock, AdjacencyGraph<int, Edge<int>> doorDependencyGraph) {
-
-            //Break tree on to-lock edge
-            MapSplitter mapSplitter = new MapSplitter(mapNoCycles.Edges, edgeToLock, startVertex);
-            int lockedTreeIndex = mapSplitter.NonOriginComponentIndex;
-
-            //Traverse the locked tree and find all clues that will be behind the locked door
-
-            //We do this simply by finding all clues in locked tree vertices
-
-            //Lists of all clues in vertices which are in the locked tree
-            var newlyLockedCluesLists = thisClueMap.Where(kv => mapSplitter.RoomComponentIndex(kv.Key) == lockedTreeIndex).Select(kv => kv.Value);
-            //Flattened to one long list
-            var newlyLockedClues = newlyLockedCluesLists.SelectMany(clue => clue);
-
-            //We can't traverse any of the doors that these clues open when we place the clue for this new locked door
-            //We also can't traverse any doors that depend on the doors in the first list
-            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
-
-            Console.WriteLine("Doors with clues behind this door");
-            foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
-            {
-                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
-            }
-
-            //Find all doors that depend on each of these doors
-            var dfs = new DepthFirstSearchAlgorithm<int, Edge<int>>(doorDependencyGraph);
-            dfs.DiscoverVertex += dfsDependencyVertexAction;
-
-            foundVertices = new List<int>();
-            foreach (var forbiddenDoorIndex in lockedCluesDoorIndices.Distinct())
-            {
-                //Do DFS with root being the inaccessible clue/door. This catches all dependent clue / doors
-                //This will include the inaccessible clues themselves
-                dfs.Compute(forbiddenDoorIndex);
-            }
-
-            //We now have all the doors we're not allowed to pass through when placing clues
-            var lockedClueDoorsAndDependentsIndices = foundVertices.Distinct();
-            var forbiddenDoorsList = lockedClueDoorsAndDependentsIndices.Select(ind => doorMap[ind]);
-
-            Console.WriteLine("Doors with clues behind this door AND doors dependent on them");
-            foreach (var door in forbiddenDoorsList)
-            {
-                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
-            }
-
-            //Add the new door to the door dependency graph (TODO: tie up with door adding below)
-            int thisDoorIndex = nextDoorIndex;
-            doorDependencyGraph.AddVertex(thisDoorIndex);
-            foreach (var door in lockedCluesDoorIndices)
-            {
-                //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
-                doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
-            }
-
-            //Place the new door clue in an allowed area
-
-            //Retrieve the door edges in the forbidden list
-            var forbiddenDoorEdges = forbiddenDoorsList.Select(door => door.DoorEdge);
-
-            //Break all forbidden door edges
-
-            var candidateTree = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            candidateTree.AddVerticesAndEdgeRange(gReduced.Edges);
-
-            //Remove new door edge
-            candidateTree.RemoveEdge(edge);
-
-            foreach (var doorEdge in forbiddenDoorEdges)
-            {
-                candidateTree.RemoveEdge(doorEdge);
-            }
-
-            //Find the component of this broken graph that is connected to the start vertex - this is the candidate subtree
-            var candidateComponents = new Dictionary<int, int>();
-            int candidateComponentsCount = candidateTree.ConnectedComponents<int, TaggedEdge<int, string>>(candidateComponents);
-            int candidateTreeIndex = candidateComponents[startVertex];
-
-            //Get all nodes in the candidate graph
-            var candidateNodes = candidateComponents.Where(kv => kv.Value == candidateTreeIndex).Select(kv => kv.Key);
-
-            Console.WriteLine("Nodes in candidate graph");
-            foreach (var node in candidateNodes)
-            {
-                Console.Write("{0} ", node);
-            }
-            Console.WriteLine();
-
-        }*/
-
-        /** Lock an edge and place a random clue.
-         *  Edge must be from GraphNoCycles.
-         *  Therefore EliminateCyclesInMap() must be run */
-        public void LockEdgeRandomClue(TaggedEdge<int, string> edge, string doorId)
-        {
-            var gReduced = graphNoCycles.mapNoCycles;
-
-            Console.WriteLine("---New door id: {0} at {1}->{2}---", doorId, edge.Source, edge.Target);
-
+        public void LockEdgeRandomClue(int edgeSource, int edgeTarget, string doorId)
+        {    
             //Check that edge is in reduced map
-            if (!gReduced.ContainsEdge(edge))
-                throw new Exception("Edge not in reduced map");
+            if (!graphNoCycles.IsEdgeInRoomsNoCycles(edgeSource, edgeTarget))
+                throw new ApplicationException("Edge not in non-cycle map");
 
-            //Break tree on this edge and label as unlocked (contains start vertex) and locked tree
-            var brokenTree = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            brokenTree.AddVerticesAndEdgeRange(gReduced.Edges);
+            var validRoomsForClue = doorAndClueManager.GetValidRoomsToPlaceClue(edgeSource, edgeTarget);
 
-            brokenTree.RemoveEdge(edge);
-
-            //We need to get the 2 subtrees created by this divide
-            //This could be done by DFS from the source and target of the edge
-            //Unfortunately, we don't have a top-level method to do that, so we get the connected components instead (may be slower)
-
-            var components = new Dictionary<int, int>();
-            int componentCount = brokenTree.ConnectedComponents<int, TaggedEdge<int, string>>(components);
-
-            if (componentCount != 2)
-            {
-                throw new Exception("Must be 2 connected components after breaking on door");
-            }
-
-            //Which tree is the unlocked one?
-            int unlockedTreeIndex = components[startVertex];
-            int lockedTreeIndex = unlockedTreeIndex == 1 ? 0 : 1;
-
-            //Traverse the locked tree and find all clues that will be behind the locked door
-
-            //We do this simply by finding all clues in locked tree vertices
-
-            var clueMap = doorAndClueManager.ClueMap;
-            var doorMap = doorAndClueManager.DoorMap;
-
-            //Lists of all clues in vertices which are in the locked tree
-            var newlyLockedCluesLists = clueMap.Where(kv => components[kv.Key] == lockedTreeIndex).Select(kv => kv.Value);
-            //Flattened to one long list
-            var newlyLockedClues = newlyLockedCluesLists.SelectMany(clue => clue);
-
-            //We can't traverse any of the doors that these clues open when we place the clue for this new locked door
-            //We also can't traverse any doors that depend on the doors in the first list
-            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
-
-            Console.WriteLine("Doors with clues behind this door");
-            foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
-            {
-                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
-            }
-
-            //TODO: refactor - this function shouldn't be writing in this directly
-            var doorDependencyGraph = doorAndClueManager.DoorDependencyGraph;
-
-            //Find all doors that depend on each of these doors
-            var dfs = new DepthFirstSearchAlgorithm<int, Edge<int>>(doorDependencyGraph);
-            dfs.DiscoverVertex += dfsDependencyVertexAction;
-
-            foundVertices = new List<int>();
-            foreach (var forbiddenDoorIndex in lockedCluesDoorIndices.Distinct())
-            {
-                //Do DFS with root being the inaccessible clue/door. This catches all dependent clue / doors
-                //This will include the inaccessible clues themselves
-                dfs.Compute(forbiddenDoorIndex);
-            }
-
-            //We now have all the doors we're not allowed to pass through when placing clues
-            var lockedClueDoorsAndDependentsIndices = foundVertices.Distinct();
-            var forbiddenDoorsList = lockedClueDoorsAndDependentsIndices.Select(ind => doorMap[ind]);
-
-            Console.WriteLine("Doors with clues behind this door AND doors dependent on them");
-            foreach (var door in forbiddenDoorsList)
-            {
-                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
-            }
-
-            //Add the new door to the door dependency graph (TODO: tie up with door adding below)
-            int thisDoorIndex = nextDoorIndex;
-            doorDependencyGraph.AddVertex(thisDoorIndex);
-            foreach (var door in lockedCluesDoorIndices)
-            {
-                //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
-                doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
-            }
-
-            //Place the new door clue in an allowed area
-
-            //Retrieve the door edges in the forbidden list
-            var forbiddenDoorEdges = forbiddenDoorsList.Select(door => door.DoorEdge);
-
-            //Break all forbidden door edges
-
-            var candidateTree = new UndirectedGraph<int, TaggedEdge<int, string>>();
-            candidateTree.AddVerticesAndEdgeRange(gReduced.Edges);
-
-            //Remove new door edge
-            candidateTree.RemoveEdge(edge);
-
-            foreach (var doorEdge in forbiddenDoorEdges)
-            {
-                candidateTree.RemoveEdge(doorEdge);
-            }
-
-            //Find the component of this broken graph that is connected to the start vertex - this is the candidate subtree
-            var candidateComponents = new Dictionary<int, int>();
-            int candidateComponentsCount = candidateTree.ConnectedComponents<int, TaggedEdge<int, string>>(candidateComponents);
-            int candidateTreeIndex = candidateComponents[startVertex];
-
-            //Get all nodes in the candidate graph
-            var candidateNodes = candidateComponents.Where(kv => kv.Value == candidateTreeIndex).Select(kv => kv.Key);
-
-            Console.WriteLine("Nodes in candidate graph");
-            foreach (var node in candidateNodes)
-            {
-                Console.Write("{0} ", node);
-            }
-            Console.WriteLine();
-
-            //Place the clue in a random node in the candidate graph
+            //Place the clue in a random valid room
             Random r = new Random();
-            int clueVertex = candidateNodes.ElementAt(r.Next(candidateNodes.Count()));
-
-            doorAndClueManager.PlaceDoorAndClue(edge.Source, edge.Target, doorId, clueVertex);
-        }
-
-        //On a dfs search of the dependency tree, each hit vertex calls this
-        private List<int> foundVertices;
-
-        private void dfsDependencyVertexAction(int vertex)
-        {
-            foundVertices.Add(vertex);
+            int clueVertex = validRoomsForClue.ElementAt(r.Next(validRoomsForClue.Count()));
+            doorAndClueManager.PlaceDoorAndClue(edgeSource, edgeTarget, doorId, clueVertex);
         }
     }
 
     /** Manages doors and clues in a map.
      *  Should be constructed with a map without cycles, which should not change subsequently.
-     *  Also pass in a pre-calculated MST for speed
+     *  Provides utility methods for finding valid places to put clues and interrogating the
+     *  clue/door dependency DAG
      */
     public class DoorAndClueManager {
 
@@ -857,8 +562,6 @@ namespace GraphMap
             }
             return null;
         }
-
-
     }
 
 
@@ -1079,6 +782,20 @@ namespace GraphMap
             }
             if (CycleDebug)
                 Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), mapNoCycles.Vertices.Count(), componentCount));
+        }
+
+        public bool IsEdgeInRoomsNoCycles(int startRoom, int endRoom)
+        {
+            try
+            {
+                var foundEdge = GetEdgeBetweenRoomsNoCycles(startRoom, endRoom);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
         }
 
         public TaggedEdge<int, String> GetEdgeBetweenRoomsNoCycles(int startRoom, int endRoom)

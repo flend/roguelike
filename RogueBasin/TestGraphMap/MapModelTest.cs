@@ -38,6 +38,76 @@ namespace TestGraphMap
             Assert.AreEqual(roomMapping[5], 3);
         }
 
+        [TestMethod]
+        public void RetainedEdgeIsInMapAfterCycleReduction()
+        {
+            //Build a graph with one nested cycle
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+            
+            newMap.AddRoomConnection(5, 6);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            Assert.IsTrue(cycleReducer.IsEdgeInRoomsNoCycles(1, 2));
+        }
+
+        [TestMethod]
+        public void EdgeTraversingCycleIsInMapAfterCycleReduction()
+        {
+            //Build a graph with one nested cycle
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            newMap.AddRoomConnection(5, 6);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            Assert.IsTrue(cycleReducer.IsEdgeInRoomsNoCycles(3, 6));
+        }
+
+        [TestMethod]
+        public void SquashedEdgeIsNotInMapAfterCycleReduction()
+        {
+            //Build a graph with one nested cycle
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            newMap.AddRoomConnection(5, 6);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            Assert.IsFalse(cycleReducer.IsEdgeInRoomsNoCycles(3, 4));
+        }
+        
+
         [ExpectedException(typeof(ApplicationException))]
         [TestMethod]
         public void RemovedEdgeNotFoundInMapCycleReducer()
