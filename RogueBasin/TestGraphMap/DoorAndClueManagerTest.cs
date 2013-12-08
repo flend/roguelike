@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GraphMap;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace TestGraphMap
 {
@@ -64,8 +65,70 @@ namespace TestGraphMap
             manager.PlaceDoorAndClue(5, 6, "lock1", 15);
             manager.PlaceDoorAndClue(3, 4, "lock2", 14);
 
+            //Maybe deprecate?
             Assert.IsNotNull(manager.GetDependencyEdge("lock0", "lock1"));
             Assert.IsNotNull(manager.GetDependencyEdge("lock0", "lock2"));
+        }
+
+        [TestMethod]
+        public void AddingTwoCluesBehindADoorMeansThereAreTwoDependenciesOnDoor()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
+            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
+            manager.PlaceDoorAndClue(3, 4, "lock2", 14);
+
+            List<string> dependentDoors = manager.GetDependentDoorIds("lock0");
+
+            CollectionAssert.AreEquivalent(new List<string>(new string[] { "lock1", "lock2" }), dependentDoors);
+        }
+
+        [TestMethod]
+        public void AddingACluesNotBehindADoorMeansThereAreNoDependentDoors()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
+            manager.PlaceDoorAndClue(5, 6, "lock1", 3);
+
+            List<string> dependentDoors = manager.GetDependentDoorIds("lock0");
+
+            CollectionAssert.AreEquivalent(new List<string>(), dependentDoors);
+        }
+
+        [TestMethod]
+        public void LockingAClueWithANewDoorMakesTheOldDoorDependentOnTheNewDoor()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(5, 6, "lock0", 13);
+            manager.PlaceDoorAndClue(11, 13, "lock1", 3);
+
+            List<string> dependentDoors = manager.GetDependentDoorIds("lock1");
+            CollectionAssert.AreEquivalent(new List<string>(new string[] { "lock0" }), dependentDoors);
+
+            List<string> noDependentDoors = manager.GetDependentDoorIds("lock0");
+            CollectionAssert.AreEquivalent(new List<string>(), noDependentDoors);
+
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void RequestingDependentDoorsForADoorIdThatDoesntExistThrowsAnException()
+        {
+            var manager = BuildStandardManager();
+            List<string> dependentDoors = manager.GetDependentDoorIds("lock0");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void RequestingDependentDoorsForADoorIndexThatDoesntExistThrowsAnException()
+        {
+            var manager = BuildStandardManager();
+            var dependentDoors = manager.GetDependentDoorIndices(0);
+
+            CollectionAssert.AreEquivalent(new List<string>(), dependentDoors);
         }
 
         private DoorAndClueManager BuildStandardManager()

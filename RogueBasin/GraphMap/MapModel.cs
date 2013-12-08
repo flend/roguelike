@@ -550,7 +550,11 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Place a door and clue. No checks, so can easily be used to make impossible situations
+        /// Place a door and clue.
+        /// Ensures that dependency graph is correctly updated (dependencies for new door and changes to dependencies for
+        /// existing doors)
+        /// However, doesn't do more than trivial checking of clue placement, so (A locks B, B locks A) situations can be
+        /// made
         /// </summary>
         /// <param name="edge"></param>
         /// <param name="doorId"></param>
@@ -560,7 +564,10 @@ namespace GraphMap
             //Check the edge is in the reduced map (will throw an exception if can't find)
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoorSource, edgeForDoorTarget);
 
+            //Simple check for first impossible situation
             //Check we can route to the clueVertex without going through the to-be-locked edge
+            //NB: We don't check for recursive locking here (A locks B, B locks A), so impossible situations can be created
+
             var tryGetPath = mapNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
 
             IEnumerable<TaggedEdge<int, string>> path;
@@ -599,6 +606,7 @@ namespace GraphMap
 
             //Add locked door on this edge
             doorMap.Add(thisDoorIndex, new Door(foundEdge, doorId, thisDoorIndex));
+            doorDependencyGraph.AddVertex(thisDoorIndex);
 
             //Find path on MST from start location to clue. Any doors which we traverse become doors we DEPEND on
             if (clueVertex != startVertex)
@@ -622,6 +630,79 @@ namespace GraphMap
                     Console.WriteLine(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
                     throw new ApplicationException(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
                 }
+            }
+
+            //Find all clues now locked by this door, these clues depend on new door
+            MapSplitter splitMap = new MapSplitter(mapNoCycles.mapNoCycles.Edges, foundEdge, startVertex);
+            
+            //Lists of all clues in vertices which are in the locked tree
+            var newlyLockedCluesLists = clueMap.Where(kv => splitMap.RoomComponentIndex(kv.Key) == splitMap.NonOriginComponentIndex).Select(kv => kv.Value);
+            //Flattened to one long list
+            var newlyLockedClues = newlyLockedCluesLists.SelectMany(clue => clue);
+            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
+
+            Console.WriteLine("Doors with clues behind this door");
+            foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
+            {
+                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
+            }
+
+            //Add dependencies
+            foreach (var door in lockedCluesDoorIndices)
+            {
+                //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
+                doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
+            }
+        }
+
+        /// <summary>
+        /// Return the ids of all doors that depend on this door (not including itself)
+        /// </summary>
+        public List<string> GetDependentDoorIds(string doorId)
+        {
+            try
+            {
+                var doorIndex = GetDoorById(doorId).DoorIndex;
+
+                var dependentDoorIndices = GetDependentDoorIndices(doorIndex);
+
+                return dependentDoorIndices.Select(x => doorMap[x].Id).ToList();
+            }
+            catch (NullReferenceException)
+            {
+                throw new ApplicationException("Can't find doorId.");
+            }
+        }
+
+        //On a dfs search of the dependency tree, each hit vertex calls this
+        private List<int> foundVertices;
+
+        private void dfsDependencyVertexAction(int vertex)
+        {
+            foundVertices.Add(vertex);
+        }
+        /// <summary>
+        /// Return the indices of all doors that depend on this door (not including itself)
+        /// </summary>
+        /// <param name="parentDoorId"></param>
+        /// <returns></returns>
+        public List<int> GetDependentDoorIndices(int parentDoorId)
+        {
+            try
+            {
+                var dfs = new DepthFirstSearchAlgorithm<int, Edge<int>>(doorDependencyGraph);
+                dfs.DiscoverVertex += dfsDependencyVertexAction;
+
+                foundVertices = new List<int>();
+                dfs.Compute(parentDoorId);
+
+                foundVertices.Remove(parentDoorId);
+
+                return foundVertices;
+            }
+            catch (Exception)
+            {
+                throw new ApplicationException("Can't find door index");
             }
         }
 
@@ -735,6 +816,8 @@ namespace GraphMap
             }
             return null;
         }
+
+
     }
 
 
@@ -987,7 +1070,6 @@ namespace GraphMap
         readonly TaggedEdge<int, string> edgeToSplitOn;
         readonly int originVertex;
         readonly Dictionary<int, int> components = new Dictionary<int,int>();
-        private IEnumerable<TaggedEdge<int, string>> enumerable;
 
         public int OriginComponentIndex { get; private set; }
         public int NonOriginComponentIndex
@@ -1003,6 +1085,12 @@ namespace GraphMap
             return components[nodeIndex];
         }
 
+        /// <summary>
+        /// Probably want to add a generalized constructor that takes a list of edges to break on
+        /// </summary>
+        /// <param name="edges"></param>
+        /// <param name="edgeToSplitOn"></param>
+        /// <param name="originVertex"></param>
         public MapSplitter(IEnumerable<TaggedEdge<int, string>> edges, TaggedEdge<int, string> edgeToSplitOn, int originVertex)
         {
 
