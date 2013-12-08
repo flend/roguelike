@@ -141,8 +141,6 @@ namespace GraphMap
 
         MapCycleReducer graphNoCycles;
 
-        MapMST graphNoCyclesMST;
-
         DoorAndClueManager doorAndClueManager;
 
         /// <summary>
@@ -161,11 +159,8 @@ namespace GraphMap
             //Build cycle-free map
             graphNoCycles = new MapCycleReducer(baseGraph.Edges);
 
-            //Build MST
-            graphNoCyclesMST = new MapMST(graphNoCycles.mapNoCycles.Edges);
-
             //Build Door and Clue Manager
-            doorAndClueManager = new DoorAndClueManager(graphNoCycles.mapNoCycles, graphNoCyclesMST, startVertex);
+            doorAndClueManager = new DoorAndClueManager(graphNoCycles, startVertex);
 
         }
 
@@ -482,7 +477,7 @@ namespace GraphMap
             Random r = new Random();
             int clueVertex = candidateNodes.ElementAt(r.Next(candidateNodes.Count()));
 
-            doorAndClueManager.PlaceDoorAndClue(edge, doorId, clueVertex);
+            doorAndClueManager.PlaceDoorAndClue(edge.Source, edge.Target, doorId, clueVertex);
         }
 
         //On a dfs search of the dependency tree, each hit vertex calls this
@@ -500,8 +495,7 @@ namespace GraphMap
      */
     public class DoorAndClueManager {
 
-        readonly UndirectedGraph<int, TaggedEdge<int, string>> baseGraph;
-        readonly MapMST minimalSpanningTree;
+        readonly MapCycleReducer mapNoCycles;
         readonly int startVertex;
 
         private int nextDoorIndex = 0;
@@ -530,10 +524,9 @@ namespace GraphMap
           */
         private Dictionary<int, List<Clue>> clueMap;
 
-        public DoorAndClueManager(UndirectedGraph<int, TaggedEdge<int, string>> graphNoCycles, MapMST mapMST, int startVertex)
+        public DoorAndClueManager(MapCycleReducer reducedMap, int startVertex)
         {
-            this.baseGraph = graphNoCycles;
-            this.minimalSpanningTree = mapMST;
+            this.mapNoCycles = reducedMap;
             this.startVertex = startVertex;
 
             doorDependencyGraph = new AdjacencyGraph<int, Edge<int>>();
@@ -562,8 +555,33 @@ namespace GraphMap
         /// <param name="edge"></param>
         /// <param name="doorId"></param>
         /// <param name="clueVertex"></param>
-        public void PlaceDoorAndClue(TaggedEdge<int, string> edgeForDoor, string doorId, int clueVertex)
+        public void PlaceDoorAndClue(int edgeForDoorSource, int edgeForDoorTarget, string doorId, int clueVertex)
         {
+            //Check the edge is in the reduced map (will throw an exception if can't find)
+            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoorSource, edgeForDoorTarget);
+
+            //Check we can route to the clueVertex without going through the to-be-locked edge
+            var tryGetPath = mapNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
+
+            IEnumerable<TaggedEdge<int, string>> path;
+            if (clueVertex != startVertex)
+            {
+                if (tryGetPath(clueVertex, out path))
+                {
+                    foreach (var edge in path)
+                    {
+                        if (edge.Source == edgeForDoorSource &&
+                            edge.Target == edgeForDoorTarget)
+                        {
+                            Console.WriteLine(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoorSource, edgeForDoorTarget));
+                            throw new ApplicationException(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoorSource, edgeForDoorTarget));
+                        }
+                    }
+                }
+            }
+
+            //Add clue at vertex
+
             List<Clue> clueListAtVertex;
             clueMap.TryGetValue(clueVertex, out clueListAtVertex);
 
@@ -576,16 +594,13 @@ namespace GraphMap
             nextDoorIndex++;
             clueMap[clueVertex].Add(new Clue(thisDoorIndex));
 
-            Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
+            Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoorSource, edgeForDoorTarget);
             Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
 
-            //Add door on this edge
-            doorMap.Add(thisDoorIndex, new Door(edgeForDoor, doorId, thisDoorIndex));
+            //Add locked door on this edge
+            doorMap.Add(thisDoorIndex, new Door(foundEdge, doorId, thisDoorIndex));
 
             //Find path on MST from start location to clue. Any doors which we traverse become doors we DEPEND on
-            var tryGetPath = minimalSpanningTree.mst.ShortestPathsDijkstra(x => 1, startVertex);
-
-            IEnumerable<TaggedEdge<int, string>> path;
             if (clueVertex != startVertex)
             {
                 if (tryGetPath(clueVertex, out path))
@@ -609,6 +624,35 @@ namespace GraphMap
                 }
             }
         }
+
+        /// <summary>
+        /// Get an edge between doors in the depedency tree
+        /// Refactor to isDependent would be better as an interface for users
+        /// </summary>
+        /// <param name="doorId1"></param>
+        /// <param name="doorId2"></param>
+        /// <returns></returns>
+        public Edge<int> GetDependencyEdge(string dependencyParentDoorId, string dependentDoorId) {
+            try
+            {
+                var dependencyParentIndex = GetDoorById(dependencyParentDoorId).DoorIndex;
+                var dependentDoorIndex = GetDoorById(dependentDoorId).DoorIndex;
+
+                QuickGraph.Edge<int> depEdge;
+                doorDependencyGraph.TryGetEdge(dependencyParentIndex, dependentDoorIndex, out depEdge);
+                if (depEdge == null)
+                {
+                    throw new ApplicationException(String.Format("Dependency {0} on {1} is not in tree", dependentDoorId, dependencyParentDoorId));
+                }
+
+                return depEdge;
+            }
+            catch (Exception)
+            {
+                throw new ApplicationException(String.Format("Dependency {0} on {1} is not in tree", dependentDoorId, dependencyParentDoorId));
+            }
+        }
+
 
         /// <summary>
         /// Return door-ids corresponding to clues present at vertex or empty if none
@@ -672,6 +716,19 @@ namespace GraphMap
             foreach (var door in doorMap)
             {
                 if (door.Value.DoorEdge == edgeToFind)
+                {
+                    return door.Value;
+                }
+            }
+            return null;
+        }
+
+        public Door GetDoorForEdge(int source, int target)
+        {
+            foreach (var door in doorMap)
+            {
+                if (door.Value.DoorEdge.Source == source &&
+                    door.Value.DoorEdge.Target == target)
                 {
                     return door.Value;
                 }
@@ -898,6 +955,28 @@ namespace GraphMap
             }
             if (CycleDebug)
                 Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), mapNoCycles.Vertices.Count(), componentCount));
+        }
+
+        public TaggedEdge<int, String> GetEdgeBetweenRoomsNoCycles(int startRoom, int endRoom)
+        {
+            TaggedEdge<int, string> possibleEdge = null;
+
+            try
+            {
+                mapNoCycles.TryGetEdge(startRoom, endRoom, out possibleEdge);
+
+                if (possibleEdge != null)
+                {
+                    return possibleEdge;
+                }
+                else
+                {
+                    throw new ApplicationException("Edge not in map after cycle reduction");
+                }
+            }
+            catch(Exception) {
+                throw new ApplicationException("Edge not in map after cycle reduction");
+            }
         }
     }
 

@@ -35,8 +35,32 @@ namespace TestGraphMap
             Assert.AreEqual(roomMapping[5], 3);
         }
 
+        [ExpectedException(typeof(ApplicationException))]
         [TestMethod]
-        public void MapPuzzleLayerRemovesMultipleCyclesInInputMap()
+        public void RemovedEdgeNotFoundInMapCycleReducer()
+        {
+            //Build a graph with one nested cycle
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            newMap.AddRoomConnection(5, 6);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            cycleReducer.GetEdgeBetweenRoomsNoCycles(4, 5);
+        }
+
+        [TestMethod]
+        public void MapCycleReducerRemovesMultipleCyclesInInputMap()
         {
             //Build a graph with one two nested cycles
 
@@ -93,15 +117,6 @@ namespace TestGraphMap
             Assert.AreEqual(splitter.RoomComponentIndex(10), splitter.NonOriginComponentIndex);
 
         }
-
-        [TestMethod]
-        public void CantPlaceClueOnLockedSideOfMap()
-        {
-            ConnectivityMap standardMap = BuildStandardTestMap();
-            
-            MapModel model = new MapModel(standardMap, 0);
-        }
-
 
         private ConnectivityMap BuildStandardTestMap() {
 

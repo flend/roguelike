@@ -11,15 +11,11 @@ namespace TestGraphMap
         [TestMethod]
         public void DoorsCanBeLockedAndCluePlacedAndRetrieved()
         {
-            var standardMap = BuildStandardTestMap();
-            var mapNoCycles = new MapCycleReducer(standardMap.RoomConnectionGraph.Edges);
-            var mapMST = new MapMST(mapNoCycles.mapNoCycles.Edges);
+            var manager = BuildStandardManager();
 
-            DoorAndClueManager manager = new DoorAndClueManager(mapNoCycles.mapNoCycles, mapMST, 1);
+            manager.PlaceDoorAndClue(11, 12, "lock0", 2);
 
-            manager.PlaceDoorAndClue(standardMap.GetEdgeBetweenRooms(11, 12), "lock0", 2);
-
-            Door placedDoor = manager.GetDoorForEdge(standardMap.GetEdgeBetweenRooms(11, 12));
+            Door placedDoor = manager.GetDoorForEdge(11, 12);
             Assert.AreEqual("lock0", placedDoor.Id);
             
             var doorIds = manager.GetClueIdForVertex(2).ToList();
@@ -28,36 +24,61 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CluesCantBePlacedBehindTheirOwnDoors()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(9, 10, "lock0", 12);
+        }
+
+        [TestMethod]
         public void AddingAClueBehindADoorMeansTheNewDoorDependsOnTheOldDoor()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
+            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
+
+            Assert.IsNotNull(manager.GetDependencyEdge("lock0", "lock1"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void AddingAClueBehindADoorMeansTheOldDoorDoesNotDependsOnTheNewDoor()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
+            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
+
+            manager.GetDependencyEdge("lock1", "lock0");
+        }
+
+        [TestMethod]
+        public void AddingTwoCluesBehindADoorMeansTheNewDoorsDependsOnTheOldDoor()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
+            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
+            manager.PlaceDoorAndClue(3, 4, "lock2", 14);
+
+            Assert.IsNotNull(manager.GetDependencyEdge("lock0", "lock1"));
+            Assert.IsNotNull(manager.GetDependencyEdge("lock0", "lock2"));
+        }
+
+        private DoorAndClueManager BuildStandardManager()
         {
             var standardMap = BuildStandardTestMap();
             var mapNoCycles = new MapCycleReducer(standardMap.RoomConnectionGraph.Edges);
             var mapMST = new MapMST(mapNoCycles.mapNoCycles.Edges);
 
-            DoorAndClueManager manager = new DoorAndClueManager(mapNoCycles.mapNoCycles, mapMST, 1);
-
-            manager.PlaceDoorAndClue(standardMap.GetEdgeBetweenRooms(11, 13), "lock0", 2);
-            manager.PlaceDoorAndClue(standardMap.GetEdgeBetweenRooms(5, 6), "lock1", 15);
-
-            var doorLock0Index = manager.GetDoorById("lock0").DoorIndex;
-            var doorLock1Index = manager.GetDoorById("lock1").DoorIndex;
-
-            var doorDepGraph = manager.DoorDependencyGraph;
-
-            //Door 1 should depend on Door 0
-            QuickGraph.Edge<int> door0ToDoor1Edge;
-            doorDepGraph.TryGetEdge(0, 1, out door0ToDoor1Edge);
-            Assert.IsNotNull(door0ToDoor1Edge);
-
-            //Not the reverse
-            QuickGraph.Edge<int> door1ToDoor0Edge;
-            doorDepGraph.TryGetEdge(1, 0, out door1ToDoor0Edge);
-            Assert.IsNull(door1ToDoor0Edge);
+            return new DoorAndClueManager(mapNoCycles, 1);
         }
 
         private ConnectivityMap BuildStandardTestMap()
         {
-
             ConnectivityMap newMap = new ConnectivityMap();
 
             newMap.AddRoomConnection(1, 2);
