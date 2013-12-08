@@ -353,7 +353,6 @@ namespace GraphMap
          *  Therefore EliminateCyclesInMap() must be run */
         public void LockEdgeRandomClue(TaggedEdge<int, string> edge, string doorId)
         {
-
             var gReduced = graphNoCycles.mapNoCycles;
 
             Console.WriteLine("---New door id: {0} at {1}->{2}---", doorId, edge.Source, edge.Target);
@@ -549,6 +548,42 @@ namespace GraphMap
             get { return doorDependencyGraph; }
         }
 
+        /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge */
+        public IEnumerable<int> GetValidRoomsToPlaceClue(int edgeForDoorSource, int edgeForDoorTarget)
+        {
+            //Check the edge is in the reduced map (will throw an exception if can't find)
+            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoorSource, edgeForDoorTarget);
+
+            //Traverse the locked tree and find all clues that will be behind the locked door
+            var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);
+
+            //Find all doors that depend on any door with a locked clue.
+            //We can't place a clue for our new door behind any of these
+            var allLockedClueDoors = newlyLockedClues.Select(c => c.DoorIndex);
+            var allDoorsDependentOnLockedClueDoors = newlyLockedClues.SelectMany(c => GetDependentDoorIndices(c.DoorIndex));
+            var allInaccessibleDoors = allLockedClueDoors.Union(allDoorsDependentOnLockedClueDoors).Distinct();
+
+            //Retrieve the door edges in the forbidden list
+            var forbiddenDoorEdges = allInaccessibleDoors.Select(doorIndex => doorMap[doorIndex].DoorEdge);
+            //Add this edge (can't put clue behind our own door) - NB: hacky way to union with a single item
+            var allForbiddenDoorEdges = forbiddenDoorEdges.Union(Enumerable.Repeat(foundEdge, 1)).Distinct();
+
+            //Remove all areas behind any locked door
+            MapSplitter allowedMap = new MapSplitter(mapNoCycles.mapNoCycles.Edges, allForbiddenDoorEdges, startVertex);
+
+            //Find the component of this broken graph that is connected to the start vertex - this is the candidate subtree
+            var allowedNodes = allowedMap.MapComponent(allowedMap.RoomComponentIndex(startVertex));
+
+            Console.WriteLine("Nodes in candidate graph");
+            foreach (var node in allowedNodes)
+            {
+                Console.Write("{0} ", node);
+            }
+            Console.WriteLine();
+
+            return allowedNodes;
+        }
+
         /// <summary>
         /// Place a door and clue.
         /// Ensures that dependency graph is correctly updated (dependencies for new door and changes to dependencies for
@@ -633,12 +668,7 @@ namespace GraphMap
             }
 
             //Find all clues now locked by this door, these clues depend on new door
-            MapSplitter splitMap = new MapSplitter(mapNoCycles.mapNoCycles.Edges, foundEdge, startVertex);
-            
-            //Lists of all clues in vertices which are in the locked tree
-            var newlyLockedCluesLists = clueMap.Where(kv => splitMap.RoomComponentIndex(kv.Key) == splitMap.NonOriginComponentIndex).Select(kv => kv.Value);
-            //Flattened to one long list
-            var newlyLockedClues = newlyLockedCluesLists.SelectMany(clue => clue);
+            var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);
             var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
 
             Console.WriteLine("Doors with clues behind this door");
@@ -647,13 +677,24 @@ namespace GraphMap
                 Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
             }
 
-            //Add dependencies
+            //Add dependency on new door to all these clues
             foreach (var door in lockedCluesDoorIndices)
             {
                 //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
                 doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
             }
         }
+
+        private IEnumerable<Clue> GetCluesBehindLockedEdge(TaggedEdge<int,string> foundEdge)
+        {
+            MapSplitter splitMap = new MapSplitter(mapNoCycles.mapNoCycles.Edges, foundEdge, startVertex);
+            
+            //Lists of all clues in vertices which are in the locked tree
+            var newlyLockedCluesLists = clueMap.Where(kv => splitMap.RoomComponentIndex(kv.Key) == splitMap.NonOriginComponentIndex).Select(kv => kv.Value);
+            //Flattened to one long list
+            return newlyLockedCluesLists.SelectMany(clue => clue);
+        }
+
 
         /// <summary>
         /// Return the ids of all doors that depend on this door (not including itself)
@@ -1067,7 +1108,7 @@ namespace GraphMap
     public class MapSplitter
     {
         readonly UndirectedGraph<int, TaggedEdge<int, string>> map;
-        readonly TaggedEdge<int, string> edgeToSplitOn;
+        readonly IEnumerable<TaggedEdge<int, string>> edgesToSplitOn;
         readonly int originVertex;
         readonly Dictionary<int, int> components = new Dictionary<int,int>();
 
@@ -1085,19 +1126,23 @@ namespace GraphMap
             return components[nodeIndex];
         }
 
-        /// <summary>
-        /// Probably want to add a generalized constructor that takes a list of edges to break on
-        /// </summary>
-        /// <param name="edges"></param>
-        /// <param name="edgeToSplitOn"></param>
-        /// <param name="originVertex"></param>
-        public MapSplitter(IEnumerable<TaggedEdge<int, string>> edges, TaggedEdge<int, string> edgeToSplitOn, int originVertex)
+        public MapSplitter(IEnumerable<TaggedEdge<int, string>> edges, IEnumerable<TaggedEdge<int, string>> edgesToSplitOn, int originVertex)
         {
-
             this.map = new UndirectedGraph<int, TaggedEdge<int, string>>();
             map.AddVerticesAndEdgeRange(edges);
 
-            this.edgeToSplitOn = edgeToSplitOn;
+            this.edgesToSplitOn = edgesToSplitOn;
+            this.originVertex = originVertex;
+
+            Process();
+        }
+
+        public MapSplitter(IEnumerable<TaggedEdge<int, string>> edges, TaggedEdge<int, string> edgeToSplitOn, int originVertex)
+        {
+            this.map = new UndirectedGraph<int, TaggedEdge<int, string>>();
+            map.AddVerticesAndEdgeRange(edges);
+
+            this.edgesToSplitOn = new List<TaggedEdge<int, string>>(new TaggedEdge<int, string>[]{ edgeToSplitOn });
             this.originVertex = originVertex;
 
             Process();
@@ -1105,9 +1150,12 @@ namespace GraphMap
 
         private void Process()
         {
-            //Break tree on this edge and label as unlocked (contains start vertex) and locked tree
+            //Break tree on all edges and label as unlocked (contains start vertex) and locked tree
 
-            map.RemoveEdge(edgeToSplitOn);
+            foreach (var edgeToSplitOn in edgesToSplitOn)
+            {
+                map.RemoveEdge(edgeToSplitOn);
+            }
 
             //We need to get the 2 subtrees created by this divide
             //This could be done by DFS from the source and target of the edge
@@ -1115,13 +1163,18 @@ namespace GraphMap
 
             int componentCount = map.ConnectedComponents<int, TaggedEdge<int, string>>(components);
 
-            if (componentCount != 2)
-            {
-                throw new Exception("Must be 2 connected components after breaking on requested edge");
-            }
-
             //Which tree is the unlocked one?
             OriginComponentIndex = components[originVertex];
+        }
+
+        /// <summary>
+        /// Returns all vertices in a component
+        /// </summary>
+        /// <param name="componentIndex"></param>
+        /// <returns></returns>
+        public IEnumerable<int> MapComponent(int componentIndex)
+        {
+            return components.Where(kv => kv.Value == componentIndex).Select(kv => kv.Key);
         }
     }      
 }

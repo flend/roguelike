@@ -1,6 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GraphMap;
+using System.Collections.Generic;
+using QuickGraph;
+using System.Linq;
 
 namespace TestGraphMap
 {
@@ -116,6 +119,20 @@ namespace TestGraphMap
             Assert.AreEqual(splitter.RoomComponentIndex(9), splitter.OriginComponentIndex);
             Assert.AreEqual(splitter.RoomComponentIndex(10), splitter.NonOriginComponentIndex);
 
+        }
+
+        [TestMethod]
+        public void RoomsOnSideOfOriginInMultiplySplitMapAreInOneComponent()
+        {
+
+            ConnectivityMap standardMap = BuildStandardTestMap();
+            var edgesToSplit = new List<TaggedEdge<int, string>>();
+            edgesToSplit.Add(standardMap.GetEdgeBetweenRooms(10, 11));
+            edgesToSplit.Add(standardMap.GetEdgeBetweenRooms(3, 5));
+
+            MapSplitter splitter = new MapSplitter(standardMap.RoomConnectionGraph.Edges, edgesToSplit, 1);
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 7, 8, 9, 10 }), splitter.MapComponent(splitter.OriginComponentIndex).ToList());
         }
 
         private ConnectivityMap BuildStandardTestMap() {

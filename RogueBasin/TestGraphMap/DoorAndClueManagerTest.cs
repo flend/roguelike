@@ -110,7 +110,46 @@ namespace TestGraphMap
 
             List<string> noDependentDoors = manager.GetDependentDoorIds("lock0");
             CollectionAssert.AreEquivalent(new List<string>(), noDependentDoors);
+        }
 
+        [TestMethod]
+        public void CheckAllRoomsExceptThoseLockedByThisClueAreValidToPlaceClueWithNoDependencies()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(5, 6, "lock0", 4);
+
+            var validRooms = manager.GetValidRoomsToPlaceClue(10, 11).ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1,2,3,4,5,6,10 }), validRooms);
+        }
+
+        [TestMethod]
+        public void CheckRoomsBehindLockedClueAreNotValidToPlaceNewClue()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(3, 5, "lock0", 15);
+
+            var validRooms = manager.GetValidRoomsToPlaceClue(11, 13).ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 10, 11, 12 }), validRooms);
+        }
+
+        [TestMethod]
+        public void CheckRoomsBehindDependenciesLockedClueAreNotValidToPlaceNewClue()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+            //Make lock0 depend on lock1
+            manager.PlaceDoorAndClue(3, 5, "lock1", 4);
+            
+            //This would cover clue1. Therefore lock1 rooms are not accessible, which includes clue0
+            //Therefore lock0 rooms are not accessible
+            var validRooms = manager.GetValidRoomsToPlaceClue(3, 4).ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 10 }), validRooms);
         }
 
         [TestMethod]
