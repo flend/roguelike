@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DoorAndClueManagerTest.cs" />
     <Compile Include="MapModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ConnectivityMapTest.cs" />

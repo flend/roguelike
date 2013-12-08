@@ -128,7 +128,7 @@ namespace TestGraphMap
             newMap.AddRoomConnection(9, 10);
             newMap.AddRoomConnection(10, 11);
             newMap.AddRoomConnection(11, 12);
-            newMap.AddRoomConnection(12, 13);
+            newMap.AddRoomConnection(11, 13);
 
             //2-way branches
             newMap.AddRoomConnection(13, 14);

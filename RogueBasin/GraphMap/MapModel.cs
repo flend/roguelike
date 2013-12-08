@@ -596,7 +596,7 @@ namespace GraphMap
                         int doorIndex = GetDoorIndexForEdge(edge);
                         if (doorIndex != -1)
                         {
-                            doorDependencyGraph.AddEdge(new Edge<int>(doorIndex, thisDoorIndex));
+                            doorDependencyGraph.AddVerticesAndEdge(new Edge<int>(doorIndex, thisDoorIndex));
                             Console.WriteLine(String.Format("Door: {1}, now depends on: {0}", doorMap[doorIndex].Id, doorMap[thisDoorIndex].Id));
                         }
 
@@ -647,6 +647,18 @@ namespace GraphMap
                 }
             }
             return -1;
+        }
+
+        public Door GetDoorById(string id)
+        {
+            foreach (var door in doorMap)
+            {
+                if (door.Value.Id == id)
+                {
+                    return door.Value;
+                }
+            }
+            return null;
         }
 
         /// <summary>
