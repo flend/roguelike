@@ -112,6 +112,8 @@ namespace GraphMap
 
         DoorAndClueManager doorAndClueManager;
 
+        Random random;
+
         public MapCycleReducer GraphNoCycles { get { return graphNoCycles; } }
 
         public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
@@ -135,6 +137,9 @@ namespace GraphMap
             //Build Door and Clue Manager
             //Ensure we pass on the mapped (to no cycles) version of the start vertex
             doorAndClueManager = new DoorAndClueManager(graphNoCycles, graphNoCycles.roomMappingToNoCycles[startVertex]);
+
+            //Build a random generator (don't keep instantiating them, because they all give the same number if during the same tick!
+            random = new Random();
         }
      
         /// <summary>
@@ -143,19 +148,18 @@ namespace GraphMap
         /// <returns></returns>
         public TaggedEdge<int, string> GetRandomUnlockedEdgeInReducedGraph()
         {
-            Random r = new Random();
             var gReduced = graphNoCycles.mapNoCycles;
 
             int edgeToGet;
 
             //Check if all edges are locked, if so just return a random locked edge
             if (gReduced.EdgeCount <= doorAndClueManager.DoorMap.Count)
-                return gReduced.Edges.ElementAt(r.Next(gReduced.EdgeCount));
+                return gReduced.Edges.ElementAt(random.Next(gReduced.EdgeCount));
 
             //If there are unlocked edges, return one of these
             do
             {
-                edgeToGet = r.Next(gReduced.EdgeCount);
+                edgeToGet = random.Next(gReduced.EdgeCount);
             } while (doorAndClueManager.GetDoorForEdge(gReduced.Edges.ElementAt(edgeToGet)) != null);
 
             return gReduced.Edges.ElementAt(edgeToGet);
@@ -172,8 +176,10 @@ namespace GraphMap
             var validRoomsForClue = doorAndClueManager.GetValidRoomsToPlaceClue(edgeSource, edgeTarget);
 
             //Place the clue in a random valid room
-            Random r = new Random();
-            int clueVertex = validRoomsForClue.ElementAt(r.Next(validRoomsForClue.Count()));
+            int clueVertex = validRoomsForClue.ElementAt(random.Next(validRoomsForClue.Count()));
+
+            Console.WriteLine(String.Format("LockEdgeRandomClue. Candidate rooms: {0}, placing at: {1}", validRoomsForClue.Count(), clueVertex));
+
             doorAndClueManager.PlaceDoorAndClue(edgeSource, edgeTarget, doorId, clueVertex);
         }
 
@@ -182,8 +188,7 @@ namespace GraphMap
         public void LockRandomEdgeRandomClue(string doorId)
         {
             //Generate a random edge
-            Random r = new Random();
-            var edgeToLock = graphNoCycles.NoCycleEdges.ElementAt(r.Next(graphNoCycles.NoCycleEdges.Count()));
+            var edgeToLock = graphNoCycles.NoCycleEdges.ElementAt(random.Next(graphNoCycles.NoCycleEdges.Count()));
 
             //Lock with a random clue
             LockEdgeRandomClue(edgeToLock.Source, edgeToLock.Target, doorId);
