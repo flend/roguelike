@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GraphMap
 {
-    class DoorClueGraphvizExport
+    public class DoorClueGraphvizExport
     {
         private MapModel model;
 

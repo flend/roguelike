@@ -39,6 +39,17 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void AddingSameEdgeTwiceDoesntMakeTwoEdges()
+        {
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(1, 2);
+
+            Assert.AreEqual(1, newMap.RoomConnectionGraph.EdgeCount);
+        }
+
+        [TestMethod]
         public void RetainedEdgeIsInMapAfterCycleReduction()
         {
             //Build a graph with one nested cycle
@@ -205,6 +216,36 @@ namespace TestGraphMap
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 7, 8, 9, 10 }), splitter.MapComponent(splitter.OriginComponentIndex).ToList());
         }
 
+        [TestMethod]
+        public void IntegrationTestMapModelCanBeBuiltWithAStartVertexInACycle()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var mapModel = new MapModel(connectivityMap, 7);
+
+            Assert.AreEqual(7, mapModel.StartVertex);
+            Assert.AreEqual(2, mapModel.StartVertexNoCycleMap);
+        }
+
+        
+        [TestMethod]
+        public void ConnectionObjectsWithSameValueAreEqual()
+        {
+            var connection1 = new Connection(1, 2);
+            var connection2 = new Connection(1, 2);
+
+            Assert.AreEqual(connection1, connection2);
+        
+        }
+
+        [TestMethod]
+        public void NewConnectionObjectsCanBeUsedAsKeysInDictionaries()
+        {
+            var dict = new Dictionary<Connection, int>();
+
+            dict.Add(new Connection(1, 2), 1);
+            Assert.AreEqual(1, dict[new Connection(1, 2)]);
+        }
+
         private ConnectivityMap BuildStandardTestMap() {
 
             ConnectivityMap newMap = new ConnectivityMap();
@@ -241,5 +282,6 @@ namespace TestGraphMap
 
             return newMap;
         }
+
     }
 }

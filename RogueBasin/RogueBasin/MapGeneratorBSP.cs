@@ -1,4 +1,4 @@
-﻿using graphtestc;
+﻿using GraphMap;
 using QuickGraph;
 using System;
 using System.Collections.Generic;
@@ -946,7 +946,7 @@ namespace RogueBasin
             do
             {
                 baseMap = new Map(width, height);
-                connectivityGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
+                connectivityGraph = new ConnectivityMap();
 
                 //BSP is always connected
                 baseMap.GuaranteedConnected = true;
@@ -1004,24 +1004,19 @@ namespace RogueBasin
                 
             } while (false); //legacy 
 
-            //Save out the graph
-            GraphvizExport.OutputUndirectedGraph(connectivityGraph, "bsptree-base");
-
-            //Build the map model for the graph, based on the PC's true starting position (useful for locking doors)
-            
-            graphModel = new MapModel(connectivityGraph);
-            graphModel.EliminateCyclesInMap();
-
             //Decide on a player start location 
             PointInRoom randomRoom = RandomPointInRoom();
             baseMap.PCStartLocation = randomRoom.GetPointInRoomOnly();
             baseMap.PCStartRoomId = randomRoom.RoomId;
 
-            //Need to 
-            
+            //Build the map model for the graph, based on the PC's true starting position (useful for locking doors)
+            graphModel = new MapModel(connectivityGraph, baseMap.PCStartRoomId);
+
+            //Save out the graph
+            GraphvizExport.OutputUndirectedGraph(connectivityGraph.RoomConnectionGraph, "bsptree-base");
             //Save out a copy of the graph with no cycles
 
-            GraphvizExport.OutputUndirectedGraph(graphModel.GraphNoCycles, "bsptree-nocycles");
+            GraphvizExport.OutputUndirectedGraph(graphModel.GraphNoCycles.mapNoCycles, "bsptree-nocycles");
 
             return baseMap.Clone();
         }
@@ -1973,9 +1968,12 @@ namespace RogueBasin
             }
         }
 
-        private UndirectedGraph<int, TaggedEdge<int, string>> connectivityGraph;
+        private ConnectivityMap connectivityGraph;
         private MapModel graphModel;
-        private Dictionary<TaggedEdge<int, string>, ConnectionInfo> edgeInfo = new Dictionary<TaggedEdge<int, string>, ConnectionInfo>();
+        /// <summary>
+        /// Tuple<startRoom, endRoom>, ConnectionInfo
+        /// </summary>
+        private Dictionary<Connection, ConnectionInfo> edgeInfo = new Dictionary<Connection, ConnectionInfo>();
 
         
         /// <summary>
@@ -1984,27 +1982,11 @@ namespace RogueBasin
         internal void AddNonDoorConnector(int originRoomId, int destRoomId)
         {
             //Add the rooms to the graph
-            AddRoomToGraphIfNotExists(originRoomId);
-            AddRoomToGraphIfNotExists(destRoomId);
-
-            //Add the connection if not already existing
-
-            var newGraphEdge = new TaggedEdge<int, string>(originRoomId, destRoomId, "");
-
-            if (connectivityGraph.ContainsEdge(originRoomId, destRoomId))
-            {
-                LogFile.Log.LogEntryDebug("Repeat NonDoor Connection - from room: " + originRoomId + " to room: " + destRoomId + "not including", LogDebugLevel.High);
-                return;
-            }
-    
-            //Otherwise it's a new connection
-
-            connectivityGraph.AddEdge(newGraphEdge);
-
+            connectivityGraph.AddRoomConnection(originRoomId, destRoomId);
             LogFile.Log.LogEntryDebug("NonDoor Connection - from room: " + originRoomId + " to room: " + destRoomId, LogDebugLevel.High);
 
             //Register that there are no door connections
-            edgeInfo.Add(newGraphEdge, new ConnectionInfo());
+            edgeInfo.Add(new Connection(originRoomId, destRoomId), new ConnectionInfo());
         }
 
         /// <summary>
@@ -2017,59 +1999,23 @@ namespace RogueBasin
             int originRoomId = baseMap.roomIdMap[leftX, leftY];
             int destRoomId = baseMap.roomIdMap[rightX, rightY];
 
-            //Add to the connectivity graph as vertices
-            AddRoomToGraphIfNotExists(originRoomId);
-            AddRoomToGraphIfNotExists(destRoomId);
-
             //Add the connection edge if not already existing
-            if (connectivityGraph.ContainsEdge(originRoomId, destRoomId))
-            {
-                LogFile.Log.LogEntryDebug("Repeat Door Connection - from room: " + originRoomId + " to room: " + destRoomId + "not including", LogDebugLevel.High);
-                return;
-            }
-
-            var newGraphEdge = new TaggedEdge<int, string>(originRoomId, destRoomId, "");
-
-            LogFile.Log.LogEntryDebug("Door Connection - from room: " + originRoomId + " to room: " + destRoomId, LogDebugLevel.High);
-
-            connectivityGraph.AddEdge(newGraphEdge);
-
+            connectivityGraph.AddRoomConnection(originRoomId, destRoomId);
+            
             //Add the door locations to the edge lookup
-            edgeInfo.Add(newGraphEdge, new ConnectionInfo(leftX, leftY, rightX, rightY, doorPosition));
+            edgeInfo.Add(new Connection(originRoomId, destRoomId), new ConnectionInfo(leftX, leftY, rightX, rightY, doorPosition));
         }
-
-        /// <summary>
-        /// Add a room to the graph representation. Safe to be called multiple times
-        /// </summary>
-        /// <param name="roomId"></param>
-        internal void AddRoomToGraphIfNotExists(int roomId)
-        {
-            if (!connectivityGraph.ContainsVertex(roomId))
-            {
-                connectivityGraph.AddVertex(roomId);
-            }
-        }
-
-
 
         /// <summary>
         /// Lock a connection (set its doors to locked with a particular id)
         /// </summary>
         /// <param name="edge"></param>
-        internal void LockConnection(TaggedEdge<int, string> edge, string lockId)
+        internal void LockConnection(int originRoom, int targetRoom, string lockId)
         {
-            ConnectionInfo connectionInfo = edgeInfo[edge];
+            ConnectionInfo connectionInfo = edgeInfo[new Connection(originRoom, targetRoom)];
 
             baseMap.mapSquareLocks[connectionInfo.LeftX, connectionInfo.LeftY] = lockId;
             baseMap.mapSquareLocks[connectionInfo.RightX, connectionInfo.RightY] = lockId;
-        }
-
-        public UndirectedGraph<int, TaggedEdge<int, string>> ConnectivityGraph
-        {
-            get
-            {
-                return connectivityGraph;
-            }
         }
 
         public MapModel GraphModel
@@ -2079,7 +2025,6 @@ namespace RogueBasin
                 return graphModel;
             }
         }
-
 
         //Passed to mapnode
         public int NoSplitChance { get; set; }

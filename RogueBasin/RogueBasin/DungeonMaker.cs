@@ -1,4 +1,4 @@
-﻿using graphtestc;
+﻿using GraphMap;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,17 +53,18 @@ namespace RogueBasin
             SetupPlayer();
             
             //Player start location must be set in here
-            SetupMapsFlatline();
+            //SetupMapsFlatline();
 
-            /*
-            bool decision = Screen.Instance.YesNoQuestion("Locks?");
+            
+            //bool decision = Screen.Instance.YesNoQuestion("Locks?");
 
-            //bool decision = false;
+            bool decision = true;
 
             if (decision)
             {
 
-                bool decision2 = Screen.Instance.YesNoQuestion("Multiple?");
+                //bool decision2 = Screen.Instance.YesNoQuestion("Multiple?");
+                bool decision2 = true;
 
                 if (decision2)
                     SetupMapsGraphingDemo(true, 4);
@@ -81,7 +82,7 @@ namespace RogueBasin
                     SetupMapsGraphingDemo(false, 0);
 
             }
-             * */
+  
 
             /*
             SetupMaps();
@@ -2190,31 +2191,29 @@ namespace RogueBasin
                 //Firstly find the node in the reduced map that corresponds to the player start location
                 connectivityModel = hallsGen.GraphModel;
 
-                int startNode = connectivityModel.GetReducedVertexMapping(hallMap.PCStartRoomId);
-                connectivityModel.StartVertex = startNode;
+                int startNode = connectivityModel.StartVertexNoCycleMap;
                 LogFile.Log.LogEntryDebug("PC start vertex: " + startNode, LogDebugLevel.High);
-
                 
-                connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "red");
+                connectivityModel.LockRandomEdgeRandomClue("red");
 
                 if (noLocks > 1)
                 {
-                    connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "green");
-                    connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "blue");
-                    connectivityModel.LockEdgeRandomClue(connectivityModel.GetRandomUnlockedEdgeInReducedGraph(), "yellow");
+                    connectivityModel.LockRandomEdgeRandomClue("green");
+                    connectivityModel.LockRandomEdgeRandomClue("blue");
+                    connectivityModel.LockRandomEdgeRandomClue("yellow");
                 }
 
-                DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
+                var visualiser = new DoorClueGraphvizExport(connectivityModel);
                 visualiser.OutputUndirectedGraph("bsptree-door");
                 visualiser.OutputDoorDependencyGraph("bsptree-dep");
 
                 //Find the doors corresponding to locked connections and lock them
-                foreach (var door in connectivityModel.DoorMap)
+                foreach (var door in connectivityModel.DoorAndClueManager.DoorMap)
                 {
                     var edge = door.Value.DoorEdge;
                     //This won't work at the mo with reduced graphs because it will look for edges which have been newly created by reducing
                     //the graph and therefore won't be here
-                    hallsGen.LockConnection(edge, door.Value.Id);
+                    hallsGen.LockConnection(edge.Source, edge.Target, door.Value.Id);
                 }
             }
 
@@ -2233,14 +2232,14 @@ namespace RogueBasin
             if (doLocks)
             {
                 //Find a random room corresponding to a vertex with a clue and place a clue there
-                foreach (var cluesAtVertex in connectivityModel.ClueMap)
+                foreach (var cluesAtVertex in connectivityModel.DoorAndClueManager.ClueMap)
                 {
                     foreach (var clue in cluesAtVertex.Value)
                     {
 
                         var clueVertexInReducedMap = cluesAtVertex.Key;
                         //Should turn this into a random room which maps to that vertex
-                        var lockId = connectivityModel.GetDoorByIndex(clue.DoorIndex).Id;
+                        var lockId = connectivityModel.DoorAndClueManager.GetDoorByIndex(clue.DoorIndex).Id;
 
                         var pointInRoom = hallsGen.RandomPointInRoomById(clueVertexInReducedMap);
 
@@ -2293,9 +2292,7 @@ namespace RogueBasin
             //Firstly find the node in the reduced map that corresponds to the player start location
             var connectivityModel = hallsGen.GraphModel;
 
-            int startNode = connectivityModel.GetReducedVertexMapping(hallMap.PCStartRoomId);
-            connectivityModel.StartVertex = startNode;
-            LogFile.Log.LogEntryDebug("PC start vertex: " + startNode, LogDebugLevel.High);
+            LogFile.Log.LogEntryDebug("PC start vertex: " + connectivityModel.StartVertex, LogDebugLevel.High);
 
             DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
             visualiser.OutputUndirectedGraph("bsptree-door");

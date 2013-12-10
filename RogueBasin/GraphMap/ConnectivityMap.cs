@@ -32,7 +32,31 @@ namespace GraphMap
         /// <param name="endRoom"></param>
         public void AddRoomConnection(int startRoom, int endRoom)
         {
-            baseGraph.AddVerticesAndEdge(new TaggedEdge<int, string>(startRoom, endRoom, ""));
+            try
+            {
+                TaggedEdge<int, string> possibleEdge = null;
+
+                baseGraph.TryGetEdge(startRoom, endRoom, out possibleEdge);
+
+                if (possibleEdge == null)
+                    baseGraph.AddVerticesAndEdge(new TaggedEdge<int, string>(startRoom, endRoom, ""));
+            }
+            catch (KeyNotFoundException)
+            {
+                //Vertex not in graph, OK to add
+                baseGraph.AddVerticesAndEdge(new TaggedEdge<int, string>(startRoom, endRoom, ""));
+            }
+            //Other exceptions passed up
+        }
+
+        public void AddRoomConnectionIfNotExists(int startRoom, int endRoom)
+        {
+            TaggedEdge<int, string> possibleEdge = null;
+
+            baseGraph.TryGetEdge(startRoom, endRoom, out possibleEdge);
+
+            if (possibleEdge != null)
+                AddRoomConnection(startRoom, endRoom);
         }
 
         public TaggedEdge<int, String> GetEdgeBetweenRooms(int startRoom, int endRoom)

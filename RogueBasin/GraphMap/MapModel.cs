@@ -11,7 +11,19 @@ using System.Windows.Forms;
 
 namespace GraphMap
 {
-   
+    /// <summary>
+    /// This should be used by clients as a way of defining an edge, instead of natively using the Edge<> class
+    /// </summary>
+    public sealed class Connection : Tuple<int, int>
+    {
+        public int Origin { get { return this.Item1; } }
+        public int Target { get { return this.Item2; } }
+
+        public Connection(int origin, int target) : base(origin, target)
+        {
+        }
+    }
+
     /** A clue to open a locked door */
     public class Clue
     {
@@ -74,6 +86,8 @@ namespace GraphMap
             }
         }
 
+        
+
         public string Id
         {
             get;
@@ -102,6 +116,11 @@ namespace GraphMap
 
         public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
 
+        /// <summary>
+        /// Constructed with the inputMap and the room id of the PC start location
+        /// </summary>
+        /// <param name="inputMap"></param>
+        /// <param name="startVertex"></param>
         public MapModel(ConnectivityMap inputMap, int startVertex)
         {
             baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
@@ -114,7 +133,8 @@ namespace GraphMap
             graphNoCycles = new MapCycleReducer(baseGraph.Edges);
 
             //Build Door and Clue Manager
-            doorAndClueManager = new DoorAndClueManager(graphNoCycles, startVertex);
+            //Ensure we pass on the mapped (to no cycles) version of the start vertex
+            doorAndClueManager = new DoorAndClueManager(graphNoCycles, graphNoCycles.roomMappingToNoCycles[startVertex]);
         }
      
         /// <summary>
@@ -156,6 +176,29 @@ namespace GraphMap
             int clueVertex = validRoomsForClue.ElementAt(r.Next(validRoomsForClue.Count()));
             doorAndClueManager.PlaceDoorAndClue(edgeSource, edgeTarget, doorId, clueVertex);
         }
+
+        /** Lock a random edge and place a random clue */
+
+        public void LockRandomEdgeRandomClue(string doorId)
+        {
+            //Generate a random edge
+            Random r = new Random();
+            var edgeToLock = graphNoCycles.NoCycleEdges.ElementAt(r.Next(graphNoCycles.NoCycleEdges.Count()));
+
+            //Lock with a random clue
+            LockEdgeRandomClue(edgeToLock.Source, edgeToLock.Target, doorId);
+        }
+
+        /// <summary>
+        /// Return the start vertex (in the full map)
+        /// </summary>
+        public int StartVertex { get { return startVertex; } }
+
+
+        /// <summary>
+        /// Return the start vertex (in the no cycles map)
+        /// </summary>
+        public int StartVertexNoCycleMap { get { return GraphNoCycles.roomMappingToNoCycles[startVertex]; } }
     }
 
     /** Manages doors and clues in a map.
@@ -784,6 +827,15 @@ namespace GraphMap
             catch(Exception) {
                 throw new ApplicationException("Edge not in map after cycle reduction");
             }
+        }
+
+        public IEnumerable<TaggedEdge<int, String>> NoCycleEdges 
+        {
+            get
+            {
+                return mapNoCycles.Edges;
+            }
+
         }
     }
 
