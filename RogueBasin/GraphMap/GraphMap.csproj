@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectivityMap.cs" />
+    <Compile Include="DoorClueGraphvizExport.cs" />
     <Compile Include="FileDotEngine.cs" />
     <Compile Include="FileDotEngineUndirected.cs" />
     <Compile Include="GraphvizExport.cs" />

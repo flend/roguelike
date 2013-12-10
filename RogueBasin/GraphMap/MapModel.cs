@@ -11,42 +11,10 @@ using System.Windows.Forms;
 
 namespace GraphMap
 {
-    /** The public interface to the map algorithms for locking doors, adding clues etc. */
-    /*public class MapPuzzleLayer
-    {
-
-        private MapModel mapModel;
-
-        public MapPuzzleLayer(ConnectivityMap inputMap)
-        {
-            mapModel = new MapModel(inputMap);
-
-            //Do initial processing
-            mapModel.EliminateCyclesInMap();
-        }
-
-        /// <summary>
-        /// Dictionary of input room id -> model node
-        /// Many rooms may map to the same node, if cycles are removed
-        /// </summary>
-        public Dictionary<int, int> RoomMappingToNoCycleMap
-        {
-            get
-            {
-                return mapModel.VertexMapping;
-            }
-        }
-
-    }*/
-
+   
     /** A clue to open a locked door */
     public class Clue
     {
-        /// <summary>
-        /// Where we are located (clue map index)
-        /// </summary>
-        private int locationVertex;
-
         /// <summary>
         /// Which door this clue locks
         /// </summary>
@@ -77,11 +45,6 @@ namespace GraphMap
         /// Which edge we lock on the acyclic graph
         /// </summary>
         private TaggedEdge<int, string> doorEdge;
-
-        /// <summary>
-        /// Indentifying index (door map index)
-        /// </summary>
-        private int locationVertex;
 
         /// <summary>
         /// Door index into containing map
@@ -118,8 +81,7 @@ namespace GraphMap
         }
     }
 
-
-    /** Carries the state of a map being processed */
+    /** Sets up a model of the input map and has state-changing methods */
     public class MapModel
     {
         /// <summary>
@@ -135,6 +97,10 @@ namespace GraphMap
         MapCycleReducer graphNoCycles;
 
         DoorAndClueManager doorAndClueManager;
+
+        public MapCycleReducer GraphNoCycles { get { return graphNoCycles; } }
+
+        public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
 
         public MapModel(ConnectivityMap inputMap, int startVertex)
         {
