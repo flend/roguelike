@@ -859,7 +859,7 @@ namespace RogueBasin
 
             //Associate the corridor (not terminals squares in the rooms) path with the new ID
             List<Point> corridorOnlyPath = corridorRoute.GetRange(1, corridorRoute.Count - 2);
-            parentGenerator.AssociatePathWithId(corridorId, corridorOnlyPath);
+            parentGenerator.AssociatePathWithCorridorId(corridorId, corridorOnlyPath);
 
             //Because this BSP node's children may have children of their own (we actually only have 1 leaf node child), we don't actually know the id of the room we're going to hit,
             //we need to look it up from the bitmap
@@ -923,6 +923,10 @@ namespace RogueBasin
 
         public MapNode rootNode;
 
+        /// <summary>
+        /// List of rooms in corridor <Id, points in corridor>
+        /// </summary>
+        public Dictionary<int, List<Point>> corridors = new Dictionary<int,List<Point>>();
 
         public Point upStaircase;
         public Point downStaircase;
@@ -1521,7 +1525,23 @@ namespace RogueBasin
         /// <returns></returns>
         public PointInRoom RandomPointInRoomById(int destId)
         {
-            return rootNode.FindRandomRoomPointById(destId);
+            //Check rooms
+            PointInRoom point = rootNode.FindRandomRoomPointById(destId);
+
+            if (point != null)
+                return point;
+
+            //Check corridors
+            if (corridors.ContainsKey(destId))
+            {
+                var pointsInRoom = corridors[destId];
+                var randomPoint = pointsInRoom[Game.Random.Next(pointsInRoom.Count)];
+
+                //The room size here doesn't make a lot of sense
+                return new PointInRoom(randomPoint.x, randomPoint.y, 1, 1, 1, 1, destId);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -1913,8 +1933,12 @@ namespace RogueBasin
             }
         }
 
-        internal void AssociatePathWithId(int corridorId, List<Point> corridorRoute)
+        internal void AssociatePathWithCorridorId(int corridorId, List<Point> corridorRoute)
         {
+            //Add to corridor database
+            corridors.Add(corridorId, corridorRoute);
+
+            //Add to ID map
             foreach (var newPoint in corridorRoute)
             {
                 baseMap.roomIdMap[newPoint.x, newPoint.y] = corridorId;
