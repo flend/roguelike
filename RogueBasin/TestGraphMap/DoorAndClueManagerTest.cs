@@ -170,6 +170,64 @@ namespace TestGraphMap
             CollectionAssert.AreEquivalent(new List<string>(), dependentDoors);
         }
 
+        
+        [TestMethod]
+        public void FullyOpenMapIsFullyAccessibleWithNoClues()
+        {
+            var manager = BuildStandardManager();
+
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>());
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
+        }
+
+        [TestMethod]
+        public void MapWithOneLockIsPartiallyAccessibleWithNoClues()
+        {
+            var manager = BuildStandardManager();
+            manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>());
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms.ToList());
+        }
+
+        [TestMethod]
+        public void MapWithOneLockIsFullyAccessibleWithRightClue()
+        {
+            var manager = BuildStandardManager();
+            var clue0 = manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue [] { clue0 }));
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
+        }
+
+        [TestMethod]
+        public void MapWithTwoLocksIsPartiallyAccessibleWithOneClue()
+        {
+            var manager = BuildStandardManager();
+            var clue0 = manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+            var clue1 = manager.PlaceDoorAndClue(5, 6, "lock1", 1);
+
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue[] { clue0 }));
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
+        }
+
+        [TestMethod]
+        public void MapWithTwoLocksIsFullyAccessibleWithTwoRightClues()
+        {
+            var manager = BuildStandardManager();
+            var clue0 = manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+            var clue1 = manager.PlaceDoorAndClue(5, 6, "lock1", 1);
+
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue[] { clue0, clue1 }));
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
+        }
+
+
         private DoorAndClueManager BuildStandardManager()
         {
             var standardMap = BuildStandardTestMap();

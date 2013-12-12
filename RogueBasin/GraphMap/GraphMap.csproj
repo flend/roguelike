@@ -50,6 +50,7 @@
     <Compile Include="DoorClueGraphvizExport.cs" />
     <Compile Include="FileDotEngine.cs" />
     <Compile Include="FileDotEngineUndirected.cs" />
+    <Compile Include="GraphSolver.cs" />
     <Compile Include="GraphvizExport.cs" />
     <Compile Include="MapModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -313,7 +313,7 @@ namespace GraphMap
         /// <param name="edge"></param>
         /// <param name="doorId"></param>
         /// <param name="clueVertex"></param>
-        public void PlaceDoorAndClue(int edgeForDoorSource, int edgeForDoorTarget, string doorId, int clueVertex)
+        public Clue PlaceDoorAndClue(int edgeForDoorSource, int edgeForDoorTarget, string doorId, int clueVertex)
         {
             //Check the edge is in the reduced map (will throw an exception if can't find)
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoorSource, edgeForDoorTarget);
@@ -353,7 +353,8 @@ namespace GraphMap
 
             int thisDoorIndex = nextDoorIndex;
             nextDoorIndex++;
-            clueMap[clueVertex].Add(new Clue(thisDoorIndex));
+            Clue newClue = new Clue(thisDoorIndex);
+            clueMap[clueVertex].Add(newClue);
 
             Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoorSource, edgeForDoorTarget);
             Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
@@ -402,6 +403,8 @@ namespace GraphMap
                 //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
                 doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
             }
+
+            return newClue;
         }
 
         private IEnumerable<Clue> GetCluesBehindLockedEdge(TaggedEdge<int,string> foundEdge)
@@ -575,6 +578,22 @@ namespace GraphMap
                 }
             }
             return null;
+        }
+
+        public IEnumerable<int> GetAccessibleVerticesWithClues(IEnumerable<Clue> clues)
+        {
+            //Find all the locked edges not accessible by our clues
+            var allDoors = doorMap.Keys;
+            var unlockedDoors = clues.Select(x => x.DoorIndex);
+            var lockedDoors = allDoors.Except(unlockedDoors);
+
+            //Remove all areas behind any locked door
+            var lockedEdges = lockedDoors.Select(d => doorMap[d].DoorEdge);
+            MapSplitter allowedMap = new MapSplitter(mapNoCycles.mapNoCycles.Edges, lockedEdges, startVertex);
+
+            //Find the component of this broken graph that is connected to the start vertex - 
+            //This component contains the vertices accessible with these clues
+            return allowedMap.MapComponent(allowedMap.RoomComponentIndex(startVertex));
         }
     }
 
