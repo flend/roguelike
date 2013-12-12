@@ -8,8 +8,6 @@ namespace GraphMap
 {
     public class GraphSolver
     {
-        List<Clue> cluesFound;
-
         MapModel model;
 
         public GraphSolver(MapModel model)
@@ -19,14 +17,32 @@ namespace GraphMap
 
         public bool MapCanBeSolved()
         {
-            //Do while locked doors exist
-            
-            //Find the part of the map that can be accessed using the clues we have
-            return false;
+            var cluesFound = new HashSet<Clue>();
+            var doorManager = model.DoorAndClueManager;
+            //Door & Clue manager works on the reduced map, so we use this here
+            //Potentially could be problematic if something is wrong with map reduction
+            var totalVerticesReducedMap = model.GraphNoCycles.mapNoCycles.VertexCount;
 
-            //Collect all new clues in that area
+            int lastTimeAccessibleVertices = 0;
+            int noAccessibleVertices = 0;
+            do
+            {
+                var accessibleVertices = doorManager.GetAccessibleVerticesWithClues(cluesFound);
 
+                //Add any clues in these vertices and add to the clues we have2
+                var cluesAtVertices = accessibleVertices.SelectMany(v => doorManager.ClueMap.ContainsKey(v) ? doorManager.ClueMap[v] : new List<Clue> ());
+                cluesAtVertices.ToList().ForEach(clue => cluesFound.Add(clue));
 
+                noAccessibleVertices = accessibleVertices.Count();
+
+                lastTimeAccessibleVertices = accessibleVertices.Count();
+            } while (noAccessibleVertices != lastTimeAccessibleVertices);
+
+            //Couldn't touch all vertices - map is not solvable
+            if (noAccessibleVertices < totalVerticesReducedMap)
+                return false;
+
+            return true;
         }
     }
 }
