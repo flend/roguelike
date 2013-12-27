@@ -58,6 +58,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DoorAndClueManagerTest.cs" />
+    <Compile Include="DoorTest.cs" />
     <Compile Include="GraphSolverTest.cs" />
     <Compile Include="MapModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

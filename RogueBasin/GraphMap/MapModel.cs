@@ -105,6 +105,12 @@ namespace GraphMap
             NumCluesRequired = numberOfCluesRequired;
         }
 
+        public bool CanDoorBeUnlockedWithClues(IEnumerable<Clue> clues)
+        {
+            var cluesForThisDoor = clues.Where(c => c.DoorIndex == this.DoorIndex).Count();
+            return cluesForThisDoor >= this.NumCluesRequired;
+        }
+
         public TaggedEdge<int, string> DoorEdge
         {
             get
@@ -208,20 +214,20 @@ namespace GraphMap
 
         /** Lock an edge and place a random clue */
 
-        public void LockEdgeRandomClue(Connection edge, string doorId)
+        public void LockEdgeRandomClue(DoorRequirements doorReq)
         {    
             //Check that edge is in reduced map
-            if (!graphNoCycles.IsEdgeInRoomsNoCycles(edge.Source, edge.Target))
+            if (!graphNoCycles.IsEdgeInRoomsNoCycles(doorReq.Location.Source, doorReq.Location.Target))
                 throw new ApplicationException("Edge not in non-cycle map");
 
-            var validRoomsForClue = doorAndClueManager.GetValidRoomsToPlaceClue(edge);
+            var validRoomsForClue = doorAndClueManager.GetValidRoomsToPlaceClue(doorReq.Location);
 
             //Place the clue in a random valid room
             int clueVertex = validRoomsForClue.ElementAt(random.Next(validRoomsForClue.Count()));
 
             Console.WriteLine(String.Format("LockEdgeRandomClue. Candidate rooms: {0}, placing at: {1}", validRoomsForClue.Count(), clueVertex));
 
-            doorAndClueManager.PlaceDoorAndClue(edge, doorId, clueVertex);
+            doorAndClueManager.PlaceDoorAndClue(doorReq, clueVertex);
         }
 
         /** Lock a random edge and place a random clue */
@@ -232,7 +238,7 @@ namespace GraphMap
             var edgeToLock = graphNoCycles.NoCycleEdges.ElementAt(random.Next(graphNoCycles.NoCycleEdges.Count()));
 
             //Lock with a random clue
-            LockEdgeRandomClue(new Connection(edgeToLock.Source, edgeToLock.Target), doorId);
+            LockEdgeRandomClue(new DoorRequirements(new Connection(edgeToLock.Source, edgeToLock.Target), doorId));
         }
 
         /// <summary>
@@ -355,7 +361,10 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Add a clue for a doorId at requested room / vertex. No checks.
+        /// Add a clue for a doorId at requested room / vertex.
+        /// No checks and no updates to the dependency graph. Therefore this function is not safe for anything other than test cases.
+        /// Adding further doors after using this function can lead to broken maps
+        /// Maybe refactor to update the dependency graph - have to think about whether this fixes it - I think it does
         /// </summary>
         /// <param name="room"></param>
         /// <param name="doorId"></param>
@@ -400,47 +409,52 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Place a door and clue.
+        /// Place a door and multiple clues for the door.
         /// Ensures that dependency graph is correctly updated (dependencies for new door and changes to dependencies for
         /// existing doors)
         /// Does no checking at all, so impossible situations can be created
         /// </summary>
-        public Clue PlaceDoorAndClueNoChecks(Connection edgeForDoor, string doorId, int clueVertex)
+        public IEnumerable<Clue> PlaceDoorAndCluesNoChecks(DoorRequirements doorReq, List<int> clueVertices)
         {
             //Check the edge is in the reduced map (will throw an exception if can't find)
+            var edgeForDoor = doorReq.Location;
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
             
-            //Add locked door on this edge and the clue
-            int thisDoorIndex = LockDoor(new DoorRequirements(edgeForDoor, doorId)).DoorIndex;
-            var newClue = PlaceClue(clueVertex, doorId);
+            //Add locked door on this edge
+            int thisDoorIndex = LockDoor(new DoorRequirements(edgeForDoor, doorReq.Id)).DoorIndex;
+            //Add clues
+            var clues = clueVertices.Select(vertex => PlaceClue(vertex, doorReq.Id));
 
-            Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
-            Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
+            //Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
+            //Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
             
             var tryGetPath = mapNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
             IEnumerable<TaggedEdge<int, string>> path;
 
-            //Find path on MST from start location to clue. Any doors which we traverse become doors we DEPEND on
-            if (clueVertex != startVertex)
+            //Find path on MST from start location to all clues. Any doors which we traverse become doors we DEPEND on
+            foreach (var clueVertex in clueVertices)
             {
-                if (tryGetPath(clueVertex, out path))
+                if (clueVertex != startVertex)
                 {
-                    foreach (var edge in path)
+                    if (tryGetPath(clueVertex, out path))
                     {
-                        //Very slow, need to hash this
-                        int doorIndex = GetDoorIndexForEdge(edge);
-                        if (doorIndex != -1)
+                        foreach (var edge in path)
                         {
-                            doorDependencyGraph.AddVerticesAndEdge(new Edge<int>(doorIndex, thisDoorIndex));
-                            Console.WriteLine(String.Format("Door: {1}, now depends on: {0}", doorMap[doorIndex].Id, doorMap[thisDoorIndex].Id));
-                        }
+                            //Very slow, need to hash this
+                            int doorIndex = GetDoorIndexForEdge(edge);
+                            if (doorIndex != -1)
+                            {
+                                doorDependencyGraph.AddVerticesAndEdge(new Edge<int>(doorIndex, thisDoorIndex));
+                                Console.WriteLine(String.Format("Door: {1}, now depends on: {0}", doorMap[doorIndex].Id, doorMap[thisDoorIndex].Id));
+                            }
 
+                        }
                     }
-                }
-                else
-                {
-                    Console.WriteLine(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
-                    throw new ApplicationException(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
+                    else
+                    {
+                        Console.WriteLine(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
+                        throw new ApplicationException(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
+                    }
                 }
             }
 
@@ -461,45 +475,38 @@ namespace GraphMap
                 doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
             }
 
-            return newClue;
+            return clues;
         }
 
         /// <summary>
-        /// Place a door and clue.
+        /// Place a door and multiple clues.
         /// Ensures that dependency graph is correctly updated (dependencies for new door and changes to dependencies for
         /// existing doors)
-        /// However, doesn't do more than trivial checking of clue placement, so (A locks B, B locks A) situations can be
-        /// made
+        /// Does a (slow) check that all clues are being placed in valid areas. If GetValidRoomsToPlaceClue() has been used
+        /// outside the function, then use the NoChecks version.
+        /// Doesn't check that sufficient clues are being placed for the door, but this should be ensured
         /// </summary>
         /// <param name="edge"></param>
         /// <param name="doorId"></param>
         /// <param name="clueVertex"></param>
-        public Clue PlaceDoorAndClue(Connection edgeForDoor, string doorId, int clueVertex)
+        public IEnumerable<Clue> PlaceDoorAndClues(DoorRequirements doorReq, List <int> clueVertices)
         {
-            //Simple check for first impossible situation
-            //Check we can route to the clueVertex without going through the to-be-locked edge
-            //NB: We don't check for recursive locking here (A locks B, B locks A), so impossible situations can be created
+            //Check all clues are in the valid placement area
+            if (!GetValidRoomsToPlaceClue(doorReq.Location).Except(clueVertices).Any())
+                throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClue(doorReq.Location).Except(clueVertices).ToString(), doorReq.Location.Source, doorReq.Location.Target));
 
-            var tryGetPath = mapNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
+            return PlaceDoorAndCluesNoChecks(doorReq, new List<int>(clueVertices));
+        }
 
-            IEnumerable<TaggedEdge<int, string>> path;
-            if (clueVertex != startVertex)
-            {
-                if (tryGetPath(clueVertex, out path))
-                {
-                    foreach (var edge in path)
-                    {
-                        if (edge.Source == edgeForDoor.Source &&
-                            edge.Target == edgeForDoor.Target)
-                        {
-                            Console.WriteLine(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoor.Source, edgeForDoor.Target));
-                            throw new ApplicationException(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoor.Source, edgeForDoor.Target));
-                        }
-                    }
-                }
-            }
-
-            return PlaceDoorAndClueNoChecks(edgeForDoor, doorId, clueVertex);
+        /// <summary>
+        /// See PlaceDoorAndClues
+        /// </summary>
+        /// <param name="doorReq"></param>
+        /// <param name="clueVertex"></param>
+        /// <returns></returns>
+        public Clue PlaceDoorAndClue(DoorRequirements doorReq, int clueVertex)
+        {
+            return PlaceDoorAndClues(doorReq, new List<int>(new int[] { clueVertex })).First();
         }
 
         private IEnumerable<Clue> GetCluesBehindLockedEdge(TaggedEdge<int,string> foundEdge)
@@ -565,13 +572,32 @@ namespace GraphMap
         }
 
         /// <summary>
+        /// Do we need to open dependencyParentDoorId before we can open dependentDoorId?
+        /// </summary>
+        /// <param name="dependencyParentDoorId"></param>
+        /// <param name="dependentDoorId"></param>
+        /// <returns></returns>
+        public bool IsDoorDependentOnParentDoor(string targetDoorId, string parentDoorId)
+        {
+            try
+            {
+                return GetDependencyEdge(parentDoorId, targetDoorId) != null;
+            }
+            catch (ApplicationException)
+            {
+                //Edge not in tree
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Get an edge between doors in the depedency tree
         /// Refactor to isDependent would be better as an interface for users
         /// </summary>
         /// <param name="doorId1"></param>
         /// <param name="doorId2"></param>
         /// <returns></returns>
-        public Edge<int> GetDependencyEdge(string dependencyParentDoorId, string dependentDoorId) {
+        private Edge<int> GetDependencyEdge(string dependencyParentDoorId, string dependentDoorId) {
             try
             {
                 var dependencyParentIndex = GetDoorById(dependencyParentDoorId).DoorIndex;
