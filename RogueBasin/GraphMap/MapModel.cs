@@ -16,7 +16,7 @@ namespace GraphMap
     /// </summary>
     public sealed class Connection : Tuple<int, int>
     {
-        public int Origin { get { return this.Item1; } }
+        public int Source { get { return this.Item1; } }
         public int Target { get { return this.Item2; } }
 
         public Connection(int origin, int target) : base(origin, target)
@@ -167,20 +167,20 @@ namespace GraphMap
 
         /** Lock an edge and place a random clue */
 
-        public void LockEdgeRandomClue(int edgeSource, int edgeTarget, string doorId)
+        public void LockEdgeRandomClue(Connection edge, string doorId)
         {    
             //Check that edge is in reduced map
-            if (!graphNoCycles.IsEdgeInRoomsNoCycles(edgeSource, edgeTarget))
+            if (!graphNoCycles.IsEdgeInRoomsNoCycles(edge.Source, edge.Target))
                 throw new ApplicationException("Edge not in non-cycle map");
 
-            var validRoomsForClue = doorAndClueManager.GetValidRoomsToPlaceClue(edgeSource, edgeTarget);
+            var validRoomsForClue = doorAndClueManager.GetValidRoomsToPlaceClue(edge);
 
             //Place the clue in a random valid room
             int clueVertex = validRoomsForClue.ElementAt(random.Next(validRoomsForClue.Count()));
 
             Console.WriteLine(String.Format("LockEdgeRandomClue. Candidate rooms: {0}, placing at: {1}", validRoomsForClue.Count(), clueVertex));
 
-            doorAndClueManager.PlaceDoorAndClue(edgeSource, edgeTarget, doorId, clueVertex);
+            doorAndClueManager.PlaceDoorAndClue(edge, doorId, clueVertex);
         }
 
         /** Lock a random edge and place a random clue */
@@ -191,7 +191,7 @@ namespace GraphMap
             var edgeToLock = graphNoCycles.NoCycleEdges.ElementAt(random.Next(graphNoCycles.NoCycleEdges.Count()));
 
             //Lock with a random clue
-            LockEdgeRandomClue(edgeToLock.Source, edgeToLock.Target, doorId);
+            LockEdgeRandomClue(new Connection(edgeToLock.Source, edgeToLock.Target), doorId);
         }
 
         /// <summary>
@@ -268,10 +268,10 @@ namespace GraphMap
         }
 
         /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge */
-        public IEnumerable<int> GetValidRoomsToPlaceClue(int edgeForDoorSource, int edgeForDoorTarget)
+        public IEnumerable<int> GetValidRoomsToPlaceClue(Connection edgeForDoor)
         {
             //Check the edge is in the reduced map (will throw an exception if can't find)
-            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoorSource, edgeForDoorTarget);
+            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
 
             //Traverse the locked tree and find all clues that will be behind the locked door
             var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);
@@ -324,9 +324,9 @@ namespace GraphMap
         /// <param name="edgeForDoorSource"></param>
         /// <param name="edgeForDoorTarget"></param>
         /// <param name="doorId"></param>
-        public int LockDoor(int edgeForDoorSource, int edgeForDoorTarget, string doorId)
+        public int LockDoor(Connection edgeForDoor, string doorId)
         {
-            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoorSource, edgeForDoorTarget);
+            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
 
             int thisDoorIndex = nextDoorIndex;
             nextDoorIndex++;
@@ -343,10 +343,10 @@ namespace GraphMap
         /// existing doors)
         /// Does no checking at all, so impossible situations can be created
         /// </summary>
-        public Clue PlaceDoorAndClueNoChecks(int edgeForDoorSource, int edgeForDoorTarget, string doorId, int clueVertex)
+        public Clue PlaceDoorAndClueNoChecks(Connection edgeForDoor, string doorId, int clueVertex)
         {
             //Check the edge is in the reduced map (will throw an exception if can't find)
-            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoorSource, edgeForDoorTarget);
+            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
 
             //Add clue at vertex
 
@@ -359,10 +359,10 @@ namespace GraphMap
             }
 
             //Add locked door on this edge and the clue
-            int thisDoorIndex = LockDoor(edgeForDoorSource, edgeForDoorTarget, doorId);
+            int thisDoorIndex = LockDoor(edgeForDoor, doorId);
             var newClue = PlaceClue(clueVertex, doorId);
 
-            Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoorSource, edgeForDoorTarget);
+            Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
             Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
             
             var tryGetPath = mapNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
@@ -422,7 +422,7 @@ namespace GraphMap
         /// <param name="edge"></param>
         /// <param name="doorId"></param>
         /// <param name="clueVertex"></param>
-        public Clue PlaceDoorAndClue(int edgeForDoorSource, int edgeForDoorTarget, string doorId, int clueVertex)
+        public Clue PlaceDoorAndClue(Connection edgeForDoor, string doorId, int clueVertex)
         {
             //Simple check for first impossible situation
             //Check we can route to the clueVertex without going through the to-be-locked edge
@@ -437,17 +437,17 @@ namespace GraphMap
                 {
                     foreach (var edge in path)
                     {
-                        if (edge.Source == edgeForDoorSource &&
-                            edge.Target == edgeForDoorTarget)
+                        if (edge.Source == edgeForDoor.Source &&
+                            edge.Target == edgeForDoor.Target)
                         {
-                            Console.WriteLine(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoorSource, edgeForDoorTarget));
-                            throw new ApplicationException(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoorSource, edgeForDoorTarget));
+                            Console.WriteLine(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoor.Source, edgeForDoor.Target));
+                            throw new ApplicationException(String.Format("Can't put clue: {0}, behind it's door at {1}:{2}", clueVertex, edgeForDoor.Source, edgeForDoor.Target));
                         }
                     }
                 }
             }
 
-            return PlaceDoorAndClueNoChecks(edgeForDoorSource, edgeForDoorTarget, doorId, clueVertex);
+            return PlaceDoorAndClueNoChecks(edgeForDoor, doorId, clueVertex);
         }
 
         private IEnumerable<Clue> GetCluesBehindLockedEdge(TaggedEdge<int,string> foundEdge)

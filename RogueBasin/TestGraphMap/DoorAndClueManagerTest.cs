@@ -14,7 +14,7 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(11, 12, "lock0", 2);
+            manager.PlaceDoorAndClue(new Connection(11, 12), "lock0", 2);
 
             Door placedDoor = manager.GetDoorForEdge(11, 12);
             Assert.AreEqual("lock0", placedDoor.Id);
@@ -30,7 +30,7 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(9, 10, "lock0", 12);
+            manager.PlaceDoorAndClue(new Connection(9, 10), "lock0", 12);
         }
 
         [TestMethod]
@@ -38,8 +38,8 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
-            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
+            manager.PlaceDoorAndClue(new Connection(11, 13), "lock0", 2);
+            manager.PlaceDoorAndClue(new Connection(5, 6), "lock1", 15);
 
             Assert.IsNotNull(manager.GetDependencyEdge("lock0", "lock1"));
         }
@@ -50,8 +50,8 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
-            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
+            manager.PlaceDoorAndClue(new Connection(11, 13), "lock0", 2);
+            manager.PlaceDoorAndClue(new Connection(5, 6), "lock1", 15);
 
             manager.GetDependencyEdge("lock1", "lock0");
         }
@@ -61,9 +61,9 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
-            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
-            manager.PlaceDoorAndClue(3, 4, "lock2", 14);
+            manager.PlaceDoorAndClue(new Connection(11, 13), "lock0", 2);
+            manager.PlaceDoorAndClue(new Connection(5, 6), "lock1", 15);
+            manager.PlaceDoorAndClue(new Connection(3, 4), "lock2", 14);
 
             //Maybe deprecate?
             Assert.IsNotNull(manager.GetDependencyEdge("lock0", "lock1"));
@@ -75,9 +75,9 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
-            manager.PlaceDoorAndClue(5, 6, "lock1", 15);
-            manager.PlaceDoorAndClue(3, 4, "lock2", 14);
+            manager.PlaceDoorAndClue(new Connection(11, 13), "lock0", 2);
+            manager.PlaceDoorAndClue(new Connection(5, 6), "lock1", 15);
+            manager.PlaceDoorAndClue(new Connection(3, 4), "lock2", 14);
 
             List<string> dependentDoors = manager.GetDependentDoorIds("lock0");
 
@@ -89,8 +89,8 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(11, 13, "lock0", 2);
-            manager.PlaceDoorAndClue(5, 6, "lock1", 3);
+            manager.PlaceDoorAndClue(new Connection(11, 13), "lock0", 2);
+            manager.PlaceDoorAndClue(new Connection(5, 6), "lock1", 3);
 
             List<string> dependentDoors = manager.GetDependentDoorIds("lock0");
 
@@ -102,8 +102,8 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(5, 6, "lock0", 13);
-            manager.PlaceDoorAndClue(11, 13, "lock1", 3);
+            manager.PlaceDoorAndClue(new Connection(5, 6), "lock0", 13);
+            manager.PlaceDoorAndClue(new Connection(11, 13), "lock1", 3);
 
             List<string> dependentDoors = manager.GetDependentDoorIds("lock1");
             CollectionAssert.AreEquivalent(new List<string>(new string[] { "lock0" }), dependentDoors);
@@ -117,9 +117,9 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(5, 6, "lock0", 4);
+            manager.PlaceDoorAndClue(new Connection(5, 6), "lock0", 4);
 
-            var validRooms = manager.GetValidRoomsToPlaceClue(10, 11).ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(10, 11)).ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1,2,3,4,5,6,10 }), validRooms);
         }
@@ -129,9 +129,9 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(3, 5, "lock0", 15);
+            manager.PlaceDoorAndClue(new Connection(3, 5), "lock0", 15);
 
-            var validRooms = manager.GetValidRoomsToPlaceClue(11, 13).ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(11, 13)).ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 10, 11, 12 }), validRooms);
         }
@@ -141,13 +141,13 @@ namespace TestGraphMap
         {
             var manager = BuildStandardManager();
 
-            manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+            manager.PlaceDoorAndClue(new Connection(10, 11), "lock0", 6);
             //Make lock0 depend on lock1
-            manager.PlaceDoorAndClue(3, 5, "lock1", 4);
+            manager.PlaceDoorAndClue(new Connection(3, 5), "lock1", 4);
             
             //This would cover clue1. Therefore lock1 rooms are not accessible, which includes clue0
             //Therefore lock0 rooms are not accessible
-            var validRooms = manager.GetValidRoomsToPlaceClue(3, 4).ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(3, 4)).ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 10 }), validRooms);
         }
@@ -185,7 +185,7 @@ namespace TestGraphMap
         public void MapWithOneLockIsPartiallyAccessibleWithNoClues()
         {
             var manager = BuildStandardManager();
-            manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+            manager.PlaceDoorAndClue(new Connection(10, 11), "lock0", 6);
 
             var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>());
 
@@ -196,7 +196,7 @@ namespace TestGraphMap
         public void MapWithOneLockIsFullyAccessibleWithRightClue()
         {
             var manager = BuildStandardManager();
-            var clue0 = manager.PlaceDoorAndClue(10, 11, "lock0", 6);
+            var clue0 = manager.PlaceDoorAndClue(new Connection(10, 11), "lock0", 6);
 
             var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue [] { clue0 }));
 
@@ -207,8 +207,8 @@ namespace TestGraphMap
         public void MapWithTwoLocksIsPartiallyAccessibleWithOneClue()
         {
             var manager = BuildStandardManager();
-            var clue0 = manager.PlaceDoorAndClue(10, 11, "lock0", 6);
-            var clue1 = manager.PlaceDoorAndClue(5, 6, "lock1", 1);
+            var clue0 = manager.PlaceDoorAndClue(new Connection(10, 11), "lock0", 6);
+            var clue1 = manager.PlaceDoorAndClue(new Connection(5, 6), "lock1", 1);
 
             var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue[] { clue0 }));
 
@@ -219,8 +219,8 @@ namespace TestGraphMap
         public void MapWithTwoLocksIsFullyAccessibleWithTwoRightClues()
         {
             var manager = BuildStandardManager();
-            var clue0 = manager.PlaceDoorAndClue(10, 11, "lock0", 6);
-            var clue1 = manager.PlaceDoorAndClue(5, 6, "lock1", 1);
+            var clue0 = manager.PlaceDoorAndClue(new Connection(10, 11), "lock0", 6);
+            var clue1 = manager.PlaceDoorAndClue(new Connection(5, 6), "lock1", 1);
 
             var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue[] { clue0, clue1 }));
 

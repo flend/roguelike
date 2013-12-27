@@ -28,7 +28,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            mapModel.DoorAndClueManager.LockDoor(10, 11, "lock0");
+            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
 
             GraphSolver solver = new GraphSolver(mapModel);
 
