@@ -252,11 +252,21 @@ namespace GraphMap
             clueMap = new Dictionary<int, List<Clue>>();
         }
 
+        /** Clue map
+          * 
+          *  key = vertex where clue is located
+          *  List<Clue> = all Clues at this vertex
+          */
         public Dictionary<int, List<Clue>> ClueMap
         {
             get { return clueMap; }
         }
 
+        /** Door map
+         * 
+         *  key = unique identifier for door
+         *  Door = information, including Edge. Only 1 door per edge.
+         */
         public Dictionary<int, Door> DoorMap
         {
             get { return doorMap; }
@@ -312,6 +322,15 @@ namespace GraphMap
         {
             int doorIndex = GetDoorById(doorId).DoorIndex;
             Clue newClue = new Clue(doorIndex);
+
+            List<Clue> clueListAtVertex;
+            clueMap.TryGetValue(room, out clueListAtVertex);
+
+            if (clueListAtVertex == null)
+            {
+                clueMap[room] = new List<Clue>();
+            }
+
             clueMap[room].Add(newClue);
 
             return newClue;
@@ -347,17 +366,7 @@ namespace GraphMap
         {
             //Check the edge is in the reduced map (will throw an exception if can't find)
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
-
-            //Add clue at vertex
-
-            List<Clue> clueListAtVertex;
-            clueMap.TryGetValue(clueVertex, out clueListAtVertex);
-
-            if (clueListAtVertex == null)
-            {
-                clueMap[clueVertex] = new List<Clue>();
-            }
-
+            
             //Add locked door on this edge and the clue
             int thisDoorIndex = LockDoor(edgeForDoor, doorId);
             var newClue = PlaceClue(clueVertex, doorId);

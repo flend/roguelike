@@ -27,15 +27,15 @@ namespace GraphMap
             int noAccessibleVertices = 0;
             do
             {
+                lastTimeAccessibleVertices = noAccessibleVertices;
+
                 var accessibleVertices = doorManager.GetAccessibleVerticesWithClues(cluesFound);
 
-                //Add any clues in these vertices and add to the clues we have2
+                //Add any clues in these vertices to the clues we have
                 var cluesAtVertices = accessibleVertices.SelectMany(v => doorManager.ClueMap.ContainsKey(v) ? doorManager.ClueMap[v] : new List<Clue> ());
                 cluesAtVertices.ToList().ForEach(clue => cluesFound.Add(clue));
 
                 noAccessibleVertices = accessibleVertices.Count();
-
-                lastTimeAccessibleVertices = accessibleVertices.Count();
             } while (noAccessibleVertices != lastTimeAccessibleVertices);
 
             //Couldn't touch all vertices - map is not solvable

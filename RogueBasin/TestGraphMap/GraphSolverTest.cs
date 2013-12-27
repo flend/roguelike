@@ -34,6 +34,72 @@ namespace TestGraphMap
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
+
+        [TestMethod]
+        public void MapWithLockedDoorAndClueIsSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.PlaceClue(6, "lock0");
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsTrue(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
+        public void MapWithLockedDoorAndInaccessibleClueIsNotSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.PlaceClue(12, "lock0");
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsFalse(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
+        public void MapWithLockedDoorAndRecursivelyLockedTwoCluesIsSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.PlaceClue(6, "lock0");
+
+            mapModel.DoorAndClueManager.LockDoor(new Connection(5, 6), "lock1");
+            mapModel.DoorAndClueManager.PlaceClue(4, "lock1");
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsTrue(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
+        public void MapWithRecursivelyDeadLockedDoorIsNotSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.PlaceClue(6, "lock0");
+
+            mapModel.DoorAndClueManager.LockDoor(new Connection(5, 6), "lock1");
+            mapModel.DoorAndClueManager.PlaceClue(13, "lock1");
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsFalse(solver.MapCanBeSolved());
+        }
         
         private ConnectivityMap BuildStandardTestMap()
         {
