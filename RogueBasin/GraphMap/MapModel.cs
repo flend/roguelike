@@ -364,11 +364,10 @@ namespace GraphMap
         /// Add a clue for a doorId at requested room / vertex.
         /// No checks and no updates to the dependency graph. Therefore this function is not safe for anything other than test cases.
         /// Adding further doors after using this function can lead to broken maps
-        /// Maybe refactor to update the dependency graph - have to think about whether this fixes it - I think it does
         /// </summary>
         /// <param name="room"></param>
         /// <param name="doorId"></param>
-        public Clue PlaceClue(int room, string doorId)
+        private Clue PlaceClue(int room, string doorId)
         {
             int doorIndex = GetDoorById(doorId).DoorIndex;
             Clue newClue = new Clue(doorIndex);
@@ -387,13 +386,13 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Lock an edge with an id, no checks.
+        /// Lock an edge with an id, no checks, no dependency updates.
         /// Returns the door id
         /// </summary>
         /// <param name="edgeForDoorSource"></param>
         /// <param name="edgeForDoorTarget"></param>
         /// <param name="doorId"></param>
-        public Door LockDoor(DoorRequirements doorReqs)
+        private Door LockDoor(DoorRequirements doorReqs)
         {
             var edgeForDoor = doorReqs.Location;
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
@@ -421,9 +420,14 @@ namespace GraphMap
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
             
             //Add locked door on this edge
-            int thisDoorIndex = LockDoor(new DoorRequirements(edgeForDoor, doorReq.Id)).DoorIndex;
+            int thisDoorIndex = LockDoor(doorReq).DoorIndex;
             //Add clues
-            var clues = clueVertices.Select(vertex => PlaceClue(vertex, doorReq.Id));
+            var clues = new List<Clue>();
+            foreach (var clueVertex in clueVertices)
+                clues.Add(PlaceClue(clueVertex, doorReq.Id));
+
+            //BUG: this seems to work under debug mode but fail in release builds
+            //var clues = clueVertices.Select(vertex => PlaceClue(vertex, doorReq.Id));
 
             //Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
             //Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
@@ -495,7 +499,7 @@ namespace GraphMap
             if (!GetValidRoomsToPlaceClue(doorReq.Location).Except(clueVertices).Any())
                 throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClue(doorReq.Location).Except(clueVertices).ToString(), doorReq.Location.Source, doorReq.Location.Target));
 
-            return PlaceDoorAndCluesNoChecks(doorReq, new List<int>(clueVertices));
+            return PlaceDoorAndCluesNoChecks(doorReq, clueVertices);
         }
 
         /// <summary>

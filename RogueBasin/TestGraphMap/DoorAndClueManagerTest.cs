@@ -231,11 +231,10 @@ namespace TestGraphMap
         public void MapRequiringTwoLocksIsFullyAccessibleWithTwoCorrectClues()
         {
             var manager = BuildStandardManager();
-            manager.LockDoor(new DoorRequirements(new Connection(10, 11), "lock0", 2));
-            var clue0 = manager.PlaceClue(5, "lock0");
-            var clue1 = manager.PlaceClue(6, "lock0");
+            var clues = manager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0", 2),
+                                                  new List<int>(new int[] { 5, 6 }));
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue[] { clue0, clue1 }));
+            var validRooms = manager.GetAccessibleVerticesWithClues(clues);
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
         }
@@ -244,10 +243,10 @@ namespace TestGraphMap
         public void MapRequiringTwoLocksIsNotFullyAccessibleWithOnlyOneCorrectClue()
         {
             var manager = BuildStandardManager();
-            manager.LockDoor(new DoorRequirements(new Connection(10, 11), "lock0", 2));
-            var clue0 = manager.PlaceClue(5, "lock0");
+            var clues = manager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0", 2),
+                                                  new List<int>(new int[] { 5 }));
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue[] { clue0 }));
+            var validRooms = manager.GetAccessibleVerticesWithClues(clues);
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms.ToList());
         }
