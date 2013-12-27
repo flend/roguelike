@@ -50,6 +50,35 @@ namespace GraphMap
         }
     }
 
+    /// <summary>
+    /// Data carrier class to specify the requirements for a door
+    /// </summary>
+    public class DoorRequirements
+    {
+        public Connection Location { get; set; }
+        public string Id { get; set; }
+        public int NumberOfCluesRequired { get; set; }
+
+        /// <summary>
+        /// Defaults to single clue required
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="id"></param>
+        public DoorRequirements(Connection location, string id)
+        {
+            this.Location = location;
+            this.Id = id;
+            this.NumberOfCluesRequired = 1;
+        }
+
+        public DoorRequirements(Connection location, string id, int numberOfCluesRequired)
+        {
+            this.Location = location;
+            this.Id = id;
+            this.NumberOfCluesRequired = numberOfCluesRequired;
+        }
+    }
+
     /** A locked door requiring one or more clues to open */
     public class Door
     {
@@ -63,11 +92,17 @@ namespace GraphMap
         /// </summary>
         private int index;
 
-        public Door(TaggedEdge<int, string> doorEdge, string id, int index)
+        /// <summary>
+        /// Number of clues that are required to open the door
+        /// </summary>
+        public int NumCluesRequired { get; private set; }
+
+        public Door(TaggedEdge<int, string> doorEdge, string id, int index, int numberOfCluesRequired)
         {
             Id = id;
             this.doorEdge = doorEdge;
             this.index = index;
+            NumCluesRequired = numberOfCluesRequired;
         }
 
         public TaggedEdge<int, string> DoorEdge
@@ -78,6 +113,14 @@ namespace GraphMap
             }
         }
 
+        public Connection DoorConnection
+        {
+            get
+            {
+                return new Connection(DoorEdge.Source, DoorEdge.Target);
+            }
+        }
+
         public int DoorIndex
         {
             get
@@ -85,8 +128,6 @@ namespace GraphMap
                 return index;
             }
         }
-
-        
 
         public string Id
         {
@@ -343,17 +384,19 @@ namespace GraphMap
         /// <param name="edgeForDoorSource"></param>
         /// <param name="edgeForDoorTarget"></param>
         /// <param name="doorId"></param>
-        public int LockDoor(Connection edgeForDoor, string doorId)
+        public Door LockDoor(DoorRequirements doorReqs)
         {
+            var edgeForDoor = doorReqs.Location;
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
 
             int thisDoorIndex = nextDoorIndex;
             nextDoorIndex++;
             
-            doorMap.Add(thisDoorIndex, new Door(foundEdge, doorId, thisDoorIndex));
+            Door newDoor = new Door(foundEdge, doorReqs.Id, thisDoorIndex, doorReqs.NumberOfCluesRequired);
+            doorMap.Add(thisDoorIndex, newDoor);
             doorDependencyGraph.AddVertex(thisDoorIndex);
 
-            return thisDoorIndex;
+            return newDoor;
         }
 
         /// <summary>
@@ -368,7 +411,7 @@ namespace GraphMap
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
             
             //Add locked door on this edge and the clue
-            int thisDoorIndex = LockDoor(edgeForDoor, doorId);
+            int thisDoorIndex = LockDoor(new DoorRequirements(edgeForDoor, doorId)).DoorIndex;
             var newClue = PlaceClue(clueVertex, doorId);
 
             Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
@@ -619,12 +662,12 @@ namespace GraphMap
             return null;
         }
 
-        public Door GetDoorForEdge(int source, int target)
+        public Door GetDoorForEdge(Connection edge)
         {
             foreach (var door in doorMap)
             {
-                if (door.Value.DoorEdge.Source == source &&
-                    door.Value.DoorEdge.Target == target)
+                if (door.Value.DoorEdge.Source == edge.Source &&
+                    door.Value.DoorEdge.Target == edge.Target)
                 {
                     return door.Value;
                 }
@@ -636,7 +679,14 @@ namespace GraphMap
         {
             //Find all the locked edges not accessible by our clues
             var allDoors = doorMap.Keys;
-            var unlockedDoors = clues.Select(x => x.DoorIndex);
+
+            //How many keys we have for each door index
+            var noCluesForDoors = clues.GroupBy(c => c.DoorIndex).ToDictionary(g => g.Key, g => g.Count());
+
+            var unlockedDoors = doorMap.Where(d => noCluesForDoors.ContainsKey(d.Value.DoorIndex) &&
+                                                   noCluesForDoors[d.Value.DoorIndex] >= d.Value.NumCluesRequired)
+                                       .Select(d => d.Key);
+            
             var lockedDoors = allDoors.Except(unlockedDoors);
 
             //Remove all areas behind any locked door

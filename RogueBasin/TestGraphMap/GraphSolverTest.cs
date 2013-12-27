@@ -28,7 +28,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.LockDoor(new DoorRequirements(new Connection(10, 11), "lock0"));
 
             GraphSolver solver = new GraphSolver(mapModel);
 
@@ -42,7 +42,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.LockDoor(new DoorRequirements(new Connection(10, 11), "lock0"));
             mapModel.DoorAndClueManager.PlaceClue(6, "lock0");
 
             GraphSolver solver = new GraphSolver(mapModel);
@@ -57,7 +57,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.LockDoor(new DoorRequirements(new Connection(10, 11), "lock0"));
             mapModel.DoorAndClueManager.PlaceClue(12, "lock0");
 
             GraphSolver solver = new GraphSolver(mapModel);
@@ -72,10 +72,10 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.LockDoor(new DoorRequirements(new Connection(10, 11), "lock0"));
             mapModel.DoorAndClueManager.PlaceClue(6, "lock0");
 
-            mapModel.DoorAndClueManager.LockDoor(new Connection(5, 6), "lock1");
+            mapModel.DoorAndClueManager.LockDoor(new DoorRequirements(new Connection(5, 6), "lock1"));
             mapModel.DoorAndClueManager.PlaceClue(4, "lock1");
 
             GraphSolver solver = new GraphSolver(mapModel);
@@ -90,10 +90,10 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            mapModel.DoorAndClueManager.LockDoor(new Connection(10, 11), "lock0");
+            mapModel.DoorAndClueManager.LockDoor(new DoorRequirements(new Connection(10, 11), "lock0"));
             mapModel.DoorAndClueManager.PlaceClue(6, "lock0");
 
-            mapModel.DoorAndClueManager.LockDoor(new Connection(5, 6), "lock1");
+            mapModel.DoorAndClueManager.LockDoor(new DoorRequirements(new Connection(5, 6), "lock1"));
             mapModel.DoorAndClueManager.PlaceClue(13, "lock1");
 
             GraphSolver solver = new GraphSolver(mapModel);
