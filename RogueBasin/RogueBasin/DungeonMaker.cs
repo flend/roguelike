@@ -2261,6 +2261,9 @@ namespace RogueBasin
             //Add standard dock triggers (allows map abortion & completion)
             //AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
 
+            //Setup pathfinding
+            CalculateWalkableAndTCOD();
+
             //Place dock bay feature at PC startloc
             Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
 
