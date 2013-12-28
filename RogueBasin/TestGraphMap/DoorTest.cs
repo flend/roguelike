@@ -12,7 +12,7 @@ namespace TestGraphMap
         public void DoorCanBeUnlockedWithAMatchedClue()
         {
             var testDoor = new Door(new QuickGraph.TaggedEdge<int, string>(0, 1, "test"), new Connection(0,1), "door1", 0, 1);
-            var clue0 = new Clue(0);
+            var clue0 = new Clue(testDoor, new List<int>());
 
             Assert.IsTrue(testDoor.CanDoorBeUnlockedWithClues(new List<Clue>(new Clue[] { clue0 })));
         }
@@ -21,8 +21,8 @@ namespace TestGraphMap
         public void MultipleLockDoorCanBeUnlockedWithEnoughClues()
         {
             var testDoor = new Door(new QuickGraph.TaggedEdge<int, string>(0, 1, "test"), new Connection(0, 1), "door1", 0, 2);
-            var clue0 = new Clue(0);
-            var clue1 = new Clue(0);
+            var clue0 = new Clue(testDoor, new List<int>());
+            var clue1 = new Clue(testDoor, new List<int>());
 
             Assert.IsTrue(testDoor.CanDoorBeUnlockedWithClues(new List<Clue>(new Clue[] { clue0, clue1 })));
         }
@@ -31,7 +31,7 @@ namespace TestGraphMap
         public void DoorCantBeUnlockedWithNotEnoughClues()
         {
             var testDoor = new Door(new QuickGraph.TaggedEdge<int, string>(0, 1, "test"), new Connection(0, 1), "door1", 0, 2);
-            var clue0 = new Clue(0);
+            var clue0 = new Clue(testDoor, new List<int>());
 
             Assert.IsFalse(testDoor.CanDoorBeUnlockedWithClues(new List<Clue>(new Clue[] { clue0 })));
         }
@@ -40,7 +40,9 @@ namespace TestGraphMap
         public void DoorCantBeUnlockedWithTheWrongClues()
         {
             var testDoor = new Door(new QuickGraph.TaggedEdge<int, string>(0, 1, "test"), new Connection(0, 1), "door1", 0, 1);
-            var clue0 = new Clue(1);
+            //door index is important here
+            var testDoor2 = new Door(new QuickGraph.TaggedEdge<int, string>(0, 1, "test"), new Connection(0, 1), "door2", 1, 1);
+            var clue0 = new Clue(testDoor2, new List<int>());
 
             Assert.IsFalse(testDoor.CanDoorBeUnlockedWithClues(new List<Clue>(new Clue[] { clue0 })));
         }

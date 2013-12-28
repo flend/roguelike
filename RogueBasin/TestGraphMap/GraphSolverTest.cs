@@ -66,7 +66,7 @@ namespace TestGraphMap
 
             var mapModel = new MapModel(map, startVertex);
             var doorManager = mapModel.DoorAndClueManager;
-            doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
+            doorManager.PlaceDoorAndCluesNoChecks(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>(new int[] { 12 }));
 
             GraphSolver solver = new GraphSolver(mapModel);
@@ -106,7 +106,7 @@ namespace TestGraphMap
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>(new int[] { 6 }));
 
-            doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "lock1"),
+            doorManager.PlaceDoorAndCluesNoChecks(new DoorRequirements(new Connection(5, 6), "lock1"),
                 new List<int>(new int[] { 13 }));
 
             GraphSolver solver = new GraphSolver(mapModel);

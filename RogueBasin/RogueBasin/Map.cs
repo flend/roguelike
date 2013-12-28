@@ -1,7 +1,9 @@
-﻿using System;using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
 using GraphMap;
+using System.Linq;
 
 namespace RogueBasin
 {
@@ -344,7 +346,7 @@ namespace RogueBasin
     {
         public MapSquare[,] mapSquares;
         public int[,] roomIdMap;
-        public Dictionary<Point, Door> mapSquareLocks;
+        public Dictionary<Point, List<Door>> mapSquareLocks;
         public Point PCStartLocation;
 
         public int width;
@@ -371,12 +373,19 @@ namespace RogueBasin
 
         }
 
-        public Dictionary<Point, Door> MapSquareLocks
+        public Dictionary<Point, List<Door>> MapSquareLocks
         {
             get
             {
                 return mapSquareLocks;
             }
+        }
+
+        public void AddLockedDoorToMap(Point coord, Door newDoor) {
+            if(!MapSquareLocks.ContainsKey(coord))
+                MapSquareLocks[coord] = new List<Door>();
+
+            MapSquareLocks[coord].Add(newDoor);
         }
 
         public MapSquare[,] MapSquares
@@ -404,7 +413,7 @@ namespace RogueBasin
                 {
                     newMap.mapSquares[i, j] = mapSquares[i, j].Clone();
                     newMap.roomIdMap[i, j] = roomIdMap[i, j];
-                    newMap.mapSquareLocks = new Dictionary<Point, Door>(mapSquareLocks);
+                    newMap.mapSquareLocks = mapSquareLocks.ToDictionary(entry => entry.Key, entry => new List<Door> (entry.Value));
                 }
             }
 
@@ -429,7 +438,7 @@ namespace RogueBasin
             }
 
             roomIdMap = new int[width, height];
-            mapSquareLocks = new Dictionary<Point, Door>();
+            mapSquareLocks = new Dictionary<Point, List<Door>>();
 
             GuaranteedConnected = false;
 

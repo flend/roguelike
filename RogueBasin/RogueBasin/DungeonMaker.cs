@@ -2210,10 +2210,8 @@ namespace RogueBasin
                 //Find the doors corresponding to locked connections and lock them
                 foreach (var door in connectivityModel.DoorAndClueManager.DoorMap)
                 {
-                    var edge = door.Value.DoorEdge;
-                    //This won't work at the mo with reduced graphs because it will look for edges which have been newly created by reducing
-                    //the graph and therefore won't be here
-                    hallsGen.LockConnection(edge.Source, edge.Target, door.Value);
+                    //The door knows its location in the full map, so this should work with cycles
+                    hallsGen.LockConnection(door.Value);
                 }
             }
 
@@ -2236,14 +2234,12 @@ namespace RogueBasin
                 {
                     foreach (var clue in cluesAtVertex.Value)
                     {
+                        var possibleRooms = clue.PossibleClueRoomsInFullMap;
+                        var randomRoom = possibleRooms[Game.Random.Next(possibleRooms.Count)];
 
-                        var clueVertexInReducedMap = cluesAtVertex.Key;
-                        //Should turn this into a random room which maps to that vertex
-                        var lockId = connectivityModel.DoorAndClueManager.GetDoorByIndex(clue.DoorIndex).Id;
+                        var pointInRoom = hallsGen.RandomPointInRoomById(randomRoom);
 
-                        var pointInRoom = hallsGen.RandomPointInRoomById(clueVertexInReducedMap);
-
-                        Game.Dungeon.AddItem(new Items.Clue(lockId), 0, pointInRoom.GetPointInRoomOnly());
+                        Game.Dungeon.AddItem(new Items.Clue(clue.LockedDoor.Id), 0, pointInRoom.GetPointInRoomOnly());
                     }
 
                 }

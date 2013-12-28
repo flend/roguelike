@@ -34,6 +34,30 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CluesCantBePlacedInRecursiveLockingSituations()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(9, 10), "lock0"), 6);
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 13);
+        }
+
+        [TestMethod]
+        public void CluesCanBePlacedInRoomIfOnlyOneRoomPossible()
+        {
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+
+            var mapNoCycles = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+            var mapMST = new MapMST(mapNoCycles.mapNoCycles.Edges);
+            var manager = new DoorAndClueManager(mapNoCycles, 1);
+
+            Assert.IsNotNull(manager.PlaceDoorAndClue(new DoorRequirements(new Connection(1, 2), "lock0"), 1));
+        }
+
+        [TestMethod]
         public void AddingAClueBehindADoorMeansTheNewDoorDependsOnTheOldDoor()
         {
             var manager = BuildStandardManager();

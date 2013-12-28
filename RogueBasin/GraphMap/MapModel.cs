@@ -48,12 +48,25 @@ namespace GraphMap
         private int doorIndex;
 
         /// <summary>
+        /// Reference to door that we lock
+        /// </summary>
+        public Door LockedDoor { get; private set; }
+
+        public List<int> PossibleClueRoomsInFullMap
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Construct a clue for the associated door
         /// </summary>
         /// <param name="doorIndex"></param>
-        public Clue(int doorIndex)
+        public Clue(Door matchingDoor, List<int> possibleRooms)
         {
-            this.doorIndex = doorIndex;
+            this.doorIndex = matchingDoor.DoorIndex;
+            this.LockedDoor = matchingDoor;
+            this.PossibleClueRoomsInFullMap = possibleRooms;
         }
 
         public int DoorIndex
@@ -386,10 +399,14 @@ namespace GraphMap
         /// </summary>
         /// <param name="room"></param>
         /// <param name="doorId"></param>
-        private Clue PlaceClue(int room, string doorId)
+        private Clue PlaceClue(int room, Door thisDoor)
         {
-            int doorIndex = GetDoorById(doorId).DoorIndex;
-            Clue newClue = new Clue(doorIndex);
+            int doorIndex = thisDoor.DoorIndex;
+            
+            //Find the possible rooms that this clue could be placed in the real map
+            var possibleRooms = mapNoCycles.roomMappingNoCycleToFullMap[room];
+
+            Clue newClue = new Clue(thisDoor, possibleRooms);
 
             List<Clue> clueListAtVertex;
             clueMap.TryGetValue(room, out clueListAtVertex);
@@ -441,11 +458,13 @@ namespace GraphMap
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
             
             //Add locked door on this edge
-            int thisDoorIndex = LockDoor(doorReq).DoorIndex;
+            Door thisDoor = LockDoor(doorReq);
+            int thisDoorIndex = thisDoor.DoorIndex;
+
             //Add clues
             var clues = new List<Clue>();
             foreach (var clueVertex in clueVertices)
-                clues.Add(PlaceClue(clueVertex, doorReq.Id));
+                clues.Add(PlaceClue(clueVertex, thisDoor));
 
             //BUG: this seems to work under debug mode but fail in release builds
             //var clues = clueVertices.Select(vertex => PlaceClue(vertex, doorReq.Id));
@@ -517,7 +536,7 @@ namespace GraphMap
         public IEnumerable<Clue> PlaceDoorAndClues(DoorRequirements doorReq, List <int> clueVertices)
         {
             //Check all clues are in the valid placement area
-            if (!GetValidRoomsToPlaceClue(doorReq.Location).Except(clueVertices).Any())
+            if (GetValidRoomsToPlaceClue(doorReq.Location).Intersect(clueVertices).Count() < clueVertices.Count())
                 throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClue(doorReq.Location).Except(clueVertices).ToString(), doorReq.Location.Source, doorReq.Location.Target));
 
             return PlaceDoorAndCluesNoChecks(doorReq, clueVertices);

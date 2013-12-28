@@ -2123,8 +2123,8 @@ namespace RogueBasin {
 
                         if (map.MapSquareLocks.ContainsKey(new Point(i,j)))
                         {
-                            //Set color to lock
-                            switch (map.MapSquareLocks[new Point(i, j)].Id)
+                            //Set color to lock (only use 1st door)
+                            switch (map.MapSquareLocks[new Point(i, j)][0].Id)
                             {
                                 case "red":
                                     baseDrawColor = ColorPresets.Red;

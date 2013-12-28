@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ClueTest.cs" />
     <Compile Include="DoorAndClueManagerTest.cs" />
     <Compile Include="DoorTest.cs" />
     <Compile Include="GraphSolverTest.cs" />
