@@ -275,6 +275,26 @@ namespace TestGraphMap
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms.ToList());
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void RedDoorCoveredByBlueDoorBlueKeyCoveredByYellowDoorYellowKeyCoveredByRedShouldNotBeAllowed()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            var doorManager = mapModel.DoorAndClueManager;
+
+            doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "red"),
+                new List<int>(new int[] { 2 }));
+
+            doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(3, 5), "blue"),
+                new List<int>(new int[] { 4 }));
+
+            doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(3, 4), "yellow"),
+                new List<int>(new int[] { 6 }));
+        }
+
         private DoorAndClueManager BuildStandardManager()
         {
             var standardMap = BuildStandardTestMap();
