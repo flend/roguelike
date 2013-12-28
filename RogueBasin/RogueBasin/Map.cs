@@ -8,6 +8,17 @@ using System.Linq;
 namespace RogueBasin
 {
 
+    public sealed class Location : Tuple<int, Point>
+    {
+        public Location(int level, Point mapCoord)
+            : base(level, mapCoord)
+        {
+        }
+
+        public int Level { get { return Item1; } }
+        public Point MapCoord { get { return Item2; } }
+    }
+
     /** Immutable Point class */
     public sealed class Point {
         public readonly int x;
@@ -346,7 +357,6 @@ namespace RogueBasin
     {
         public MapSquare[,] mapSquares;
         public int[,] roomIdMap;
-        public Dictionary<Point, List<Door>> mapSquareLocks;
         public Point PCStartLocation;
 
         public int width;
@@ -373,20 +383,6 @@ namespace RogueBasin
 
         }
 
-        public Dictionary<Point, List<Door>> MapSquareLocks
-        {
-            get
-            {
-                return mapSquareLocks;
-            }
-        }
-
-        public void AddLockedDoorToMap(Point coord, Door newDoor) {
-            if(!MapSquareLocks.ContainsKey(coord))
-                MapSquareLocks[coord] = new List<Door>();
-
-            MapSquareLocks[coord].Add(newDoor);
-        }
 
         public MapSquare[,] MapSquares
         {
@@ -413,7 +409,6 @@ namespace RogueBasin
                 {
                     newMap.mapSquares[i, j] = mapSquares[i, j].Clone();
                     newMap.roomIdMap[i, j] = roomIdMap[i, j];
-                    newMap.mapSquareLocks = mapSquareLocks.ToDictionary(entry => entry.Key, entry => new List<Door> (entry.Value));
                 }
             }
 
@@ -438,7 +433,6 @@ namespace RogueBasin
             }
 
             roomIdMap = new int[width, height];
-            mapSquareLocks = new Dictionary<Point, List<Door>>();
 
             GuaranteedConnected = false;
 

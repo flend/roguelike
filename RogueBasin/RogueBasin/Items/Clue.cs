@@ -5,19 +5,19 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Clue : Item, IUseableItem
+    public class Clue : Item
     {
-        bool usedUp;
-
         Color color;
         string id;
 
-        public Clue(string id)
+        GraphMap.Clue mapClue;
+
+        public Clue(GraphMap.Clue mapClue)
         {
-            usedUp = false;
+            this.mapClue = mapClue;
+            this.id = mapClue.LockedDoor.Id;
 
             color = ColorPresets.Magenta;
-            this.id = id;
 
             //Map id to color
             switch (id)
@@ -35,37 +35,6 @@ namespace RogueBasin.Items
                     color = ColorPresets.Yellow;
                     break;
             }
-        }
-
-        public bool Use(Creature user)
-        {
-            //Currently healing is implemented as a player effect so we need to check the user is a player
-            Player player = user as Player;
-
-            //Not a player
-            if (player == null)
-            {
-                return false;
-            }
-            
-            Game.MessageQueue.AddMessage("You eat the berry.");
-
-            //Apply the healing effect to the player
-
-            int delta = (int)Math.Ceiling(Game.Dungeon.Player.MaxHitpointsStat / 4.0);
-            if (delta < 10)
-                delta = 10;
-
-            int healing = 10 + Game.Random.Next(delta);
-            player.AddEffect(new PlayerEffects.Healing(healing));
-
-            //Add a message
-            
-
-            //This uses up the potion
-            usedUp = true;
-
-            return true;
         }
 
         public override int GetWeight()
@@ -88,12 +57,6 @@ namespace RogueBasin.Items
             return color;
         }
 
-        public bool UsedUp
-        {
-            set { usedUp = value; }
-            get { return usedUp; }
-        }
-
         protected override char GetRepresentation()
         {
             return (char)236;
@@ -105,7 +68,7 @@ namespace RogueBasin.Items
         {
             get
             {
-                return "vial";
+                return "key";
             }
         }
     }

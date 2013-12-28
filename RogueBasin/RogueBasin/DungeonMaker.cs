@@ -2180,7 +2180,7 @@ namespace RogueBasin
                 hallsGen.Width = 50;
             hallsGen.Height = 25;
 
-            Map hallMap = hallsGen.GenerateMap(0);
+            hallsGen.GenerateMap(0);
 
             MapModel connectivityModel = null;
 
@@ -2215,13 +2215,20 @@ namespace RogueBasin
                 }
             }
 
-            //We've altered the map now, so get a new copy before we store it
-            hallMap = hallsGen.GetOriginalMap();
-            int levelNo = Game.Dungeon.AddMap(hallMap);
+            //Add map to dungeon
+            int levelNo = Game.Dungeon.AddMap(hallsGen.BaseMap);
+            //Add locks to dungeon as simple doors
+            foreach (var locksInLocation in hallsGen.MapSquareLocks)
+            {
+                var lockLocation = locksInLocation.Key;
+                foreach(var thisLock in locksInLocation.Value) {
+                    var lockedDoor = new Locks.SimpleLockedDoor(thisLock);
 
-            //Store the hallGen
-            //Will get sorted in level order
-            levelGen.Add(0, hallsGen);
+                    lockedDoor.LocationLevel = levelNo;
+                    lockedDoor.LocationMap = lockLocation;
+                    Game.Dungeon.AddLock(lockedDoor);
+                }
+            }
 
             //Place the player, so monster placing can be checked against it
             //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
@@ -2239,7 +2246,7 @@ namespace RogueBasin
 
                         var pointInRoom = hallsGen.RandomPointInRoomById(randomRoom);
 
-                        Game.Dungeon.AddItem(new Items.Clue(clue.LockedDoor.Id), 0, pointInRoom.GetPointInRoomOnly());
+                        Game.Dungeon.AddItem(new Items.Clue(clue), 0, pointInRoom.GetPointInRoomOnly());
                     }
 
                 }

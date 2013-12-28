@@ -255,6 +255,8 @@
     <Compile Include="LibtcodColorFlags.cs" />
     <Compile Include="LibTCOD\TCODFovWrapper.cs" />
     <Compile Include="LibTCOD\TCODPathFindingWrapper.cs" />
+    <Compile Include="Lock.cs" />
+    <Compile Include="Locks\SimpleLockedDoor.cs" />
     <Compile Include="LogFile.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MapExport.cs" />

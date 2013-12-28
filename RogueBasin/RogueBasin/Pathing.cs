@@ -62,7 +62,7 @@ namespace RogueBasin
 
             List<Point> blockedSquares = new List<Point>();
             bool goodPath = false;
-            bool pathBlockedByCreature = false;
+            bool pathBlockedByCreatureOrLock = false;
             Point nextStep = new Point(-1, -1);
 
             //Check for pathing to own square - return blocked but not terminally
@@ -83,7 +83,7 @@ namespace RogueBasin
                 if (pathNodes.Count == 1)
                 {
                     //If there was no blocking creature then there is no possible route (hopefully impossible in a fully connected dungeon)
-                    if (!pathBlockedByCreature)
+                    if (!pathBlockedByCreatureOrLock)
                     {
                         //This gets thrown a lot mainly when you cheat
                         LogFile.Log.LogEntryDebug("Path blocked by terrain!", LogDebugLevel.High);
@@ -132,8 +132,11 @@ namespace RogueBasin
                     }
                 }
 
-                //If no blocking creature, the path is good
-                if (blockingCreature == null)
+                //Check if there is a blocking lock
+                var locksInSquare = dungeon.NonOpenLocksAtLocation(level, theNextStep);
+
+                //If no blocking creature or lock, the path is good
+                if (blockingCreature == null && !locksInSquare)
                 {
                     goodPath = true;
                     nextStep = theNextStep;
@@ -141,7 +144,7 @@ namespace RogueBasin
                 else
                 {
                     //Otherwise, there's a blocking creature. Make his square unwalkable temporarily and try to reroute
-                    pathBlockedByCreature = true;
+                    pathBlockedByCreatureOrLock = true;
 
                     pathFinding.updateMap(level, theNextStep, PathingTerrain.Unwalkable);
 

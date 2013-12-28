@@ -6,6 +6,7 @@ using Console = System.Console;
 using System.IO;
 using System.Windows.Forms;
 using System.Reflection;
+using System.Linq;
 
 namespace RogueBasin {
 
@@ -833,6 +834,9 @@ namespace RogueBasin {
             //Draw terrain (must be done first since sets some params)
             //First level in tileMap
             DrawMap(dungeon.PCMap);
+
+            //Draw locks
+            DrawLocks(dungeon.Locks);
 
             //Draw fixed features
             DrawFeatures(dungeon.Features);
@@ -1685,7 +1689,7 @@ namespace RogueBasin {
                 {
 
                     if (!isViewVisible(item.LocationMap))
-                        return;
+                        continue;
 
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)] = new TileEngine.TileCell(item.Representation);
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileFlag = new LibtcodColorFlags(itemColorToUse);
@@ -1696,11 +1700,55 @@ namespace RogueBasin {
 
         }
 
+        private void DrawLocks(Dictionary<Location, List<Lock>> allLocks)
+        {
+            var locksOnThisLevel = allLocks.Where(kv => kv.Key.Level == Game.Dungeon.Player.LocationLevel).SelectMany(kv => kv.Value);
+
+            foreach (var thisLock in locksOnThisLevel)
+            {
+                //Colour depending on FOV (for development)
+                MapSquare featureSquare = Game.Dungeon.Levels[thisLock.LocationLevel].mapSquares[thisLock.LocationMap.x, thisLock.LocationMap.y];
+
+                Color featureColor = thisLock.RepresentationColor();
+
+                bool drawFeature = true;
+
+                if (featureSquare.InPlayerFOV || SeeAllMap)
+                {
+
+                }
+                else if (featureSquare.SeenByPlayer)
+                {
+                    //Not in FOV but seen
+                    featureColor = Color.Interpolate(featureColor, ColorPresets.Black, 0.3);
+                }
+                else
+                {
+                    //Never in FOV
+                    if (DebugMode)
+                    {
+                        featureColor = neverSeenFOVTerrainColor;
+                    }
+                    else
+                    {
+                        drawFeature = false;
+                    }
+                }
+
+                if (drawFeature)
+                {
+                    if (!isViewVisible(thisLock.LocationMap))
+                        continue;
+
+                    tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)] = new TileEngine.TileCell(thisLock.Representation);
+                    tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor);
+                }
+            }
+
+        }
+
         private void DrawFeatures(List<Feature> featureList)
         {
-
-            //Could consider storing here and sorting to give an accurate representation of multiple objects
-
             foreach (Feature feature in featureList)
             {
                 //Don't draw features on other levels
@@ -1743,7 +1791,7 @@ namespace RogueBasin {
                 if (drawFeature)
                 {
                     if (!isViewVisible(feature.LocationMap))
-                        return;
+                        continue;
 
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.Representation);
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor);
@@ -2121,27 +2169,6 @@ namespace RogueBasin {
                         screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
                         baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
 
-                        if (map.MapSquareLocks.ContainsKey(new Point(i,j)))
-                        {
-                            //Set color to lock (only use 1st door)
-                            switch (map.MapSquareLocks[new Point(i, j)][0].Id)
-                            {
-                                case "red":
-                                    baseDrawColor = ColorPresets.Red;
-                                    break;
-                                case "green":
-                                    baseDrawColor = ColorPresets.Green;
-                                    break;
-                                case "blue":
-                                    baseDrawColor = ColorPresets.Blue;
-                                    break;
-                                case "yellow":
-                                    baseDrawColor = ColorPresets.Yellow;
-                                    break;
-
-                            }
-
-                        }
                         //Otherwise not locked
 
                     }

@@ -928,6 +928,8 @@ namespace RogueBasin
         /// </summary>
         public Dictionary<int, List<Point>> corridors = new Dictionary<int,List<Point>>();
 
+        public Dictionary<Point, List<Door>> mapSquareLocks;
+
         public Point upStaircase;
         public Point downStaircase;
 
@@ -936,11 +938,33 @@ namespace RogueBasin
         {
             //0 is the default in the array, so good to distinguish
             NextRoomId = 1;
+            mapSquareLocks = new Dictionary<Point, List<Door>>();
         }
 
         static MapGeneratorBSP()
         {
             rand = new Random();
+        }
+
+        public Map BaseMap
+        {
+            get { return baseMap;  }
+        }
+
+        public Dictionary<Point, List<Door>> MapSquareLocks
+        {
+            get
+            {
+                return mapSquareLocks;
+            }
+        }
+
+        public void AddLockedDoorToMap(Point coord, Door newDoor) {
+            
+            if(!MapSquareLocks.ContainsKey(coord))
+                MapSquareLocks[coord] = new List<Door>();
+
+            MapSquareLocks[coord].Add(newDoor);
         }
 
         public Map GenerateMap(int extraConnections)
@@ -2036,12 +2060,29 @@ namespace RogueBasin
         /// <param name="edge"></param>
         internal void LockConnection(Door lockedDoor)
         {
-            ConnectionInfo connectionInfo = edgeInfo[lockedDoor.DoorConnectionFullMap];
+            ConnectionInfo connectionInfo;
+            try
+            {
+                connectionInfo = edgeInfo[lockedDoor.DoorConnectionFullMap];
+            }
+            catch (KeyNotFoundException ex)
+            {
+                //May be we only have the other edge
+                connectionInfo = edgeInfo[new Connection(lockedDoor.DoorConnectionFullMap.Target, lockedDoor.DoorConnectionFullMap.Source)];
+            }
+
+            Point doorLocation;
 
             if (connectionInfo.DoorPosition == ConnectionInfo.DoorPos.Left)
-                baseMap.AddLockedDoorToMap(new Point(connectionInfo.LeftX, connectionInfo.LeftY), lockedDoor);
+                doorLocation = new Point(connectionInfo.LeftX, connectionInfo.LeftY);
             else
-                baseMap.AddLockedDoorToMap(new Point(connectionInfo.RightX, connectionInfo.RightY), lockedDoor);
+                doorLocation = new Point(connectionInfo.RightX, connectionInfo.RightY);
+
+            AddLockedDoorToMap(doorLocation, lockedDoor);
+
+            //Make this square open (now that it has a lock feature)
+            baseMap.mapSquares[doorLocation.x, doorLocation.y].Terrain = MapTerrain.Empty;
+            baseMap.mapSquares[doorLocation.x, doorLocation.y].SetOpen();
         }
 
         public MapModel GraphModel

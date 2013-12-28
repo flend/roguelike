@@ -55,6 +55,14 @@ namespace RogueBasin
             }
         }
 
+        public Location Location
+        {
+            get
+            {
+                return new Location(locationLevel, locationMap);
+            }
+        }
+
         /// <summary>
         /// Map char. Stored in derived classes but can also be overridden by setting with this
         /// </summary>
