@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace RogueBasin
 {
@@ -180,6 +181,16 @@ namespace RogueBasin
                 newGroup.ItemIndex.Add(i);
                 equipmentListing.Add(newGroup);
             }
+        }
+
+        /// <summary>
+        /// Returns all items derived of a particular type
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <returns></returns>
+        public List<T> GetItemsOfType<T>()
+        {
+            return items.Where(i => i is T).Cast<T>().ToList();
         }
 
         /// <summary>

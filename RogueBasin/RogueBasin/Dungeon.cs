@@ -1975,28 +1975,14 @@ namespace RogueBasin
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
             SpecialMove moveDone = DoSpecialMove(newPCLocation);
 
-            bool okToMoveIntoSquare = false;
+            bool okToMoveIntoSquare = true;
 
             //If there's no special move, do a conventional move
             if (moveDone == null)
             {
+                //If square is not walkable exit, except in special conditions
                 if (!MapSquareIsWalkable(player.LocationLevel, newPCLocation))
                 {
-                    //Is there a lock at the new location? Interact
-                    var locksAtLocation = LocksAtLocation(player.LocationLevel, newPCLocation);
-                    
-                    foreach(var thisLock in locksAtLocation) {
-                        
-                        bool thisSuccess = true;
-                        if(!thisLock.IsOpen()) {
-                            thisSuccess = thisLock.OpenLock(player);
-                        }
-
-                        //Any failure prevents onward movement
-                        if(!thisSuccess)
-                            okToMoveIntoSquare = false;
-                    }
-
                     //Is there a closed door? This is a move, so return
                     if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedDoor)
                     {
@@ -2010,14 +1996,25 @@ namespace RogueBasin
                     }
                 }
 
+                //Is there a lock at the new location? Interact
+                var locksAtLocation = LocksAtLocation(player.LocationLevel, newPCLocation);
+
+                //Try to open each lock
+                foreach (var thisLock in locksAtLocation)
+                {
+                    bool thisSuccess = true;
+                    if (!thisLock.IsOpen())
+                    {
+                        thisSuccess = thisLock.OpenLock(player);
+                    }
+
+                    //Any failure prevents onward movement
+                    if (!thisSuccess)
+                        okToMoveIntoSquare = false;
+                }
+
                 //Check for monsters in the square
                 SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
-                
-                //If it's empty, it's OK
-                if (contents.monster == null)
-                {
-                    okToMoveIntoSquare = true;
-                }
 
                 //Monster - check for charm / passive / normal status
                 if (contents.monster != null)

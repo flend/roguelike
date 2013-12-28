@@ -18,9 +18,22 @@ namespace RogueBasin.Locks
 
         public override bool OpenLock(Player player)
         {
-            isOpen = true;
+            var allPlayerClueItems = player.Inventory.GetItemsOfType<Items.Clue>();
+            var allPlayerClues = allPlayerClueItems.Select(i => i.MapClue);
 
-            return true;
+            bool canDoorBeOpened = mapDoor.CanDoorBeUnlockedWithClues(allPlayerClues);
+
+            if (!canDoorBeOpened)
+            {
+                Game.MessageQueue.AddMessage("You can't open the door. You need " + mapDoor.NumCluesRequired + " " + mapDoor.Id + " keys.");
+                return false;
+            }
+            else
+            {
+                Game.MessageQueue.AddMessage("You open the door with your " + mapDoor.NumCluesRequired + " " + mapDoor.Id + " keys.");
+                isOpen = true;
+                return true;
+            }
         }
 
         public override bool CloseLock(Player player)

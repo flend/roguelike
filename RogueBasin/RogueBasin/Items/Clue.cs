@@ -37,6 +37,11 @@ namespace RogueBasin.Items
             }
         }
 
+        public GraphMap.Clue MapClue
+        {
+            get { return mapClue;  }
+        }
+
         public override int GetWeight()
         {
             return 10;
