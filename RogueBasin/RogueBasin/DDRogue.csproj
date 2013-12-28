@@ -197,12 +197,6 @@
     <Compile Include="FOV\MRPAS.cs" />
     <Compile Include="GameIntro.cs" />
     <Compile Include="Gaussian.cs" />
-    <Compile Include="Graph\DoorClueGraphvizExport.cs" />
-    <Compile Include="Graph\Example7.cs" />
-    <Compile Include="Graph\FileDotEngine.cs" />
-    <Compile Include="Graph\FileDotEngineUndirected.cs" />
-    <Compile Include="Graph\GraphvizExport.cs" />
-    <Compile Include="Graph\MapModel.cs" />
     <Compile Include="IEquippableItem.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\StaircaseDown.cs" />

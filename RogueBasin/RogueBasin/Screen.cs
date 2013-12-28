@@ -2121,10 +2121,10 @@ namespace RogueBasin {
                         screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
                         baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
 
-                        if (map.mapSquareLocks[i, j] != null)
+                        if (map.MapSquareLocks.ContainsKey(new Point(i,j)))
                         {
                             //Set color to lock
-                            switch (map.mapSquareLocks[i, j])
+                            switch (map.MapSquareLocks[new Point(i, j)].Id)
                             {
                                 case "red":
                                     baseDrawColor = ColorPresets.Red;

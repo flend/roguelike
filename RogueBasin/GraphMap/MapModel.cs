@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Collections.ObjectModel;
 
 namespace GraphMap
 {
@@ -21,6 +22,20 @@ namespace GraphMap
 
         public Connection(int origin, int target) : base(origin, target)
         {
+        }
+
+        /// <summary>
+        /// Return the lowest index first
+        /// </summary>
+        public Connection Ordered
+        {
+            get
+            {
+                if (Source < Target)
+                    return new Connection(Source, Target);
+                else
+                    return new Connection(Target, Source);
+            }
         }
     }
 
@@ -97,12 +112,13 @@ namespace GraphMap
         /// </summary>
         public int NumCluesRequired { get; private set; }
 
-        public Door(TaggedEdge<int, string> doorEdge, string id, int index, int numberOfCluesRequired)
+        public Door(TaggedEdge<int, string> doorEdge, Connection connectionFullMap, string id, int index, int numberOfCluesRequired)
         {
             Id = id;
             this.doorEdge = doorEdge;
             this.index = index;
             NumCluesRequired = numberOfCluesRequired;
+            DoorConnectionFullMap = connectionFullMap;
         }
 
         public bool CanDoorBeUnlockedWithClues(IEnumerable<Clue> clues)
@@ -111,6 +127,9 @@ namespace GraphMap
             return cluesForThisDoor >= this.NumCluesRequired;
         }
 
+        /// <summary>
+        /// Edge in reduced no-cycle map
+        /// </summary>
         public TaggedEdge<int, string> DoorEdge
         {
             get
@@ -119,12 +138,13 @@ namespace GraphMap
             }
         }
 
-        public Connection DoorConnection
+        /// <summary>
+        /// Connection in full, non-reduced map
+        /// </summary>
+        public Connection DoorConnectionFullMap
         {
-            get
-            {
-                return new Connection(DoorEdge.Source, DoorEdge.Target);
-            }
+            get;
+            private set;
         }
 
         public int DoorIndex
@@ -183,7 +203,7 @@ namespace GraphMap
 
             //Build Door and Clue Manager
             //Ensure we pass on the mapped (to no cycles) version of the start vertex
-            doorAndClueManager = new DoorAndClueManager(graphNoCycles, graphNoCycles.roomMappingToNoCycles[startVertex]);
+            doorAndClueManager = new DoorAndClueManager(graphNoCycles, graphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
 
             //Build a random generator (don't keep instantiating them, because they all give the same number if during the same tick!
             random = new Random();
@@ -250,7 +270,7 @@ namespace GraphMap
         /// <summary>
         /// Return the start vertex (in the no cycles map)
         /// </summary>
-        public int StartVertexNoCycleMap { get { return GraphNoCycles.roomMappingToNoCycles[startVertex]; } }
+        public int StartVertexNoCycleMap { get { return GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]; } }
     }
 
     /** Manages doors and clues in a map.
@@ -362,8 +382,7 @@ namespace GraphMap
 
         /// <summary>
         /// Add a clue for a doorId at requested room / vertex.
-        /// No checks and no updates to the dependency graph. Therefore this function is not safe for anything other than test cases.
-        /// Adding further doors after using this function can lead to broken maps
+        /// No checks and no updates to the dependency graph.
         /// </summary>
         /// <param name="room"></param>
         /// <param name="doorId"></param>
@@ -399,8 +418,10 @@ namespace GraphMap
 
             int thisDoorIndex = nextDoorIndex;
             nextDoorIndex++;
-            
-            Door newDoor = new Door(foundEdge, doorReqs.Id, thisDoorIndex, doorReqs.NumberOfCluesRequired);
+
+            var doorEdgeInFullMap = mapNoCycles.edgeMappingNoCycleToFullMap[new Connection(edgeForDoor.Source, edgeForDoor.Target).Ordered];
+
+            Door newDoor = new Door(foundEdge, doorEdgeInFullMap, doorReqs.Id, thisDoorIndex, doorReqs.NumberOfCluesRequired);
             doorMap.Add(thisDoorIndex, newDoor);
             doorDependencyGraph.AddVertex(thisDoorIndex);
 
@@ -788,18 +809,26 @@ namespace GraphMap
         public bool CycleDebug { get; set; }
         public readonly UndirectedGraph<int, TaggedEdge<int, string>> mapNoCycles = new UndirectedGraph<int,TaggedEdge<int,string>>();
 
-        public readonly Dictionary<int, int> roomMappingToNoCycles = new Dictionary<int,int>();
+        /// <summary>
+        /// Mapping from room vertex in non-reduced map to node in no-cycle reduced map
+        /// </summary>
+        public readonly ReadOnlyDictionary<int, int> roomMappingFullToNoCycleMap;
+
+        /// <summary>
+        /// Mapping from room vertex in no-cycle reduced map to node in full non-reduced map
+        /// </summary>
+        public readonly ReadOnlyDictionary<int, List<int>> roomMappingNoCycleToFullMap;
+
+        /// <summary>
+        /// Mapping from edge connection in no-cycle reduced map to edge connection in full non-reduced map
+        /// </summary>
+        public readonly ReadOnlyDictionary<Connection, Connection> edgeMappingNoCycleToFullMap;
 
         public MapCycleReducer(IEnumerable<TaggedEdge<int, string>> edges)
         {
             this.baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
             baseGraph.AddVerticesAndEdgeRange(edges);
 
-            Process();
-        }
-
-        private void Process()
-        {
             //Find minimum spanning tree
             MapMST mapMST = new MapMST(baseGraph.Edges);
             
@@ -898,11 +927,16 @@ namespace GraphMap
 
             //Maintain a map of vertex number mappings after cycle removal
             //Initialise with no-change case
+
+            var roomMappingToNoCyclesWork = new Dictionary<int, int>();
+
             foreach (var vertex in baseGraph.Vertices)
-                roomMappingToNoCycles[vertex] = vertex;
+                roomMappingToNoCyclesWork[vertex] = vertex;
+
+            //Maintain a map of all edges after cycle removal to initial map
+            var edgeMappingNoCycleToFullMapWork = new Dictionary<Connection, Connection>();
 
             //For each cycle
-
             for (int i = 0; i < componentCount; i++)
             {
                 //Get all vertices in this cycle
@@ -931,7 +965,7 @@ namespace GraphMap
                 foreach (int vertex in verticesInCycleNotFirst)
                 {
                     //Update vertex map
-                    roomMappingToNoCycles[vertex] = firstVertex;
+                    roomMappingToNoCyclesWork[vertex] = firstVertex;
 
                     //Remove vertex from graph
                     mapNoCycles.RemoveVertex(vertex);
@@ -940,11 +974,29 @@ namespace GraphMap
                 //Add all exterior edges onto the remaining cycle vertex
                 foreach (var edge in exteriorEdges)
                 {
+                    //Maintain reverse mapping. Edges which are collasped map back to the original rooms (where the door actually is)
+                    //Store in lowest node first ordering
+                    edgeMappingNoCycleToFullMapWork.Add(new Connection(roomMappingToNoCyclesWork[edge.Source], roomMappingToNoCyclesWork[edge.Target]).Ordered, new Connection(edge.Source, edge.Target).Ordered);
+
                     //Rewrite edge
                     //Use mapped vertex indices, since those in this cycle (and other source cycles) will have been reduced
-                    mapNoCycles.AddEdge(new TaggedEdge<int, string>(roomMappingToNoCycles[edge.Source], roomMappingToNoCycles[edge.Target], edge.Tag));
+                    mapNoCycles.AddEdge(new TaggedEdge<int, string>(roomMappingToNoCyclesWork[edge.Source], roomMappingToNoCyclesWork[edge.Target], edge.Tag));
                 }
             }
+
+            //Fill in any unchanged edges in the edge mapping
+            foreach (var edge in mapNoCycles.Edges)
+            {
+                if(!edgeMappingNoCycleToFullMapWork.ContainsKey(new Connection(edge.Source, edge.Target).Ordered))
+                    edgeMappingNoCycleToFullMapWork[new Connection(edge.Source, edge.Target).Ordered] = new Connection(edge.Source, edge.Target).Ordered;
+            }
+            
+            edgeMappingNoCycleToFullMap = edgeMappingNoCycleToFullMapWork.AsReadOnly();
+
+            roomMappingFullToNoCycleMap = roomMappingToNoCyclesWork.AsReadOnly();
+            //Reverse the above mapping
+            roomMappingNoCycleToFullMap = roomMappingToNoCyclesWork.GroupBy(kv => kv.Value).ToDictionary(g => g.Key, g => g.Select(kv => kv.Key).ToList()).AsReadOnly();
+                
             if (CycleDebug)
                 Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), mapNoCycles.Vertices.Count(), componentCount));
         }
@@ -1067,5 +1119,16 @@ namespace GraphMap
         {
             return components.Where(kv => kv.Value == componentIndex).Select(kv => kv.Key);
         }
-    }      
+
+    }
+
+    static class DictionaryExtension
+    {
+        public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            return new ReadOnlyDictionary<TKey, TValue>(dictionary);
+        }
+    }
+    
+    
 }

@@ -2034,12 +2034,14 @@ namespace RogueBasin
         /// Lock a connection (set its doors to locked with a particular id)
         /// </summary>
         /// <param name="edge"></param>
-        internal void LockConnection(int originRoom, int targetRoom, string lockId)
+        internal void LockConnection(int originRoom, int targetRoom, Door lockedDoor)
         {
             ConnectionInfo connectionInfo = edgeInfo[new Connection(originRoom, targetRoom)];
 
-            baseMap.mapSquareLocks[connectionInfo.LeftX, connectionInfo.LeftY] = lockId;
-            baseMap.mapSquareLocks[connectionInfo.RightX, connectionInfo.RightY] = lockId;
+            if (connectionInfo.DoorPosition == ConnectionInfo.DoorPos.Left)
+                baseMap.MapSquareLocks.Add(new Point(connectionInfo.LeftX, connectionInfo.LeftY), lockedDoor);
+            else
+                baseMap.MapSquareLocks.Add(new Point(connectionInfo.RightX, connectionInfo.RightY), lockedDoor);
         }
 
         public MapModel GraphModel

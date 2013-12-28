@@ -30,7 +30,7 @@ namespace TestGraphMap
 
             MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
 
-            var roomMapping = cycleReducer.roomMappingToNoCycles;
+            var roomMapping = cycleReducer.roomMappingFullToNoCycleMap;
 
             //Confirm that all the cycle nodes are mapped to the first node
             Assert.AreEqual(roomMapping[3], 3);
@@ -70,6 +70,32 @@ namespace TestGraphMap
             MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
 
             Assert.IsTrue(cycleReducer.IsEdgeInRoomsNoCycles(1, 2));
+        }
+
+        [TestMethod]
+        public void EdgeBetweenNonCycleAndCycleMapsToBottleneckEdge()
+        {
+            //Build a graph with one nested cycle
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            newMap.AddRoomConnection(5, 6);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            //In the reduced graph, we have the edge between the first node of the cycle and the next node
+            //In the full graph, we have the bottleneck edge between the cycle and the next node
+
+            Assert.AreEqual(cycleReducer.edgeMappingNoCycleToFullMap[new Connection(3, 6)], new Connection(5, 6));
         }
 
         [TestMethod]
@@ -175,7 +201,7 @@ namespace TestGraphMap
 
             MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
 
-            var roomMapping = cycleReducer.roomMappingToNoCycles;
+            var roomMapping = cycleReducer.roomMappingFullToNoCycleMap;
 
             //Confirm that all the first cycle nodes are mapped to the first node in the cycle
             Assert.AreEqual(3, roomMapping[3]);
@@ -189,6 +215,154 @@ namespace TestGraphMap
             Assert.AreEqual(6, roomMapping[9]);
             Assert.AreEqual(6, roomMapping[10]);
             Assert.AreEqual(6, roomMapping[11]);
+        }
+
+        [TestMethod]
+        public void MapCycleReducerMapsContainsAMappingForEachEdgeInReducedMap() {
+            //Build a graph with one nested cycles
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            //Exterior connections
+
+            newMap.AddRoomConnection(5, 6);
+            newMap.AddRoomConnection(4, 7);
+            newMap.AddRoomConnection(4, 8);
+            newMap.AddRoomConnection(3, 9);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            Assert.AreEqual(6, cycleReducer.edgeMappingNoCycleToFullMap.Count());
+        }
+
+        [TestMethod]
+        public void MapCycleReducerMapsContainsCorrectMappingForUnchangedEdgesInReducedMap()
+        {
+            //Build a graph with one nested cycles
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            //Exterior connections
+
+            newMap.AddRoomConnection(5, 6);
+            newMap.AddRoomConnection(6, 7);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+            var edgeMapping = cycleReducer.edgeMappingNoCycleToFullMap;
+
+            Assert.AreEqual(new Connection(1, 2), edgeMapping[new Connection(1, 2)].Ordered);
+            Assert.AreEqual(new Connection(2, 3), edgeMapping[new Connection(2, 3)].Ordered);
+            Assert.AreEqual(new Connection(6, 7), edgeMapping[new Connection(6, 7)].Ordered);
+        }
+
+        [TestMethod]
+        public void MapCycleReducerMapsExterorEdgesOfCycleToOriginalConnections()
+        {
+            //Build a graph with one nested cycles
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            //Exterior connections
+
+            newMap.AddRoomConnection(5, 6);
+            newMap.AddRoomConnection(4, 7);
+            newMap.AddRoomConnection(4, 8);
+            newMap.AddRoomConnection(3, 9);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            var edgeMapping = cycleReducer.edgeMappingNoCycleToFullMap;
+
+            //Exterior connections from start node
+            Assert.AreEqual(new Connection(2, 3), edgeMapping[new Connection(2, 3)].Ordered);
+            Assert.AreEqual(new Connection(3, 9), edgeMapping[new Connection(3, 9)].Ordered);
+
+            //Exterior connections from collasped nodes
+            Assert.AreEqual(new Connection(4, 7), edgeMapping[new Connection(3, 7)].Ordered);
+            Assert.AreEqual(new Connection(4, 8), edgeMapping[new Connection(3, 8)].Ordered);
+
+            Assert.AreEqual(new Connection(5, 6), edgeMapping[new Connection(3, 6)].Ordered);
+        }
+
+        [TestMethod]
+        public void MapCycleReducerMapsReducedCycleNodeBackToOriginalNodes()
+        {
+            //Build a graph with one nested cycles
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            newMap.AddRoomConnection(5, 6);
+            
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            var roomMapping = cycleReducer.roomMappingNoCycleToFullMap;
+
+            //Confirm that all the first node in the cycle maps back to all the collapsed nodes
+            CollectionAssert.AreEquivalent(new List<int>(new int[] {3, 4, 5}), roomMapping[3]);
+        }
+
+        [TestMethod]
+        public void MapCycleReducerMapsNonReducedNodeBackToThemselves()
+        {
+            //Build a graph with one nested cycles
+
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Cycle
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 5);
+            newMap.AddRoomConnection(3, 5);
+
+            newMap.AddRoomConnection(5, 6);
+
+            MapCycleReducer cycleReducer = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+
+            var roomMapping = cycleReducer.roomMappingNoCycleToFullMap;
+
+            //Confirm that all the first node in the cycle maps back to all the collapsed nodes
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1 }), roomMapping[1]);
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 2 }), roomMapping[2]);
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 6 }), roomMapping[6]);
         }
 
         [TestMethod]

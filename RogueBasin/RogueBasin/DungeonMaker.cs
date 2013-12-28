@@ -2213,7 +2213,7 @@ namespace RogueBasin
                     var edge = door.Value.DoorEdge;
                     //This won't work at the mo with reduced graphs because it will look for edges which have been newly created by reducing
                     //the graph and therefore won't be here
-                    hallsGen.LockConnection(edge.Source, edge.Target, door.Value.Id);
+                    hallsGen.LockConnection(edge.Source, edge.Target, door.Value);
                 }
             }
 

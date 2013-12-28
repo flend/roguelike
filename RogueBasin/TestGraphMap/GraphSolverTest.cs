@@ -116,7 +116,6 @@ namespace TestGraphMap
         
         private ConnectivityMap BuildStandardTestMap()
         {
-
             ConnectivityMap newMap = new ConnectivityMap();
 
             newMap.AddRoomConnection(1, 2);

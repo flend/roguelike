@@ -1,6 +1,7 @@
 ﻿using System;using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
+using GraphMap;
 
 namespace RogueBasin
 {
@@ -343,7 +344,7 @@ namespace RogueBasin
     {
         public MapSquare[,] mapSquares;
         public int[,] roomIdMap;
-        public string[,] mapSquareLocks;
+        public Dictionary<Point, Door> mapSquareLocks;
         public Point PCStartLocation;
 
         public int width;
@@ -368,6 +369,14 @@ namespace RogueBasin
         Map()
         {
 
+        }
+
+        public Dictionary<Point, Door> MapSquareLocks
+        {
+            get
+            {
+                return mapSquareLocks;
+            }
         }
 
         public MapSquare[,] MapSquares
@@ -395,8 +404,7 @@ namespace RogueBasin
                 {
                     newMap.mapSquares[i, j] = mapSquares[i, j].Clone();
                     newMap.roomIdMap[i, j] = roomIdMap[i, j];
-                    if(mapSquareLocks[i, j] != null)
-                        newMap.mapSquareLocks[i, j] = (string)mapSquareLocks[i, j].Clone();
+                    newMap.mapSquareLocks = new Dictionary<Point, Door>(mapSquareLocks);
                 }
             }
 
@@ -421,7 +429,7 @@ namespace RogueBasin
             }
 
             roomIdMap = new int[width, height];
-            mapSquareLocks = new string[width, height];
+            mapSquareLocks = new Dictionary<Point, Door>();
 
             GuaranteedConnected = false;
 
