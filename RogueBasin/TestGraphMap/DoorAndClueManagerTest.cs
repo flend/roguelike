@@ -189,6 +189,25 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void ValidRoomsAreCorrectWhenSpecifyingExtraDependencies()
+        {
+            var manager = BuildStandardManager();
+
+            //Extra dependencies
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(2, 10), "lock0"), 1);
+            //Make lock0 depend on lock1
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(3, 5), "lock1"), 4);
+
+            //New lock
+            //Asking for valid rooms for lock2 clue, specifying we don't want to have open lock0
+            //We are locking lock1 clues, so rooms behind lock1 and lock0 are excluded
+            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(3, 4), new List<string>(new string[] { "lock0" })).ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3 }), validRooms);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void RequestingDependentDoorsForADoorIdThatDoesntExistThrowsAnException()
         {

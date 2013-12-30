@@ -357,9 +357,10 @@ namespace GraphMap
             get { return doorDependencyGraph; }
         }
 
-        /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge */
-        public IEnumerable<int> GetValidRoomsToPlaceClue(Connection edgeForDoor)
-        {
+        /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge,
+         * specifying also that we want to not place the clue behind any door in the list doorsToAvoid*/
+        public IEnumerable<int> GetValidRoomsToPlaceClue(Connection edgeForDoor, List<string> doorsToAvoidIds) {
+
             //Check the edge is in the reduced map (will throw an exception if can't find)
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
 
@@ -372,8 +373,12 @@ namespace GraphMap
             var allDoorsDependentOnLockedClueDoors = newlyLockedClues.SelectMany(c => GetDependentDoorIndices(c.DoorIndex));
             var allInaccessibleDoors = allLockedClueDoors.Union(allDoorsDependentOnLockedClueDoors).Distinct();
 
+            //Add to the list any doors we want to avoid (this can be used to localise clues to parts of levels etc.)
+            var allDoorsToAvoid = doorsToAvoidIds.Select(id => GetDoorById(id).DoorIndex);
+            var allInaccessibleDoorsAndAvoidedDoors = allInaccessibleDoors.Union(allDoorsToAvoid);
+
             //Retrieve the door edges in the forbidden list
-            var forbiddenDoorEdges = allInaccessibleDoors.Select(doorIndex => doorMap[doorIndex].DoorEdge);
+            var forbiddenDoorEdges = allInaccessibleDoorsAndAvoidedDoors.Select(doorIndex => doorMap[doorIndex].DoorEdge);
             //Add this edge (can't put clue behind our own door) - NB: hacky way to union with a single item
             var allForbiddenDoorEdges = forbiddenDoorEdges.Union(Enumerable.Repeat(foundEdge, 1)).Distinct();
 
@@ -391,6 +396,13 @@ namespace GraphMap
             Console.WriteLine();
 
             return allowedNodes;
+        }
+
+
+        /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge */
+        public IEnumerable<int> GetValidRoomsToPlaceClue(Connection edgeForDoor)
+        {
+            return GetValidRoomsToPlaceClue(edgeForDoor, new List<string>());
         }
 
         /// <summary>
