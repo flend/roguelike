@@ -52,6 +52,7 @@
     <Compile Include="FileDotEngineUndirected.cs" />
     <Compile Include="GraphSolver.cs" />
     <Compile Include="GraphvizExport.cs" />
+    <Compile Include="MapHeuristics.cs" />
     <Compile Include="MapModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
