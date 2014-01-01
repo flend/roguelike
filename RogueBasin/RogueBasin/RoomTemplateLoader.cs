@@ -296,6 +296,39 @@ namespace RogueBasin
             return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
         }
 
+        static public bool ArePointsOnVerticalLine(Point point1, Point point2)
+        {
+            return point1.x == point2.x;
+        }
+
+        /** Orient a corridorTemplate for a width 1 / height 1 corridor */
+        static public TemplatePositioned GetTemplateForSingleSpaceCorridor(Point location, bool corridorRunVertically, int z, RoomTemplate corridorTemplate, int corridorRoomIndex)
+        {
+            if (corridorTemplate.Height > 1)
+                throw new ApplicationException("Corridor template is too long for gap");
+
+            bool horizontalSwitchNeeded = !corridorRunVertically;
+
+            RoomTemplate expandedCorridor = ExpandCorridorTemplate(horizontalSwitchNeeded, 1, corridorTemplate);
+
+            int centreOfTemplateShortAxis = corridorTemplate.Width / 2;
+
+            int left = location.x;
+            int top = location.y;
+
+            //Find the TL for the template to be placed
+            if (horizontalSwitchNeeded)
+            {
+                top -= centreOfTemplateShortAxis;
+            }
+            else
+            {
+                left -= centreOfTemplateShortAxis;
+            }
+
+            return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
+        }
+
         public static RoomTemplate.DoorLocation GetDoorLocation(RoomTemplate roomTemplate, int doorIndex)
         {
             if (roomTemplate.PotentialDoors.Count <= doorIndex)

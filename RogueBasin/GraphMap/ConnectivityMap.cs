@@ -72,6 +72,11 @@ namespace GraphMap
             throw new ApplicationException("Edge not in map");
         }
 
+        public IEnumerable<Connection> GetAllConnections()
+        {
+            return baseGraph.Edges.Select(edge => new Connection(edge.Source, edge.Target));
+        }
+
         public UndirectedGraph<int, TaggedEdge<int, string>> RoomConnectionGraph
         {
             get

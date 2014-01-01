@@ -749,7 +749,10 @@ namespace GraphMap
             foreach (var door in doorMap)
             {
                 if (door.Value.DoorEdge.Source == edge.Source &&
-                    door.Value.DoorEdge.Target == edge.Target)
+                    door.Value.DoorEdge.Target == edge.Target ||
+                    
+                    door.Value.DoorEdge.Source == edge.Target &&
+                    door.Value.DoorEdge.Target == edge.Source)
                 {
                     return door.Value;
                 }

@@ -59,6 +59,10 @@
     <Compile Include="RoomTemplateLoaderTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GraphMap\GraphMap.csproj">
+      <Project>{c01c4688-5271-42fa-a329-bfbb6bd59abc}</Project>
+      <Name>GraphMap</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RogueBasin\DDRogue.csproj">
       <Project>{3d08dd25-6df5-49e7-966d-9c843399c6fc}</Project>
       <Name>DDRogue</Name>

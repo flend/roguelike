@@ -69,6 +69,42 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void SingleSpaceVerticalCorridorsArePositionedCorrectly()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate = RoomTemplateUtilities.GetTemplateForSingleSpaceCorridor(new Point(0, 0), true, 0, corridorTemplate, 0);
+
+            Assert.AreEqual(positionedTemplate.X, -1);
+            Assert.AreEqual(positionedTemplate.Y, 0);
+
+            Assert.AreEqual(positionedTemplate.Room.Height, 1);
+        }
+
+        [TestMethod]
+        public void PointsOnAVerticalLineAreIdentifiedAsSuch()
+        {
+            Assert.IsTrue(RoomTemplateUtilities.ArePointsOnVerticalLine(new Point(4, 3), new Point(4, 6)));
+        }
+
+        [TestMethod]
+        public void PointsNotOnAVerticalLineAreIdentifiedAsSuch()
+        {
+            Assert.IsFalse(RoomTemplateUtilities.ArePointsOnVerticalLine(new Point(4, 1), new Point(5, 1)));
+        }
+
+        [TestMethod]
+        public void SingleSpaceHorizontalCorridorsArePositionedCorrectly()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            TemplatePositioned positionedTemplate = RoomTemplateUtilities.GetTemplateForSingleSpaceCorridor(new Point(0, 0), false, 0, corridorTemplate, 0);
+
+            Assert.AreEqual(positionedTemplate.X, 0);
+            Assert.AreEqual(positionedTemplate.Y, -1);
+
+            Assert.AreEqual(positionedTemplate.Room.Width, 1);
+        }
+
+        [TestMethod]
         public void HorizontalCorridorsCanBeMadeRegardlessOfPointOrder()
         {
             RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GraphMap;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,10 +127,12 @@ namespace RogueBasin
         int nextRoomIndex = 0;
 
         TemplatedMapBuilder mapBuilder;
+        ConnectivityMap connectivityMap;
 
         public TemplatedMapGenerator(TemplatedMapBuilder builder)
         {
             this.mapBuilder = builder;
+            this.connectivityMap = new ConnectivityMap();
         }
 
         private int NextRoomIndex()
@@ -155,6 +158,14 @@ namespace RogueBasin
             }
         }
 
+        public ConnectivityMap ConnectivityMap
+        {
+            get
+            {
+                return connectivityMap;
+            }
+        }
+
         public bool PlaceRoomTemplateAtPosition(RoomTemplate roomTemplate, Point point)
         {
             var roomIndex = NextRoomIndex();
@@ -163,6 +174,8 @@ namespace RogueBasin
 
             if (!placementSuccess)
                 return false;
+
+            IncreaseNextRoomIndex();
 
             //Store a reference to each potential door in the room
             int noDoors = positionedRoom.PotentialDoors.Count();
@@ -197,21 +210,41 @@ namespace RogueBasin
 
             TemplatePositioned corridorTemplateConnectingRooms = null;
 
-            if (distanceApart > 0)
+            if (distanceApart > 1)
             {
                 //Need points that are '1-in' from the doors
                 var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(existingDoorLoc, alignedDoorLocation);
+                var corridorIndex = NextRoomIndex();
 
-                corridorTemplateConnectingRooms =
-                    RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(corridorTermini.Item1, corridorTermini.Item2, 0, corridorTemplate, NextRoomIndex());
+                if (corridorTermini.Item1 == corridorTermini.Item2)
+                {
+                    corridorTemplateConnectingRooms =
+                        RoomTemplateUtilities.GetTemplateForSingleSpaceCorridor(corridorTermini.Item1,
+                        RoomTemplateUtilities.ArePointsOnVerticalLine(corridorTermini.Item1, corridorTermini.Item2), 0, corridorTemplate, corridorIndex);
+                }
+                else
+                {
+                    corridorTemplateConnectingRooms =
+                        RoomTemplateUtilities.GetTemplateForCorridorBetweenPoints(corridorTermini.Item1, corridorTermini.Item2, 0, corridorTemplate, corridorIndex);
+                }
 
                 //Implicit guarantee that the corridor won't overlap with the new room we're about to place
+                //(but it may overlap other previously placed rooms or corridors)
                 if (!mapBuilder.CanBePlacedWithoutOverlappingOtherTemplates(corridorTemplateConnectingRooms))
                     return false;
 
                 //Place the corridor
                 mapBuilder.AddPositionedTemplateOnTop(corridorTemplateConnectingRooms);
                 IncreaseNextRoomIndex();
+
+                //Add connections to the old and new rooms
+                connectivityMap.AddRoomConnection(existingDoor.OwnerRoomIndex, corridorIndex);
+                connectivityMap.AddRoomConnection(corridorIndex, newRoomIndex);
+            }
+            else
+            {
+                //No corridor - a direct connection between the rooms
+                connectivityMap.AddRoomConnection(existingDoor.OwnerRoomIndex, newRoomIndex);
             }
 
             //Place the room

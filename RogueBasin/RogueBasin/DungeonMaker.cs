@@ -2120,50 +2120,6 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Uses graphviz to make a png from a dot. No filename extension on parameter
-        /// </summary>
-        /// <param name="filename"></param>
-        private void RunGraphVizPNG(string filename)
-        {
-
-            // Use ProcessStartInfo class
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = false;
-            startInfo.UseShellExecute = false;
-            startInfo.FileName = "c:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe";
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.Arguments = filename + ".dot -Tpng -o " + filename + ".png";
-
-            try
-            {
-                // Start the process with the info we specified.
-                // Call WaitForExit and then the using statement will close.
-                using (Process exeProcess = Process.Start(startInfo))
-                {
-                    exeProcess.WaitForExit();
-                }
-            }
-            catch
-            {
-                // Log error.
-            }
-        }
-
-        /// <summary>
-        /// Launches a new form to display the png. No extension in parameter.
-        /// </summary>
-        /// <param name="filename"></param>
-        private void DisplayPNGInChildWindow(string filename)
-        {
-            string pngFilename = filename + ".png";
-
-            ImageDisplay displayForm = new ImageDisplay();
-            displayForm.AssignImage(pngFilename);
-            displayForm.Text = pngFilename;
-
-            displayForm.Show();
-        }
 
         /// <summary>
         /// Adds levels and interconnecting staircases
@@ -2253,16 +2209,16 @@ namespace RogueBasin
             }
 
             //Run graphviz to png the output then display
-            RunGraphVizPNG("bsptree-base");
+            GraphVizUtils.RunGraphVizPNG("bsptree-base");
 
-            DisplayPNGInChildWindow("bsptree-base");
+            GraphVizUtils.DisplayPNGInChildWindow("bsptree-base");
 
             if (doLocks)
             {
-                RunGraphVizPNG("bsptree-door");
-                RunGraphVizPNG("bsptree-dep");
-                DisplayPNGInChildWindow("bsptree-door");
-                DisplayPNGInChildWindow("bsptree-dep");
+                GraphVizUtils.RunGraphVizPNG("bsptree-door");
+                GraphVizUtils.RunGraphVizPNG("bsptree-dep");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
             }
 
             //Add standard dock triggers (allows map abortion & completion)
@@ -2320,11 +2276,11 @@ namespace RogueBasin
 
 
             //Run graphviz to png the output then display
-            RunGraphVizPNG("bsptree-base");
-            RunGraphVizPNG("bsptree-nocycles");
+            GraphVizUtils.RunGraphVizPNG("bsptree-base");
+            GraphVizUtils.RunGraphVizPNG("bsptree-nocycles");
 
-            DisplayPNGInChildWindow("bsptree-base");
-            DisplayPNGInChildWindow("bsptree-nocycles");
+            GraphVizUtils.DisplayPNGInChildWindow("bsptree-base");
+            GraphVizUtils.DisplayPNGInChildWindow("bsptree-nocycles");
 
 
 

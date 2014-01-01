@@ -25,6 +25,16 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void GetDoorForEdgeWorksInEitherOrientation()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 12), "lock0"), 2);
+
+            Assert.IsNotNull(manager.GetDoorForEdge(new Connection(12, 11)));
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void CluesCantBePlacedBehindTheirOwnDoors()
         {

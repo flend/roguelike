@@ -11,6 +11,24 @@ namespace TestGraphMap
     public class MapModelTest
     {
         [TestMethod]
+        public void UndirectedEdgesMayBeFoundInEitherOrientation()
+        {
+            var mapNoCycles = new UndirectedGraph<int, TaggedEdge<int, string>>();
+
+            mapNoCycles.AddVerticesAndEdge(new TaggedEdge<int, string>(1, 2, ""));
+
+            TaggedEdge<int, string> possibleEdge = null;
+
+            mapNoCycles.TryGetEdge(2, 1, out possibleEdge);
+            Assert.IsNotNull(possibleEdge);
+
+            TaggedEdge<int, string> possibleEdge2 = null;
+
+            mapNoCycles.TryGetEdge(1, 2, out possibleEdge2);
+            Assert.IsNotNull(possibleEdge2);
+        }
+
+        [TestMethod]
         public void MapCycleReducerRemovesOneCycleInInputMap()
         {
             //Build a graph with one nested cycle
