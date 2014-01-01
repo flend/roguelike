@@ -33,14 +33,35 @@ namespace GraphMap
         }
 
 
-        /** Get nodes depth nodes away from leaves (dead ends) */
-        public IEnumerable<int> GetTerminalBranchNodes(int depth)
+        /** Get dictionary of terminal nodes (those with  */
+        public Dictionary<int, List<int>> GetTerminalBranchNodes()
         {
-            if(depth > 0)
-                throw new NotImplementedException();
-
             var graphMap = mapWithoutCycles.mapNoCycles;
-            return graphMap.Vertices.Where(v => graphMap.AdjacentEdges(v).Count() == 1);
+            var originNodes = graphMap.Vertices.Where(v => graphMap.AdjacentEdges(v).Count() == 1);
+
+            Dictionary<int, List<int>> degreeOfTerminalNodes = new Dictionary<int, List<int>>();
+
+            foreach(var baseNode in originNodes) {
+
+                var nextNode = baseNode;
+                var adjacentEdges = graphMap.AdjacentEdges(baseNode);
+                int degree = -1;
+
+                do {
+                    degree++;
+                    if (!degreeOfTerminalNodes.ContainsKey(degree))
+                        degreeOfTerminalNodes[degree] = new List<int>();
+
+                    degreeOfTerminalNodes[degree].Add(nextNode);
+
+                    nextNode = adjacentEdges.First().Target == nextNode ? adjacentEdges.First().Source : adjacentEdges.First().Target;
+                    adjacentEdges = graphMap.AdjacentEdges(nextNode);
+
+                    //Terminate when we hit a node that branches in 2 ways (3 connections)
+                } while(adjacentEdges.Count() < 3);
+            }
+
+            return degreeOfTerminalNodes;
         }
     }
 }

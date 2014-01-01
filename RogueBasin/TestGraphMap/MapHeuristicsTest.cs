@@ -24,14 +24,35 @@ namespace TestGraphMap
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6 }), accessibleNodes.ToList());
         }
 
+        //Need to rewrite these to return connections. Oh and to fix them too.
         [TestMethod]
         public void DeadEndFinalRoomsCanBeFound()
         {
-
             MapHeuristics mapH = BuildMapHeuristics();
-            var deadEndNodes = mapH.GetTerminalBranchNodes(0).ToList();
+            var deadEndNodes = mapH.GetTerminalBranchNodes()[0].ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 4, 6, 12, 14, 15 }), deadEndNodes);
+        }
+
+        [TestMethod]
+        public void RoomsOfMultipleDepthFromDeadEndFinalRoomsCanBeFound()
+        {
+            var standardMap = BuildBranchingTestMap();
+            var mapNoCycles = new MapCycleReducer(standardMap.RoomConnectionGraph.Edges);
+            var mapH = new MapHeuristics(mapNoCycles, 1);
+
+            var expectedNodes = new Dictionary<int, List<int>> {
+                {0, new List<int>(new int[]{1, 6, 14, 15, 17, 18})},
+                {1, new List<int>(new int[]{5, 12, 16})},
+                {2, new List<int>(new int[]{4})}
+            };
+
+            var terminalNodesFound = mapH.GetTerminalBranchNodes();
+
+            CollectionAssert.AreEquivalent(expectedNodes[0], terminalNodesFound[0]);
+            CollectionAssert.AreEquivalent(expectedNodes[1], terminalNodesFound[1]);
+            CollectionAssert.AreEquivalent(expectedNodes[2], terminalNodesFound[2]);
+            CollectionAssert.AreEquivalent(expectedNodes.Keys, terminalNodesFound.Keys);
         }
 
         private MapHeuristics BuildMapHeuristics()
@@ -74,6 +95,47 @@ namespace TestGraphMap
 
             //Save to disk
             GraphvizExport.OutputUndirectedGraph(newMap.RoomConnectionGraph, "door-and-clue-manager-map");
+
+            return newMap;
+        }
+
+        private ConnectivityMap BuildBranchingTestMap()
+        {
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            //Branch
+
+            newMap.AddRoomConnection(3, 4);
+            newMap.AddRoomConnection(4, 16);
+            newMap.AddRoomConnection(16, 17);
+
+            newMap.AddRoomConnection(3, 5);
+            newMap.AddRoomConnection(5, 6);
+
+            //Cycle
+
+            newMap.AddRoomConnection(2, 8);
+            newMap.AddRoomConnection(2, 7);
+            newMap.AddRoomConnection(8, 9);
+            newMap.AddRoomConnection(7, 9);
+
+            //Post-cycle
+
+            newMap.AddRoomConnection(9, 10);
+            newMap.AddRoomConnection(10, 11);
+            newMap.AddRoomConnection(11, 12);
+            newMap.AddRoomConnection(12, 18);
+        
+            //2-way branches
+            newMap.AddRoomConnection(11, 13);
+            newMap.AddRoomConnection(13, 14);
+            newMap.AddRoomConnection(13, 15);
+
+            //Save to disk
+            GraphvizExport.OutputUndirectedGraph(newMap.RoomConnectionGraph, "branch-test-map");
 
             return newMap;
         }
