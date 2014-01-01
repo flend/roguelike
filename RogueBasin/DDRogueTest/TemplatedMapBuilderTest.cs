@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RogueBasin;
 using System.Reflection;
 using System.IO;
+using System.Collections.Generic;
 
 namespace DDRogueTest
 {
@@ -20,7 +21,58 @@ namespace DDRogueTest
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
             TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            Assert.IsTrue(mapGen.AddPositionedTemplateOnTop(templatePos1));
+        }
+
+        [TestMethod]
+        public void MapContainsCorrectIdOnSingleRoom()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 12);
             mapGen.AddPositionedTemplateOnTop(templatePos1);
+
+            Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+
+            Assert.IsTrue(outputMap.roomIdMap[0, 0] == 12);
+        }
+
+        [TestMethod]
+        public void MapContainsCorrectIdOnTwoNonOverlappingRooms()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 1);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 10, room1, TemplateRotation.Deg0, 2);
+            mapGen.AddPositionedTemplate(templatePos2);
+
+            Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+
+            Assert.IsTrue(outputMap.roomIdMap[0, 0] == 1);
+            Assert.IsTrue(outputMap.roomIdMap[8, 0] == 2);
+        }
+
+        private Dictionary<RoomTemplateTerrain, MapTerrain> GetStandardTerrainMapping()
+        {
+            var terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
+            terrainMapping[RoomTemplateTerrain.Wall] = MapTerrain.Wall;
+            terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
+            terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
+            terrainMapping[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
+
+            return terrainMapping;
         }
 
         [TestMethod]

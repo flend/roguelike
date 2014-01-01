@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="RoomTemplateUtilitiesTest.cs" />
     <Compile Include="TemplatedMapBuilderTest.cs" />
+    <Compile Include="TemplatedMapGeneratorTest.cs" />
     <Compile Include="TemplatePositionedTest.cs" />
     <Compile Include="TemplateRectangleTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -226,6 +226,7 @@ namespace RogueBasin
                     for (int j = 0; j < roomExtent.Height; j++)
                     {
                         RoomTemplateTerrain terrainToMerge = template.terrainMap[i, j];
+                        masterMap.roomIdMap[roomMapLeft + i, roomMapTop + j] = templatePlacement.Value.RoomIndex;
 
                         //For transparent areas, the terrain below is kept
                         if (terrainToMerge != RoomTemplateTerrain.Transparent)
