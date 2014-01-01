@@ -2145,22 +2145,16 @@ namespace RogueBasin {
                         {
                             //Draw the room id (in empty areas only for SRN==1)
 
+                            List<Color> colors = new List<Color>(new Color[] { ColorPresets.Yellow, ColorPresets.Gold, ColorPresets.RosyBrown, ColorPresets.SaddleBrown, ColorPresets.LightGray, ColorPresets.Gray });
+
                             int roomId = map.roomIdMap[i, j];
 
-                            if (roomId < 10)
-                            {
-                                string roomIdS = roomId.ToString();
-                                char r = Convert.ToChar(roomIdS.Substring(0, 1));
-                                screenChar = r;
-                                baseDrawColor = ColorPresets.Yellow;
-                            }
-                            else
-                            {
-                                string roomIdS = roomId.ToString();
-                                char r = Convert.ToChar(roomIdS.Substring(1, 1));
-                                screenChar = r;
-                                baseDrawColor = ColorPresets.Green;
-                            }
+                            int numberToDraw = roomId % 10;
+                            int colorIndex = roomId / 10;
+
+                            char r = Convert.ToChar(numberToDraw.ToString());
+                            screenChar = r;
+                            baseDrawColor = colors[colorIndex];
                         }
                     }
                     else if (map.mapSquares[i, j].Terrain == MapTerrain.ClosedDoor || map.mapSquares[i, j].Terrain == MapTerrain.OpenDoor)

@@ -21,7 +21,7 @@ namespace RogueBasin
         List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
         List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
 
-
+        TemplatedMapGenerator templatedGenerator;
 
         public MapGeneratorTemplated()
         {
@@ -47,6 +47,14 @@ namespace RogueBasin
             return generator.PotentialDoors[Game.Random.Next(generator.PotentialDoors.Count())];
         }
 
+        public ConnectivityMap ConnectivityMap
+        {
+            get
+            {
+                return templatedGenerator.ConnectivityMap;
+            }
+        }
+
         /** Build a map using templated rooms */
         public Map GenerateMap()
         {
@@ -62,9 +70,9 @@ namespace RogueBasin
 
             //Create generator
             var mapBuilder = new TemplatedMapBuilder();
-            var templatedGenerator = new TemplatedMapGenerator(mapBuilder);
+            templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
-            int roomsToPlace = 40;
+            int roomsToPlace = 50;
             int maxRoomDistance = 10;
 
             int roomsPlaced = 0;

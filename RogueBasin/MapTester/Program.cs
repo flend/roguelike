@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RogueBasin;
+using GraphMap;
 
 namespace MapTester
 {
@@ -27,14 +28,26 @@ namespace MapTester
             StandardGameSetup();
 
             //Setup a single test level
-
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
             Map templateMap = templateGen.GenerateMap();
             int levelNo = Game.Dungeon.AddMap(templateMap);
 
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+            //Extract connectivity map
+            var graphModel = new MapModel(templateGen.ConnectivityMap, 0);
+            VisualiseConnectivityGraph(graphModel);
 
             RunGame();
+        }
+
+        private void VisualiseConnectivityGraph(MapModel graphModel)
+        {
+            var visualiser = new DoorClueGraphvizExport(graphModel);
+            visualiser.OutputUndirectedGraph("bsptree-door");
+            visualiser.OutputDoorDependencyGraph("bsptree-dep");
+            GraphVizUtils.RunGraphVizPNG("bsptree-door");
+            GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
+            GraphVizUtils.RunGraphVizPNG("bsptree-dep");
+            GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
         }
 
         private void StandardGameSetup()
@@ -49,6 +62,7 @@ namespace MapTester
 
         private void RunGame()
         {
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
             Game.Dungeon.RecalculateWalkable();
             Game.Dungeon.RefreshAllLevelPathing();
