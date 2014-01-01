@@ -44,6 +44,7 @@ namespace RogueBasin
             //example7.OutputGraph();
 
 
+            SetupSystem();
             bool loadedGame = SetupGame();
 
             MainLoop(loadedGame);
@@ -69,7 +70,7 @@ namespace RogueBasin
             return 1;
         }
 
-        private void MainLoop(bool loadedGame)
+        public void MainLoop(bool loadedGame)
         {
             //Game time
             //Normal creatures have a speed of 100
@@ -2373,14 +2374,11 @@ namespace RogueBasin
             } while (true);
         }
 
-
-
-
         /// <summary>
-        /// Returns true if we loaded a save game
+        /// Setup internal systems
         /// </summary>
         /// <returns></returns>
-        private bool SetupGame()
+        public void SetupSystem()
         {
             //Initial setup
 
@@ -2405,12 +2403,16 @@ namespace RogueBasin
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
+        }
+
+        public bool SetupGame()
+        {
 
             //Intro screen pre-game (must come after screen)
-            
-            
-          //  GameIntro intro = new GameIntro();
-          //  intro.ShowIntroScreen();
+
+
+            //  GameIntro intro = new GameIntro();
+            //  intro.ShowIntroScreen();
 
             string playerName = "Dave";
             bool showMovies = false;
@@ -2425,33 +2427,33 @@ namespace RogueBasin
             //Setup dungeon
 
             //Is there a save game to load?
-         //   if (Utility.DoesSaveGameExist(playerName))
-        //    {
-       //         LoadGame(playerName);
-       //         return true;
-        //    }
-        //    else {
+            //   if (Utility.DoesSaveGameExist(playerName))
+            //    {
+            //         LoadGame(playerName);
+            //         return true;
+            //    }
+            //    else {
 
-                //If not, make a new dungeon for the new player
-                //Dungeon really contains all the state, so also sets up player etc.
+            //If not, make a new dungeon for the new player
+            //Dungeon really contains all the state, so also sets up player etc.
 
-                dungeonMaker = new DungeonMaker(diff);
-                Game.Dungeon = dungeonMaker.SpawnNewDungeon();
+            dungeonMaker = new DungeonMaker(diff);
+            Game.Dungeon = dungeonMaker.SpawnNewDungeon();
 
-                Game.Dungeon.Player.Name = playerName;
-                Game.Dungeon.Player.PlayItemMovies = showMovies;
-                Game.Dungeon.Difficulty = diff;
+            Game.Dungeon.Player.Name = playerName;
+            Game.Dungeon.Player.PlayItemMovies = showMovies;
+            Game.Dungeon.Difficulty = diff;
 
-                //Do final player player
-                Game.Dungeon.Player.StartGameSetup();
+            //Do final player player
+            Game.Dungeon.Player.StartGameSetup();
 
-                //Move the player to the start location, triggering any triggers etc.
-                Game.Dungeon.MoveToFirstMission();
+            //Move the player to the start location, triggering any triggers etc.
+            Game.Dungeon.MoveToFirstMission();
 
-                //Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
+            //Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
 
-                return false;
-      //      }
+            return false;
+            //      }
 
             //Fall into the main loop
         }

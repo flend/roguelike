@@ -2494,7 +2494,7 @@ namespace RogueBasin
         /// Check and set the walkable parameter on each map square
         /// At the moment done for all levels
         /// </summary>
-        internal void RecalculateWalkable()
+        public void RecalculateWalkable()
         {
             for (int i = 0; i < levels.Count; i++)
             {
@@ -2507,7 +2507,7 @@ namespace RogueBasin
         /// Refresh the TCOD maps used for FOV and pathfinding
         /// Unoptimised at present
         /// </summary>
-        internal void RefreshAllLevelPathing()
+        public void RefreshAllLevelPathing()
         {
             //Set the properties on the TCODMaps from our Maps
             for (int i = 0; i < levels.Count; i++) {

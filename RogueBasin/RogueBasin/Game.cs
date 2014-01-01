@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueBasin
 {
-    static class Game
+    public static class Game
     {
         static Dungeon dungeon = null;
         static MessageQueue messages = null;
