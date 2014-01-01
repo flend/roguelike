@@ -136,11 +136,11 @@ namespace RogueBasin
     /** Types of terrain possible for an abstract room template */
     public enum RoomTemplateTerrain
     {
+        Transparent, //default
         Floor,
         Wall,
         WallWithPossibleDoor,
-        OpenWithPossibleDoor,
-        Transparent
+        OpenWithPossibleDoor
     }
 
     /** Mapping for templates. Could be loaded from disk */
@@ -163,6 +163,23 @@ namespace RogueBasin
 
     public static class RoomTemplateUtilities
     {
+        public static Dictionary<RoomTemplateTerrain, char> RoomTerrainChars { get; private set; }
+
+        static RoomTemplateUtilities()
+        {
+            RoomTerrainChars = new Dictionary<RoomTemplateTerrain, char>();
+            SetupRoomTerrainChars();
+        }
+
+        private static void SetupRoomTerrainChars()
+        {
+            RoomTerrainChars.Add(RoomTemplateTerrain.Floor, '.');
+            RoomTerrainChars.Add(RoomTemplateTerrain.OpenWithPossibleDoor, '+');
+            RoomTerrainChars.Add(RoomTemplateTerrain.Transparent, ' ');
+            RoomTerrainChars.Add(RoomTemplateTerrain.Wall, '#');
+            RoomTerrainChars.Add(RoomTemplateTerrain.WallWithPossibleDoor, '#');
+        }
+
         /** Stretches a corridor template into a full sized corridor of length.
          *  Template must be n x 1 (1 row deep).*/
         static public RoomTemplate ExpandCorridorTemplate(bool switchToHorizontal, int length, RoomTemplate corridorTemplate)
@@ -196,6 +213,149 @@ namespace RogueBasin
             }
 
             return new RoomTemplate(newRoom);
+        }
+
+        public static RoomTemplate ExpandCorridorTemplateLShaped(int xOffset, int yOffset, int lTransition, bool switchToHorizontal, RoomTemplate corridorTemplate)
+        {
+            if (corridorTemplate.Height > 1)
+                throw new ApplicationException("Only corridor templates of height 1 supported");
+
+            //I think the code is getting there for #..# but I don't want to put the time in now
+            if (corridorTemplate.Width != 3)
+                throw new ApplicationException("Only corridor templates of width 3 supported");
+
+            int mirroring = 0;
+            RoomTemplateTerrain[,] newRoom;
+
+            if (switchToHorizontal)
+            {
+                //Horizontal
+                mirroring = 2;
+                int transition = xOffset - lTransition;
+
+                if (xOffset * yOffset < 0)
+                {
+                    mirroring = 3;
+                    transition = lTransition;
+                }
+
+                newRoom = GenerateBaseLCorridor(yOffset, xOffset, transition, corridorTemplate);
+            }
+            else
+            {
+                //Vertical
+                if (xOffset * yOffset < 0)
+                    mirroring = 1;
+
+                newRoom = GenerateBaseLCorridor(xOffset, yOffset, lTransition, corridorTemplate);
+            }
+
+            //Horizontal reflection
+            if (mirroring == 1)
+            {
+                var mirrorRoom = new RoomTemplateTerrain[newRoom.GetLength(0), newRoom.GetLength(1)];
+
+                for (int i = 0; i < newRoom.GetLength(0); i++)
+                {
+                    for (int j = 0; j < newRoom.GetLength(1); j++)
+                    {
+                        mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
+                    }
+                }
+                return new RoomTemplate(mirrorRoom);
+            }
+
+            //X-Y mirror
+            if (mirroring == 2)
+            {
+                var mirrorRoom = new RoomTemplateTerrain[newRoom.GetLength(1), newRoom.GetLength(0)];
+
+                for (int i = 0; i < newRoom.GetLength(0); i++)
+                {
+                    for (int j = 0; j < newRoom.GetLength(1); j++)
+                    {
+                        mirrorRoom[newRoom.GetLength(1) - 1 - j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
+                    }
+                }
+                return new RoomTemplate(mirrorRoom);
+            }
+
+            //X-Y mirror, Y reflect
+            if (mirroring == 3)
+            {
+                var mirrorRoom = new RoomTemplateTerrain[newRoom.GetLength(1), newRoom.GetLength(0)];
+
+                for (int i = 0; i < newRoom.GetLength(0); i++)
+                {
+                    for (int j = 0; j < newRoom.GetLength(1); j++)
+                    {
+                        mirrorRoom[j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
+                    }
+                }
+                return new RoomTemplate(mirrorRoom);
+            }
+
+            return new RoomTemplate(newRoom);
+        }
+
+        private static RoomTemplateTerrain[,] GenerateBaseLCorridor(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
+        {
+            var absXOffset = Math.Abs(xOffset);
+            var absYOffset = Math.Abs(yOffset);
+
+            var width = absXOffset + 1 + corridorTemplate.Width - 1;
+            var height = absYOffset + 1;
+
+            var leftFromCentre = (int)Math.Floor((corridorTemplate.Width - 1) / 2.0);
+            var rightFromCentre = corridorTemplate.Width - 1 - leftFromCentre;
+
+            var openSquares = corridorTemplate.Width - 2;
+
+            var newRoom = new RoomTemplateTerrain[width, height];
+
+            //Down left
+            for (int j = 0; j <= lTransition; j++)
+            {
+                for (int i = 0; i < corridorTemplate.Width; i++)
+                {
+                    newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
+                }
+            }
+
+            //Cap
+            for (int i = 0; i < corridorTemplate.Width; i++)
+            {
+                //Use the outside character (should be solid)
+                newRoom[i, lTransition + 1] = corridorTemplate.terrainMap[0, 0];
+            }
+
+            //Down right
+            for (int j = lTransition; j <= absYOffset; j++)
+            {
+                for (int i = 0; i < corridorTemplate.Width; i++)
+                {
+                    newRoom[absXOffset + 1 - rightFromCentre + i, j] = corridorTemplate.terrainMap[i, 0];
+                }
+            }
+
+            //Cap
+            for (int i = 0; i < corridorTemplate.Width; i++)
+            {
+                //Use the outside character (should be solid)
+                newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] = corridorTemplate.terrainMap[0, 0];
+            }
+
+            //Overlay rotated cross-corridor. Always prefer open to closed
+            for (int j = 1; j <= absXOffset; j++)
+            {
+                for (int i = 0; i < corridorTemplate.Width; i++)
+                {
+                    if (newRoom[j, lTransition - 1 + i] == RoomTemplateTerrain.Transparent ||
+                        corridorTemplate.terrainMap[i, 0] == RoomTemplateTerrain.Floor)
+                        newRoom[j, lTransition - 1 + i] = corridorTemplate.terrainMap[i, 0];
+                }
+            }
+            return newRoom;
         }
 
         private static RoomTemplateTerrain[,] RotateTerrainRight(RoomTemplateTerrain[,] matrix)
@@ -453,6 +613,32 @@ namespace RogueBasin
             }
 
             return new Tuple<Point, Point>(corridorStart, corridorEnd);
+        }
+
+        static public void ExportTemplateToTextFile(RoomTemplate templateToExport, string filename)
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(filename, false))
+                {
+                    for (int j = 0; j < templateToExport.Height; j++)
+                    {
+                        StringBuilder mapLine = new StringBuilder();
+
+                        for (int i = 0; i < templateToExport.Width; i++)
+                        {
+                            //Defaults
+                            char screenChar = RoomTerrainChars[templateToExport.terrainMap[i, j]];
+                            mapLine.Append(screenChar);
+                        }
+                        writer.WriteLine(mapLine);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogFile.Log.LogEntryDebug("Failed to write file " + e.Message, LogDebugLevel.High);
+            }
         }
     }
 
