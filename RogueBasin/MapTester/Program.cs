@@ -34,9 +34,6 @@ namespace MapTester
 
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
-            Game.Dungeon.RecalculateWalkable();
-            Game.Dungeon.RefreshAllLevelPathing();
-
             RunGame();
         }
 
@@ -52,6 +49,10 @@ namespace MapTester
 
         private void RunGame()
         {
+
+            Game.Dungeon.RecalculateWalkable();
+            Game.Dungeon.RefreshAllLevelPathing();
+
             rb.MainLoop(false);
         }
     }

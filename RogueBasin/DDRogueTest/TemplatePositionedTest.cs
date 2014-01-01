@@ -16,7 +16,7 @@ namespace DDRogueTest
         {
             RoomTemplate room1 = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(11, 12, 0, room1, TemplateRotation.Deg0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(11, 12, 0, room1, TemplateRotation.Deg0, 0);
             //Doors at: (3,0),(0,1),(7,1),(3,3)
             List <Point> outputList = new List<Point>();
             outputList.Add(new Point(14, 12));

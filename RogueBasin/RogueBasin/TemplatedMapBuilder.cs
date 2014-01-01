@@ -21,17 +21,20 @@ namespace RogueBasin
 
         public int Z { get; set; }
 
+        public int RoomIndex { get; private set; }
+
         public RoomTemplate Room { get; private set; }
 
         public TemplateRotation Rotation { get; set; }
 
-        public TemplatePositioned(int x, int y, int z, RoomTemplate room, TemplateRotation rotation)
+        public TemplatePositioned(int x, int y, int z, RoomTemplate room, TemplateRotation rotation, int roomIndex)
         {
             X = x;
             Y = y;
             Z = z;
             Room = room;
             Rotation = rotation;
+            RoomIndex = roomIndex;
         }
 
         /// <summary>
@@ -110,7 +113,6 @@ namespace RogueBasin
         /// <param name="templateToAdd"></param>
         public bool AddPositionedTemplate(TemplatePositioned templateToAdd)
         {
-
             return AddPositionedTemplate(templateToAdd, templateToAdd.Z);
         }
 

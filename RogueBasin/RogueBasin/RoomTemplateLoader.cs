@@ -256,7 +256,7 @@ namespace RogueBasin
         }
 
         /** Expand a corridor template (vertically aligned) into a suitable room template */
-        static public TemplatePositioned GetTemplateForCorridorBetweenPoints(Point point1, Point point2, int z, RoomTemplate corridorTemplate)
+        static public TemplatePositioned GetTemplateForCorridorBetweenPoints(Point point1, Point point2, int z, RoomTemplate corridorTemplate, int corridorRoomIndex)
         {
             if (!((point1.x == point2.x) || (point1.y == point2.y)))
             {
@@ -293,7 +293,7 @@ namespace RogueBasin
                 left -= centreOfTemplateShortAxis;
             }
 
-            return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0);
+            return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
         }
 
         public static RoomTemplate.DoorLocation GetDoorLocation(RoomTemplate roomTemplate, int doorIndex)
@@ -330,7 +330,7 @@ namespace RogueBasin
         /// Align toAlignRoomTemplate so that a straight corridor can be drawn from baseRoom.
         /// Will rotate toAlignRoomTemplate if required
         /// </summary>
-        public static Tuple<TemplatePositioned, Point> AlignRoomOnDoor(RoomTemplate toAlignRoomTemplate, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
+        public static Tuple<TemplatePositioned, Point> AlignRoomOnDoor(RoomTemplate toAlignRoomTemplate, int toAlignRoomIndex, TemplatePositioned baseRoom, int toAlignRoomDoorIndex, int baseRoomDoorIndex, int distanceApart)
         {
             Point toAlignDoorLocation = toAlignRoomTemplate.PotentialDoors[toAlignRoomDoorIndex].Location;
             Point baseDoorLocation = baseRoom.Room.PotentialDoors[baseRoomDoorIndex].Location;
@@ -379,7 +379,7 @@ namespace RogueBasin
                 toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (rotatedTemplate.Width - 1), baseRoom.Y + yOffset);
             }
 
-            TemplatePositioned rotatedTemplatePosition = new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, TemplateRotation.Deg0);
+            TemplatePositioned rotatedTemplatePosition = new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, TemplateRotation.Deg0, toAlignRoomIndex);
             Point rotatedDoorLocation = new Point(toAlignRoomPosition.x + rotatedtoAlignDoorLocation.x, toAlignRoomPosition.y + rotatedtoAlignDoorLocation.y);
 
             return new Tuple<TemplatePositioned, Point>(rotatedTemplatePosition, rotatedDoorLocation);
