@@ -229,25 +229,34 @@ namespace RogueBasin
 
             if (switchToHorizontal)
             {
+                if (xOffset < 0 && lTransition > 0 ||
+                    xOffset > 0 && lTransition < 0)
+                    throw new ApplicationException("Transition is not within corridor");
+
                 //Horizontal
                 mirroring = 2;
-                int transition = xOffset - lTransition;
+                int transition = lTransition > 0 ? Math.Abs(xOffset) - lTransition : - lTransition;
 
                 if (xOffset * yOffset < 0)
                 {
                     mirroring = 3;
-                    transition = lTransition;
+                    transition = lTransition > 0 ? lTransition : Math.Abs(xOffset) + lTransition;
                 }
 
                 newRoom = GenerateBaseLCorridor(yOffset, xOffset, transition, corridorTemplate);
             }
             else
             {
+                if (yOffset < 0 && lTransition > 0 ||
+                    yOffset > 0 && lTransition < 0)
+                    throw new ApplicationException("Transition is not within corridor");
+
                 //Vertical
+                int transition = lTransition > 0 ? lTransition : Math.Abs(yOffset) + lTransition;
                 if (xOffset * yOffset < 0)
                     mirroring = 1;
 
-                newRoom = GenerateBaseLCorridor(xOffset, yOffset, lTransition, corridorTemplate);
+                newRoom = GenerateBaseLCorridor(xOffset, yOffset, transition, corridorTemplate);
             }
 
             //Horizontal reflection
