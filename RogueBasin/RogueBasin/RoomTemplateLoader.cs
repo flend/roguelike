@@ -527,6 +527,23 @@ namespace RogueBasin
             }
         }
 
+        public static RoomTemplate.DoorLocation GetOppositeDoorLocation(RoomTemplate.DoorLocation doorLocation)
+        {
+            switch (doorLocation)
+            {
+                case RoomTemplate.DoorLocation.Bottom:
+                    return RoomTemplate.DoorLocation.Top;
+                case RoomTemplate.DoorLocation.Top:
+                    return RoomTemplate.DoorLocation.Bottom;
+                case RoomTemplate.DoorLocation.Left:
+                    return RoomTemplate.DoorLocation.Left;
+                case RoomTemplate.DoorLocation.Right:
+                    return RoomTemplate.DoorLocation.Right;
+            }
+
+            throw new ApplicationException("Unknown door location");
+        }
+
 
         /// <summary>
         /// Align toAlignRoomTemplate so that a straight corridor can be drawn from baseRoom.
@@ -587,15 +604,12 @@ namespace RogueBasin
             return new Tuple<TemplatePositioned, Point>(rotatedTemplatePosition, rotatedDoorLocation);
         }
 
-        public static Tuple<Point, Point> CorridorTerminalPointsBetweenDoors(Point start, Point end)
+        public static Tuple<Point, Point> CorridorTerminalPointsBetweenDoors(Point start, Point end, bool isHorizontal)
         {
             Point corridorStart;
             Point corridorEnd;
 
-            if (start.x != end.x && start.y != end.y)
-                throw new ArgumentException("Start and end must be in cardinal direction");
-
-            if (start.x == end.x)
+            if (!isHorizontal)
             {
                 //vertical
                 if (start.y > end.y)
@@ -622,6 +636,11 @@ namespace RogueBasin
             }
 
             return new Tuple<Point, Point>(corridorStart, corridorEnd);
+        }
+
+        public static double DistanceBetween(Point p1, Point p2)
+        {
+            return Math.Sqrt((p1.x - p2.x) ^ 2 + (p1.y - p2.y) ^ 2);
         }
 
         static public void ExportTemplateToTextFile(RoomTemplate templateToExport, string filename)

@@ -480,7 +480,7 @@ namespace DDRogueTest
         public void CorridorsBetweenVerticallyTopBottomAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(5, 5), new Point(5, 10));
+                new Point(5, 5), new Point(5, 10), false);
 
             Assert.AreEqual(new Point(5, 6), corridorPoints.Item1);
             Assert.AreEqual(new Point(5, 9), corridorPoints.Item2);
@@ -490,7 +490,7 @@ namespace DDRogueTest
         public void CorridorsBetweenVerticallyBottomTopAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(0, -5), new Point(0, -10));
+                new Point(0, -5), new Point(0, -10), false);
 
             Assert.AreEqual(new Point(0, -6), corridorPoints.Item1);
             Assert.AreEqual(new Point(0, -9), corridorPoints.Item2);
@@ -500,7 +500,7 @@ namespace DDRogueTest
         public void CorridorsBetweenHorizontallyLeftRightAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(15, 15), new Point(25, 15));
+                new Point(15, 15), new Point(25, 15), true);
 
             Assert.AreEqual(new Point(16, 15), corridorPoints.Item1);
             Assert.AreEqual(new Point(24, 15), corridorPoints.Item2);
@@ -510,18 +510,7 @@ namespace DDRogueTest
         public void CorridorsBetweenHorizontallyRightLeftAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(-15, -15), new Point(-25, -15));
-
-            Assert.AreEqual(new Point(-16, -15), corridorPoints.Item1);
-            Assert.AreEqual(new Point(-24, -15), corridorPoints.Item2);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), "Points not on cardinal directions.")]
-        public void CorridorsStartEndPointsNotInCardinalDirectionShouldThrowException()
-        {
-            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(-15, -14), new Point(-25, -15));
+                new Point(-15, -15), new Point(-25, -15), true);
 
             Assert.AreEqual(new Point(-16, -15), corridorPoints.Item1);
             Assert.AreEqual(new Point(-24, -15), corridorPoints.Item2);
