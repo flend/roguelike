@@ -38,6 +38,33 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void AddingAHorizontalCorridorBetweenTwoRoomsGivesConnectedNodeGraph()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testalignmentroom4.room");
+            RoomTemplate room2 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAtPosition(room2, new Point(-15, -10));
+
+            //TODO: Rooms can't be too close together
+
+            bool corridorPlacement = mapGen.JoinDoorsWithCorridor(mapGen.PotentialDoors[0], mapGen.PotentialDoors[1], corridor1);
+
+            var connectivityMap = mapGen.ConnectivityMap;
+            var allConnections = connectivityMap.GetAllConnections().Select(c => c.Ordered).ToList();
+
+            CollectionAssert.AreEquivalent(new List<Connection>(new Connection[] { new Connection(0, 2), new Connection(1, 2) }), allConnections);
+        }
+
+        [TestMethod]
         public void AddingTwoAlignedRoomsGiveTwoConnectedNodeGraph()
         {
             //Load sample template 8x4

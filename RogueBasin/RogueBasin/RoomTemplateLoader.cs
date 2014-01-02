@@ -536,9 +536,9 @@ namespace RogueBasin
                 case RoomTemplate.DoorLocation.Top:
                     return RoomTemplate.DoorLocation.Bottom;
                 case RoomTemplate.DoorLocation.Left:
-                    return RoomTemplate.DoorLocation.Left;
-                case RoomTemplate.DoorLocation.Right:
                     return RoomTemplate.DoorLocation.Right;
+                case RoomTemplate.DoorLocation.Right:
+                    return RoomTemplate.DoorLocation.Left;
             }
 
             throw new ApplicationException("Unknown door location");
