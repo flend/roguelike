@@ -794,6 +794,42 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Failed to write file " + e.Message, LogDebugLevel.High);
             }
         }
+
+        public static bool CanBeConnectedWithLShapedCorridor(Point door1Coord, RoomTemplate.DoorLocation door1Loc, Point door2Coord, RoomTemplate.DoorLocation door2Loc)
+        {
+            //Directs and opposites can't connect
+
+            if(door1Loc == door2Loc)
+                return false;
+
+            if(door1Loc  == GetOppositeDoorLocation(door2Loc))
+                return false;
+
+            //Both doors must be in each other's mutual acceptance areas
+
+            return DoorLocationIsPossible(door1Loc, door1Coord, door2Coord) && DoorLocationIsPossible(door2Loc, door2Coord, door1Coord);
+        }
+
+        private static bool DoorLocationIsPossible(RoomTemplate.DoorLocation door1Loc, Point door1Coord, Point door2Coord)
+        {
+            if (door1Loc == RoomTemplate.DoorLocation.Top &&
+                door2Coord.y > door1Coord.y)
+                return false;
+
+            if (door1Loc == RoomTemplate.DoorLocation.Bottom &&
+                door2Coord.y < door1Coord.y)
+                return false;
+
+            if (door1Loc == RoomTemplate.DoorLocation.Left &&
+                door2Coord.x > door1Coord.x)
+                return false;
+
+            if (door1Loc == RoomTemplate.DoorLocation.Right &&
+                door2Coord.x < door1Coord.x)
+                return false;
+
+            return true;
+        }
     }
 
     /** Loads a room / vault from disk and returns as a usuable object */

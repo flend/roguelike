@@ -137,6 +137,53 @@ namespace DDRogueTest
             Assert.AreEqual(expandedTemplate, correctOutput);
         }
 
+        [TestMethod]
+        public void TopRoomCanConnectToRightCorridorAtLowerYLowerX()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(-5, -1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Right;
+
+            Assert.IsTrue(RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopRoomCannotConnectToRightCorridorAtLowerYGreaterX()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(5, -1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Right;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopRoomCannotConnectToRightCorridorAtGreaterY()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(5, 1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Right;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopRoomCanConnectToLeftCorridorAtLowerYGreaterX()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(5, -1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Left;
+
+            Assert.IsTrue(RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
 
         [TestMethod]
         public void VerticalLSharedCorridorsCanBeExpandedCorrectlyReversed()
