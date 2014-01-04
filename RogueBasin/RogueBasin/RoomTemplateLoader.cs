@@ -802,7 +802,7 @@ namespace RogueBasin
             if(door1Loc == door2Loc)
                 return false;
 
-            if(door1Loc  == GetOppositeDoorLocation(door2Loc))
+            if(door1Loc == GetOppositeDoorLocation(door2Loc))
                 return false;
 
             //Both doors must be in each other's mutual acceptance areas
@@ -829,6 +829,18 @@ namespace RogueBasin
                 return false;
 
             return true;
+        }
+
+        public static bool CanBeConnectedWithBendCorridor(Point door1Coord, RoomTemplate.DoorLocation door1Loc, Point door2Coord, RoomTemplate.DoorLocation door2Loc)
+        {
+            //Door orientation must be opposite
+
+            if (door1Loc != GetOppositeDoorLocation(door2Loc))
+                return false;
+
+            //Door 2 must be acceptable area for door1
+
+            return DoorLocationIsPossible(door1Loc, door1Coord, door2Coord);
         }
     }
 

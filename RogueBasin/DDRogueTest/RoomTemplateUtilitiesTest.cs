@@ -186,6 +186,42 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void TopDoorCanConnectToBottomDoorAtLowerYWithBendCorridor()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(2, -1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
+
+            Assert.IsTrue(RoomTemplateUtilities.CanBeConnectedWithBendCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopDoorCannotConnectToBottomDoorAtHigherYWithBendCorridor()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(2, 1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithBendCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopDoorCannotConnectToLeftDoorWithBendCorridor()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(2, 1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithBendCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
         public void VerticalLSharedCorridorsCanBeExpandedCorrectlyReversed()
         {
             RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
