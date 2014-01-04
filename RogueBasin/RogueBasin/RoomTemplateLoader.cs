@@ -215,7 +215,7 @@ namespace RogueBasin
             return new RoomTemplate(newRoom);
         }
 
-        public static RoomTemplate ExpandCorridorTemplateLShaped(int xOffset, int yOffset, int lTransition, bool switchToHorizontal, RoomTemplate corridorTemplate)
+        public static RoomTemplate ExpandCorridorTemplateBend(int xOffset, int yOffset, int lTransition, bool switchToHorizontal, RoomTemplate corridorTemplate)
         {
             if (corridorTemplate.Height > 1)
                 throw new ApplicationException("Only corridor templates of height 1 supported");
@@ -224,7 +224,7 @@ namespace RogueBasin
             if (corridorTemplate.Width != 3)
                 throw new ApplicationException("Only corridor templates of width 3 supported");
 
-            if(Math.Abs(xOffset) < 2 || Math.Abs(yOffset) < 2)
+            if (Math.Abs(xOffset) < 2 || Math.Abs(yOffset) < 2)
                 throw new ApplicationException("offset must be at least 2");
 
             int mirroring = 0;
@@ -238,7 +238,7 @@ namespace RogueBasin
 
                 //Horizontal
                 mirroring = 2;
-                int transition = lTransition > 0 ? Math.Abs(xOffset) - lTransition : - lTransition;
+                int transition = lTransition > 0 ? Math.Abs(xOffset) - lTransition : -lTransition;
 
                 if (xOffset * yOffset < 0)
                 {
@@ -246,7 +246,7 @@ namespace RogueBasin
                     transition = lTransition > 0 ? lTransition : Math.Abs(xOffset) + lTransition;
                 }
 
-                newRoom = GenerateBaseLCorridor(yOffset, xOffset, transition, corridorTemplate);
+                newRoom = GenerateBaseCorridorBend(yOffset, xOffset, transition, corridorTemplate);
             }
             else
             {
@@ -259,7 +259,7 @@ namespace RogueBasin
                 if (xOffset * yOffset < 0)
                     mirroring = 1;
 
-                newRoom = GenerateBaseLCorridor(xOffset, yOffset, transition, corridorTemplate);
+                newRoom = GenerateBaseCorridorBend(xOffset, yOffset, transition, corridorTemplate);
             }
 
             //Horizontal reflection
@@ -309,8 +309,87 @@ namespace RogueBasin
 
             return new RoomTemplate(newRoom);
         }
+        
 
-        private static RoomTemplateTerrain[,] GenerateBaseLCorridor(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
+        public static RoomTemplate ExpandCorridorTemplateLShaped(int xOffset, int yOffset, bool horizontalFirst, RoomTemplate corridorTemplate)
+        {
+            if (corridorTemplate.Height > 1)
+                throw new ApplicationException("Only corridor templates of height 1 supported");
+
+            //I think the code is getting there for #..# but I don't want to put the time in now
+            if (corridorTemplate.Width != 3)
+                throw new ApplicationException("Only corridor templates of width 3 supported");
+
+            if(Math.Abs(xOffset) < 2 || Math.Abs(yOffset) < 2)
+                throw new ApplicationException("offset must be at least 2");
+
+            int mirroring = 0;
+            RoomTemplateTerrain[,] newRoom;
+
+            if (xOffset < 0 && yOffset < 0) {
+                mirroring = horizontalFirst ? 0 : 2;
+            }
+            if (xOffset > 0 && yOffset > 0) {
+                mirroring = horizontalFirst ? 2 : 0;
+            }
+            if (xOffset < 0 && yOffset > 0) {
+                mirroring = horizontalFirst ? 3 : 1;
+            }
+            if (xOffset > 0 && yOffset < 0) {
+                mirroring = horizontalFirst ? 1 : 3;
+            }
+            
+            newRoom = GenerateBaseCorridorLShaped(Math.Abs(xOffset), Math.Abs(yOffset), corridorTemplate);
+
+            //Horizontal reflection
+            if (mirroring == 1)
+            {
+                var mirrorRoom = new RoomTemplateTerrain[newRoom.GetLength(0), newRoom.GetLength(1)];
+
+                for (int i = 0; i < newRoom.GetLength(0); i++)
+                {
+                    for (int j = 0; j < newRoom.GetLength(1); j++)
+                    {
+                        mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
+                    }
+                }
+                return new RoomTemplate(mirrorRoom);
+            }
+
+            //Y=-X mirror
+            if (mirroring == 2)
+            {
+                var mirrorRoom = new RoomTemplateTerrain[newRoom.GetLength(0), newRoom.GetLength(1)];
+
+                for (int i = 0; i < newRoom.GetLength(0); i++)
+                {
+                    for (int j = 0; j < newRoom.GetLength(1); j++)
+                    {
+                        mirrorRoom[i, j] = newRoom[newRoom.GetLength(0) - 1 - i, newRoom.GetLength(1) - 1 - j];
+                    }
+                }
+                return new RoomTemplate(mirrorRoom);
+            }
+
+            //Vertical reflection
+            if (mirroring == 3)
+            {
+                var mirrorRoom = new RoomTemplateTerrain[newRoom.GetLength(0), newRoom.GetLength(1)];
+
+                for (int i = 0; i < newRoom.GetLength(0); i++)
+                {
+                    for (int j = 0; j < newRoom.GetLength(1); j++)
+                    {
+                        mirrorRoom[i, newRoom.GetLength(1) - 1 - j] = newRoom[i, j];
+                    }
+                }
+                return new RoomTemplate(mirrorRoom);
+            }
+
+            return new RoomTemplate(newRoom);
+        }
+
+        private static RoomTemplateTerrain[,] GenerateBaseCorridorBend(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
         {
             var absXOffset = Math.Abs(xOffset);
             var absYOffset = Math.Abs(yOffset);
@@ -365,6 +444,50 @@ namespace RogueBasin
                     if (newRoom[j, lTransition - 1 + i] == RoomTemplateTerrain.Transparent ||
                         corridorTemplate.terrainMap[i, 0] == RoomTemplateTerrain.Floor)
                         newRoom[j, lTransition - 1 + i] = corridorTemplate.terrainMap[i, 0];
+                }
+            }
+            return newRoom;
+        }
+
+        private static RoomTemplateTerrain[,] GenerateBaseCorridorLShaped(int xOffset, int yOffset, RoomTemplate corridorTemplate)
+        {
+            var absXOffset = Math.Abs(xOffset);
+            var absYOffset = Math.Abs(yOffset);
+
+            var leftFromCentre = (int)Math.Floor((corridorTemplate.Width - 1) / 2.0);
+            var rightFromCentre = corridorTemplate.Width - 1 - leftFromCentre;
+
+            var width = absXOffset + leftFromCentre + 1;
+            var height = absYOffset + corridorTemplate.Width - 1;
+
+            var openSquares = corridorTemplate.Width - 2;
+
+            var newRoom = new RoomTemplateTerrain[width, height];
+
+            //Down left
+            for (int j = 0; j <= yOffset; j++)
+            {
+                for (int i = 0; i < corridorTemplate.Width; i++)
+                {
+                    newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
+                }
+            }
+
+            //Cap
+            for (int i = 0; i < corridorTemplate.Width; i++)
+            {
+                //Use the outside character (should be solid)
+                newRoom[i, yOffset + 1] = corridorTemplate.terrainMap[0, 0];
+            }
+
+            //Overlay rotated cross-corridor. Always prefer open to closed
+            for (int j = 1; j <= absXOffset + 1; j++)
+            {
+                for (int i = 0; i < corridorTemplate.Width; i++)
+                {
+                    if (newRoom[j, yOffset - 1 + i] == RoomTemplateTerrain.Transparent ||
+                        corridorTemplate.terrainMap[i, 0] == RoomTemplateTerrain.Floor)
+                        newRoom[j, yOffset - 1 + i] = corridorTemplate.terrainMap[i, 0];
                 }
             }
             return newRoom;

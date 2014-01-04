@@ -259,7 +259,7 @@ namespace RogueBasin
                     transition = (int)Math.Floor(xOffset / 2.0);
                 }
 
-                var expandedCorridor = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(xOffset, yOffset, transition, horizontal, corridorTemplate);
+                var expandedCorridor = RoomTemplateUtilities.ExpandCorridorTemplateBend(xOffset, yOffset, transition, horizontal, corridorTemplate);
 
                 //Place corridor
 
