@@ -232,6 +232,27 @@ namespace RogueBasin
 
             int mirroring = 0;
             RoomTemplateTerrain[,] newRoom;
+            bool useEndPoint = false;
+
+            if (xOffset < 0 && yOffset < 0)
+            {
+                useEndPoint = switchToHorizontal ? false : true;
+            }
+            if (xOffset > 0 && yOffset > 0)
+            {
+                useEndPoint = switchToHorizontal ? true : false;
+            }
+            if (xOffset < 0 && yOffset > 0)
+            {
+                useEndPoint = switchToHorizontal ? true : false;
+            }
+            if (xOffset > 0 && yOffset < 0)
+            {
+                useEndPoint = switchToHorizontal ? false : true;
+            }
+
+            Point startPoint;
+            Point endPoint;
 
             if (switchToHorizontal)
             {
@@ -249,7 +270,10 @@ namespace RogueBasin
                     transition = lTransition > 0 ? lTransition : Math.Abs(xOffset) + lTransition;
                 }
 
-                newRoom = GenerateBaseCorridorBend(yOffset, xOffset, transition, corridorTemplate);
+                var corridorBend = GenerateBaseCorridorBend(yOffset, xOffset, transition, corridorTemplate);
+                newRoom = corridorBend.Item1;
+                startPoint = corridorBend.Item2;
+                endPoint = corridorBend.Item3;
             }
             else
             {
@@ -262,9 +286,22 @@ namespace RogueBasin
                 if (xOffset * yOffset < 0)
                     mirroring = 1;
 
-                newRoom = GenerateBaseCorridorBend(xOffset, yOffset, transition, corridorTemplate);
+                var corridorBend = GenerateBaseCorridorBend(xOffset, yOffset, transition, corridorTemplate);
+                newRoom = corridorBend.Item1;
+                startPoint = corridorBend.Item2;
+                endPoint = corridorBend.Item3;
             }
 
+            RoomTemplate templateToReturn = null;
+            Point startPointToRet = null;
+            Point endPointToRet = null;
+
+            if (mirroring == 0)
+            {
+                templateToReturn = new RoomTemplate(newRoom);
+                startPointToRet = startPoint;
+                endPointToRet = endPoint;
+            }
             //Horizontal reflection
             if (mirroring == 1)
             {
@@ -277,7 +314,9 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
                     }
                 }
-                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
+                templateToReturn = new RoomTemplate(mirrorRoom);
+                startPointToRet = new Point(newRoom.GetLength(0) - 1 - startPoint.x, startPoint.y);
+                endPointToRet = new Point(newRoom.GetLength(0) - 1 - endPoint.x, endPoint.y);
             }
 
             //X-Y mirror
@@ -292,7 +331,9 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(1) - 1 - j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
                     }
                 }
-                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
+                templateToReturn = new RoomTemplate(mirrorRoom);
+                startPointToRet = new Point(newRoom.GetLength(1) - 1 - startPoint.y, newRoom.GetLength(0) - 1 - startPoint.x);
+                endPointToRet = new Point(newRoom.GetLength(1) - 1 - endPoint.y, newRoom.GetLength(0) - 1 - endPoint.x);
             }
 
             //X-Y mirror, Y reflect
@@ -307,10 +348,15 @@ namespace RogueBasin
                         mirrorRoom[j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
                     }
                 }
-                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
+                templateToReturn = new RoomTemplate(mirrorRoom);
+                startPointToRet = new Point(startPoint.y, newRoom.GetLength(0) - 1 - startPoint.x);
+                endPointToRet = new Point(endPoint.y, newRoom.GetLength(0) - 1 - endPoint.x);
             }
 
-            return new Tuple<RoomTemplate, Point>(new RoomTemplate(newRoom), null);
+            if (useEndPoint)
+                return new Tuple<RoomTemplate, Point>(templateToReturn, endPointToRet);
+            else
+                return new Tuple<RoomTemplate, Point>(templateToReturn, startPointToRet);
         }
         
 
@@ -328,22 +374,40 @@ namespace RogueBasin
 
             int mirroring = 0;
             RoomTemplateTerrain[,] newRoom;
+            bool useEndPoint = false;
 
             if (xOffset < 0 && yOffset < 0) {
                 mirroring = horizontalFirst ? 0 : 2;
+                useEndPoint = horizontalFirst ? true : false;
             }
             if (xOffset > 0 && yOffset > 0) {
                 mirroring = horizontalFirst ? 2 : 0;
+                useEndPoint = horizontalFirst ? true : false;
             }
             if (xOffset < 0 && yOffset > 0) {
                 mirroring = horizontalFirst ? 3 : 1;
+                useEndPoint = horizontalFirst ? true : false;
             }
             if (xOffset > 0 && yOffset < 0) {
                 mirroring = horizontalFirst ? 1 : 3;
+                useEndPoint = horizontalFirst ? true : false;
             }
             
-            newRoom = GenerateBaseCorridorLShaped(Math.Abs(xOffset), Math.Abs(yOffset), corridorTemplate);
+            var roomAndStartPoint = GenerateBaseCorridorLShaped(Math.Abs(xOffset), Math.Abs(yOffset), corridorTemplate);
+            newRoom = roomAndStartPoint.Item1;
+            var startPoint = roomAndStartPoint.Item2;
+            var endPoint = roomAndStartPoint.Item3;
 
+            RoomTemplate mapToReturn = null;
+            Point startPointMirror = null;
+            Point endPointMirror = null;
+
+            if (mirroring == 0)
+            {
+                mapToReturn = new RoomTemplate(newRoom);
+                startPointMirror = startPoint;
+                endPointMirror = endPoint;
+            }
             //Horizontal reflection
             if (mirroring == 1)
             {
@@ -356,7 +420,9 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
                     }
                 }
-                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
+                mapToReturn = new RoomTemplate(mirrorRoom);
+                startPointMirror = new Point(newRoom.GetLength(0) - 1 - startPoint.x, startPoint.y);
+                endPointMirror = new Point(newRoom.GetLength(0) - 1 - endPoint.x, endPoint.y);
             }
 
             //Y=-X mirror
@@ -371,7 +437,9 @@ namespace RogueBasin
                         mirrorRoom[i, j] = newRoom[newRoom.GetLength(0) - 1 - i, newRoom.GetLength(1) - 1 - j];
                     }
                 }
-                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
+                mapToReturn =  new RoomTemplate(mirrorRoom);
+                startPointMirror = new Point(newRoom.GetLength(0) - 1 - startPoint.x, newRoom.GetLength(1) - 1 - startPoint.y);
+                endPointMirror = new Point(newRoom.GetLength(0) - 1 - endPoint.x, newRoom.GetLength(1) - 1 - endPoint.y);
             }
 
             //Vertical reflection
@@ -386,13 +454,18 @@ namespace RogueBasin
                         mirrorRoom[i, newRoom.GetLength(1) - 1 - j] = newRoom[i, j];
                     }
                 }
-                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
+                mapToReturn = new RoomTemplate(mirrorRoom);
+                startPointMirror = new Point(startPoint.x, newRoom.GetLength(1) - 1 - startPoint.y);
+                endPointMirror = new Point(endPoint.x, newRoom.GetLength(1) - 1 - endPoint.y);
             }
 
-            return new Tuple<RoomTemplate, Point>(new RoomTemplate(newRoom), null);
+            if(useEndPoint)
+                return new Tuple<RoomTemplate, Point>(mapToReturn, endPointMirror);
+            else
+                return new Tuple<RoomTemplate, Point>(mapToReturn, startPointMirror);
         }
 
-        private static RoomTemplateTerrain[,] GenerateBaseCorridorBend(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
+        private static Tuple<RoomTemplateTerrain[,], Point, Point> GenerateBaseCorridorBend(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
         {
             var absXOffset = Math.Abs(xOffset);
             var absYOffset = Math.Abs(yOffset);
@@ -449,10 +522,17 @@ namespace RogueBasin
                         newRoom[j, lTransition - 1 + i] = corridorTemplate.terrainMap[i, 0];
                 }
             }
-            return newRoom;
+            return new Tuple<RoomTemplateTerrain[,], Point, Point>(newRoom, new Point(leftFromCentre, 0), new Point(width - 1 - rightFromCentre, absYOffset));
         }
 
-        private static RoomTemplateTerrain[,] GenerateBaseCorridorLShaped(int xOffset, int yOffset, RoomTemplate corridorTemplate)
+        /// <summary>
+        /// Returns terrain, start of corridor, end of corridor
+        /// </summary>
+        /// <param name="xOffset"></param>
+        /// <param name="yOffset"></param>
+        /// <param name="corridorTemplate"></param>
+        /// <returns></returns>
+        private static Tuple<RoomTemplateTerrain[,], Point, Point> GenerateBaseCorridorLShaped(int xOffset, int yOffset, RoomTemplate corridorTemplate)
         {
             var absXOffset = Math.Abs(xOffset);
             var absYOffset = Math.Abs(yOffset);
@@ -493,7 +573,7 @@ namespace RogueBasin
                         newRoom[j, yOffset - 1 + i] = corridorTemplate.terrainMap[i, 0];
                 }
             }
-            return newRoom;
+            return new Tuple<RoomTemplateTerrain[,], Point, Point>(newRoom, new Point(leftFromCentre, 0), new Point(absXOffset + leftFromCentre, absYOffset));
         }
 
         private static RoomTemplateTerrain[,] RotateTerrainRight(RoomTemplateTerrain[,] matrix)
