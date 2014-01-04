@@ -27,10 +27,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedlvertical1.room");
 
             //+x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(4, 6, 2, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "vertical-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(4, 6, 2, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "vertical-l-corridor.txt");
             
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(1, 0));
         }
 
         [TestMethod]
@@ -40,10 +41,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorldr.room");
 
             //+x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(5, 3, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdh-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(5, 3, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdh-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(1, 0));
         }
 
         [TestMethod]
@@ -53,10 +55,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorlrd.room");
 
             //+x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, 4, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdv-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, 4, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdv-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(0, 1));
         }
 
         [TestMethod]
@@ -66,10 +69,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorlrd.room");
 
             //-x -y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-6, -4, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdh-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-6, -4, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdh-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(6, 5));
         }
 
         [TestMethod]
@@ -79,10 +83,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorldr.room");
 
             //-x -y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-5, -3, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdv-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-5, -3, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdv-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(6, 3));
         }
 
         [TestMethod]
@@ -92,10 +97,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorlld.room");
 
             //-x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-6, 4, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdh-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-6, 4, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdh-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(7, 1));
         }
 
         [TestMethod]
@@ -105,23 +111,25 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorldl.room");
 
             //-x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-5, 3, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdv-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(-5, 3, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdv-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(6, 0));
         }
 
         [TestMethod]
         public void RUHorizontalLShapedCorridorsCanBeExpandedCorrectly()
         {
-            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            var corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorldl.room");
 
             //+x -y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(5, -3, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdh-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(5, -3, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdh-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(0, 3));
         }
 
         [TestMethod]
@@ -131,10 +139,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorlld.room");
 
             //+x -y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, -4, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "rdv-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, -4, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdv-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(1, 5));
         }
 
         [TestMethod]
@@ -228,10 +237,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedlvertical1.room");
 
             //-x -y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-4, -6, -4, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "vertical-l-corridor-rev.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-4, -6, -4, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "vertical-l-corridor-rev.txt");
 
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(5, 6));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
         [TestMethod]
@@ -241,10 +251,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedlhorizontal1.room");
 
             //+x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(7, 5, 5, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "horizontal-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(7, 5, 5, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "horizontal-l-corridor.txt");
 
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(0, 1));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
         [TestMethod]
@@ -254,10 +265,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedlhorizontal1.room");
 
             //-x -y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-7, -5, -2, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "horizontal-l-corridor-rev.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-7, -5, -2, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "horizontal-l-corridor-rev.txt");
 
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(6, 7));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
         [TestMethod]
@@ -267,10 +279,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.negativeexpandedlhorizontal1.room");
 
             //+x -y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(7, -5, 5, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "negative-horizontal-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(7, -5, 5, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "negative-horizontal-l-corridor.txt");
 
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(0, 6));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
         [TestMethod]
@@ -280,10 +293,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.negativeexpandedlhorizontal1.room");
 
             //-x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-7, 5, -2, true, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "negative-horizontal-l-corridor-rev.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-7, 5, -2, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "negative-horizontal-l-corridor-rev.txt");
 
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(7, 1));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
         [TestMethod]
@@ -293,10 +307,11 @@ namespace DDRogueTest
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.negativeexpandedlvertical1.room");
 
             //-x +y
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-4, 6, 2, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "negative-vertical-l-corridor.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(-4, 6, 2, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "negative-vertical-l-corridor.txt");
 
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(0, 5));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
         [TestMethod]
@@ -305,10 +320,11 @@ namespace DDRogueTest
             RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
             RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.negativeexpandedlvertical1.room");
 
-            RoomTemplate expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(4, -6, -4, false, corridorTemplate);
-            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate, "negative-vertical-l-corridor-rev.txt");
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateBend(4, -6, -4, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "negative-vertical-l-corridor-rev.txt");
 
-            Assert.AreEqual(expandedTemplate, correctOutput);
+            Assert.AreEqual(expandedTemplate.Item2, new Point(1, 6));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
         [TestMethod]
@@ -668,7 +684,7 @@ namespace DDRogueTest
         public void CorridorsBetweenVerticallyTopBottomAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(5, 5), new Point(5, 10), false);
+                new Point(5, 5), RoomTemplate.DoorLocation.Bottom, new Point(5, 10), RoomTemplate.DoorLocation.Top);
 
             Assert.AreEqual(new Point(5, 6), corridorPoints.Item1);
             Assert.AreEqual(new Point(5, 9), corridorPoints.Item2);
@@ -678,7 +694,7 @@ namespace DDRogueTest
         public void CorridorsBetweenVerticallyBottomTopAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(0, -5), new Point(0, -10), false);
+                new Point(0, -5), RoomTemplate.DoorLocation.Top, new Point(0, -10), RoomTemplate.DoorLocation.Bottom);
 
             Assert.AreEqual(new Point(0, -6), corridorPoints.Item1);
             Assert.AreEqual(new Point(0, -9), corridorPoints.Item2);
@@ -688,7 +704,7 @@ namespace DDRogueTest
         public void CorridorsBetweenHorizontallyLeftRightAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(15, 15), new Point(25, 15), true);
+                new Point(15, 15), RoomTemplate.DoorLocation.Right, new Point(25, 15), RoomTemplate.DoorLocation.Left);
 
             Assert.AreEqual(new Point(16, 15), corridorPoints.Item1);
             Assert.AreEqual(new Point(24, 15), corridorPoints.Item2);
@@ -698,7 +714,7 @@ namespace DDRogueTest
         public void CorridorsBetweenHorizontallyRightLeftAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(-15, -15), new Point(-25, -15), true);
+                new Point(-15, -15), RoomTemplate.DoorLocation.Left, new Point(-25, -15), RoomTemplate.DoorLocation.Right);
 
             Assert.AreEqual(new Point(-16, -15), corridorPoints.Item1);
             Assert.AreEqual(new Point(-24, -15), corridorPoints.Item2);
@@ -708,7 +724,7 @@ namespace DDRogueTest
         public void CorridorsBetweenHorizontallyRightLeftNonAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(-8, -9), new Point(0, 2), true);
+                new Point(-8, -9), RoomTemplate.DoorLocation.Right, new Point(0, 2), RoomTemplate.DoorLocation.Left);
 
             Assert.AreEqual(new Point(-7, -9), corridorPoints.Item1);
             Assert.AreEqual(new Point(-1, 2), corridorPoints.Item2);
@@ -718,7 +734,7 @@ namespace DDRogueTest
         public void CorridorsBetweeVerticallyTopBottomNonAlignedPointShouldStart1SquareIn()
         {
             Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
-                new Point(-8, -9), new Point(0, 2), false);
+                new Point(-8, -9), RoomTemplate.DoorLocation.Bottom, new Point(0, 2), RoomTemplate.DoorLocation.Top);
 
             Assert.AreEqual(new Point(-8, -8), corridorPoints.Item1);
             Assert.AreEqual(new Point(0, 1), corridorPoints.Item2);

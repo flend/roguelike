@@ -237,8 +237,14 @@ namespace RogueBasin
                 var firstDoorLoc = RoomTemplateUtilities.GetDoorLocation(firstDoor.OwnerRoom.Room, firstDoor.DoorIndexInRoom);
                 var secondDoorLoc = RoomTemplateUtilities.GetDoorLocation(secondDoor.OwnerRoom.Room, secondDoor.DoorIndexInRoom);
 
-                if (RoomTemplateUtilities.GetOppositeDoorLocation(firstDoorLoc) != secondDoorLoc)
-                    throw new ApplicationException("Can't join non-opposing doors");
+                var firstDoorCoord = firstDoor.MapCoords;
+                var secondDoorCoord = secondDoor.MapCoords;
+
+                bool canDoLSharedCorridor = RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(firstDoorCoord, firstDoorLoc, secondDoorCoord, secondDoorLoc);
+                bool canDoBendCorridor = RoomTemplateUtilities.CanBeConnectedWithBendCorridor(firstDoorCoord, firstDoorLoc, secondDoorCoord, secondDoorLoc);
+
+                if (!canDoLSharedCorridor && !canDoBendCorridor)
+                    throw new ApplicationException("No corridor available to connect this type of door");
 
                 //Create template
 
@@ -248,20 +254,35 @@ namespace RogueBasin
                     horizontal = true;
                 }
 
-                var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(firstDoor.MapCoords, secondDoor.MapCoords, horizontal);
+                var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(firstDoor.MapCoords, firstDoor.DoorLocation, secondDoor.MapCoords, secondDoor.DoorLocation);
 
                 int xOffset = corridorTermini.Item1.x - corridorTermini.Item2.x;
                 int yOffset = corridorTermini.Item1.y - corridorTermini.Item2.y;
 
-                int transition = (int)Math.Floor(yOffset / 2.0);
-                if (horizontal == true)
+                RoomTemplate expandedCorridor;
+                Point corridorTerminus1InTemplate;
+
+                if (canDoBendCorridor)
                 {
-                    transition = (int)Math.Floor(xOffset / 2.0);
+                    int transition = (int)Math.Floor(yOffset / 2.0);
+                    if (horizontal == true)
+                    {
+                        transition = (int)Math.Floor(xOffset / 2.0);
+                    }
+                    var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateBend(xOffset, yOffset, transition, horizontal, corridorTemplate);
+                    expandedCorridor = expandedCorridorAndPoint.Item1;
+                    corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
+                }
+                else
+                {
+                    var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(xOffset, yOffset, horizontal, corridorTemplate);
+                    expandedCorridor = expandedCorridorAndPoint.Item1;
+                    corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
                 }
 
-                var expandedCorridor = RoomTemplateUtilities.ExpandCorridorTemplateBend(xOffset, yOffset, transition, horizontal, corridorTemplate);
-
                 //Place corridor
+
+                //Replace with sensible code using corridorTerminus1InTemplate;
 
                 //-1 is for a 3 width corridor, which they all are at the moment
                 Point topLeftDoors = new Point(Math.Min(corridorTermini.Item1.x, corridorTermini.Item2.x), Math.Min(corridorTermini.Item1.y, corridorTermini.Item2.y));
@@ -323,7 +344,7 @@ namespace RogueBasin
                 var doorOrientation = RoomTemplateUtilities.GetDoorLocation(existingDoor.OwnerRoom.Room, existingDoor.DoorIndexInRoom);
                 bool isHorizontal = doorOrientation == RoomTemplate.DoorLocation.Left || doorOrientation == RoomTemplate.DoorLocation.Right;
 
-                var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(existingDoorLoc, alignedDoorLocation, isHorizontal);
+                var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(existingDoorLoc, existingDoor.DoorLocation, alignedDoorLocation, RoomTemplateUtilities.GetOppositeDoorLocation(existingDoor.DoorLocation));
                 var corridorIndex = NextRoomIndex();
 
                 if (corridorTermini.Item1 == corridorTermini.Item2)

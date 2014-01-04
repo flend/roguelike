@@ -215,7 +215,10 @@ namespace RogueBasin
             return new RoomTemplate(newRoom);
         }
 
-        public static RoomTemplate ExpandCorridorTemplateBend(int xOffset, int yOffset, int lTransition, bool switchToHorizontal, RoomTemplate corridorTemplate)
+        /// <summary>
+        /// Returns the template and the offset onto the template of the start points (where the offsets are relative to)
+        /// </summary>
+        public static Tuple<RoomTemplate, Point> ExpandCorridorTemplateBend(int xOffset, int yOffset, int lTransition, bool switchToHorizontal, RoomTemplate corridorTemplate)
         {
             if (corridorTemplate.Height > 1)
                 throw new ApplicationException("Only corridor templates of height 1 supported");
@@ -274,7 +277,7 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
                     }
                 }
-                return new RoomTemplate(mirrorRoom);
+                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
             }
 
             //X-Y mirror
@@ -289,7 +292,7 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(1) - 1 - j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
                     }
                 }
-                return new RoomTemplate(mirrorRoom);
+                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
             }
 
             //X-Y mirror, Y reflect
@@ -304,14 +307,14 @@ namespace RogueBasin
                         mirrorRoom[j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
                     }
                 }
-                return new RoomTemplate(mirrorRoom);
+                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
             }
 
-            return new RoomTemplate(newRoom);
+            return new Tuple<RoomTemplate, Point>(new RoomTemplate(newRoom), null);
         }
         
 
-        public static RoomTemplate ExpandCorridorTemplateLShaped(int xOffset, int yOffset, bool horizontalFirst, RoomTemplate corridorTemplate)
+        public static new Tuple<RoomTemplate, Point> ExpandCorridorTemplateLShaped(int xOffset, int yOffset, bool horizontalFirst, RoomTemplate corridorTemplate)
         {
             if (corridorTemplate.Height > 1)
                 throw new ApplicationException("Only corridor templates of height 1 supported");
@@ -353,7 +356,7 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
                     }
                 }
-                return new RoomTemplate(mirrorRoom);
+                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
             }
 
             //Y=-X mirror
@@ -368,7 +371,7 @@ namespace RogueBasin
                         mirrorRoom[i, j] = newRoom[newRoom.GetLength(0) - 1 - i, newRoom.GetLength(1) - 1 - j];
                     }
                 }
-                return new RoomTemplate(mirrorRoom);
+                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
             }
 
             //Vertical reflection
@@ -383,10 +386,10 @@ namespace RogueBasin
                         mirrorRoom[i, newRoom.GetLength(1) - 1 - j] = newRoom[i, j];
                     }
                 }
-                return new RoomTemplate(mirrorRoom);
+                return new Tuple<RoomTemplate, Point>(new RoomTemplate(mirrorRoom), null);
             }
 
-            return new RoomTemplate(newRoom);
+            return new Tuple<RoomTemplate, Point>(new RoomTemplate(newRoom), null);
         }
 
         private static RoomTemplateTerrain[,] GenerateBaseCorridorBend(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
@@ -730,38 +733,25 @@ namespace RogueBasin
             return new Tuple<TemplatePositioned, Point>(rotatedTemplatePosition, rotatedDoorLocation);
         }
 
-        public static Tuple<Point, Point> CorridorTerminalPointsBetweenDoors(Point start, Point end, bool isHorizontal)
+        public static Tuple<Point, Point> CorridorTerminalPointsBetweenDoors(Point start, RoomTemplate.DoorLocation startDoorLoc, Point end, RoomTemplate.DoorLocation endDoorLoc)
         {
-            Point corridorStart;
-            Point corridorEnd;
+            return new Tuple<Point, Point>(GetPointOutsideDoor(start, startDoorLoc), GetPointOutsideDoor(end, endDoorLoc));
+        }
 
-            if (!isHorizontal)
-            {
-                //vertical
-                if (start.y > end.y)
-                {
-                    corridorStart = new Point(start.x, start.y - 1);
-                    corridorEnd = new Point(end.x, end.y + 1);
-                }
-                else
-                {
-                    corridorStart = new Point(start.x, start.y + 1);
-                    corridorEnd = new Point(end.x, end.y - 1);
-                }
-            }
-            else {
-                //horizontal
-                if(start.x > end.x) {
-                    corridorStart = new Point(start.x - 1, start.y);
-                    corridorEnd = new Point(end.x + 1, end.y);
-                }
-                else {
-                    corridorStart = new Point(start.x + 1, start.y);
-                    corridorEnd = new Point(end.x - 1, end.y);
-                }
+        public static Point GetPointOutsideDoor(Point start, RoomTemplate.DoorLocation startDoorLoc) {
+          
+            switch(startDoorLoc) {
+                case RoomTemplate.DoorLocation.Bottom:
+                    return new Point(start.x, start.y + 1);
+                case RoomTemplate.DoorLocation.Top:
+                    return new Point(start.x, start.y - 1);
+                case RoomTemplate.DoorLocation.Left:
+                    return new Point(start.x - 1, start.y);
+                case RoomTemplate.DoorLocation.Right:
+                    return new Point(start.x + 1, start.y);
             }
 
-            return new Tuple<Point, Point>(corridorStart, corridorEnd);
+            throw new ApplicationException("location not implemented");
         }
 
         public static double DistanceBetween(Point p1, Point p2)
