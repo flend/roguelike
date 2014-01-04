@@ -516,6 +516,26 @@ namespace DDRogueTest
             Assert.AreEqual(new Point(-24, -15), corridorPoints.Item2);
         }
 
+        [TestMethod]
+        public void CorridorsBetweenHorizontallyRightLeftNonAlignedPointShouldStart1SquareIn()
+        {
+            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
+                new Point(-8, -9), new Point(0, 2), true);
+
+            Assert.AreEqual(new Point(-7, -9), corridorPoints.Item1);
+            Assert.AreEqual(new Point(-1, 2), corridorPoints.Item2);
+        }
+
+        [TestMethod]
+        public void CorridorsBetweeVerticallyTopBottomNonAlignedPointShouldStart1SquareIn()
+        {
+            Tuple<Point, Point> corridorPoints = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(
+                new Point(-8, -9), new Point(0, 2), false);
+
+            Assert.AreEqual(new Point(-8, -8), corridorPoints.Item1);
+            Assert.AreEqual(new Point(0, 1), corridorPoints.Item2);
+        }
+
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();

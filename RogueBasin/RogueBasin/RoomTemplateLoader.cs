@@ -224,6 +224,9 @@ namespace RogueBasin
             if (corridorTemplate.Width != 3)
                 throw new ApplicationException("Only corridor templates of width 3 supported");
 
+            if(Math.Abs(xOffset) < 2 || Math.Abs(yOffset) < 2)
+                throw new ApplicationException("offset must be at least 2");
+
             int mirroring = 0;
             RoomTemplateTerrain[,] newRoom;
 
@@ -627,11 +630,11 @@ namespace RogueBasin
                 //horizontal
                 if(start.x > end.x) {
                     corridorStart = new Point(start.x - 1, start.y);
-                    corridorEnd = new Point(end.x + 1, start.y);
+                    corridorEnd = new Point(end.x + 1, end.y);
                 }
                 else {
                     corridorStart = new Point(start.x + 1, start.y);
-                    corridorEnd = new Point(end.x - 1, start.y);
+                    corridorEnd = new Point(end.x - 1, end.y);
                 }
             }
 

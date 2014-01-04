@@ -8,7 +8,6 @@ using System.Text;
 namespace RogueBasin
 {
 
-
     public class MapGeneratorTemplated
     {
 
@@ -58,8 +57,6 @@ namespace RogueBasin
         /** Build a map using templated rooms */
         public Map GenerateMap()
         {
-            
-
             //Load sample templates
             RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
@@ -72,7 +69,7 @@ namespace RogueBasin
             var mapBuilder = new TemplatedMapBuilder();
             templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
-            int roomsToPlace = 50;
+            int roomsToPlace = 20;
             int maxRoomDistance = 10;
 
             int roomsPlaced = 0;
@@ -83,13 +80,14 @@ namespace RogueBasin
                 if (roomsPlaced == 0)
                 {
                     //Place a random room at a location near the origin
-                    templatedGenerator.PlaceRoomTemplateAtPosition(RandomRoom(), new Point(Game.Random.Next(maxRoomDistance), Game.Random.Next(maxRoomDistance)));
-                    roomsPlaced++;
+                    bool success = templatedGenerator.PlaceRoomTemplateAtPosition(RandomRoom(), new Point(Game.Random.Next(maxRoomDistance), Game.Random.Next(maxRoomDistance)));
+                    if (success)
+                        roomsPlaced++;
                 }
                 else
                 {
                     //Find a random potential door and try to grow a random room off this
-                    templatedGenerator.PlaceRoomTemplateAlignedWithExistingDoor(RandomRoom(), corridorTemplates[0], RandomDoor(templatedGenerator), 
+                    templatedGenerator.PlaceRoomTemplateAlignedWithExistingDoor(RandomRoom(), corridorTemplates[0], RandomDoor(templatedGenerator),
                         Game.Random.Next(maxRoomDistance));
 
                     roomsPlaced++;
@@ -97,29 +95,31 @@ namespace RogueBasin
             } while (roomsPlaced < roomsToPlace && templatedGenerator.HaveRemainingPotentialDoors());
 
             //Add some extra connections, if doors are available
-            var totalExtraConnections = 5;
+            var totalExtraConnections = 500;
             var extraConnections = 0;
 
-            while (templatedGenerator.HaveRemainingPotentialDoors() && extraConnections <= totalExtraConnections)
+            var allDoors = templatedGenerator.PotentialDoors;
+
+            //Find all possible doors matches that aren't in the same room
+            var allMatchingDoorPossibilities = from d1 in allDoors
+                                               from d2 in allDoors
+                                               where d1.DoorLocation == RoomTemplateUtilities.GetOppositeDoorLocation(d2.DoorLocation)
+                                                     && d1.OwnerRoomIndex != d2.OwnerRoomIndex
+                                               select new { origin = d1, target = d2 };
+
+            while (allMatchingDoorPossibilities.Any() && extraConnections < totalExtraConnections)
             {
-                //Find a random spare door
-                var originDoor = RandomDoor(templatedGenerator);
-                var originDoorLocation = RoomTemplateUtilities.GetDoorLocation(originDoor.OwnerRoom.Room, originDoor.OwnerRoomIndex);
-                
-                //All doors we can join to, sorted in increasing distance
+                //Try a random combination to see if it works
+                var doorsToTry = allMatchingDoorPossibilities.ElementAt(Game.Random.Next(allMatchingDoorPossibilities.Count()));
 
-                var candidateDoors = templatedGenerator.PotentialDoors.Where(d => RoomTemplateUtilities.GetDoorLocation(d.OwnerRoom.Room, d.DoorIndexInRoom) ==
-                    RoomTemplateUtilities.GetOppositeDoorLocation(originDoorLocation));
-                var candidateDoorsWithIndex = Enumerable.Range(0, candidateDoors.Count()).Zip(candidateDoors, (i, d) => new Tuple<int, TemplatedMapGenerator.DoorInfo>(i, d));
+                LogFile.Log.LogEntryDebug("Trying door " + doorsToTry.origin.MapCoords + " to " + doorsToTry.target.MapCoords, LogDebugLevel.Medium);
 
-                var candidateDoorsWithDistance = candidateDoorsWithIndex.Select(t => new Tuple<int, double>(t.Item1, 
-                    RoomTemplateUtilities.DistanceBetween(originDoor.MapCoords, t.Item2.MapCoords)));
+                bool success = templatedGenerator.JoinDoorsWithCorridor(doorsToTry.origin, doorsToTry.target, corridor1);
+                if (success)
+                    extraConnections++;
 
-                var candidateDoorsSortedByDistance = candidateDoorsWithDistance.OrderBy(t => t.Item2);
-
-                //Join to the nearest door
-                var targetDoor = templatedGenerator.PotentialDoors[candidateDoorsSortedByDistance.First().Item1];
-
+                //In any case, remove this attempt
+                allMatchingDoorPossibilities = allMatchingDoorPossibilities.Except(Enumerable.Repeat(doorsToTry, 1));
             }
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
@@ -140,12 +140,14 @@ namespace RogueBasin
             public TemplatePositioned OwnerRoom { get; private set; }
             public int DoorIndexInRoom { get; private set; }
             public int OwnerRoomIndex { get; private set; }
+            public RoomTemplate.DoorLocation DoorLocation { get; private set; }
 
-            public DoorInfo(TemplatePositioned ownerRoom, int ownerRoomIndex, int doorIndex)
+            public DoorInfo(TemplatePositioned ownerRoom, int ownerRoomIndex, int doorIndex, RoomTemplate.DoorLocation doorLocation)
             {
                 OwnerRoom = ownerRoom;
                 DoorIndexInRoom = doorIndex;
                 OwnerRoomIndex = ownerRoomIndex;
+                DoorLocation = doorLocation;
             }
 
             public Point MapCoords
@@ -210,15 +212,19 @@ namespace RogueBasin
                 return false;
 
             IncreaseNextRoomIndex();
+            AddNewRoomsToPotentialRooms(positionedRoom, roomIndex);
 
+            return true;
+        }
+
+        private void AddNewRoomsToPotentialRooms(TemplatePositioned positionedRoom, int roomIndex)
+        {
             //Store a reference to each potential door in the room
             int noDoors = positionedRoom.PotentialDoors.Count();
             for (int i = 0; i < noDoors; i++)
             {
-                potentialDoors.Add(new DoorInfo(positionedRoom, roomIndex, i));
+                potentialDoors.Add(new DoorInfo(positionedRoom, roomIndex, i, RoomTemplateUtilities.GetDoorLocation(positionedRoom.Room, i)));
             }
-
-            return true;
         }
 
         /// <summary>
@@ -226,57 +232,66 @@ namespace RogueBasin
         /// </summary>
         public bool JoinDoorsWithCorridor(DoorInfo firstDoor, DoorInfo secondDoor, RoomTemplate corridorTemplate)
         {
-            var firstDoorLoc = RoomTemplateUtilities.GetDoorLocation(firstDoor.OwnerRoom.Room, firstDoor.DoorIndexInRoom);
-            var secondDoorLoc = RoomTemplateUtilities.GetDoorLocation(secondDoor.OwnerRoom.Room, secondDoor.DoorIndexInRoom);
-
-            if (RoomTemplateUtilities.GetOppositeDoorLocation(firstDoorLoc) != secondDoorLoc)
-                throw new ApplicationException("Can't join non-opposing doors");
-
-            //Create template
-
-            var horizontal = false;
-            if(firstDoorLoc == RoomTemplate.DoorLocation.Left || firstDoorLoc == RoomTemplate.DoorLocation.Right) {
-                horizontal = true;
-            }
-
-            var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(firstDoor.MapCoords, secondDoor.MapCoords, horizontal);
-
-            int xOffset = corridorTermini.Item1.x - corridorTermini.Item2.x;
-            int yOffset = corridorTermini.Item1.y - corridorTermini.Item2.y;
-
-            int transition = (int)Math.Floor(yOffset / 2.0);
-            if (horizontal == true)
+            try
             {
-                transition = (int)Math.Floor(xOffset / 2.0);
+                var firstDoorLoc = RoomTemplateUtilities.GetDoorLocation(firstDoor.OwnerRoom.Room, firstDoor.DoorIndexInRoom);
+                var secondDoorLoc = RoomTemplateUtilities.GetDoorLocation(secondDoor.OwnerRoom.Room, secondDoor.DoorIndexInRoom);
+
+                if (RoomTemplateUtilities.GetOppositeDoorLocation(firstDoorLoc) != secondDoorLoc)
+                    throw new ApplicationException("Can't join non-opposing doors");
+
+                //Create template
+
+                var horizontal = false;
+                if (firstDoorLoc == RoomTemplate.DoorLocation.Left || firstDoorLoc == RoomTemplate.DoorLocation.Right)
+                {
+                    horizontal = true;
+                }
+
+                var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(firstDoor.MapCoords, secondDoor.MapCoords, horizontal);
+
+                int xOffset = corridorTermini.Item1.x - corridorTermini.Item2.x;
+                int yOffset = corridorTermini.Item1.y - corridorTermini.Item2.y;
+
+                int transition = (int)Math.Floor(yOffset / 2.0);
+                if (horizontal == true)
+                {
+                    transition = (int)Math.Floor(xOffset / 2.0);
+                }
+
+                var expandedCorridor = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(xOffset, yOffset, transition, horizontal, corridorTemplate);
+
+                //Place corridor
+
+                //-1 is for a 3 width corridor, which they all are at the moment
+                Point topLeftDoors = new Point(Math.Min(corridorTermini.Item1.x, corridorTermini.Item2.x), Math.Min(corridorTermini.Item1.y, corridorTermini.Item2.y));
+                Point topLeftCorridor = horizontal ? topLeftDoors - new Point(0, 1) : topLeftDoors - new Point(1, 0);
+
+                var corridorRoomIndex = NextRoomIndex();
+                var positionedCorridor = new TemplatePositioned(topLeftCorridor.x, topLeftCorridor.y, 0, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
+
+                if (!mapBuilder.CanBePlacedWithoutOverlappingOtherTemplates(positionedCorridor))
+                    return false;
+
+                //Place the corridor
+                mapBuilder.AddPositionedTemplateOnTop(positionedCorridor);
+                IncreaseNextRoomIndex();
+
+                //Add connections to the old and new rooms
+                connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, corridorRoomIndex);
+                connectivityMap.AddRoomConnection(corridorRoomIndex, secondDoor.OwnerRoomIndex);
+
+                //Remove both doors from the potential list
+                potentialDoors.Remove(firstDoor);
+                potentialDoors.Remove(secondDoor);
+
+                return true;
             }
-
-            var expandedCorridor = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(xOffset, yOffset, transition, horizontal, corridorTemplate);
-
-            //Place corridor
-
-            //-1 is for a 3 width corridor, which they all are at the moment
-            Point topLeftDoors = new Point(Math.Min(corridorTermini.Item1.x, corridorTermini.Item2.x), Math.Min(corridorTermini.Item1.y, corridorTermini.Item2.y));
-            Point topLeftCorridor = horizontal ? topLeftDoors - new Point(0, 1) : topLeftDoors - new Point(1, 0);
-
-            var corridorRoomIndex = NextRoomIndex();
-            var positionedCorridor = new TemplatePositioned(topLeftCorridor.x, topLeftCorridor.y, 0, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
-
-            if (!mapBuilder.CanBePlacedWithoutOverlappingOtherTemplates(positionedCorridor))
+            catch (ApplicationException ex)
+            {
+                LogFile.Log.LogEntryDebug("Failed to join doors: " + ex.Message, LogDebugLevel.Medium);
                 return false;
-
-            //Place the corridor
-            mapBuilder.AddPositionedTemplateOnTop(positionedCorridor);
-            IncreaseNextRoomIndex();
-
-            //Add connections to the old and new rooms
-            connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, corridorRoomIndex);
-            connectivityMap.AddRoomConnection(corridorRoomIndex, secondDoor.OwnerRoomIndex);
-
-            //Remove both doors from the potential list
-            potentialDoors.Remove(firstDoor);
-            potentialDoors.Remove(secondDoor);
-
-            return true;
+            }
         }
 
         public bool PlaceRoomTemplateAlignedWithExistingDoor(RoomTemplate roomTemplateToPlace, RoomTemplate corridorTemplate, DoorInfo existingDoor, int distanceApart)
@@ -350,11 +365,8 @@ namespace RogueBasin
             }
 
             //Add the new potential doors
-            int noDoors = alignedNewRoom.PotentialDoors.Count();
-            for (int i = 0; i < noDoors; i++)
-            {
-                potentialDoors.Add(new DoorInfo(alignedNewRoom, newRoomIndex, i));
-            }
+
+            AddNewRoomsToPotentialRooms(alignedNewRoom, newRoomIndex);
 
             //If successful, remove the candidate door from the list
             potentialDoors.Remove(existingDoor);
