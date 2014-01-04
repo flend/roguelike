@@ -101,11 +101,21 @@ namespace RogueBasin
             var allDoors = templatedGenerator.PotentialDoors;
 
             //Find all possible doors matches that aren't in the same room
-            var allMatchingDoorPossibilities = from d1 in allDoors
+            var allBendDoorPossibilities = from d1 in allDoors
                                                from d2 in allDoors
-                                               where d1.DoorLocation == RoomTemplateUtilities.GetOppositeDoorLocation(d2.DoorLocation)
+                                               where RoomTemplateUtilities.CanBeConnectedWithBendCorridor(d1.MapCoords, d1.DoorLocation, d2.MapCoords, d2.DoorLocation)
                                                      && d1.OwnerRoomIndex != d2.OwnerRoomIndex
                                                select new { origin = d1, target = d2 };
+
+            var allLDoorPossibilities = from d1 in allDoors
+                                           from d2 in allDoors
+                                           where RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(d1.MapCoords, d1.DoorLocation, d2.MapCoords, d2.DoorLocation)
+                                                 && d1.OwnerRoomIndex != d2.OwnerRoomIndex
+                                           select new { origin = d1, target = d2 };
+
+            var allMatchingDoorPossibilities = allBendDoorPossibilities.Union(allLDoorPossibilities);
+            //var allMatchingDoorPossibilities = allLDoorPossibilities;
+            //var allMatchingDoorPossibilities = allBendDoorPossibilities;
 
             while (allMatchingDoorPossibilities.Any() && extraConnections < totalExtraConnections)
             {
