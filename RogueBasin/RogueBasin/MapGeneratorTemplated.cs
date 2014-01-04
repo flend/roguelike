@@ -256,8 +256,8 @@ namespace RogueBasin
 
                 var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(firstDoor.MapCoords, firstDoor.DoorLocation, secondDoor.MapCoords, secondDoor.DoorLocation);
 
-                int xOffset = corridorTermini.Item1.x - corridorTermini.Item2.x;
-                int yOffset = corridorTermini.Item1.y - corridorTermini.Item2.y;
+                int xOffset = corridorTermini.Item2.x - corridorTermini.Item1.x;
+                int yOffset = corridorTermini.Item2.y - corridorTermini.Item1.y;
 
                 RoomTemplate expandedCorridor;
                 Point corridorTerminus1InTemplate;
@@ -282,11 +282,8 @@ namespace RogueBasin
 
                 //Place corridor
 
-                //Replace with sensible code using corridorTerminus1InTemplate;
-
-                //-1 is for a 3 width corridor, which they all are at the moment
-                Point topLeftDoors = new Point(Math.Min(corridorTermini.Item1.x, corridorTermini.Item2.x), Math.Min(corridorTermini.Item1.y, corridorTermini.Item2.y));
-                Point topLeftCorridor = horizontal ? topLeftDoors - new Point(0, 1) : topLeftDoors - new Point(1, 0);
+                //Match corridor tile to location of door
+                Point topLeftCorridor = corridorTermini.Item1 - corridorTerminus1InTemplate;
 
                 var corridorRoomIndex = NextRoomIndex();
                 var positionedCorridor = new TemplatePositioned(topLeftCorridor.x, topLeftCorridor.y, 0, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
