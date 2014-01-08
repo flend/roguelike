@@ -58,6 +58,11 @@ namespace RogueBasin
                 return Room.PotentialDoors.Select(x => x.Location + new Point(X, Y)).ToList();
             }
         }
+
+        public RoomTemplateTerrain TerrainAtPoint(Point p)
+        {
+            return Room.terrainMap[p.x - X, p.y - Y];
+        }
     }
 
     
@@ -99,7 +104,8 @@ namespace RogueBasin
             foreach (Point p in template.Extent())
             {
                 //Overlap with existing template
-                if (GetMergedTerrainAtPoint(p) != RoomTemplateTerrain.Transparent)
+                var existingMergedTerrain = GetMergedTerrainAtPoint(p);
+                if (existingMergedTerrain != RoomTemplateTerrain.Transparent && template.TerrainAtPoint(p) != RoomTemplateTerrain.Transparent)
                 {
                     LogFile.Log.LogEntryDebug("Overlapping terrain at " + p + " add template failed", LogDebugLevel.Medium);
                     return false;
