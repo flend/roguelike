@@ -227,8 +227,14 @@ namespace RogueBasin
             if (corridorTemplate.Width != 3)
                 throw new ApplicationException("Only corridor templates of width 3 supported");
 
-            if (Math.Abs(xOffset) < 2 || Math.Abs(yOffset) < 2)
-                throw new ApplicationException("offset must be at least 2");
+            if (Math.Abs(lTransition) < 1)
+                throw new ApplicationException("transition must be at least 1");
+
+            if(Math.Abs(xOffset) < 2 && switchToHorizontal)
+                throw new ApplicationException("Need x-offset of at least 2 for horizontal corridor");
+
+            if (Math.Abs(yOffset) < 2 && !switchToHorizontal)
+                throw new ApplicationException("Need y-offset of at least 2 for vertical corridor");
 
             int mirroring = 0;
             RoomTemplateTerrain[,] newRoom;
@@ -493,7 +499,8 @@ namespace RogueBasin
             for (int i = 0; i < corridorTemplate.Width; i++)
             {
                 //Use the outside character (should be solid)
-                newRoom[i, lTransition + 1] = corridorTemplate.terrainMap[0, 0];
+                if (newRoom[i, lTransition + 1] == RoomTemplateTerrain.Transparent)
+                    newRoom[i, lTransition + 1] = corridorTemplate.terrainMap[0, 0];
             }
 
             //Down right
@@ -509,7 +516,8 @@ namespace RogueBasin
             for (int i = 0; i < corridorTemplate.Width; i++)
             {
                 //Use the outside character (should be solid)
-                newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] = corridorTemplate.terrainMap[0, 0];
+                if(newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] == RoomTemplateTerrain.Transparent)
+                    newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] = corridorTemplate.terrainMap[0, 0];
             }
 
             //Overlay rotated cross-corridor. Always prefer open to closed

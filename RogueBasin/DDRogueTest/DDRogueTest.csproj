@@ -137,6 +137,15 @@
   <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\expandedcorridorlld.room" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\expandedlhorizontal2.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\expandedlvertical2.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\expandedlhorizontal3.room" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
