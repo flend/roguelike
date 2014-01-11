@@ -365,8 +365,7 @@ namespace RogueBasin
                 return new Tuple<RoomTemplate, Point>(templateToReturn, startPointToRet);
         }
         
-
-        public static new Tuple<RoomTemplate, Point> ExpandCorridorTemplateLShaped(int xOffset, int yOffset, bool horizontalFirst, RoomTemplate corridorTemplate)
+        public static Tuple<RoomTemplate, Point> ExpandCorridorTemplateLShaped(int xOffset, int yOffset, bool horizontalFirst, RoomTemplate corridorTemplate)
         {
             if (corridorTemplate.Height > 1)
                 throw new ApplicationException("Only corridor templates of height 1 supported");
@@ -375,8 +374,8 @@ namespace RogueBasin
             if (corridorTemplate.Width != 3)
                 throw new ApplicationException("Only corridor templates of width 3 supported");
 
-            if(Math.Abs(xOffset) < 2 || Math.Abs(yOffset) < 2)
-                throw new ApplicationException("offset must be at least 2");
+            if(Math.Abs(xOffset) < 1 || Math.Abs(yOffset) < 1)
+                throw new ApplicationException("offset must be at least 1");
 
             int mirroring = 0;
             RoomTemplateTerrain[,] newRoom;
@@ -471,6 +470,27 @@ namespace RogueBasin
                 return new Tuple<RoomTemplate, Point>(mapToReturn, startPointMirror);
         }
 
+        public static Tuple<RoomTemplate, Point> ExpandCorridorTemplateStraight(int offset, bool switchToHorizontal, RoomTemplate corridorTemplate)
+        {
+            var length = Math.Abs(offset) + 1;
+            var expandedTemplate = ExpandCorridorTemplate(switchToHorizontal, length, corridorTemplate);
+
+            Point corridorEndPoint;
+
+            if (offset > 0)
+                corridorEndPoint = new Point(0, 1);
+            else
+            {
+                if(switchToHorizontal)
+                    corridorEndPoint = new Point(-offset, 1);
+                else
+                    corridorEndPoint = new Point(1, -offset);
+            }
+                
+
+            return new Tuple<RoomTemplate, Point>(expandedTemplate, corridorEndPoint);
+        }
+
         private static Tuple<RoomTemplateTerrain[,], Point, Point> GenerateBaseCorridorBend(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
         {
             var absXOffset = Math.Abs(xOffset);
@@ -516,7 +536,7 @@ namespace RogueBasin
             for (int i = 0; i < corridorTemplate.Width; i++)
             {
                 //Use the outside character (should be solid)
-                if(newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] == RoomTemplateTerrain.Transparent)
+                if (newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] == RoomTemplateTerrain.Transparent)
                     newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] = corridorTemplate.terrainMap[0, 0];
             }
 
@@ -685,6 +705,11 @@ namespace RogueBasin
         static public bool ArePointsOnVerticalLine(Point point1, Point point2)
         {
             return point1.x == point2.x;
+        }
+
+        static public bool ArePointsOnHorizontalLine(Point point1, Point point2)
+        {
+            return point1.y == point2.y;
         }
 
         /** Orient a corridorTemplate for a width 1 / height 1 corridor */
@@ -885,7 +910,14 @@ namespace RogueBasin
 
             //Both doors must be in each other's mutual acceptance areas
 
-            return DoorLocationIsPossible(door1Loc, door1Coord, door2Coord) && DoorLocationIsPossible(door2Loc, door2Coord, door1Coord);
+           if(!(DoorLocationIsPossible(door1Loc, door1Coord, door2Coord) && DoorLocationIsPossible(door2Loc, door2Coord, door1Coord)))
+               return false;
+
+            //Offset in x and y must be at least 1
+            if (door1Coord.x == door2Coord.x || door1Coord.y == door2Coord.y)
+               return false;
+
+           return true;
         }
 
         private static bool DoorLocationIsPossible(RoomTemplate.DoorLocation door1Loc, Point door1Coord, Point door2Coord)
@@ -918,7 +950,47 @@ namespace RogueBasin
 
             //Door 2 must be acceptable area for door1
 
-            return DoorLocationIsPossible(door1Loc, door1Coord, door2Coord);
+            if (!DoorLocationIsPossible(door1Loc, door1Coord, door2Coord))
+                return false;
+
+            //There must be sufficient length to implement a bend
+
+            if (door1Loc == RoomTemplate.DoorLocation.Left || door1Loc == RoomTemplate.DoorLocation.Right)
+            {
+                if (Math.Abs(door1Coord.x - door2Coord.x) < 2)
+                    return false;
+            }
+            else {
+                if (Math.Abs(door1Coord.y - door2Coord.y) < 2)
+                    return false;
+            }
+
+            //There must be sufficient width to implement a bend
+
+            if (door1Coord.x == door2Coord.x || door1Coord.y == door2Coord.y)
+                return false;
+
+            return true;
+
+        }
+
+        public static bool CanBeConnectedWithStraightCorridor(Point door1Coord, RoomTemplate.DoorLocation door1Loc, Point door2Coord, RoomTemplate.DoorLocation door2Loc)
+        {
+            //Door orientation must be opposite
+
+            if (door1Loc != GetOppositeDoorLocation(door2Loc))
+                return false;
+
+            //Door 2 must be acceptable area for door1 (i.e. correct relative position)
+
+            if (!DoorLocationIsPossible(door1Loc, door1Coord, door2Coord))
+                return false;
+
+            if (door1Loc == RoomTemplate.DoorLocation.Top || door1Loc == RoomTemplate.DoorLocation.Bottom)
+                return ArePointsOnVerticalLine(door1Coord, door2Coord);
+
+            //if (door1Loc == RoomTemplate.DoorLocation.Left || door1Loc == RoomTemplate.DoorLocation.Right)
+            return ArePointsOnHorizontalLine(door1Coord, door2Coord);
         }
     }
 

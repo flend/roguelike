@@ -35,6 +35,20 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void Offset1HorizontalLShapedCorridorsCanBeExpandedCorrectly()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorldr1.room");
+
+            //+x +y
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(1, 1, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdh-l-corridor.txt");
+
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
+            Assert.AreEqual(new Point(1, 0), expandedTemplate.Item2);
+        }
+
+        [TestMethod]
         public void RDVerticalLShapedCorridorsCanBeExpandedCorrectly()
         {
             RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
@@ -43,6 +57,20 @@ namespace DDRogueTest
             //+x +y
             var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, 4, true, corridorTemplate);
             RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdv-l-corridor.txt");
+
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
+            Assert.AreEqual(new Point(0, 1), expandedTemplate.Item2);
+        }
+
+        [TestMethod]
+        public void Offset1RDVerticalLShapedCorridorsCanBeExpandedCorrectly()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorlrd1.room");
+
+            //+x +y
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(1, 1, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "rdv-l-corridor1.txt");
 
             Assert.AreEqual(expandedTemplate.Item1, correctOutput);
             Assert.AreEqual(new Point(0, 1), expandedTemplate.Item2);
@@ -168,16 +196,17 @@ namespace DDRogueTest
             Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
         }
 
+
         [TestMethod]
-        public void TopRoomCanConnectToLeftCorridorAtLowerYGreaterX()
+        public void TopRoomCannotConnectToLeftCorridorAtTooLowOffset()
         {
             Point door1Coord = new Point(0, 0);
             RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
 
-            Point door2Coord = new Point(5, -1);
+            Point door2Coord = new Point(0, -1);
             RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Left;
 
-            Assert.IsTrue(RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
         }
 
         [TestMethod]
@@ -186,7 +215,7 @@ namespace DDRogueTest
             Point door1Coord = new Point(0, 0);
             RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
 
-            Point door2Coord = new Point(2, -1);
+            Point door2Coord = new Point(2, -2);
             RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
 
             Assert.IsTrue(RoomTemplateUtilities.CanBeConnectedWithBendCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
@@ -205,6 +234,30 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void TopDoorCannotConnectToBottomDoorIfYOffsetNotSufficientForBend()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(1, -1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithBendCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void LeftDoorCannotConnectToRightDoorIfXOffsetNotSufficientForBend()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Left;
+
+            Point door2Coord = new Point(-1, -2);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Right;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithBendCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
         public void TopDoorCannotConnectToLeftDoorWithBendCorridor()
         {
             Point door1Coord = new Point(0, 0);
@@ -214,6 +267,78 @@ namespace DDRogueTest
             RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
 
             Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithBendCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopDoorCannotConnectToBottomDoorWithStraightCorridorWhenTopDoorIsHigher()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(0, 2);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopDoorCannotConnectToBottomDoorWithStraightCorridorWhenMisaligned()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(1, 2);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopDoorCanConnectToBottomDoorWithStraightCorridorWhenAligned()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(0, -2);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Bottom;
+
+            Assert.IsTrue(RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void LeftDoorCannotConnectToRightDoorWithStraightCorridorWhenMisaligned()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Left;
+
+            Point door2Coord = new Point(-3, 1);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Right;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void LeftDoorCanConnectToRightDoorWithStraightCorridorWhenAligned()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Left;
+
+            Point door2Coord = new Point(-3, 0);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Right;
+
+            Assert.IsTrue(RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
+        }
+
+        [TestMethod]
+        public void TopDoorCannotConnectToLeftDoorWithStraightCorridor()
+        {
+            Point door1Coord = new Point(0, 0);
+            RoomTemplate.DoorLocation door1Loc = RoomTemplate.DoorLocation.Top;
+
+            Point door2Coord = new Point(0, -2);
+            RoomTemplate.DoorLocation door2Loc = RoomTemplate.DoorLocation.Left;
+
+            Assert.IsFalse(RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(door1Coord, door1Loc, door2Coord, door2Loc));
         }
 
         [TestMethod]
@@ -269,6 +394,58 @@ namespace DDRogueTest
             RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "horizontal-l-corridor.txt");
 
             Assert.AreEqual(expandedTemplate.Item2, new Point(0, 1));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
+        }
+
+        [TestMethod]
+        public void HorizontalCorridorsCanBeExpandedCorrectly()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorhoriz2.room");
+
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateStraight(2, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "horizontal-corridor1.txt");
+
+            Assert.AreEqual(expandedTemplate.Item2, new Point(0, 1));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
+        }
+
+        [TestMethod]
+        public void HorizontalCorridorsCanBeExpandedCorrectlyReversed()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridorhoriz2.room");
+
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateStraight(-2, true, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "horizontal-corridor1-rev.txt");
+
+            Assert.AreEqual(expandedTemplate.Item2, new Point(2, 1));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
+        }
+
+        [TestMethod]
+        public void VerticalCorridorsCanBeExpandedCorrectly()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridor2.room");
+
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateStraight(3, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "vertical-corridor1.txt");
+
+            Assert.AreEqual(expandedTemplate.Item2, new Point(0, 1));
+            Assert.AreEqual(expandedTemplate.Item1, correctOutput);
+        }
+
+        [TestMethod]
+        public void VerticalCorridorsCanBeExpandedCorrectlyReversed()
+        {
+            RoomTemplate corridorTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testcorridor1.room"); //3x1
+            RoomTemplate correctOutput = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.expandedcorridor2.room");
+
+            var expandedTemplate = RoomTemplateUtilities.ExpandCorridorTemplateStraight(-3, false, corridorTemplate);
+            RoomTemplateUtilities.ExportTemplateToTextFile(expandedTemplate.Item1, "vertical-corridor1.txt");
+
+            Assert.AreEqual(expandedTemplate.Item2, new Point(1, 3));
             Assert.AreEqual(expandedTemplate.Item1, correctOutput);
         }
 
