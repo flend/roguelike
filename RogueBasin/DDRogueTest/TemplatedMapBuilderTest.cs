@@ -25,6 +25,38 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void AddingOverlappingTemplatesWorksIfOverlapIsTransparent()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            //Start
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            mapGen.AddPositionedTemplateOnTop(templatePos1);
+
+            //End
+            TemplatePositioned templatePos2 = new TemplatePositioned(-10, 20, 0, room1, TemplateRotation.Deg0, 0);
+            mapGen.AddPositionedTemplateOnTop(templatePos2);
+
+            //Middle
+            TemplatePositioned templatePos3 = new TemplatePositioned(-8, 30, 0, room1, TemplateRotation.Deg0, 0);
+            mapGen.AddPositionedTemplateOnTop(templatePos3);
+
+            //Corridor from start - end that overlaps middle
+            var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, 28, true, corridor1);
+            var positionedCorridor = new TemplatePositioned(-2, 4, 0, expandedCorridorAndPoint.Item1, TemplateRotation.Deg0, 3);
+
+            Assert.IsTrue(mapGen.AddPositionedTemplateOnTop(positionedCorridor));
+
+        }
+
+        [TestMethod]
         public void MapContainsCorrectIdOnSingleRoom()
         {
             //Load sample template 8x4
@@ -192,5 +224,9 @@ namespace DDRogueTest
             return RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
         }
 
+        private static RoomTemplate LoadTemplateFromFileRogueBasin(string filename)
+        {
+            return RoomTemplateLoader.LoadTemplateFromFile(filename, StandardTemplateMapping.terrainMapping);
+        }
     }
 }
