@@ -65,6 +65,120 @@ namespace RogueBasin
         }
     }
 
+    public class ArrayCache<T>
+    {
+        private T[,] arrayCache;
+        
+        /// <summary>
+        /// TL extent of the cache
+        /// </summary>
+        Point cacheTL;
+
+        /// <summary>
+        /// TL extent of added areas
+        /// </summary>
+        Point realTL;
+
+        /// <summary>
+        /// BR extent of added areas
+        /// </summary>
+        Point realBR
+
+        public ArrayCache(Point cacheTL, int sizeX, int sizeY)
+        {
+            arrayCache = new T[sizeX, sizeY];
+            this.cacheTL = cacheTL;
+        }
+
+        public int CacheWidth
+        {
+            get
+            {
+                return arrayCache.GetLength(0);
+            }
+        }
+
+        public int CacheHeight
+        {
+            get
+            {
+                return arrayCache.GetLength(1);
+            }
+        }
+
+        public int Width {
+        get {
+            return realBR.x - realTL.x + 1;
+        }
+        }
+
+        public int Height {
+            get {
+                return realBR.y - realTL.y + 1;
+            }
+        }
+
+        public Point TL {
+            get {
+                return realTL;
+            }
+        }
+
+        public Point BR {
+            get {
+                return realBR;
+            }
+        }
+
+        //Merge in areaToAdd at areaTL, using the mergeArea function
+        public void MergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea) {
+
+            //Check extent
+
+            int cacheRight = cacheTL.x + CacheWidth - 1;
+            int cacheBot = cacheTL.y + CacheHeight - 1;
+
+            int left = Math.Min(areaTL.x, cacheTL.x);
+            int top = Math.Min(areaTL.y, cacheTL.y);
+            int bottom = Math.Max(cacheBot, areaTL.y + areaToAdd.GetLength(1));
+            int right = Math.Max(cacheRight, areaTL.x + areaToAdd.GetLength(0));
+
+            if (left < cacheTL.x || right > cacheRight
+                || bottom > cacheBot || top < cacheTL.y)
+            {
+                //Area is too big, we need to resize
+                T[,] newCache = new T[right - left + 1, top - bottom + 1];
+                Point newTL = new Point(left, top);
+
+                int offsetX = cacheTL.x - left;
+                int offsetY = cacheTL.y - top;
+
+                //Copy from the old array into the new array
+                for (int i = 0; i < arrayCache.GetLength(0); i++)
+                {
+                    for (int j = 0; j < arrayCache.GetLength(1); j++)
+                    {
+                        newCache[offsetX + i, offsetY + j] = arrayCache[i, j];
+                    }
+                }
+
+                //Adopt the new, larger cache area
+                arrayCache = newCache;
+                cacheTL = newTL;
+            }
+
+            //Merge new area into the old area, using the passed in function
+            for (int i = 0; i < areaToAdd.GetLength(0); i++)
+            {
+                for (int j = 0; j < areaToAdd.GetLength(1); j++)
+                {
+                    arrayCache[areaTL.x + i, areaTL.y + j] = mergeArea(arrayCache[areaTL.x + i, areaTL.y + j], areaToAdd[i, j]);
+                }
+            }
+        }
+
+    }
+
     
     /** Allows a map to be built up by placing templates in z-ordering.
      *  Z-ordering is currently meaningless because no overlap is allowed**/
