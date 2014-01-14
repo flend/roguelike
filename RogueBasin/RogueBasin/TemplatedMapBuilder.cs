@@ -71,10 +71,9 @@ namespace RogueBasin
     public class TemplatedMapBuilder
     {
         /// <summary>
-        /// Templates as they are placed on the map (after positions, rotations etc.).
-        /// Sorted by z-ordering
+        /// Templates as they are placed on the map - not really used
         /// </summary>
-        SortedDictionary<int, TemplatePositioned> templates = new SortedDictionary<int, TemplatePositioned>();
+        List<TemplatePositioned> templates = new List<TemplatePositioned>();
 
         /// <summary>
         /// 2d array for terrain
@@ -124,31 +123,6 @@ namespace RogueBasin
             return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, MergeTerrain);
         }
 
-        /// <summary>
-        /// Add template at z ordering specified in the pre-built template class. Z must be unique
-        /// </summary>
-        /// <param name="z"></param>
-        /// <param name="templateToAdd"></param>
-        public bool AddPositionedTemplate(TemplatePositioned templateToAdd)
-        {
-            return AddPositionedTemplate(templateToAdd, templateToAdd.Z);
-        }
-
-        /// <summary>
-        /// Add template on top of current templates. Overwrites Z value in templateToAdd
-        /// </summary>
-        /// <param name="z"></param>
-        /// <param name="templateToAdd"></param>
-        public bool AddPositionedTemplateOnTop(TemplatePositioned templateToAdd)
-        {
-            int maxZ = 0;
-
-            if (templates.Count > 0)
-                maxZ = templates.Keys.Max(x => x) + 1;
-
-            return AddPositionedTemplate(templateToAdd, maxZ);
-        }
-
         private RoomTemplateTerrain MergeTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
         {
             if (originTerrain == RoomTemplateTerrain.Transparent)
@@ -163,14 +137,14 @@ namespace RogueBasin
             }
         }
 
-        private bool AddPositionedTemplate(TemplatePositioned templateToAdd, int zToPlace)
+        public bool AddPositionedTemplate(TemplatePositioned templateToAdd)
         {
             if (!CanBePlacedWithoutOverlappingOtherTemplates(templateToAdd))
                 return false;
 
             try
             {
-                templates.Add(zToPlace, templateToAdd);
+                templates.Add(templateToAdd);
                 mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain);
       
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd.Room.terrainMap.GetLength(0), templateToAdd.Room.terrainMap.GetLength(1),
@@ -179,7 +153,7 @@ namespace RogueBasin
             }
             catch (ArgumentException e)
             {
-                throw new ApplicationException("Can't place room at z: " + zToPlace + e.Message);
+                throw new ApplicationException("Can't place room: " + e.Message);
             }
         }
 
@@ -204,7 +178,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="z"></param>
         /// <returns></returns>
-        public TemplatePositioned GetTemplateAtZ(int z)
+        public TemplatePositioned GetTemplate(int z)
         {
             return templates[z];
         }

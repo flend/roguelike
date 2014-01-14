@@ -21,7 +21,7 @@ namespace DDRogueTest
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
             TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
-            Assert.IsTrue(mapGen.AddPositionedTemplateOnTop(templatePos1));
+            Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos1));
         }
 
         [TestMethod]
@@ -38,21 +38,21 @@ namespace DDRogueTest
 
             //Start
             TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
-            mapGen.AddPositionedTemplateOnTop(templatePos1);
+            mapGen.AddPositionedTemplate(templatePos1);
 
             //End
             TemplatePositioned templatePos2 = new TemplatePositioned(-10, 20, 0, room1, TemplateRotation.Deg0, 0);
-            mapGen.AddPositionedTemplateOnTop(templatePos2);
+            mapGen.AddPositionedTemplate(templatePos2);
 
             //Middle
             TemplatePositioned templatePos3 = new TemplatePositioned(-8, 30, 0, room1, TemplateRotation.Deg0, 0);
-            mapGen.AddPositionedTemplateOnTop(templatePos3);
+            mapGen.AddPositionedTemplate(templatePos3);
 
             //Corridor from start - end that overlaps middle
             var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, 28, true, corridor1);
             var positionedCorridor = new TemplatePositioned(-2, 4, 0, expandedCorridorAndPoint.Item1, TemplateRotation.Deg0, 3);
 
-            Assert.IsTrue(mapGen.AddPositionedTemplateOnTop(positionedCorridor));
+            Assert.IsTrue(mapGen.AddPositionedTemplate(positionedCorridor));
 
         }
 
@@ -67,7 +67,7 @@ namespace DDRogueTest
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
             TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 12);
-            mapGen.AddPositionedTemplateOnTop(templatePos1);
+            mapGen.AddPositionedTemplate(templatePos1);
 
             Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
 
@@ -159,8 +159,7 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ApplicationException), "Rooms can't be placed at the same Z")]
-        public void RoomsCantBePlacedAtSameZ()
+        public void RoomsCanBePlacedAtPresetZUsingAddPositionedTemplate()
         {
             //Load sample template 8x4
             RoomTemplate room1 = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testsolid1.room");
@@ -172,21 +171,6 @@ namespace DDRogueTest
 
             TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 0, room1, TemplateRotation.Deg0, 0);
             Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
-        }
-
-        [TestMethod]
-        public void RoomsCanBePlacedAtPresetZUsingAddPositionedTemplateOnTop()
-        {
-            //Load sample template 8x4
-            RoomTemplate room1 = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testsolid1.room");
-
-            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
-
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
-            mapGen.AddPositionedTemplate(templatePos1);
-
-            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 0, room1, TemplateRotation.Deg0, 0);
-            Assert.IsTrue(mapGen.AddPositionedTemplateOnTop(templatePos2));
         }
 
         [TestMethod]

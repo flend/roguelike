@@ -102,17 +102,6 @@ namespace DDRogueTest
 
             Assert.IsTrue(arrayCache.CheckMergeArea(new Point(13, 13), MakeTestArray(10, 10, 1), MergeWithException));
         }
-        
-        [TestMethod]
-        public void IfMergeDoesNotThrowsExceptionCheckMergedAreaPassesAnotherCase()
-        {
-            var arrayCache = new ArrayCache<int>(10, 10);
-
-            arrayCache.MergeArea(new Point(3, 1), MakeTestArray(5, 9, 1), Math.Max);
-            arrayCache.MergeArea(new Point(6, 6), MakeTestArray(3, 4, 1), MergeWithException);
-
-            Assert.IsTrue(arrayCache.CheckMergeArea(new Point(3, 10), MakeTestArray(9, 5, 1), MergeWithException));
-        }
 
         [TestMethod]
         public void ArrayCacheMergesTwoInputAreasUsingDifferentFunction()
