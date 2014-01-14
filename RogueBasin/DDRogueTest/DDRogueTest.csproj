@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ArrayCacheTest.cs" />
     <Compile Include="RoomTemplateUtilitiesTest.cs" />
     <Compile Include="TemplatedMapBuilderTest.cs" />
     <Compile Include="TemplatedMapGeneratorTest.cs" />
