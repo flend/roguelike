@@ -77,6 +77,16 @@ namespace RogueBasin
         SortedDictionary<int, TemplatePositioned> templates = new SortedDictionary<int, TemplatePositioned>();
 
         /// <summary>
+        /// 2d array for terrain
+        /// </summary>
+        ArrayCache<RoomTemplateTerrain> mapCache;
+
+        /// <summary>
+        /// 2d array for room ids
+        /// </summary>
+        ArrayCache<int> idCache;
+
+        /// <summary>
         /// The X, Y coords of the top left of the output map: all templates will be offset by this when merged
         /// </summary>
         Point masterMapTopLeft;
@@ -87,31 +97,31 @@ namespace RogueBasin
         Point masterMapBottomRight;
 
         /// <summary>
-        /// Only available after MergeTemplatesIntoMap() is called
+        /// May be null if no templates have been added
         /// </summary>
         public Point MasterMapTopLeft
         {
             get
             {
-                //May not have been calculated yet
-                CalculateTemplatedMapExtent();
-                return masterMapTopLeft;
+                return mapCache.TL;
             }
+        }
+
+        public TemplatedMapBuilder()
+        {
+            mapCache = new ArrayCache<RoomTemplateTerrain>(10, 10);
+            idCache = new ArrayCache<int>(10, 10);
+        }
+
+        public TemplatedMapBuilder(int cacheX, int cacheY)
+        {
+            mapCache = new ArrayCache<RoomTemplateTerrain>(cacheX, cacheY);
+            idCache = new ArrayCache<int>(cacheX, cacheY);
         }
 
         public bool CanBePlacedWithoutOverlappingOtherTemplates(TemplatePositioned template)
         {
-            foreach (Point p in template.Extent())
-            {
-                //Overlap with existing template
-                var existingMergedTerrain = GetMergedTerrainAtPoint(p);
-                if (existingMergedTerrain != RoomTemplateTerrain.Transparent && template.TerrainAtPoint(p) != RoomTemplateTerrain.Transparent)
-                {
-                    LogFile.Log.LogEntryDebug("Overlapping terrain at " + p + " add template failed", LogDebugLevel.Medium);
-                    return false;
-                }
-            }
-            return true;
+            return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, MergeTerrain);
         }
 
         /// <summary>
@@ -139,6 +149,20 @@ namespace RogueBasin
             return AddPositionedTemplate(templateToAdd, maxZ);
         }
 
+        private RoomTemplateTerrain MergeTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
+        {
+            if (originTerrain == RoomTemplateTerrain.Transparent)
+            {
+                return newTerrain;
+            }
+            else if(newTerrain == RoomTemplateTerrain.Transparent) {
+                return originTerrain;
+            }
+            else {
+                throw new ApplicationException("Can't overlap terrain");
+            }
+        }
+
         private bool AddPositionedTemplate(TemplatePositioned templateToAdd, int zToPlace)
         {
             if (!CanBePlacedWithoutOverlappingOtherTemplates(templateToAdd))
@@ -147,12 +171,32 @@ namespace RogueBasin
             try
             {
                 templates.Add(zToPlace, templateToAdd);
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain);
+      
+                idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd.Room.terrainMap.GetLength(0), templateToAdd.Room.terrainMap.GetLength(1),
+                    templateToAdd.RoomIndex), Math.Max);
                 return true;
             }
             catch (ArgumentException e)
             {
                 throw new ApplicationException("Can't place room at z: " + zToPlace + e.Message);
             }
+        }
+
+        private int[,] MakeIdArray(int x, int y, int val)
+        {
+            var ret = new int[x, y];
+
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    ret[i, j] = val;
+                }
+
+            }
+
+            return ret;
         }
 
         /// <summary>
@@ -171,38 +215,14 @@ namespace RogueBasin
          Absence of a template at this point returns Transparent */
         private RoomTemplateTerrain GetMergedTerrainAtPoint(Point point)
         {
-            foreach (var templatePlacement in templates)
-            {
-                TemplateRectangle roomExtent = templatePlacement.Value.Extent();
-
-                Point ptRelativeToTemplate = new Point(point.x - roomExtent.Left, point.y - roomExtent.Top);
-
-                //Check for point outside of template
-
-                if (!(ptRelativeToTemplate.x >= 0 && ptRelativeToTemplate.x < roomExtent.Width &&
-                    ptRelativeToTemplate.y >= 0 && ptRelativeToTemplate.y < roomExtent.Height))
-                    continue;
-
-                RoomTemplateTerrain thisTerrain = templatePlacement.Value.Room.terrainMap[ptRelativeToTemplate.x, ptRelativeToTemplate.y];
-
-                if (thisTerrain != RoomTemplateTerrain.Transparent)
-                    return thisTerrain;
-            }
-
-            return RoomTemplateTerrain.Transparent;
+            return mapCache.GetMergedPoint(point);
         }
-
 
         private void CalculateTemplatedMapExtent()
         {
-            int mapLeft = templates.Min(x => x.Value.Extent().Left);
-            int mapRight = templates.Max(x => x.Value.Extent().Right);
-            int mapTop = templates.Min(x => x.Value.Extent().Top);
-            int mapBottom = templates.Max(x => x.Value.Extent().Bottom);
-
-            masterMapTopLeft = new Point(mapLeft, mapTop);
-            masterMapBottomRight = new Point(mapRight, mapBottom);
-            LogFile.Log.LogEntryDebug("Map coords: TL: " + masterMapTopLeft.x + ", " + masterMapTopLeft.y + " BR: " + mapBottom + ", " + mapRight, LogDebugLevel.Medium);
+            masterMapTopLeft = mapCache.TL;
+            masterMapBottomRight = mapCache.BR;
+            LogFile.Log.LogEntryDebug("Map coords: TL: " + masterMapTopLeft.x + ", " + masterMapTopLeft.y + " BR: " + masterMapBottomRight.x + ", " + masterMapBottomRight.y, LogDebugLevel.Medium);
         }
 
         /// <summary>
@@ -211,37 +231,20 @@ namespace RogueBasin
         /// <returns></returns>
         public Map MergeTemplatesIntoMap(Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping)
         {
-
             if (templates.Count == 0)
                 throw new ApplicationException("No templates in map");
 
-            //Calculate smallest rectangle to enclose all templates in current positions
-            CalculateTemplatedMapExtent();
-            Map masterMap = new Map(masterMapBottomRight.x - masterMapTopLeft.x + 1, masterMapBottomRight.y - masterMapTopLeft.y + 1);
+            var mergedArea = mapCache.GetMergedArea();
+            var mergedIdArea = idCache.GetMergedArea();
 
-            //Merge each template onto the map in z-order
-            foreach (var templatePlacement in templates)
+            Map masterMap = new Map(mergedArea.GetLength(0), mergedArea.GetLength(1));
+
+            for (int i = 0; i < mergedArea.GetLength(0); i++)
             {
-                RoomTemplate template = templatePlacement.Value.Room;
-                TemplateRectangle roomExtent = templatePlacement.Value.Extent();
-
-                //Find masterMap relative coordinates
-                int roomMapLeft = roomExtent.Left - masterMapTopLeft.x;
-                int roomMapTop = roomExtent.Top - masterMapTopLeft.y;
-
-                for (int i = 0; i < roomExtent.Width; i++)
+                for (int j = 0; j < mergedArea.GetLength(1); j++)
                 {
-                    for (int j = 0; j < roomExtent.Height; j++)
-                    {
-                        RoomTemplateTerrain terrainToMerge = template.terrainMap[i, j];
-                        masterMap.roomIdMap[roomMapLeft + i, roomMapTop + j] = templatePlacement.Value.RoomIndex;
-
-                        //For transparent areas, the terrain below is kept
-                        if (terrainToMerge != RoomTemplateTerrain.Transparent)
-                        {
-                            masterMap.mapSquares[roomMapLeft + i, roomMapTop + j].Terrain = terrainMapping[terrainToMerge];
-                        }
-                    }
+                    masterMap.mapSquares[i, j].Terrain = terrainMapping[mergedArea[i, j]];
+                    masterMap.roomIdMap[i, j] = mergedIdArea[i, j];
                 }
             }
 

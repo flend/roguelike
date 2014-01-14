@@ -26,10 +26,9 @@ namespace RogueBasin
         /// </summary>
         Point realBR;
 
-        public ArrayCache(Point cacheTL, int sizeX, int sizeY)
+        public ArrayCache(int sizeX, int sizeY)
         {
             arrayCache = new T[sizeX, sizeY];
-            this.cacheTL = cacheTL;
         }
 
         public int CacheWidth
@@ -74,18 +73,56 @@ namespace RogueBasin
             }
         }
 
+        /// <summary>
+        /// Run the merge function as we will when merging. Any exceptions from the mergeArea function will cause failure
+        /// </summary>
+        public bool CheckMergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea)
+        {
+            //Assume merging onto an uninitalised map always works (although this might not be true for bizarrely setup systems)
+            if (cacheTL == null)
+                return true;
+
+            //Area to check (assume all area off the side of the cache will work)
+            int left = Math.Max(areaTL.x, cacheTL.x);
+            int top = Math.Max(areaTL.y, cacheTL.y);
+            int bottom = Math.Min(cacheTL.y + CacheHeight - 1, areaTL.y + areaToAdd.GetLength(1) - 1);
+            int right = Math.Min(cacheTL.x + CacheWidth - 1, areaTL.x + areaToAdd.GetLength(0) - 1);
+
+            try
+            {
+                for (int i = left; i <= right; i++)
+                {
+                    for (int j = top; j <= bottom; j++)
+                    {
+                        mergeArea(arrayCache[i - cacheTL.x, j - cacheTL.y], areaToAdd[i - left, j - top]);
+                    }
+                }
+
+                return true;
+            }
+            catch (ApplicationException ex)
+            {
+                return false;
+            }
+        }
+
         //Merge in areaToAdd at areaTL, using the mergeArea function
         public void MergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea) {
 
             //Check extent
+
+            if (cacheTL == null)
+            {
+                cacheTL = areaTL;
+            }
 
             int cacheRight = cacheTL.x + CacheWidth - 1;
             int cacheBot = cacheTL.y + CacheHeight - 1;
 
             int left = Math.Min(areaTL.x, cacheTL.x);
             int top = Math.Min(areaTL.y, cacheTL.y);
-            int bottom = Math.Max(cacheBot, areaTL.y + areaToAdd.GetLength(1));
-            int right = Math.Max(cacheRight, areaTL.x + areaToAdd.GetLength(0));
+            int bottom = Math.Max(cacheBot, areaTL.y + areaToAdd.GetLength(1) - 1);
+            int right = Math.Max(cacheRight, areaTL.x + areaToAdd.GetLength(0) - 1);
 
             if (left < cacheTL.x || right > cacheRight
                 || bottom > cacheBot || top < cacheTL.y)
@@ -158,6 +195,19 @@ namespace RogueBasin
             }
 
             return mergedArea;
+        }
+
+        /// <summary>
+        /// Get a single merged point in real coords
+        /// </summary>
+        /// <returns></returns>
+        public T GetMergedPoint(Point p)
+        {
+            if (p.x < realTL.x || p.x > realBR.x
+                || p.y < realTL.y || p.y > realBR.y)
+                throw new ApplicationException("Outside of area");
+
+            return arrayCache[p.x - cacheTL.x, p.y - cacheTL.y];
         }
 
     }

@@ -65,8 +65,8 @@ namespace RogueBasin
             roomTemplates.Add(room1);
             corridorTemplates.Add(corridor1);
 
-            //Create generator
-            var mapBuilder = new TemplatedMapBuilder();
+            //Create generator (guess initial cache size)
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
             templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
             int roomsToPlace = 20;
