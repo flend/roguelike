@@ -25,17 +25,14 @@ namespace RogueBasin
 
         public RoomTemplate Room { get; private set; }
 
-        public TemplateRotation Rotation { get; set; }
-
         public Point Location { get { return new Point(X, Y); } }
 
-        public TemplatePositioned(int x, int y, int z, RoomTemplate room, TemplateRotation rotation, int roomIndex)
+        public TemplatePositioned(int x, int y, int z, RoomTemplate room, int roomIndex)
         {
             X = x;
             Y = y;
             Z = z;
             Room = room;
-            Rotation = rotation;
             RoomIndex = roomIndex;
         }
 

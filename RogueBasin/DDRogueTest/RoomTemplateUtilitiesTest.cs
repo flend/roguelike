@@ -682,7 +682,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item1;
 
@@ -696,7 +696,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item1;
 
@@ -710,7 +710,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item1;
 
@@ -724,7 +724,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.test4doors.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(-31, -8, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(-31, -8, 0, baseRoomTemplate, 0);
 
             var alignedRoomAndDoor = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 2, 3, 1);
             TemplatePositioned alignedRoom = alignedRoomAndDoor.Item1;
@@ -743,7 +743,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item1;
 
@@ -757,7 +757,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item1;
 
@@ -771,7 +771,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item1;
 
@@ -785,7 +785,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             TemplatePositioned alignedRoom = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item1;
 
@@ -799,7 +799,7 @@ namespace DDRogueTest
             RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
             RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
 
-            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, TemplateRotation.Deg0, 0);
+            TemplatePositioned baseRoom = new TemplatePositioned(0, 0, 0, baseRoomTemplate, 0);
 
             Point alignedDoor = RoomTemplateUtilities.AlignRoomOnDoor(toAlignRoomTemplate, 0, baseRoom, 0, 0, 5).Item2;
 

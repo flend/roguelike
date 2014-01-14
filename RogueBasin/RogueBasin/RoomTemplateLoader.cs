@@ -699,7 +699,7 @@ namespace RogueBasin
                 left -= centreOfTemplateShortAxis;
             }
 
-            return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
+            return new TemplatePositioned(left, top, z, expandedCorridor, corridorRoomIndex);
         }
 
         static public bool ArePointsOnVerticalLine(Point point1, Point point2)
@@ -737,7 +737,7 @@ namespace RogueBasin
                 left -= centreOfTemplateShortAxis;
             }
 
-            return new TemplatePositioned(left, top, z, expandedCorridor, TemplateRotation.Deg0, corridorRoomIndex);
+            return new TemplatePositioned(left, top, z, expandedCorridor, corridorRoomIndex);
         }
 
         public static RoomTemplate.DoorLocation GetDoorLocation(RoomTemplate roomTemplate, int doorIndex)
@@ -840,7 +840,7 @@ namespace RogueBasin
                 toAlignRoomPosition = new Point(baseRoom.X - distanceApart - (rotatedTemplate.Width - 1), baseRoom.Y + yOffset);
             }
 
-            TemplatePositioned rotatedTemplatePosition = new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, TemplateRotation.Deg0, toAlignRoomIndex);
+            TemplatePositioned rotatedTemplatePosition = new TemplatePositioned(toAlignRoomPosition.x, toAlignRoomPosition.y, baseRoom.Z + 1, rotatedTemplate, toAlignRoomIndex);
             Point rotatedDoorLocation = new Point(toAlignRoomPosition.x + rotatedtoAlignDoorLocation.x, toAlignRoomPosition.y + rotatedtoAlignDoorLocation.y);
 
             return new Tuple<TemplatePositioned, Point>(rotatedTemplatePosition, rotatedDoorLocation);

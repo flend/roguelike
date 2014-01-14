@@ -20,7 +20,7 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
             Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos1));
         }
 
@@ -37,20 +37,20 @@ namespace DDRogueTest
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
             //Start
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos1);
 
             //End
-            TemplatePositioned templatePos2 = new TemplatePositioned(-10, 20, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos2 = new TemplatePositioned(-10, 20, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos2);
 
             //Middle
-            TemplatePositioned templatePos3 = new TemplatePositioned(-8, 30, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos3 = new TemplatePositioned(-8, 30, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos3);
 
             //Corridor from start - end that overlaps middle
             var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(6, 28, true, corridor1);
-            var positionedCorridor = new TemplatePositioned(-2, 4, 0, expandedCorridorAndPoint.Item1, TemplateRotation.Deg0, 3);
+            var positionedCorridor = new TemplatePositioned(-2, 4, 0, expandedCorridorAndPoint.Item1, 3);
 
             Assert.IsTrue(mapGen.AddPositionedTemplate(positionedCorridor));
 
@@ -66,7 +66,7 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 12);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 12);
             mapGen.AddPositionedTemplate(templatePos1);
 
             Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
@@ -84,10 +84,10 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 1);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 1);
             mapGen.AddPositionedTemplate(templatePos1);
 
-            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 10, room1, TemplateRotation.Deg0, 2);
+            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 10, room1, 2);
             mapGen.AddPositionedTemplate(templatePos2);
 
             Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
@@ -117,10 +117,10 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos1);
 
-            TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, 0);
             Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
         }
 
@@ -134,10 +134,10 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos1);
 
-            TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 1, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 1, room1, 0);
             Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
         }
 
@@ -151,10 +151,10 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos1);
 
-            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 10, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 10, room1, 0);
             Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
         }
 
@@ -166,10 +166,10 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos1);
 
-            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos2 = new TemplatePositioned(8, 0, 0, room1, 0);
             Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
         }
 
@@ -180,10 +180,10 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos1);
 
-            TemplatePositioned templatePos2 = new TemplatePositioned(9, 0, 1, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos2 = new TemplatePositioned(9, 0, 1, room1, 0);
             Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
         }
 
@@ -194,10 +194,10 @@ namespace DDRogueTest
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
-            TemplatePositioned templatePos1 = new TemplatePositioned(20, 20, 0, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos1 = new TemplatePositioned(20, 20, 0, room1, 0);
             mapGen.AddPositionedTemplate(templatePos1);
 
-            TemplatePositioned templatePos2 = new TemplatePositioned(21, 21, 1, room1, TemplateRotation.Deg0, 0);
+            TemplatePositioned templatePos2 = new TemplatePositioned(21, 21, 1, room1, 0);
             Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
         }
         
