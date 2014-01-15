@@ -2160,7 +2160,7 @@ namespace RogueBasin
                 }
 
                 var visualiser = new DoorClueGraphvizExport(connectivityModel);
-                visualiser.OutputUndirectedGraph("bsptree-door");
+                visualiser.OutputClueDoorGraph("bsptree-door");
                 visualiser.OutputDoorDependencyGraph("bsptree-dep");
 
                 //Find the doors corresponding to locked connections and lock them
@@ -2257,7 +2257,7 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("PC start vertex: " + connectivityModel.StartVertex, LogDebugLevel.High);
 
             DoorClueGraphvizExport visualiser = new DoorClueGraphvizExport(connectivityModel);
-            visualiser.OutputUndirectedGraph("bsptree-door");
+            visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
 
             

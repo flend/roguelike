@@ -83,6 +83,11 @@ namespace RogueBasin
         ArrayCache<int> idCache;
 
         /// <summary>
+        /// Default value for id map. Must not be a possible id
+        /// </summary>
+        readonly static int defaultId = -1;
+
+        /// <summary>
         /// The X, Y coords of the top left of the output map: all templates will be offset by this when merged
         /// </summary>
         Point masterMapTopLeft;
@@ -105,14 +110,17 @@ namespace RogueBasin
 
         public TemplatedMapBuilder()
         {
-            mapCache = new ArrayCache<RoomTemplateTerrain>(10, 10);
-            idCache = new ArrayCache<int>(10, 10);
+            InitialiseCaches(10, 10);
         }
 
         public TemplatedMapBuilder(int cacheX, int cacheY)
         {
-            mapCache = new ArrayCache<RoomTemplateTerrain>(cacheX, cacheY);
-            idCache = new ArrayCache<int>(cacheX, cacheY);
+            InitialiseCaches(cacheX, cacheY);
+        }
+
+        private void InitialiseCaches(int cacheX, int cacheY) {
+            mapCache = new ArrayCache<RoomTemplateTerrain>(cacheX, cacheY, RoomTemplateTerrain.Transparent);
+            idCache = new ArrayCache<int>(cacheX, cacheY, defaultId);
         }
 
         public bool CanBePlacedWithoutOverlappingOtherTemplates(TemplatePositioned template)
@@ -145,13 +153,21 @@ namespace RogueBasin
                 mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain);
       
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd.Room.terrainMap.GetLength(0), templateToAdd.Room.terrainMap.GetLength(1),
-                    templateToAdd.RoomIndex), Math.Max);
+                    templateToAdd.RoomIndex), MergeIds);
                 return true;
             }
             catch (ArgumentException e)
             {
                 throw new ApplicationException("Can't place room: " + e.Message);
             }
+        }
+
+        private int MergeIds(int existingId, int newId)
+        {
+            if (existingId == defaultId)
+                return newId;
+            else
+                return existingId;
         }
 
         private int[,] MakeIdArray(int x, int y, int val)

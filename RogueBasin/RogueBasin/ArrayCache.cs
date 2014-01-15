@@ -26,9 +26,39 @@ namespace RogueBasin
         /// </summary>
         Point realBR;
 
+        /// <summary>
+        /// Value to initialize unset area to
+        /// </summary>
+        T defaultValue;
+
+        bool useDefaultValue = false;
+
         public ArrayCache(int sizeX, int sizeY)
         {
+            MakeArrayCache(sizeX, sizeY);
+        }
+
+        public ArrayCache(int sizeX, int sizeY, T defaultValue)
+        {
+            MakeArrayCache(sizeX, sizeY);
+            InitializeArrayCache(defaultValue);
+            this.useDefaultValue = true;
+            this.defaultValue = defaultValue;
+        }
+
+        public void MakeArrayCache(int sizeX, int sizeY) {
             arrayCache = new T[sizeX, sizeY];
+        }
+
+        public void InitializeArrayCache(T defaultValue)
+        {
+            for (int i = 0; i < arrayCache.GetLength(0); i++)
+            {
+                for (int j = 0; j < arrayCache.GetLength(1); j++)
+                {
+                    arrayCache[i, j] = defaultValue;
+                }
+            }
         }
 
         public int CacheWidth
@@ -78,9 +108,9 @@ namespace RogueBasin
         /// </summary>
         public bool CheckMergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea)
         {
-            //Assume merging onto an uninitalised map always works (although this might not be true for bizarrely setup systems)
+            //Adopt this coord as the start if we haven't done so before
             if (cacheTL == null)
-                return true;
+                cacheTL = areaTL;
 
             //Area to check (assume all area off the side of the cache will work)
             int left = Math.Max(areaTL.x, cacheTL.x);
@@ -133,6 +163,18 @@ namespace RogueBasin
 
                 int offsetX = cacheTL.x - left;
                 int offsetY = cacheTL.y - top;
+
+                //Initialise new area if required
+                if (useDefaultValue)
+                {
+                    for (int i = 0; i < newCache.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < newCache.GetLength(1); j++)
+                        {
+                            newCache[i, j] = defaultValue;
+                        }
+                    }
+                }
 
                 //Copy from the old array into the new array
                 for (int i = 0; i < arrayCache.GetLength(0); i++)

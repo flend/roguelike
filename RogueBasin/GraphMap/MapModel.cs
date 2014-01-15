@@ -196,6 +196,8 @@ namespace GraphMap
 
         public MapCycleReducer GraphNoCycles { get { return graphNoCycles; } }
 
+        public UndirectedGraph<int, TaggedEdge<int, string>> BaseGraph { get { return baseGraph; } }
+
         public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
 
         /// <summary>

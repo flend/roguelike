@@ -373,6 +373,7 @@
     <Compile Include="MonsterThrowAndRunAI.cs" />
     <Compile Include="TargettingType.cs" />
     <Compile Include="TemplatedMapBuilder.cs" />
+    <Compile Include="TemplatedMapGenerator.cs" />
     <Compile Include="TemplateRectangle.cs" />
     <Compile Include="TileCell.cs" />
     <Compile Include="TileMap.cs" />
@@ -741,5 +742,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <EmbeddedResource Include="bin\Debug\vaults\branchroom.room" />
   </ItemGroup>
 </Project>

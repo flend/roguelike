@@ -22,6 +22,43 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void ArrayCacheCanBeInitialisedToAValue()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10, 1);
+
+            var areaToAdd = MakeTestArray(10, 10, 0);
+            var areaExpected = MakeTestArray(10, 10, 1);
+
+            arrayCache.MergeArea(new Point(0, 0), areaToAdd, Math.Max);
+
+            CollectionAssert.AreEqual(areaExpected, arrayCache.GetMergedArea());
+        }
+
+        [TestMethod]
+        public void ArrayCacheUsesInitialisedValueWhenCacheExpands()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10, 1);
+
+            var areaToAdd = MakeTestArray(10, 10, 0);
+            var areaToAdd2 = MakeTestArray(10, 10, 0);
+
+            arrayCache.MergeArea(new Point(0, 0), areaToAdd, Math.Max);
+            arrayCache.MergeArea(new Point(30, 30), areaToAdd2, Math.Max);
+
+            Assert.AreEqual(arrayCache.GetMergedPoint(new Point(20, 20)), 1);
+        }
+
+        [TestMethod]
+        public void CheckMergeTestsAgainstDefaultValue()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10, 1);
+
+            var areaToAdd = MakeTestArray(10, 10, 1);
+
+            Assert.IsFalse(arrayCache.CheckMergeArea(new Point(0, 0), areaToAdd, MergeWithException));
+        }
+
+        [TestMethod]
         public void ArrayCacheStoresAreasWithinDefaultSizeNotOriginAligned()
         {
             var arrayCache = new ArrayCache<int>(10, 10);

@@ -18,14 +18,32 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Output the map graph, with doors & clues
+        /// Visualise the cucle-reduced graph, including door and clue locations
         /// </summary>
         /// <param name="filename"></param>
-        public void OutputUndirectedGraph(string filename)
+        public void OutputClueDoorGraph(string filename)
         {
-
             //Visualise the reduced graph, including door and clue locations
             var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(model.GraphNoCycles.mapNoCycles);
+
+            graphviz.FormatVertex += graphviz_FormatVertex;
+            graphviz.FormatEdge += graphviz_FormatEdge;
+
+            graphviz.Generate(new FileDotEngineUndirected(), filename);
+
+            //TODO: Visualise the full graph, including door and clue locations
+
+            // "C:\Program Files (x86)\Graphviz 2.28\bin\dot.exe" -Tbmp -ograph.bmp graph.dot
+        }
+
+        /// <summary>
+        /// Visualise the full graph, including door and clue locations (though clues will be at the wrapped-up vertex)
+        /// </summary>
+        /// <param name="filename"></param>
+        public void OutputFullGraph(string filename)
+        {
+            //Visualise the reduced graph, including door and clue locations
+            var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(model.BaseGraph);
 
             graphviz.FormatVertex += graphviz_FormatVertex;
             graphviz.FormatEdge += graphviz_FormatEdge;
@@ -43,7 +61,6 @@ namespace GraphMap
         /// <param name="filename"></param>
         public void OutputDoorDependencyGraph(string filename)
         {
-            //Visualise the reduced graph, including door and clue locations
             var graphviz = new GraphvizAlgorithm<int, Edge<int>>(model.DoorAndClueManager.DoorDependencyGraph);
 
             graphviz.FormatVertex += graphviz_FormatDoorVertex;

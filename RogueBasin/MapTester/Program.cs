@@ -29,8 +29,10 @@ namespace MapTester
 
             //Setup a single test level
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
-            Map templateMap = templateGen.GenerateMap();
+            Map templateMap = templateGen.GenerateMap2();
             int levelNo = Game.Dungeon.AddMap(templateMap);
+
+            LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             //Extract connectivity map
             var graphModel = new MapModel(templateGen.ConnectivityMap, 0);
@@ -42,8 +44,11 @@ namespace MapTester
         private void VisualiseConnectivityGraph(MapModel graphModel)
         {
             var visualiser = new DoorClueGraphvizExport(graphModel);
-            visualiser.OutputUndirectedGraph("bsptree-door");
+            visualiser.OutputFullGraph("bsptree-full");
+            visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
+            GraphVizUtils.RunGraphVizPNG("bsptree-full");
+            GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
             GraphVizUtils.RunGraphVizPNG("bsptree-door");
             GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
             GraphVizUtils.RunGraphVizPNG("bsptree-dep");

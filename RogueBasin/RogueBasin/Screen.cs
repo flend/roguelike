@@ -2152,9 +2152,16 @@ namespace RogueBasin {
                             int numberToDraw = roomId % 10;
                             int colorIndex = roomId / 10;
 
-                            char r = Convert.ToChar(numberToDraw.ToString());
-                            screenChar = r;
-                            baseDrawColor = colors[colorIndex];
+                            if (numberToDraw == -1)
+                            {
+                                screenChar = 'n';
+                                baseDrawColor = ColorPresets.DarkGray;
+                            }
+                            else {
+                                char r = Convert.ToChar(numberToDraw.ToString());
+                                screenChar = r;
+                                baseDrawColor = colors[colorIndex];
+                            }
                         }
                     }
                     else if (map.mapSquares[i, j].Terrain == MapTerrain.ClosedDoor || map.mapSquares[i, j].Terrain == MapTerrain.OpenDoor)
