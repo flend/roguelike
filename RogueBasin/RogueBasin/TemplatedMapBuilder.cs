@@ -142,6 +142,11 @@ namespace RogueBasin
             }
         }
 
+        private RoomTemplateTerrain OverrideTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
+        {
+            return newTerrain;
+        }
+
         public bool AddPositionedTemplate(TemplatePositioned templateToAdd)
         {
             if (!CanBePlacedWithoutOverlappingOtherTemplates(templateToAdd))
@@ -160,6 +165,19 @@ namespace RogueBasin
             {
                 throw new ApplicationException("Can't place room: " + e.Message);
             }
+        }
+
+        /// <summary>
+        /// Merge in terrain at location, ignoring using transparent requirement
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="terrain"></param>
+        public void AddOverrideTerrain(Point location, RoomTemplateTerrain terrain)
+        {
+            RoomTemplateTerrain[,] terrainToAdd = new RoomTemplateTerrain[1,1];
+            terrainToAdd[0, 0] = terrain;
+
+            mapCache.MergeArea(location, terrainToAdd, OverrideTerrain);
         }
 
         private int MergeIds(int existingId, int newId)

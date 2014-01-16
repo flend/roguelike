@@ -96,6 +96,26 @@ namespace DDRogueTest
             Assert.IsTrue(outputMap.roomIdMap[8, 0] == 2);
         }
 
+        [TestMethod]
+        public void TerrainAtPointCanBeOverriden()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 1);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            mapGen.AddOverrideTerrain(new Point(0, 0), RoomTemplateTerrain.Floor);
+
+            Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+
+            Assert.AreEqual(outputMap.mapSquares[0, 0], MapTerrain.Empty);
+        }
+
         private Dictionary<RoomTemplateTerrain, MapTerrain> GetStandardTerrainMapping()
         {
             var terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
