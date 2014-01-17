@@ -113,7 +113,7 @@ namespace DDRogueTest
 
             Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
 
-            Assert.AreEqual(outputMap.mapSquares[0, 0], MapTerrain.Empty);
+            Assert.AreEqual(MapTerrain.Empty, outputMap.mapSquares[0, 0].Terrain);
         }
 
         private Dictionary<RoomTemplateTerrain, MapTerrain> GetStandardTerrainMapping()

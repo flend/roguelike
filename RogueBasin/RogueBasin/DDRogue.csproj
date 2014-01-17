@@ -741,7 +741,6 @@
     <EmbeddedResource Include="bin\Debug\vaults\corridortemplate3x1.room" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <EmbeddedResource Include="bin\Debug\vaults\branchroom.room" />
   </ItemGroup>
 </Project>
