@@ -279,5 +279,15 @@ namespace RogueBasin
 
             return true;
         }
+
+        public void ReplaceDoorsWithTerrain(RoomTemplateTerrain roomTemplateTerrain)
+        {
+            foreach (var door in PotentialDoors)
+            {
+                mapBuilder.AddOverrideTerrain(door.MapCoords, roomTemplateTerrain);
+            }
+
+            PotentialDoors.Clear();
+        }
     }
 }

@@ -34,6 +34,38 @@ namespace DDRogueTest
             CollectionAssert.AreEquivalent(new List<Connection>(new Connection[] { new Connection(0, 2), new Connection(1, 2) }), allConnections);
         }
 
+        private Dictionary<RoomTemplateTerrain, MapTerrain> GetStandardTerrainMapping()
+        {
+            var terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
+            terrainMapping[RoomTemplateTerrain.Wall] = MapTerrain.Wall;
+            terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
+            terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
+            terrainMapping[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
+
+            return terrainMapping;
+        }
+
+        [TestMethod]
+        public void DoorsCanBeReplacedWithOtherTerrain()
+        {
+            //With 4 doors
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.test4doors.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+
+            mapGen.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            //Check the doors are walls when merged
+            var map = mapBuilder.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+            Assert.AreEqual(map.mapSquares[0, 3].Terrain, MapTerrain.Wall);
+            Assert.AreEqual(map.mapSquares[7, 1].Terrain, MapTerrain.Wall);
+            Assert.AreEqual(map.mapSquares[7, 0].Terrain, MapTerrain.Wall);
+            Assert.AreEqual(map.mapSquares[3, 3].Terrain, MapTerrain.Wall);
+        }
+
         [TestMethod]
         public void AddingAVerticalCorridorBetweenTwoRoomsGivesConnectedNodeGraphBR()
         {
