@@ -131,6 +131,27 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void CorrectPotentialDoorsAreRemovedAfterMultiDoorsRoomsAreConnectedByACorridor()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.test4doors.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.test2doors.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[3], 1, 1);
+
+            var expectedDoors = new List<Point>(new Point[] { new Point(3, 0), new Point(0, 1), new Point(7, 1),
+                                                              new Point(6, 6)});
+            var actualDoors = mapGen.PotentialDoors.Select(d => d.MapCoords);
+
+            CollectionAssert.AreEquivalent(expectedDoors.ToList(), actualDoors.ToList());
+        }
+
+        [TestMethod]
         public void PotentialDoorsAreRemovedAfterRoomsAreConnectedByPlacingSideToSide()
         {
             //Load sample template 8x4

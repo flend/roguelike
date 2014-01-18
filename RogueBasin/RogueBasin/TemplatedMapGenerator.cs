@@ -207,8 +207,14 @@ namespace RogueBasin
 
         public bool PlaceRoomTemplateAlignedWithExistingDoor(RoomTemplate roomTemplateToPlace, RoomTemplate corridorTemplate, DoorInfo existingDoor, int distanceApart)
         {
-            var newRoomIndex = NextRoomIndex();
             int newRoomDoorIndex = Game.Random.Next(roomTemplateToPlace.PotentialDoors.Count);
+            return PlaceRoomTemplateAlignedWithExistingDoor(roomTemplateToPlace, corridorTemplate, existingDoor, newRoomDoorIndex, distanceApart);
+        }
+
+        public bool PlaceRoomTemplateAlignedWithExistingDoor(RoomTemplate roomTemplateToPlace, RoomTemplate corridorTemplate, DoorInfo existingDoor, int newRoomDoorIndex, int distanceApart)
+        {
+            var newRoomIndex = NextRoomIndex();
+            
 
             Point existingDoorLoc = existingDoor.MapCoords;
 
@@ -284,7 +290,7 @@ namespace RogueBasin
             int noDoors = alignedNewRoom.PotentialDoors.Count();
             for (int i = 0; i < noDoors; i++)
             {
-                if (i == newRoomDoorIndex)
+                if (alignedNewRoom.PotentialDoors[i] == alignedDoorLocation)
                     continue;
                 potentialDoors.Add(new DoorInfo(alignedNewRoom, newRoomIndex, i, RoomTemplateUtilities.GetDoorLocation(alignedNewRoom.Room, i)));
             }
