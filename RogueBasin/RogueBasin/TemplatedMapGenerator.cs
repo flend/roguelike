@@ -88,12 +88,12 @@ namespace RogueBasin
                 return false;
 
             IncreaseNextRoomIndex();
-            AddNewRoomsToPotentialRooms(positionedRoom, roomIndex);
+            AddNewDoorsToPotentialDoors(positionedRoom, roomIndex);
 
             return true;
         }
 
-        private void AddNewRoomsToPotentialRooms(TemplatePositioned positionedRoom, int roomIndex)
+        private void AddNewDoorsToPotentialDoors(TemplatePositioned positionedRoom, int roomIndex)
         {
             //Store a reference to each potential door in the room
             int noDoors = positionedRoom.PotentialDoors.Count();
@@ -116,73 +116,82 @@ namespace RogueBasin
                 var firstDoorCoord = firstDoor.MapCoords;
                 var secondDoorCoord = secondDoor.MapCoords;
 
+                var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(firstDoor.MapCoords, firstDoor.DoorLocation, secondDoor.MapCoords, secondDoor.DoorLocation);
+
                 bool canDoLSharedCorridor = RoomTemplateUtilities.CanBeConnectedWithLShapedCorridor(firstDoorCoord, firstDoorLoc, secondDoorCoord, secondDoorLoc);
                 bool canDoBendCorridor = RoomTemplateUtilities.CanBeConnectedWithBendCorridor(firstDoorCoord, firstDoorLoc, secondDoorCoord, secondDoorLoc);
                 bool canDoStraightCorridor = RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(firstDoorCoord, firstDoorLoc, secondDoorCoord, secondDoorLoc);
+                bool areAdjacent = corridorTermini.Item1 == secondDoorCoord && corridorTermini.Item2 == firstDoorCoord;
 
-                if (!canDoLSharedCorridor && !canDoBendCorridor && !canDoStraightCorridor)
+                if (!canDoLSharedCorridor && !canDoBendCorridor && !canDoStraightCorridor && !areAdjacent)
                     throw new ApplicationException("No corridor available to connect this type of door");
 
-                //Create template
-
-                var horizontal = false;
-                if (firstDoorLoc == RoomTemplate.DoorLocation.Left || firstDoorLoc == RoomTemplate.DoorLocation.Right)
+                if (areAdjacent)
                 {
-                    horizontal = true;
-                }
-
-                var corridorTermini = RoomTemplateUtilities.CorridorTerminalPointsBetweenDoors(firstDoor.MapCoords, firstDoor.DoorLocation, secondDoor.MapCoords, secondDoor.DoorLocation);
-
-                int xOffset = corridorTermini.Item2.x - corridorTermini.Item1.x;
-                int yOffset = corridorTermini.Item2.y - corridorTermini.Item1.y;
-
-                RoomTemplate expandedCorridor;
-                Point corridorTerminus1InTemplate;
-
-                if (canDoBendCorridor)
-                {
-                    int transition = (int)Math.Floor(yOffset / 2.0);
-                    if (horizontal == true)
-                    {
-                        transition = (int)Math.Floor(xOffset / 2.0);
-                    }
-                    var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateBend(xOffset, yOffset, transition, horizontal, corridorTemplate);
-                    expandedCorridor = expandedCorridorAndPoint.Item1;
-                    corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
-                }
-                else if (canDoLSharedCorridor)
-                {
-                    var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(xOffset, yOffset, horizontal, corridorTemplate);
-                    expandedCorridor = expandedCorridorAndPoint.Item1;
-                    corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
+                    //Add a direct connection in the connectivity graph
+                    connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, secondDoor.OwnerRoomIndex);
                 }
                 else
                 {
-                    var offsetToUse = horizontal ? xOffset : yOffset;
-                    var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateStraight(offsetToUse, horizontal, corridorTemplate);
-                    expandedCorridor = expandedCorridorAndPoint.Item1;
-                    corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
+                    //Create template
+
+                    var horizontal = false;
+                    if (firstDoorLoc == RoomTemplate.DoorLocation.Left || firstDoorLoc == RoomTemplate.DoorLocation.Right)
+                    {
+                        horizontal = true;
+                    }
+
+                    int xOffset = corridorTermini.Item2.x - corridorTermini.Item1.x;
+                    int yOffset = corridorTermini.Item2.y - corridorTermini.Item1.y;
+
+                    RoomTemplate expandedCorridor;
+                    Point corridorTerminus1InTemplate;
+
+                    if (canDoBendCorridor)
+                    {
+                        int transition = (int)Math.Floor(yOffset / 2.0);
+                        if (horizontal == true)
+                        {
+                            transition = (int)Math.Floor(xOffset / 2.0);
+                        }
+                        var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateBend(xOffset, yOffset, transition, horizontal, corridorTemplate);
+                        expandedCorridor = expandedCorridorAndPoint.Item1;
+                        corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
+                    }
+                    else if (canDoLSharedCorridor)
+                    {
+                        var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateLShaped(xOffset, yOffset, horizontal, corridorTemplate);
+                        expandedCorridor = expandedCorridorAndPoint.Item1;
+                        corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
+                    }
+                    else
+                    {
+                        var offsetToUse = horizontal ? xOffset : yOffset;
+                        var expandedCorridorAndPoint = RoomTemplateUtilities.ExpandCorridorTemplateStraight(offsetToUse, horizontal, corridorTemplate);
+                        expandedCorridor = expandedCorridorAndPoint.Item1;
+                        corridorTerminus1InTemplate = expandedCorridorAndPoint.Item2;
+                    }
+
+                    //Place corridor
+
+                    //Match corridor tile to location of door
+                    Point topLeftCorridor = corridorTermini.Item1 - corridorTerminus1InTemplate;
+
+                    var corridorRoomIndex = NextRoomIndex();
+                    var positionedCorridor = new TemplatePositioned(topLeftCorridor.x, topLeftCorridor.y, 0, expandedCorridor, corridorRoomIndex);
+
+                    if (!mapBuilder.CanBePlacedWithoutOverlappingOtherTemplates(positionedCorridor))
+                        return false;
+
+                    //Place the corridor
+                    mapBuilder.AddPositionedTemplate(positionedCorridor);
+                    IncreaseNextRoomIndex();
+
+                    //Add connections to the old and new rooms
+                    connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, corridorRoomIndex);
+                    connectivityMap.AddRoomConnection(corridorRoomIndex, secondDoor.OwnerRoomIndex);
                 }
-
-                //Place corridor
-
-                //Match corridor tile to location of door
-                Point topLeftCorridor = corridorTermini.Item1 - corridorTerminus1InTemplate;
-
-                var corridorRoomIndex = NextRoomIndex();
-                var positionedCorridor = new TemplatePositioned(topLeftCorridor.x, topLeftCorridor.y, 0, expandedCorridor, corridorRoomIndex);
-
-                if (!mapBuilder.CanBePlacedWithoutOverlappingOtherTemplates(positionedCorridor))
-                    return false;
-
-                //Place the corridor
-                mapBuilder.AddPositionedTemplate(positionedCorridor);
-                IncreaseNextRoomIndex();
-
-                //Add connections to the old and new rooms
-                connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, corridorRoomIndex);
-                connectivityMap.AddRoomConnection(corridorRoomIndex, secondDoor.OwnerRoomIndex);
-
+                
                 //Remove both doors from the potential list
                 potentialDoors.Remove(firstDoor);
                 potentialDoors.Remove(secondDoor);
@@ -270,9 +279,15 @@ namespace RogueBasin
                 return false;
             }
 
-            //Add the new potential doors
-
-            AddNewRoomsToPotentialRooms(alignedNewRoom, newRoomIndex);
+            //Add the new potential doors (excluding the one we are linked on)
+            //Can't find a nice linq alternative
+            int noDoors = alignedNewRoom.PotentialDoors.Count();
+            for (int i = 0; i < noDoors; i++)
+            {
+                if (i == newRoomDoorIndex)
+                    continue;
+                potentialDoors.Add(new DoorInfo(alignedNewRoom, newRoomIndex, i, RoomTemplateUtilities.GetDoorLocation(alignedNewRoom.Room, i)));
+            }
 
             //If successful, remove the candidate door from the list
             potentialDoors.Remove(existingDoor);

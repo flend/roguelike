@@ -112,6 +112,9 @@ namespace RogueBasin
             var totalExtraConnections = 500;
             AddCorridorsBetweenOpenDoors(totalExtraConnections);
 
+            //Replace spare doors with walls
+            templatedGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
             var firstRoom = mapBuilder.GetTemplate(0);
