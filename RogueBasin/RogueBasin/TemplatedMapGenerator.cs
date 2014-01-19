@@ -97,9 +97,12 @@ namespace RogueBasin
         {
             //Store a reference to each potential door in the room
             int noDoors = positionedRoom.PotentialDoors.Count();
+            //var currentDoorLocations = potentialDoors.Select(d => d.MapCoords);
+
             for (int i = 0; i < noDoors; i++)
             {
-                potentialDoors.Add(new DoorInfo(positionedRoom, roomIndex, i, RoomTemplateUtilities.GetDoorLocation(positionedRoom.Room, i)));
+                //if (!currentDoorLocations.Contains(positionedRoom.PotentialDoors[i]))
+                    potentialDoors.Add(new DoorInfo(positionedRoom, roomIndex, i, RoomTemplateUtilities.GetDoorLocation(positionedRoom.Room, i)));
             }
         }
 
@@ -122,11 +125,12 @@ namespace RogueBasin
                 bool canDoBendCorridor = RoomTemplateUtilities.CanBeConnectedWithBendCorridor(firstDoorCoord, firstDoorLoc, secondDoorCoord, secondDoorLoc);
                 bool canDoStraightCorridor = RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(firstDoorCoord, firstDoorLoc, secondDoorCoord, secondDoorLoc);
                 bool areAdjacent = corridorTermini.Item1 == secondDoorCoord && corridorTermini.Item2 == firstDoorCoord;
+                bool areOverlapping = firstDoorCoord == secondDoorCoord;
 
-                if (!canDoLSharedCorridor && !canDoBendCorridor && !canDoStraightCorridor && !areAdjacent)
+                if (!canDoLSharedCorridor && !canDoBendCorridor && !canDoStraightCorridor && !areAdjacent && !areOverlapping)
                     throw new ApplicationException("No corridor available to connect this type of door");
 
-                if (areAdjacent)
+                if (areAdjacent || areOverlapping)
                 {
                     //Add a direct connection in the connectivity graph
                     connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, secondDoor.OwnerRoomIndex);

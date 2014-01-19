@@ -53,7 +53,48 @@ namespace DDRogueTest
             var positionedCorridor = new TemplatePositioned(-2, 4, 0, expandedCorridorAndPoint.Item1, 3);
 
             Assert.IsTrue(mapGen.AddPositionedTemplate(positionedCorridor));
+        }
 
+        [TestMethod]
+        public void AddingOverlappingTemplatesWorksIfOnlyOverlapIsOnWallsAndDoors()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            //Base
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            //Overlapping by wall and door only
+            TemplatePositioned templatePos2 = new TemplatePositioned(7, 0, 0, room1, 0);
+            mapGen.AddPositionedTemplate(templatePos2);
+
+            Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
+        }
+
+        [TestMethod]
+        public void AddingOverlappingTemplatesDoesntWorkIfOOverlapBetweenWallAndDoor()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            //Base
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 0);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            //Overlapping by wall and door only
+            TemplatePositioned templatePos2 = new TemplatePositioned(7, 1, 0, room1, 0);
+            mapGen.AddPositionedTemplate(templatePos2);
+
+            Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
         }
 
         [TestMethod]
@@ -128,7 +169,7 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void TestOverlappingSolidRoomsCantBeAdded()
+        public void TestOverlappingSolidRoomsCanBeAdded()
         {
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
@@ -141,11 +182,11 @@ namespace DDRogueTest
             mapGen.AddPositionedTemplate(templatePos1);
 
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, 0);
-            Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
+            Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
         }
 
         [TestMethod]
-        public void TestCompletelyOverlappingSolidRoomsCantBeAdded()
+        public void TestCompletelyOverlappingSolidRoomsCanBeAdded()
         {
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
@@ -158,7 +199,7 @@ namespace DDRogueTest
             mapGen.AddPositionedTemplate(templatePos1);
 
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 1, room1, 0);
-            Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
+            Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
         }
 
         [TestMethod]

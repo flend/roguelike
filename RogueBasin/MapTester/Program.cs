@@ -27,6 +27,9 @@ namespace MapTester
         {
             StandardGameSetup();
 
+            int seedToUse = 100;
+            Game.Random = new Random(seedToUse);
+
             //Setup a single test level
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
             Map templateMap = templateGen.GenerateMap2();

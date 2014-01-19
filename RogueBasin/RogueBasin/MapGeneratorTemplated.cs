@@ -103,8 +103,8 @@ namespace RogueBasin
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
-            int roomsToPlace = 20;
-            int maxRoomDistance = 2;
+            int roomsToPlace = 10;
+            int maxRoomDistance = 1;
 
             var roomsPlaced = PlaceRandomConnectedRooms(roomsToPlace, maxRoomDistance);
 

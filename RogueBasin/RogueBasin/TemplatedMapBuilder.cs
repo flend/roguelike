@@ -138,6 +138,11 @@ namespace RogueBasin
                 return originTerrain;
             }
             else {
+                //Can overlap indentical terrain
+                if (newTerrain == originTerrain)
+                    return originTerrain;
+
+                //Mismatched terrain throws exception
                 throw new ApplicationException("Can't overlap terrain");
             }
         }
