@@ -171,6 +171,10 @@ namespace DDRogueTest
         [TestMethod]
         public void TestOverlappingSolidRoomsCanBeAdded()
         {
+            //I'd rather overlapping solid rooms couldn't be added
+            //(it causes problems if new doors are placed over old doors)
+            //but it's a pain to enforce this behaviour, so it's allowed for now
+
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");

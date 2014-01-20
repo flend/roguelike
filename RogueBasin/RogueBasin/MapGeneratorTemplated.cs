@@ -144,7 +144,14 @@ namespace RogueBasin
                                               && d1.OwnerRoomIndex != d2.OwnerRoomIndex
                                         select new { origin = d1, target = d2 };
 
-            var allMatchingDoorPossibilities = allBendDoorPossibilities.Union(allLDoorPossibilities);
+            var allOverlappingDoorPossibilities = from d1 in allDoors
+                                        from d2 in allDoors
+                                        where d1.MapCoords == d2.MapCoords
+                                              && d1.OwnerRoomIndex != d2.OwnerRoomIndex
+                                        select new { origin = d1, target = d2 };
+
+
+            var allMatchingDoorPossibilities = allBendDoorPossibilities.Union(allLDoorPossibilities).Union(allOverlappingDoorPossibilities);
             //var allMatchingDoorPossibilities = allLDoorPossibilities;
             //var allMatchingDoorPossibilities = allBendDoorPossibilities;
 
