@@ -169,12 +169,9 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void TestOverlappingSolidRoomsCanBeAdded()
+        public void TestOverlappingSolidRoomsCantBeAdded()
         {
-            //I'd rather overlapping solid rooms couldn't be added
-            //(it causes problems if new doors are placed over old doors)
-            //but it's a pain to enforce this behaviour, so it's allowed for now
-
+            //Completely overlapping rooms cause problems with door removal etc. so they can't be allowed
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
@@ -186,7 +183,7 @@ namespace DDRogueTest
             mapGen.AddPositionedTemplate(templatePos1);
 
             TemplatePositioned templatePos2 = new TemplatePositioned(0, 0, 10, room1, 0);
-            Assert.IsTrue(mapGen.AddPositionedTemplate(templatePos2));
+            Assert.IsFalse(mapGen.AddPositionedTemplate(templatePos2));
         }
 
         [TestMethod]

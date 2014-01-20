@@ -2160,6 +2160,9 @@ namespace RogueBasin {
                             else {
                                 char r = Convert.ToChar(numberToDraw.ToString());
                                 screenChar = r;
+                                if (colorIndex >= colors.Count)
+                                    colorIndex = colorIndex % colors.Count;
+                                
                                 baseDrawColor = colors[colorIndex];
                             }
                         }

@@ -27,7 +27,7 @@ namespace MapTester
         {
             StandardGameSetup();
 
-            int seedToUse = 100;
+            int seedToUse = 150;
             Game.Random = new Random(seedToUse);
 
             //Setup a single test level
