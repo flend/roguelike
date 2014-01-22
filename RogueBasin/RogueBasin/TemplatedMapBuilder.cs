@@ -125,7 +125,7 @@ namespace RogueBasin
 
         public bool CanBePlacedWithoutOverlappingOtherTemplates(TemplatePositioned template)
         {
-            return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, MergeTerrain);
+            return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
         }
 
         private RoomTemplateTerrain MergeTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
@@ -160,7 +160,7 @@ namespace RogueBasin
             try
             {
                 templates.Add(templateToAdd);
-                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain);
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
       
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd.Room.terrainMap.GetLength(0), templateToAdd.Room.terrainMap.GetLength(1),
                     templateToAdd.RoomIndex), MergeIds);
@@ -170,6 +170,20 @@ namespace RogueBasin
             {
                 throw new ApplicationException("Can't place room: " + e.Message);
             }
+        }
+
+        /// <summary>
+        /// Ensure that rooms can't completely overlap (which passes - is any terrain different - test) 
+        /// by requiring some different terrain (which implicitally must be transparent)
+        /// </summary>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <returns></returns>
+        private bool CheckNotCompletelyOverlapping(RoomTemplateTerrain arg1, RoomTemplateTerrain arg2)
+        {
+            if (arg1 != arg2)
+                return true;
+            return false;
         }
 
         /// <summary>

@@ -103,10 +103,15 @@ namespace RogueBasin
             }
         }
 
+        public bool CheckMergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea)
+        {
+            return CheckMergeArea(areaTL, areaToAdd, mergeArea, null);
+        }
+
         /// <summary>
         /// Run the merge function as we will when merging. Any exceptions from the mergeArea function will cause failure
         /// </summary>
-        public bool CheckMergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea)
+        public bool CheckMergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea, Func<T, T, bool> checkArea)
         {
             //Adopt this coord as the start if we haven't done so before
             if (cacheTL == null)
@@ -120,11 +125,39 @@ namespace RogueBasin
 
             try
             {
+                if (checkArea != null)
+                {
+                    bool passCondition = false;
+
+                    for (int i = areaTL.x; i <= areaTL.x + areaToAdd.GetLength(0) - 1; i++)
+                    {
+                        for (int j = areaTL.y; j <= areaTL.y + areaToAdd.GetLength(1) - 1; j++)
+                        {
+                            //Area that is in the cache
+                            if (i >= cacheTL.x && i <= cacheTL.x + CacheWidth - 1 &&
+                                j >= cacheTL.y && j <= cacheTL.y + CacheHeight - 1)
+                            {
+                                if (checkArea(arrayCache[i - cacheTL.x, j - cacheTL.y], areaToAdd[i - areaTL.x, j - areaTL.y]))
+                                    passCondition = true;
+                            }
+                            else
+                            {
+                                //Otherwise check against the default values
+                                if (checkArea(defaultValue, areaToAdd[i - areaTL.x, j - areaTL.y]))
+                                    passCondition = true;
+                            }
+                        }
+                    }
+
+                    if (!passCondition)
+                        throw new ApplicationException("Check Area function never passed, aborting.");
+                }
+
                 for (int i = left; i <= right; i++)
                 {
                     for (int j = top; j <= bottom; j++)
                     {
-                        mergeArea(arrayCache[i - cacheTL.x, j - cacheTL.y], areaToAdd[i - left, j - top]);
+                        mergeArea(arrayCache[i - cacheTL.x, j - cacheTL.y], areaToAdd[i - areaTL.x, j - areaTL.y]);
                     }
                 }
 
@@ -136,8 +169,24 @@ namespace RogueBasin
             }
         }
 
-        //Merge in areaToAdd at areaTL, using the mergeArea function
-        public void MergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea) {
+        /// <summary>
+        /// The checking function must pass at least once for the merged areas
+        /// </summary>
+        private void ApplyCheckingFunction(Point areaTL, T[,] areaToAdd, Func<T, T, bool> checkArea)
+        {
+
+           
+        }
+
+        public void MergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea)
+        {
+            MergeArea(areaTL, areaToAdd, mergeArea, null);
+        }
+
+        /// <summary>
+        /// Merge in areaToAdd at areaTL, using the mergeArea function
+        /// </summary>
+        public void MergeArea(Point areaTL, T[,] areaToAdd, Func<T, T, T> mergeArea, Func<T, T, bool> checkArea) {
 
             //Check extent
 
@@ -188,6 +237,24 @@ namespace RogueBasin
                 //Adopt the new, larger cache area
                 arrayCache = newCache;
                 cacheTL = newTL;
+            }
+
+            //The check area function must pass once in the mergedArea, otherwise we abort
+            if (checkArea != null)
+            {
+                bool passCondition = false;
+
+                for (int i = 0; i < areaToAdd.GetLength(0); i++)
+                {
+                    for (int j = 0; j < areaToAdd.GetLength(1); j++)
+                    {
+                        if (checkArea(arrayCache[areaTL.x - cacheTL.x + i, areaTL.y - cacheTL.y + j], areaToAdd[i, j]))
+                            passCondition = true;
+                    }
+                }
+
+                if (!passCondition)
+                    throw new ApplicationException("Check Area function never passed, aborting.");
             }
 
             //Merge new area into the old area, using the passed in function

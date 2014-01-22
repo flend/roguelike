@@ -192,6 +192,56 @@ namespace DDRogueTest
             arrayCache.GetMergedPoint(new Point(13, 13));
         }
 
+        [TestMethod]
+        public void CheckingFunctionMustPassOnceToAllowMerge()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10);
+
+            arrayCache.MergeArea(new Point(3, 3), MakeTestArray(10, 10, 1), Math.Max);
+            arrayCache.MergeArea(new Point(12, 12), MakeTestArray(10, 10, 2), Math.Max, (a, b) => { return a == 1; });
+
+            //Check we have the correct value
+            var mergedArea = arrayCache.GetMergedArea();
+            Assert.AreEqual(mergedArea[13 - arrayCache.TL.x, 13 - arrayCache.TL.x], 2);
+        }
+
+        [TestMethod]
+        public void CheckingFunctionMustPassOnceToAllowMergeAndCanBeTested()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10);
+
+            arrayCache.MergeArea(new Point(3, 3), MakeTestArray(10, 10, 1), Math.Max);
+            Assert.IsTrue(arrayCache.CheckMergeArea(new Point(12, 12), MakeTestArray(10, 10, 2), Math.Max, (a, b) => { return a != b; }));
+        }
+
+        [TestMethod]
+        public void CheckingFunctionMustPassOnceToAllowMergeOfSubsetAndCanBeTested()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10);
+
+            arrayCache.MergeArea(new Point(3, 3), MakeTestArray(10, 10, 1), Math.Max);
+            Assert.IsTrue(arrayCache.CheckMergeArea(new Point(4, 4), MakeTestArray(5, 5, 2), Math.Max, (a, b) => { return b > a; }));
+        }
+
+        [TestMethod]
+        public void IfCheckingFunctionDoesntPassOnceCheckMergeAreaFails()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10);
+
+            arrayCache.MergeArea(new Point(3, 3), MakeTestArray(10, 10, 1), Math.Max);
+            Assert.IsFalse(arrayCache.CheckMergeArea(new Point(3, 3), MakeTestArray(10, 10, 1), Math.Max, (a, b) => { return a != b; }));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void IfCheckingFunctionDoesntPassOnceMergeAreaThrowsException()
+        {
+            var arrayCache = new ArrayCache<int>(10, 10);
+
+            arrayCache.MergeArea(new Point(3, 3), MakeTestArray(10, 10, 1), Math.Max);
+            arrayCache.MergeArea(new Point(3, 3), MakeTestArray(10, 10, 1), Math.Max, (a, b) => { return a != b; });
+        }
+
         private int[,] MakeTestArray(int x, int y, int val)
         {
             var ret = new int[x, y];
