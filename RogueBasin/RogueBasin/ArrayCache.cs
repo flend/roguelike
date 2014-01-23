@@ -207,11 +207,27 @@ namespace RogueBasin
                 || bottom > cacheBot || top < cacheTL.y)
             {
                 //Area is too big, we need to resize
-                T[,] newCache = new T[right - left + 1, bottom - top + 1];
-                Point newTL = new Point(left, top);
 
-                int offsetX = cacheTL.x - left;
-                int offsetY = cacheTL.y - top;
+                //Prefer to double size as minimum
+                Point newTL = new Point(left, top);
+                int newWidth = right - left + 1;
+                int newHeight = bottom - top + 1;
+
+                if (right - left + 1 < 2 * CacheWidth)
+                {
+                    newWidth = 2 * CacheWidth;
+                    newTL = new Point(newTL.x - (newWidth - (right - left + 1)) / 2, newTL.y);
+                }
+                if (bottom - top + 1 < 2 * CacheHeight)
+                {
+                    newHeight = 2 * CacheHeight;
+                    newTL = new Point(newTL.x, newTL.y - (newHeight - (bottom - top + 1)) / 2);
+                }
+
+                T[,] newCache = new T[newWidth, newHeight];
+
+                int offsetX = cacheTL.x - newTL.x;
+                int offsetY = cacheTL.y - newTL.y;
 
                 //Initialise new area if required
                 if (useDefaultValue)

@@ -20,7 +20,7 @@ namespace RogueBasin
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = false;
             startInfo.UseShellExecute = false;
-            startInfo.FileName = "c:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe";
+            startInfo.FileName = "c:\\Program Files (x86)\\Graphviz2.36\\bin\\dot.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.Arguments = filename + ".dot -Tpng -o " + filename + ".png";
 

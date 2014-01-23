@@ -101,9 +101,6 @@ namespace DDRogueTest
 
             Assert.AreEqual(arrayCache.TL, new Point(3, 3));
             Assert.AreEqual(arrayCache.BR, new Point(13, 13));
-
-            Assert.AreEqual(arrayCache.CacheWidth, 11);
-            Assert.AreEqual(arrayCache.CacheHeight, 11);
         }
 
         [TestMethod]

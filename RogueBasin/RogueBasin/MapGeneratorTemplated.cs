@@ -103,7 +103,7 @@ namespace RogueBasin
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
-            int roomsToPlace = 30;
+            int roomsToPlace = 100;
             int maxRoomDistance = 1;
 
             var roomsPlaced = PlaceRandomConnectedRooms(roomsToPlace, maxRoomDistance);
@@ -151,24 +151,30 @@ namespace RogueBasin
                                         select new { origin = d1, target = d2 };
 
 
-            var allMatchingDoorPossibilities = allBendDoorPossibilities.Union(allLDoorPossibilities).Union(allOverlappingDoorPossibilities);
+            //Materialize for speed
+
+            var allMatchingDoorPossibilities = allBendDoorPossibilities.Union(allLDoorPossibilities).Union(allOverlappingDoorPossibilities).ToList();
             //var allMatchingDoorPossibilities = allLDoorPossibilities;
             //var allMatchingDoorPossibilities = allBendDoorPossibilities;
 
-            while (allMatchingDoorPossibilities.Any() && extraConnections < totalExtraConnections)
+            for (int i = 0; i < allMatchingDoorPossibilities.Count; i++)
             {
                 //Try a random combination to see if it works
-                var doorsToTry = allMatchingDoorPossibilities.ElementAt(Game.Random.Next(allMatchingDoorPossibilities.Count()));
+                var doorsToTry = allMatchingDoorPossibilities.ElementAt(i);
 
                 LogFile.Log.LogEntryDebug("Trying door " + doorsToTry.origin.MapCoords + " to " + doorsToTry.target.MapCoords, LogDebugLevel.Medium);
 
                 bool success = templatedGenerator.JoinDoorsWithCorridor(doorsToTry.origin, doorsToTry.target, RandomCorridor());
                 if (success)
                     extraConnections++;
-
-                //In any case, remove this attempt
-                allMatchingDoorPossibilities = allMatchingDoorPossibilities.Except(Enumerable.Repeat(doorsToTry, 1));
             }
+
+            //Previous code (was super-slow!)
+            //while (allMatchingDoorPossibilities.Any() && extraConnections < totalExtraConnections)
+            //In any case, remove this attempt
+            //var doorsToTry = allMatchingDoorPossibilities.ElementAt(Game.Random.Next(allMatchingDoorPossibilities.Count()));
+            //allMatchingDoorPossibilities = allMatchingDoorPossibilities.Except(Enumerable.Repeat(doorsToTry, 1));
+                
         }
 
         private int PlaceRandomConnectedRooms(int roomsToPlace, int maxRoomDistance)
@@ -193,7 +199,7 @@ namespace RogueBasin
                 {
                     //Find a random potential door and try to grow a random room off this
                     if(templatedGenerator.PlaceRoomTemplateAlignedWithExistingDoor(RandomRoom(), corridorTemplates[0], RandomDoor(templatedGenerator),
-                        Game.Random.Next(maxRoomDistance)));
+                        Game.Random.Next(maxRoomDistance)))
                         roomsPlaced++;
 
                         attempts++;
