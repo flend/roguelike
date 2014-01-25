@@ -1,6 +1,8 @@
 # Rearranges dwarf fortress tile ordering for use in libtcod
 # requires ImageMagick
 
+# http://dwarffortresswiki.org/index.php/Tileset_repository
+
 my $imageMagickPath="C:/Program\\\ Files/ImageMagick-6.8.8-Q16/";
 
 use File::Find;
@@ -30,7 +32,7 @@ system("rm crawl_tiles_*");
 
 #my $fileNamingConvention = " -set filename:tile '%[fx:page.x/" . $inputTileSize . "+1+fx:page.y/" . $inputTileSize . "+1]'";
 #my $fileNamingConvention = " -set filename:tile '%[fx:page.x/10+16*(page.y/10)]'";
-my $fileNamingConvention = " -set filename:tile '%[fx:16*(page.x/10)+page.y/10]'";
+my $fileNamingConvention = " -set filename:tile '%[fx:16*(page.x/" . $inputTileSize . ")+page.y/" . $inputTileSize . "]'";
 my $cropping = " -crop " . $inputTileSize . "x" . $inputTileSize;
 
 my $tileCmd = $imageMagickPath . "convert.exe " . $fileToConvert . $cropping . $fileNamingConvention . " +repage +adjoin 'tiles_crawl_%[filename:tile].png'";
