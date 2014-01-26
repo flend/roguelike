@@ -27,12 +27,15 @@ namespace MapTester
         {
             StandardGameSetup();
 
-            int seedToUse = 150;
-            Game.Random = new Random(seedToUse);
+            //int seedToUse = 150;
+            //Game.Random = new Random(seedToUse);
+            Game.Random = new Random();
 
             //Setup a single test level
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
-            Map templateMap = templateGen.GenerateMap2();
+            //Map templateMap = templateGen.GenerateMap2();
+            Map templateMap = templateGen.GenerateMapBranchRooms();
+            
             int levelNo = Game.Dungeon.AddMap(templateMap);
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);

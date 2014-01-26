@@ -85,7 +85,7 @@ namespace RogueBasin
         /// <summary>
         /// Default value for id map. Must not be a possible id
         /// </summary>
-        readonly static int defaultId = -1;
+        readonly public static int defaultId = -1;
 
         /// <summary>
         /// The X, Y coords of the top left of the output map: all templates will be offset by this when merged
@@ -162,8 +162,7 @@ namespace RogueBasin
                 templates.Add(templateToAdd);
                 mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
       
-                idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd.Room.terrainMap.GetLength(0), templateToAdd.Room.terrainMap.GetLength(1),
-                    templateToAdd.RoomIndex), MergeIds);
+                idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), MergeIds);
                 return true;
             }
             catch (ArgumentException e)
@@ -207,15 +206,18 @@ namespace RogueBasin
                 return existingId;
         }
 
-        private int[,] MakeIdArray(int x, int y, int val)
+        private int[,] MakeIdArray(TemplatePositioned template)
         {
-            var ret = new int[x, y];
+            var ret = new int[template.Room.terrainMap.GetLength(0), template.Room.terrainMap.GetLength(1)];
 
-            for (int i = 0; i < x; i++)
+            for (int i = 0; i < template.Room.terrainMap.GetLength(0); i++)
             {
-                for (int j = 0; j < y; j++)
+                for (int j = 0; j < template.Room.terrainMap.GetLength(1); j++)
                 {
-                    ret[i, j] = val;
+                    if (template.Room.terrainMap[i, j] != RoomTemplateTerrain.Transparent)
+                        ret[i, j] = template.RoomIndex;
+                    else
+                        ret[i, j] = defaultId;
                 }
 
             }

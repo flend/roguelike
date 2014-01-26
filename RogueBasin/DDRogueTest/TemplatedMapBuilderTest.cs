@@ -112,6 +112,25 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void MapContainsDefaultIdForTransparentPartsOfRoom()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testtransparent1.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            TemplatePositioned templatePos1 = new TemplatePositioned(0, 0, 0, room1, 12);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+
+            Assert.IsTrue(outputMap.roomIdMap[0, 0] == TemplatedMapBuilder.defaultId);
+            Assert.IsTrue(outputMap.roomIdMap[1, 1] == 12);
+        }
+
+        [TestMethod]
         public void MapContainsCorrectIdOnTwoNonOverlappingRooms()
         {
             //Load sample template 8x4

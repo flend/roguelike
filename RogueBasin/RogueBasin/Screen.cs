@@ -256,6 +256,10 @@ namespace RogueBasin {
         {
 
             CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
+            //CustomFontRequest fontReq = new CustomFontRequest("Anikki_square_20x20.bmp", 20, 20, CustomFontRequestFontTypes.LayoutAsciiInRow);
+            //CustomFontRequest fontReq = new CustomFontRequest("Markvii.png", 12, 12, CustomFontRequestFontTypes.LayoutAsciiInRow);
+            //CustomFontRequest fontReq = new CustomFontRequest("Tahin_16x16_rounded.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
+            //CustomFontRequest fontReq = new CustomFontRequest("msgothic.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
             RootConsole.Width = Width;
             RootConsole.Height = Height;
             RootConsole.WindowTitle = "FlatlineRL";
