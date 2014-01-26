@@ -270,6 +270,7 @@
     </Compile>
     <Compile Include="MapGeneratorRogue.cs" />
     <Compile Include="MapGeneratorTemplated.cs" />
+    <Compile Include="MapInfo.cs" />
     <Compile Include="MapObject.cs" />
     <Compile Include="MapRendererLibTCod.cs" />
     <Compile Include="MessageQueue.cs" />
@@ -748,5 +749,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\vaults\chamber7x3_1door.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\vaults\elevator1.room" />
   </ItemGroup>
 </Project>

@@ -80,8 +80,10 @@ namespace RogueBasin
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            var firstRoom = templatedGenerator.GetRoomTemplateByIndex(0);
-            masterMap.PCStartLocation = new Point(firstRoom.X - mapBuilder.MasterMapTopLeft.x + firstRoom.Room.Width / 2, firstRoom.Y - mapBuilder.MasterMapTopLeft.y + firstRoom.Room.Height / 2);
+            var mapRooms = templatedGenerator.GetRoomTemplatesInWorldCoords();
+
+            var firstRoom = mapRooms[0];
+            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             LogFile.Log.LogEntryDebug("Player start location (map gen coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
 
@@ -117,10 +119,12 @@ namespace RogueBasin
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            var firstRoom = templatedGenerator.GetRoomTemplateByIndex(0);
-            masterMap.PCStartLocation = new Point(firstRoom.X - mapBuilder.MasterMapTopLeft.x + firstRoom.Room.Width / 2, firstRoom.Y - mapBuilder.MasterMapTopLeft.y + firstRoom.Room.Height / 2);
+            var mapRooms = templatedGenerator.GetRoomTemplatesInWorldCoords();
 
-            LogFile.Log.LogEntryDebug("Player start location (map gen coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
+            var firstRoom = mapRooms[0];
+            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            LogFile.Log.LogEntryDebug("Player start location (map coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
 
             return masterMap;
         }
@@ -164,12 +168,51 @@ namespace RogueBasin
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            var firstRoom = templatedGenerator.GetRoomTemplateByIndex(0);
-            masterMap.PCStartLocation = new Point(firstRoom.X - mapBuilder.MasterMapTopLeft.x + firstRoom.Room.Width / 2, firstRoom.Y - mapBuilder.MasterMapTopLeft.y + firstRoom.Room.Height / 2);
+            var mapRooms = templatedGenerator.GetRoomTemplatesInWorldCoords();
 
-            LogFile.Log.LogEntryDebug("Player start location (map gen coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
+            var firstRoom = mapRooms[0];
+
+            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            LogFile.Log.LogEntryDebug("Player start location (map coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
 
             return masterMap;
+        }
+
+        /** Build a map using templated rooms */
+        public void GenerateMultiLevelDungeon()
+        {
+            //Load standard room types
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate elevator1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.elevator1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            templatedGenerator = new TemplatedMapGenerator(mapBuilder);
+
+            //Build level 1
+
+            PlaceOriginRoom(room1);
+            PlaceRandomConnectedRooms(3, room1, corridor1, 5, 10);
+
+            //Add an elevator
+            int elevatorIndex = templatedGenerator.NextRoomIndex();
+            bool elevatorPlaced = templatedGenerator.PlaceRoomTemplateAlignedWithExistingDoor(elevator1, corridor1, RandomDoor(templatedGenerator), 0, 3);
+
+            LogFile.Log.LogEntryDebug("Level 1 elevator at index " + elevatorIndex, LogDebugLevel.High);
+            
+            //Add to game
+
+            Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+
+            var mapRooms = templatedGenerator.GetRoomTemplatesInWorldCoords();
+
+            var firstRoom = mapRooms[0];
+            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            LogFile.Log.LogEntryDebug("Player start location (map coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
+
+            Game.Dungeon.AddMap(masterMap);
         }
 
         private void AddCorridorsBetweenOpenDoors(int totalExtraConnections)

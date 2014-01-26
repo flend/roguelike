@@ -31,20 +31,45 @@ namespace MapTester
             //Game.Random = new Random(seedToUse);
             Game.Random = new Random();
 
+
+
+            bool multiLevelDungeon = true;
+
+            if (multiLevelDungeon)
+                GenerateMultiLevelDungeon();
+            else
+            {
+                //Setup a single test level
+                MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
+
+                //Map templateMap = templateGen.GenerateMap2();
+                Map templateMap = templateGen.GenerateMapBranchRooms();
+            
+                int levelNo = Game.Dungeon.AddMap(templateMap);
+
+                LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
+
+                //Extract connectivity map
+                var graphModel = new MapModel(templateGen.ConnectivityMap, 0);
+                VisualiseConnectivityGraph(graphModel);
+            }
+            RunGame();
+        }
+
+        private void GenerateMultiLevelDungeon()
+        {
             //Setup a single test level
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
-            //Map templateMap = templateGen.GenerateMap2();
-            Map templateMap = templateGen.GenerateMapBranchRooms();
-            
-            int levelNo = Game.Dungeon.AddMap(templateMap);
+
+            templateGen.GenerateMultiLevelDungeon();
+
+            //int levelNo = Game.Dungeon.AddMap(templateMap);
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             //Extract connectivity map
             var graphModel = new MapModel(templateGen.ConnectivityMap, 0);
             VisualiseConnectivityGraph(graphModel);
-
-            RunGame();
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel)

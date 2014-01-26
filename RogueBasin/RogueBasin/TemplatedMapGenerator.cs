@@ -80,11 +80,6 @@ namespace RogueBasin
             }
         }
 
-        public TemplatePositioned GetRoomTemplateByIndex(int i)
-        {
-            return templates[i];
-        }
-
         public bool PlaceRoomTemplateAtPosition(RoomTemplate roomTemplate, Point point)
         {
             var roomIndex = NextRoomIndex();
@@ -323,6 +318,16 @@ namespace RogueBasin
             }
 
             PotentialDoors.Clear();
+        }
+
+        /// <summary>
+        /// Get all the room templates in world / map coords. These can then be passed onto another class
+        /// </summary>
+        /// <returns></returns>
+        public List<TemplatePositioned> GetRoomTemplatesInWorldCoords()
+        {
+            return templates.Select(t => 
+                new TemplatePositioned(t.X - mapBuilder.MasterMapTopLeft.x, t.Y - mapBuilder.MasterMapTopLeft.y, t.Z, t.Room, t.RoomIndex)).ToList();
         }
     }
 }

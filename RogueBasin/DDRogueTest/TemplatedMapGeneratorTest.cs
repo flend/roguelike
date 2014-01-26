@@ -35,6 +35,25 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void TemplatesCanBeReturnedInMapCoords()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(-5, -5));
+            bool placement2 = mapGen.PlaceRoomTemplateAtPosition(room2, new Point(5, 10));
+
+            var roomTemplatesInWorldCoords = mapGen.GetRoomTemplatesInWorldCoords();
+
+            Assert.AreEqual(new Point(10, 15), roomTemplatesInWorldCoords[1].Location);
+        }
+
+        [TestMethod]
         public void AddingSideToSideRoomsGivesConnectedNodeGraph()
         {
             //Load sample template 8x4
@@ -89,7 +108,7 @@ namespace DDRogueTest
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
 
-            Assert.AreEqual(room1, mapGen.GetRoomTemplateByIndex(0).Room);
+            Assert.AreEqual(room1, mapGen.GetRoomTemplatesInWorldCoords()[0].Room);
         }
 
         [TestMethod]
@@ -105,7 +124,7 @@ namespace DDRogueTest
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
             bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0);
 
-            Assert.AreEqual(room2, mapGen.GetRoomTemplateByIndex(1).Room);
+            Assert.AreEqual(room2, mapGen.GetRoomTemplatesInWorldCoords()[1].Room);
         }
 
         [TestMethod]
@@ -125,7 +144,7 @@ namespace DDRogueTest
             bool corridorPlacement = mapGen.JoinDoorsWithCorridor(mapGen.PotentialDoors[0], mapGen.PotentialDoors[1], corridor1);
 
             //We are only testing that the corridor exists, where it is is tested elsewhere
-            Assert.AreNotEqual(null, mapGen.GetRoomTemplateByIndex(2).Room);
+            Assert.AreNotEqual(null, mapGen.GetRoomTemplatesInWorldCoords()[2].Room);
         }
 
         private Dictionary<RoomTemplateTerrain, MapTerrain> GetStandardTerrainMapping()
