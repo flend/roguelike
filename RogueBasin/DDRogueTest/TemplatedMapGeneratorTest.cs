@@ -78,6 +78,56 @@ namespace DDRogueTest
             CollectionAssert.AreEquivalent(new List<Connection>(new Connection[] { new Connection(0, 1) }), allConnections);
         }
 
+        [TestMethod]
+        public void RoomTemplateMayBeRetrievedAfterAddingRoom()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+
+            Assert.AreEqual(room1, mapGen.GetRoomTemplateByIndex(0).Room);
+        }
+
+        [TestMethod]
+        public void RoomTemplateMayBeRetrievedAfterAddingAlignedRoom()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0);
+
+            Assert.AreEqual(room2, mapGen.GetRoomTemplateByIndex(1).Room);
+        }
+
+        [TestMethod]
+        public void RoomTemplateMayBeRetrievedAfterAddingCorridor()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAtPosition(room2, new Point(-7, 8));
+
+            bool corridorPlacement = mapGen.JoinDoorsWithCorridor(mapGen.PotentialDoors[0], mapGen.PotentialDoors[1], corridor1);
+
+            //We are only testing that the corridor exists, where it is is tested elsewhere
+            Assert.AreNotEqual(null, mapGen.GetRoomTemplateByIndex(2).Room);
+        }
+
         private Dictionary<RoomTemplateTerrain, MapTerrain> GetStandardTerrainMapping()
         {
             var terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();

@@ -41,13 +41,15 @@ namespace RogueBasin
         TemplatedMapBuilder mapBuilder;
         ConnectivityMap connectivityMap;
 
+        List<TemplatePositioned> templates = new List<TemplatePositioned>();
+
         public TemplatedMapGenerator(TemplatedMapBuilder builder)
         {
             this.mapBuilder = builder;
             this.connectivityMap = new ConnectivityMap();
         }
 
-        private int NextRoomIndex()
+        public int NextRoomIndex()
         {
             return nextRoomIndex;
         }
@@ -78,10 +80,16 @@ namespace RogueBasin
             }
         }
 
+        public TemplatePositioned GetRoomTemplateByIndex(int i)
+        {
+            return templates[i];
+        }
+
         public bool PlaceRoomTemplateAtPosition(RoomTemplate roomTemplate, Point point)
         {
             var roomIndex = NextRoomIndex();
             var positionedRoom = new TemplatePositioned(point.x, point.y, 0, roomTemplate, roomIndex);
+            templates.Add(positionedRoom);
             bool placementSuccess = mapBuilder.AddPositionedTemplate(positionedRoom);
 
             if (!placementSuccess)
@@ -189,6 +197,7 @@ namespace RogueBasin
 
                     //Place the corridor
                     mapBuilder.AddPositionedTemplate(positionedCorridor);
+                    templates.Add(positionedCorridor);
                     IncreaseNextRoomIndex();
 
                     //Add connections to the old and new rooms
@@ -219,7 +228,6 @@ namespace RogueBasin
         {
             var newRoomIndex = NextRoomIndex();
             
-
             Point existingDoorLoc = existingDoor.MapCoords;
 
             Tuple<TemplatePositioned, Point> newRoomTuple = RoomTemplateUtilities.AlignRoomOnDoor(roomTemplateToPlace, newRoomIndex, existingDoor.OwnerRoom,
@@ -266,6 +274,7 @@ namespace RogueBasin
 
                 //Place the corridor
                 mapBuilder.AddPositionedTemplate(corridorTemplateConnectingRooms);
+                templates.Add(corridorTemplateConnectingRooms);
                 IncreaseNextRoomIndex();
 
                 //Add connections to the old and new rooms
@@ -288,6 +297,7 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Room failed to place because overlaps own corridor - bug", LogDebugLevel.High);
                 return false;
             }
+            templates.Add(alignedNewRoom);
 
             //Add the new potential doors (excluding the one we are linked on)
             //Can't find a nice linq alternative

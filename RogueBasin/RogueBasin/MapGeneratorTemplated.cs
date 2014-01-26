@@ -80,7 +80,7 @@ namespace RogueBasin
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            var firstRoom = mapBuilder.GetTemplate(0);
+            var firstRoom = templatedGenerator.GetRoomTemplateByIndex(0);
             masterMap.PCStartLocation = new Point(firstRoom.X - mapBuilder.MasterMapTopLeft.x + firstRoom.Room.Width / 2, firstRoom.Y - mapBuilder.MasterMapTopLeft.y + firstRoom.Room.Height / 2);
 
             LogFile.Log.LogEntryDebug("Player start location (map gen coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
@@ -117,7 +117,7 @@ namespace RogueBasin
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            var firstRoom = mapBuilder.GetTemplate(0);
+            var firstRoom = templatedGenerator.GetRoomTemplateByIndex(0);
             masterMap.PCStartLocation = new Point(firstRoom.X - mapBuilder.MasterMapTopLeft.x + firstRoom.Room.Width / 2, firstRoom.Y - mapBuilder.MasterMapTopLeft.y + firstRoom.Room.Height / 2);
 
             LogFile.Log.LogEntryDebug("Player start location (map gen coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
@@ -162,17 +162,9 @@ namespace RogueBasin
             //Replace spare doors with walls
             templatedGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
-            /*
-            //Add some extra connections, if doors are available
-            var totalExtraConnections = 500;
-            AddCorridorsBetweenOpenDoors(totalExtraConnections);
-
-            //Replace spare doors with walls
-            templatedGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
-            */
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-            var firstRoom = mapBuilder.GetTemplate(0);
+            var firstRoom = templatedGenerator.GetRoomTemplateByIndex(0);
             masterMap.PCStartLocation = new Point(firstRoom.X - mapBuilder.MasterMapTopLeft.x + firstRoom.Room.Width / 2, firstRoom.Y - mapBuilder.MasterMapTopLeft.y + firstRoom.Room.Height / 2);
 
             LogFile.Log.LogEntryDebug("Player start location (map gen coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);

@@ -67,10 +67,7 @@ namespace RogueBasin
      *  Z-ordering is currently meaningless because no overlap is allowed**/
     public class TemplatedMapBuilder
     {
-        /// <summary>
-        /// Templates as they are placed on the map - not really used
-        /// </summary>
-        List<TemplatePositioned> templates = new List<TemplatePositioned>();
+
 
         /// <summary>
         /// 2d array for terrain
@@ -159,7 +156,6 @@ namespace RogueBasin
 
             try
             {
-                templates.Add(templateToAdd);
                 mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
       
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), MergeIds);
@@ -225,16 +221,6 @@ namespace RogueBasin
             return ret;
         }
 
-        /// <summary>
-        /// Return the template at this z
-        /// </summary>
-        /// <param name="z"></param>
-        /// <returns></returns>
-        public TemplatePositioned GetTemplate(int z)
-        {
-            return templates[z];
-        }
-
         /** Get the current terrain at the required point, calculated by flattening the templates. 
          Any terrain overrides Transparent, but no templates should be placed that having different types of
          terrain on the same point. e.g. 2 walls overlapping is OK but wall and floor overlapping is not.
@@ -257,9 +243,6 @@ namespace RogueBasin
         /// <returns></returns>
         public Map MergeTemplatesIntoMap(Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping)
         {
-            if (templates.Count == 0)
-                throw new ApplicationException("No templates in map");
-
             var mergedArea = mapCache.GetMergedArea();
             var mergedIdArea = idCache.GetMergedArea();
 
