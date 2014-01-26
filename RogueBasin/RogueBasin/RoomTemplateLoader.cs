@@ -180,6 +180,22 @@ namespace RogueBasin
             RoomTerrainChars.Add(RoomTemplateTerrain.WallWithPossibleDoor, '#');
         }
 
+        public static Point GetRandomPointWithTerrain(RoomTemplate room, RoomTemplateTerrain terrainToFind)
+        {
+            var candidatePoints = new List<Point>();
+
+            for (int i = 0; i < room.Width; i++)
+            {
+                for (int j = 0; j < room.Height; j++)
+                {
+                    if (room.terrainMap[i, j] == terrainToFind)
+                        candidatePoints.Add(new Point(i, j));
+                }
+            }
+
+            return candidatePoints[Game.Random.Next(candidatePoints.Count)];
+        }
+
         /** Stretches a corridor template into a full sized corridor of length.
          *  Template must be n x 1 (1 row deep).*/
         static public RoomTemplate ExpandCorridorTemplate(bool switchToHorizontal, int length, RoomTemplate corridorTemplate)

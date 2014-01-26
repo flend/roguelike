@@ -19,8 +19,8 @@ namespace RogueBasin
 
         List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
         List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
-
-        TemplatedMapGenerator templatedGenerator;
+        
+        ConnectivityMap connectivityMap = null;
 
         public MapGeneratorTemplated()
         {
@@ -50,7 +50,7 @@ namespace RogueBasin
         {
             get
             {
-                return templatedGenerator.ConnectivityMap;
+                return connectivityMap;
             }
         }
 
@@ -67,16 +67,16 @@ namespace RogueBasin
 
             //Create generator (guess initial cache size)
             var mapBuilder = new TemplatedMapBuilder(100, 100);
-            templatedGenerator = new TemplatedMapGenerator(mapBuilder);
+            var templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
             int roomsToPlace = 20;
             int maxRoomDistance = 10;
 
-            var roomsPlaced = PlaceRandomConnectedRooms(roomsToPlace, maxRoomDistance);
+            var roomsPlaced = PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, maxRoomDistance);
 
             //Add some extra connections, if doors are available
             var totalExtraConnections = 500;
-            AddCorridorsBetweenOpenDoors(totalExtraConnections);
+            AddCorridorsBetweenOpenDoors(templatedGenerator, totalExtraConnections);
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
@@ -86,6 +86,8 @@ namespace RogueBasin
             masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             LogFile.Log.LogEntryDebug("Player start location (map gen coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
+
+            connectivityMap = templatedGenerator.ConnectivityMap;
 
             return masterMap;
         }
@@ -103,16 +105,16 @@ namespace RogueBasin
 
             //Create generator (guess initial cache size)
             var mapBuilder = new TemplatedMapBuilder(100, 100);
-            templatedGenerator = new TemplatedMapGenerator(mapBuilder);
+            var templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
             int roomsToPlace = 100;
             int maxRoomDistance = 1;
 
-            var roomsPlaced = PlaceRandomConnectedRooms(roomsToPlace, maxRoomDistance);
+            var roomsPlaced = PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, maxRoomDistance);
 
             //Add some extra connections, if doors are available
             var totalExtraConnections = 500;
-            AddCorridorsBetweenOpenDoors(totalExtraConnections);
+            AddCorridorsBetweenOpenDoors(templatedGenerator, totalExtraConnections);
 
             //Replace spare doors with walls
             templatedGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
@@ -125,6 +127,8 @@ namespace RogueBasin
             masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             LogFile.Log.LogEntryDebug("Player start location (map coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
+
+            connectivityMap = templatedGenerator.ConnectivityMap;
 
             return masterMap;
         }
@@ -147,21 +151,21 @@ namespace RogueBasin
 
             //Create generator (guess initial cache size)
             var mapBuilder = new TemplatedMapBuilder(100, 100);
-            templatedGenerator = new TemplatedMapGenerator(mapBuilder);
+            var templatedGenerator = new TemplatedMapGenerator(mapBuilder);
 
             //Place branch rooms to form the initial structure, joined on long axis
-            PlaceOriginRoom(branchRoom);
+            PlaceOriginRoom(templatedGenerator, branchRoom);
 
-            PlaceRandomConnectedRooms(3, branchRoom, corridor1, 0, 0, () => Game.Random.Next(1) > 0 ? 3 : 4);
+            PlaceRandomConnectedRooms(templatedGenerator, 3, branchRoom, corridor1, 0, 0, () => Game.Random.Next(1) > 0 ? 3 : 4);
            
             //Add some 2-door rooms
-            PlaceRandomConnectedRooms(10, chamber2Doors, corridor1, 0, 0);
+            PlaceRandomConnectedRooms(templatedGenerator, 10, chamber2Doors, corridor1, 0, 0);
 
             //Add some 1-door deadends
-            PlaceRandomConnectedRooms(10, chamber1Doors, corridor1, 0, 0);
+            PlaceRandomConnectedRooms(templatedGenerator, 10, chamber1Doors, corridor1, 0, 0);
 
             //Add some extra connections, if doors are available
-            AddCorridorsBetweenOpenDoors(10);
+            AddCorridorsBetweenOpenDoors(templatedGenerator, 10);
 
             //Replace spare doors with walls
             templatedGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
@@ -176,6 +180,8 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Player start location (map coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
 
+            connectivityMap = templatedGenerator.ConnectivityMap;
+
             return masterMap;
         }
 
@@ -187,35 +193,55 @@ namespace RogueBasin
             RoomTemplate elevator1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.elevator1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
-            var mapBuilder = new TemplatedMapBuilder(100, 100);
-            templatedGenerator = new TemplatedMapGenerator(mapBuilder);
-
+            
             //Build level 1
 
-            PlaceOriginRoom(room1);
-            PlaceRandomConnectedRooms(3, room1, corridor1, 5, 10);
+            var l1mapBuilder = new TemplatedMapBuilder(100, 100);
+            var l1templateGenerator = new TemplatedMapGenerator(l1mapBuilder);
 
-            //Add an elevator
-            int elevatorIndex = templatedGenerator.NextRoomIndex();
-            bool elevatorPlaced = templatedGenerator.PlaceRoomTemplateAlignedWithExistingDoor(elevator1, corridor1, RandomDoor(templatedGenerator), 0, 3);
+            PlaceOriginRoom(l1templateGenerator, room1);
+            PlaceRandomConnectedRooms(l1templateGenerator, 3, room1, corridor1, 5, 10);
 
-            LogFile.Log.LogEntryDebug("Level 1 elevator at index " + elevatorIndex, LogDebugLevel.High);
+            //Add an elevator room
+            int l1elevatorIndex = l1templateGenerator.NextRoomIndex();
+            bool elevatorPlaced = l1templateGenerator.PlaceRoomTemplateAlignedWithExistingDoor(elevator1, corridor1, RandomDoor(l1templateGenerator), 0, 3);
+
+            LogFile.Log.LogEntryDebug("Level 1 elevator at index " + l1elevatorIndex, LogDebugLevel.High);
+
+            //Build the l1 map and set start location
+
+            var mapInfo = new MapInfo();
+            mapInfo.AddConstructedLevel(l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), null);
+
+            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+            Game.Dungeon.AddMap(masterMap);
             
-            //Add to game
-
-            Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
-
-            var mapRooms = templatedGenerator.GetRoomTemplatesInWorldCoords();
-
-            var firstRoom = mapRooms[0];
+            var firstRoom = mapInfo.RoomTemplatesForLevel(0)[0];
             masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
-            LogFile.Log.LogEntryDebug("Player start location (map coords) " + new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2), LogDebugLevel.High);
+            //Build level 2
 
-            Game.Dungeon.AddMap(masterMap);
+            var l2mapBuilder = new TemplatedMapBuilder(100, 100);
+            var l2templateGenerator = new TemplatedMapGenerator(l2mapBuilder);
+
+            PlaceOriginRoom(l2templateGenerator, room1);
+            PlaceRandomConnectedRooms(l2templateGenerator, 3, room1, corridor1, 5, 10);
+
+            //Add an elevator room
+            int l2elevatorIndex = l2templateGenerator.NextRoomIndex();
+            elevatorPlaced = l2templateGenerator.PlaceRoomTemplateAlignedWithExistingDoor(elevator1, corridor1, RandomDoor(l2templateGenerator), 0, 3);
+
+            LogFile.Log.LogEntryDebug("Level 2 elevator at index " + l2elevatorIndex, LogDebugLevel.High);
+
+            mapInfo.AddConstructedLevel(l2templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), null);
+            
+            Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+
+            //Add to game
+
         }
 
-        private void AddCorridorsBetweenOpenDoors(int totalExtraConnections)
+        private void AddCorridorsBetweenOpenDoors(TemplatedMapGenerator templatedGenerator, int totalExtraConnections)
         {
             var extraConnections = 0;
 
@@ -272,7 +298,7 @@ namespace RogueBasin
                 
         }
 
-        private int PlaceRandomConnectedRooms(int roomsToPlace, int maxRoomDistance)
+        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, int maxRoomDistance)
         {
             int roomsPlaced = 0;
             int attempts = 0;
@@ -303,17 +329,17 @@ namespace RogueBasin
             return roomsPlaced;
         }
 
-        private bool PlaceOriginRoom(RoomTemplate roomToPlace)
+        private bool PlaceOriginRoom(TemplatedMapGenerator templatedGenerator, RoomTemplate roomToPlace)
         {
             return templatedGenerator.PlaceRoomTemplateAtPosition(roomToPlace, new Point(0, 0));
         }
 
-        private int PlaceRandomConnectedRooms(int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
+        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
         {
-            return PlaceRandomConnectedRooms(roomsToPlace, roomToPlace, corridorToPlace, minCorridorLength, maxCorridorLength, null);
+            return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, roomToPlace, corridorToPlace, minCorridorLength, maxCorridorLength, null);
         }
 
-        private int PlaceRandomConnectedRooms(int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength, Func<int> doorPicker)
+        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength, Func<int> doorPicker)
         {
             int roomsPlaced = 0;
             int attempts = 0;
@@ -324,7 +350,6 @@ namespace RogueBasin
             //Terminate when all rooms placed or no more potential door sites
             do
             {
-
                 //Find a random potential door and try to grow a random room off this
                 
                 //Use a random door, or the function passed in
