@@ -188,6 +188,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Features\DockBay.cs" />
+    <Compile Include="Features\Elevator.cs" />
     <Compile Include="Features\StaircaseEntry.cs" />
     <Compile Include="Features\StaircaseExit.cs">
       <SubType>Code</SubType>

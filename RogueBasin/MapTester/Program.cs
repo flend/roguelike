@@ -31,7 +31,7 @@ namespace MapTester
             //Game.Random = new Random(seedToUse);
             Game.Random = new Random();
 
-            bool multiLevelDungeon = false;
+            bool multiLevelDungeon = true;
 
             if (multiLevelDungeon)
                 GenerateMultiLevelDungeon();
@@ -60,8 +60,6 @@ namespace MapTester
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
 
             templateGen.GenerateMultiLevelDungeon();
-
-            //int levelNo = Game.Dungeon.AddMap(templateMap);
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 

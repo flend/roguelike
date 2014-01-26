@@ -15,6 +15,8 @@ namespace RogueBasin
         List<List<TemplatePositioned>> roomTemplates;
         List<ConnectivityMap> connectivityMap;
 
+        ConnectivityMap fullMap;
+
         public MapInfo()
         {
             roomTemplates = new List<List<TemplatePositioned>>();
@@ -22,14 +24,33 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Add level. Must be added in numerical order (and the same as dungeon!)
+        /// Add second or subsequent level. Must be added in numerical order (and the same as dungeon!)
         /// </summary>
-        /// <param name="levelMap"></param>
-        /// <param name="roomsInLevelCoords"></param>
         public void AddConstructedLevel(ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, Connection connectionBetweenLevels) {
-            
+
+            if (connectivityMap.Count == 0)
+                throw new ApplicationException("Need to add first level before using this method");
+
             roomTemplates.Add(roomsInLevelCoords);
             connectivityMap.Add(levelMap);
+
+            //Add into full map
+            fullMap.AddAllConnections(levelMap);
+            fullMap.AddRoomConnection(connectionBetweenLevels);
+        }
+
+        /// <summary>
+        /// Add first level. Must be added in numerical order (and the same as dungeon!)
+        /// </summary>
+        public void AddConstructedLevel(ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords)
+        {
+            if (connectivityMap.Count > 0)
+                throw new ApplicationException("Can't add first level twice");
+
+            roomTemplates.Add(roomsInLevelCoords);
+            connectivityMap.Add(levelMap);
+
+            fullMap = levelMap;
         }
         
         public List<TemplatePositioned> RoomTemplatesForLevel(int levelNo) {
@@ -46,7 +67,20 @@ namespace RogueBasin
          
             var roomRelativePoint = RoomTemplateUtilities.GetRandomPointWithTerrain(roomTemplates[levelNo][roomIndex].Room, terrainToFind);
 
-            return new Point(roomTemplates[levelNo][roomIndex].Location + roomRelativePoint);
+            return new Point(GetRoom(levelNo, roomIndex).Location + roomRelativePoint);
+        }
+
+        public TemplatePositioned GetRoom(int levelNo, int roomIndex)
+        {
+            return roomTemplates[levelNo][roomIndex];
+        }
+
+        public ConnectivityMap FullConnectivityMap
+        {
+            get
+            {
+                return fullMap;
+            }
         }
     }
 }

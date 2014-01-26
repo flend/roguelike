@@ -2,12 +2,33 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GraphMap;
 using QuickGraph;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TestGraphMap
 {
     [TestClass]
     public class ConnectivityMapTest
     {
+        [TestMethod]
+        public void ConnectionCanBeAddedFromAnotherMap()
+        {
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            ConnectivityMap newMap2 = new ConnectivityMap();
+
+            newMap2.AddRoomConnection(3, 4);
+            newMap2.AddRoomConnection(4, 5);
+
+            newMap.AddAllConnections(newMap2);
+
+            CollectionAssert.AreEquivalent(new List<Connection>(new Connection[] { new Connection(1, 2), new Connection(2, 3),
+                new Connection(3, 4), new Connection(4, 5)}), newMap.GetAllConnections().ToList());
+        }
+
         [TestMethod]
         public void ContainEdgeInMap()
         {

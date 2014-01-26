@@ -193,7 +193,6 @@ namespace RogueBasin
             RoomTemplate elevator1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.elevator1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
-            
             //Build level 1
 
             var l1mapBuilder = new TemplatedMapBuilder(100, 100);
@@ -211,7 +210,7 @@ namespace RogueBasin
             //Build the l1 map and set start location
 
             var mapInfo = new MapInfo();
-            mapInfo.AddConstructedLevel(l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), null);
+            mapInfo.AddConstructedLevel(l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords());
 
             Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
             Game.Dungeon.AddMap(masterMap);
@@ -222,7 +221,7 @@ namespace RogueBasin
             //Build level 2
 
             var l2mapBuilder = new TemplatedMapBuilder(100, 100);
-            var l2templateGenerator = new TemplatedMapGenerator(l2mapBuilder);
+            var l2templateGenerator = new TemplatedMapGenerator(l2mapBuilder, 100);
 
             PlaceOriginRoom(l2templateGenerator, room1);
             PlaceRandomConnectedRooms(l2templateGenerator, 3, room1, corridor1, 5, 10);
@@ -233,12 +232,20 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Level 2 elevator at index " + l2elevatorIndex, LogDebugLevel.High);
 
-            mapInfo.AddConstructedLevel(l2templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), null);
+            mapInfo.AddConstructedLevel(l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(), 
+                new Connection(l1elevatorIndex, l2elevatorIndex));
             
             Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+            Game.Dungeon.AddMap(masterMapL2);
 
-            //Add to game
+            //Add elevator features to link the maps
 
+            //L1 -> L2
+            var elevator1Loc = mapInfo.GetRandomPointInRoomOfTerrain(0, l1elevatorIndex, RoomTemplateTerrain.Floor);
+            var elevator2Loc = mapInfo.GetRandomPointInRoomOfTerrain(1, l2elevatorIndex, RoomTemplateTerrain.Floor);
+
+            Game.Dungeon.AddFeature(new Features.Elevator(1, elevator2Loc), 0, elevator1Loc);
+            Game.Dungeon.AddFeature(new Features.Elevator(0, elevator1Loc), 0, elevator2Loc);
         }
 
         private void AddCorridorsBetweenOpenDoors(TemplatedMapGenerator templatedGenerator, int totalExtraConnections)

@@ -1822,6 +1822,11 @@ namespace RogueBasin
             return MovePCAbsolute(level, x, y, false);
         }
 
+        internal bool MovePCAbsolute(int level, Point location)
+        {
+            return MovePCAbsolute(level, location.x, location.y, false);
+        }
+
         /// <summary>
         /// Move PC to an absolute square (doesn't check the contents). Runs triggers.
         /// Doesn't do any checking at the mo, should return false if there's a problem.
@@ -1841,7 +1846,17 @@ namespace RogueBasin
                 return true;
             }
 
-            player.LocationMap = new Point(x,y);
+            player.LocationMap = new Point(x, y);
+
+            //Kill monsters if they are going to be under the PC
+            foreach (Monster monster in monsters)
+            {
+                if (monster.InSameSpace(player))
+                {
+                    KillMonster(monster, false);
+                }
+            }
+
             RunDungeonTriggers(player.LocationLevel, player.LocationMap);
 
             return true;

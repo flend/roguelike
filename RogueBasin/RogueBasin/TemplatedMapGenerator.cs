@@ -49,6 +49,13 @@ namespace RogueBasin
             this.connectivityMap = new ConnectivityMap();
         }
 
+        public TemplatedMapGenerator(TemplatedMapBuilder builder, int roomIndexToStart)
+        {
+            this.mapBuilder = builder;
+            this.connectivityMap = new ConnectivityMap();
+            this.nextRoomIndex = roomIndexToStart;
+        }
+
         public int NextRoomIndex()
         {
             return nextRoomIndex;

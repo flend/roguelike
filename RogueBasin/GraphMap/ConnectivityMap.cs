@@ -49,6 +49,19 @@ namespace GraphMap
             //Other exceptions passed up
         }
 
+        public void AddAllConnections(ConnectivityMap originMap)
+        {
+            foreach (var connection in originMap.GetAllConnections())
+            {
+                AddRoomConnection(connection.Source, connection.Target);
+            }
+        }
+
+        public void AddRoomConnection(Connection newConnection)
+        {
+            AddRoomConnection(newConnection.Source, newConnection.Target);
+        }
+
         public void AddRoomConnectionIfNotExists(int startRoom, int endRoom)
         {
             TaggedEdge<int, string> possibleEdge = null;
