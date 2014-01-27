@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace RogueBasin
 {
     /// <summary>
-    /// Class that returns useful information about the map in world coordinates
+    /// Class that constructs the full map out of discrete level graphs and room sets
     /// </summary>
-    public class MapInfo
+    public class MapInfoBuilder
     {
         Dictionary<int, TemplatePositioned> roomTemplates;
         Dictionary<int, int> roomLevels;
@@ -18,7 +18,9 @@ namespace RogueBasin
 
         ConnectivityMap fullMap;
 
-        public MapInfo()
+        int startRoom;
+
+        public MapInfoBuilder()
         {
             roomTemplates = new Dictionary<int, TemplatePositioned>();
             connectivityMap = new List<ConnectivityMap>();
@@ -47,7 +49,7 @@ namespace RogueBasin
         /// <summary>
         /// Add first level, or level without other connections
         /// </summary>
-        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords)
+        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, int startRoom)
         {
             foreach (var r in roomsInLevelCoords)
             {
@@ -57,25 +59,10 @@ namespace RogueBasin
             connectivityMap.Add(levelMap);
 
             fullMap = levelMap;
+
+            this.startRoom = startRoom;
         }
         
-        /// <summary>
-        /// Returns point in map coords of this level in the required room of terrain
-        /// </summary>
-        /// <param name="roomIndex"></param>
-        /// <param name="terrainToFind"></param>
-        /// <returns></returns>
-        public Point GetRandomPointInRoomOfTerrain(int levelNo, int roomIndex, RoomTemplateTerrain terrainToFind) {
-         
-            var roomRelativePoint = RoomTemplateUtilities.GetRandomPointWithTerrain(roomTemplates[roomIndex].Room, terrainToFind);
-
-            return new Point(roomTemplates[roomIndex].Location + roomRelativePoint);
-        }
-
-        public TemplatePositioned GetRoom(int roomIndex)
-        {
-            return roomTemplates[roomIndex];
-        }
 
         public ConnectivityMap FullConnectivityMap
         {
@@ -83,6 +70,84 @@ namespace RogueBasin
             {
                 return fullMap;
             }
+        }
+
+        public Dictionary<int, int> RoomLevelMapping
+        {
+            get
+            {
+                return roomLevels;
+            }
+        }
+
+        public Dictionary<int, TemplatePositioned> Rooms
+        {
+            get
+            {
+                return roomTemplates;
+            }
+        }
+
+        public int StartRoom
+        {
+            get
+            {
+                return startRoom;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Holds state about the multi-level map
+    /// </summary>
+    public class MapInfo
+    {
+        Dictionary<int, TemplatePositioned> rooms;
+        Dictionary<int, int> roomLevels;
+        ConnectivityMap map;
+        int startRoom;
+
+        MapModel model;
+        
+        public MapInfo(MapInfoBuilder builder) {
+
+            rooms = builder.Rooms;
+            roomLevels = builder.RoomLevelMapping;
+            map = builder.FullConnectivityMap;
+            startRoom = builder.StartRoom;
+
+            model = new MapModel(map, startRoom);
+        }
+
+        /// <summary>
+        /// Returns point in map coords of this level in the required room of terrain
+        /// </summary>
+        /// <param name="roomIndex"></param>
+        /// <param name="terrainToFind"></param>
+        /// <returns></returns>
+        public Point GetRandomPointInRoomOfTerrain(int levelNo, int roomIndex, RoomTemplateTerrain terrainToFind)
+        {
+            var roomRelativePoint = RoomTemplateUtilities.GetRandomPointWithTerrain(rooms[roomIndex].Room, terrainToFind);
+
+            return new Point(rooms[roomIndex].Location + roomRelativePoint);
+        }
+
+        public IEnumerable<int> GetRoomIndicesForLevel(int level)
+        {
+            return roomLevels.Where(kv => kv.Key == level).Select(kv => kv.Value);
+        }
+
+        public MapModel Model
+        {
+            get
+            {
+                return model;
+            }
+        }
+
+        public TemplatePositioned GetRoom(int roomIndex)
+        {
+            return rooms[roomIndex];
         }
     }
 }

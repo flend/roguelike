@@ -13,7 +13,7 @@ namespace DDRogueTest
         [TestMethod]
         public void MapsFromDifferentLevelsCanBeConnected()
         {
-            var mapInfo = new MapInfo();
+            var mapInfo = new MapInfoBuilder();
 
             var l1ConnectivityMap = new ConnectivityMap();
             l1ConnectivityMap.AddRoomConnection(1, 2);
@@ -23,7 +23,7 @@ namespace DDRogueTest
             l2ConnectivityMap.AddRoomConnection(5, 6);
             l2ConnectivityMap.AddRoomConnection(6, 7);
 
-            mapInfo.AddConstructedLevel(0, l1ConnectivityMap, new List<TemplatePositioned>());
+            mapInfo.AddConstructedLevel(0, l1ConnectivityMap, new List<TemplatePositioned>(), 0);
             mapInfo.AddConstructedLevel(1, l2ConnectivityMap, new List<TemplatePositioned>(), new Connection(3, 5));
 
             ConnectivityMap fullMap = mapInfo.FullConnectivityMap;
@@ -36,12 +36,17 @@ namespace DDRogueTest
         public void RoomsCanBeRetrievedByIndex()
         {
             var newTemplate = new TemplatePositioned(9, 9, 0, null, 100);
-            var mapInfo = new MapInfo();
+            var mapInfoBuilder = new MapInfoBuilder();
 
             var templateList = new List<TemplatePositioned>();
             templateList.Add(newTemplate);
 
-            mapInfo.AddConstructedLevel(0, new ConnectivityMap(), templateList);
+            var map = new ConnectivityMap();
+            map.AddRoomConnection(new Connection(100, 101));
+
+            mapInfoBuilder.AddConstructedLevel(0, map, templateList, 100);
+
+            var mapInfo = new MapInfo(mapInfoBuilder);
 
             Assert.AreEqual(new Point(9,9), mapInfo.GetRoom(100).Location);
         }
@@ -50,7 +55,7 @@ namespace DDRogueTest
         [ExpectedException(typeof(ApplicationException))]
         public void AddConstructedLevelCantBeCalledForFirstLevel()
         {
-            var mapInfo = new MapInfo();
+            var mapInfo = new MapInfoBuilder();
             mapInfo.AddConstructedLevel(0, new ConnectivityMap(), null, new Connection(1, 2));
         }
     }

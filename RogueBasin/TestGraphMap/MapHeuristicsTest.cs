@@ -24,7 +24,6 @@ namespace TestGraphMap
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6 }), accessibleNodes.ToList());
         }
 
-        //Need to rewrite these to return connections. Oh and to fix them too.
         [TestMethod]
         public void DeadEndFinalRoomsCanBeFound()
         {
@@ -54,6 +53,39 @@ namespace TestGraphMap
             CollectionAssert.AreEquivalent(expectedNodes[2], terminalNodesFound[2]);
             CollectionAssert.AreEquivalent(expectedNodes.Keys, terminalNodesFound.Keys);
         }
+
+        [TestMethod]
+        public void ConnectionsOfMultipleDepthFromDeadEndFinalRoomsCanBeFound()
+        {
+            var standardMap = BuildBranchingTestMap();
+            var mapNoCycles = new MapCycleReducer(standardMap.RoomConnectionGraph.Edges);
+            var mapH = new MapHeuristics(mapNoCycles, 1);
+
+            var expectedConnections = new Dictionary<int, List<Connection>> {
+                {0, new List<Connection>(new Connection[]{ 
+                    new Connection(1, 2),
+                    new Connection(5, 6),
+                    new Connection(13, 14),
+                    new Connection(13, 15),
+                    new Connection(16, 17),
+                    new Connection(12, 18)
+                    })},
+                {1, new List<Connection>(new Connection[]{
+                    new Connection(3, 5),
+                    new Connection(11, 12),
+                    new Connection(4, 16)})},
+                {2, new List<Connection>(new Connection[]{
+                    new Connection(3, 4)})}
+            };
+
+            var terminalConnectionsFound = mapH.GetTerminalBranchConnections();
+
+            CollectionAssert.AreEquivalent(expectedConnections[0], terminalConnectionsFound[0]);
+            CollectionAssert.AreEquivalent(expectedConnections[1], terminalConnectionsFound[1]);
+            CollectionAssert.AreEquivalent(expectedConnections[2], terminalConnectionsFound[2]);
+            CollectionAssert.AreEquivalent(expectedConnections.Keys, terminalConnectionsFound.Keys);
+        }
+
 
         private MapHeuristics BuildMapHeuristics()
         {

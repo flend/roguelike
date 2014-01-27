@@ -214,15 +214,13 @@ namespace RogueBasin
 
             //Build the l1 map and set start location
 
-            var mapInfo = new MapInfo();
-            mapInfo.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords());
+            var mapInfoBuilder = new MapInfoBuilder();
+            var startRoom = 0;
+            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), startRoom);
 
             Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
             Game.Dungeon.AddMap(masterMap);
             
-            var firstRoom = mapInfo.GetRoom(0);
-            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
-
             //Build level 2
 
             var l2mapBuilder = new TemplatedMapBuilder(100, 100);
@@ -240,7 +238,7 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Level 2 elevator at index " + l2elevatorIndex, LogDebugLevel.High);
 
-            mapInfo.AddConstructedLevel(1, l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(), 
+            mapInfoBuilder.AddConstructedLevel(1, l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(), 
                 new Connection(l1elevatorIndex, l2elevatorIndex));
             
             Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
@@ -248,6 +246,9 @@ namespace RogueBasin
 
             //Recalculate walkable to allow placing objects
             Game.Dungeon.RecalculateWalkable();
+
+            MapInfo mapInfo = new MapInfo(mapInfoBuilder);
+            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
 
             //Add elevator features to link the maps
 
@@ -258,8 +259,20 @@ namespace RogueBasin
             Game.Dungeon.AddFeature(new Features.Elevator(1, elevator2Loc), 0, elevator1Loc);
             Game.Dungeon.AddFeature(new Features.Elevator(0, elevator1Loc), 1, elevator2Loc);
 
+            //Set PC start location
+
+            var firstRoom = mapInfo.GetRoom(0);
+            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            //Add a locked door on a dead end, localised to level 0
+            var level0Indices = mapInfo.GetRoomIndicesForLevel(0);
+            var terminalNodes = mapHeuristics.GetTerminalBranchNodes();
+
+            var deadEndNodesL0 = terminalNodes[0].Intersect(level0Indices);
+            //mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue();
+
             //Set map for visualisation
-            connectivityMap = mapInfo.FullConnectivityMap;
+            connectivityMap = mapInfoBuilder.FullConnectivityMap;
         }
 
         private void AddCorridorsBetweenOpenDoors(TemplatedMapGenerator templatedGenerator, int totalExtraConnections)

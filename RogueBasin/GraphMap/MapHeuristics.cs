@@ -33,7 +33,7 @@ namespace GraphMap
         }
 
 
-        /** Get dictionary of terminal nodes (those with  */
+        /** Get dictionary of terminal nodes (those that lead to a dead end, n nodes away) */
         public Dictionary<int, List<int>> GetTerminalBranchNodes()
         {
             var graphMap = mapWithoutCycles.mapNoCycles;
@@ -63,5 +63,39 @@ namespace GraphMap
 
             return degreeOfTerminalNodes;
         }
+
+        /** Get dictionary of terminal connections. These are defined as the connections that lead to dead ends
+         *  and are n nodes away */
+        public Dictionary<int, List<Connection>> GetTerminalBranchConnections()
+        {
+            var graphMap = mapWithoutCycles.mapNoCycles;
+            var originNodes = graphMap.Vertices.Where(v => graphMap.AdjacentEdges(v).Count() == 1);
+
+            Dictionary<int, List<Connection>> degreeOfTerminalNodes = new Dictionary<int, List<Connection>>();
+
+            foreach (var baseNode in originNodes)
+            {
+                var nextNode = baseNode;
+                var adjacentEdges = graphMap.AdjacentEdges(baseNode);
+                int degree = -1;
+
+                do
+                {
+                    degree++;
+                    if (!degreeOfTerminalNodes.ContainsKey(degree))
+                        degreeOfTerminalNodes[degree] = new List<Connection>();
+
+                    degreeOfTerminalNodes[degree].Add(new Connection(adjacentEdges.First().Source, adjacentEdges.First().Target).Ordered);
+
+                    nextNode = adjacentEdges.First().Target == nextNode ? adjacentEdges.First().Source : adjacentEdges.First().Target;
+                    adjacentEdges = graphMap.AdjacentEdges(nextNode);
+
+                    //Terminate when we hit a node that branches in 2 ways (3 connections)
+                } while (adjacentEdges.Count() < 3);
+            }
+
+            return degreeOfTerminalNodes;
+        }
+
     }
 }
