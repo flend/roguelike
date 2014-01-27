@@ -421,7 +421,7 @@ namespace RogueBasin
                                     // Do nothing
                                     timeAdvances = DoNothing();
                                     break;
-                                    /*
+                                    
                                 case '>':
                                 case '<':
                                     //Interact with feature
@@ -432,7 +432,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
 
-                                    break;*/
+                                    break;
                                     /*
                                 case 'd':
                                 case 'D':
@@ -731,7 +731,7 @@ namespace RogueBasin
                         KeyModifier mod = KeyModifier.Arrow;
                         bool wasDirection = GetDirectionFromKeypress(userKey, out direction, out mod);
 
-                        if (wasDirection && mod == KeyModifier.Numeric)
+                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi))
                         {
                             timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
                         }

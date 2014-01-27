@@ -23,8 +23,8 @@ namespace DDRogueTest
             l2ConnectivityMap.AddRoomConnection(5, 6);
             l2ConnectivityMap.AddRoomConnection(6, 7);
 
-            mapInfo.AddConstructedLevel(l1ConnectivityMap, null);
-            mapInfo.AddConstructedLevel(l2ConnectivityMap, null, new Connection(3, 5));
+            mapInfo.AddConstructedLevel(0, l1ConnectivityMap, new List<TemplatePositioned>());
+            mapInfo.AddConstructedLevel(1, l2ConnectivityMap, new List<TemplatePositioned>(), new Connection(3, 5));
 
             ConnectivityMap fullMap = mapInfo.FullConnectivityMap;
 
@@ -41,18 +41,9 @@ namespace DDRogueTest
             var templateList = new List<TemplatePositioned>();
             templateList.Add(newTemplate);
 
-            mapInfo.AddConstructedLevel(new ConnectivityMap(), templateList);
+            mapInfo.AddConstructedLevel(0, new ConnectivityMap(), templateList);
 
-            Assert.AreEqual(new Point(9,9), mapInfo.GetRoom(0, 100).Location);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ApplicationException))]
-        public void AddConstructedLevelCanOnlyBeCalledForFirstLevelWith2Arguments()
-        {
-            var mapInfo = new MapInfo();
-            mapInfo.AddConstructedLevel(new ConnectivityMap(), null);
-            mapInfo.AddConstructedLevel(new ConnectivityMap(), null);
+            Assert.AreEqual(new Point(9,9), mapInfo.GetRoom(100).Location);
         }
 
         [TestMethod]
@@ -60,7 +51,7 @@ namespace DDRogueTest
         public void AddConstructedLevelCantBeCalledForFirstLevel()
         {
             var mapInfo = new MapInfo();
-            mapInfo.AddConstructedLevel(new ConnectivityMap(), null, new Connection(1, 2));
+            mapInfo.AddConstructedLevel(0, new ConnectivityMap(), null, new Connection(1, 2));
         }
     }
 }

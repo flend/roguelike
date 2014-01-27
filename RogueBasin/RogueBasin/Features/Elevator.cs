@@ -24,7 +24,7 @@ namespace RogueBasin.Features
         {
             Dungeon dungeon = Game.Dungeon;
 
-            Game.MessageQueue.AddMessage("You take the elevator.");
+            Game.MessageQueue.AddMessage("You take the elevator. Welcome to level " + destLevel);
 
             dungeon.MovePCAbsolute(destLevel, destLocation);
 

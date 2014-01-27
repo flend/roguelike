@@ -12,51 +12,53 @@ namespace RogueBasin
     /// </summary>
     public class MapInfo
     {
-        List<List<TemplatePositioned>> roomTemplates;
+        Dictionary<int, TemplatePositioned> roomTemplates;
+        Dictionary<int, int> roomLevels;
         List<ConnectivityMap> connectivityMap;
 
         ConnectivityMap fullMap;
 
         public MapInfo()
         {
-            roomTemplates = new List<List<TemplatePositioned>>();
+            roomTemplates = new Dictionary<int, TemplatePositioned>();
             connectivityMap = new List<ConnectivityMap>();
+            roomLevels = new Dictionary<int, int>();
         }
 
         /// <summary>
-        /// Add second or subsequent level. Must be added in numerical order (and the same as dungeon!)
+        /// Add second or subsequent level.
         /// </summary>
-        public void AddConstructedLevel(ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, Connection connectionBetweenLevels) {
+        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, Connection connectionBetweenLevels) {
 
             if (connectivityMap.Count == 0)
                 throw new ApplicationException("Need to add first level before using this method");
 
-            roomTemplates.Add(roomsInLevelCoords);
+            foreach(var r in roomsInLevelCoords) {
+                roomTemplates.Add(r.RoomIndex, r);
+                roomLevels.Add(r.RoomIndex, levelNo);
+            }
             connectivityMap.Add(levelMap);
 
-            //Add into full map
+            //Combine into full map
             fullMap.AddAllConnections(levelMap);
             fullMap.AddRoomConnection(connectionBetweenLevels);
         }
 
         /// <summary>
-        /// Add first level. Must be added in numerical order (and the same as dungeon!)
+        /// Add first level, or level without other connections
         /// </summary>
-        public void AddConstructedLevel(ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords)
+        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords)
         {
-            if (connectivityMap.Count > 0)
-                throw new ApplicationException("Can't add first level twice");
-
-            roomTemplates.Add(roomsInLevelCoords);
+            foreach (var r in roomsInLevelCoords)
+            {
+                roomTemplates.Add(r.RoomIndex, r);
+                roomLevels.Add(r.RoomIndex, levelNo);
+            }
             connectivityMap.Add(levelMap);
 
             fullMap = levelMap;
         }
         
-        public List<TemplatePositioned> RoomTemplatesForLevel(int levelNo) {
-            return roomTemplates[levelNo];
-        }
-
         /// <summary>
         /// Returns point in map coords of this level in the required room of terrain
         /// </summary>
@@ -65,14 +67,14 @@ namespace RogueBasin
         /// <returns></returns>
         public Point GetRandomPointInRoomOfTerrain(int levelNo, int roomIndex, RoomTemplateTerrain terrainToFind) {
          
-            var roomRelativePoint = RoomTemplateUtilities.GetRandomPointWithTerrain(roomTemplates[levelNo][roomIndex].Room, terrainToFind);
+            var roomRelativePoint = RoomTemplateUtilities.GetRandomPointWithTerrain(roomTemplates[roomIndex].Room, terrainToFind);
 
-            return new Point(GetRoom(levelNo, roomIndex).Location + roomRelativePoint);
+            return new Point(roomTemplates[roomIndex].Location + roomRelativePoint);
         }
 
-        public TemplatePositioned GetRoom(int levelNo, int roomIndex)
+        public TemplatePositioned GetRoom(int roomIndex)
         {
-            return roomTemplates[levelNo][roomIndex];
+            return roomTemplates[roomIndex];
         }
 
         public ConnectivityMap FullConnectivityMap
