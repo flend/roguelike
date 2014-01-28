@@ -52,11 +52,58 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void RoomsInALevelCanBeReturned()
+        {
+            var mapInfo = new MapInfo(GetStandardMapInfoBuilder());
+
+            var level1Nodes = mapInfo.GetRoomIndicesForLevel(1);
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 5, 6, 7 }), level1Nodes.ToList());
+        }
+
+        [TestMethod]
+        public void ConnectionsInALevelCanBeReturned()
+        {
+            var mapInfo = new MapInfo(GetStandardMapInfoBuilder());
+
+            var level1Nodes = mapInfo.GetConnectionsOnLevel(0);
+
+            CollectionAssert.AreEquivalent(new List<Connection>(new Connection[] { new Connection(1,2), new Connection(2,3), new Connection(3,5) }), level1Nodes.ToList());
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void AddConstructedLevelCantBeCalledForFirstLevel()
         {
             var mapInfo = new MapInfoBuilder();
             mapInfo.AddConstructedLevel(0, new ConnectivityMap(), null, new Connection(1, 2));
+        }
+
+        private MapInfoBuilder GetStandardMapInfoBuilder() {
+            var builder = new MapInfoBuilder();
+
+            var l1ConnectivityMap = new ConnectivityMap();
+            l1ConnectivityMap.AddRoomConnection(1, 2);
+            l1ConnectivityMap.AddRoomConnection(2, 3);
+
+            var l1RoomList = new List<TemplatePositioned>();
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 1));
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 2));
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 3));
+            
+            var l2ConnectivityMap = new ConnectivityMap();
+            l2ConnectivityMap.AddRoomConnection(5, 6);
+            l2ConnectivityMap.AddRoomConnection(6, 7);
+
+            var l2RoomList = new List<TemplatePositioned>();
+            l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 5));
+            l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 6));
+            l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 7));
+
+            builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, 1);
+            builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, new Connection(3, 5));
+
+            return builder;
         }
     }
 }

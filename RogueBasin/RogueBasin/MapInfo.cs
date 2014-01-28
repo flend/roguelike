@@ -134,7 +134,20 @@ namespace RogueBasin
 
         public IEnumerable<int> GetRoomIndicesForLevel(int level)
         {
-            return roomLevels.Where(kv => kv.Key == level).Select(kv => kv.Value);
+            return roomLevels.Where(kv => kv.Value == level).Select(kv => kv.Key);
+        }
+
+        /// <summary>
+        /// Get all connections on level. Also includes connections from this level to other levels
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public IEnumerable<Connection> GetConnectionsOnLevel(int level)
+        {
+            var roomIndicesForLevel = GetRoomIndicesForLevel(level);
+
+            //This may be slow and better done by the underlying map representation
+            return map.GetAllConnections().Where(c => roomIndicesForLevel.Contains(c.Source) || roomIndicesForLevel.Contains(c.Target));
         }
 
         public MapModel Model

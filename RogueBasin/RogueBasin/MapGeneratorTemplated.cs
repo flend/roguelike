@@ -266,9 +266,9 @@ namespace RogueBasin
 
             //Add a locked door on a dead end, localised to level 0
             var level0Indices = mapInfo.GetRoomIndicesForLevel(0);
-            var terminalNodes = mapHeuristics.GetTerminalBranchNodes();
+            var terminalConnections = mapHeuristics.GetTerminalBranchConnections();
 
-            var deadEndNodesL0 = terminalNodes[0].Intersect(level0Indices);
+            //var deadEndConnectionsL0 = terminalConnections[0].Intersect(level0Indices);
             //mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue();
 
             //Set map for visualisation
