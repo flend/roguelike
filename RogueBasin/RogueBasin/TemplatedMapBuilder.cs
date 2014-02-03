@@ -168,6 +168,27 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Add the terrain to the map, overriding what was there before.
+        /// Use with caution since may break connectivity
+        /// </summary>
+        /// <param name="templateToAdd"></param>
+        /// <returns></returns>
+        public void OverridePositionedTemplate(TemplatePositioned templateToAdd)
+        {
+            try
+            {
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, OverrideTerrain);
+
+                idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), OverrideIds);
+            }
+            catch (ArgumentException e)
+            {
+                throw new ApplicationException("Can't place room: " + e.Message);
+            }
+        }
+
+
+        /// <summary>
         /// Ensure that rooms can't completely overlap (which passes - is any terrain different - test) 
         /// by requiring some different terrain (which implicitally must be transparent)
         /// </summary>
@@ -200,6 +221,11 @@ namespace RogueBasin
                 return newId;
             else
                 return existingId;
+        }
+
+        private int OverrideIds(int existingId, int newId)
+        {
+            return newId;
         }
 
         private int[,] MakeIdArray(TemplatePositioned template)
