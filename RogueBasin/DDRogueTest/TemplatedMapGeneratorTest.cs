@@ -295,6 +295,89 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void ConnectingDoorBetweenTwoOverlappingRoomsCanBeIdentified()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0, 0);
+
+            var connectingDoor = mapGen.GetDoorForConnection(new Connection(0, 1));
+
+            Assert.AreEqual(new Point(4, 3), connectingDoor.MapCoords);
+        }
+
+        [TestMethod]
+        public void ConnectingDoorsBetweenTwoRoomsAlignedWithACorridorCanBeIdentified()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, corridor1, mapGen.PotentialDoors[0], 0, 5);
+
+            var room1ToCorridorDoor = mapGen.GetDoorForConnection(new Connection(0, 2));
+            var room2ToCorridorDoor = mapGen.GetDoorForConnection(new Connection(1, 2));
+
+            Assert.AreEqual(new Point(4, 3), room1ToCorridorDoor.MapCoords);
+            Assert.AreEqual(new Point(4, 8), room2ToCorridorDoor.MapCoords);
+        }
+
+        [TestMethod]
+        public void ConnectingDoorsBetweenTwoRoomsJoinedWithACorridorCanBeIdentified()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room2, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(10, -8));
+
+            bool corridorPlacement = mapGen.JoinDoorsWithCorridor(mapGen.PotentialDoors[0], mapGen.PotentialDoors[1], corridor1);
+
+            var room1ToCorridorDoor = mapGen.GetDoorForConnection(new Connection(0, 2));
+            var room2ToCorridorDoor = mapGen.GetDoorForConnection(new Connection(1, 2));
+
+            Assert.AreEqual(new Point(1, 0), room1ToCorridorDoor.MapCoords);
+            Assert.AreEqual(new Point(14, -5), room2ToCorridorDoor.MapCoords);
+        }
+
+        [TestMethod]
+        public void ConnectingDoorsBetweenTwoRoomsJoinedWithACorridorButAdjacentCanBeIdentified()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom4.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAtPosition(room2, new Point(-7, 1));
+
+            bool corridorPlacement = mapGen.JoinDoorsWithCorridor(mapGen.PotentialDoors[0], mapGen.PotentialDoors[1], corridor1);
+
+            var room1ToRoom2Door = mapGen.GetDoorForConnection(new Connection(0, 1));
+
+            Assert.AreEqual(new Point(0, 2), room1ToRoom2Door.MapCoords);
+        }
+        [TestMethod]
         public void AddingAVerticalCorridorBetweenTwoRoomsGivesConnectedNodeGraphTR()
         {
             //Load sample template 8x4

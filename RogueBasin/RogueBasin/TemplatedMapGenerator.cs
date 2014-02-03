@@ -36,6 +36,7 @@ namespace RogueBasin
         }
 
         List<DoorInfo> potentialDoors = new List<DoorInfo>();
+        Dictionary<Connection, DoorInfo> connectionDoors = new Dictionary<Connection, DoorInfo>();
         int nextRoomIndex = 0;
 
         TemplatedMapBuilder mapBuilder;
@@ -144,6 +145,7 @@ namespace RogueBasin
                 {
                     //Add a direct connection in the connectivity graph
                     connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, secondDoor.OwnerRoomIndex);
+                    connectionDoors.Add(new Connection(firstDoor.OwnerRoomIndex, secondDoor.OwnerRoomIndex).Ordered, firstDoor);
                 }
                 else
                 {
@@ -205,6 +207,9 @@ namespace RogueBasin
                     //Add connections to the old and new rooms
                     connectivityMap.AddRoomConnection(firstDoor.OwnerRoomIndex, corridorRoomIndex);
                     connectivityMap.AddRoomConnection(corridorRoomIndex, secondDoor.OwnerRoomIndex);
+
+                    connectionDoors.Add(new Connection(firstDoor.OwnerRoomIndex, corridorRoomIndex).Ordered, firstDoor);
+                    connectionDoors.Add(new Connection(corridorRoomIndex, secondDoor.OwnerRoomIndex).Ordered, secondDoor);
                 }
                 
                 //Remove both doors from the potential list
@@ -237,6 +242,9 @@ namespace RogueBasin
 
             var alignedNewRoom = newRoomTuple.Item1;
             var alignedDoorLocation = newRoomTuple.Item2;
+
+            var alignedDoorIndex = alignedNewRoom.PotentialDoors.IndexOf(alignedDoorLocation);
+            var alignedDoor = new DoorInfo(alignedNewRoom, newRoomIndex, alignedDoorIndex, RoomTemplateUtilities.GetDoorLocation(alignedNewRoom.Room, alignedDoorIndex));
 
             //In order to place this successfully, we need to be able to both place the room and a connecting corridor
 
@@ -281,15 +289,19 @@ namespace RogueBasin
 
                 //Add connections to the old and new rooms
                 connectivityMap.AddRoomConnection(existingDoor.OwnerRoomIndex, corridorIndex);
-                LogFile.Log.LogEntryDebug("Addiing connection: " + existingDoor.OwnerRoomIndex + " to " + corridorIndex, LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Adding connection: " + existingDoor.OwnerRoomIndex + " to " + corridorIndex, LogDebugLevel.Medium);
                 connectivityMap.AddRoomConnection(corridorIndex, newRoomIndex);
-                LogFile.Log.LogEntryDebug("Addiing connection: " + corridorIndex + " to " + newRoomIndex, LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Adding connection: " + corridorIndex + " to " + newRoomIndex, LogDebugLevel.Medium);
+
+                connectionDoors.Add(new Connection(existingDoor.OwnerRoomIndex, corridorIndex).Ordered, existingDoor);
+                connectionDoors.Add(new Connection(corridorIndex, newRoomIndex).Ordered, alignedDoor);
             }
             else
             {
                 //No corridor - a direct connection between the rooms
                 connectivityMap.AddRoomConnection(existingDoor.OwnerRoomIndex, newRoomIndex);
-                LogFile.Log.LogEntryDebug("Addiing connection: " + existingDoor.OwnerRoomIndex + " to " + newRoomIndex, LogDebugLevel.Medium);
+                connectionDoors.Add(new Connection(existingDoor.OwnerRoomIndex, newRoomIndex).Ordered, alignedDoor);
+                LogFile.Log.LogEntryDebug("Adding connection: " + existingDoor.OwnerRoomIndex + " to " + newRoomIndex, LogDebugLevel.Medium);
             }
 
             //Place the room
@@ -335,6 +347,16 @@ namespace RogueBasin
         {
             return templates.Select(t => 
                 new TemplatePositioned(t.X - mapBuilder.MasterMapTopLeft.x, t.Y - mapBuilder.MasterMapTopLeft.y, t.Z, t.Room, t.RoomIndex)).ToList();
+        }
+
+        /// <summary>
+        /// Get the door on the map for the connection
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public DoorInfo GetDoorForConnection(Connection connection)
+        {
+            return connectionDoors[connection.Ordered];
         }
     }
 }
