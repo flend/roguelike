@@ -94,14 +94,14 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void TemplateCanBeOverlappedUsingOverrideTemplate()
+        public void TemplateCanBeOverlappedUsingOverrideTemplateIfSecondTemplateIsSmallerAndDoesntBreakoutOfLarger()
         {
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
             RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
 
-            Stream overlapFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testOverlap.room");
+            Stream overlapFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testoverlap.room");
             RoomTemplate room2 = RoomTemplateLoader.LoadTemplateFromFile(overlapFileStream, StandardTemplateMapping.terrainMapping);
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
@@ -112,12 +112,34 @@ namespace DDRogueTest
 
             //Overlap in smaller room
             TemplatePositioned templatePos2 = new TemplatePositioned(5, 5, 0, room2, 0);
+            Assert.IsFalse(mapGen.OverridePositionedTemplate(templatePos2));
+        }
+
+        [TestMethod]
+        public void TemplateCanBeOverlappedUsingOverrideTemplateIfSecondTemplateOnlyReplacesNonFloorTiles()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            Stream overlapFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testoverlap.room");
+            RoomTemplate room2 = RoomTemplateLoader.LoadTemplateFromFile(overlapFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            //Base
+            TemplatePositioned templatePos1 = new TemplatePositioned(5, 5, 0, room1, 0);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            //Overlap in smaller room
+            TemplatePositioned templatePos2 = new TemplatePositioned(5, 6, 0, room2, 0);
             mapGen.OverridePositionedTemplate(templatePos2);
 
             Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
 
-            Assert.AreEqual(MapTerrain.ClosedDoor, outputMap.mapSquares[3, 1].Terrain);
-            Assert.AreEqual(MapTerrain.ClosedDoor, outputMap.mapSquares[7, 1].Terrain);
+            Assert.AreEqual(MapTerrain.ClosedDoor, outputMap.mapSquares[0, 2].Terrain);
+            Assert.AreEqual(MapTerrain.ClosedDoor, outputMap.mapSquares[3, 2].Terrain);
         }
 
         [TestMethod]

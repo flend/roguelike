@@ -125,6 +125,16 @@ namespace RogueBasin
             return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
         }
 
+        /// <summary>
+        /// Check placement using the rules for replacing a room
+        /// </summary>
+        /// <param name="template"></param>
+        /// <returns></returns>
+        public bool CanBePlacedOverlappingOtherTemplates(TemplatePositioned template)
+        {
+            return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, OverrideFloorTerrain);
+        }
+        
         private RoomTemplateTerrain MergeTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
         {
             if (originTerrain == RoomTemplateTerrain.Transparent)
@@ -147,6 +157,31 @@ namespace RogueBasin
         private RoomTemplateTerrain OverrideTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
         {
             return newTerrain;
+        }
+
+        private RoomTemplateTerrain OverrideFloorTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
+        {
+            if (originTerrain == RoomTemplateTerrain.Transparent)
+            {
+                return newTerrain;
+            }
+            else if (newTerrain == RoomTemplateTerrain.Transparent)
+            {
+                return originTerrain;
+            }
+            else
+            {
+                //Can overlap indentical terrain
+                if (newTerrain == originTerrain)
+                    return originTerrain;
+
+                //Can replace floor with new terrain
+                if (originTerrain == RoomTemplateTerrain.Floor)
+                    return newTerrain;
+
+                //Mismatched terrain throws exception
+                throw new ApplicationException("Can't overlap terrain");
+            }
         }
 
         public bool AddPositionedTemplate(TemplatePositioned templateToAdd)
@@ -173,13 +208,18 @@ namespace RogueBasin
         /// </summary>
         /// <param name="templateToAdd"></param>
         /// <returns></returns>
-        public void OverridePositionedTemplate(TemplatePositioned templateToAdd)
+        public bool OverridePositionedTemplate(TemplatePositioned templateToAdd)
         {
+            if (!CanBePlacedOverlappingOtherTemplates(templateToAdd))
+                return false;
+
             try
             {
-                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, OverrideTerrain);
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, OverrideFloorTerrain);
 
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), OverrideIds);
+
+                return true;
             }
             catch (ArgumentException e)
             {
