@@ -143,6 +143,24 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void TemplateCanBeOverlappedByItself()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            //Base
+            TemplatePositioned templatePos1 = new TemplatePositioned(5, 5, 0, room1, 0);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            //Overlap the same room as a limit test
+            Assert.IsTrue(mapGen.OverridePositionedTemplate(templatePos1));
+        }
+
+        [TestMethod]
         public void MapContainsCorrectIdOnSingleRoom()
         {
             //Load sample template 8x4

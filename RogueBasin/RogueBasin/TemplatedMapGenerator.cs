@@ -224,6 +224,40 @@ namespace RogueBasin
                 return false;
             }
         }
+        
+        /// <summary>
+        /// Replace a room template with a smaller one. Aligns new template with old door.
+        /// This should only be called on dead-ends
+        /// </summary>
+        public bool ReplaceRoomTemplate(int roomToReplaceIndex, Connection existingRoomConnection, RoomTemplate replacementRoom, int replaceRoomDoorIndex)
+        {
+            if(roomToReplaceIndex >= templates.Count)
+                throw new ApplicationException("Room index out of range");
+
+            var templateToReplace = templates[roomToReplaceIndex];
+
+            if (templateToReplace.PotentialDoors.Count() > 1)
+                throw new ApplicationException("Can't replace rooms with >1 doors");
+
+            var doorToConnection = GetDoorForConnection(existingRoomConnection);
+
+            Tuple<TemplatePositioned, Point> replacementRoomTuple = RoomTemplateUtilities.AlignRoomOverlapping(replacementRoom, roomToReplaceIndex, templateToReplace,
+                replaceRoomDoorIndex, doorToConnection.DoorIndexInRoom);
+
+            var replacementRoomTemplate = replacementRoomTuple.Item1;
+
+            var overrideSuccessful = mapBuilder.OverridePositionedTemplate(replacementRoomTemplate);
+
+            if (!overrideSuccessful)
+                return false;
+
+            templates.RemoveAt(roomToReplaceIndex);
+            templates.Add(replacementRoomTemplate);
+
+            //We don't change the connectivity or doors
+
+            return true;
+        }
 
         public bool PlaceRoomTemplateAlignedWithExistingDoor(RoomTemplate roomTemplateToPlace, RoomTemplate corridorTemplate, DoorInfo existingDoor, int distanceApart)
         {
@@ -237,7 +271,7 @@ namespace RogueBasin
             
             Point existingDoorLoc = existingDoor.MapCoords;
 
-            Tuple<TemplatePositioned, Point> newRoomTuple = RoomTemplateUtilities.AlignRoomOnDoor(roomTemplateToPlace, newRoomIndex, existingDoor.OwnerRoom,
+            Tuple<TemplatePositioned, Point> newRoomTuple = RoomTemplateUtilities.AlignRoomFacing(roomTemplateToPlace, newRoomIndex, existingDoor.OwnerRoom,
                 newRoomDoorIndex, existingDoor.DoorIndexInRoom, distanceApart);
 
             var alignedNewRoom = newRoomTuple.Item1;
@@ -358,5 +392,6 @@ namespace RogueBasin
         {
             return connectionDoors[connection.Ordered];
         }
+
     }
 }

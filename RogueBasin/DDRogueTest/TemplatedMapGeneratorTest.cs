@@ -661,6 +661,28 @@ namespace DDRogueTest
 
             CollectionAssert.AreEquivalent(new List<Connection>(new Connection[] { new Connection(0, 2), new Connection(1, 2) }), allConnections);
         }
+        
+        [TestMethod]
+        public void RoomCanBeReplacedWithSmallerRoomsWithAlignmentCorrected()
+        {
+            //Load sample template 8x4
+            RoomTemplate baseRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate joinedRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            RoomTemplate replacementRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testoverlap2.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(baseRoom, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0);
+            
+            var replaceSuccess = mapGen.ReplaceRoomTemplate(0, new Connection(0,1), replacementRoom, 0);
+
+            //Check replacement was successful and terrain is correct
+            var map = mapBuilder.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+            Assert.AreEqual(MapTerrain.Wall, map.mapSquares[4, 1].Terrain);
+        }
 
         private static RoomTemplate LoadTemplateFromFile(string filename)
         {
