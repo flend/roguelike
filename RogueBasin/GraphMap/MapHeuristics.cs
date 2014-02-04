@@ -71,7 +71,7 @@ namespace GraphMap
             var graphMap = mapWithoutCycles.mapNoCycles;
             var originNodes = graphMap.Vertices.Where(v => graphMap.AdjacentEdges(v).Count() == 1);
 
-            Dictionary<int, HashSet<Connection>> degreeOfTerminalNodes = new Dictionary<int, HashSet<Connection>>();
+            Dictionary<Connection, int> degreeOfConnections = new Dictionary<Connection, int>();
 
             foreach (var baseNode in originNodes)
             {
@@ -95,11 +95,12 @@ namespace GraphMap
                     }
 
                     //Set the degree of the next connection
+                    //If we have seen the node before, but this is a lower degree, replace the degree
                     degree++;
-                    if (!degreeOfTerminalNodes.ContainsKey(degree))
-                        degreeOfTerminalNodes[degree] = new HashSet<Connection>();
 
-                    degreeOfTerminalNodes[degree].Add(nextEdgeAsConnection);
+                    if (!degreeOfConnections.ContainsKey(nextEdgeAsConnection) ||
+                        (degreeOfConnections.ContainsKey(nextEdgeAsConnection) && degreeOfConnections[nextEdgeAsConnection] > degree))
+                    degreeOfConnections[nextEdgeAsConnection] = degree;
 
                     //Move on
                     nextNode = nextEdgeAsConnection.Target == nextNode ? nextEdgeAsConnection.Source : nextEdgeAsConnection.Target;
@@ -113,9 +114,12 @@ namespace GraphMap
 
             Dictionary<int, List<Connection>> degreeOfTerminalNodesAsList = new Dictionary<int, List<Connection>>();
 
-            foreach (var connectionHashset in degreeOfTerminalNodes)
+            foreach (var connectionDegree in degreeOfConnections)
             {
-                degreeOfTerminalNodesAsList[connectionHashset.Key] = connectionHashset.Value.ToList();
+                if (!degreeOfTerminalNodesAsList.ContainsKey(connectionDegree.Value))
+                    degreeOfTerminalNodesAsList[connectionDegree.Value] = new List<Connection>();
+
+                degreeOfTerminalNodesAsList[connectionDegree.Value].Add(connectionDegree.Key);
             }
 
             return degreeOfTerminalNodesAsList;
