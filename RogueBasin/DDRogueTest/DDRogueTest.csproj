@@ -169,6 +169,9 @@
   <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\testoverlap2.room" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testoverlap3.room" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

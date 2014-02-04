@@ -684,6 +684,45 @@ namespace DDRogueTest
             Assert.AreEqual(MapTerrain.Wall, map.mapSquares[4, 1].Terrain);
         }
 
+        [TestMethod]
+        public void RoomCantBeReplacedWithLargeRooms()
+        {
+            //Load sample template 8x4
+            RoomTemplate baseRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate joinedRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            RoomTemplate replacementRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testoverlap3.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(baseRoom, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0);
+
+            Assert.IsFalse(mapGen.ReplaceRoomTemplate(0, new Connection(0, 1), replacementRoom, 0));
+        }
+
+        [TestMethod]
+        public void RoomReplacedWithSmallRoomsCantThenBeMadeLargeAgain()
+        {
+            //Load sample template 8x4
+            RoomTemplate baseRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate joinedRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            RoomTemplate replacementRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testoverlap2.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            bool placement1 = mapGen.PlaceRoomTemplateAtPosition(baseRoom, new Point(0, 0));
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0);
+
+            mapGen.ReplaceRoomTemplate(0, new Connection(0, 1), replacementRoom, 0);
+
+            //Here we use the knowledge that we deleted index 0, so the new replacement room is at index 1
+            Assert.IsFalse(mapGen.ReplaceRoomTemplate(1, new Connection(0, 1), baseRoom, 0));
+        }
+
         private static RoomTemplate LoadTemplateFromFile(string filename)
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();
