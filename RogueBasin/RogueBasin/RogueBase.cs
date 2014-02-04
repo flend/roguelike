@@ -553,7 +553,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(new PlayerEffects.SightRadiusUp(2000, 1));
                                     Screen.Instance.Update();
                                     break;
-                                case 'y':
+/*                                case 'y':
                                     //next mission
                                     Game.Dungeon.MoveToNextMission();
                                     break;
@@ -565,7 +565,7 @@ namespace RogueBasin
                                     TeleportToDungeon1Entrance();
                                     Screen.Instance.Update();
                                     break;
-
+                                    */
                                 case 'J':
                                     //change debug level
                                     LogFile.Log.DebugLevel += 1;
@@ -731,7 +731,7 @@ namespace RogueBasin
                         KeyModifier mod = KeyModifier.Arrow;
                         bool wasDirection = GetDirectionFromKeypress(userKey, out direction, out mod);
 
-                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi))
+                        if (wasDirection && (mod == KeyModifier.Numeric))// || mod == KeyModifier.Vi))
                         {
                             timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
                         }

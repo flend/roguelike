@@ -754,4 +754,10 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\vaults\elevator1.room" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\vaults\placeholdervault1.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\vaults\replacevault1.room" />
+  </ItemGroup>
 </Project>
