@@ -37,6 +37,68 @@ namespace GraphMap
                     return new Connection(Target, Source);
             }
         }
+
+        public static bool operator ==(Connection a, Connection b)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(a, b))
+            {
+                return true;
+            }
+
+            // If one is null, but not both, return false.
+            if (((object)a == null) || ((object)b == null))
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return (a.Source == b.Source && a.Target == b.Target) ||
+                   (a.Target == b.Source && a.Source == b.Target);
+        }
+
+        public static bool operator !=(Connection a, Connection b)
+        {
+            return !(a == b);
+        }
+
+        public override bool Equals(System.Object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            // If parameter cannot be cast to Point return false.
+            Connection p = obj as Connection;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return ((Source == p.Source) && (Target == p.Target)) ||
+                ((Target == p.Source) && (Source == p.Target));
+        }
+
+        public bool Equals(Connection p)
+        {
+            // If parameter is null return false:
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return ((Source == p.Source) && (Target == p.Target)) ||
+                ((Target == p.Source) && (Source == p.Target));
+        }
+
+        public override int GetHashCode()
+        {
+            return Source ^ Target;
+        }
     }
 
     /** A clue to open a locked door */
