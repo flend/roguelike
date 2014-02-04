@@ -122,7 +122,7 @@ namespace DDRogueTest
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
-            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0);
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0, 0);
 
             Assert.AreEqual(room2, mapGen.GetRoomTemplatesInWorldCoords()[1].Room);
         }
@@ -272,7 +272,7 @@ namespace DDRogueTest
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
-            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 1);
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0, 1);
 
             Assert.AreEqual(0, mapGen.PotentialDoors.Count);
         }
@@ -588,7 +588,7 @@ namespace DDRogueTest
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
-            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 1);
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0, 1);
 
             var connectivityMap = mapGen.ConnectivityMap;
             var allConnections = connectivityMap.GetAllConnections().ToList();
@@ -608,7 +608,7 @@ namespace DDRogueTest
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
-            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, corridor1, mapGen.PotentialDoors[0], 2);
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, corridor1, mapGen.PotentialDoors[0], 0, 2);
 
             var connectivityMap = mapGen.ConnectivityMap;
 
@@ -675,7 +675,7 @@ namespace DDRogueTest
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(baseRoom, new Point(0, 0));
-            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0);
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0, 0);
             
             var replaceSuccess = mapGen.ReplaceRoomTemplate(0, new Connection(0,1), replacementRoom, 0);
 
@@ -697,7 +697,7 @@ namespace DDRogueTest
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(baseRoom, new Point(0, 0));
-            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0);
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0, 0);
 
             Assert.IsFalse(mapGen.ReplaceRoomTemplate(0, new Connection(0, 1), replacementRoom, 0));
         }
@@ -715,7 +715,7 @@ namespace DDRogueTest
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
 
             bool placement1 = mapGen.PlaceRoomTemplateAtPosition(baseRoom, new Point(0, 0));
-            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0);
+            bool placement2 = mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0, 0);
 
             mapGen.ReplaceRoomTemplate(0, new Connection(0, 1), replacementRoom, 0);
 

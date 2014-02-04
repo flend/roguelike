@@ -86,6 +86,31 @@ namespace TestGraphMap
             CollectionAssert.AreEquivalent(expectedConnections.Keys, terminalConnectionsFound.Keys);
         }
 
+        [TestMethod]
+        public void DeadEndNodesAreFoundInSinglePathGraphs()
+        {
+            ConnectivityMap newMap = new ConnectivityMap();
+
+            newMap.AddRoomConnection(1, 2);
+            newMap.AddRoomConnection(2, 3);
+
+            var mapNoCycles = new MapCycleReducer(newMap.RoomConnectionGraph.Edges);
+            var mapH = new MapHeuristics(mapNoCycles, 1);
+
+            var expectedConnections = new Dictionary<int, List<Connection>> {
+                {0, new List<Connection>(new Connection[]{ 
+                    new Connection(1, 2),
+                    new Connection(2, 3)})}
+            };
+
+            var terminalConnectionsFound = mapH.GetTerminalBranchConnections();
+
+            //TODO: We have slightly pathological behaviour that all non-terminal node connections
+            //will be double counted in the 
+            CollectionAssert.AreEquivalent(expectedConnections[0], terminalConnectionsFound[0]);
+            CollectionAssert.AreEquivalent(expectedConnections.Keys, terminalConnectionsFound.Keys);
+        }
+
 
         private MapHeuristics BuildMapHeuristics()
         {

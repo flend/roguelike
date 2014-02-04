@@ -353,7 +353,10 @@ namespace RogueBasin
                 else
                 {
                     //Find a random potential door and try to grow a random room off this
-                    if(templatedGenerator.PlaceRoomTemplateAlignedWithExistingDoor(RandomRoom(), corridorTemplates[0], RandomDoor(templatedGenerator),
+                    var randomRoom = RandomRoom();
+                    var randomDoorInRoom = Game.Random.Next(randomRoom.PotentialDoors.Count);
+                    if (templatedGenerator.PlaceRoomTemplateAlignedWithExistingDoor(randomRoom, corridorTemplates[0], RandomDoor(templatedGenerator),
+                        randomDoorInRoom,
                         Game.Random.Next(maxRoomDistance)))
                         roomsPlaced++;
 

@@ -71,30 +71,54 @@ namespace GraphMap
             var graphMap = mapWithoutCycles.mapNoCycles;
             var originNodes = graphMap.Vertices.Where(v => graphMap.AdjacentEdges(v).Count() == 1);
 
-            Dictionary<int, List<Connection>> degreeOfTerminalNodes = new Dictionary<int, List<Connection>>();
+            Dictionary<int, HashSet<Connection>> degreeOfTerminalNodes = new Dictionary<int, HashSet<Connection>>();
 
             foreach (var baseNode in originNodes)
             {
-                var nextNode = baseNode;
+
+                int nextNode = baseNode;
                 var adjacentEdges = graphMap.AdjacentEdges(baseNode);
+                var nextEdge = adjacentEdges.First();
                 int degree = -1;
+                Connection lastConnection = null;// = new Connection(baseNode, nextEdge.Target == baseNode ? nextEdge.Source : nextEdge.Target);
 
                 do
                 {
+                    //Choose our next connection, avoid going back on ourselves
+                    nextEdge = adjacentEdges.First();
+
+                    var nextEdgeAsConnection = new Connection(nextEdge.Source, nextEdge.Target).Ordered;
+                    if (lastConnection != null && lastConnection == nextEdgeAsConnection)
+                    {
+                        nextEdge = adjacentEdges.ElementAt(1);
+                        nextEdgeAsConnection = new Connection(nextEdge.Source, nextEdge.Target).Ordered;
+                    }
+
+                    //Set the degree of the next connection
                     degree++;
                     if (!degreeOfTerminalNodes.ContainsKey(degree))
-                        degreeOfTerminalNodes[degree] = new List<Connection>();
+                        degreeOfTerminalNodes[degree] = new HashSet<Connection>();
 
-                    degreeOfTerminalNodes[degree].Add(new Connection(adjacentEdges.First().Source, adjacentEdges.First().Target).Ordered);
+                    degreeOfTerminalNodes[degree].Add(nextEdgeAsConnection);
 
-                    nextNode = adjacentEdges.First().Target == nextNode ? adjacentEdges.First().Source : adjacentEdges.First().Target;
+                    //Move on
+                    nextNode = nextEdgeAsConnection.Target == nextNode ? nextEdgeAsConnection.Source : nextEdgeAsConnection.Target;
+
                     adjacentEdges = graphMap.AdjacentEdges(nextNode);
+                    lastConnection = nextEdgeAsConnection;
 
-                    //Terminate when we hit a node that branches in 2 ways (3 connections)
-                } while (adjacentEdges.Count() < 3);
+                    //Terminate when we hit a node that branches in 2 ways (3 connections) or another dead end
+                } while (adjacentEdges.Count() == 2);
             }
 
-            return degreeOfTerminalNodes;
+            Dictionary<int, List<Connection>> degreeOfTerminalNodesAsList = new Dictionary<int, List<Connection>>();
+
+            foreach (var connectionHashset in degreeOfTerminalNodes)
+            {
+                degreeOfTerminalNodesAsList[connectionHashset.Key] = connectionHashset.Value.ToList();
+            }
+
+            return degreeOfTerminalNodesAsList;
         }
 
     }
