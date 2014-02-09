@@ -231,9 +231,6 @@ namespace RogueBasin
         /// </summary>
         public bool ReplaceRoomTemplate(int roomToReplaceIndex, Connection existingRoomConnection, RoomTemplate replacementRoom, int replaceRoomDoorIndex)
         {
-            if(roomToReplaceIndex >= templates.Count)
-                throw new ApplicationException("Room index out of range");
-
             var templateToReplace = templates[roomToReplaceIndex];
 
             if (templateToReplace.PotentialDoors.Count() > 1)
@@ -259,7 +256,11 @@ namespace RogueBasin
             return true;
         }
 
-        public int PlaceRoomTemplateAlignedWithExistingDoor(RoomTemplate roomTemplateToPlace, RoomTemplate corridorTemplate, DoorInfo existingDoor, int newRoomDoorIndex, int distanceApart)
+        /// <summary>
+        /// Place a room template aligned with an existing door.
+        /// Returns Connection(Source = existing room or corridor to new room, Target = new room))
+        /// </summary>
+        public Connection PlaceRoomTemplateAlignedWithExistingDoor(RoomTemplate roomTemplateToPlace, RoomTemplate corridorTemplate, DoorInfo existingDoor, int newRoomDoorIndex, int distanceApart)
         {
             var newRoomIndex = NextRoomIndex();
             
@@ -283,6 +284,7 @@ namespace RogueBasin
             IncreaseNextRoomIndex();
 
             TemplatePositioned corridorTemplateConnectingRooms = null;
+            Connection connectionToNewRoom = null;
 
             if (distanceApart > 1)
             {
@@ -316,19 +318,23 @@ namespace RogueBasin
                 IncreaseNextRoomIndex();
 
                 //Add connections to the old and new rooms
+                connectionToNewRoom = new Connection(corridorIndex, newRoomIndex);
+
                 connectivityMap.AddRoomConnection(existingDoor.OwnerRoomIndex, corridorIndex);
                 LogFile.Log.LogEntryDebug("Adding connection: " + existingDoor.OwnerRoomIndex + " to " + corridorIndex, LogDebugLevel.Medium);
                 connectivityMap.AddRoomConnection(corridorIndex, newRoomIndex);
                 LogFile.Log.LogEntryDebug("Adding connection: " + corridorIndex + " to " + newRoomIndex, LogDebugLevel.Medium);
 
                 connectionDoors.Add(new Connection(existingDoor.OwnerRoomIndex, corridorIndex).Ordered, existingDoor);
-                connectionDoors.Add(new Connection(corridorIndex, newRoomIndex).Ordered, alignedDoor);
+                connectionDoors.Add(connectionToNewRoom.Ordered, alignedDoor);
             }
             else
             {
                 //No corridor - a direct connection between the rooms
+                connectionToNewRoom = new Connection(existingDoor.OwnerRoomIndex, newRoomIndex);
+
                 connectivityMap.AddRoomConnection(existingDoor.OwnerRoomIndex, newRoomIndex);
-                connectionDoors.Add(new Connection(existingDoor.OwnerRoomIndex, newRoomIndex).Ordered, alignedDoor);
+                connectionDoors.Add(connectionToNewRoom.Ordered, alignedDoor);
                 LogFile.Log.LogEntryDebug("Adding connection: " + existingDoor.OwnerRoomIndex + " to " + newRoomIndex, LogDebugLevel.Medium);
             }
 
@@ -354,7 +360,7 @@ namespace RogueBasin
             //If successful, remove the candidate door from the list
             potentialDoors.Remove(existingDoor);
 
-            return newRoomIndex;
+            return connectionToNewRoom;
         }
 
         public void ReplaceDoorsWithTerrain(RoomTemplateTerrain roomTemplateTerrain)

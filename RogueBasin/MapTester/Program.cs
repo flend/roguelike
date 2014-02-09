@@ -59,8 +59,9 @@ namespace MapTester
             //Setup a single test level
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
 
-            templateGen.GenerateMultiLevelDungeon();
-
+            //templateGen.GenerateMultiLevelDungeon();
+            templateGen.GenerateDungeonWithReplacedVaults();
+            
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             //Extract connectivity map

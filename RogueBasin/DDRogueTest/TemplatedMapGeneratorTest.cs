@@ -142,6 +142,37 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void AligningARoomWithNoCorridorReturnsTheConnectionToTheNewRoom()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            Assert.AreEqual(new Connection(0, 1), 
+                mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, null, mapGen.PotentialDoors[0], 0, 0));
+        }
+
+                [TestMethod]
+        public void AligningARoomWithACorridorReturnsTheConnectionToTheNewRoom()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            Assert.AreEqual(new Connection(1, 2),
+                mapGen.PlaceRoomTemplateAlignedWithExistingDoor(room2, corridor1, mapGen.PotentialDoors[0], 0, 10));
+        }
+
+        [TestMethod]
         public void RoomTemplateMayBeRetrievedAfterAddingCorridor()
         {
             //Load sample template 8x4

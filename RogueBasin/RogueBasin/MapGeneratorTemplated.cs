@@ -203,19 +203,8 @@ namespace RogueBasin
 
             //Add an elevator room
             int l1elevatorIndex = l1templateGenerator.NextRoomIndex();
-            
-            do
-            {
-                try
-                {
-                    l1templateGenerator.PlaceRoomTemplateAlignedWithExistingDoor(elevator1, corridor1, RandomDoor(l1templateGenerator), 0, 3);
-                    break;
-                }
-                catch (ApplicationException)
-                {
-                    continue;
-                }
-            } while (true);
+
+            AddRoomToRandomOpenDoor(l1templateGenerator, elevator1, corridor1, 3);
 
             LogFile.Log.LogEntryDebug("Level 1 elevator at index " + l1elevatorIndex, LogDebugLevel.High);
 
@@ -239,18 +228,7 @@ namespace RogueBasin
             //Add an elevator room
             int l2elevatorIndex = l2templateGenerator.NextRoomIndex();
 
-            do
-            {
-                try
-                {
-                    l2templateGenerator.PlaceRoomTemplateAlignedWithExistingDoor(elevator1, corridor1, RandomDoor(l2templateGenerator), 0, 3);
-                    break;
-                }
-                catch (ApplicationException)
-                {
-                    continue;
-                }
-            } while (true);
+            AddRoomToRandomOpenDoor(l2templateGenerator, elevator1, corridor1, 3);
 
             LogFile.Log.LogEntryDebug("Level 2 elevator at index " + l2elevatorIndex, LogDebugLevel.High);
 
@@ -300,7 +278,7 @@ namespace RogueBasin
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
-            /*
+            
             //Build level 1
 
             var l1mapBuilder = new TemplatedMapBuilder(100, 100);
@@ -309,25 +287,11 @@ namespace RogueBasin
             PlaceOriginRoom(l1templateGenerator, room1);
             PlaceRandomConnectedRooms(l1templateGenerator, 3, room1, corridor1, 5, 10);
 
-            //Add an elevator room
-            int l1elevatorIndex = l1templateGenerator.NextRoomIndex();
-
-            bool elevatorPlaced = false;
-            do
-            {
-                elevatorPlaced = l1templateGenerator.PlaceRoomTemplateAlignedWithExistingDoor(placeHolderVault, corridor1, RandomDoor(l1templateGenerator), 0, 3);
-            } while (!elevatorPlaced);
+            //Add a place holder room for the elevator
+            var l1elevatorConnection = AddRoomToRandomOpenDoor(l1templateGenerator, placeHolderVault, corridor1, 3);
+            var l1elevatorIndex = l1elevatorConnection.Target;
 
             LogFile.Log.LogEntryDebug("Level 1 elevator at index " + l1elevatorIndex, LogDebugLevel.High);
-
-            //Build the l1 map and set start location
-
-            var mapInfoBuilder = new MapInfoBuilder();
-            var startRoom = 0;
-            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), startRoom);
-
-            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
-            Game.Dungeon.AddMap(masterMap);
 
             //Build level 2
 
@@ -337,21 +301,36 @@ namespace RogueBasin
             PlaceOriginRoom(l2templateGenerator, room1);
             PlaceRandomConnectedRooms(l2templateGenerator, 3, room1, corridor1, 5, 10);
 
-            //Add an elevator room
-            int l2elevatorIndex = l2templateGenerator.NextRoomIndex();
-
-            do
-            {
-                elevatorPlaced = l2templateGenerator.PlaceRoomTemplateAlignedWithExistingDoor(placeHolderVault, corridor1, RandomDoor(l2templateGenerator), 0, 3);
-            } while (!elevatorPlaced);
+            //Add a place holder room for the elevator
+            var l2elevatorConnection = AddRoomToRandomOpenDoor(l2templateGenerator, placeHolderVault, corridor1, 3);
+            var l2elevatorIndex = l2elevatorConnection.Target;
 
             LogFile.Log.LogEntryDebug("Level 2 elevator at index " + l2elevatorIndex, LogDebugLevel.High);
+
+            //Replace the placeholder vaults with the actual elevator rooms
+            l1templateGenerator.ReplaceRoomTemplate(l1elevatorIndex, l1elevatorConnection, replacementVault, 0);
+            l2templateGenerator.ReplaceRoomTemplate(l2elevatorIndex, l2elevatorConnection, replacementVault, 0);
+
+            //Build the maps and add to the dungeon
+
+            //Build and add the l1 map
+
+            var mapInfoBuilder = new MapInfoBuilder();
+            var startRoom = 0;
+            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), startRoom);
+
+            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+            Game.Dungeon.AddMap(masterMap);
+
+            //Build and add the l2 map
 
             mapInfoBuilder.AddConstructedLevel(1, l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(),
                 new Connection(l1elevatorIndex, l2elevatorIndex));
 
             Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
             Game.Dungeon.AddMap(masterMapL2);
+
+            //Add features
 
             //Recalculate walkable to allow placing objects
             Game.Dungeon.RecalculateWalkable();
@@ -382,8 +361,29 @@ namespace RogueBasin
 
             //Set map for visualisation
             connectivityMap = mapInfoBuilder.FullConnectivityMap;
-             * */
+            
         }
+
+        Connection AddRoomToRandomOpenDoor(TemplatedMapGenerator gen, RoomTemplate templateToPlace, RoomTemplate corridorTemplate, int distanceFromDoor)
+        {
+            int attempts = 20;
+            int thisAttempt = 0;
+
+            do
+            {
+                try
+                {
+                    return gen.PlaceRoomTemplateAlignedWithExistingDoor(templateToPlace, corridorTemplate, RandomDoor(gen), 0, distanceFromDoor);
+                }
+                catch (ApplicationException)
+                {
+                    thisAttempt++;
+                }
+            } while (thisAttempt < attempts);
+
+            return null;
+        }
+
 
         private void AddCorridorsBetweenOpenDoors(TemplatedMapGenerator templatedGenerator, int totalExtraConnections)
         {
