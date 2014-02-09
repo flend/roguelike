@@ -228,6 +228,7 @@ namespace RogueBasin
         /// <summary>
         /// Replace a room template with a smaller one. Aligns new template with old door.
         /// This should only be called on dead-ends
+        /// Enforces that replacement rooms can only override floor areas of old rooms (helping to avoid some breakage)
         /// </summary>
         public bool ReplaceRoomTemplate(int roomToReplaceIndex, Connection existingRoomConnection, RoomTemplate replacementRoom, int replaceRoomDoorIndex)
         {
@@ -243,10 +244,16 @@ namespace RogueBasin
 
             var replacementRoomTemplate = replacementRoomTuple.Item1;
 
-            var overrideSuccessful = mapBuilder.OverridePositionedTemplate(replacementRoomTemplate);
-
-            if (!overrideSuccessful)
+            //Check if the overlapping room can be placed
+            if (!mapBuilder.CanBePlacedOverlappingOtherTemplates(replacementRoomTemplate))
                 return false;
+
+            //Blank the old room area
+            var voidedOldRoomTemplate = RoomTemplateUtilities.TransparentTemplate(templateToReplace);
+            mapBuilder.UnconditionallyOverridePositionedTemplate(voidedOldRoomTemplate);
+
+            //Override with new template
+            mapBuilder.OverridePositionedTemplate(replacementRoomTemplate);
 
             //Ensure that the room is replaced in the index
             templates[roomToReplaceIndex] = replacementRoomTemplate;

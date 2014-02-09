@@ -730,6 +730,27 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void ExcessAreaFromReplacedRoomsAreRemovedWhenSmallerRoomReplacesThem()
+        {
+            //Load sample template 8x4
+            RoomTemplate baseRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate joinedRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+
+            RoomTemplate replacementRoom = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testoverlap2.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            mapGen.PlaceRoomTemplateAtPosition(baseRoom, new Point(0, 0));
+            mapGen.PlaceRoomTemplateAlignedWithExistingDoor(joinedRoom, null, mapGen.PotentialDoors[0], 0, 0);
+
+            mapGen.ReplaceRoomTemplate(0, new Connection(0, 1), replacementRoom, 0);
+
+            var map = mapBuilder.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+            Assert.AreEqual(MapTerrain.Void, map.mapSquares[0, 0].Terrain);
+        }
+
+        [TestMethod]
         public void RoomCantBeReplacedWithLargeRooms()
         {
             //Load sample template 8x4

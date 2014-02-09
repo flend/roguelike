@@ -306,6 +306,31 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void TransparentTemplateReturnsAFullyTransparentTemplate()
+        {
+            RoomTemplate baseTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+
+            var originalTemplatePositioned = new TemplatePositioned(1, 2, 3, baseTemplate, 0);
+            var transparentTemplatePositioned = RoomTemplateUtilities.TransparentTemplate(originalTemplatePositioned);
+
+            Assert.AreEqual(1, transparentTemplatePositioned.X);
+            Assert.AreEqual(2, transparentTemplatePositioned.Y);
+            Assert.AreEqual(3, transparentTemplatePositioned.Z);
+            Assert.AreEqual(0, transparentTemplatePositioned.RoomIndex);
+
+            var expectedTerrain = new RoomTemplateTerrain[originalTemplatePositioned.Room.Width, originalTemplatePositioned.Room.Height];
+            for (int i = 0; i < originalTemplatePositioned.Room.Width; i++)
+            {
+                for (int j = 0; j < originalTemplatePositioned.Room.Height; j++)
+                {
+                    expectedTerrain[i, j] = RoomTemplateTerrain.Transparent;
+                }
+            }
+
+            CollectionAssert.AreEqual(expectedTerrain, transparentTemplatePositioned.Room.terrainMap);
+        }
+
+        [TestMethod]
         public void LeftDoorCannotConnectToRightDoorWithStraightCorridorWhenMisaligned()
         {
             Point door1Coord = new Point(0, 0);

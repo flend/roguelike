@@ -171,7 +171,7 @@ namespace RogueBasin
             }
             else
             {
-                //Can overlap indentical terrain
+                //Can overlap identical terrain
                 if (newTerrain == originTerrain)
                     return originTerrain;
 
@@ -220,6 +220,27 @@ namespace RogueBasin
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), OverrideIds);
 
                 return true;
+            }
+            catch (ArgumentException e)
+            {
+                throw new ApplicationException("Can't place room: " + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Add the terrain to the map, overriding what was there before.
+        /// Use with caution since may break connectivity
+        /// Performs no checking and allows any override
+        /// </summary>
+        /// <param name="templateToAdd"></param>
+        /// <returns></returns>
+        public void UnconditionallyOverridePositionedTemplate(TemplatePositioned templateToAdd)
+        {
+            try
+            {
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, OverrideTerrain);
+
+                idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), OverrideIds);
             }
             catch (ArgumentException e)
             {

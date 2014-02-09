@@ -1046,6 +1046,23 @@ namespace RogueBasin
             //if (door1Loc == RoomTemplate.DoorLocation.Left || door1Loc == RoomTemplate.DoorLocation.Right)
             return ArePointsOnHorizontalLine(door1Coord, door2Coord);
         }
+
+        /// <summary>
+        /// Return a new template with terrain set to all Transparent
+        /// </summary>
+        public static TemplatePositioned TransparentTemplate(TemplatePositioned templateToReplace)
+        {
+            var newTerrain = new RoomTemplateTerrain [templateToReplace.Room.Width, templateToReplace.Room.Height];
+            for (int i = 0; i < templateToReplace.Room.Width; i++)
+            {
+                for (int j = 0; j < templateToReplace.Room.Height; j++)
+                {
+                    newTerrain[i, j] = RoomTemplateTerrain.Transparent;
+                }
+            }
+
+            return new TemplatePositioned(templateToReplace.X, templateToReplace.Y, templateToReplace.Z, new RoomTemplate(newTerrain), templateToReplace.RoomIndex);
+        }
     }
 
     /** Loads a room / vault from disk and returns as a usuable object */

@@ -42,7 +42,7 @@ namespace MapTester
 
                 //Map templateMap = templateGen.GenerateMap2();
                 Map templateMap = templateGen.GenerateMapBranchRooms();
-            
+
                 int levelNo = Game.Dungeon.AddMap(templateMap);
 
                 LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);

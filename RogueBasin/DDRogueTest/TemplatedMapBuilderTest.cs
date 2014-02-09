@@ -94,7 +94,7 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void TemplateCanBeOverlappedUsingOverrideTemplateIfSecondTemplateIsSmallerAndDoesntBreakoutOfLarger()
+        public void TemplateCantBeOverlappedUsingOverrideTemplateIfSecondTemplateTriesToReplacesNonFloorTiles()
         {
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
@@ -113,6 +113,33 @@ namespace DDRogueTest
             //Overlap in smaller room
             TemplatePositioned templatePos2 = new TemplatePositioned(5, 5, 0, room2, 0);
             Assert.IsFalse(mapGen.OverridePositionedTemplate(templatePos2));
+        }
+
+        [TestMethod]
+        public void TemplateCanBeOverlappedUsingUnconditionallyOverrideTemplateWhenTerrainTypesDontMatch()
+        {
+            //Load sample template 8x4
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+
+            Stream overlapFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testoverlap.room");
+            RoomTemplate room2 = RoomTemplateLoader.LoadTemplateFromFile(overlapFileStream, StandardTemplateMapping.terrainMapping);
+
+            TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
+
+            //Base
+            TemplatePositioned templatePos1 = new TemplatePositioned(5, 5, 0, room1, 0);
+            mapGen.AddPositionedTemplate(templatePos1);
+
+            //Overlap in smaller room
+            TemplatePositioned templatePos2 = new TemplatePositioned(5, 5, 0, room2, 0);
+            mapGen.UnconditionallyOverridePositionedTemplate(templatePos2);
+
+            Map outputMap = mapGen.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+
+            Assert.AreEqual(MapTerrain.Wall, outputMap.mapSquares[3, 0].Terrain);
+            Assert.AreEqual(MapTerrain.ClosedDoor, outputMap.mapSquares[0, 1].Terrain);
         }
 
         [TestMethod]
