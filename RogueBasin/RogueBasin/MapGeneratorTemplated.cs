@@ -518,7 +518,59 @@ namespace RogueBasin
             return roomsPlaced;
         }
 
-        
+        /** Build a map using templated rooms */
+        public MapInfo GenerateTestGraphicsDungeon()
+        {
+
+            //Load standard room types
+            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largetestvault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            //Build level 1
+
+            var l1mapBuilder = new TemplatedMapBuilder(100, 100);
+            var l1templateGenerator = new TemplatedMapGenerator(l1mapBuilder);
+
+            PlaceOriginRoom(l1templateGenerator, room1);
+            PlaceRandomConnectedRooms(l1templateGenerator, 1, room1, corridor1, 0, 0, () => 0);
+            
+            //Build the graph containing all the levels
+
+            //Build and add the l1 map
+
+            var mapInfoBuilder = new MapInfoBuilder();
+            var startRoom = 0;
+            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), l1templateGenerator.GetDoorsInMapCoords(), startRoom);
+
+            MapInfo mapInfo = new MapInfo(mapInfoBuilder);
+
+            //Add maps to the dungeon
+
+            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+            Game.Dungeon.AddMap(masterMap);
+
+            //Recalculate walkable to allow placing objects
+            Game.Dungeon.RecalculateWalkable();
+
+            //Set player's start location (must be done before adding items)
+
+            //Set PC start location
+
+            var firstRoom = mapInfo.GetRoom(0);
+            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            //Add items
+            var dungeon = Game.Dungeon;
+
+            dungeon.AddItem(new Items.Pistol(), 0, new Point(1, 1));
+            dungeon.AddItem(new Items.Shotgun(), 0, new Point(2, 1));
+            dungeon.AddItem(new Items.Laser(), 0, new Point(3, 1));
+            dungeon.AddItem(new Items.Vibroblade(), 0, new Point(4, 1));
+
+            //Set map for visualisation
+            return mapInfo;
+
+        }
     }
 
     public static class ShuffleExtension

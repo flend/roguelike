@@ -165,7 +165,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return '{';
+            return (char)146;
         }
 
         public override libtcodWrapper.Color GetColour()

@@ -196,10 +196,10 @@ namespace RogueBasin {
 
         Screen()
         {
-            Width = 90;
+            Width = 60;
             Height = 35;
 
-            ViewableWidth = 60;
+            ViewableWidth = 30;
             ViewableHeight = 25;
 
             ViewportScrollSpeed = 1;
@@ -211,7 +211,7 @@ namespace RogueBasin {
             CombatAnimations = true;
 
             msgDisplayTopLeft = new Point(2, 1);
-            msgDisplayBotRight = new Point(87, 3);
+            msgDisplayBotRight = new Point(57, 3);
 
             MessageQueueWidth = (uint)(msgDisplayBotRight.y - msgDisplayBotRight.x);
 
@@ -220,18 +220,18 @@ namespace RogueBasin {
             //Max 60 * 25 map
 
             mapTopLeftBase = new Point(2, 6);
-            mapBotRightBase = new Point(61, 32);
+            mapBotRightBase = new Point(31, 32);
 
-            statsDisplayTopLeft = new Point(64, 6);
-            statsDisplayBotRight = new Point(87, 32);
+            statsDisplayTopLeft = new Point(34, 6);
+            statsDisplayBotRight = new Point(57, 32);
                       
 
             inventoryTL = new Point(5, 5);
-            inventoryTR = new Point(85, 5);
+            inventoryTR = new Point(55, 5);
             inventoryBL = new Point(5, 30);
 
             trainingTL = new Point(15, 10);
-            trainingTR = new Point(75, 10);
+            trainingTR = new Point(45, 10);
             trainingBL = new Point(15, 25);
 
             MsgLogWrapWidth = inventoryTR.x - inventoryTL.x - 4;
@@ -242,7 +242,7 @@ namespace RogueBasin {
             TotalKills = null;
 
             DeathTL = new Point(1, 1);
-            DeathWidth = 89;
+            DeathWidth = 59;
             DeathHeight = 34;
 
             PCColor = ColorPresets.White;
@@ -255,7 +255,8 @@ namespace RogueBasin {
         public void InitialSetup()
         {
 
-            CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
+            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
+            CustomFontRequest fontReq = new CustomFontRequest("shroom_moved_big.png", 32, 32, CustomFontRequestFontTypes.LayoutAsciiInRow);
             //CustomFontRequest fontReq = new CustomFontRequest("Anikki_square_20x20.bmp", 20, 20, CustomFontRequestFontTypes.LayoutAsciiInRow);
             //CustomFontRequest fontReq = new CustomFontRequest("Markvii.png", 12, 12, CustomFontRequestFontTypes.LayoutAsciiInRow);
             //CustomFontRequest fontReq = new CustomFontRequest("Tahin_16x16_rounded.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);

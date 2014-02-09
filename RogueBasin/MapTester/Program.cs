@@ -31,25 +31,34 @@ namespace MapTester
             //Game.Random = new Random(seedToUse);
             Game.Random = new Random();
 
-            bool multiLevelDungeon = true;
+            bool testGraphics = true;
 
-            if (multiLevelDungeon)
-                GenerateMultiLevelDungeon();
+            if (testGraphics)
+            {
+                TestGraphics();
+            }
             else
             {
-                //Setup a single test level
-                MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
+                bool multiLevelDungeon = true;
 
-                //Map templateMap = templateGen.GenerateMap2();
-                Map templateMap = templateGen.GenerateMapBranchRooms();
+                if (multiLevelDungeon)
+                    GenerateMultiLevelDungeon();
+                else
+                {
+                    //Setup a single test level
+                    MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
 
-                int levelNo = Game.Dungeon.AddMap(templateMap);
+                    //Map templateMap = templateGen.GenerateMap2();
+                    Map templateMap = templateGen.GenerateMapBranchRooms();
 
-                LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
+                    int levelNo = Game.Dungeon.AddMap(templateMap);
 
-                //Extract connectivity map
-                var graphModel = new MapModel(templateGen.ConnectivityMap, 0);
-                VisualiseConnectivityGraph(graphModel);
+                    LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
+
+                    //Extract connectivity map
+                    var graphModel = new MapModel(templateGen.ConnectivityMap, 0);
+                    VisualiseConnectivityGraph(graphModel);
+                }
             }
             RunGame();
         }
@@ -66,6 +75,14 @@ namespace MapTester
 
             //Extract connectivity map
             VisualiseConnectivityGraph(mapInfo.Model);
+        }
+
+        private void TestGraphics()
+        {
+            //Setup a single test level
+            MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
+
+            var mapInfo = templateGen.GenerateTestGraphicsDungeon();
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel)
