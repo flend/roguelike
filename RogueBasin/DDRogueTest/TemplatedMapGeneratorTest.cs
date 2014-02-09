@@ -54,6 +54,30 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void DoorsCanBeReturnedInMapCoords()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            mapGen.PlaceRoomTemplateAtPosition(room1, new Point(-5, -5));
+            mapGen.PlaceRoomTemplateAtPosition(room2, new Point(5, 10));
+
+            bool corridorPlacement = mapGen.JoinDoorsWithCorridor(mapGen.PotentialDoors[0], mapGen.PotentialDoors[1], corridor1);
+
+            var doorsTemplatesInWorldCoords = mapGen.GetDoorsInMapCoords();
+
+            CollectionAssert.AreEquivalent(new Dictionary<Connection, Point>() {
+                { new Connection(0, 2), new Point(4, 3) },
+                { new Connection(1, 2), new Point(11, 15) }
+                }, doorsTemplatesInWorldCoords);
+        }
+
+        [TestMethod]
         public void RoomTemplatesCanBeRetrievedById()
         {
             RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");

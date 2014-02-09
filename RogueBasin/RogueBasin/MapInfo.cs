@@ -8,11 +8,29 @@ using System.Threading.Tasks;
 namespace RogueBasin
 {
     /// <summary>
+    /// Info about a door's location. We don't know the levelNo when this is created in TemplatedMapGenerator
+    /// </summary>
+    public class DoorLocationInfo
+    {
+        public Point MapLocation { get; private set; }
+        public int LevelNo { get; private set; }
+
+        public DoorLocationInfo() { }
+
+        public DoorLocationInfo(Point mapLocation, int levelNo) {
+            MapLocation = mapLocation;
+            LevelNo = levelNo;
+        }
+    }
+
+
+    /// <summary>
     /// Class that constructs the full map out of discrete level graphs and room sets
     /// </summary>
     public class MapInfoBuilder
     {
         Dictionary<int, TemplatePositioned> roomTemplates;
+        Dictionary<Connection, DoorLocationInfo> doors;
         Dictionary<int, int> roomLevels;
         List<ConnectivityMap> connectivityMap;
 
@@ -25,21 +43,18 @@ namespace RogueBasin
             roomTemplates = new Dictionary<int, TemplatePositioned>();
             connectivityMap = new List<ConnectivityMap>();
             roomLevels = new Dictionary<int, int>();
+            doors = new Dictionary<Connection, DoorLocationInfo>();
         }
 
         /// <summary>
         /// Add second or subsequent level.
         /// </summary>
-        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, Connection connectionBetweenLevels) {
-
+        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, Dictionary<Connection, Point> doorsInLevel, Connection connectionBetweenLevels)
+        {
             if (connectivityMap.Count == 0)
                 throw new ApplicationException("Need to add first level before using this method");
 
-            foreach(var r in roomsInLevelCoords) {
-                roomTemplates.Add(r.RoomIndex, r);
-                roomLevels.Add(r.RoomIndex, levelNo);
-            }
-            connectivityMap.Add(levelMap);
+            AddConstructedLevelItems(levelNo, levelMap, roomsInLevelCoords, doorsInLevel);
 
             //Combine into full map
             fullMap.AddAllConnections(levelMap);
@@ -49,18 +64,28 @@ namespace RogueBasin
         /// <summary>
         /// Add first level, or level without other connections
         /// </summary>
-        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, int startRoom)
+        public void AddConstructedLevel(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, Dictionary<Connection, Point> doorsInLevel, int startRoom)
         {
-            foreach (var r in roomsInLevelCoords)
-            {
+            AddConstructedLevelItems(levelNo, levelMap, roomsInLevelCoords, doorsInLevel);
+
+            fullMap = levelMap;
+
+            this.startRoom = startRoom;
+        }
+
+        private void AddConstructedLevelItems(int levelNo, ConnectivityMap levelMap, List<TemplatePositioned> roomsInLevelCoords, Dictionary<Connection, Point> doorsInLevel)
+        {
+            foreach(var r in roomsInLevelCoords) {
                 roomTemplates.Add(r.RoomIndex, r);
                 roomLevels.Add(r.RoomIndex, levelNo);
             }
             connectivityMap.Add(levelMap);
 
-            fullMap = levelMap;
-
-            this.startRoom = startRoom;
+            //Add all new doors
+            foreach (var p in doorsInLevel)
+            {
+                doors.Add(p.Key, new DoorLocationInfo(p.Value, levelNo));
+            }
         }
         
 
@@ -95,6 +120,14 @@ namespace RogueBasin
                 return startRoom;
             }
         }
+
+        public Dictionary<Connection, DoorLocationInfo> Doors
+        {
+            get
+            {
+                return doors;
+            }
+        }
     }
 
     /// <summary>
@@ -106,6 +139,7 @@ namespace RogueBasin
         Dictionary<int, int> roomLevels;
         ConnectivityMap map;
         int startRoom;
+        Dictionary<Connection, DoorLocationInfo> doors;
 
         MapModel model;
         
@@ -115,6 +149,7 @@ namespace RogueBasin
             roomLevels = builder.RoomLevelMapping;
             map = builder.FullConnectivityMap;
             startRoom = builder.StartRoom;
+            doors = builder.Doors;
 
             model = new MapModel(map, startRoom);
         }
@@ -166,6 +201,11 @@ namespace RogueBasin
         public TemplatePositioned GetRoom(int roomIndex)
         {
             return rooms[roomIndex];
+        }
+
+        public DoorLocationInfo GetDoorForConnection(Connection connection)
+        {
+            return doors[connection];
         }
     }
 }

@@ -41,7 +41,7 @@ namespace RogueBasin
             return corridorTemplates[Game.Random.Next(corridorTemplates.Count)];
         }
 
-        private TemplatedMapGenerator.DoorInfo RandomDoor(TemplatedMapGenerator generator)
+        private DoorInfo RandomDoor(TemplatedMapGenerator generator)
         {
             return generator.PotentialDoors[Game.Random.Next(generator.PotentialDoors.Count())];
         }
@@ -238,11 +238,11 @@ namespace RogueBasin
 
             var mapInfoBuilder = new MapInfoBuilder();
             var startRoom = 0;
-            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), startRoom);
+            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), l1templateGenerator.GetDoorsInMapCoords(), startRoom);
 
             //Build and add the l2 map
 
-            mapInfoBuilder.AddConstructedLevel(1, l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(),
+            mapInfoBuilder.AddConstructedLevel(1, l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(), l2templateGenerator.GetDoorsInMapCoords(),
                 new Connection(l1elevatorIndex, l2elevatorIndex));
 
             MapInfo mapInfo = new MapInfo(mapInfoBuilder);
@@ -257,7 +257,7 @@ namespace RogueBasin
             var deadEnds = roomConnectivityMap[0];
             var deadEndsInLevel0 = deadEnds.Where(c => level0Indices.Contains(c.Source) && level0Indices.Contains(c.Target)).ToList();
 
-            var randomDeadEndToLock = deadEndsInLevel0.ElementAt(Game.Random.Next(deadEndsInLevel0.Count()));
+            var randomDeadEndToLock = deadEndsInLevel0.RandomElement();
 
             var allRoomsForClue0 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLock);
             var roomsForClue0Level0 = allRoomsForClue0.Intersect(level0Indices);
@@ -312,28 +312,16 @@ namespace RogueBasin
             }
             
             //Add locks to dungeon as simple doors
-            /*
-            foreach (var locksInLocation in hallsGen.MapSquareLocks)
+            
+            foreach (var door in mapInfo.Model.DoorAndClueManager.DoorMap.Values)
             {
-                var lockLocation = locksInLocation.Key;
-                foreach (var thisLock in locksInLocation.Value)
-                {
-                    var lockedDoor = new Locks.SimpleLockedDoor(thisLock);
+                var lockedDoor = new Locks.SimpleLockedDoor(door);
 
-                    lockedDoor.LocationLevel = levelNo;
-                    lockedDoor.LocationMap = lockLocation;
-                    Game.Dungeon.AddLock(lockedDoor);
-                }
+                //find door by door.DoorConnectionFullMap
+                //lockedDoor.LocationLevel = ;
+                //lockedDoor.LocationMap = lockLocation;
+                //Game.Dungeon.AddLock(lockedDoor);
             }
-
-            //Place the player, so monster placing can be checked against it
-            //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
-            //needs to be done before placing items
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
-            if (doLocks)
-            {
-                
-            }*/
 
 
             

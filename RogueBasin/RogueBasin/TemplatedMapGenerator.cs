@@ -8,33 +8,34 @@ using System.Threading.Tasks;
 namespace RogueBasin
 {
 
+    public class DoorInfo
+    {
+        public TemplatePositioned OwnerRoom { get; private set; }
+        public int DoorIndexInRoom { get; private set; }
+        public int OwnerRoomIndex { get; private set; }
+        public RoomTemplate.DoorLocation DoorLocation { get; private set; }
+
+        public DoorInfo(TemplatePositioned ownerRoom, int ownerRoomIndex, int doorIndex, RoomTemplate.DoorLocation doorLocation)
+        {
+            OwnerRoom = ownerRoom;
+            DoorIndexInRoom = doorIndex;
+            OwnerRoomIndex = ownerRoomIndex;
+            DoorLocation = doorLocation;
+        }
+
+        public Point MapCoords
+        {
+            get
+            {
+                return OwnerRoom.PotentialDoors[DoorIndexInRoom];
+            }
+        }
+    }
+
     /** Builds up a template map and connectivity graph, exposing methods for room aligned placement */
     public class TemplatedMapGenerator
     {
-        public class DoorInfo
-        {
-            public TemplatePositioned OwnerRoom { get; private set; }
-            public int DoorIndexInRoom { get; private set; }
-            public int OwnerRoomIndex { get; private set; }
-            public RoomTemplate.DoorLocation DoorLocation { get; private set; }
-
-            public DoorInfo(TemplatePositioned ownerRoom, int ownerRoomIndex, int doorIndex, RoomTemplate.DoorLocation doorLocation)
-            {
-                OwnerRoom = ownerRoom;
-                DoorIndexInRoom = doorIndex;
-                OwnerRoomIndex = ownerRoomIndex;
-                DoorLocation = doorLocation;
-            }
-
-            public Point MapCoords
-            {
-                get
-                {
-                    return OwnerRoom.PotentialDoors[DoorIndexInRoom];
-                }
-            }
-        }
-
+    
         List<DoorInfo> potentialDoors = new List<DoorInfo>();
         Dictionary<Connection, DoorInfo> connectionDoors = new Dictionary<Connection, DoorInfo>();
         int nextRoomIndex = 0;
@@ -85,6 +86,14 @@ namespace RogueBasin
             get
             {
                 return connectivityMap;
+            }
+        }
+
+        public Dictionary<Connection, DoorInfo> ConnectionDoors
+        {
+            get
+            {
+                return connectionDoors;
             }
         }
 
@@ -389,6 +398,24 @@ namespace RogueBasin
             var templatesList = templates.Values.Select(v => v).ToList();
             return templatesList.Select(t => 
                 new TemplatePositioned(t.X - mapBuilder.MasterMapTopLeft.x, t.Y - mapBuilder.MasterMapTopLeft.y, t.Z, t.Room, t.RoomIndex)).ToList();
+        }
+
+        /// <summary>
+        /// Get all the doors in world / map coords. These can then be passed onto another class
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<Connection, Point> GetDoorsInMapCoords()
+        {
+            var dictToReturn = new Dictionary<Connection, Point>();
+
+            foreach(var door in connectionDoors) {
+                var doorLocMap = door.Value.MapCoords;
+                var doorLocWorld = new Point(doorLocMap.x - mapBuilder.MasterMapTopLeft.x, doorLocMap.y - mapBuilder.MasterMapTopLeft.y);
+
+                dictToReturn.Add(door.Key, doorLocWorld);
+            }
+
+            return dictToReturn;
         }
 
         /// <summary>

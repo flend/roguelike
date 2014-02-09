@@ -23,8 +23,8 @@ namespace DDRogueTest
             l2ConnectivityMap.AddRoomConnection(5, 6);
             l2ConnectivityMap.AddRoomConnection(6, 7);
 
-            mapInfo.AddConstructedLevel(0, l1ConnectivityMap, new List<TemplatePositioned>(), 0);
-            mapInfo.AddConstructedLevel(1, l2ConnectivityMap, new List<TemplatePositioned>(), new Connection(3, 5));
+            mapInfo.AddConstructedLevel(0, l1ConnectivityMap, new List<TemplatePositioned>(), new Dictionary<Connection, Point>(), 0);
+            mapInfo.AddConstructedLevel(1, l2ConnectivityMap, new List<TemplatePositioned>(), new Dictionary<Connection, Point>(), new Connection(3, 5));
 
             ConnectivityMap fullMap = mapInfo.FullConnectivityMap;
 
@@ -44,7 +44,7 @@ namespace DDRogueTest
             var map = new ConnectivityMap();
             map.AddRoomConnection(new Connection(100, 101));
 
-            mapInfoBuilder.AddConstructedLevel(0, map, templateList, 100);
+            mapInfoBuilder.AddConstructedLevel(0, map, templateList, new Dictionary<Connection, Point>(), 100);
 
             var mapInfo = new MapInfo(mapInfoBuilder);
 
@@ -72,11 +72,21 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void TheDoorOnAConnectionCanBeReturned()
+        {
+            var mapInfo = new MapInfo(GetStandardMapInfoBuilder());
+            var doorInfo = mapInfo.GetDoorForConnection(new Connection(2, 3));
+
+            Assert.AreEqual(0, doorInfo.LevelNo);
+            Assert.AreEqual(new Point(5,5), doorInfo.MapLocation);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void AddConstructedLevelCantBeCalledForFirstLevel()
         {
             var mapInfo = new MapInfoBuilder();
-            mapInfo.AddConstructedLevel(0, new ConnectivityMap(), null, new Connection(1, 2));
+            mapInfo.AddConstructedLevel(0, new ConnectivityMap(), null, new Dictionary<Connection, Point>(), new Connection(1, 2));
         }
 
         private MapInfoBuilder GetStandardMapInfoBuilder() {
@@ -87,7 +97,8 @@ namespace DDRogueTest
             l1ConnectivityMap.AddRoomConnection(2, 3);
 
             var l1RoomList = new List<TemplatePositioned>();
-            l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 1));
+            var room1 = new TemplatePositioned(1, 1, 0, null, 1);
+            l1RoomList.Add(room1);
             l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 2));
             l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 3));
             
@@ -96,12 +107,19 @@ namespace DDRogueTest
             l2ConnectivityMap.AddRoomConnection(6, 7);
 
             var l2RoomList = new List<TemplatePositioned>();
-            l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 5));
+            var room5 = new TemplatePositioned(1, 1, 0, null, 5);
+            l2RoomList.Add(room5);
             l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 6));
             l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 7));
 
-            builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, 1);
-            builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, new Connection(3, 5));
+            var l1DoorDict = new Dictionary<Connection, Point>();
+            l1DoorDict.Add(new Connection(2, 3), new Point(5,5));
+
+            var l2DoorDict = new Dictionary<Connection, Point>();
+            l2DoorDict.Add(new Connection(5, 6), new Point(8, 8));
+
+            builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, l1DoorDict, 1);
+            builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, l2DoorDict, new Connection(3, 5));
 
             return builder;
         }
