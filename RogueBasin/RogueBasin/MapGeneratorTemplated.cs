@@ -117,7 +117,7 @@ namespace RogueBasin
             AddCorridorsBetweenOpenDoors(templatedGenerator, totalExtraConnections);
 
             //Replace spare doors with walls
-            templatedGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            templatedGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
@@ -168,7 +168,7 @@ namespace RogueBasin
             AddCorridorsBetweenOpenDoors(templatedGenerator, 10);
 
             //Replace spare doors with walls
-            templatedGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            templatedGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
@@ -229,8 +229,8 @@ namespace RogueBasin
             l2templateGenerator.ReplaceRoomTemplate(l2elevatorIndex, l2elevatorConnection, replacementVault, 0);
 
             //Replace spare doors with walls
-            l1templateGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
-            l2templateGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            l1templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            l2templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             //Build the graph containing all the levels
 
@@ -316,15 +316,15 @@ namespace RogueBasin
             foreach (var door in mapInfo.Model.DoorAndClueManager.DoorMap.Values)
             {
                 var lockedDoor = new Locks.SimpleLockedDoor(door);
+                var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
+                lockedDoor.LocationLevel = doorInfo.LevelNo;
+                lockedDoor.LocationMap = doorInfo.MapLocation;
 
-                //find door by door.DoorConnectionFullMap
-                //lockedDoor.LocationLevel = ;
-                //lockedDoor.LocationMap = lockLocation;
-                //Game.Dungeon.AddLock(lockedDoor);
+                LogFile.Log.LogEntryDebug("Lock door level " + lockedDoor.LocationLevel + " loc: " + doorInfo.MapLocation, LogDebugLevel.High);
+
+                Game.Dungeon.AddLock(lockedDoor);
             }
 
-
-            
             //Set map for visualisation
             connectivityMap = mapInfoBuilder.FullConnectivityMap;
             

@@ -228,7 +228,7 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void DoorsCanBeReplacedWithOtherTerrain()
+        public void UnconnectedDoorsCanBeReplacedWithOtherTerrain()
         {
             //With 4 doors
             RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.test4doors.room");
@@ -238,7 +238,7 @@ namespace DDRogueTest
 
             mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
 
-            mapGen.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            mapGen.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             //Check the doors are walls when merged
             var map = mapBuilder.MergeTemplatesIntoMap(GetStandardTerrainMapping());
@@ -246,6 +246,30 @@ namespace DDRogueTest
             Assert.AreEqual(map.mapSquares[7, 1].Terrain, MapTerrain.Wall);
             Assert.AreEqual(map.mapSquares[7, 0].Terrain, MapTerrain.Wall);
             Assert.AreEqual(map.mapSquares[3, 3].Terrain, MapTerrain.Wall);
+        }
+
+        [TestMethod]
+        public void ConnectedDoorsCanBeReplacedWithOtherTerrain()
+        {
+            //Load sample template 8x4
+            RoomTemplate room1 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate room2 = LoadTemplateFromFile("DDRogueTest.testdata.vaults.testalignmentroom2.room");
+            RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            mapGen.PlaceRoomTemplateAtPosition(room1, new Point(0, 0));
+            mapGen.PlaceRoomTemplateAtPosition(room2, new Point(7, 8));
+
+            bool corridorPlacement = mapGen.JoinDoorsWithCorridor(mapGen.PotentialDoors[0], mapGen.PotentialDoors[1], corridor1);
+
+            mapGen.ReplaceConnectedDoorsWithTerrain(RoomTemplateTerrain.Floor);
+
+            //Check the doors are floor when merged
+            var map = mapBuilder.MergeTemplatesIntoMap(GetStandardTerrainMapping());
+            Assert.AreEqual(MapTerrain.Empty, map.mapSquares[4, 3].Terrain);
+            Assert.AreEqual(MapTerrain.Empty, map.mapSquares[8, 8].Terrain);
         }
 
         [TestMethod]

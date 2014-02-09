@@ -379,7 +379,7 @@ namespace RogueBasin
             return connectionToNewRoom;
         }
 
-        public void ReplaceDoorsWithTerrain(RoomTemplateTerrain roomTemplateTerrain)
+        public void ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain roomTemplateTerrain)
         {
             foreach (var door in PotentialDoors)
             {
@@ -387,6 +387,14 @@ namespace RogueBasin
             }
 
             PotentialDoors.Clear();
+        }
+
+        public void ReplaceConnectedDoorsWithTerrain(RoomTemplateTerrain roomTemplateTerrain)
+        {
+            foreach (var door in ConnectionDoors)
+            {
+                mapBuilder.AddOverrideTerrain(door.Value.MapCoords, roomTemplateTerrain);
+            }
         }
 
         /// <summary>

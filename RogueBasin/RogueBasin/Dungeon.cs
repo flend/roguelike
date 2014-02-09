@@ -1401,11 +1401,10 @@ namespace RogueBasin
                 int level = newLock.LocationLevel;
                 Point location = newLock.LocationMap;
 
-                //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
+                //There must be a closed door here
+                if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.ClosedDoor)
                 {
-                    LogFile.Log.LogEntryDebug("AddLock: map square can't be entered", LogDebugLevel.High);
-                    return false;
+                    OpenDoor(level, location);
                 }
 
                 //Otherwise OK
