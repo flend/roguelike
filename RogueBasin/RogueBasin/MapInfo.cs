@@ -125,7 +125,7 @@ namespace RogueBasin
         /// <param name="roomIndex"></param>
         /// <param name="terrainToFind"></param>
         /// <returns></returns>
-        public Point GetRandomPointInRoomOfTerrain(int levelNo, int roomIndex, RoomTemplateTerrain terrainToFind)
+        public Point GetRandomPointInRoomOfTerrain(int roomIndex, RoomTemplateTerrain terrainToFind)
         {
             var roomRelativePoint = RoomTemplateUtilities.GetRandomPointWithTerrain(rooms[roomIndex].Room, terrainToFind);
 
@@ -135,6 +135,11 @@ namespace RogueBasin
         public IEnumerable<int> GetRoomIndicesForLevel(int level)
         {
             return roomLevels.Where(kv => kv.Value == level).Select(kv => kv.Key);
+        }
+
+        public int GetLevelForRoomIndex(int roomIndex)
+        {
+            return roomLevels[roomIndex];
         }
 
         /// <summary>

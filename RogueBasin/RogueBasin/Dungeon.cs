@@ -1561,11 +1561,14 @@ namespace RogueBasin
             }
 
             //Check for PC blocking
-            if (player.LocationLevel == level && player.LocationMap.x == location.x && player.LocationMap.y == location.y)
+            //Allow this to work before having the player placed (at beginning of game)
+            if (player != null && player.LocationMap != null)
             {
-                contents.player = player;
+                if (player.LocationLevel == level && player.LocationMap.x == location.x && player.LocationMap.y == location.y)
+                {
+                    contents.player = player;
+                }
             }
-
             if (contents.monster == null && contents.player == null)
                 contents.empty = true;
 

@@ -186,92 +186,9 @@ namespace RogueBasin
         }
 
         /** Build a map using templated rooms */
-        public void GenerateMultiLevelDungeon()
-        {
-            //Load standard room types
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate elevator1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.elevator1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
-
-            //Build level 1
-
-            var l1mapBuilder = new TemplatedMapBuilder(100, 100);
-            var l1templateGenerator = new TemplatedMapGenerator(l1mapBuilder);
-
-            PlaceOriginRoom(l1templateGenerator, room1);
-            PlaceRandomConnectedRooms(l1templateGenerator, 3, room1, corridor1, 5, 10);
-
-            //Add an elevator room
-            int l1elevatorIndex = l1templateGenerator.NextRoomIndex();
-
-            AddRoomToRandomOpenDoor(l1templateGenerator, elevator1, corridor1, 3);
-
-            LogFile.Log.LogEntryDebug("Level 1 elevator at index " + l1elevatorIndex, LogDebugLevel.High);
-
-            //Build the l1 map and set start location
-
-            var mapInfoBuilder = new MapInfoBuilder();
-            var startRoom = 0;
-            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), startRoom);
-
-            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
-            Game.Dungeon.AddMap(masterMap);
-            
-            //Build level 2
-
-            var l2mapBuilder = new TemplatedMapBuilder(100, 100);
-            var l2templateGenerator = new TemplatedMapGenerator(l2mapBuilder, 100);
-
-            PlaceOriginRoom(l2templateGenerator, room1);
-            PlaceRandomConnectedRooms(l2templateGenerator, 3, room1, corridor1, 5, 10);
-
-            //Add an elevator room
-            int l2elevatorIndex = l2templateGenerator.NextRoomIndex();
-
-            AddRoomToRandomOpenDoor(l2templateGenerator, elevator1, corridor1, 3);
-
-            LogFile.Log.LogEntryDebug("Level 2 elevator at index " + l2elevatorIndex, LogDebugLevel.High);
-
-            mapInfoBuilder.AddConstructedLevel(1, l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(), 
-                new Connection(l1elevatorIndex, l2elevatorIndex));
-            
-            Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
-            Game.Dungeon.AddMap(masterMapL2);
-
-            //Recalculate walkable to allow placing objects
-            Game.Dungeon.RecalculateWalkable();
-
-            MapInfo mapInfo = new MapInfo(mapInfoBuilder);
-            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
-
-            //Add elevator features to link the maps
-
-            //L1 -> L2
-            var elevator1Loc = mapInfo.GetRandomPointInRoomOfTerrain(0, l1elevatorIndex, RoomTemplateTerrain.Floor);
-            var elevator2Loc = mapInfo.GetRandomPointInRoomOfTerrain(1, l2elevatorIndex, RoomTemplateTerrain.Floor);
-
-            Game.Dungeon.AddFeature(new Features.Elevator(1, elevator2Loc), 0, elevator1Loc);
-            Game.Dungeon.AddFeature(new Features.Elevator(0, elevator1Loc), 1, elevator2Loc);
-
-            //Set PC start location
-
-            var firstRoom = mapInfo.GetRoom(0);
-            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
-
-            //Add a locked door on a dead end, localised to level 0
-            var level0Indices = mapInfo.GetRoomIndicesForLevel(0);
-            var terminalConnections = mapHeuristics.GetTerminalBranchConnections();
-
-            //var deadEndConnectionsL0 = terminalConnections[0].Intersect(level0Indices);
-            //mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue();
-
-            //Set map for visualisation
-            connectivityMap = mapInfoBuilder.FullConnectivityMap;
-        }
-
-        /** Build a map using templated rooms */
         public void GenerateDungeonWithReplacedVaults()
         {
+
             //Load standard room types
             RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
@@ -311,7 +228,11 @@ namespace RogueBasin
             l1templateGenerator.ReplaceRoomTemplate(l1elevatorIndex, l1elevatorConnection, replacementVault, 0);
             l2templateGenerator.ReplaceRoomTemplate(l2elevatorIndex, l2elevatorConnection, replacementVault, 0);
 
-            //Build the maps and add to the dungeon
+            //Replace spare doors with walls
+            l1templateGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            l2templateGenerator.ReplaceDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            //Build the graph containing all the levels
 
             //Build and add the l1 map
 
@@ -319,49 +240,115 @@ namespace RogueBasin
             var startRoom = 0;
             mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), startRoom);
 
-            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
-            Game.Dungeon.AddMap(masterMap);
-
             //Build and add the l2 map
 
             mapInfoBuilder.AddConstructedLevel(1, l2templateGenerator.ConnectivityMap, l2templateGenerator.GetRoomTemplatesInWorldCoords(),
                 new Connection(l1elevatorIndex, l2elevatorIndex));
 
+            MapInfo mapInfo = new MapInfo(mapInfoBuilder);
+            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
+
+            //LOCKS
+
+            //Add a locked door on a dead end, localised to level 0
+            var level0Indices = mapInfo.GetRoomIndicesForLevel(0);
+            var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
+
+            var deadEnds = roomConnectivityMap[0];
+            var deadEndsInLevel0 = deadEnds.Where(c => level0Indices.Contains(c.Source) && level0Indices.Contains(c.Target)).ToList();
+
+            var randomDeadEndToLock = deadEndsInLevel0.ElementAt(Game.Random.Next(deadEndsInLevel0.Count()));
+
+            var allRoomsForClue0 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLock);
+            var roomsForClue0Level0 = allRoomsForClue0.Intersect(level0Indices);
+            var roomForClue0 = roomsForClue0Level0.RandomElement();
+
+            LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLock + " clue at " + roomForClue0, LogDebugLevel.High);
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLock, "lock0"), roomForClue0);
+
+            //Add maps to the dungeon
+
+            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+            Game.Dungeon.AddMap(masterMap);
+
             Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
             Game.Dungeon.AddMap(masterMapL2);
-
-            //Add features
 
             //Recalculate walkable to allow placing objects
             Game.Dungeon.RecalculateWalkable();
 
-            MapInfo mapInfo = new MapInfo(mapInfoBuilder);
-            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
-
             //Add elevator features to link the maps
 
             //L1 -> L2
-            var elevator1Loc = mapInfo.GetRandomPointInRoomOfTerrain(0, l1elevatorIndex, RoomTemplateTerrain.Floor);
-            var elevator2Loc = mapInfo.GetRandomPointInRoomOfTerrain(1, l2elevatorIndex, RoomTemplateTerrain.Floor);
+            var elevator1Loc = mapInfo.GetRandomPointInRoomOfTerrain(l1elevatorIndex, RoomTemplateTerrain.Floor);
+            var elevator2Loc = mapInfo.GetRandomPointInRoomOfTerrain(l2elevatorIndex, RoomTemplateTerrain.Floor);
 
             Game.Dungeon.AddFeature(new Features.Elevator(1, elevator2Loc), 0, elevator1Loc);
             Game.Dungeon.AddFeature(new Features.Elevator(0, elevator1Loc), 1, elevator2Loc);
+
+            //Set player's start location (must be done before adding items)
 
             //Set PC start location
 
             var firstRoom = mapInfo.GetRoom(0);
             masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
-            //Add a locked door on a dead end, localised to level 0
-            var level0Indices = mapInfo.GetRoomIndicesForLevel(0);
-            var terminalConnections = mapHeuristics.GetTerminalBranchConnections();
+            //Add clues
 
-            //var deadEndConnectionsL0 = terminalConnections[0].Intersect(level0Indices);
-            //mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue();
+            //Find a random room corresponding to a vertex with a clue and place a clue there
+            foreach (var cluesAtVertex in mapInfo.Model.DoorAndClueManager.ClueMap)
+            {
+                foreach (var clue in cluesAtVertex.Value)
+                {
+                    var possibleRooms = clue.PossibleClueRoomsInFullMap;
+                    var randomRoom = possibleRooms[Game.Random.Next(possibleRooms.Count)];
 
+                    var pointInRoom = mapInfo.GetRandomPointInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
+
+                    Game.Dungeon.AddItem(new Items.Clue(clue), mapInfo.GetLevelForRoomIndex(randomRoom), pointInRoom);
+                }
+
+            }
+            
+            //Add locks to dungeon as simple doors
+            /*
+            foreach (var locksInLocation in hallsGen.MapSquareLocks)
+            {
+                var lockLocation = locksInLocation.Key;
+                foreach (var thisLock in locksInLocation.Value)
+                {
+                    var lockedDoor = new Locks.SimpleLockedDoor(thisLock);
+
+                    lockedDoor.LocationLevel = levelNo;
+                    lockedDoor.LocationMap = lockLocation;
+                    Game.Dungeon.AddLock(lockedDoor);
+                }
+            }
+
+            //Place the player, so monster placing can be checked against it
+            //Game.Dungeon.Player.LocationLevel = 0; //on reload, don't reset this
+            //needs to be done before placing items
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+            if (doLocks)
+            {
+                
+            }*/
+
+
+            
             //Set map for visualisation
             connectivityMap = mapInfoBuilder.FullConnectivityMap;
             
+        }
+
+        T RandomItem<T>(IEnumerable<T> items)
+        {
+            var totalItems = items.Count();
+            if (totalItems == 0)
+                throw new ApplicationException("Empty list for randomization");
+
+            return items.ElementAt(Game.Random.Next(totalItems));
         }
 
         Connection AddRoomToRandomOpenDoor(TemplatedMapGenerator gen, RoomTemplate templateToPlace, RoomTemplate corridorTemplate, int distanceFromDoor)
@@ -548,6 +535,18 @@ namespace RogueBasin
 
     public static class ShuffleExtension
     {
+
+        public static T RandomElement<T>(this IEnumerable<T> enumerable)
+        {
+            return RandomElementUsing<T>(enumerable, Game.Random);
+        }
+
+        public static T RandomElementUsing<T>(this IEnumerable<T> enumerable, Random rand)
+        {
+            int index = rand.Next(0, enumerable.Count());
+            return enumerable.ElementAt(index);
+        }
+
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng)
         {
             T[] elements = source.ToArray();
