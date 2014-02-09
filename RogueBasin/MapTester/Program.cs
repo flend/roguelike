@@ -60,13 +60,12 @@ namespace MapTester
             MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
 
             //templateGen.GenerateMultiLevelDungeon();
-            templateGen.GenerateDungeonWithReplacedVaults();
+            var mapInfo = templateGen.GenerateDungeonWithReplacedVaults();
             
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             //Extract connectivity map
-            var graphModel = new MapModel(templateGen.ConnectivityMap, 0);
-            VisualiseConnectivityGraph(graphModel);
+            VisualiseConnectivityGraph(mapInfo.Model);
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel)

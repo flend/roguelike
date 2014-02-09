@@ -186,7 +186,7 @@ namespace RogueBasin
         }
 
         /** Build a map using templated rooms */
-        public void GenerateDungeonWithReplacedVaults()
+        public MapInfo GenerateDungeonWithReplacedVaults()
         {
 
             //Load standard room types
@@ -326,7 +326,7 @@ namespace RogueBasin
             }
 
             //Set map for visualisation
-            connectivityMap = mapInfoBuilder.FullConnectivityMap;
+            return mapInfo;
             
         }
 
