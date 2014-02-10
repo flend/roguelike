@@ -324,6 +324,13 @@ namespace GraphMap
             }
         }
 
+        public Dictionary<int, int> GetDistanceOfVerticesFromParticularVertex(int startVertex, List<int> verticesToCheck)
+        {
+            var vertexDistances = verticesToCheck.Select(v => GetPathBetweenVerticesInReducedMap(startVertex, v).Count());
+            return verticesToCheck.Zip(vertexDistances, (v, d) => new { Key = v, Value = d })
+                .ToDictionary(x => x.Key, x => x.Value);
+        }
+
         /** Lock an edge and place a random clue */
 
         public void LockEdgeRandomClue(DoorRequirements doorReq)
