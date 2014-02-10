@@ -438,6 +438,56 @@ namespace TestGraphMap
             Assert.AreEqual(1, dict[new Connection(1, 2)]);
         }
 
+        [TestMethod]
+        public void ShortestPathBetweenVerticesCanBeFoundWhenItExists()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            var shortestPath = model.GetPathBetweenVerticesInReducedMap(1, 15).ToList();
+
+            var expectedPath = new List<Connection>(new Connection[] {
+                new Connection(1, 2),
+                new Connection(2, 10),
+                new Connection(10, 11),
+                new Connection(11, 13),
+                new Connection(13, 15)
+            });
+
+            CollectionAssert.AreEqual(shortestPath, expectedPath);
+        }
+
+        [TestMethod]
+        public void PathBetweenVerticesIsEquivalentWhenTravelledInEitherDirection()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            var shortestPath = model.GetPathBetweenVerticesInReducedMap(15, 1).ToList();
+
+            var expectedPath = new List<Connection>(new Connection[] {
+                new Connection(1, 2),
+                new Connection(2, 10),
+                new Connection(10, 11),
+                new Connection(11, 13),
+                new Connection(13, 15)
+            });
+
+            //Expect to get back the same connections in a different order
+            CollectionAssert.AreEquivalent(shortestPath, expectedPath);
+        }
+
+        [TestMethod]
+        public void EmptyPathReturnedWhenNoPathExists()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            var shortestPath = model.GetPathBetweenVerticesInReducedMap(1, 20).ToList();
+
+            CollectionAssert.AreEqual(shortestPath, new List<Connection>());
+        }
+
         private ConnectivityMap BuildStandardTestMap() {
 
             ConnectivityMap newMap = new ConnectivityMap();

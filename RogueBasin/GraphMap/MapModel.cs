@@ -309,6 +309,21 @@ namespace GraphMap
             return gReduced.Edges.ElementAt(edgeToGet);
         }
 
+        public IEnumerable<Connection> GetPathBetweenVerticesInReducedMap(int startVertex, int endVertex)
+        {
+            var tryGetPath = graphNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
+
+            IEnumerable<TaggedEdge<int, string>> path;
+            if (tryGetPath(endVertex, out path))
+            {
+                return path.Select(e => new Connection(e.Source, e.Target));
+            }
+            else
+            {
+                return new List<Connection>();
+            }
+        }
+
         /** Lock an edge and place a random clue */
 
         public void LockEdgeRandomClue(DoorRequirements doorReq)
