@@ -202,7 +202,7 @@ namespace RogueBasin
             var l1templateGenerator = new TemplatedMapGenerator(l1mapBuilder);
 
             PlaceOriginRoom(l1templateGenerator, room1);
-            PlaceRandomConnectedRooms(l1templateGenerator, 3, room1, corridor1, 5, 10);
+            PlaceRandomConnectedRooms(l1templateGenerator, 5, room1, corridor1, 5, 10);
 
             //Add a place holder room for the elevator
             var l1elevatorConnection = AddRoomToRandomOpenDoor(l1templateGenerator, placeHolderVault, corridor1, 3);
@@ -216,7 +216,7 @@ namespace RogueBasin
             var l2templateGenerator = new TemplatedMapGenerator(l2mapBuilder, 100);
 
             PlaceOriginRoom(l2templateGenerator, room1);
-            PlaceRandomConnectedRooms(l2templateGenerator, 3, room1, corridor1, 5, 10);
+            PlaceRandomConnectedRooms(l2templateGenerator, 5, room1, corridor1, 5, 10);
 
             //Add a place holder room for the elevator
             var l2elevatorConnection = AddRoomToRandomOpenDoor(l2templateGenerator, placeHolderVault, corridor1, 3);
@@ -277,6 +277,21 @@ namespace RogueBasin
             mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(l0CriticalConnection, "green"), roomForCriticalL0Clue);
 
             LogFile.Log.LogEntryDebug("L0 Critical Path, candidates: " + l0CriticalPath.Count() + " lock at: " + l0CriticalConnection + " clue at " + roomForCriticalL0Clue, LogDebugLevel.High);
+
+            //Add a multi-level clue
+            var level1Indices = mapInfo.GetRoomIndicesForLevel(1);
+
+            var deadEndsInLevel1 = deadEnds.Where(c => level1Indices.Contains(c.Source) && level1Indices.Contains(c.Target)).ToList();
+
+            var randomDeadEndToLockL1 = deadEndsInLevel1.RandomElement();
+
+            var allRoomsForClue1 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLockL1);
+            var roomsForClue1Level0 = allRoomsForClue1.Intersect(level0Indices);
+            var roomForClue1 = roomsForClue0Level0.RandomElement();
+
+            LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLock + " clue at " + roomForClue0, LogDebugLevel.High);
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1, "red"), roomForClue1);
 
             //Add maps to the dungeon
 
