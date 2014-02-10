@@ -293,6 +293,19 @@ namespace RogueBasin
 
             mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1, "red"), roomForClue1);
 
+            //Add a locked door to a dead end, localised to level 1 and place the clue as far away as possible on that level
+
+            var randomDeadEndToLockL1FarClue = deadEndsInLevel1.RandomElement();
+
+            var allRoomsForFarClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLock);
+            var roomsForFarClueLevel1 = allRoomsForFarClue.Intersect(level1Indices);
+            var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertex(randomDeadEndToLockL1.Source, roomsForFarClueLevel1);
+            var roomForFarClue0 = MaxEntry(distancesBetweenClueAndDoor).Key;
+            LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLockL1FarClue + " clue at " + roomForFarClue0, LogDebugLevel.High);
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1FarClue, "magenta"), roomForFarClue0);
+
+
             //Add maps to the dungeon
 
             Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
@@ -544,7 +557,10 @@ namespace RogueBasin
             return roomsPlaced;
         }
 
-        
+        public static KeyValuePair<int, int> MaxEntry(Dictionary<int, int> dict)
+        {
+            return dict.Aggregate((a, b) => a.Value > b.Value ? a : b);
+        }
     }
 
     public static class ShuffleExtension

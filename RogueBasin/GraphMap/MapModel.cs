@@ -324,7 +324,7 @@ namespace GraphMap
             }
         }
 
-        public Dictionary<int, int> GetDistanceOfVerticesFromParticularVertex(int startVertex, List<int> verticesToCheck)
+        public Dictionary<int, int> GetDistanceOfVerticesFromParticularVertex(int startVertex, IEnumerable<int> verticesToCheck)
         {
             var vertexDistances = verticesToCheck.Select(v => GetPathBetweenVerticesInReducedMap(startVertex, v).Count());
             return verticesToCheck.Zip(vertexDistances, (v, d) => new { Key = v, Value = d })
