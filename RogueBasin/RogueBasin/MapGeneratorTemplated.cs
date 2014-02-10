@@ -265,7 +265,18 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLock + " clue at " + roomForClue0, LogDebugLevel.High);
 
-            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLock, "lock0"), roomForClue0);
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLock, "yellow"), roomForClue0);
+
+            //Add a locked door halfway along the critical path between the l0 and l1 elevators
+            var l0CriticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(startRoom, l1elevatorIndex);
+            var l0CriticalConnection = l0CriticalPath.ElementAt(l0CriticalPath.Count() / 2);
+
+            var allRoomsForCriticalL0Clue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(l0CriticalConnection);
+            var roomForCriticalL0Clue = allRoomsForCriticalL0Clue.RandomElement();
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(l0CriticalConnection, "green"), roomForCriticalL0Clue);
+
+            LogFile.Log.LogEntryDebug("L0 Critical Path, candidates: " + l0CriticalPath.Count() + " lock at: " + l0CriticalConnection + " clue at " + roomForCriticalL0Clue, LogDebugLevel.High);
 
             //Add maps to the dungeon
 
