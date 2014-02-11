@@ -254,10 +254,23 @@ namespace RogueBasin {
         //Setup the screen
         public void InitialSetup()
         {
+            int tileSize = 16;
 
+            try
+            {
+                tileSize = Convert.ToInt16(Game.Config.Entries["tilesize"]);
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Error getting tilesize from config file", LogDebugLevel.High);
+            }
+
+            string tileMapFilename = "shroom_moved.png";
+            if(tileSize == 32)
+                tileMapFilename = "shroom_moved_big.png";
 
             //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
-            CustomFontRequest fontReq = new CustomFontRequest("shroom_moved_big.png", 32, 32, CustomFontRequestFontTypes.LayoutAsciiInRow);
+            CustomFontRequest fontReq = new CustomFontRequest(tileMapFilename, tileSize, tileSize, CustomFontRequestFontTypes.LayoutAsciiInRow);
             //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
             //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
             //CustomFontRequest fontReq = new CustomFontRequest("shroom_moved_big.png", 32, 32, CustomFontRequestFontTypes.LayoutAsciiInRow);

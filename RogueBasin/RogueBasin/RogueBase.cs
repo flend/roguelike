@@ -2382,6 +2382,12 @@ namespace RogueBasin
         {
             //Initial setup
 
+            //See all debug messages
+            LogFile.Log.DebugLevel = 4;
+
+            //Load config
+            Game.Config = new Config("config.txt");
+
             //Setup screen
             Screen.Instance.InitialSetup();
 
@@ -2397,9 +2403,6 @@ namespace RogueBasin
             {
                 Screen.Instance.ConsoleLine("Error creating log file: " + e.Message);
             }
-
-            //See all debug messages
-            LogFile.Log.DebugLevel = 4;
 
             //Setup message queue
             Game.MessageQueue = new MessageQueue();

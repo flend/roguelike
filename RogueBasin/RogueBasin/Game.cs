@@ -9,6 +9,7 @@ namespace RogueBasin
         static Dungeon dungeon = null;
         static MessageQueue messages = null;
         static Random rand;
+        static Config config;
 
         static Game()
         {
@@ -58,6 +59,18 @@ namespace RogueBasin
             set
             {
                 rand = value;
+            }
+        }
+
+        public static Config Config
+        {
+            get
+            {
+                return config;
+            }
+            set
+            {
+                config = value;
             }
         }
     }
