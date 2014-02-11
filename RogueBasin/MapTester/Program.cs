@@ -113,8 +113,7 @@ namespace MapTester
         {
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
-            Game.Dungeon.RecalculateWalkable();
-            Game.Dungeon.RefreshAllLevelPathing();
+            Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
             rb.MainLoop(false);
         }

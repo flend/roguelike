@@ -3739,10 +3739,8 @@ namespace RogueBasin
 
         private void CalculateWalkableAndTCOD() {
 
-            Game.Dungeon.RecalculateWalkable();
-
             //TCOD routine uses Walkable flag set above
-            Game.Dungeon.RefreshAllLevelPathing();
+            Game.Dungeon.RefreshAllLevelPathingAndFOV();
         }
     }
 }

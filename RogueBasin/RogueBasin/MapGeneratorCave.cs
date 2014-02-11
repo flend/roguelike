@@ -315,7 +315,7 @@ namespace RogueBasin
 
             //If not, open a path between the staircases
 
-            foreach (Point p in Utility.GetPointsOnLine(upStairsPoint.x, upStairsPoint.y, downStairsPoint.x, downStairsPoint.y))
+            foreach (Point p in Utility.GetPointsOnLine(upStairsPoint, downStairsPoint))
             {
 
                 int nextX = p.x;

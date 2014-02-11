@@ -485,8 +485,7 @@ namespace RogueBasin
                     for (int k = 0; k < height; k++)
                     {
                         newMap.setCell(j, k, mapSquares[j, k].BlocksLight ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
-                        //tcodLevel.SetCell(j, k, !level.mapSquares[j, k].BlocksLight, level.mapSquares[j, k].Walkable);
-                    }
+                   }
                 }
 
                 return newMap;
@@ -495,16 +494,14 @@ namespace RogueBasin
 
 
         /// <summary>
-        /// Set walkable flag on map squares. Must be called before RecalculatePathingRepresentation()
+        /// Set walkable flag on map squares. Must be called before FovRepresentaton
         /// </summary>
         public void RecalculateWalkable()
         {
-
             for (int j = 0; j < width; j++)
             {
                 for (int k = 0; k < height; k++)
                 {
-
                     //Terrain
 
                     bool walkable = true;
@@ -515,6 +512,29 @@ namespace RogueBasin
                         walkable = false;
 
                     mapSquares[j, k].Walkable = walkable;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set light blocking flag on map squares. Must be called before FovRepresentaton
+        /// </summary>
+        public void RecalculateLightBlocking()
+        {
+            for (int j = 0; j < width; j++)
+            {
+                for (int k = 0; k < height; k++)
+                {
+                    //Terrain
+
+                    bool blocking = false;
+
+                    //Use new function
+
+                    if (!Dungeon.IsTerrainLightBlocking(mapSquares[j, k].Terrain))
+                        blocking = false;
+
+                    mapSquares[j, k].BlocksLight = blocking;
                 }
             }
         }

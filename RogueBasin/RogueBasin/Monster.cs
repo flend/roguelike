@@ -91,6 +91,8 @@ namespace RogueBasin
 
             hitpoints = maxHitpoints;
 
+            SightRadius = NormalSightRadius;
+
             WasSummoned = false;
             //Calculate our combat stats
             CalculateCombatStats();

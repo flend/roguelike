@@ -315,7 +315,7 @@ namespace RogueBasin
             Game.Dungeon.AddMap(masterMapL2);
 
             //Recalculate walkable to allow placing objects
-            Game.Dungeon.RecalculateWalkable();
+            Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
             //Add elevator features to link the maps
 
@@ -589,7 +589,7 @@ namespace RogueBasin
             Game.Dungeon.AddMap(masterMap);
 
             //Recalculate walkable to allow placing objects
-            Game.Dungeon.RecalculateWalkable();
+            Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
             //Set player's start location (must be done before adding items)
 

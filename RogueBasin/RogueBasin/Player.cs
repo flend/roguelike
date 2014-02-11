@@ -164,6 +164,8 @@ namespace RogueBasin
             //Setup initial training stats
             SetupInitialTrainingStats();
 
+            SightRadius = NormalSightRadius;
+
             //Setup combat parameters
             //CalculateCombatStats();
 
@@ -365,7 +367,7 @@ namespace RogueBasin
 
             //Calculate sight radius (depends on dungeon light level)
 
-            CalculateSightRadius();
+            //CalculateSightRadius();
         }
 
 

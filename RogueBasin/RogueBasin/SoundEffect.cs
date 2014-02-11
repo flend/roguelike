@@ -106,7 +106,8 @@ namespace RogueBasin
 
             int noWallsCrossed = 0;
 
-            foreach(Point p in Utility.GetPointsOnLine(xSource, ySource, mapLocation.x, mapLocation.y)) {
+            foreach (Point p in Utility.GetPointsOnLine(this.MapLocation, mapLocation))
+            {
                 //Check if this square is in wall (for now, is non-walkable
                 if (!Game.Dungeon.MapSquareIsWalkable(levelLocation, p))
                 {

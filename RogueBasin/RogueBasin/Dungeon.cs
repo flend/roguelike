@@ -2508,24 +2508,23 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Check and set the walkable parameter on each map square
-        /// At the moment done for all levels
-        /// </summary>
-        public void RecalculateWalkable()
-        {
-            for (int i = 0; i < levels.Count; i++)
-            {
-                levels[i].RecalculateWalkable();
-
-            }
-        }
-
-        /// <summary>
         /// Refresh the TCOD maps used for FOV and pathfinding
         /// Unoptimised at present
         /// </summary>
-        public void RefreshAllLevelPathing()
+        public void RefreshAllLevelPathingAndFOV()
         {
+            //Set the walkable flag based on the terrain
+            for (int i = 0; i < levels.Count; i++)
+            {
+                levels[i].RecalculateWalkable();
+            }
+
+            //Set the light blocking flag based on the terrain
+            for (int i = 0; i < levels.Count; i++)
+            {
+                levels[i].RecalculateLightBlocking();
+            }
+
             //Set the properties on the TCODMaps from our Maps
             for (int i = 0; i < levels.Count; i++) {
 
@@ -2620,7 +2619,7 @@ namespace RogueBasin
         {
             List<Point> pointsToRet = new List<Point>();
 
-            foreach (Point p in Utility.GetPointsOnLine(start.x, start.y, end.x, end.y))
+            foreach (Point p in Utility.GetPointsOnLine(start, end))
             {
                 if (fov.CheckTileFOV(level, p))
                 {
@@ -3029,6 +3028,29 @@ namespace RogueBasin
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Master is terrain light blocking from MapTerrain type (not universally used yet)
+        /// </summary>
+        /// <param name="terrain"></param>
+        /// <returns></returns>
+        public static bool IsTerrainLightBlocking(MapTerrain terrain)
+        {
+            if (terrain == MapTerrain.Empty ||
+                terrain == MapTerrain.Flooded ||
+                terrain == MapTerrain.OpenDoor ||
+                terrain == MapTerrain.Corridor ||
+                terrain == MapTerrain.Grass ||
+                terrain == MapTerrain.Road ||
+                terrain == MapTerrain.Gravestone ||
+                terrain == MapTerrain.Trees ||
+                terrain == MapTerrain.Rubble)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

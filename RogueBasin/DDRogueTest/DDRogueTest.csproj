@@ -60,6 +60,7 @@
     <Compile Include="RoomTemplateLoaderTest.cs" />
     <Compile Include="MapInfoTest.cs" />
     <Compile Include="ConnectionTest.cs" />
+    <Compile Include="UtilityTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphMap\GraphMap.csproj">

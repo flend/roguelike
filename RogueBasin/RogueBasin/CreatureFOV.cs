@@ -185,7 +185,7 @@ namespace RogueBasin
         {
             List<Point> pointsToRet = new List<Point>();
 
-            foreach (Point p in Utility.GetPointsOnLine(start.x, start.y, end.x, end.y))
+            foreach (Point p in Utility.GetPointsOnLine(start, end))
             {
                 if (CheckTileFOV(p.x, p.y))
                 {

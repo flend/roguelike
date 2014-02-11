@@ -433,7 +433,7 @@ namespace RogueBasin {
             int lastX = start.x;
             int lastY = start.y;
 
-            foreach(Point p in Utility.GetPointsOnLine(start.x, start.y, end.x, end.y)) {
+            foreach(Point p in Utility.GetPointsOnLine(start, end)) {
 
                 //Don't draw the first char (where the player is)
                 if(p == start)
