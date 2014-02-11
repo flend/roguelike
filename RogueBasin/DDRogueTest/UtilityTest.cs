@@ -82,5 +82,19 @@ namespace DDRogueTest
 
             CollectionAssert.AreEqual(expectedPath, path);
         }
+
+        [TestMethod]
+        public void GetPointsOnLineReturnsCorrectPointsForSameInputs()
+        {
+            Point start = new Point(0, 0);
+            Point end = new Point(0, 0);
+
+            var path = Utility.GetPointsOnLine(start, end).ToList();
+            var expectedPath = new List<Point>(new Point[] {
+                new Point(0, 0)
+            });
+
+            CollectionAssert.AreEqual(expectedPath, path);
+        }
     }
 }

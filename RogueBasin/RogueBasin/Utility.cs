@@ -212,6 +212,9 @@ namespace RogueBasin
 
             yield return start;
 
+            if (start == end)
+                yield break;
+
             Vector3 currentLocation = startV;
             Point currentPoint;
             Point lastPoint = start;
