@@ -202,7 +202,7 @@ namespace RogueBasin
             var l1templateGenerator = new TemplatedMapGenerator(l1mapBuilder);
 
             PlaceOriginRoom(l1templateGenerator, room1);
-            PlaceRandomConnectedRooms(l1templateGenerator, 3, room1, corridor1, 5, 10);
+            PlaceRandomConnectedRooms(l1templateGenerator, 5, room1, corridor1, 5, 10);
 
             //Add a place holder room for the elevator
             var l1elevatorConnection = AddRoomToRandomOpenDoor(l1templateGenerator, placeHolderVault, corridor1, 3);
@@ -216,7 +216,7 @@ namespace RogueBasin
             var l2templateGenerator = new TemplatedMapGenerator(l2mapBuilder, 100);
 
             PlaceOriginRoom(l2templateGenerator, room1);
-            PlaceRandomConnectedRooms(l2templateGenerator, 3, room1, corridor1, 5, 10);
+            PlaceRandomConnectedRooms(l2templateGenerator, 5, room1, corridor1, 5, 10);
 
             //Add a place holder room for the elevator
             var l2elevatorConnection = AddRoomToRandomOpenDoor(l2templateGenerator, placeHolderVault, corridor1, 3);
@@ -265,7 +265,46 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLock + " clue at " + roomForClue0, LogDebugLevel.High);
 
-            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLock, "lock0"), roomForClue0);
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLock, "yellow"), roomForClue0);
+
+            //Add a locked door halfway along the critical path between the l0 and l1 elevators
+            var l0CriticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(startRoom, l1elevatorIndex);
+            var l0CriticalConnection = l0CriticalPath.ElementAt(l0CriticalPath.Count() / 2);
+
+            var allRoomsForCriticalL0Clue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(l0CriticalConnection);
+            var roomForCriticalL0Clue = allRoomsForCriticalL0Clue.RandomElement();
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(l0CriticalConnection, "green"), roomForCriticalL0Clue);
+
+            LogFile.Log.LogEntryDebug("L0 Critical Path, candidates: " + l0CriticalPath.Count() + " lock at: " + l0CriticalConnection + " clue at " + roomForCriticalL0Clue, LogDebugLevel.High);
+
+            //Add a multi-level clue
+            var level1Indices = mapInfo.GetRoomIndicesForLevel(1);
+
+            var deadEndsInLevel1 = deadEnds.Where(c => level1Indices.Contains(c.Source) && level1Indices.Contains(c.Target)).ToList();
+
+            var randomDeadEndToLockL1 = deadEndsInLevel1.RandomElement();
+
+            var allRoomsForClue1 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLockL1);
+            var roomsForClue1Level0 = allRoomsForClue1.Intersect(level0Indices);
+            var roomForClue1 = roomsForClue0Level0.RandomElement();
+
+            LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLock + " clue at " + roomForClue0, LogDebugLevel.High);
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1, "red"), roomForClue1);
+
+            //Add a locked door to a dead end, localised to level 1 and place the clue as far away as possible on that level
+
+            var randomDeadEndToLockL1FarClue = deadEndsInLevel1.RandomElement();
+
+            var allRoomsForFarClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLock);
+            var roomsForFarClueLevel1 = allRoomsForFarClue.Intersect(level1Indices);
+            var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertex(randomDeadEndToLockL1.Source, roomsForFarClueLevel1);
+            var roomForFarClue0 = MaxEntry(distancesBetweenClueAndDoor).Key;
+            LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLockL1FarClue + " clue at " + roomForFarClue0, LogDebugLevel.High);
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1FarClue, "magenta"), roomForFarClue0);
+
 
             //Add maps to the dungeon
 
@@ -533,7 +572,7 @@ namespace RogueBasin
 
             PlaceOriginRoom(l1templateGenerator, room1);
             PlaceRandomConnectedRooms(l1templateGenerator, 1, room1, corridor1, 0, 0, () => 0);
-            
+
             //Build the graph containing all the levels
 
             //Build and add the l1 map
@@ -569,7 +608,11 @@ namespace RogueBasin
 
             //Set map for visualisation
             return mapInfo;
+        }
 
+        public static KeyValuePair<int, int> MaxEntry(Dictionary<int, int> dict)
+        {
+            return dict.Aggregate((a, b) => a.Value > b.Value ? a : b);
         }
     }
 

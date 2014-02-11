@@ -438,6 +438,86 @@ namespace TestGraphMap
             Assert.AreEqual(1, dict[new Connection(1, 2)]);
         }
 
+        [TestMethod]
+        public void ShortestPathBetweenVerticesCanBeFoundWhenItExists()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            var shortestPath = model.GetPathBetweenVerticesInReducedMap(1, 15).ToList();
+
+            var expectedPath = new List<Connection>(new Connection[] {
+                new Connection(1, 2),
+                new Connection(2, 10),
+                new Connection(10, 11),
+                new Connection(11, 13),
+                new Connection(13, 15)
+            });
+
+            CollectionAssert.AreEqual(shortestPath, expectedPath);
+        }
+
+        [TestMethod]
+        public void PathBetweenVerticesIsEquivalentWhenTravelledInEitherDirection()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            var shortestPath = model.GetPathBetweenVerticesInReducedMap(15, 1).ToList();
+
+            var expectedPath = new List<Connection>(new Connection[] {
+                new Connection(1, 2),
+                new Connection(2, 10),
+                new Connection(10, 11),
+                new Connection(11, 13),
+                new Connection(13, 15)
+            });
+
+            //Expect to get back the same connections in a different order
+            CollectionAssert.AreEquivalent(shortestPath, expectedPath);
+        }
+
+        [TestMethod]
+        public void VertexDistanceFromSourceVertexCanBeFound()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            //Use the keys to get all vertices in the graph
+            var allVerticesInReducedGraph = model.GraphNoCycles.roomMappingNoCycleToFullMap.Keys.ToList();
+            var verticesAndDistances = model.GetDistanceOfVerticesFromParticularVertex(11, allVerticesInReducedGraph);
+
+            var expectedDistance = new Dictionary<int, int>();
+
+            expectedDistance.Add(1, 3);
+            expectedDistance.Add(2, 2);
+            expectedDistance.Add(3, 3);
+            expectedDistance.Add(4, 4);
+            expectedDistance.Add(5, 4);
+
+            expectedDistance.Add(6, 5);
+
+            expectedDistance.Add(10, 1);
+            expectedDistance.Add(11, 0);
+            expectedDistance.Add(12, 1);
+            expectedDistance.Add(13, 1);
+            expectedDistance.Add(14, 2);
+            expectedDistance.Add(15, 2);
+
+            CollectionAssert.AreEquivalent(verticesAndDistances, expectedDistance);
+        }
+
+        [TestMethod]
+        public void EmptyPathReturnedWhenNonExistentVertexUsed()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            var shortestPath = model.GetPathBetweenVerticesInReducedMap(1, 20);
+
+            CollectionAssert.AreEqual(shortestPath.ToList(), new List<Connection>());
+        }
+
         private ConnectivityMap BuildStandardTestMap() {
 
             ConnectivityMap newMap = new ConnectivityMap();

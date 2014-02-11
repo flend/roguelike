@@ -199,8 +199,8 @@ namespace RogueBasin {
             Width = 60;
             Height = 35;
 
-            ViewableWidth = 30;
-            ViewableHeight = 25;
+            ViewableWidth = 37;
+            ViewableHeight = 30;
 
             ViewportScrollSpeed = 1;
 
@@ -220,9 +220,9 @@ namespace RogueBasin {
             //Max 60 * 25 map
 
             mapTopLeftBase = new Point(2, 6);
-            mapBotRightBase = new Point(31, 32);
+            mapBotRightBase = new Point(38, 32);
 
-            statsDisplayTopLeft = new Point(34, 6);
+            statsDisplayTopLeft = new Point(40, 6);
             statsDisplayBotRight = new Point(57, 32);
                       
 
@@ -255,8 +255,13 @@ namespace RogueBasin {
         public void InitialSetup()
         {
 
+
             //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
             CustomFontRequest fontReq = new CustomFontRequest("shroom_moved_big.png", 32, 32, CustomFontRequestFontTypes.LayoutAsciiInRow);
+            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
+            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
+            //CustomFontRequest fontReq = new CustomFontRequest("shroom_moved_big.png", 32, 32, CustomFontRequestFontTypes.LayoutAsciiInRow);
+            //CustomFontRequest fontReq = new CustomFontRequest("shroom_moved.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
             //CustomFontRequest fontReq = new CustomFontRequest("Anikki_square_20x20.bmp", 20, 20, CustomFontRequestFontTypes.LayoutAsciiInRow);
             //CustomFontRequest fontReq = new CustomFontRequest("Markvii.png", 12, 12, CustomFontRequestFontTypes.LayoutAsciiInRow);
             //CustomFontRequest fontReq = new CustomFontRequest("Tahin_16x16_rounded.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
@@ -1358,13 +1363,15 @@ namespace RogueBasin {
             //rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
             DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false, frameColor);
 
+            int baseOffset = 2;
+
             //Mission
-            Point missionOffset = new Point(4, 1);
-            hitpointsOffset = new Point(4, 4);
-            Point weaponOffset = new Point(4, 6);
-            Point utilityOffset = new Point(4, 11);
-            Point viewOffset = new Point(4, 19);
-            Point gameDataOffset = new Point(4, 24);
+            Point missionOffset = new Point(baseOffset, 1);
+            hitpointsOffset = new Point(baseOffset, 4);
+            Point weaponOffset = new Point(baseOffset, 6);
+            Point utilityOffset = new Point(baseOffset, 11);
+            Point viewOffset = new Point(baseOffset, 19);
+            Point gameDataOffset = new Point(baseOffset, 24);
 
             PrintLine("ZONE: " + (player.LocationLevel + 1).ToString("00"), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
             PrintLine(DungeonInfo.LookupMissionName(player.LocationLevel), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
