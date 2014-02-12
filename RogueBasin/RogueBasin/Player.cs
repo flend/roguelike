@@ -1220,7 +1220,7 @@ namespace RogueBasin
 
         protected override char GetRepresentation()
         {
-            return '\x15';
+            return (char)257;
         }
 
         /// <summary>

@@ -48,16 +48,16 @@ namespace RogueBasin
 
         private static void SetupTerrainChars()
         {
-            TerrainChars.Add(MapTerrain.Empty, '.');
+            TerrainChars.Add(MapTerrain.Empty, ' ');
             TerrainChars.Add(MapTerrain.Void, '\xb0');
-            TerrainChars.Add(MapTerrain.Wall, '#');
+            TerrainChars.Add(MapTerrain.Wall, (char)320);
             
             TerrainChars.Add(MapTerrain.HellWall, '#');
             TerrainChars.Add(MapTerrain.SkeletonWall, '8');
             TerrainChars.Add(MapTerrain.SkeletonWallWhite, '8');
             TerrainChars.Add(MapTerrain.Corridor, '|');
-            TerrainChars.Add(MapTerrain.ClosedDoor, '+');
-            TerrainChars.Add(MapTerrain.OpenDoor, '/');
+            TerrainChars.Add(MapTerrain.ClosedDoor, (char)322);
+            TerrainChars.Add(MapTerrain.OpenDoor, (char)323);
             TerrainChars.Add(MapTerrain.Flooded, '=');
             TerrainChars.Add(MapTerrain.Grass, ',');
             TerrainChars.Add(MapTerrain.River, '=');
@@ -69,7 +69,7 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Forest, '%');
             TerrainChars.Add(MapTerrain.Gravestone, '+');
             TerrainChars.Add(MapTerrain.BarDoor, '|');
-            TerrainChars.Add(MapTerrain.DockWall, '\x08');
+            TerrainChars.Add(MapTerrain.DockWall, (char)368);
         }
 
         private static void SetupTerrainColors()

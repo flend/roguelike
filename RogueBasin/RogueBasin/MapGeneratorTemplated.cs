@@ -16,10 +16,11 @@ namespace RogueBasin
         /// Mapping from template terrain to real terrain on the map
         /// </summary>
         Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping;
+        Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping2;
 
         List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
         List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
-        
+
         ConnectivityMap connectivityMap = null;
 
         public MapGeneratorTemplated()
@@ -29,6 +30,12 @@ namespace RogueBasin
             terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
             terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
             terrainMapping[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
+
+            terrainMapping2 = new Dictionary<RoomTemplateTerrain, MapTerrain>();
+            terrainMapping2[RoomTemplateTerrain.Wall] = MapTerrain.DockWall;
+            terrainMapping2[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
+            terrainMapping2[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
+            terrainMapping2[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
         }
 
         private RoomTemplate RandomRoom()
@@ -140,7 +147,7 @@ namespace RogueBasin
             RoomTemplate branchRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.branchroom.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate chamber1Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_1door.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate chamber2Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_2door.room", StandardTemplateMapping.terrainMapping);
-            
+
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             //Build a network of branched corridors
@@ -157,7 +164,7 @@ namespace RogueBasin
             PlaceOriginRoom(templatedGenerator, branchRoom);
 
             PlaceRandomConnectedRooms(templatedGenerator, 3, branchRoom, corridor1, 0, 0, () => Game.Random.Next(1) > 0 ? 3 : 4);
-           
+
             //Add some 2-door rooms
             PlaceRandomConnectedRooms(templatedGenerator, 10, chamber2Doors, corridor1, 0, 0);
 
@@ -195,7 +202,7 @@ namespace RogueBasin
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
-            
+
             //Build level 1
 
             var l1mapBuilder = new TemplatedMapBuilder(100, 100);
@@ -297,13 +304,13 @@ namespace RogueBasin
 
             var randomDeadEndToLockL1FarClue = deadEndsInLevel1.RandomElement();
 
-            var allRoomsForFarClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLock);
+            var allRoomsForFarClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLockL1FarClue);
             var roomsForFarClueLevel1 = allRoomsForFarClue.Intersect(level1Indices);
             var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertex(randomDeadEndToLockL1.Source, roomsForFarClueLevel1);
-            var roomForFarClue0 = MaxEntry(distancesBetweenClueAndDoor).Key;
-            LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLockL1FarClue + " clue at " + roomForFarClue0, LogDebugLevel.High);
+            var roomForFarClue = MaxEntry(distancesBetweenClueAndDoor).Key;
+            LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLockL1FarClue + " clue at " + roomForFarClue, LogDebugLevel.High);
 
-            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1FarClue, "magenta"), roomForFarClue0);
+            mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1FarClue, "magenta"), roomForFarClue);
 
 
             //Add maps to the dungeon
@@ -311,7 +318,7 @@ namespace RogueBasin
             Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
             Game.Dungeon.AddMap(masterMap);
 
-            Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+            Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping2);
             Game.Dungeon.AddMap(masterMapL2);
 
             //Recalculate walkable to allow placing objects
@@ -349,9 +356,9 @@ namespace RogueBasin
                 }
 
             }
-            
+
             //Add locks to dungeon as simple doors
-            
+
             foreach (var door in mapInfo.Model.DoorAndClueManager.DoorMap.Values)
             {
                 var lockedDoor = new Locks.SimpleLockedDoor(door);
@@ -366,7 +373,7 @@ namespace RogueBasin
 
             //Set map for visualisation
             return mapInfo;
-            
+
         }
 
         T RandomItem<T>(IEnumerable<T> items)
@@ -419,10 +426,10 @@ namespace RogueBasin
                                         select new { origin = d1, target = d2 };
 
             var allOverlappingDoorPossibilities = from d1 in allDoors
-                                        from d2 in allDoors
-                                        where d1.MapCoords == d2.MapCoords
-                                              && d1.OwnerRoomIndex != d2.OwnerRoomIndex
-                                        select new { origin = d1, target = d2 };
+                                                  from d2 in allDoors
+                                                  where d1.MapCoords == d2.MapCoords
+                                                        && d1.OwnerRoomIndex != d2.OwnerRoomIndex
+                                                  select new { origin = d1, target = d2 };
 
 
             //Materialize for speed
@@ -432,7 +439,7 @@ namespace RogueBasin
             //var allMatchingDoorPossibilities = allBendDoorPossibilities;
 
             var shuffleMatchingDoors = allMatchingDoorPossibilities.Shuffle(Game.Random);
-            
+
             for (int i = 0; i < allMatchingDoorPossibilities.Count; i++)
             {
                 //Try a random combination to see if it works
@@ -453,7 +460,7 @@ namespace RogueBasin
             //In any case, remove this attempt
             //var doorsToTry = allMatchingDoorPossibilities.ElementAt(Game.Random.Next(allMatchingDoorPossibilities.Count()));
             //allMatchingDoorPossibilities = allMatchingDoorPossibilities.Except(Enumerable.Repeat(doorsToTry, 1)); //order n - making it slow?
-                
+
         }
 
         private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, int maxRoomDistance)
@@ -492,7 +499,7 @@ namespace RogueBasin
                         roomsPlaced++;
                     }
                     catch (ApplicationException) { }
-                    
+
                     attempts++;
                 }
             } while (roomsPlaced < roomsToPlace && attempts < maxAttempts && templatedGenerator.HaveRemainingPotentialDoors());
@@ -506,7 +513,7 @@ namespace RogueBasin
                 templatedGenerator.PlaceRoomTemplateAtPosition(roomToPlace, new Point(0, 0));
                 return true;
             }
-            catch(ApplicationException)
+            catch (ApplicationException)
             {
                 return false;
             }
@@ -529,7 +536,7 @@ namespace RogueBasin
             do
             {
                 //Find a random potential door and try to grow a random room off this
-                
+
                 //Use a random door, or the function passed in
                 int randomNewDoorIndex;
                 if (doorPicker == null)

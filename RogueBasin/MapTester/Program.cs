@@ -31,7 +31,8 @@ namespace MapTester
             //Game.Random = new Random(seedToUse);
             Game.Random = new Random();
 
-            bool testGraphics = true;
+            bool testGraphics = false;
+            bool multiLevelDungeon = true;
 
             if (testGraphics)
             {
@@ -39,8 +40,7 @@ namespace MapTester
             }
             else
             {
-                bool multiLevelDungeon = true;
-
+                
                 if (multiLevelDungeon)
                     GenerateMultiLevelDungeon();
                 else

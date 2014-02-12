@@ -67,7 +67,7 @@ namespace RogueBasin
                             }
                             else
                             {
-                                rootConsole.BackgroundColor = colorFlags.BackgroundColor;
+                                rootConsole.BackgroundColor = colorFlags.BackgroundColor; 
                             }
 
                             rootConsole.ForegroundColor = colorFlags.ForegroundColor;

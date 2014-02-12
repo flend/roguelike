@@ -45,10 +45,10 @@ namespace RogueBasin.Locks
         {
             if (isOpen)
             {
-                return '-';
+                return (char)355;
             }
             else
-                return '+';
+                return (char)354;
         }
 
         public override libtcodWrapper.Color RepresentationColor()
