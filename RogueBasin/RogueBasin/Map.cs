@@ -553,7 +553,7 @@ namespace RogueBasin
                 {
                     //Terrain
 
-                    bool blocking = false;
+                    bool blocking = true;
 
                     //Use new function
 

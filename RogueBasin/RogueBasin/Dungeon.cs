@@ -963,7 +963,8 @@ namespace RogueBasin
             dungeonInfo.SetupLevelInfo();
 
             //Add TCOD version
-            fov.updateFovMap(levels.Count - 1, mapToAdd.FovRepresentaton);
+            //Do this at the end for speed
+            //fov.updateFovMap(levels.Count - 1, mapToAdd.FovRepresentaton);
 
             return levels.Count - 1;
         }
