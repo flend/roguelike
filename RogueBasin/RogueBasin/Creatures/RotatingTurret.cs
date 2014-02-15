@@ -139,7 +139,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return 'R';
+            return (char)263;
         }
 
         protected override int RelaxDirectionAt()

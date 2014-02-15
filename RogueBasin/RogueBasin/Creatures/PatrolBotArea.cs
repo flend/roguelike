@@ -90,7 +90,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return 'P';
+            return (char)260;
         }
 
         protected override int GetChanceToRecover()

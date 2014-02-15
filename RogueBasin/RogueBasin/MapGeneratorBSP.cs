@@ -1030,12 +1030,13 @@ namespace RogueBasin
                 baseMap.PCStartLocation = AddEntryRoomForPlayer();
 
                 
-            } while (false); //legacy 
+            } while (baseMap.PCStartLocation == null);
 
-            //Decide on a player start location 
-            PointInRoom randomRoom = RandomPointInRoom();
-            baseMap.PCStartLocation = randomRoom.GetPointInRoomOnly();
-            baseMap.PCStartRoomId = randomRoom.RoomId;
+            //Fake a start room
+                PointInRoom randomRoom = RandomPointInRoom();
+                //baseMap.PCStartLocation = randomRoom.GetPointInRoomOnly();
+                baseMap.PCStartRoomId = randomRoom.RoomId;
+
 
             //Build the map model for the graph, based on the PC's true starting position (useful for locking doors)
             graphModel = new MapModel(connectivityGraph, baseMap.PCStartRoomId);

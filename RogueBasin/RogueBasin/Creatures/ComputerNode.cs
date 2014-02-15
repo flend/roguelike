@@ -59,7 +59,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return 'C';
+            return (char)268;
         }
 
 
@@ -75,7 +75,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new PatrolBot();
+            return new ComputerNode();
         }
 
         public override Color RepresentationColor()

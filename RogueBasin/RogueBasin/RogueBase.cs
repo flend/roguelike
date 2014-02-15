@@ -77,6 +77,8 @@ namespace RogueBasin
             //Loop through creatures
             //If their internal clocks signal another turn then take one
 
+            bool centreOnPC = true;
+
             while (Game.Dungeon.RunMainLoop)
             {
                 try
@@ -199,7 +201,8 @@ namespace RogueBasin
                             ProfileEntry("Pre Screen Update");
 
                             //Update screen just before PC's turn
-                            Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationMap);
+                            if (centreOnPC)
+                                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationMap);
                             Screen.Instance.Update();
 
                             ProfileEntry("Post Screen Update");
@@ -208,7 +211,9 @@ namespace RogueBasin
                             bool timeAdvances = false;
                             do
                             {
-                                timeAdvances = UserInput();
+                                var inputResult = UserInput();
+                                timeAdvances = inputResult.Item1;
+                                centreOnPC = inputResult.Item2;
                             } while (!timeAdvances);
 
                             ProfileEntry("After user");
@@ -245,9 +250,11 @@ namespace RogueBasin
 
         //Deal with user input
         //Return code is if the command was successful and time increments (i.e. the player has done a time-using command like moving)
-        private bool UserInput()
+        private Tuple<bool, bool> UserInput()
         {
             bool timeAdvances = false;
+            bool centreOnPC = true;
+
             try
             {
                 KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -260,11 +267,20 @@ namespace RogueBasin
                     //Normal movement on the map
                     case InputState.MapMovement:
 
+                        bool functionPressed = false;
+
                         if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                         {
                             char keyCode = (char)userKey.Character;
+
+                            functionPressed = true;
                             switch (keyCode)
                             {
+                                default:
+                                    functionPressed = false;
+                                    //This allows us to collect keypresses
+                                    break;
+
                                 case 'Q':
                                     //Exit from game
                                     bool response = Screen.Instance.YesNoQuestion("Really quit?");
@@ -415,6 +431,8 @@ namespace RogueBasin
                                 case '.':
                                     // Do nothing
                                     timeAdvances = DoNothing();
+                                    // Don't recentre - useful for viewing
+                                    centreOnPC = false;
                                     break;
                                     
                                 case '>':
@@ -548,11 +566,13 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(new PlayerEffects.SightRadiusUp(2000, 1));
                                     Screen.Instance.Update();
                                     break;
-/*                                case 'y':
+
+                                case 'Y':
                                     //next mission
                                     Game.Dungeon.MoveToNextMission();
+                                    timeAdvances = true;
                                     break;
-
+                                    /*
                                 case 'Y':
                                     //Take me to first dungeon
                                     //Game.Dungeon.DungeonInfo.LastMission = true;
@@ -722,22 +742,25 @@ namespace RogueBasin
                         }
 
                         //Handle direction keys (both arrows and vi keys)
-                        Point direction = new Point(9,9);
-                        KeyModifier mod = KeyModifier.Arrow;
-                        bool wasDirection = GetDirectionFromKeypress(userKey, out direction, out mod);
 
-                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi))
+                        if (!functionPressed)
                         {
-                            timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
-                        }
+                            Point direction = new Point(9, 9);
+                            KeyModifier mod = KeyModifier.Arrow;
+                            bool wasDirection = GetDirectionFromKeypress(userKey, out direction, out mod);
 
-                        if (wasDirection && mod == KeyModifier.Arrow)
-                        {
-                            Screen.Instance.ViewportScrollSpeed = 4;
-                            Screen.Instance.ScrollViewport(direction);
-                            Screen.Instance.Update();
-                        }
+                            if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi))
+                            {
+                                timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
+                            }
 
+                            if (wasDirection && mod == KeyModifier.Arrow)
+                            {
+                                Screen.Instance.ViewportScrollSpeed = 4;
+                                Screen.Instance.ScrollViewport(direction);
+                                Screen.Instance.Update();
+                            }
+                        }
 
                         break;
 
@@ -770,7 +793,7 @@ namespace RogueBasin
                 //This should catch most exceptions that happen as a result of user commands
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
             }
-            return timeAdvances;
+            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
 
         /// <summary>
