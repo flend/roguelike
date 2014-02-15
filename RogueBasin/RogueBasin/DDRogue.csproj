@@ -275,6 +275,7 @@
     <Compile Include="MapInfo.cs" />
     <Compile Include="MapObject.cs" />
     <Compile Include="MapRendererLibTCod.cs" />
+    <Compile Include="MapTerrainRandomizer.cs" />
     <Compile Include="MessageQueue.cs" />
     <Compile Include="Monster.cs" />
     <Compile Include="MonsterEffect.cs" />

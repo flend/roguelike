@@ -16,7 +16,6 @@ namespace RogueBasin
         /// Mapping from template terrain to real terrain on the map
         /// </summary>
         Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping;
-        Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping2;
 
         List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
         List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
@@ -30,12 +29,6 @@ namespace RogueBasin
             terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
             terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
             terrainMapping[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
-
-            terrainMapping2 = new Dictionary<RoomTemplateTerrain, MapTerrain>();
-            terrainMapping2[RoomTemplateTerrain.Wall] = MapTerrain.DockWall;
-            terrainMapping2[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
-            terrainMapping2[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
-            terrainMapping2[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
         }
 
         private RoomTemplate RandomRoom()
@@ -312,14 +305,28 @@ namespace RogueBasin
 
             mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(randomDeadEndToLockL1FarClue, "magenta"), roomForFarClue);
 
-
             //Add maps to the dungeon
 
             Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
-            Game.Dungeon.AddMap(masterMap);
 
-            Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping2);
-            Game.Dungeon.AddMap(masterMapL2);
+            //Set player's start location (must be done before adding items)
+
+            var firstRoom = mapInfo.GetRoom(0);
+            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            //Add terrain and randomize walls
+
+            Dictionary<MapTerrain, List<MapTerrain>> brickTerrainMapping = new Dictionary<MapTerrain,List<MapTerrain>> {
+                { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.BrickWall1, MapTerrain.BrickWall1, MapTerrain.BrickWall1, MapTerrain.BrickWall2, MapTerrain.BrickWall3, MapTerrain.BrickWall4, MapTerrain.BrickWall5 } }};
+
+            Map randomizedMapL1 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMap, brickTerrainMapping);
+            Game.Dungeon.AddMap(randomizedMapL1);
+
+            Map masterMapL2 = l2mapBuilder.MergeTemplatesIntoMap(terrainMapping);
+            Dictionary<MapTerrain, List<MapTerrain>> panelTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
+                { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.PanelWall1, MapTerrain.PanelWall1, MapTerrain.PanelWall1, MapTerrain.PanelWall2, MapTerrain.PanelWall3, MapTerrain.PanelWall4, MapTerrain.PanelWall5 } }};
+            Map randomizedMapL2 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMapL2, panelTerrainMapping);
+            Game.Dungeon.AddMap(randomizedMapL2);
 
             //Recalculate walkable to allow placing objects
             Game.Dungeon.RefreshAllLevelPathingAndFOV();
@@ -333,12 +340,6 @@ namespace RogueBasin
             Game.Dungeon.AddFeature(new Features.Elevator(1, elevator2Loc), 0, elevator1Loc);
             Game.Dungeon.AddFeature(new Features.Elevator(0, elevator1Loc), 1, elevator2Loc);
 
-            //Set player's start location (must be done before adding items)
-
-            //Set PC start location
-
-            var firstRoom = mapInfo.GetRoom(0);
-            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             //Add clues
 

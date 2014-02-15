@@ -121,7 +121,33 @@ namespace RogueBasin
         Forest, //not walkable
         BarDoor,//not walkable
         HellWall,//not walkable
-        DockWall//not walkable
+        DockWall, //not walkable
+        BrickWall1, //not walkable
+        BrickWall2, //not walkable
+        BrickWall3, //not walkable
+        BrickWall4, //not walkable
+        BrickWall5, //not walkable
+        PanelWall1, //not walkable
+        PanelWall2, //not walkable
+        PanelWall3, //not walkable
+        PanelWall4, //not walkable
+        PanelWall5, //not walkable
+        IrisWall1, //not walkable
+        IrisWall2, //not walkable
+        IrisWall3, //not walkable
+        IrisWall4, //not walkable
+        IrisWall5, //not walkable
+        LineWall1, //not walkable
+        LineWall2, //not walkable
+        LineWall3, //not walkable
+        LineWall4, //not walkable
+        LineWall5, //not walkable
+        SecurityWall1, //not walkable
+        SecurityWall2, //not walkable
+        SecurityWall3, //not walkable
+        SecurityWall4, //not walkable
+        SecurityWall5 //not walkable
+
      }
 
     public enum PathingTerrain

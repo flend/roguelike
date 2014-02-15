@@ -3016,7 +3016,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Master is terrain walkable from MapTerrain type (not universally used yet)
+        /// Master is terrain walkable from MapTerrain type (not universally used yet) - defaults false
         /// </summary>
         /// <param name="terrain"></param>
         /// <returns></returns>
@@ -3031,7 +3031,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Master is terrain light blocking from MapTerrain type (not universally used yet)
+        /// Master is terrain light blocking from MapTerrain type (not universally used yet) - defaults true
         /// </summary>
         /// <param name="terrain"></param>
         /// <returns></returns>
