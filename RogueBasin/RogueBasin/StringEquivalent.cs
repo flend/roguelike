@@ -24,6 +24,8 @@ namespace RogueBasin
 
         public static Dictionary<GameDifficulty, string> GameDifficultyString { get; private set; }
 
+        public static char Heading { get { return (char)7; } }
+
         static StringEquivalent()
         {
             EquipmentSlots = new Dictionary<EquipmentSlot, string>();
@@ -48,7 +50,7 @@ namespace RogueBasin
 
         private static void SetupTerrainChars()
         {
-            TerrainChars.Add(MapTerrain.Empty, ' ');
+            TerrainChars.Add(MapTerrain.Empty, (char)250);
             TerrainChars.Add(MapTerrain.Void, '\xb0');
             TerrainChars.Add(MapTerrain.Wall, (char)320);
             

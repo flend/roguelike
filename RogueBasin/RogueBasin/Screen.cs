@@ -219,12 +219,14 @@ namespace RogueBasin {
 
             //Max 60 * 25 map
 
+            movieWidth = 60;
+            movieHeight = 25;
+
             mapTopLeftBase = new Point(2, 6);
             mapBotRightBase = new Point(38, 32);
 
             statsDisplayTopLeft = new Point(40, 6);
             statsDisplayBotRight = new Point(57, 32);
-                      
 
             inventoryTL = new Point(5, 5);
             inventoryTR = new Point(55, 5);
@@ -1911,8 +1913,8 @@ namespace RogueBasin {
                                 {
                                     char charToOverwrite = (char)terrainChar;
                                     //Dot is too hard to see
-                                    if (charToOverwrite == '.')
-                                        charToOverwrite = '\x9';
+                                    if (charToOverwrite == StringEquivalent.TerrainChars[MapTerrain.Empty])
+                                        charToOverwrite = (char)7;
 
 
                                     tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)] = new TileEngine.TileCell(charToOverwrite);

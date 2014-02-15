@@ -25,12 +25,6 @@ namespace RogueBasin.LibTCOD
 
         public void updateMap(int level, PathingMap terrainMap) {
 
-            if (levelTCODMaps.Count() == 0)
-            {
-                LogFile.Log.LogEntryDebug("updateMap called before pathfinding initially done.", LogDebugLevel.Medium);
-                return;
-            }
-
             TCODFov tcodLevel = new TCODFov(terrainMap.Width, terrainMap.Height);
 
             for (int j = 0; j < terrainMap.Width; j++)

@@ -39,11 +39,6 @@ namespace RogueBasin
 
         public int Run(string[] args)
         {
-            //Try to run the graph example
-            //var example7 = new graphtestc.Example7();
-            //example7.OutputGraph();
-
-
             SetupSystem();
             bool loadedGame = SetupGame();
 
@@ -2413,13 +2408,13 @@ namespace RogueBasin
 
             //Intro screen pre-game (must come after screen)
 
-
             //  GameIntro intro = new GameIntro();
             //  intro.ShowIntroScreen();
 
             string playerName = "Dave";
             bool showMovies = false;
             GameDifficulty diff = GameDifficulty.Easy;
+
             /*
 
             string playerName = "Dave";
@@ -2447,18 +2442,13 @@ namespace RogueBasin
             Game.Dungeon.Player.PlayItemMovies = showMovies;
             Game.Dungeon.Difficulty = diff;
 
-            //Do final player player
+            //Do final player setup
             Game.Dungeon.Player.StartGameSetup();
 
             //Move the player to the start location, triggering any triggers etc.
             Game.Dungeon.MoveToFirstMission();
 
-            //Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y);
-
             return false;
-            //      }
-
-            //Fall into the main loop
         }
 
 

@@ -2034,7 +2034,8 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("NonDoor Connection - from room: " + originRoomId + " to room: " + destRoomId, LogDebugLevel.High);
 
             //Register that there are no door connections
-            edgeInfo.Add(new Connection(originRoomId, destRoomId), new ConnectionInfo());
+            if(!edgeInfo.ContainsKey(new Connection(originRoomId, destRoomId)))
+                edgeInfo.Add(new Connection(originRoomId, destRoomId), new ConnectionInfo());
         }
 
         /// <summary>

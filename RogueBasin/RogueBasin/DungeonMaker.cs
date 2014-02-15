@@ -57,7 +57,7 @@ namespace RogueBasin
 
             
             //bool decision = Screen.Instance.YesNoQuestion("Locks?");
-
+            /*
             bool decision = true;
 
             if (decision)
@@ -82,19 +82,11 @@ namespace RogueBasin
                     SetupMapsGraphingDemo(false, 0);
 
             }
-  
+  */
 
-            /*
-            SetupMaps();
 
-            //Uniques must be spawned before creatures (and followers)
-            SpawnUniques();
-
-            SpawnCreaturesAndItems();
-
-            //Debug only
-            //SpawnItems();
-            */
+            SetupMapsFlatline();
+            
             return Game.Dungeon;
         }
 
@@ -2308,6 +2300,13 @@ namespace RogueBasin
 
             //Game.Dungeon.DungeonInfo.SetupDungeonStartAndEndDebug();
 
+            //Make the generators
+
+            MapGeneratorCave caveGen = new MapGeneratorCave();
+
+            //Set width height of all maps to 60 / 25
+            caveGen.Width = 60;
+            caveGen.Height = 25;
 
             //These need to start from 0 now and be continuous
 
@@ -2319,13 +2318,13 @@ namespace RogueBasin
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
             //Place monsters in levels
-            //SpawnCreaturesFlatline(dungeonLevelsToTest, levelGen, false);
+            SpawnCreaturesFlatline(dungeonLevelsToTest, levelGen, false);
 
-            //SpawnItemsFlatline(dungeonLevelsToTest, levelGen, false);
+            SpawnItemsFlatline(dungeonLevelsToTest, levelGen, false);
 
-            //SpawnObjectivesFlatline(dungeonLevelsToTest, levelGen, false);
+            SpawnObjectivesFlatline(dungeonLevelsToTest, levelGen, false);
         }
-
+        
         private List<int> RebuildAllMaps()
         {
             List<int> dungeonLevelsToTest = new List<int>();
@@ -2335,7 +2334,7 @@ namespace RogueBasin
                 dungeonLevelsToTest.Add(i);
             }
 
-            bool experimentalTemplateGen = true;
+            bool experimentalTemplateGen = false;
 
             if(!experimentalTemplateGen)
                 SpawnMapFlatline(dungeonLevelsToTest, false);
@@ -2381,7 +2380,7 @@ namespace RogueBasin
 
                             MapGeneratorBSP hallsGen = new MapGeneratorBSP();
 
-                            hallsGen.Width = 200;
+                            hallsGen.Width = 40;
                             hallsGen.Height = 80;
 
                             Map hallMap = hallsGen.GenerateMap(hallsExtraCorridorDefinite + Game.Random.Next(hallsExtraCorridorRandom));
