@@ -1,0 +1,7 @@
+The slowest things are:
+
+Calculating the display of the creatures' FOV (needs to be refactored, if we use it - currently restricted to Debug Mode)
+Writing to the MSDOS-style Console (is not really necessary since we can always tail the logfile which works OK)
+Closing the log file every log entry (resolved)
+
+Then: 15% of runtime in CheckTileFOV, 12.64% in Triangular FOV, 10.41% in Angle, 8.86% in Normalize

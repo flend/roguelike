@@ -2723,7 +2723,6 @@ namespace RogueBasin
                 return;
 
             Map currentMap = levels[creature.LocationLevel];
-            //TCODFov tcodFOV = levelTCODMaps[creature.LocationLevel];
            
             //Calculate FOV
             CreatureFOV creatureFov = Game.Dungeon.CalculateCreatureFOV(creature);
@@ -2743,6 +2742,8 @@ namespace RogueBasin
 
             //Always check the whole map (now we have strange FOVs)
             // (may not be necessary) [and is certainly slow]
+
+            //According to profiling this is *BY FAR* the slowest thing in the game
 
             int xl = 0;
             int xr = currentMap.width;

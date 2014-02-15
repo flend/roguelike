@@ -31,7 +31,6 @@ namespace RogueBasin
                 //Open logfile
                 Directory.CreateDirectory("logs");
                 logFile = new StreamWriter(logFilename);
-                logFile.Close();
                 logFileWorking = true;
             }
             catch (Exception e)
@@ -67,9 +66,11 @@ namespace RogueBasin
             //Add to file
             try
             {
-                logFile = new StreamWriter(logFilename, true);
+                //In case we log again after closing
+                if(logFile == null)
+                    logFile = new StreamWriter(logFilename);
+
                 logFile.WriteLine(datedEntry);
-                logFile.Close();
             }
             catch (Exception)
             {
@@ -78,6 +79,13 @@ namespace RogueBasin
 
             //To debug console
             Screen.Instance.ConsoleLine(datedEntry);
+        }
+
+        public void Close()
+        {
+            if(logFile != null)
+                logFile.Close();
+            logFile = null;
         }
 
         //Produce save dateTime string for filenames
@@ -90,7 +98,8 @@ namespace RogueBasin
         ~LogFile()
         {
             //Close logfile
-            logFile.Close();
+            if(logFile != null)
+                logFile.Close();
         }
 
         public static LogFile Log

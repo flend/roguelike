@@ -181,9 +181,13 @@ namespace RogueBasin
                             ProfileEntry("Pre Monster POV");
 
                             //Debug: show the FOV of all monsters. Should flag or comment this for release.
-                            foreach (Monster monster in Game.Dungeon.Monsters)
+                            //This is extremely slow, so restricting to debug mode
+                            if (Screen.Instance.DebugMode)
                             {
-                                Game.Dungeon.ShowCreatureFOVOnMap(monster);
+                                foreach (Monster monster in Game.Dungeon.Monsters)
+                                {
+                                    Game.Dungeon.ShowCreatureFOVOnMap(monster);
+                                }
                             }
 
                             Game.Dungeon.ShowSoundsOnMap();
@@ -214,6 +218,7 @@ namespace RogueBasin
                                 var inputResult = UserInput();
                                 timeAdvances = inputResult.Item1;
                                 centreOnPC = inputResult.Item2;
+                                //timeAdvances = true;
                             } while (!timeAdvances);
 
                             ProfileEntry("After user");
@@ -240,6 +245,9 @@ namespace RogueBasin
 
                 }
             }
+
+            //Do any final cleanup
+            LogFile.Log.Close();
         }
 
         private void ProfileEntry(string p)
