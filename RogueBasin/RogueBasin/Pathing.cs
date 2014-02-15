@@ -258,7 +258,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, true);
         }
 
         /// <summary>
