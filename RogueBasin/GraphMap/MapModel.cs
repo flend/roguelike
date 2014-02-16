@@ -929,20 +929,22 @@ namespace GraphMap
         public bool CycleDebug { get; set; }
         public readonly UndirectedGraph<int, TaggedEdge<int, string>> mapNoCycles = new UndirectedGraph<int,TaggedEdge<int,string>>();
 
+        //TODO: These should be ReadOnly dictionaries, but that is a .net 4.5 feature
+
         /// <summary>
         /// Mapping from room vertex in non-reduced map to node in no-cycle reduced map
         /// </summary>
-        public readonly ReadOnlyDictionary<int, int> roomMappingFullToNoCycleMap;
+        public readonly Dictionary<int, int> roomMappingFullToNoCycleMap;
 
         /// <summary>
         /// Mapping from room vertex in no-cycle reduced map to node in full non-reduced map
         /// </summary>
-        public readonly ReadOnlyDictionary<int, List<int>> roomMappingNoCycleToFullMap;
+        public readonly Dictionary<int, List<int>> roomMappingNoCycleToFullMap;
 
         /// <summary>
         /// Mapping from edge connection in no-cycle reduced map to edge connection in full non-reduced map
         /// </summary>
-        public readonly ReadOnlyDictionary<Connection, Connection> edgeMappingNoCycleToFullMap;
+        public readonly Dictionary<Connection, Connection> edgeMappingNoCycleToFullMap;
 
         public MapCycleReducer(IEnumerable<TaggedEdge<int, string>> edges)
         {
@@ -1244,9 +1246,9 @@ namespace GraphMap
 
     static class DictionaryExtension
     {
-        public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        public static Dictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
         {
-            return new ReadOnlyDictionary<TKey, TValue>(dictionary);
+            return new Dictionary<TKey, TValue>(dictionary);
         }
     }
     
