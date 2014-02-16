@@ -101,6 +101,79 @@ namespace TestGraphMap
             Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock1", "lock0"));
             Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock2", "lock0"));
         }
+        
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CluesCannotBeAddedToExistingDoorsIfTheClueIsBehindTheDoorItself()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 6);
+
+            manager.AddCluesToExistingDoor("lock0", new List<int> { 15 });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CluesCannotBeAddedToExistingDoorsIfTheyArePlacedBehindDoorsWeDependOn()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 6);
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 2);
+
+            manager.AddCluesToExistingDoor("lock1", new List<int>{ 15 } );
+        }
+
+        [TestMethod]
+        public void CluesCanBeAddedToExistingDoorsIfTheyArePlacedInAllowedAreas()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 6);
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 2);
+
+            Assert.IsNotNull(manager.AddCluesToExistingDoor("lock1", new List<int> { 10 }));
+        }
+
+        [TestMethod]
+        public void AddingAnClueToAnExistingDoorAddsTheRightDependency()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 2);
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 2);
+
+            manager.AddCluesToExistingDoor("lock1", new List<int> { 15 });
+
+            Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock1", "lock0"));
+        }
+
+        [TestMethod]
+        public void AddingAnClueToAnExistingDoorWhichAddsADependencyGivesTheCorrectlyUpdatedListOfPossibleClueVertices()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 2);
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 2);
+
+            manager.AddCluesToExistingDoor("lock1", new List<int> { 15 });
+
+            var validRooms = manager.GetValidRoomsToPlaceClueForExistingDoor("lock0").ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 10, 11, 12 }), validRooms);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CluesCannotBeAddedToNoExistantDoors()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 6);
+
+            manager.AddCluesToExistingDoor("lock1", new List<int> { 15 });
+        }
 
         [TestMethod]
         public void AddingTheTwoCluesForADoorBehindOtherDoorsMeansTheNewDoorDependsOnTheTwoOtherDoors()

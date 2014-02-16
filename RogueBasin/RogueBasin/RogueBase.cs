@@ -158,13 +158,13 @@ namespace RogueBasin
                         {
                             LogFile.Log.LogEntry("Exception thrown" + e.Message);
                         }
-                        
+
                     }
-                    
+
                     //PC turn
                     try
                     {
-                        
+
 
                         //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
                         if (Game.Dungeon.Player.IncrementTurnTime())
@@ -231,7 +231,7 @@ namespace RogueBasin
                             Game.Dungeon.PlayerHadBonusTurn = true;
                         }
 
-                        
+
                     }
                     catch (Exception ex)
                     {

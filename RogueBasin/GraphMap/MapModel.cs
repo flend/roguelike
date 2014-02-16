@@ -187,13 +187,14 @@ namespace GraphMap
         /// </summary>
         public int NumCluesRequired { get; private set; }
 
-        public Door(TaggedEdge<int, string> doorEdge, Connection connectionFullMap, string id, int index, int numberOfCluesRequired)
+        public Door(TaggedEdge<int, string> doorEdge, Connection connectionReducedMap, Connection connectionFullMap, string id, int index, int numberOfCluesRequired)
         {
             Id = id;
             this.doorEdge = doorEdge;
             this.index = index;
             NumCluesRequired = numberOfCluesRequired;
             DoorConnectionFullMap = connectionFullMap;
+            DoorConnectionReducedMap = connectionReducedMap;
         }
 
         public bool CanDoorBeUnlockedWithClues(IEnumerable<Clue> clues)
@@ -217,6 +218,12 @@ namespace GraphMap
         /// Connection in full, non-reduced map
         /// </summary>
         public Connection DoorConnectionFullMap
+        {
+            get;
+            private set;
+        }
+
+        public Connection DoorConnectionReducedMap
         {
             get;
             private set;
@@ -491,6 +498,23 @@ namespace GraphMap
             return GetValidRoomsToPlaceClue(edgeForDoor, new List<string>());
         }
 
+        public IEnumerable<int> GetValidRoomsToPlaceClueForExistingDoor(string doorId)
+        {
+            return GetValidRoomsToPlaceClueForExistingDoor(doorId, new List<string>());
+        }
+
+        public IEnumerable<int> GetValidRoomsToPlaceClueForExistingDoor(string doorId, List<string> doorsToAvoidIds)
+        {
+            var door = GetDoorById(doorId);
+
+            if (doorId == null)
+            {
+                throw new ApplicationException("Can't find door id " + doorId);
+            }
+
+            return GetValidRoomsToPlaceClue(door.DoorConnectionReducedMap, doorsToAvoidIds);
+        }
+
         /// <summary>
         /// Add a clue for a doorId at requested room / vertex.
         /// No checks and no updates to the dependency graph.
@@ -536,7 +560,7 @@ namespace GraphMap
 
             var doorEdgeInFullMap = mapNoCycles.edgeMappingNoCycleToFullMap[new Connection(edgeForDoor.Source, edgeForDoor.Target).Ordered];
 
-            Door newDoor = new Door(foundEdge, doorEdgeInFullMap, doorReqs.Id, thisDoorIndex, doorReqs.NumberOfCluesRequired);
+            Door newDoor = new Door(foundEdge, edgeForDoor, doorEdgeInFullMap, doorReqs.Id, thisDoorIndex, doorReqs.NumberOfCluesRequired);
             doorMap.Add(thisDoorIndex, newDoor);
             doorDependencyGraph.AddVertex(thisDoorIndex);
 
@@ -559,17 +583,43 @@ namespace GraphMap
             Door thisDoor = LockDoor(doorReq);
             int thisDoorIndex = thisDoor.DoorIndex;
 
+            var clues = PlaceCluesAndUpdateDependencyGraph(clueVertices, thisDoor);
+
+            //Find all clues now locked by this door, these clues depend on new door
+            var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);
+            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
+
+            Console.WriteLine("Doors with clues behind this door");
+            foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
+            {
+                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
+            }
+
+            //Add dependency on new door to all these clues
+            foreach (var door in lockedCluesDoorIndices)
+            {
+                //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
+                doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
+            }
+
+            return clues;
+        }
+
+        private List<Clue> PlaceCluesAndUpdateDependencyGraph(List<int> clueVertices, Door thisDoor)
+        {
             //Add clues
             var clues = new List<Clue>();
             foreach (var clueVertex in clueVertices)
                 clues.Add(PlaceClue(clueVertex, thisDoor));
+
+            int thisDoorIndex = thisDoor.DoorIndex;
 
             //BUG: this seems to work under debug mode but fail in release builds
             //var clues = clueVertices.Select(vertex => PlaceClue(vertex, doorReq.Id));
 
             //Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
             //Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
-            
+
             var tryGetPath = mapNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
             IEnumerable<TaggedEdge<int, string>> path;
 
@@ -599,24 +649,6 @@ namespace GraphMap
                     }
                 }
             }
-
-            //Find all clues now locked by this door, these clues depend on new door
-            var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);
-            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
-
-            Console.WriteLine("Doors with clues behind this door");
-            foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
-            {
-                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
-            }
-
-            //Add dependency on new door to all these clues
-            foreach (var door in lockedCluesDoorIndices)
-            {
-                //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
-                doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
-            }
-
             return clues;
         }
 
@@ -867,6 +899,18 @@ namespace GraphMap
             //Find the component of this broken graph that is connected to the start vertex - 
             //This component contains the vertices accessible with these clues
             return allowedMap.MapComponent(allowedMap.RoomComponentIndex(startVertex));
+        }
+
+        public List<Clue> AddCluesToExistingDoor(string doorId, List<int> newClueVertices)
+        {
+            var door = GetDoorById(doorId);
+            if (door == null)
+                throw new ApplicationException("Can't find door id " + doorId);
+
+            if (GetValidRoomsToPlaceClue(door.DoorConnectionReducedMap).Intersect(newClueVertices).Count() < newClueVertices.Count())
+                throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClue(door.DoorConnectionReducedMap).Except(newClueVertices).ToString(), door.DoorConnectionReducedMap.Source, door.DoorConnectionReducedMap.Target));
+
+            return PlaceCluesAndUpdateDependencyGraph(newClueVertices, door);
         }
     }
 

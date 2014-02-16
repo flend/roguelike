@@ -39,6 +39,22 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void MapWithObjectiveAndNoCluesIsNotSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            var doorManager = mapModel.DoorAndClueManager;
+            doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
+                new List<int>());
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsFalse(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
         public void MapWithLockedDoorAndClueIsSolvable()
         {
             var map = BuildStandardTestMap();
