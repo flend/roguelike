@@ -249,8 +249,8 @@ namespace RogueBasin {
 
             PCColor = ColorPresets.White;
 
-            SeeAllMonsters = true;
-            SeeAllMap = true;
+            SeeAllMonsters = false;
+            SeeAllMap = false;
         }
 
         //Setup the screen
@@ -1024,7 +1024,7 @@ namespace RogueBasin {
 
             if (SetTargetInRange)
             {
-                backgroundColor = ColorPresets.White;
+                backgroundColor = ColorPresets.Red;
             }
 
             char toDraw = '.';

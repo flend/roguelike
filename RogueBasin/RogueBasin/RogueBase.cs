@@ -1654,7 +1654,7 @@ namespace RogueBasin
             Monster oldTargetCreature = Screen.Instance.CreatureToView;
             Item oldTargetItem = Screen.Instance.ItemToView;
 
-            targettingSuccess = TargetAttack(out target, 0, TargettingType.Line, 0, 'x', currentFOV);
+            targettingSuccess = TargetAttack(out target, TargettingType.Line, 0, 'x', currentFOV);
 
             if (!targettingSuccess)
             {
@@ -1921,6 +1921,11 @@ namespace RogueBasin
             return knownSpells[selectedSpell];
         }
 
+        private bool TargetAttack(out Point target, TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
+        {
+            return TargetAttack(out target, -1, targetType, spreadAngle, confirmChar, currentFOV);
+        }
+
         /// <summary>
         /// Let the user target something
         /// </summary>
@@ -1938,7 +1943,7 @@ namespace RogueBasin
 
             Point startPoint;
 
-            if (Utility.TestRange(Game.Dungeon.Player, closeCreature, range))
+            if (Utility.TestRange(Game.Dungeon.Player, closeCreature, range) || range == -1)
             {
                 startPoint = new Point(closeCreature.LocationMap.x, closeCreature.LocationMap.y);
             }
@@ -1983,22 +1988,16 @@ namespace RogueBasin
             Screen.Instance.TargetRange = range;
             Screen.Instance.TargetPermissiveAngle = spreadAngle;
 
-            if (Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
+            if ((range == -1 && currentFOV.CheckTileFOV(start.x, start.y))
+                || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
             {
                 Screen.Instance.SetTargetInRange = true;
+                SquareContents sqC = SetViewPanelToTargetAtSquare(start);
             }
             else
+            {
                 Screen.Instance.SetTargetInRange = false;
-
-            //Update the last creature looked at
-            //initial start square
-            SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, start);
-            Screen.Instance.CreatureToView = sqC.monster;
-            if (sqC.items.Count > 0)
-                Screen.Instance.ItemToView = sqC.items[0];
-            else
-                Screen.Instance.ItemToView = null;
-            // (may reset to null)
+            }
 
             Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
             Screen.Instance.Update();
@@ -2056,21 +2055,14 @@ namespace RogueBasin
                     //Otherwise OK
                     target = newPoint;
 
-                    if (Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, range, currentFOV))
+                    if ((range == -1 && currentFOV.CheckTileFOV(newPoint.x, newPoint.y))
+                        || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, range, currentFOV))
                     {
                         Screen.Instance.SetTargetInRange = true;
+                        SquareContents sqC = SetViewPanelToTargetAtSquare(target);
                     }
                     else
                         Screen.Instance.SetTargetInRange = false;
-
-                    //Update the last creature looked at
-                    sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
-                    Screen.Instance.CreatureToView = sqC.monster;
-                    if(sqC.items.Count > 0)
-                        Screen.Instance.ItemToView = sqC.items[0];
-                    else
-                        Screen.Instance.ItemToView = null;
-                    // (may reset to null)
 
                     //Update screen
                     Screen.Instance.Target = newPoint;
@@ -2086,6 +2078,17 @@ namespace RogueBasin
 
             return validFire;
 
+        }
+
+        private static SquareContents SetViewPanelToTargetAtSquare(Point start)
+        {
+            SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, start);
+            Screen.Instance.CreatureToView = sqC.monster; //may reset to null
+            if (sqC.items.Count > 0)
+                Screen.Instance.ItemToView = sqC.items[0];
+            else
+                Screen.Instance.ItemToView = null;
+            return sqC;
         }
 
         /// <summary>

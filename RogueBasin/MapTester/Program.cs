@@ -107,6 +107,9 @@ namespace MapTester
             Game.Dungeon = new Dungeon();
 
             Game.Dungeon.Player.LocationLevel = 0;
+
+            Screen.Instance.SeeAllMonsters = true;
+            Screen.Instance.SeeAllMap = true;
         }
 
         private void RunGame()
