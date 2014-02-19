@@ -32,7 +32,8 @@ namespace MapTester
             Game.Random = new Random();
 
             bool testGraphics = false;
-            bool multiLevelDungeon = true;
+            bool multiLevelDungeon = false;
+            bool storyDungeon = true;
 
             if (testGraphics)
             {
@@ -43,8 +44,9 @@ namespace MapTester
                 
                 if (multiLevelDungeon)
                     GenerateMultiLevelDungeon();
-                else
-                {
+                else if(storyDungeon)
+                    GenerateStoryDungeon();
+                else {
                     //Setup a single test level
                     MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
 
@@ -71,6 +73,20 @@ namespace MapTester
             //templateGen.GenerateMultiLevelDungeon();
             var mapInfo = templateGen.GenerateDungeonWithReplacedVaults();
             
+            LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
+
+            //Extract connectivity map
+            VisualiseConnectivityGraph(mapInfo.Model);
+        }
+
+        private void GenerateStoryDungeon()
+        {
+            //Setup a single test level
+            MapGeneratorTemplated templateGen = new MapGeneratorTemplated();
+
+            //templateGen.GenerateMultiLevelDungeon();
+            var mapInfo = templateGen.GenerateDungeonWithStory();
+
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             //Extract connectivity map
