@@ -64,7 +64,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return (char)272;
+            return (char)307;
         }
 
         public override bool UseHiddenName { get { return false; } }

@@ -43,12 +43,16 @@ namespace RogueBasin.Locks
 
         protected override char GetRepresentation()
         {
+            int shroomWallStartRow = 21;
+            int shroomWallSkip = 7;
+            int rowLength = 16;
+
             if (isOpen)
             {
-                return (char)355;
+                return (char)((shroomWallStartRow + 2) * rowLength + 3);
             }
             else
-                return (char)354;
+                return (char)((shroomWallStartRow + 2) * rowLength + 2);
         }
 
         public override libtcodWrapper.Color RepresentationColor()

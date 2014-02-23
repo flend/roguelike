@@ -58,8 +58,7 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.SkeletonWall, '8');
             TerrainChars.Add(MapTerrain.SkeletonWallWhite, '8');
             TerrainChars.Add(MapTerrain.Corridor, '|');
-            TerrainChars.Add(MapTerrain.ClosedDoor, (char)322);
-            TerrainChars.Add(MapTerrain.OpenDoor, (char)323);
+            
             TerrainChars.Add(MapTerrain.Flooded, '=');
             TerrainChars.Add(MapTerrain.Grass, ',');
             TerrainChars.Add(MapTerrain.River, '=');
@@ -73,9 +72,12 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.BarDoor, '|');
             TerrainChars.Add(MapTerrain.DockWall, (char)368);
 
-            int shroomWallStartRow = 19;
+            int shroomWallStartRow = 21;
             int shroomWallSkip = 7;
             int rowLength = 16;
+
+            TerrainChars.Add(MapTerrain.ClosedDoor, (char)((shroomWallStartRow + 1) * rowLength + 2));
+            TerrainChars.Add(MapTerrain.OpenDoor, (char)((shroomWallStartRow + 1) * rowLength + 3));
 
             TerrainChars.Add(MapTerrain.BrickWall1, (char)((shroomWallStartRow + 0) * rowLength + 0));
             TerrainChars.Add(MapTerrain.BrickWall2, (char)((shroomWallStartRow + 0) * rowLength + shroomWallSkip + 1));
