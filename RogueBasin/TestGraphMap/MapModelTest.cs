@@ -143,7 +143,7 @@ namespace TestGraphMap
 
             //Use the keys to get all vertices in the graph
             var allVerticesInReducedGraph = model.GraphNoCycles.roomMappingNoCycleToFullMap.Keys.ToList();
-            var verticesAndDistances = model.GetDistanceOfVerticesFromParticularVertex(11, allVerticesInReducedGraph);
+            var verticesAndDistances = model.GetDistanceOfVerticesFromParticularVertexInReducedMap(11, allVerticesInReducedGraph);
 
             var expectedDistance = new Dictionary<int, int>();
 

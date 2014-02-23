@@ -297,7 +297,7 @@ namespace RogueBasin
 
             var allRoomsForFarClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLockL1FarClue);
             var roomsForFarClueLevel1 = allRoomsForFarClue.Intersect(level1Indices);
-            var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertex(randomDeadEndToLockL1.Source, roomsForFarClueLevel1);
+            var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertexInReducedMap(randomDeadEndToLockL1.Source, roomsForFarClueLevel1);
             var roomForFarClue = MaxEntry(distancesBetweenClueAndDoor).Key;
             LogFile.Log.LogEntryDebug("Lock door " + randomDeadEndToLockL1FarClue + " clue at " + roomForFarClue, LogDebugLevel.High);
 
@@ -484,7 +484,7 @@ namespace RogueBasin
                 int roomForCriticalBridgeClue;
                 if (allowedBridgeRoomsNotOnCriticalPath.Count() > 0)
                 {
-                    var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertex(bridgeCriticalConnection.Source, allowedBridgeRoomsNotOnCriticalPath);
+                    var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertexInReducedMap(bridgeCriticalConnection.Source, allowedBridgeRoomsNotOnCriticalPath);
 
                     //Get room that is half maximum distance from door
                     var verticesByDistance = distancesBetweenClueAndDoor.OrderByDescending(kv => kv.Value).Select(kv => kv.Key);
