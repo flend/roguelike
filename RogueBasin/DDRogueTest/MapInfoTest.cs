@@ -82,6 +82,60 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void CyclesOnSeparateLevelsCanBeReturned()
+        {
+            var builder = new MapInfoBuilder();
+
+            var l1ConnectivityMap = new ConnectivityMap();
+            
+            //Cycle in level 1
+            l1ConnectivityMap.AddRoomConnection(1, 2);
+            l1ConnectivityMap.AddRoomConnection(2, 3);
+            l1ConnectivityMap.AddRoomConnection(3, 1);
+
+            var l1RoomList = new List<TemplatePositioned>();
+            var room1 = new TemplatePositioned(1, 1, 0, null, 1);
+            l1RoomList.Add(room1);
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 2));
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, null, 3));
+
+            var l2ConnectivityMap = new ConnectivityMap();
+
+            //Cycle in level 2
+            l2ConnectivityMap.AddRoomConnection(5, 6);
+            l2ConnectivityMap.AddRoomConnection(6, 7);
+            l2ConnectivityMap.AddRoomConnection(7, 5);
+
+            var l2RoomList = new List<TemplatePositioned>();
+            var room5 = new TemplatePositioned(1, 1, 0, null, 5);
+            l2RoomList.Add(room5);
+            l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 6));
+            l2RoomList.Add(new TemplatePositioned(1, 1, 0, null, 7));
+
+            builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, new Dictionary<Connection, Point>(), 1);
+            builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, new Dictionary<Connection, Point>(), new Connection(3, 5));
+
+            var mapInfo = new MapInfo(builder);
+
+            var cyclesOnLevel0 = mapInfo.GetCyclesOnLevel(0).ToList();
+            Assert.AreEqual(1, cyclesOnLevel0.Count());
+            CollectionAssert.AreEquivalent(cyclesOnLevel0[0], new List<Connection>{
+                new Connection(1, 2),
+                new Connection(2, 3),
+                new Connection(3, 1)
+            });
+
+            var cyclesOnLevel1 = mapInfo.GetCyclesOnLevel(1).ToList();
+            Assert.AreEqual(1, cyclesOnLevel1.Count());
+            CollectionAssert.AreEquivalent(cyclesOnLevel1[0], new List<Connection>{
+                new Connection(5, 6),
+                new Connection(6, 7),
+                new Connection(7, 5)
+            });
+
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void AddConstructedLevelCantBeCalledForFirstLevel()
         {

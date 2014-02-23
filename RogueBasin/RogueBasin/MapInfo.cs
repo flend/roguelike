@@ -32,6 +32,7 @@ namespace RogueBasin
         Dictionary<int, TemplatePositioned> roomTemplates;
         Dictionary<Connection, DoorLocationInfo> doors;
         Dictionary<int, int> roomLevels;
+        Dictionary<int, List<int>> roomForLevel;
         List<ConnectivityMap> connectivityMap;
 
         ConnectivityMap fullMap;
@@ -43,6 +44,7 @@ namespace RogueBasin
             roomTemplates = new Dictionary<int, TemplatePositioned>();
             connectivityMap = new List<ConnectivityMap>();
             roomLevels = new Dictionary<int, int>();
+            roomForLevel = new Dictionary<int, List<int>>();
             doors = new Dictionary<Connection, DoorLocationInfo>();
         }
 
@@ -136,7 +138,9 @@ namespace RogueBasin
     public class MapInfo
     {
         Dictionary<int, TemplatePositioned> rooms;
-        Dictionary<int, int> roomLevels;
+        Dictionary<int, int> roomToLevelMapping;
+        Dictionary<int, List<int>> roomListForLevel;
+
         ConnectivityMap map;
         int startRoom;
         Dictionary<Connection, DoorLocationInfo> doors;
@@ -146,12 +150,24 @@ namespace RogueBasin
         public MapInfo(MapInfoBuilder builder) {
 
             rooms = builder.Rooms;
-            roomLevels = builder.RoomLevelMapping;
+            roomToLevelMapping = builder.RoomLevelMapping;
             map = builder.FullConnectivityMap;
             startRoom = builder.StartRoom;
             doors = builder.Doors;
 
             model = new MapModel(map, startRoom);
+
+            BuildRoomIndices();
+        }
+
+        private void BuildRoomIndices()
+        {
+            roomListForLevel = new Dictionary<int,List<int>>();
+
+            foreach(var level in roomToLevelMapping.Values.Distinct()) {
+                var roomsInThisLevel = roomToLevelMapping.Where(kv => kv.Value == level).Select(kv => kv.Key).ToList();
+                roomListForLevel[level] = roomsInThisLevel;
+            }
         }
 
         /// <summary>
@@ -169,12 +185,12 @@ namespace RogueBasin
 
         public IEnumerable<int> GetRoomIndicesForLevel(int level)
         {
-            return roomLevels.Where(kv => kv.Value == level).Select(kv => kv.Key);
+            return roomListForLevel[level];
         }
 
         public int GetLevelForRoomIndex(int roomIndex)
         {
-            return roomLevels[roomIndex];
+            return roomToLevelMapping[roomIndex];
         }
 
         /// <summary>
@@ -188,6 +204,15 @@ namespace RogueBasin
 
             //This may be slow and better done by the underlying map representation
             return map.GetAllConnections().Where(c => roomIndicesForLevel.Contains(c.Source) || roomIndicesForLevel.Contains(c.Target));
+        }
+
+        public IEnumerable<List<Connection>> GetCyclesOnLevel(int level)
+        {
+            var allCycles = Model.GraphNoCycles.AllCycles;
+
+            return allCycles.Where(cycle =>
+                cycle.Select(c => c.Source).Union(cycle.Select(c => c.Target)).Intersect(roomListForLevel[level]).Any()
+            );
         }
 
         public MapModel Model
