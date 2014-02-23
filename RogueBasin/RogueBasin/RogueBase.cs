@@ -771,10 +771,21 @@ namespace RogueBasin
                                 timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
                             }
 
-                            if (wasDirection && mod == KeyModifier.Arrow)
+                            if (wasDirection && mod == KeyModifier.Arrow && !userKey.Shift)
                             {
                                 Screen.Instance.ViewportScrollSpeed = 4;
                                 Screen.Instance.ScrollViewport(direction);
+                                Screen.Instance.Update();
+                            }
+
+                            if (wasDirection && mod == KeyModifier.Arrow && userKey.Shift)
+                            {
+                                if (direction == new Point(0, -1))
+                                    ScreenLevelUp();
+
+                                if (direction == new Point(0, 1))
+                                    ScreenLevelDown();
+
                                 Screen.Instance.Update();
                             }
                         }
@@ -811,6 +822,19 @@ namespace RogueBasin
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
             }
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+        }
+
+        private void ScreenLevelDown()
+        {
+            if (Screen.Instance.LevelToDisplay > 0)
+                Screen.Instance.LevelToDisplay--;
+        }
+
+        private void ScreenLevelUp()
+        {
+            if (Screen.Instance.LevelToDisplay < Game.Dungeon.NoLevels - 1)
+                Screen.Instance.LevelToDisplay++;
+
         }
 
         /// <summary>

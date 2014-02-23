@@ -1410,8 +1410,8 @@ namespace RogueBasin {
             Point viewOffset = new Point(baseOffset, 19);
             Point gameDataOffset = new Point(baseOffset, 24);
 
-            PrintLine("ZONE: " + (player.LocationLevel + 1).ToString("00"), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
-            PrintLine(DungeonInfo.LookupMissionName(player.LocationLevel), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
+            PrintLine("ZONE: " + (LevelToDisplay + 1).ToString("00"), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
+            PrintLine(DungeonInfo.LookupMissionName(LevelToDisplay), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
             
             
             //Draw HP Status
