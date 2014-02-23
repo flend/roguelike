@@ -188,11 +188,16 @@ namespace RogueBasin {
         /// <summary>
         /// Viewable area TL offset
         /// </summary>
-        Point viewTL;
-        Point viewBR;
+        private Point viewTL;
+        private Point viewBR;
 
         private int ViewableWidth {get; set; }
         private int ViewableHeight {get; set; }
+
+        public int LevelToDisplay
+        {
+            get; set;
+        }
 
         Screen()
         {
@@ -206,6 +211,8 @@ namespace RogueBasin {
 
             viewTL = new Point(0, 0);
             SetViewBRFromTL();
+
+            LevelToDisplay = 0;
 
             DebugMode = false;
             CombatAnimations = true;
@@ -349,6 +356,17 @@ namespace RogueBasin {
 
             SetViewBRFromTL();
         }
+
+        /// <summary>
+        /// Centre the view on a point
+        /// </summary>
+        /// <param name="viewCenter"></param>
+        public void CenterViewOnPoint(int level, Point viewCenter)
+        {
+            LevelToDisplay = level;
+            CenterViewOnPoint(viewCenter);
+        }
+
 
         private void SetViewBRFromTL()
         {
@@ -820,8 +838,10 @@ namespace RogueBasin {
             return false;
         }
 
-        private void DrawPC(Player player)
+        private void DrawPC(int levelToDraw, Player player)
         {
+            if (player.LocationLevel != levelToDraw)
+                return;
          
             Point PClocation = player.LocationMap;
             Color PCDrawColor = PCColor;
@@ -854,26 +874,28 @@ namespace RogueBasin {
 
             tileMap = new TileEngine.TileMap(7, ViewableHeight, ViewableWidth);
 
+            int levelToDisplay = LevelToDisplay;
+
             //Draw the map screen
 
             //Draw terrain (must be done first since sets some params)
             //First level in tileMap
-            DrawMap(dungeon.PCMap);
+            DrawMap(levelToDisplay, dungeon.Levels);
 
             //Draw locks
-            DrawLocks(dungeon.Locks);
+            DrawLocks(levelToDisplay, dungeon.Locks);
 
             //Draw fixed features
-            DrawFeatures(dungeon.Features);
+            DrawFeatures(levelToDisplay, dungeon.Features);
 
             //Draw items (will appear on top of staircases etc.)
-            DrawItems(dungeon.Items);
+            DrawItems(levelToDisplay, dungeon.Items);
 
             //Draw creatures
-            DrawCreatures(dungeon.Monsters);
+            DrawCreatures(levelToDisplay, dungeon.Monsters);
 
             //Draw PC
-            DrawPC(player);
+            DrawPC(levelToDisplay, player);
 
             //Draw targetting cursor
             if (targettingMode)
@@ -1655,7 +1677,7 @@ namespace RogueBasin {
             }
         }
 
-        private void DrawItems(List<Item> itemList)
+        private void DrawItems(int levelToDraw, List<Item> itemList)
         {
 
             //Could consider storing here and sorting to give an accurate representation of multiple objects
@@ -1667,7 +1689,7 @@ namespace RogueBasin {
                     continue;
 
                 //Don't draw items on other levels
-                if (item.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                if (item.LocationLevel != levelToDraw)
                     continue;
 
                 //Colour depending on FOV (for development)
@@ -1727,9 +1749,9 @@ namespace RogueBasin {
 
         }
 
-        private void DrawLocks(Dictionary<Location, List<Lock>> allLocks)
+        private void DrawLocks(int levelToDraw, Dictionary<Location, List<Lock>> allLocks)
         {
-            var locksOnThisLevel = allLocks.Where(kv => kv.Key.Level == Game.Dungeon.Player.LocationLevel).SelectMany(kv => kv.Value);
+            var locksOnThisLevel = allLocks.Where(kv => kv.Key.Level == levelToDraw).SelectMany(kv => kv.Value);
 
             foreach (var thisLock in locksOnThisLevel)
             {
@@ -1774,12 +1796,12 @@ namespace RogueBasin {
 
         }
 
-        private void DrawFeatures(List<Feature> featureList)
+        private void DrawFeatures(int levelToDraw, List<Feature> featureList)
         {
             foreach (Feature feature in featureList)
             {
                 //Don't draw features on other levels
-                if (feature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                if (feature.LocationLevel != levelToDraw)
                     continue;
 
                 //Colour depending on FOV (for development)
@@ -1827,12 +1849,12 @@ namespace RogueBasin {
 
         }
 
-        private void DrawCreatures(List<Monster> creatureList)
+        private void DrawCreatures(int levelToDraw, List<Monster> creatureList)
         {
             //Draw stuff about creatures which should be overwritten by other creatures
             foreach (Monster creature in creatureList)
             {
-                if (creature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                if (creature.LocationLevel != levelToDraw)
                     continue;
 
                 if (!creature.Alive)
@@ -1929,7 +1951,7 @@ namespace RogueBasin {
             foreach (Monster creature in creatureList)
             {
                 //Not on this level
-                if (creature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                if (creature.LocationLevel != levelToDraw)
                     continue;
 
                 if (!creature.Alive)
@@ -2115,8 +2137,9 @@ namespace RogueBasin {
 
 
 
-        private void DrawMap(Map map)
+        private void DrawMap(int level, List<Map> maps)
         {
+            var map = maps[level];
 
             //Calculate where to draw the map
 

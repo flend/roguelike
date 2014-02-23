@@ -77,6 +77,9 @@ namespace RogueBasin
             //Loop through creatures
             //If their internal clocks signal another turn then take one
 
+            var dungeon = Game.Dungeon;
+            var player = Game.Dungeon.Player;
+
             bool centreOnPC = true;
 
             while (Game.Dungeon.RunMainLoop)
@@ -206,7 +209,7 @@ namespace RogueBasin
 
                             //Update screen just before PC's turn
                             if (centreOnPC)
-                                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationMap);
+                                Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
                             Screen.Instance.Update();
 
                             ProfileEntry("Post Screen Update");
@@ -576,6 +579,12 @@ namespace RogueBasin
                                     break;
 
                                 case 'Y':
+                                    //next mission
+                                    Game.Dungeon.MoveToNextMission();
+                                    timeAdvances = true;
+                                    break;
+
+                                case 'E':
                                     //next mission
                                     Game.Dungeon.MoveToNextMission();
                                     timeAdvances = true;
