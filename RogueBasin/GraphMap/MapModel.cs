@@ -990,6 +990,8 @@ namespace GraphMap
         /// </summary>
         public readonly Dictionary<Connection, Connection> edgeMappingNoCycleToFullMap;
 
+        private List<List<Connection>> allCycles = new List<List<Connection>>();
+
         public MapCycleReducer(IEnumerable<TaggedEdge<int, string>> edges)
         {
             this.baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
@@ -1037,6 +1039,7 @@ namespace GraphMap
                 if (tryGetPath(endVertex, out path))
                 {
                     cycleList.Add(path);
+                    AddToAllCycles(path, backEdge);
                 }
                 else
                 {
@@ -1167,6 +1170,14 @@ namespace GraphMap
                 Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), mapNoCycles.Vertices.Count(), componentCount));
         }
 
+        private void AddToAllCycles(IEnumerable<TaggedEdge<int, string>> path, TaggedEdge<int, string> backEdge)
+        {
+            var connectionList = path.Select(edge => new Connection(edge.Source, edge.Target)).ToList();
+            connectionList.Add(new Connection(backEdge.Source, backEdge.Target));
+
+            allCycles.Add(connectionList);
+        }
+
         public bool IsEdgeInRoomsNoCycles(int startRoom, int endRoom)
         {
             try
@@ -1211,6 +1222,8 @@ namespace GraphMap
             }
 
         }
+
+        public List<List<Connection>> AllCycles { get { return allCycles; } }
     }
 
     /** Immutable one-method class used to split a map into locked / unlocked sections */

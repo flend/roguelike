@@ -61,6 +61,7 @@
     <Compile Include="DoorAndClueManagerTest.cs" />
     <Compile Include="DoorTest.cs" />
     <Compile Include="GraphSolverTest.cs" />
+    <Compile Include="MapCycleReducerTest.cs" />
     <Compile Include="MapHeuristicsTest.cs" />
     <Compile Include="MapModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
