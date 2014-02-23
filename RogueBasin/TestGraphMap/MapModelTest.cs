@@ -116,6 +116,35 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void ShortestPathBetweenVerticesCanBeFoundWhenItExistsOnFullMap()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            var shortestPath = model.GetPathBetweenVerticesInFullMap(1, 4).ToList();
+
+            var expectedPath = new List<Connection>(new Connection[] {
+                new Connection(1, 2),
+                new Connection(2, 3),
+                new Connection(3, 4)
+            });
+
+            CollectionAssert.AreEqual(shortestPath, expectedPath);
+        }
+
+        [TestMethod]
+        public void ShortestPathBetweenVerticesCanBeFoundWhenItExistsOnFullMapThroughCycle()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            //Only test the length since we don't know which way it will go
+            var shortestPath = model.GetPathBetweenVerticesInFullMap(1, 11).ToList();
+
+            Assert.AreEqual(6, shortestPath.Count());
+        }
+
+        [TestMethod]
         public void PathBetweenVerticesIsEquivalentWhenTravelledInEitherDirection()
         {
             var connectivityMap = BuildStandardTestMap();
@@ -136,7 +165,7 @@ namespace TestGraphMap
         }
 
         [TestMethod]
-        public void VertexDistanceFromSourceVertexCanBeFound()
+        public void VertexDistanceFromSourceVertexCanBeFoundInReducedMap()
         {
             var connectivityMap = BuildStandardTestMap();
             var model = new MapModel(connectivityMap, 1);
@@ -154,6 +183,40 @@ namespace TestGraphMap
             expectedDistance.Add(5, 4);
 
             expectedDistance.Add(6, 5);
+
+            expectedDistance.Add(10, 1);
+            expectedDistance.Add(11, 0);
+            expectedDistance.Add(12, 1);
+            expectedDistance.Add(13, 1);
+            expectedDistance.Add(14, 2);
+            expectedDistance.Add(15, 2);
+
+            CollectionAssert.AreEquivalent(verticesAndDistances, expectedDistance);
+        }
+
+        [TestMethod]
+        public void VertexDistanceFromSourceVertexCanBeFound()
+        {
+            var connectivityMap = BuildStandardTestMap();
+            var model = new MapModel(connectivityMap, 1);
+
+            //Use the keys to get all vertices in the graph
+            var allVerticesInFullGraph = model.BaseGraph.Vertices.ToList();
+            var verticesAndDistances = model.GetDistanceOfVerticesFromParticularVertexInFullMap(11, allVerticesInFullGraph);
+
+            var expectedDistance = new Dictionary<int, int>();
+
+            expectedDistance.Add(1, 5);
+            expectedDistance.Add(2, 4);
+            expectedDistance.Add(3, 5);
+            expectedDistance.Add(4, 6);
+            expectedDistance.Add(5, 6);
+
+            expectedDistance.Add(6, 7);
+
+            expectedDistance.Add(7, 3);
+            expectedDistance.Add(8, 3);
+            expectedDistance.Add(9, 2);
 
             expectedDistance.Add(10, 1);
             expectedDistance.Add(11, 0);

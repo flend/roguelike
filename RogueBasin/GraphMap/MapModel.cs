@@ -331,9 +331,31 @@ namespace GraphMap
             }
         }
 
+        public IEnumerable<Connection> GetPathBetweenVerticesInFullMap(int startVertex, int endVertex)
+        {
+            var tryGetPath = baseGraph.ShortestPathsDijkstra(x => 1, startVertex);
+
+            IEnumerable<TaggedEdge<int, string>> path;
+            if (tryGetPath(endVertex, out path))
+            {
+                return path.Select(e => new Connection(e.Source, e.Target));
+            }
+            else
+            {
+                return new List<Connection>();
+            }
+        }
+
         public Dictionary<int, int> GetDistanceOfVerticesFromParticularVertexInReducedMap(int startVertex, IEnumerable<int> verticesToCheck)
         {
             var vertexDistances = verticesToCheck.Select(v => GetPathBetweenVerticesInReducedMap(startVertex, v).Count());
+            return verticesToCheck.Zip(vertexDistances, (v, d) => new { Key = v, Value = d })
+                .ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        public Dictionary<int, int> GetDistanceOfVerticesFromParticularVertexInFullMap(int startVertex, IEnumerable<int> verticesToCheck)
+        {
+            var vertexDistances = verticesToCheck.Select(v => GetPathBetweenVerticesInFullMap(startVertex, v).Count());
             return verticesToCheck.Zip(vertexDistances, (v, d) => new { Key = v, Value = d })
                 .ToDictionary(x => x.Key, x => x.Value);
         }
