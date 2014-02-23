@@ -141,7 +141,7 @@ namespace TestGraphMap
             //Only test the length since we don't know which way it will go
             var shortestPath = model.GetPathBetweenVerticesInFullMap(1, 11).ToList();
 
-            Assert.AreEqual(6, shortestPath.Count());
+            Assert.AreEqual(5, shortestPath.Count());
         }
 
         [TestMethod]
