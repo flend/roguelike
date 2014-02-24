@@ -1343,6 +1343,24 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Add a feature that blocks (sets the square unwalkable)
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool AddFeatureBlocking(Feature feature, int level, Point location, bool blocksLight)
+        {
+            var addFeatureSuccess = AddFeature(feature, level, location);
+            if (!addFeatureSuccess)
+                return false;
+
+            SetTerrainAtPoint(level, location, blocksLight ? MapTerrain.NonWalkableFeatureLightBlocking : MapTerrain.NonWalkableFeature);
+
+            return true;
+        }
+
+        /// <summary>
         /// Add feature to the dungeon
         /// </summary>
         /// <param name="feature"></param>
@@ -1373,6 +1391,23 @@ namespace RogueBasin
                         LogFile.Log.LogEntry("AddFeature: other feature already there");
                         return false;
                     }
+                }
+
+                //DON'T PLACE UNDER MONSTERS OR ITEMS - may make the square unroutable
+
+                //Check square has nothing else on it
+                SquareContents contents = MapSquareContents(level, location);
+
+                if (contents.monster != null)
+                {
+                    LogFile.Log.LogEntryDebug("AddFeature failure: Monster at this square", LogDebugLevel.Low);
+                    return false;
+                }
+
+                if (contents.items.Count() != 0)
+                {
+                    LogFile.Log.LogEntryDebug("AddFeature failure: Item at this square", LogDebugLevel.Low);
+                    return false;
                 }
 
                 //Otherwise OK
@@ -3047,7 +3082,8 @@ namespace RogueBasin
                 terrain == MapTerrain.Road ||
                 terrain == MapTerrain.Gravestone ||
                 terrain == MapTerrain.Trees ||
-                terrain == MapTerrain.Rubble)
+                terrain == MapTerrain.Rubble ||
+                terrain == MapTerrain.NonWalkableFeature)
             {
                 return false;
             }
@@ -3082,16 +3118,7 @@ namespace RogueBasin
                     return false;
                 }
 
-                //Open the door
-                levels[level].mapSquares[doorLocation.x, doorLocation.y].Terrain = MapTerrain.OpenDoor;
-                levels[level].mapSquares[doorLocation.x, doorLocation.y].SetOpen();
-
-                //This is very inefficient since it resets the whole level. Could just do the door
-                //RefreshTCODMap(level);
-
-                //More efficient version
-                fov.updateFovMap(level, doorLocation, FOVTerrain.NonBlocking);
-                Pathing.PathFindingInternal.updateMap(level, doorLocation, PathingTerrain.Walkable);
+                SetTerrainAtPoint(level, doorLocation, MapTerrain.OpenDoor);
 
                 return true;
             }
@@ -3101,6 +3128,26 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Non-valid location for door requested");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Set a point to a new type of terrain and update pathing and fov
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="location"></param>
+        /// <param name="newTerrain"></param>
+        private void SetTerrainAtPoint(int level, Point location, MapTerrain newTerrain)
+        {
+            //Update map
+
+            levels[level].mapSquares[location.x, location.y].Terrain = newTerrain;
+
+            levels[level].mapSquares[location.x, location.y].Walkable = IsTerrainWalkable(newTerrain) ? true : false;
+            levels[level].mapSquares[location.x, location.y].BlocksLight = IsTerrainLightBlocking(newTerrain) ? true : false;
+
+            //Update pathing and fov
+            fov.updateFovMap(level, location, IsTerrainLightBlocking(newTerrain) ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
+            Pathing.PathFindingInternal.updateMap(level, location, IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable);
         }
 
         /// <summary>
@@ -3121,16 +3168,7 @@ namespace RogueBasin
                     return false;
                 }
 
-                //Open the door
-                levels[level].mapSquares[doorLocation.x, doorLocation.y].Terrain = MapTerrain.ClosedDoor;
-                levels[level].mapSquares[doorLocation.x, doorLocation.y].SetBlocking();
-
-                //This is very inefficient since it resets the whole level. Could just do the door
-                //RefreshTCODMap(level);
-
-                //More efficient version
-                fov.updateFovMap(level, doorLocation, FOVTerrain.Blocking);
-                Pathing.PathFindingInternal.updateMap(level, doorLocation, PathingTerrain.ClosedDoor);
+                SetTerrainAtPoint(level, doorLocation, MapTerrain.ClosedDoor);
 
                 return true;
             }

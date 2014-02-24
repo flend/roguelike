@@ -106,6 +106,8 @@ namespace RogueBasin
         Corridor, //walkable
         ClosedDoor, //non-walkable
         OpenDoor, //walkable
+        NonWalkableFeature, //non-walkable (used for blocking features)
+        NonWalkableFeatureLightBlocking,
         Flooded, //walkable
         River, //non-walkable
         Mountains, //non-walkable

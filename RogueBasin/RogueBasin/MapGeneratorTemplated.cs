@@ -437,7 +437,7 @@ namespace RogueBasin
                 var bridgeTransitConnection = AddRoomToRandomOpenDoor(bridgeTemplateGenerator, replacementVault, corridor1, 3);
 
                 //Add main bridge
-                var bridgeMainBridgeConnection = AddRoomToRandomOpenDoor(bridgeTemplateGenerator, replacementVault, corridor1, 3);
+                var bridgeMainBridgeConnection = AddRoomToRandomOpenDoor(bridgeTemplateGenerator, placeHolderVault, corridor1, 3);
 
                 //Replace spare doors with walls
                 bridgeTemplateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
@@ -466,7 +466,6 @@ namespace RogueBasin
                 //  - bridge self-destruct
 
                 mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(escapePodsConnection, "escape"), bridgeMainBridgeConnection.Target);
-
 
                 //MAIN QUEST SUPPORT
 
@@ -499,7 +498,6 @@ namespace RogueBasin
                 mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(bridgeCriticalConnection, "green"), roomForCriticalBridgeClue);
 
                 LogFile.Log.LogEntryDebug("L0 Critical Path, candidates: " + allowedBridgeRoomsNotOnCriticalPath.Count() + " lock at: " + bridgeCriticalConnection + " clue at " + roomForCriticalBridgeClue, LogDebugLevel.High);
-
 
                 //Add maps to the dungeon
 
@@ -536,6 +534,25 @@ namespace RogueBasin
                 Game.Dungeon.AddFeature(new Features.Elevator(1, elevator2Loc), 0, elevator1Loc);
                 Game.Dungeon.AddFeature(new Features.Elevator(0, elevator1Loc), 1, elevator2Loc);
 
+                //Add non-interactable features
+                var bridgeRoomOnMap = mapInfo.GetRoom(bridgeMainBridgeConnection.Target);
+                var bridgeRouter = new RoomRouting(bridgeRoomOnMap.Room);
+
+                int featuresToPlace = 5;
+                for (int i = 0; i < featuresToPlace; i++)
+                {
+                    int randX = Game.Random.Next(bridgeRoomOnMap.Room.Width);
+                    int randY = Game.Random.Next(bridgeRoomOnMap.Room.Height);
+
+                    if (bridgeRouter.SetSquareUnwalkableIfDoorPathingIsPreserved(new Point(randX, randY)))
+                    {
+                        var featureLocationInMapCoords = new Point(bridgeRoomOnMap.Location.x + randX, bridgeRoomOnMap.Location.y + randY);
+                        Game.Dungeon.AddFeatureBlocking(new Features.Corpse(), 1, featureLocationInMapCoords, true);
+
+                        LogFile.Log.LogEntryDebug("Placing feature in room " + bridgeRoomOnMap.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                    }
+                }
+
                 //Add clues
 
                 //Find a random room corresponding to a vertex with a clue and place a clue there
@@ -546,9 +563,13 @@ namespace RogueBasin
                         var possibleRooms = clue.PossibleClueRoomsInFullMap;
                         var randomRoom = possibleRooms[Game.Random.Next(possibleRooms.Count)];
 
-                        var pointInRoom = mapInfo.GetRandomPointInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
+                        bool placedItem = false;
+                        do
+                        {
+                            var pointInRoom = mapInfo.GetRandomPointInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
 
-                        Game.Dungeon.AddItem(new Items.Clue(clue), mapInfo.GetLevelForRoomIndex(randomRoom), pointInRoom);
+                            placedItem = Game.Dungeon.AddItem(new Items.Clue(clue), mapInfo.GetLevelForRoomIndex(randomRoom), pointInRoom);
+                        } while (!placedItem);
                     }
 
                 }
