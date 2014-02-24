@@ -62,8 +62,7 @@ namespace RogueBasin.Items
         {
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The siren grenade explodes!");
-            Point dest = Pistol.ThrowItemGeneric(this, target, 0, true);
-            
+            Point dest = Game.Dungeon.Player.ThrowItemGeneric(this, target, 0, true);
 
             //Draw attack
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(target, Game.Dungeon.Player.LocationLevel, 4);

@@ -2512,6 +2512,10 @@ namespace RogueBasin
             //Do final player setup
             Game.Dungeon.Player.StartGameSetup();
 
+            //See everything
+            Screen.Instance.SeeAllMap = true;
+            Screen.Instance.SeeAllMonsters = true;
+
             //Move the player to the start location, triggering any triggers etc.
             Game.Dungeon.MoveToFirstMission();
 

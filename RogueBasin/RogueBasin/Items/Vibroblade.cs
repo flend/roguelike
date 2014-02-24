@@ -61,7 +61,7 @@ namespace RogueBasin.Items
         public Point ThrowItem(Point target)
         {
             //Damage for 5 pts
-            Point dest = Pistol.ThrowItemGeneric(this, target, 5, false);
+            Point dest = Game.Dungeon.Player.ThrowItemGeneric(this, target, 5, false);
             return dest;
         }
 

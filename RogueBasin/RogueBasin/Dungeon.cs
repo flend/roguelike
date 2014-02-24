@@ -4408,6 +4408,48 @@ namespace RogueBasin
             return;
         }
 
+        public List<Point> CalculateTrajectory(Point target)
+        {
+            return CalculateTrajectory(player, target);
+        }
+
+        public List<Point> CalculateTrajectory(Creature creature, Point target)
+        {
+            //Get the points along the line of where we are firing
+            CreatureFOV currentFOV = CalculateCreatureFOV(creature);
+            List<Point> trajPoints = currentFOV.GetPathLinePointsInFOV(creature.LocationMap, target);
+
+            //Also exclude unwalkable points (since we will use this to determine where our item falls
+            List<Point> walkableSq = new List<Point>();
+            foreach (Point p in trajPoints)
+            {
+                if (Game.Dungeon.MapSquareIsWalkable(Game.Dungeon.Player.LocationLevel, p))
+                    walkableSq.Add(p);
+            }
+
+            return walkableSq;
+        }
+
+        public Monster FirstMonsterInTrajectory(List<Point> squares)
+        {
+            //Hit the first monster only
+            Monster monster = null;
+            foreach (Point p in squares)
+            {
+                //Check there is a monster at target
+                SquareContents squareContents = MapSquareContents(player.LocationLevel, p);
+
+                //Hit the monster if it's there
+                if (squareContents.monster != null)
+                {
+                    monster = squareContents.monster;
+                    break;
+                }
+            }
+
+            return monster;
+        }
+
         public List<Point> GetFreeAdjacentSquares(int locationLevel, Point locationMap) {
 
             Map levelMap = levels[locationLevel];

@@ -129,7 +129,7 @@ namespace RogueBasin.Items
         public Point ThrowItem(Point target)
         {
             //Stun for 3 turns
-            return Pistol.ThrowItemGeneric(this, target, 3, true);
+            return Game.Dungeon.Player.ThrowItemGeneric(this, target, 3, true);
         }
 
         /// <summary>

@@ -1909,5 +1909,62 @@ namespace RogueBasin
             }
 
         }
+
+        /// <summary>
+        /// Generic throw method for most normal items
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public Point ThrowItemGeneric(IEquippableItem item, Point target, int damageOrStunTurns, bool stunDamage)
+        {
+            Item itemAsItem = item as Item;
+
+            LogFile.Log.LogEntryDebug("Throwing " + itemAsItem.SingleItemDescription, LogDebugLevel.Medium);
+
+            //Find target
+
+            List<Point> targetSquares = Game.Dungeon.CalculateTrajectory(target);
+            Monster monster = Game.Dungeon.FirstMonsterInTrajectory(targetSquares);
+
+            //Find where it landed
+
+            //Destination will be the last square in trajectory
+            Point destination;
+            if (targetSquares.Count > 0)
+                destination = targetSquares[targetSquares.Count - 1];
+            else
+                //Threw it on themselves!
+                destination = LocationMap;
+
+            //Stopped by a monster
+            if (monster != null)
+            {
+                destination = monster.LocationMap;
+            }
+
+            //Make throwing sound AT target location
+            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), LocationLevel, destination);
+
+            //Draw throw
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
+
+            if (stunDamage)
+            {
+                if (monster != null && damageOrStunTurns > 0)
+                {
+                    ApplyStunDamageToMonster(monster, damageOrStunTurns);
+                }
+            }
+            else
+            {
+                if (monster != null && damageOrStunTurns > 0)
+                {
+                    AttackMonsterThrown(monster, damageOrStunTurns);
+                }
+            }
+
+            return destination;
+        }
     }
 }
