@@ -4492,6 +4492,5 @@ namespace RogueBasin
 
             return adjacentSqFree;
         }
-
     }
 }

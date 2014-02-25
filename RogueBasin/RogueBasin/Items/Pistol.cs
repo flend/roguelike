@@ -210,7 +210,7 @@ namespace RogueBasin.Items
             
             int damageBase = 3;
 
-            string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 2";
+            string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 3";
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Apply damage

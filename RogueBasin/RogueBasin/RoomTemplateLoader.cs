@@ -182,6 +182,12 @@ namespace RogueBasin
 
         public static Point GetRandomPointWithTerrain(RoomTemplate room, RoomTemplateTerrain terrainToFind)
         {
+            var candidatePoints = GetPointsInRoomWithTerrain(room, terrainToFind);
+            return candidatePoints[Game.Random.Next(candidatePoints.Count)];
+        }
+
+        public static List<Point> GetPointsInRoomWithTerrain(RoomTemplate room, RoomTemplateTerrain terrainToFind)
+        {
             var candidatePoints = new List<Point>();
 
             for (int i = 0; i < room.Width; i++)
@@ -193,7 +199,7 @@ namespace RogueBasin
                 }
             }
 
-            return candidatePoints[Game.Random.Next(candidatePoints.Count)];
+            return candidatePoints;
         }
 
         /** Stretches a corridor template into a full sized corridor of length.

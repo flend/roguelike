@@ -9,5 +9,11 @@ namespace RogueBasin
     /// </summary>
     public abstract class UseableFeature : Feature
     {
+        /// <summary>
+        /// Process a player interacting with this object
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public abstract bool PlayerInteraction(Player player);
     }
 }

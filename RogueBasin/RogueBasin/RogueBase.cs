@@ -1415,14 +1415,16 @@ namespace RogueBasin
 
             Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
 
-            if (featureAtSpace == null)
+            UseableFeature useableFeature = featureAtSpace as UseableFeature;
+
+            if (useableFeature == null)
             {
                 Game.MessageQueue.AddMessage("Nothing to interact with here");
                 return false;
             }
 
             //Interact with feature - these will normally put success / failure messages in queue
-            return featureAtSpace.PlayerInteraction(player);
+            return useableFeature.PlayerInteraction(player);
         }
 
         Spell lastSpell = null;

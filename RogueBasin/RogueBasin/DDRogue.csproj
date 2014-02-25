@@ -82,6 +82,7 @@
     <Compile Include="Creatures\Swarmer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DecorationFeatureDetails.cs" />
     <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />
     <Compile Include="Creature.cs" />
@@ -190,6 +191,7 @@
     </Compile>
     <Compile Include="Features\DockBay.cs" />
     <Compile Include="Features\Elevator.cs" />
+    <Compile Include="Features\StandardDecorativeFeature.cs" />
     <Compile Include="Features\StaircaseEntry.cs" />
     <Compile Include="Features\StaircaseExit.cs">
       <SubType>Code</SubType>

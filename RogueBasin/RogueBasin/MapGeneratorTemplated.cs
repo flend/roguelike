@@ -1,4 +1,5 @@
 ﻿using GraphMap;
+using libtcodWrapper;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -404,7 +405,7 @@ namespace RogueBasin
                 var cargoTransitConnection = AddRoomToRandomOpenDoor(cargoTemplateGenerator, replacementVault, corridor1, 3);
 
                 //Add escape pods
-                var escapePodsConnection = AddRoomToRandomOpenDoor(cargoTemplateGenerator, replacementVault, corridor1, 3);
+                var escapePodsConnection = AddRoomToRandomOpenDoor(cargoTemplateGenerator, placeHolderVault, corridor1, 3);
 
                 //Add a small number of place holder holder rooms for vaults
                 var cargoPlaceholders = new List<Connection>();
@@ -536,22 +537,9 @@ namespace RogueBasin
 
                 //Add non-interactable features
                 var bridgeRoomOnMap = mapInfo.GetRoom(bridgeMainBridgeConnection.Target);
-                var bridgeRouter = new RoomRouting(bridgeRoomOnMap.Room);
-
-                int featuresToPlace = 5;
-                for (int i = 0; i < featuresToPlace; i++)
-                {
-                    int randX = Game.Random.Next(bridgeRoomOnMap.Room.Width);
-                    int randY = Game.Random.Next(bridgeRoomOnMap.Room.Height);
-
-                    if (bridgeRouter.SetSquareUnwalkableIfDoorPathingIsPreserved(new Point(randX, randY)))
-                    {
-                        var featureLocationInMapCoords = new Point(bridgeRoomOnMap.Location.x + randX, bridgeRoomOnMap.Location.y + randY);
-                        Game.Dungeon.AddFeatureBlocking(new Features.Corpse(), 1, featureLocationInMapCoords, true);
-
-                        LogFile.Log.LogEntryDebug("Placing feature in room " + bridgeRoomOnMap.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
-                    }
-                }
+                AddStandardDecorativeFeaturesToRoom(1, bridgeRoomOnMap, 5, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
+                var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
+                AddStandardDecorativeFeaturesToRoom(0, escapePodsRoom, 5, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                 //Add clues
 
@@ -594,6 +582,48 @@ namespace RogueBasin
 
             //Set map for visualisation
             return mapInfo;
+        }
+
+        private static void AddFeaturesToRoom<T>(int level, TemplatePositioned positionedRoom, int featuresToPlace) where T: Feature, new()
+        {
+            var bridgeRouter = new RoomRouting(positionedRoom.Room);
+
+            var floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
+
+            for (int i = 0; i < featuresToPlace; i++)
+            {
+                var randomPoint = floorPoints.RandomElement();
+                floorPoints.Remove(randomPoint);
+
+                if (bridgeRouter.SetSquareUnwalkableIfDoorPathingIsPreserved(randomPoint))
+                {
+                    var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
+                    Game.Dungeon.AddFeatureBlocking(new T(), level, featureLocationInMapCoords, true);
+
+                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                }
+            }
+        }
+
+        private static void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, int featuresToPlace, DecorationFeatureDetails.Decoration decorationDetails)
+        {
+            var bridgeRouter = new RoomRouting(positionedRoom.Room);
+
+            var floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
+
+            for (int i = 0; i < featuresToPlace; i++)
+            {
+                var randomPoint = floorPoints.RandomElement();
+                floorPoints.Remove(randomPoint);
+
+                if (bridgeRouter.SetSquareUnwalkableIfDoorPathingIsPreserved(randomPoint))
+                {
+                    var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
+                    Game.Dungeon.AddFeatureBlocking(new Features.StandardDecorativeFeature(decorationDetails.representation, decorationDetails.colour), level, featureLocationInMapCoords, true);
+
+                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                }
+            }
         }
 
         T RandomItem<T>(IEnumerable<T> items)
