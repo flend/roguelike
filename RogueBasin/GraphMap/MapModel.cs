@@ -601,21 +601,22 @@ namespace GraphMap
             if (obj == null)
                 throw new ApplicationException("Objective id not valid");
 
-            return GetValidRoomsToPlaceClueForObjective(obj, new List<string>());
+            return GetValidRoomsToPlaceObjectiveOrClueForObjective(obj.OpenLockIndex, new List<string>());
         }
 
-        public IEnumerable<int> GetValidRoomsToPlaceClueForObjective(Objective objective)
+        public IEnumerable<int> GetValidRoomsToPlaceClueForObjective(List<int> locksLockedByObjective)
         {
-            return GetValidRoomsToPlaceClueForObjective(objective, new List<string>());
+            return GetValidRoomsToPlaceObjectiveOrClueForObjective(locksLockedByObjective, new List<string>());
         }
 
 
         /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge,
-         * specifying also that we want to not place the clue behind any door in the list doorsToAvoid*/
-        public IEnumerable<int> GetValidRoomsToPlaceClueForObjective(Objective objective, List<string> doorsToAvoidIds)
+         * specifying also that we want to not place the clue behind any door in the list doorsToAvoid. 
+           This function is also used when working out where to place the objective itself - it must also
+           be accessible in the same way as its clues*/
+        public IEnumerable<int> GetValidRoomsToPlaceObjectiveOrClueForObjective(List<int> locksLockedByObjective, List<string> doorsToAvoidIds)
         {
-            List<int> lockedClues = objective.OpenLockIndex;
-            var allowedNodes = GetValidRoomsToPlaceClue(doorsToAvoidIds, null, lockedClues);
+            var allowedNodes = GetValidRoomsToPlaceClue(doorsToAvoidIds, null, locksLockedByObjective);
 
             return allowedNodes;
         }
@@ -925,7 +926,7 @@ namespace GraphMap
         /// </summary>
         public void PlaceDoor(DoorRequirements doorReq)
         {
-            PlaceDoorAndClues(doorReq, new List<int> ()).First();
+            PlaceDoorAndClues(doorReq, new List<int> ());
         }
 
         /// <summary>
@@ -1194,20 +1195,30 @@ namespace GraphMap
             if (objective == null)
                 throw new ApplicationException("Can't find obj id " + objectiveId);
 
-            if (GetValidRoomsToPlaceClueForObjective(objective).Intersect(newClueVertices).Count() < newClueVertices.Count())
-                throw new ApplicationException(String.Format("Can't put clues: {0}, for objective at {1}", GetValidRoomsToPlaceClueForObjective(objective).Except(newClueVertices).ToString(), objective.Vertex));
+            var validRoomsForObjectiveClues = GetValidRoomsToPlaceClueForObjective(objective.OpenLockIndex);
+            if (validRoomsForObjectiveClues.Intersect(newClueVertices).Count() < newClueVertices.Count())
+                throw new ApplicationException(String.Format("Can't put clues: {0}, for objective at {1}", validRoomsForObjectiveClues.Except(newClueVertices).ToString(), objective.Vertex));
 
             return PlaceCluesAndUpdateDependencyGraph(newClueVertices, null, objective);
         }
-    
+
         public void PlaceObjective(ObjectiveRequirements objectiveRequirements)
+        {
+            PlaceObjective(objectiveRequirements, new List<string>());
+        }
+
+        public void PlaceObjective(ObjectiveRequirements objectiveRequirements, List<string> doorsToAvoidIds)
         {
  	        //Objectives are like clues in so much as they may be a 'clue' to lock a door
 
-            if (GetLockIndicesByIds(objectiveRequirements.OpenLockId).Count() != objectiveRequirements.OpenLockId.Count())
+            var locksLockedByObjectiveIndices = GetLockIndicesByIds(objectiveRequirements.OpenLockId);
+            if (locksLockedByObjectiveIndices.Count() != objectiveRequirements.OpenLockId.Count())
             {
                 throw new ApplicationException("Lock for objective does not exist");
             }
+
+            if (!GetValidRoomsToPlaceObjectiveOrClueForObjective(locksLockedByObjectiveIndices, doorsToAvoidIds).Contains(objectiveRequirements.Vertex))
+                throw new ApplicationException("Can't place objective " + objectiveRequirements.Id + " at vertex " + objectiveRequirements.Vertex);
 
             var objective = BuildAndAddObjectiveToMap(objectiveRequirements);
 

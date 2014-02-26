@@ -80,6 +80,30 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void AddingAnObjectiveAsAClueForMultipleParentObjectiveMakesTheParentsDependOnTheChild()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj0", 1));
+            manager.PlaceObjective(new ObjectiveRequirements(3, "obj1", 1));
+            manager.PlaceObjective(new ObjectiveRequirements(4, "obj2", 1, new List<string> { "obj0", "obj1" }));
+
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("obj0", "obj2"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("obj1", "obj2"));
+        }
+
+        [TestMethod]
+        public void AddingAnObjectiveAsAClueForADoorMakesTheDoorDependOnTheObjective()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(11, 13), "lock0"));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1, new List<string> { "lock0" }));
+
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock0", "obj1"));
+        }
+
+        [TestMethod]
         public void AddingAClueBehindADoorMeansTheNewDoorDependsOnTheOldDoor()
         {
             var manager = BuildStandardManager();
@@ -127,6 +151,16 @@ namespace TestGraphMap
 
         [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
+        public void ObjectivesCannotBeAddedToExistingDoorsIfTheObjectiveIsBehindTheDoorItself()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 6);
+            manager.PlaceObjective(new ObjectiveRequirements(15, "obj0", 1, new List<string> { "lock0" }));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
         public void CluesCannotBeAddedToExistingDoorsIfTheyArePlacedBehindDoorsWeDependOn()
         {
             var manager = BuildStandardManager();
@@ -135,6 +169,18 @@ namespace TestGraphMap
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 2);
 
             manager.AddCluesToExistingDoor("lock1", new List<int>{ 15 } );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void ObjectivesCannotBeAddedToExistingDoorsIfTheyArePlacedBehindDoorsWeDependOn()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 6);
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 2);
+
+            manager.PlaceObjective(new ObjectiveRequirements(15, "obj1", 1, new List<string> { "lock1" }));
         }
 
         [TestMethod]
@@ -342,6 +388,18 @@ namespace TestGraphMap
             var validRooms = manager.GetValidRoomsToPlaceClueForObjective("obj1").ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void ObjectivesThatAreRequiredToUnlockADoorCantBePlacedBehindDoorsThatDependOnTheDoor()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(10, 11), "lock0"), 4);
+            manager.PlaceDoorAndClue(new DoorRequirements(new Connection(3, 4), "lock1"), 2);
+
+            manager.PlaceObjective(new ObjectiveRequirements(11, "obj1", 1, new List<string> { "lock1" }));
         }
 
         [TestMethod]
