@@ -51,6 +51,7 @@ namespace TestGraphMap
 
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(9, 10), "lock0"), 6);
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 13);
+
         }
 
         [TestMethod]
@@ -68,6 +69,17 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void AddingAnObjectiveAsAClueForAParentObjectiveMakesTheParentDependOnTheChild()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj0", 1));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1, new List<string>{"obj0"}));
+
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("obj0", "obj1"));
+        }
+
+        [TestMethod]
         public void AddingAClueBehindADoorMeansTheNewDoorDependsOnTheOldDoor()
         {
             var manager = BuildStandardManager();
@@ -75,7 +87,7 @@ namespace TestGraphMap
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 2);
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 15);
 
-            Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock1", "lock0"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock1", "lock0"));
         }
 
         [TestMethod]
@@ -86,7 +98,7 @@ namespace TestGraphMap
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock0"), 2);
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 15);
 
-            Assert.IsFalse(manager.IsDoorDependentOnParentDoor("lock0", "lock1"));
+            Assert.IsFalse(manager.IsLockDependentOnParentLock("lock0", "lock1"));
         }
 
         [TestMethod]
@@ -98,8 +110,8 @@ namespace TestGraphMap
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 15);
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(3, 4), "lock2"), 14);
 
-            Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock1", "lock0"));
-            Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock2", "lock0"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock1", "lock0"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock2", "lock0"));
         }
         
         [TestMethod]
@@ -146,7 +158,7 @@ namespace TestGraphMap
 
             manager.AddCluesToExistingDoor("lock1", new List<int> { 15 });
 
-            Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock1", "lock0"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock1", "lock0"));
         }
 
         [TestMethod]
@@ -185,8 +197,8 @@ namespace TestGraphMap
 
             manager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "lock3"), new List<int>(new int[] { 12, 13 }));
 
-            Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock3", "lock1"));
-            Assert.IsTrue(manager.IsDoorDependentOnParentDoor("lock3", "lock2"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock1"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock2"));
         }
 
         [TestMethod]
@@ -201,6 +213,25 @@ namespace TestGraphMap
             List<string> dependentDoors = manager.GetDependentDoorIds("lock0");
 
             CollectionAssert.AreEquivalent(new List<string>(new string[] { "lock1", "lock2" }), dependentDoors);
+        }
+
+        [TestMethod]
+        public void ObjectivesCanBePlacedAndRetrieved()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(12, "obj1", 1));
+            Assert.AreEqual("obj1", manager.GetObjectiveById("obj1").Id);
+        }
+
+        [TestMethod]
+        public void CluesCanBeAddedToObjectivesCanBePlacedAndRetrieved()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(12, "obj1", 1));
+            var cluesPlaced = manager.AddCluesToExistingObjective("obj1", new List<int> { 2 });
+            Assert.AreEqual(1, cluesPlaced.Count());
         }
 
         [TestMethod]
@@ -272,6 +303,48 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void AllRoomsAreValidForCluesForSingleObjective()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(15, "obj1", 1));
+            
+            var validRooms = manager.GetValidRoomsToPlaceClueForObjective("obj1").ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>{ 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }, validRooms);
+        }
+
+        [TestMethod]
+        public void CheckRoomsBehindLockedDoorsThatDependOnObjectivesAreNotValidForPlacingObjectiveClues()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"), new List<int>());
+            //lock0 depends on obj0. Therefore clues for obj0 cannot be placed behind lock0
+            manager.PlaceObjective(new ObjectiveRequirements(6, "obj0", 1, new List<string>{"lock0"}));
+
+            var validRooms = manager.GetValidRoomsToPlaceClueForObjective("obj0").ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms);
+        }
+
+        [TestMethod]
+        public void CheckRoomsBehindDoorsDependentOnParentObjectivesAreNotValidForChildObjectiveClues()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"), new List<int>());
+            //lock0 depends on obj0. Therefore clues for obj0 cannot be placed behind lock0
+            manager.PlaceObjective(new ObjectiveRequirements(6, "obj0", 1, new List<string>{"lock0"}));
+            //obj0 depends on obj1. Therefore we can't place obj1 clues behind lock0
+            manager.PlaceObjective(new ObjectiveRequirements(6, "obj1", 1, new List<string>{"obj0"}));
+
+            var validRooms = manager.GetValidRoomsToPlaceClueForObjective("obj1").ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6 }), validRooms);
+        }
+
+        [TestMethod]
         public void ValidRoomsAreCorrectWhenSpecifyingExtraDependencies()
         {
             var manager = BuildStandardManager();
@@ -285,7 +358,7 @@ namespace TestGraphMap
             //New lock
             //Asking for valid rooms for lock2 clue, specifying we don't want to have open lock0
             //We are locking lock1 clues, so rooms behind lock1 and lock0 are excluded
-            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(3, 4), new List<string>(new string[] { "lock0" })).ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClueForDoor(new Connection(3, 4), new List<string>(new string[] { "lock0" })).ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3 }), validRooms);
         }

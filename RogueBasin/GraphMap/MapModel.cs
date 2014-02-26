@@ -101,18 +101,74 @@ namespace GraphMap
         }
     }
 
+    /** A locked item that is unlocked by clues and produces clues when unlocked */
+    public class Objective
+    {
+        public int LockIndex
+        {
+            get
+            {
+                return index;
+            }
+        }
+
+        public List<int> OpenLockIndex { get; private set; }
+
+        public int Vertex { get; private set; }
+
+        /// <summary>
+        /// Index into containing map
+        /// </summary>
+        private int index;
+
+        /// <summary>
+        /// Number of clues that are required to open the door
+        /// </summary>
+        public int NumCluesRequired { get; private set; }
+
+        /** lockIndex = index of the objective itself
+         *  openLockIndex = index of the objective or door that the clue this objective provides opens
+         */
+        public Objective(int objectiveVertex, string id, int lockIndex, List<int> openLockIndex, int numberOfCluesRequired, List<int> possibleRooms)
+        {
+            Id = id;
+            this.index = lockIndex;
+            OpenLockIndex = openLockIndex;
+            Vertex = objectiveVertex;
+            NumCluesRequired = numberOfCluesRequired;
+            PossibleClueRoomsInFullMap = possibleRooms;
+        }
+
+        public List<int> PossibleClueRoomsInFullMap
+        {
+            get;
+            private set;
+        }
+
+        public string Id
+        {
+            get;
+            private set;
+        }
+    }
+
     /** A clue to open a locked door */
     public class Clue
     {
         /// <summary>
         /// Which door this clue locks
         /// </summary>
-        private int doorIndex;
+        private int lockIndex;
 
         /// <summary>
-        /// Reference to door that we lock
+        /// Reference to door that we lock (for display only)
         /// </summary>
         public Door LockedDoor { get; private set; }
+
+        /// <summary>
+        /// Reference to objective that we lock (for display only)
+        /// </summary>
+        public Objective LockedObjective { get; private set; }
 
         public List<int> PossibleClueRoomsInFullMap
         {
@@ -121,21 +177,32 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Construct a clue for the associated door
+        /// Construct a clue for an associated door
         /// </summary>
         /// <param name="doorIndex"></param>
         public Clue(Door matchingDoor, List<int> possibleRooms)
         {
-            this.doorIndex = matchingDoor.DoorIndex;
+            this.lockIndex = matchingDoor.LockIndex;
             this.LockedDoor = matchingDoor;
             this.PossibleClueRoomsInFullMap = possibleRooms;
         }
 
-        public int DoorIndex
+        /// <summary>
+        /// Construct a clue for an associated objective
+        /// </summary>
+        /// <param name="doorIndex"></param>
+        public Clue(Objective matchingObjective, List<int> possibleRooms)
+        {
+            this.lockIndex = matchingObjective.LockIndex;
+            this.LockedObjective = matchingObjective;
+            this.PossibleClueRoomsInFullMap = possibleRooms;
+        }
+
+        public int OpenLockIndex
         {
             get
             {
-                return doorIndex;
+                return lockIndex;
             }
         }
     }
@@ -145,9 +212,9 @@ namespace GraphMap
     /// </summary>
     public class DoorRequirements
     {
-        public Connection Location { get; set; }
-        public string Id { get; set; }
-        public int NumberOfCluesRequired { get; set; }
+        public Connection Location { get; private set; }
+        public string Id { get; private set; }
+        public int NumberOfCluesRequired { get; private set; }
 
         /// <summary>
         /// Defaults to single clue required
@@ -166,6 +233,35 @@ namespace GraphMap
             this.Location = location;
             this.Id = id;
             this.NumberOfCluesRequired = numberOfCluesRequired;
+        }
+    }
+
+    public class ObjectiveRequirements
+    {
+        public int Vertex { get; private set; }
+        public string Id { get; private set; }
+        public int NumberOfCluesRequired { get; set; }
+        public List<string> OpenLockId { get; private set; }
+
+        /// <summary>
+        /// Defaults to single clue required
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="id"></param>
+        public ObjectiveRequirements(int vertex, string id, int numberOfCluesRequired, List<string> openLockId)
+        {
+            this.Vertex = vertex;
+            this.Id = id;
+            this.NumberOfCluesRequired = numberOfCluesRequired;
+            this.OpenLockId = openLockId;
+        }
+
+        public ObjectiveRequirements(int vertex, string id, int numberOfCluesRequired)
+        {
+            this.Vertex = vertex;
+            this.Id = id;
+            this.NumberOfCluesRequired = numberOfCluesRequired;
+            this.OpenLockId = new List<string>();
         }
     }
 
@@ -199,7 +295,7 @@ namespace GraphMap
 
         public bool CanDoorBeUnlockedWithClues(IEnumerable<Clue> clues)
         {
-            var cluesForThisDoor = clues.Where(c => c.DoorIndex == this.DoorIndex).Count();
+            var cluesForThisDoor = clues.Where(c => c.OpenLockIndex == this.LockIndex).Count();
             return cluesForThisDoor >= this.NumCluesRequired;
         }
 
@@ -229,7 +325,7 @@ namespace GraphMap
             private set;
         }
 
-        public int DoorIndex
+        public int LockIndex
         {
             get
             {
@@ -411,7 +507,7 @@ namespace GraphMap
         readonly MapCycleReducer mapNoCycles;
         readonly int startVertex;
 
-        private int nextDoorIndex = 0;
+        private int nextLockIndex = 0;
 
         /** Door dependency graph
          *
@@ -421,14 +517,28 @@ namespace GraphMap
          *  
          *  vertex number <int> = door index
         */
-        private AdjacencyGraph<int, Edge<int>> doorDependencyGraph;
+        private AdjacencyGraph<int, Edge<int>> lockDependencyGraph;
 
         /** Door map
          * 
-         *  key = unique identifier for door
+         *  key = lock index, unique between doors & objectives
          *  Door = information, including Edge. Only 1 door per edge.
          */
         private Dictionary<int, Door> doorMap;
+
+        /** Objective map
+         * 
+         *  key = lock index, unique between doors & objectives
+         *  Objective = information
+         */
+        private Dictionary<int, Objective> objectiveMap;
+
+        /** Objective room map
+         * 
+         *  key = vertex where objective is located
+         *  List<Objective> = all Objectives at this vertex
+         */
+        private Dictionary<int, List<Objective>> objectiveRoomMap;
 
         /** Clue map
           * 
@@ -442,60 +552,97 @@ namespace GraphMap
             this.mapNoCycles = reducedMap;
             this.startVertex = startVertex;
 
-            doorDependencyGraph = new AdjacencyGraph<int, Edge<int>>();
+            lockDependencyGraph = new AdjacencyGraph<int, Edge<int>>();
             doorMap = new Dictionary<int, Door>();
             clueMap = new Dictionary<int, List<Clue>>();
+            objectiveMap = new Dictionary<int,Objective>();
+            objectiveRoomMap = new Dictionary<int, List<Objective>>();
         }
 
-        /** Clue map
-          * 
-          *  key = vertex where clue is located
-          *  List<Clue> = all Clues at this vertex
-          */
         public Dictionary<int, List<Clue>> ClueMap
         {
             get { return clueMap; }
         }
 
-        /** Door map
-         * 
-         *  key = unique identifier for door
-         *  Door = information, including Edge. Only 1 door per edge.
-         */
         public Dictionary<int, Door> DoorMap
         {
             get { return doorMap; }
         }
 
+        public Dictionary<int, Objective> ObjectiveMap
+        {
+            get { return objectiveMap; }
+        }
+
         public AdjacencyGraph<int, Edge<int>> DoorDependencyGraph
         {
-            get { return doorDependencyGraph; }
+            get { return lockDependencyGraph; }
         }
 
         /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge,
          * specifying also that we want to not place the clue behind any door in the list doorsToAvoid*/
-        public IEnumerable<int> GetValidRoomsToPlaceClue(Connection edgeForDoor, List<string> doorsToAvoidIds) {
-
-            //Check the edge is in the reduced map (will throw an exception if can't find)
-            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
+        public IEnumerable<int> GetValidRoomsToPlaceClueForDoor(Connection edgeForDoor, List<string> doorsToAvoidIds) {
 
             //Traverse the locked tree and find all clues that will be behind the locked door
+            var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
             var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);
+            var newlyLockedObjectives = GetObjectivesBehindLockedEdge(foundEdge);
+
+            var newlyLockedCluesIndices = newlyLockedClues.Select(c => c.OpenLockIndex).Union(newlyLockedObjectives.SelectMany(o => o.OpenLockIndex));
+
+            var allowedNodes = GetValidRoomsToPlaceClue(doorsToAvoidIds, edgeForDoor, newlyLockedCluesIndices);
+
+            return allowedNodes;
+        }
+
+        public IEnumerable<int> GetValidRoomsToPlaceClueForObjective(string objectiveId)
+        {
+            var obj = GetObjectiveById(objectiveId);
+            if (obj == null)
+                throw new ApplicationException("Objective id not valid");
+
+            return GetValidRoomsToPlaceClueForObjective(obj, new List<string>());
+        }
+
+        public IEnumerable<int> GetValidRoomsToPlaceClueForObjective(Objective objective)
+        {
+            return GetValidRoomsToPlaceClueForObjective(objective, new List<string>());
+        }
+
+
+        /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge,
+         * specifying also that we want to not place the clue behind any door in the list doorsToAvoid*/
+        public IEnumerable<int> GetValidRoomsToPlaceClueForObjective(Objective objective, List<string> doorsToAvoidIds)
+        {
+            List<int> lockedClues = objective.OpenLockIndex;
+            var allowedNodes = GetValidRoomsToPlaceClue(doorsToAvoidIds, null, lockedClues);
+
+            return allowedNodes;
+        }
+
+        /** Get valid rooms to place a clue, where rooms behind edgeToLock are inaccessible and rooms behind doors needing lockedClues are inaccessible */
+        private IEnumerable<int> GetValidRoomsToPlaceClue(List<string> doorsToAvoidIds, Connection edgeToLock, IEnumerable<int> lockedClues)
+        {
+            //Check the edge is in the reduced map (will throw an exception if can't find)
+            List<TaggedEdge<int, string>> foundEdge = new List<TaggedEdge<int,string>>();;
+            if(edgeToLock != null)
+                foundEdge.Add(mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeToLock.Source, edgeToLock.Target));
 
             //Find all doors that depend on any door with a locked clue.
             //We can't place a clue for our new door behind any of these
-            var allLockedClueDoors = newlyLockedClues.Select(c => c.DoorIndex);
-            var allDoorsDependentOnLockedClueDoors = newlyLockedClues.SelectMany(c => GetDependentDoorIndices(c.DoorIndex));
-            var allInaccessibleDoors = allLockedClueDoors.Union(allDoorsDependentOnLockedClueDoors).Distinct();
+            var allDoorsDependentOnLockedClueDoors = lockedClues.SelectMany(c => GetDependentDoorIndices(c));
+            var allInaccessibleDoors = lockedClues.Union(allDoorsDependentOnLockedClueDoors).Distinct();
 
             //Add to the list any doors we want to avoid (this can be used to localise clues to parts of levels etc.)
-            var allDoorsToAvoid = doorsToAvoidIds.Select(id => GetDoorById(id).DoorIndex);
+            var allDoorsToAvoid = doorsToAvoidIds.Select(id => GetDoorById(id).LockIndex);
             var allInaccessibleDoorsAndAvoidedDoors = allInaccessibleDoors.Union(allDoorsToAvoid);
 
             //Retrieve the door edges in the forbidden list
-            var forbiddenDoorEdges = allInaccessibleDoorsAndAvoidedDoors.Select(doorIndex => doorMap[doorIndex].DoorEdge);
+            //Note that some ids correspond to objectives, so these are avoided by the ugly SelectMany
+            var forbiddenDoorEdges = allInaccessibleDoorsAndAvoidedDoors.SelectMany(
+                doorIndex => doorMap.ContainsKey(doorIndex) ? new List<TaggedEdge<int, string>> { doorMap[doorIndex].DoorEdge } : new List<TaggedEdge<int, string>>());
             //Add this edge (can't put clue behind our own door) - NB: hacky way to union with a single item
-            var allForbiddenDoorEdges = forbiddenDoorEdges.Union(Enumerable.Repeat(foundEdge, 1)).Distinct();
+            var allForbiddenDoorEdges = forbiddenDoorEdges.Union(foundEdge).Distinct();
 
             //Remove all areas behind any locked door
             MapSplitter allowedMap = new MapSplitter(mapNoCycles.mapNoCycles.Edges, allForbiddenDoorEdges, startVertex);
@@ -509,7 +656,6 @@ namespace GraphMap
                 Console.Write("{0} ", node);
             }
             Console.WriteLine();
-
             return allowedNodes;
         }
 
@@ -517,7 +663,7 @@ namespace GraphMap
         /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge */
         public IEnumerable<int> GetValidRoomsToPlaceClue(Connection edgeForDoor)
         {
-            return GetValidRoomsToPlaceClue(edgeForDoor, new List<string>());
+            return GetValidRoomsToPlaceClueForDoor(edgeForDoor, new List<string>());
         }
 
         public IEnumerable<int> GetValidRoomsToPlaceClueForExistingDoor(string doorId)
@@ -534,7 +680,7 @@ namespace GraphMap
                 throw new ApplicationException("Can't find door id " + doorId);
             }
 
-            return GetValidRoomsToPlaceClue(door.DoorConnectionReducedMap, doorsToAvoidIds);
+            return GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap, doorsToAvoidIds);
         }
 
         /// <summary>
@@ -543,14 +689,16 @@ namespace GraphMap
         /// </summary>
         /// <param name="room"></param>
         /// <param name="doorId"></param>
-        private Clue PlaceClue(int room, Door thisDoor)
-        {
-            int doorIndex = thisDoor.DoorIndex;
-            
+        private Clue BuildAndAddClueToMap(int room, Door thisDoor, Objective thisObjective)
+        {           
             //Find the possible rooms that this clue could be placed in the real map
             var possibleRooms = mapNoCycles.roomMappingNoCycleToFullMap[room];
 
-            Clue newClue = new Clue(thisDoor, possibleRooms);
+            Clue newClue;
+            if (thisDoor != null)
+                newClue = new Clue(thisDoor, possibleRooms);
+            else
+                newClue = new Clue(thisObjective, possibleRooms);
 
             List<Clue> clueListAtVertex;
             clueMap.TryGetValue(room, out clueListAtVertex);
@@ -565,6 +713,59 @@ namespace GraphMap
             return newClue;
         }
 
+        private int GetLockIndexById(string id)
+        {
+            return GetLockIndicesByIds(new List<string> { id }).First();
+        }
+
+        private List<int> GetLockIndicesByIds(List<string> ids)
+        {
+            var indices = new List<int>();
+
+            foreach (var id in ids)
+            {
+                var door = GetDoorById(id);
+                if(door != null)
+                    indices.Add(door.LockIndex);
+
+                var obj = GetObjectiveById(id);
+
+                if (obj != null)
+                    indices.Add(obj.LockIndex);
+            }
+
+            return indices;
+        }
+
+        private Objective BuildAndAddObjectiveToMap(ObjectiveRequirements thisObj)
+        {
+
+            //Find the possible rooms that this objective could be placed in the real map
+            var possibleRooms = mapNoCycles.roomMappingNoCycleToFullMap[thisObj.Vertex];
+
+            int thisLockIndex = nextLockIndex;
+            nextLockIndex++;
+
+            var newObj = new Objective(thisObj.Vertex, thisObj.Id, thisLockIndex, GetLockIndicesByIds(thisObj.OpenLockId), thisObj.NumberOfCluesRequired, possibleRooms);
+
+            //add to lock map
+            objectiveMap.Add(thisLockIndex, newObj);
+            lockDependencyGraph.AddVertex(thisLockIndex);
+
+            //add to room map
+            List<Objective> objListAtVertex;
+            objectiveRoomMap.TryGetValue(thisObj.Vertex, out objListAtVertex);
+
+            if (objListAtVertex == null)
+            {
+                objectiveRoomMap[thisObj.Vertex] = new List<Objective>();
+            }
+
+            objectiveRoomMap[thisObj.Vertex].Add(newObj);
+
+            return newObj;
+        }
+
         /// <summary>
         /// Lock an edge with an id, no checks, no dependency updates.
         /// Returns the door id
@@ -572,19 +773,19 @@ namespace GraphMap
         /// <param name="edgeForDoorSource"></param>
         /// <param name="edgeForDoorTarget"></param>
         /// <param name="doorId"></param>
-        private Door LockDoor(DoorRequirements doorReqs)
+        private Door BuildDoorAndAddToMap(DoorRequirements doorReqs)
         {
             var edgeForDoor = doorReqs.Location;
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
 
-            int thisDoorIndex = nextDoorIndex;
-            nextDoorIndex++;
+            int thisDoorIndex = nextLockIndex;
+            nextLockIndex++;
 
             var doorEdgeInFullMap = mapNoCycles.edgeMappingNoCycleToFullMap[new Connection(edgeForDoor.Source, edgeForDoor.Target).Ordered];
 
             Door newDoor = new Door(foundEdge, edgeForDoor, doorEdgeInFullMap, doorReqs.Id, thisDoorIndex, doorReqs.NumberOfCluesRequired);
             doorMap.Add(thisDoorIndex, newDoor);
-            doorDependencyGraph.AddVertex(thisDoorIndex);
+            lockDependencyGraph.AddVertex(thisDoorIndex);
 
             return newDoor;
         }
@@ -597,19 +798,31 @@ namespace GraphMap
         /// </summary>
         public IEnumerable<Clue> PlaceDoorAndCluesNoChecks(DoorRequirements doorReq, List<int> clueVertices)
         {
+            Door thisDoor = PlaceDoorAndUpdateDependencyGraph(doorReq);
+            var clues = PlaceCluesAndUpdateDependencyGraph(clueVertices, thisDoor, null);
+
+            return clues;
+        }
+
+        private Door PlaceDoorAndUpdateDependencyGraph(DoorRequirements doorReq)
+        {
             //Check the edge is in the reduced map (will throw an exception if can't find)
             var edgeForDoor = doorReq.Location;
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
-            
-            //Add locked door on this edge
-            Door thisDoor = LockDoor(doorReq);
-            int thisDoorIndex = thisDoor.DoorIndex;
 
-            var clues = PlaceCluesAndUpdateDependencyGraph(clueVertices, thisDoor);
+            //Add locked door on this edge
+            Door thisDoor = BuildDoorAndAddToMap(doorReq);
+            int thisDoorIndex = thisDoor.LockIndex;
 
             //Find all clues now locked by this door, these clues depend on new door
             var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);
-            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.DoorIndex);
+            var lockedCluesDoorIndices = newlyLockedClues.Select(clue => clue.OpenLockIndex);
+
+            //Find all objectives now locked by this door, these objectives depend on new door
+            var newlyLockedObj = GetObjectivesBehindLockedEdge(foundEdge);
+            var lockedObjDoorIndices = newlyLockedObj.SelectMany(o => o.OpenLockIndex);
+
+            var allLockedIndices = lockedCluesDoorIndices.Union(lockedObjDoorIndices);
 
             Console.WriteLine("Doors with clues behind this door");
             foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
@@ -618,60 +831,68 @@ namespace GraphMap
             }
 
             //Add dependency on new door to all these clues
-            foreach (var door in lockedCluesDoorIndices)
+            foreach (var door in allLockedIndices)
             {
                 //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
-                doorDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
+                lockDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
             }
-
-            return clues;
+            return thisDoor;
         }
 
-        private List<Clue> PlaceCluesAndUpdateDependencyGraph(List<int> clueVertices, Door thisDoor)
+        private List<Clue> PlaceCluesAndUpdateDependencyGraph(List<int> clueVertices, Door doorLockedByClues, Objective objectiveLockedByClues)
         {
             //Add clues
             var clues = new List<Clue>();
             foreach (var clueVertex in clueVertices)
-                clues.Add(PlaceClue(clueVertex, thisDoor));
+                clues.Add(BuildAndAddClueToMap(clueVertex, doorLockedByClues, objectiveLockedByClues));
 
-            int thisDoorIndex = thisDoor.DoorIndex;
+            int thisDoorIndex;
+            if (doorLockedByClues != null)
+                thisDoorIndex = doorLockedByClues.LockIndex;
+            else
+                thisDoorIndex = objectiveLockedByClues.LockIndex;
 
             //BUG: this seems to work under debug mode but fail in release builds
             //var clues = clueVertices.Select(vertex => PlaceClue(vertex, doorReq.Id));
 
-            //Console.WriteLine("Placing door id: {0}, (index: {1}) at {2}->{3}", doorId, thisDoorIndex, edgeForDoor.Source, edgeForDoor.Target);
-            //Console.WriteLine("Placing clue index: {0} at {1}", thisDoorIndex, clueVertex);
+            foreach (var clueVertex in clueVertices)
+            {
+                UpdateDependencyGraphWhenClueIsPlaced(clueVertex, new List<int>{ thisDoorIndex });
+            }
+            return clues;
+        }
 
+        private void UpdateDependencyGraphWhenClueIsPlaced(int clueVertex, List<int> locksLockedByClue)
+        {
+            //Find path on MST from start location to all clues. Any doors which we traverse become doors we DEPEND on
+            
             var tryGetPath = mapNoCycles.mapNoCycles.ShortestPathsDijkstra(x => 1, startVertex);
             IEnumerable<TaggedEdge<int, string>> path;
 
-            //Find path on MST from start location to all clues. Any doors which we traverse become doors we DEPEND on
-            foreach (var clueVertex in clueVertices)
+            if (clueVertex != startVertex)
             {
-                if (clueVertex != startVertex)
+                if (tryGetPath(clueVertex, out path))
                 {
-                    if (tryGetPath(clueVertex, out path))
+                    foreach (var edge in path)
                     {
-                        foreach (var edge in path)
+                        //Very slow, need to hash this
+                        int doorIndex = GetDoorIndexForEdge(edge);
+                        if (doorIndex != -1)
                         {
-                            //Very slow, need to hash this
-                            int doorIndex = GetDoorIndexForEdge(edge);
-                            if (doorIndex != -1)
-                            {
-                                doorDependencyGraph.AddVerticesAndEdge(new Edge<int>(doorIndex, thisDoorIndex));
-                                Console.WriteLine(String.Format("Door: {1}, now depends on: {0}", doorMap[doorIndex].Id, doorMap[thisDoorIndex].Id));
-                            }
-
+                            locksLockedByClue.ForEach(
+                                lockIndex => lockDependencyGraph.AddVerticesAndEdge(new Edge<int>(doorIndex, lockIndex))
+                            );
+                            Console.WriteLine(String.Format("Door: {1}, now depends on: {0}", doorMap[doorIndex].Id, locksLockedByClue));
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
-                        throw new ApplicationException(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
+
                     }
                 }
+                else
+                {
+                    Console.WriteLine(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
+                    throw new ApplicationException(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
+                }
             }
-            return clues;
         }
 
         /// <summary>
@@ -697,12 +918,9 @@ namespace GraphMap
         /// <summary>
         /// See PlaceDoorAndClues
         /// </summary>
-        /// <param name="doorReq"></param>
-        /// <param name="clueVertex"></param>
-        /// <returns></returns>
         public Clue PlaceDoorAndClue(DoorRequirements doorReq, int clueVertex)
         {
-            return PlaceDoorAndClues(doorReq, new List<int>(new int[] { clueVertex })).First();
+            return PlaceDoorAndClues(doorReq, new List<int>{ clueVertex }).First();
         }
 
         private IEnumerable<Clue> GetCluesBehindLockedEdge(TaggedEdge<int,string> foundEdge)
@@ -715,6 +933,16 @@ namespace GraphMap
             return newlyLockedCluesLists.SelectMany(clue => clue);
         }
 
+        private IEnumerable<Objective> GetObjectivesBehindLockedEdge(TaggedEdge<int, string> foundEdge)
+        {
+            MapSplitter splitMap = new MapSplitter(mapNoCycles.mapNoCycles.Edges, foundEdge, startVertex);
+
+            //Lists of all clues in vertices which are in the locked tree
+            var newlyLockedObjectiveLists = objectiveRoomMap.Where(kv => splitMap.RoomComponentIndex(kv.Key) == splitMap.NonOriginComponentIndex).Select(kv => kv.Value);
+            //Flattened to one long list
+            return newlyLockedObjectiveLists.SelectMany(o => o);
+        }
+
 
         /// <summary>
         /// Return the ids of all doors that depend on this door (not including itself)
@@ -723,7 +951,7 @@ namespace GraphMap
         {
             try
             {
-                var doorIndex = GetDoorById(doorId).DoorIndex;
+                var doorIndex = GetDoorById(doorId).LockIndex;
 
                 var dependentDoorIndices = GetDependentDoorIndices(doorIndex);
 
@@ -751,7 +979,7 @@ namespace GraphMap
         {
             try
             {
-                var dfs = new DepthFirstSearchAlgorithm<int, Edge<int>>(doorDependencyGraph);
+                var dfs = new DepthFirstSearchAlgorithm<int, Edge<int>>(lockDependencyGraph);
                 dfs.DiscoverVertex += dfsDependencyVertexAction;
 
                 foundVertices = new List<int>();
@@ -773,7 +1001,7 @@ namespace GraphMap
         /// <param name="dependencyParentDoorId"></param>
         /// <param name="dependentDoorId"></param>
         /// <returns></returns>
-        public bool IsDoorDependentOnParentDoor(string targetDoorId, string parentDoorId)
+        public bool IsLockDependentOnParentLock(string targetDoorId, string parentDoorId)
         {
             try
             {
@@ -796,11 +1024,11 @@ namespace GraphMap
         private Edge<int> GetDependencyEdge(string dependencyParentDoorId, string dependentDoorId) {
             try
             {
-                var dependencyParentIndex = GetDoorById(dependencyParentDoorId).DoorIndex;
-                var dependentDoorIndex = GetDoorById(dependentDoorId).DoorIndex;
+                var dependencyParentIndex = GetLockIndexById(dependencyParentDoorId);
+                var dependentDoorIndex = GetLockIndexById(dependentDoorId);
 
                 QuickGraph.Edge<int> depEdge;
-                doorDependencyGraph.TryGetEdge(dependencyParentIndex, dependentDoorIndex, out depEdge);
+                lockDependencyGraph.TryGetEdge(dependencyParentIndex, dependentDoorIndex, out depEdge);
                 if (depEdge == null)
                 {
                     throw new ApplicationException(String.Format("Dependency {0} on {1} is not in tree", dependentDoorId, dependencyParentDoorId));
@@ -829,7 +1057,7 @@ namespace GraphMap
             if (foundClue == null)
                 return new List<string>();
 
-            return foundClue.Select(c => doorMap[c.DoorIndex].Id);
+            return foundClue.Select(c => doorMap[c.OpenLockIndex].Id);
         }
 
         public Door GetDoorByIndex(int doorIndex)
@@ -848,7 +1076,7 @@ namespace GraphMap
             {
                 if (door.Value.DoorEdge == edgeToFind)
                 {
-                    return door.Value.DoorIndex;
+                    return door.Value.LockIndex;
                 }
             }
             return -1;
@@ -861,6 +1089,18 @@ namespace GraphMap
                 if (door.Value.Id == id)
                 {
                     return door.Value;
+                }
+            }
+            return null;
+        }
+
+        public Objective GetObjectiveById(string id)
+        {
+            foreach (var obj in objectiveMap)
+            {
+                if (obj.Value.Id == id)
+                {
+                    return obj.Value;
                 }
             }
             return null;
@@ -906,10 +1146,10 @@ namespace GraphMap
             var allDoors = doorMap.Keys;
 
             //How many keys we have for each door index
-            var noCluesForDoors = clues.GroupBy(c => c.DoorIndex).ToDictionary(g => g.Key, g => g.Count());
+            var noCluesForDoors = clues.GroupBy(c => c.OpenLockIndex).ToDictionary(g => g.Key, g => g.Count());
 
-            var unlockedDoors = doorMap.Where(d => noCluesForDoors.ContainsKey(d.Value.DoorIndex) &&
-                                                   noCluesForDoors[d.Value.DoorIndex] >= d.Value.NumCluesRequired)
+            var unlockedDoors = doorMap.Where(d => noCluesForDoors.ContainsKey(d.Value.LockIndex) &&
+                                                   noCluesForDoors[d.Value.LockIndex] >= d.Value.NumCluesRequired)
                                        .Select(d => d.Key);
             
             var lockedDoors = allDoors.Except(unlockedDoors);
@@ -932,7 +1172,33 @@ namespace GraphMap
             if (GetValidRoomsToPlaceClue(door.DoorConnectionReducedMap).Intersect(newClueVertices).Count() < newClueVertices.Count())
                 throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClue(door.DoorConnectionReducedMap).Except(newClueVertices).ToString(), door.DoorConnectionReducedMap.Source, door.DoorConnectionReducedMap.Target));
 
-            return PlaceCluesAndUpdateDependencyGraph(newClueVertices, door);
+            return PlaceCluesAndUpdateDependencyGraph(newClueVertices, door, null);
+        }
+
+        public List<Clue> AddCluesToExistingObjective(string objectiveId, List<int> newClueVertices)
+        {
+            var objective = GetObjectiveById(objectiveId);
+            if (objective == null)
+                throw new ApplicationException("Can't find obj id " + objectiveId);
+
+            if (GetValidRoomsToPlaceClueForObjective(objective).Intersect(newClueVertices).Count() < newClueVertices.Count())
+                throw new ApplicationException(String.Format("Can't put clues: {0}, for objective at {1}", GetValidRoomsToPlaceClueForObjective(objective).Except(newClueVertices).ToString(), objective.Vertex));
+
+            return PlaceCluesAndUpdateDependencyGraph(newClueVertices, null, objective);
+        }
+    
+        public void PlaceObjective(ObjectiveRequirements objectiveRequirements)
+        {
+ 	        //Objectives are like clues in so much as they may be a 'clue' to lock a door
+
+            if (GetLockIndicesByIds(objectiveRequirements.OpenLockId).Count() != objectiveRequirements.OpenLockId.Count())
+            {
+                throw new ApplicationException("Lock for objective does not exist");
+            }
+
+            var objective = BuildAndAddObjectiveToMap(objectiveRequirements);
+
+            UpdateDependencyGraphWhenClueIsPlaced(objective.Vertex, objective.OpenLockIndex);
         }
     }
 
