@@ -830,13 +830,18 @@ namespace GraphMap
                 Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
             }
 
+            AddLockDependencyToExistingLocks(thisDoorIndex, allLockedIndices);
+            return thisDoor;
+        }
+
+        private void AddLockDependencyToExistingLocks(int newDependency, IEnumerable<int> existingLockIndices)
+        {
             //Add dependency on new door to all these clues
-            foreach (var door in allLockedIndices)
+            foreach (var door in existingLockIndices)
             {
                 //Edge goes FROM new door TO old door. Old door now DEPENDS on new door, since old door's clue is locked behind new door. New door must be opened first.
-                lockDependencyGraph.AddEdge(new Edge<int>(thisDoorIndex, door));
+                lockDependencyGraph.AddEdge(new Edge<int>(newDependency, door));
             }
-            return thisDoor;
         }
 
         private List<Clue> PlaceCluesAndUpdateDependencyGraph(List<int> clueVertices, Door doorLockedByClues, Objective objectiveLockedByClues)
@@ -913,6 +918,14 @@ namespace GraphMap
                 throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClue(doorReq.Location).Except(clueVertices).ToString(), doorReq.Location.Source, doorReq.Location.Target));
 
             return PlaceDoorAndCluesNoChecks(doorReq, clueVertices);
+        }
+
+        /// <summary>
+        /// See PlaceDoorAndClues
+        /// </summary>
+        public void PlaceDoor(DoorRequirements doorReq)
+        {
+            PlaceDoorAndClues(doorReq, new List<int> ()).First();
         }
 
         /// <summary>
@@ -1198,7 +1211,11 @@ namespace GraphMap
 
             var objective = BuildAndAddObjectiveToMap(objectiveRequirements);
 
+            //An objective acts like
+            //a) placing clues for the lock that depends on it (if any)
             UpdateDependencyGraphWhenClueIsPlaced(objective.Vertex, objective.OpenLockIndex);
+            //b) locking these clues with a virtual door that is the objective
+            AddLockDependencyToExistingLocks(objective.LockIndex, objective.OpenLockIndex);
         }
     }
 

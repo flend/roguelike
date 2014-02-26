@@ -341,7 +341,7 @@ namespace TestGraphMap
 
             var validRooms = manager.GetValidRoomsToPlaceClueForObjective("obj1").ToList();
 
-            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6 }), validRooms);
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms);
         }
 
         [TestMethod]
