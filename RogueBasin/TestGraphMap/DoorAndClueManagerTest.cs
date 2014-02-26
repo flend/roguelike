@@ -391,6 +391,25 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void CheckValidRoomsForCluesForADoorOnWhichAnObjectiveAndAnotherLockedDoorDepend()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0"));
+            //lock0 depends on obj0
+            manager.PlaceObjective(new ObjectiveRequirements(6, "obj0", 1, new List<string>{"lock0"}));
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(3, 4), "lock1"));
+            manager.AddCluesToExistingObjective("obj0", new List<int>{ 4 });
+            //obj0 depends on lock1
+
+            //lock1 clues can't be placed behind lock0 (or behind lock1)
+            var validRooms = manager.GetValidRoomsToPlaceClueForDoor("lock1", new List<string>()).ToList();
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 5, 6, 10 }), validRooms);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void ObjectivesThatAreRequiredToUnlockADoorCantBePlacedBehindDoorsThatDependOnTheDoor()
         {

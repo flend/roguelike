@@ -579,6 +579,20 @@ namespace GraphMap
             get { return lockDependencyGraph; }
         }
 
+        public IEnumerable<int> GetValidRoomsToPlaceClueForDoor(string doorId)
+        {
+            return GetValidRoomsToPlaceClueForDoor(doorId, new List<string>());
+        }
+
+        public IEnumerable<int> GetValidRoomsToPlaceClueForDoor(string doorId, List<string> doorsToAvoidIds)
+        {
+            var door = GetDoorById(doorId);
+            if (door == null)
+                throw new ApplicationException("Can't find door id: " + doorId);
+
+            return GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap, doorsToAvoidIds);
+        }
+
         /** Return the list of valid rooms in the cycle-free map to place a clue for a locked edge,
          * specifying also that we want to not place the clue behind any door in the list doorsToAvoid*/
         public IEnumerable<int> GetValidRoomsToPlaceClueForDoor(Connection edgeForDoor, List<string> doorsToAvoidIds) {
