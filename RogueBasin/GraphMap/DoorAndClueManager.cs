@@ -698,10 +698,14 @@ namespace GraphMap
                                                .Select(d => d.Value);
 
                 var newlyUnlockedObjectives = unlockedObjectives.Except(openedObjectives);
-                foreach(var obj in newlyUnlockedObjectives) openedObjectives.Add(obj);
-                
-                allClues.AddRange(newlyUnlockedObjectives.SelectMany(obj => obj.OpenLockIndex));
+                var newClues = newlyUnlockedObjectives.SelectMany(obj => obj.OpenLockIndex);
+                allClues.AddRange(newClues);
+
+                //Seems that ordering here is important - ensure we have got the new clues before we add to openObjectives (lazy evaluation)
+                foreach (var obj in newlyUnlockedObjectives) openedObjectives.Add(obj);
             } while(openedObjectivesCount != openedObjectives.Count());
+
+            noCluesForDoors = allClues.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
 
             var unlockedDoors = doorMap.Where(d => noCluesForDoors.ContainsKey(d.Value.LockIndex) &&
                                                    noCluesForDoors[d.Value.LockIndex] >= d.Value.NumCluesRequired)

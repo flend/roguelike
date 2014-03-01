@@ -517,6 +517,35 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void LockedDoorDependingOnAnObjectiveIsAccessibleIfCluesForTheObjectiveAreAccessible()
+        {
+            var manager = BuildStandardManager();
+            manager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 1));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj0", 1, new List<string> { "lock0" }));
+            var clues = manager.AddCluesToExistingObjective("obj0", new List<int> { 2 });
+
+            var validRooms = manager.GetAccessibleVerticesWithClues(clues.Select(c => c.OpenLockIndex));
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
+        }
+
+        [TestMethod]
+        public void LockedDoorDependingOnAnObjectiveIsInAccessibleIfInsufficientCluesForTheObjectiveAreAccessible()
+        {
+            var manager = BuildStandardManager();
+            manager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 2));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj0", 1, new List<string> { "lock0" }));
+            //red herring
+            manager.PlaceObjective(new ObjectiveRequirements(3, "obj1", 1));
+            //One clue before and one after the door (not enough to unlock it)
+            var clues = manager.AddCluesToExistingObjective("obj0", new List<int> { 2 });
+            
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<int>{clues.First().OpenLockIndex});
+
+            CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms.ToList());
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void RedDoorCoveredByBlueDoorBlueKeyCoveredByYellowDoorYellowKeyCoveredByRedShouldNotBeAllowed()
         {

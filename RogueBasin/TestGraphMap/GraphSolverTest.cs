@@ -165,6 +165,27 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void MapWithLockedDoorDependingOnAnObjectiveWithNotEnoughCluesIsNotSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            var doorManager = mapModel.DoorAndClueManager;
+
+            doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 2));
+            doorManager.PlaceObjective(new ObjectiveRequirements(2, "obj0", 1, new List<string> { "lock0" }));
+            //red herring
+            doorManager.PlaceObjective(new ObjectiveRequirements(3, "obj1", 1));
+            //One clue before and one after the door (not enough to unlock it)
+            var clues = doorManager.AddCluesToExistingObjective("obj0", new List<int> { 2 });
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsFalse(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
         public void MapWithLockedDoorWithRecursiveDependencyOnObjectiveIsSolvable()
         {
             var map = BuildStandardTestMap();
