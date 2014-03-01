@@ -217,7 +217,7 @@ namespace TestGraphMap
 
             manager.AddCluesToExistingDoor("lock1", new List<int> { 15 });
 
-            var validRooms = manager.GetValidRoomsToPlaceClueForExistingDoor("lock0").ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClueForDoor("lock0").ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 10, 11, 12 }), validRooms);
         }
@@ -315,7 +315,7 @@ namespace TestGraphMap
 
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock0"), 4);
 
-            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(10, 11)).ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClueForDoor(new Connection(10, 11)).ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1,2,3,4,5,6,10 }), validRooms);
         }
@@ -327,7 +327,7 @@ namespace TestGraphMap
 
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(3, 5), "lock0"), 15);
 
-            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(11, 13)).ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClueForDoor(new Connection(11, 13)).ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 10, 11, 12 }), validRooms);
         }
@@ -343,7 +343,7 @@ namespace TestGraphMap
             
             //This would cover clue1. Therefore lock1 rooms are not accessible, which includes clue0
             //Therefore lock0 rooms are not accessible
-            var validRooms = manager.GetValidRoomsToPlaceClue(new Connection(3, 4)).ToList();
+            var validRooms = manager.GetValidRoomsToPlaceClueForDoor(new Connection(3, 4)).ToList();
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 10 }), validRooms);
         }
@@ -447,24 +447,13 @@ namespace TestGraphMap
             var manager = BuildStandardManager();
             List<string> dependentDoors = manager.GetDependentDoorIds("lock0");
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(ApplicationException))]
-        public void RequestingDependentDoorsForADoorIndexThatDoesntExistThrowsAnException()
-        {
-            var manager = BuildStandardManager();
-            var dependentDoors = manager.GetDependentDoorIndices(0);
-
-            CollectionAssert.AreEquivalent(new List<string>(), dependentDoors);
-        }
-
-        
+      
         [TestMethod]
         public void FullyOpenMapIsFullyAccessibleWithNoClues()
         {
             var manager = BuildStandardManager();
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>());
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<int>());
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
         }
@@ -475,7 +464,7 @@ namespace TestGraphMap
             var manager = BuildStandardManager();
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(10, 11), "lock0"), 6);
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>());
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<int>());
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms.ToList());
         }
@@ -486,7 +475,7 @@ namespace TestGraphMap
             var manager = BuildStandardManager();
             var clue0 = manager.PlaceDoorAndClue(new DoorRequirements(new Connection(10, 11), "lock0"), 6);
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue [] { clue0 }));
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<int>(new int [] { clue0.OpenLockIndex }));
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
         }
@@ -498,7 +487,7 @@ namespace TestGraphMap
             var clue0 = manager.PlaceDoorAndClue(new DoorRequirements(new Connection(10, 11), "lock0"), 6);
             var clue1 = manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 1);
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(new List<Clue>(new Clue[] { clue0 }));
+            var validRooms = manager.GetAccessibleVerticesWithClues(new List<int>(new int[] { clue0.OpenLockIndex }));
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
         }
@@ -510,7 +499,7 @@ namespace TestGraphMap
             var clues = manager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0", 2),
                                                   new List<int>(new int[] { 5, 6 }));
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(clues);
+            var validRooms = manager.GetAccessibleVerticesWithClues(clues.Select(c => c.OpenLockIndex));
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15 }), validRooms.ToList());
         }
@@ -522,7 +511,7 @@ namespace TestGraphMap
             var clues = manager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0", 2),
                                                   new List<int>(new int[] { 5 }));
 
-            var validRooms = manager.GetAccessibleVerticesWithClues(clues);
+            var validRooms = manager.GetAccessibleVerticesWithClues(clues.Select(c => c.OpenLockIndex));
 
             CollectionAssert.AreEquivalent(new List<int>(new int[] { 1, 2, 3, 4, 5, 6, 10 }), validRooms.ToList());
         }

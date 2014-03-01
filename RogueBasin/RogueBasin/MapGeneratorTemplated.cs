@@ -258,7 +258,7 @@ namespace RogueBasin
 
             var randomDeadEndToLock = deadEndsInLevel0.RandomElement();
 
-            var allRoomsForClue0 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLock);
+            var allRoomsForClue0 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(randomDeadEndToLock);
             var roomsForClue0Level0 = allRoomsForClue0.Intersect(level0Indices);
             var roomForClue0 = roomsForClue0Level0.RandomElement();
 
@@ -270,7 +270,7 @@ namespace RogueBasin
             var l0CriticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(startRoom, l1elevatorIndex);
             var l0CriticalConnection = l0CriticalPath.ElementAt(l0CriticalPath.Count() / 2);
 
-            var allRoomsForCriticalL0Clue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(l0CriticalConnection);
+            var allRoomsForCriticalL0Clue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(l0CriticalConnection);
             var roomForCriticalL0Clue = allRoomsForCriticalL0Clue.RandomElement();
 
             mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(l0CriticalConnection, "green"), roomForCriticalL0Clue);
@@ -284,7 +284,7 @@ namespace RogueBasin
 
             var randomDeadEndToLockL1 = deadEndsInLevel1.RandomElement();
 
-            var allRoomsForClue1 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLockL1);
+            var allRoomsForClue1 = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(randomDeadEndToLockL1);
             var roomsForClue1Level0 = allRoomsForClue1.Intersect(level0Indices);
             var roomForClue1 = roomsForClue0Level0.RandomElement();
 
@@ -296,7 +296,7 @@ namespace RogueBasin
 
             var randomDeadEndToLockL1FarClue = deadEndsInLevel1.RandomElement();
 
-            var allRoomsForFarClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(randomDeadEndToLockL1FarClue);
+            var allRoomsForFarClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(randomDeadEndToLockL1FarClue);
             var roomsForFarClueLevel1 = allRoomsForFarClue.Intersect(level1Indices);
             var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertexInReducedMap(randomDeadEndToLockL1.Source, roomsForFarClueLevel1);
             var roomForFarClue = MaxEntry(distancesBetweenClueAndDoor).Key;
@@ -475,7 +475,7 @@ namespace RogueBasin
                 var bridgeCriticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(bridgeTransitConnection.Target, bridgeMainBridgeConnection.Target);
                 var bridgeCriticalConnection = bridgeCriticalPath.ElementAt(bridgeCriticalPath.Count() / 2);
 
-                var allRoomsForCriticalClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClue(bridgeCriticalConnection);
+                var allRoomsForCriticalClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(bridgeCriticalConnection);
                 var bridgeRooms = mapInfo.GetRoomIndicesForLevel(1);
                 var bridgeCriticalPathRooms = bridgeCriticalPath.Select(c => c.Source).Union(bridgeCriticalPath.Select(c => c.Target));
 

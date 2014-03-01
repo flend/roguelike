@@ -29,11 +29,11 @@ namespace GraphMap
             {
                 lastTimeAccessibleVertices = noAccessibleVertices;
 
-                var accessibleVertices = doorManager.GetAccessibleVerticesWithClues(cluesFound);
+                var accessibleVertices = doorManager.GetAccessibleVerticesWithClues(cluesFound.Select(c => c.OpenLockIndex));
 
-                //Add any clues in these vertices to the clues we have
+                //Add any clues in these vertices to the clues we have (hashset ensures we don't add twice)
                 var cluesAtVertices = accessibleVertices.SelectMany(v => doorManager.ClueMap.ContainsKey(v) ? doorManager.ClueMap[v] : new List<Clue> ());
-                cluesAtVertices.ToList().ForEach(clue => cluesFound.Add(clue));
+                foreach (var clue in cluesAtVertices) { cluesFound.Add(clue); }
 
                 noAccessibleVertices = accessibleVertices.Count();
             } while (noAccessibleVertices != lastTimeAccessibleVertices);

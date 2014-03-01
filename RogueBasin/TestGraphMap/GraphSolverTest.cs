@@ -129,6 +129,77 @@ namespace TestGraphMap
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
+
+        [TestMethod]
+        public void MapWithLockedDoorWithDependencyOnObjectiveIsSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            var doorManager = mapModel.DoorAndClueManager;
+            doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 1));
+            doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
+            doorManager.AddCluesToExistingObjective("obj0", new List<int> { 1 });
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsTrue(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
+        public void MapWithLockedDoorWithDependencyOnUnsolveableObjectiveIsNotSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            var doorManager = mapModel.DoorAndClueManager;
+            doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 1));
+            doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
+            //missing clue for objective
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsFalse(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
+        public void MapWithLockedDoorWithRecursiveDependencyOnObjectiveIsSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            var doorManager = mapModel.DoorAndClueManager;
+            doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 1));
+            doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
+            doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj1", 1, new List<string> { "obj0" }));
+            doorManager.AddCluesToExistingObjective("obj1", new List<int> { 1 });
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsTrue(solver.MapCanBeSolved());
+        }
+
+        [TestMethod]
+        public void MapWithLockedDoorWithMultipleDependencyOnObjectivesIsSolvable()
+        {
+            var map = BuildStandardTestMap();
+            var startVertex = 1;
+
+            var mapModel = new MapModel(map, startVertex);
+            var doorManager = mapModel.DoorAndClueManager;
+            doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 2));
+            doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
+            doorManager.PlaceObjective(new ObjectiveRequirements(5, "obj1", 1, new List<string> { "lock0" }));
+            doorManager.AddCluesToExistingObjective("obj0", new List<int> { 1 });
+            doorManager.AddCluesToExistingObjective("obj1", new List<int> { 1 });
+
+            GraphSolver solver = new GraphSolver(mapModel);
+
+            Assert.IsTrue(solver.MapCanBeSolved());
+        }
         
         private ConnectivityMap BuildStandardTestMap()
         {
