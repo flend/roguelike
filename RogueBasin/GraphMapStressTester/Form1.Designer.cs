@@ -40,6 +40,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.seedBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.visualiseBox = new System.Windows.Forms.CheckBox();
+            this.iterationBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // nodesBox
@@ -149,11 +152,43 @@
             this.label5.TabIndex = 11;
             this.label5.Text = "Random Seed";
             // 
+            // visualiseBox
+            // 
+            this.visualiseBox.AutoSize = true;
+            this.visualiseBox.Checked = true;
+            this.visualiseBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.visualiseBox.Location = new System.Drawing.Point(41, 347);
+            this.visualiseBox.Name = "visualiseBox";
+            this.visualiseBox.Size = new System.Drawing.Size(67, 17);
+            this.visualiseBox.TabIndex = 12;
+            this.visualiseBox.Text = "Visualise";
+            this.visualiseBox.UseVisualStyleBackColor = true;
+            // 
+            // iterationBox
+            // 
+            this.iterationBox.Location = new System.Drawing.Point(133, 380);
+            this.iterationBox.Name = "iterationBox";
+            this.iterationBox.Size = new System.Drawing.Size(100, 20);
+            this.iterationBox.TabIndex = 13;
+            this.iterationBox.Text = "1";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(38, 383);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(50, 13);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "Iterations";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 364);
+            this.ClientSize = new System.Drawing.Size(284, 440);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.iterationBox);
+            this.Controls.Add(this.visualiseBox);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.seedBox);
             this.Controls.Add(this.label4);
@@ -188,6 +223,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox seedBox;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox visualiseBox;
+        private System.Windows.Forms.TextBox iterationBox;
+        private System.Windows.Forms.Label label6;
 
     }
 }

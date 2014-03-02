@@ -17,7 +17,7 @@ namespace GraphMapStressTester
             this.random = rand;
         }
 
-        public bool DoLockClueStressTest(int numberOfNodes, double branchingRatio, int numberOfDoors, int numberOfCluesPerDoor)
+        public bool DoLockClueStressTest(int numberOfNodes, double branchingRatio, int numberOfDoors, int numberOfCluesPerDoor, bool visualise)
         {
             var graphGenerator = new GraphGenerator(random);
 
@@ -26,11 +26,13 @@ namespace GraphMapStressTester
             var doorAndClueTester = new DoorAndClueGenerator(random);
 
             var mapModel = new MapModel(randomMap, 0);
-            VisualiseConnectivityGraph(mapModel);
+            if (visualise)
+                VisualiseConnectivityGraph(mapModel);
 
             doorAndClueTester.AddDoorsAndClues(mapModel, numberOfDoors, numberOfCluesPerDoor);
 
-            VisualiseConnectivityGraphWithDoors(mapModel);
+            if (visualise)
+                VisualiseConnectivityGraphWithDoors(mapModel);
 
             var mapTester = new GraphSolver(mapModel);
 

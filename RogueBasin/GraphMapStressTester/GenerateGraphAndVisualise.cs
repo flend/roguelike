@@ -17,14 +17,16 @@ namespace GraphMapStressTester
             this.random = rand;
         }
 
-        public void DoLockClueStressTest(int numberOfNodes, double branchingRatio)
+        public void DoLockClueStressTest(int numberOfNodes, double branchingRatio, bool visualise)
         {
             var graphGenerator = new GraphGenerator(random);
 
             var randomMap = graphGenerator.GenerateConnectivityMapNoCycles(numberOfNodes, branchingRatio);
 
             var mapModel = new MapModel(randomMap, 0);
-            VisualiseConnectivityGraph(mapModel);
+
+            if (visualise)
+                VisualiseConnectivityGraph(mapModel);
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel)

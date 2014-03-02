@@ -27,6 +27,9 @@ namespace GraphMapStressTester
             var numberOfClues = Convert.ToInt32(noCluesBox.Text);
 
             var randomSeed = Convert.ToInt32(seedBox.Text);
+            var iterations = Convert.ToInt32(iterationBox.Text);
+
+            var visualise = visualiseBox.Checked;
 
             WriteToLogfile();
 
@@ -35,17 +38,27 @@ namespace GraphMapStressTester
 
             if(testOptionBox.SelectedIndex == 0) {
                 var graphVisualiser = new GenerateGraphAndVisualise(random);
-                graphVisualiser.DoLockClueStressTest(numberOfNodes, branchingRatio);
+                graphVisualiser.DoLockClueStressTest(numberOfNodes, branchingRatio, visualise);
             }
             else
             {
                 var doorAndClueTest = new GenerateDoorAndClueTestAndVisualise(random);
-                var solvable = doorAndClueTest.DoLockClueStressTest(numberOfNodes, branchingRatio, numberOfDoors, numberOfClues);
+                var unsolveableSituationFound = false;
 
-                if(solvable)
-                    MessageBox.Show("Map is solvable");
-                else
-                    MessageBox.Show("Map is not solvable");
+                for (int i = 0; i < iterations; i++)
+                {
+                    var solvable = doorAndClueTest.DoLockClueStressTest(numberOfNodes, branchingRatio, numberOfDoors, numberOfClues, visualise);
+                    if (!solvable)
+                    {
+                        MessageBox.Show("Map is not solvable, iteration: " + i);
+                        unsolveableSituationFound = true;
+                        break;
+                    }
+                }
+                       
+                if(!unsolveableSituationFound)
+                    MessageBox.Show("All iterations solved");
+                    
             }
         }
 
