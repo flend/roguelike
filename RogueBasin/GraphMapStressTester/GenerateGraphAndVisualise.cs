@@ -10,14 +10,16 @@ namespace GraphMapStressTester
 {
     class GenerateGraphAndVisualise
     {
-        public GenerateGraphAndVisualise()
-        {
+        Random random;
 
+        public GenerateGraphAndVisualise(Random rand)
+        {
+            this.random = rand;
         }
 
         public void DoLockClueStressTest(int numberOfNodes, double branchingRatio)
         {
-            var graphGenerator = new GraphGenerator(Game.Random);
+            var graphGenerator = new GraphGenerator(random);
 
             var randomMap = graphGenerator.GenerateConnectivityMapNoCycles(numberOfNodes, branchingRatio);
 

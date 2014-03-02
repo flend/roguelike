@@ -33,6 +33,13 @@
             this.goButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.testOptionBox = new System.Windows.Forms.ComboBox();
+            this.noDoorsBox = new System.Windows.Forms.TextBox();
+            this.noCluesBox = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.seedBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // nodesBox
@@ -80,11 +87,80 @@
             this.label2.TabIndex = 4;
             this.label2.Text = "Branching Ratio";
             // 
+            // testOptionBox
+            // 
+            this.testOptionBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.testOptionBox.Items.AddRange(new object[] {
+            "GraphGenerator",
+            "DoorAndClue"});
+            this.testOptionBox.Location = new System.Drawing.Point(113, 192);
+            this.testOptionBox.Name = "testOptionBox";
+            this.testOptionBox.Size = new System.Drawing.Size(121, 21);
+            this.testOptionBox.TabIndex = 5;
+            // 
+            // noDoorsBox
+            // 
+            this.noDoorsBox.Location = new System.Drawing.Point(134, 232);
+            this.noDoorsBox.Name = "noDoorsBox";
+            this.noDoorsBox.Size = new System.Drawing.Size(100, 20);
+            this.noDoorsBox.TabIndex = 6;
+            this.noDoorsBox.Text = "20";
+            // 
+            // noCluesBox
+            // 
+            this.noCluesBox.Location = new System.Drawing.Point(134, 269);
+            this.noCluesBox.Name = "noCluesBox";
+            this.noCluesBox.Size = new System.Drawing.Size(100, 20);
+            this.noCluesBox.TabIndex = 7;
+            this.noCluesBox.Text = "3";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(38, 235);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(87, 13);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "Number of Doors";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(38, 269);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(85, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Number of Clues";
+            // 
+            // seedBox
+            // 
+            this.seedBox.Location = new System.Drawing.Point(133, 309);
+            this.seedBox.Name = "seedBox";
+            this.seedBox.Size = new System.Drawing.Size(100, 20);
+            this.seedBox.TabIndex = 10;
+            this.seedBox.Text = "111111";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(38, 312);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(75, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Random Seed";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.ClientSize = new System.Drawing.Size(284, 364);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.seedBox);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.noCluesBox);
+            this.Controls.Add(this.noDoorsBox);
+            this.Controls.Add(this.testOptionBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.goButton);
@@ -92,6 +168,7 @@
             this.Controls.Add(this.nodesBox);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -104,6 +181,13 @@
         private System.Windows.Forms.Button goButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox testOptionBox;
+        private System.Windows.Forms.TextBox noDoorsBox;
+        private System.Windows.Forms.TextBox noCluesBox;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox seedBox;
+        private System.Windows.Forms.Label label5;
 
     }
 }

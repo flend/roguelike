@@ -1,1 +1,1 @@
-tilesize=32
+tilesize=16

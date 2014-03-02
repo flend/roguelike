@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,12 +20,59 @@ namespace GraphMapStressTester
 
         private void goButton_Click(object sender, EventArgs e)
         {
-            var lockClueStressTest = new GenerateGraphAndVisualise();
-
             var numberOfNodes = Convert.ToInt32(nodesBox.Text);
             var branchingRatio = Convert.ToDouble(ratioBox.Text);
 
-            lockClueStressTest.DoLockClueStressTest(numberOfNodes, branchingRatio);
+            var numberOfDoors = Convert.ToInt32(noDoorsBox.Text);
+            var numberOfClues = Convert.ToInt32(noCluesBox.Text);
+
+            var randomSeed = Convert.ToInt32(seedBox.Text);
+
+            WriteToLogfile();
+
+            //Set seed
+            Random random = new Random(randomSeed);
+
+            if(testOptionBox.SelectedIndex == 0) {
+                var graphVisualiser = new GenerateGraphAndVisualise(random);
+                graphVisualiser.DoLockClueStressTest(numberOfNodes, branchingRatio);
+            }
+            else
+            {
+                var doorAndClueTest = new GenerateDoorAndClueTestAndVisualise(random);
+                var solvable = doorAndClueTest.DoLockClueStressTest(numberOfNodes, branchingRatio, numberOfDoors, numberOfClues);
+
+                if(solvable)
+                    MessageBox.Show("Map is solvable");
+                else
+                    MessageBox.Show("Map is not solvable");
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            testOptionBox.SelectedIndex = 0;
+        }
+
+        private void WriteToLogfile()
+        {
+            var filename = "logfile" + LogTime(DateTime.Now) + ".txt";
+
+            using (var stream = new StreamWriter(filename))
+            {
+                stream.WriteLine("random seed: " + seedBox.Text);
+                stream.WriteLine("numberOfNodes: " + nodesBox.Text);
+                stream.WriteLine("branchingRatio: " + ratioBox.Text);
+                stream.WriteLine("numberOfDoors: " + noDoorsBox.Text);
+                stream.WriteLine("numberOfClues: " + noCluesBox.Text);
+            }
+        }
+
+        //Produce save dateTime string for filenames
+        private string LogTime(DateTime dateTime)
+        {
+            string ret = dateTime.Year.ToString("0000") + "-" + dateTime.Month.ToString("00") + "-" + dateTime.Day.ToString("00") + "_" + dateTime.Hour.ToString("00") + "-" + dateTime.Minute.ToString("00") + "-" + dateTime.Second.ToString("00");
+            return ret;
         }
     }
 }

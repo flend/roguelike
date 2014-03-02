@@ -35,7 +35,7 @@ namespace GraphMapStressTester
                     sourceVertex = rand.Next(nextNodeIndex);
                 }
                 else {
-                    sourceVertex = terminalNodes.RandomElement();
+                    sourceVertex = terminalNodes.RandomElementUsing(rand);
                 }
 
                 map.AddRoomConnection(sourceVertex, nextNodeIndex);

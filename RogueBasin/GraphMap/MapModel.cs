@@ -348,6 +348,8 @@ namespace GraphMap
         /// </summary>
         private UndirectedGraph<int, TaggedEdge<int, string>> baseGraph;
 
+        private ConnectivityMap inputMap;
+
         /// <summary>
         /// Where the player starts. This node determines the unlocked side of a locked door
         /// </summary>
@@ -365,6 +367,8 @@ namespace GraphMap
 
         public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
 
+        public ConnectivityMap FullMap { get { return inputMap;  } }
+
         /// <summary>
         /// Constructed with the inputMap and the room id of the PC start location
         /// </summary>
@@ -372,6 +376,8 @@ namespace GraphMap
         /// <param name="startVertex"></param>
         public MapModel(ConnectivityMap inputMap, int startVertex)
         {
+            this.inputMap = inputMap;
+
             baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
             this.startVertex = startVertex;
 
@@ -407,7 +413,7 @@ namespace GraphMap
             do
             {
                 edgeToGet = random.Next(gReduced.EdgeCount);
-            } while (doorAndClueManager.GetDoorForEdge(gReduced.Edges.ElementAt(edgeToGet)) != null);
+            } while (doorAndClueManager.GetDoorsForEdge(gReduced.Edges.ElementAt(edgeToGet)).Count() > 1);
 
             return gReduced.Edges.ElementAt(edgeToGet);
         }

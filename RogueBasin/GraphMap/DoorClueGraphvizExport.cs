@@ -92,12 +92,17 @@ namespace GraphMap
 
             //If there is a door on this edge, override with this tag
 
-            Door doorHere = model.DoorAndClueManager.GetDoorForEdge(edge);
+            var doorHere = model.DoorAndClueManager.GetDoorsForEdge(edge);
 
             string edgeTag = edge.Tag;
 
-            if (doorHere != null)
-                edgeTag = doorHere.Id;
+            if (doorHere.Count() > 0)
+            {
+                edgeTag = "";
+                foreach(var door in doorHere)
+                    edgeTag += door.Id + "+";
+            }
+                
 
             edgeFormattor.Label = new QuickGraph.Graphviz.Dot.GraphvizEdgeLabel();
             edgeFormattor.Label.Value = edgeTag;
@@ -113,12 +118,18 @@ namespace GraphMap
 
             //If there is a door on this edge, override with this tag
 
-            Door doorHere = model.DoorAndClueManager.GetDoorForEdge(edge);
+            var doorHere = model.DoorAndClueManager.GetDoorsForEdge(edge);
 
             string edgeTag = edge.Tag;
 
-            if (doorHere != null)
-                edgeTag = doorHere.Id;
+            if (doorHere.Count() > 0)
+            {
+                edgeTag = "";
+                foreach (var door in doorHere)
+                    edgeTag += door.Id + "+";
+            }
+            if(edgeTag.Length > 0)
+                edgeTag = edgeTag.Substring(0, edgeTag.Length - 1);
                         
             edgeFormattor.Label = new QuickGraph.Graphviz.Dot.GraphvizEdgeLabel();
             edgeFormattor.Label.Value = edgeTag;

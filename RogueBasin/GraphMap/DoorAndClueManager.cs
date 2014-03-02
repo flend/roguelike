@@ -643,26 +643,24 @@ namespace GraphMap
             return null;
         }
 
-        /// <summary>
-        /// Get Door on edge, or return null. Suboptimal, should be constructed as we go if used a lot
-        /// </summary>
-        /// <param name="edgeToFind"></param>
-        /// <returns></returns>
-        public Door GetDoorForEdge(TaggedEdge<int, string> edgeToFind)
+        public List<Door> GetDoorsForEdge(TaggedEdge<int, string> edgeToFind)
         {
+            var toRet = new List<Door>();
 
             foreach (var door in doorMap)
             {
                 if (door.Value.DoorEdge == edgeToFind)
                 {
-                    return door.Value;
+                    toRet.Add(door.Value);
                 }
             }
-            return null;
+            return toRet;
         }
 
-        public Door GetDoorForEdge(Connection edge)
+        public List<Door> GetDoorsForEdge(Connection edge)
         {
+            var toRet = new List<Door>();
+
             foreach (var door in doorMap)
             {
                 if (door.Value.DoorEdge.Source == edge.Source &&
@@ -671,10 +669,10 @@ namespace GraphMap
                     door.Value.DoorEdge.Source == edge.Target &&
                     door.Value.DoorEdge.Target == edge.Source)
                 {
-                    return door.Value;
+                    toRet.Add(door.Value);
                 }
             }
-            return null;
+            return toRet;
         }
 
         public IEnumerable<int> GetAccessibleVerticesWithClues(IEnumerable<int> lockedDoorsForCluesAndObjectives)
@@ -728,7 +726,8 @@ namespace GraphMap
             if (door == null)
                 throw new ApplicationException("Can't find door id " + doorId);
 
-            if (GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap).Intersect(newClueVertices).Count() < newClueVertices.Count())
+            var validRoomsToPlaceClues = GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap);
+            if (validRoomsToPlaceClues.Intersect(newClueVertices).Count() < newClueVertices.Count())
                 throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap).Except(newClueVertices).ToString(), door.DoorConnectionReducedMap.Source, door.DoorConnectionReducedMap.Target));
 
             return PlaceCluesAndUpdateDependencyGraph(newClueVertices, door, null);
