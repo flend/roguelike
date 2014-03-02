@@ -16,7 +16,7 @@ namespace TestGraphMap
 
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 12), "lock0"), 2);
 
-            Door placedDoor = manager.GetDoorForEdge(new Connection(11, 12));
+            Door placedDoor = manager.GetDoorsForEdge(new Connection(11, 12)).First();
             Assert.AreEqual("lock0", placedDoor.Id);
             
             var doorIds = manager.GetClueIdForVertex(2).ToList();
@@ -31,7 +31,7 @@ namespace TestGraphMap
 
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 12), "lock0"), 2);
 
-            Assert.IsNotNull(manager.GetDoorForEdge(new Connection(12, 11)));
+            Assert.IsNotNull(manager.GetDoorsForEdge(new Connection(12, 11)).First());
         }
 
         [TestMethod]
@@ -242,6 +242,20 @@ namespace TestGraphMap
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(11, 13), "lock2"), 2);
 
             manager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "lock3"), new List<int>(new int[] { 12, 13 }));
+
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock1"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock2"));
+        }
+
+        [TestMethod]
+        public void ACluePlacedBehindTwoDoorsOnTheSameEdgeGivesADependencyOnBothDoors()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock1"));
+            manager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock2"));
+
+            manager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "lock3"), new List<int>(new int[] { 12 }));
 
             Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock1"));
             Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock2"));
