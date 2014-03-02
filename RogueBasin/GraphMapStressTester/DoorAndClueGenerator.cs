@@ -25,7 +25,7 @@ namespace GraphMapStressTester
             while (numberDoors < numberDoorsToAdd)
             {
                 var doorName = "door" + numberDoors.ToString();
-                var cluesToPlace = Math.Max(1, random.Next(cluesPerDoorMax));
+                var cluesToPlace = cluesPerDoorMax;
                 var edgeToPlaceDoor = GetRandomEdgeInMap(mapModel.FullMap);
 
                 var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(edgeToPlaceDoor);

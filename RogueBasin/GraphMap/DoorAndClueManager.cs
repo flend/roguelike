@@ -189,12 +189,6 @@ namespace GraphMap
             //Find the component of this broken graph that is connected to the start vertex - this is the candidate subtree
             var allowedNodes = allowedMap.MapComponent(allowedMap.RoomComponentIndex(startVertex));
 
-            Console.WriteLine("Nodes in candidate graph");
-            foreach (var node in allowedNodes)
-            {
-                Console.Write("{0} ", node);
-            }
-            Console.WriteLine();
             return allowedNodes;
         }
 
@@ -347,12 +341,6 @@ namespace GraphMap
 
             var allLockedIndices = lockedCluesDoorIndices.Union(lockedObjDoorIndices);
 
-            Console.WriteLine("Doors with clues behind this door");
-            foreach (var door in lockedCluesDoorIndices.Distinct().Select(ind => doorMap[ind]))
-            {
-                Console.WriteLine("Id: {0} door loc: {1}", door.Id, door.DoorEdge.Source);
-            }
-
             AddLockDependencyToExistingLocks(thisDoorIndex, allLockedIndices);
             return thisDoor;
         }
@@ -380,9 +368,6 @@ namespace GraphMap
             else
                 thisDoorIndex = objectiveLockedByClues.LockIndex;
 
-            //BUG: this seems to work under debug mode but fail in release builds
-            //var clues = clueVertices.Select(vertex => PlaceClue(vertex, doorReq.Id));
-
             foreach (var clueVertex in clueVertices)
             {
                 UpdateDependencyGraphWhenClueIsPlaced(clueVertex, new List<int> { thisDoorIndex });
@@ -409,7 +394,8 @@ namespace GraphMap
                         {
                             foreach(var lockLockedByClue in locksLockedByClue) {
                                 foreach(var doordepToAdd in doorIndex) {
-                                    lockDependencyGraph.AddVerticesAndEdge(new Edge<int>(doordepToAdd, lockLockedByClue));
+                                    if(!lockDependencyGraph.ContainsEdge(doordepToAdd, lockLockedByClue))
+                                        lockDependencyGraph.AddVerticesAndEdge(new Edge<int>(doordepToAdd, lockLockedByClue));
                                 }
                             }
                             
@@ -419,7 +405,6 @@ namespace GraphMap
                 }
                 else
                 {
-                    Console.WriteLine(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
                     throw new ApplicationException(String.Format("BUG: no path found for between start and clue, start: {0}, end: {1}", startVertex, clueVertex));
                 }
             }
