@@ -404,13 +404,15 @@ namespace GraphMap
                     foreach (var edge in path)
                     {
                         //Very slow, need to hash this
-                        int doorIndex = GetDoorIndexForEdge(edge);
-                        if (doorIndex != -1)
+                        List<int> doorIndex = GetDoorIndicesForEdge(edge);
+                        if (doorIndex.Count() > 0)
                         {
-                            locksLockedByClue.ForEach(
-                                lockIndex => lockDependencyGraph.AddVerticesAndEdge(new Edge<int>(doorIndex, lockIndex))
-                            );
-                            Console.WriteLine(String.Format("Door: {1}, now depends on: {0}", doorMap[doorIndex].Id, locksLockedByClue));
+                            foreach(var lockLockedByClue in locksLockedByClue) {
+                                foreach(var doordepToAdd in doorIndex) {
+                                    lockDependencyGraph.AddVerticesAndEdge(new Edge<int>(doordepToAdd, lockLockedByClue));
+                                }
+                            }
+                            
                         }
 
                     }
@@ -607,16 +609,18 @@ namespace GraphMap
         /// </summary>
         /// <param name="edgeToFind"></param>
         /// <returns></returns>
-        public int GetDoorIndexForEdge(TaggedEdge<int, string> edgeToFind)
+        public List<int> GetDoorIndicesForEdge(TaggedEdge<int, string> edgeToFind)
         {
+            var toRet = new List<int>();
+
             foreach (var door in doorMap)
             {
                 if (door.Value.DoorEdge == edgeToFind)
                 {
-                    return door.Value.LockIndex;
+                    toRet.Add(door.Value.LockIndex);
                 }
             }
-            return -1;
+            return toRet;
         }
 
         public Door GetDoorById(string id)

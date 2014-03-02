@@ -262,6 +262,20 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void AClueLockedBehindTwoDoorsOnTheSameEdgeGivesADependencyOnBothDoors()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "lock3"), new List<int>(new int[] { 12 }));
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock1"));
+            manager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock2"));
+
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock1"));
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("lock3", "lock2"));
+        }
+
+        [TestMethod]
         public void AddingTwoCluesBehindADoorMeansThereAreTwoDependenciesOnDoor()
         {
             var manager = BuildStandardManager();
