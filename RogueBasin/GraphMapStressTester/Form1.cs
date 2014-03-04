@@ -40,7 +40,7 @@ namespace GraphMapStressTester
                 var graphVisualiser = new GenerateGraphAndVisualise(random);
                 graphVisualiser.DoLockClueStressTest(numberOfNodes, branchingRatio, visualise);
             }
-            else
+            else if(testOptionBox.SelectedIndex == 1)
             {
                 var doorAndClueTest = new GenerateDoorAndClueTestAndVisualise(random);
                 var unsolveableSituationFound = false;
@@ -59,6 +59,26 @@ namespace GraphMapStressTester
                 if(!unsolveableSituationFound)
                     MessageBox.Show("All iterations solved");
                     
+            }
+            else if (testOptionBox.SelectedIndex == 2)
+            {
+                var doorAndClueTest = new GenerateDoorAndObjectiveTestAndVisualise(random);
+                var unsolveableSituationFound = false;
+
+                for (int i = 0; i < iterations; i++)
+                {
+                    var solvable = doorAndClueTest.DoLockClueStressTest(numberOfNodes, branchingRatio, numberOfDoors, numberOfClues, visualise);
+                    if (!solvable)
+                    {
+                        MessageBox.Show("Map is not solvable, iteration: " + i);
+                        unsolveableSituationFound = true;
+                        break;
+                    }
+                }
+
+                if (!unsolveableSituationFound)
+                    MessageBox.Show("All iterations solved");
+
             }
         }
 

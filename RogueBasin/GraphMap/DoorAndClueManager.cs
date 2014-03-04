@@ -375,7 +375,7 @@ namespace GraphMap
             return clues;
         }
 
-        private void UpdateDependencyGraphWhenClueIsPlaced(int clueVertex, List<int> locksLockedByClue)
+        private void UpdateDependencyGraphWhenClueIsPlaced(int clueVertex, IEnumerable<int> locksLockedByClue)
         {
             //Find path on MST from start location to all clues. Any doors which we traverse become doors we DEPEND on
 
@@ -572,21 +572,53 @@ namespace GraphMap
         /// </summary>
         /// <param name="vertexIndex"></param>
         /// <returns></returns>
-        public IEnumerable<string> GetClueIdForVertex(int vertexIndex)
+        public IEnumerable<string> GetObjectiveAndClueIdsAtVertex(int vertexIndex)
         {
-            List<Clue> foundClue;
+            List<string> lockIds = new List<string>();
 
+            List<Clue> foundClue;
             clueMap.TryGetValue(vertexIndex, out foundClue);
 
-            if (foundClue == null)
-                return new List<string>();
+            if (foundClue != null)
+            {
+                foreach (var clue in foundClue)
+                {
+                    if (doorMap.ContainsKey(clue.OpenLockIndex))
+                        lockIds.Add("clue-" + doorMap[clue.OpenLockIndex].Id);
+                    if (objectiveMap.ContainsKey(clue.OpenLockIndex))
+                        lockIds.Add("clue-" + objectiveMap[clue.OpenLockIndex].Id);
+                }
+            }
 
-            return foundClue.Select(c => doorMap[c.OpenLockIndex].Id);
+            List<Objective> foundObj;
+            objectiveRoomMap.TryGetValue(vertexIndex, out foundObj);
+
+            if (foundObj != null)
+            {
+                foreach (var obj in foundObj)
+                {
+                    lockIds.Add(obj.Id);
+                }
+            }
+
+            return lockIds;
         }
 
-        public Door GetDoorByIndex(int doorIndex)
+        public IEnumerable<string> GetObjIdForVertex(int vertexIndex)
         {
-            return doorMap[doorIndex];
+            return objectiveRoomMap.ContainsKey(vertexIndex) ? 
+                objectiveRoomMap[vertexIndex].Select(obj => obj.Id) :
+                new List<string>();
+        }
+
+        public string GetLockIdByIndex(int lockIndex)
+        {
+            if (doorMap.ContainsKey(lockIndex))
+                return doorMap[lockIndex].Id;
+            if (objectiveMap.ContainsKey(lockIndex))
+                return objectiveMap[lockIndex].Id;
+
+            return null;
         }
 
         /// <summary>
@@ -756,8 +788,13 @@ namespace GraphMap
             var objective = BuildAndAddObjectiveToMap(objectiveRequirements);
 
             //An objective acts like
-            //a) placing clues for the lock that depends on it (if any)
-            UpdateDependencyGraphWhenClueIsPlaced(objective.Vertex, objective.OpenLockIndex);
+            //a) placing clues for the lock that depends on it
+            //we include the objective itself for clarity (although this doesn't make a functional difference -
+            //it's OK providing its parent doors are included)
+            //IS THERE EVER A REASON TO INCLUDE THE OBJECTIVES IN THE DEPENDENCY TREE IF WE HAVE THEIR PARENTS?
+            //WELL, IF WE SUBSEQUENTLY ADD CLUES THEN MAYBE YES
+            var selfAndLockedItems = objective.OpenLockIndex.Union(new List<int> { objective.LockIndex });
+            UpdateDependencyGraphWhenClueIsPlaced(objective.Vertex, selfAndLockedItems);
             //b) locking these clues with a virtual door that is the objective
             AddLockDependencyToExistingLocks(objective.LockIndex, objective.OpenLockIndex);
         }

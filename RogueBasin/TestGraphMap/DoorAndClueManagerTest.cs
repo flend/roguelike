@@ -19,9 +19,32 @@ namespace TestGraphMap
             Door placedDoor = manager.GetDoorsForEdge(new Connection(11, 12)).First();
             Assert.AreEqual("lock0", placedDoor.Id);
             
-            var doorIds = manager.GetClueIdForVertex(2).ToList();
+            var doorIds = manager.GetObjectiveAndClueIdsAtVertex(2).ToList();
             Assert.AreEqual(1, doorIds.Count);
-            Assert.AreEqual("lock0", doorIds[0]);
+            Assert.AreEqual("clue-lock0", doorIds[0]);
+        }
+
+        [TestMethod]
+        public void ObjectivesCanBePlacedAndRetrievedByRoom()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1));
+
+            var objIds = manager.GetObjectiveAndClueIdsAtVertex(2).ToList();
+            CollectionAssert.AreEqual(new List<string> { "obj1" }, objIds);
+        }
+
+        [TestMethod]
+        public void CluesForObjectivesCanBePlacedAndRetrievedByRoom()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1));
+            manager.AddCluesToExistingObjective("obj1", new List<int> { 3 });
+
+            var objIds = manager.GetObjectiveAndClueIdsAtVertex(3).ToList();
+            CollectionAssert.AreEqual(new List<string> { "clue-obj1" }, objIds);
         }
 
         [TestMethod]
@@ -104,6 +127,18 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void AddingAnObjectiveBehindADoorMeansTheObjectiveDependsOnTheDoor()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(11, 13), "lock0"));
+            manager.PlaceDoor(new DoorRequirements(new Connection(5, 6), "lock1"));
+            manager.PlaceObjective(new ObjectiveRequirements(13, "obj1", 1, new List<string>{"lock1"}));
+
+            Assert.IsTrue(manager.IsLockDependentOnParentLock("obj1", "lock0"));
+        }
+
+        [TestMethod]
         public void AddingAClueBehindADoorMeansTheNewDoorDependsOnTheOldDoor()
         {
             var manager = BuildStandardManager();
@@ -181,6 +216,19 @@ namespace TestGraphMap
             manager.PlaceDoorAndClue(new DoorRequirements(new Connection(5, 6), "lock1"), 2);
 
             manager.PlaceObjective(new ObjectiveRequirements(15, "obj1", 1, new List<string> { "lock1" }));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CluesCannotBeAddedToExistingDoorsIfTheyArePlacedBehindDoorsWeDependOnViaObjectives()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(11, 13), "lock0"));
+            manager.PlaceDoor(new DoorRequirements(new Connection(5, 6), "lock1"));
+
+            manager.PlaceObjective(new ObjectiveRequirements(6, "obj1", 1, new List<string> { "lock0" }));
+            manager.AddCluesToExistingDoor("lock1", new List<int> { 13 });
         }
 
         [TestMethod]

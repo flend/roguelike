@@ -78,9 +78,9 @@ namespace GraphMap
             var vertexFormattor = e.VertexFormatter;
             int vertexNo = e.Vertex;
 
-            var door = model.DoorAndClueManager.GetDoorByIndex(vertexNo);
+            var door = model.DoorAndClueManager.GetLockIdByIndex(vertexNo);
 
-            vertexFormattor.Label = door.Id;
+            vertexFormattor.Label = door;
         }
 
         private void graphviz_FormatDoorEdge(object sender, FormatEdgeEventArgs<int, TaggedEdge<int, string>> e)
@@ -147,7 +147,7 @@ namespace GraphMap
             string vertexLabel = vertexNo.ToString();
 
             //If there is a clue here, append clue
-            var clues = model.DoorAndClueManager.GetClueIdForVertex(vertexNo);
+            var clues = model.DoorAndClueManager.GetObjectiveAndClueIdsAtVertex(vertexNo);
 
             foreach (var clue in clues)
             {

@@ -95,7 +95,8 @@
             this.testOptionBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.testOptionBox.Items.AddRange(new object[] {
             "GraphGenerator",
-            "DoorAndClue"});
+            "DoorAndClue",
+            "DoorAndObjective"});
             this.testOptionBox.Location = new System.Drawing.Point(113, 192);
             this.testOptionBox.Name = "testOptionBox";
             this.testOptionBox.Size = new System.Drawing.Size(121, 21);
