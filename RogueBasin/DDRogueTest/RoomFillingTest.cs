@@ -46,6 +46,15 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void RoomWithPartialVerticalBarrierDividingWalkableAreasIsConnected()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testfilling_dividedgap_vert.room");
+            var filler = new RoomFilling(roomTemplate);
+
+            Assert.IsTrue(filler.Connected);
+        }
+
+        [TestMethod]
         public void RoomWithDiagonalGapConnectingWalkableAreasIsConnected()
         {
             RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testfilling_diagonalconnected.room");

@@ -331,6 +331,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RogueBase.cs" />
+    <Compile Include="RoomFilling.cs" />
     <Compile Include="RoomRouting.cs" />
     <Compile Include="RoomTemplateLoader.cs" />
     <Compile Include="SaveGameInfo.cs" />

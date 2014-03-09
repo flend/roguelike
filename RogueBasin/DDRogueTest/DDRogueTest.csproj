@@ -51,6 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ArrayCacheTest.cs" />
+    <Compile Include="RoomFillingTest.cs" />
     <Compile Include="RoomTemplateUtilitiesTest.cs" />
     <Compile Include="TemplatedMapBuilderTest.cs" />
     <Compile Include="TemplatedMapGeneratorTest.cs" />
@@ -177,6 +178,24 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\testrouting.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testfilling_walkable.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testfilling_notwalkable.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testfilling_divided.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testfilling_dividedgap.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testfilling_diagonalconnected.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testfilling_dividedgap_vert.room" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
