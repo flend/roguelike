@@ -353,10 +353,21 @@ namespace RogueBasin
             return pathingMap[x, y];
         }
 
+        public T getCell(Point p)
+        {
+            return pathingMap[p.x, p.y];
+        }
+
         public void setCell(int x, int y, T terrain)
         {
             pathingMap[x, y] = terrain;
         }
+
+        public void setCell(Point p, T terrain)
+        {
+            pathingMap[p.x, p.y] = terrain;
+        }
+
     }
 
     /** Map of enums that indicate pathing information */

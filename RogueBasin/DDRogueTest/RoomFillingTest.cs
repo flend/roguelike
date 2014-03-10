@@ -63,6 +63,72 @@ namespace DDRogueTest
             Assert.IsTrue(filler.Connected);
         }
 
+        [TestMethod]
+        public void TestPlacingABlockInCentreOfLargeRoomAllowsPathing()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareUnwalkable(new Point(3, 2));
+            Assert.IsTrue(filler.Connected);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void PlacingABlockOffSideOfTemplateFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareUnwalkable(new Point(-1, -11));
+            Assert.IsTrue(filler.Connected);
+        }
+
+        [TestMethod]
+        public void CompletelyBlockingOffADoorwayFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareUnwalkable(new Point(1, 1));
+            filler.SetSquareUnwalkable(new Point(1, 2));
+            filler.SetSquareUnwalkable(new Point(1, 3));
+            Assert.IsFalse(filler.Connected);
+        }
+
+        [TestMethod]
+        public void CompletelyBlockingDoorwayUsingCheckAndSetFunctionFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(1, 1));
+            filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(1, 2));
+            
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(1, 3)));
+        }
+
+        [TestMethod]
+        public void DividingRoomIntoTwoBreakingSomeConnectionsButLeavingAllDoorsWithOneRouteFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareUnwalkable(new Point(4, 1));
+            filler.SetSquareUnwalkable(new Point(4, 2));
+            filler.SetSquareUnwalkable(new Point(3, 2));
+            filler.SetSquareUnwalkable(new Point(2, 2));
+            filler.SetSquareUnwalkable(new Point(2, 1));
+
+            Assert.IsFalse(filler.Connected);
+        }
+
+
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();

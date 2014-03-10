@@ -9,7 +9,7 @@ namespace RogueBasin
     {
         RoomTemplate template;
         PathingMap thisMap;
-        HashSet<Point> foundPathablePoints = new HashSet<Point>();
+        HashSet<Point> foundPathablePoints;
         bool result;
 
         public RoomFilling(RoomTemplate template)
@@ -17,8 +17,6 @@ namespace RogueBasin
             this.template = template;
 
             BuildPathableMap();
-
-            result = IsConnected();
         }
 
         private void BuildPathableMap()
@@ -35,14 +33,42 @@ namespace RogueBasin
             }
         }
 
-        public bool Connected
+        public void SetSquareUnwalkable(Point p)
         {
-            get { return result; }
+            if (p.x < 0 || p.y < 0 || p.x >= thisMap.Width || p.y >= thisMap.Height)
+                throw new ApplicationException("Point off template.");
+
+            thisMap.setCell(p.x, p.y, PathingTerrain.Unwalkable);
         }
 
-        private bool IsConnected()
+        public bool SetSquareUnWalkableIfMaintainsConnectivity(Point p)
+        {
+            if (p.x < 0 || p.y < 0 || p.x >= thisMap.Width || p.y >= thisMap.Height)
+                throw new ApplicationException("Point off template.");
+
+            var oldTerrain = thisMap.getCell(p);
+            thisMap.setCell(p, PathingTerrain.Unwalkable);
+
+            var isConnected = IsConnected();
+
+            if (!isConnected)
+                thisMap.setCell(p, oldTerrain);
+
+            return isConnected;
+        }
+
+        public bool Connected
+        {
+            get
+            {
+                return IsConnected();
+            }
+        }
+
+        public bool IsConnected()
         {
             HashSet<Point> allPathablePoints = new HashSet<Point>();
+            foundPathablePoints = new HashSet<Point>();
 
             for (int i = 0; i < thisMap.Width; i++)
             {
