@@ -1728,7 +1728,9 @@ namespace RogueBasin {
             {
                 if (i < shieldBarFirstBar)
                 {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.DarkCyan);
+                    Color shieldColor = player.IsEffectActive(typeof(PlayerEffects.ShieldEnhance)) ? ColorPresets.Cyan : ColorPresets.DarkCyan;
+
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', shieldColor);
                 }
                 else
                 {

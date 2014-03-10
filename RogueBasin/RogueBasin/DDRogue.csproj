@@ -304,6 +304,7 @@
     <Compile Include="PlayerEffectSimpleDuration.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PlayerEffects\ShieldEnhance.cs" />
     <Compile Include="PlayerEffects\ArmourUp.cs" />
     <Compile Include="PlayerEffects\DamageUp.cs">
       <SubType>Code</SubType>

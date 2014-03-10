@@ -459,11 +459,11 @@ namespace RogueBasin
 
                                     //WETWARE
                                 case 'S':
-                                    timeAdvances = Game.Dungeon.Player.EquipWetware(typeof(Items.ShieldWare));
+                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.ShieldWare));
                                     break;
 
                                 case 'D':
-                                    timeAdvances = Game.Dungeon.Player.EquipWetware(typeof(Items.StealthWare));
+                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
                                     break;
 
                                     /*

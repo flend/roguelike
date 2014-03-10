@@ -253,5 +253,10 @@ namespace RogueBasin.Items
         {
             return false;
         }
+
+        public int GetEnergyDrain()
+        {
+            return 10;
+        }
     }
 }

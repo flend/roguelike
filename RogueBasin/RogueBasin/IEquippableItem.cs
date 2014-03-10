@@ -175,5 +175,7 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         double ShotgunSpreadAngle();
+
+        int GetEnergyDrain();
     }
 }

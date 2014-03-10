@@ -30,6 +30,9 @@ namespace RogueBasin.Items
         public bool Equip(Creature user)
         {
             LogFile.Log.LogEntryDebug("ShieldWare equipped", LogDebugLevel.Medium);
+            
+            Player player = user as Player;
+            player.AddEffect(new PlayerEffects.ShieldEnhance(1));
 
             return true;
         }
@@ -37,6 +40,10 @@ namespace RogueBasin.Items
         public bool UnEquip(Creature user)
         {
             LogFile.Log.LogEntryDebug("ShieldWare unequipped", LogDebugLevel.Low);
+
+            Player player = user as Player;
+            player.RemoveEffect(typeof(PlayerEffects.ShieldEnhance));
+
             return true;
         }
 
@@ -252,6 +259,11 @@ namespace RogueBasin.Items
         public bool DestroyedOnUse()
         {
             return false;
+        }
+
+        public int GetEnergyDrain()
+        {
+            return 10;
         }
     }
 }

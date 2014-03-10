@@ -1175,6 +1175,17 @@ namespace RogueBasin
             return false;
         }
 
+        /// <summary>
+        /// Is this class of effect currently active?
+        /// Refactor to take a Type not an object
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <returns></returns>
+        public IEnumerable<PlayerEffect> GetActiveEffects(Type effectType)
+        {
+            return effects.FindAll(x => x.GetType() == effectType);
+        }
+
 
         protected override char GetRepresentation()
         {
@@ -1266,6 +1277,23 @@ namespace RogueBasin
             return true;
         }
 
+        public bool ToggleEquipWetware(Type wetwareTypeToEquip)
+        {
+            var justUnequip = false;
+            var currentlyEquippedWetware = GetEquippedWetware();
+            if (currentlyEquippedWetware != null && currentlyEquippedWetware.GetType() == wetwareTypeToEquip)
+            {
+                justUnequip = true;
+            }
+            
+            UnequipWetware();
+
+            if (justUnequip)
+                return true;
+
+            return EquipWetware(wetwareTypeToEquip);
+        }
+
         internal bool EquipWetware(Type wetwareTypeToEquip)
         {
             //Check if we have this item
@@ -1275,15 +1303,6 @@ namespace RogueBasin
             {
                 LogFile.Log.LogEntryDebug("Do not have wetware of type: " + wetwareTypeToEquip.ToString(), LogDebugLevel.Medium);
                 return false;
-            }
-
-            //Unequip any item in the wetware slot
-            var currentlyEquippedWetware = GetEquippedWetware();
-            if (currentlyEquippedWetware != null)
-            {
-                var currentlyEquippedWetwareItem = currentlyEquippedWetware as Item;
-                currentlyEquippedWetware.UnEquip(this);
-                currentlyEquippedWetwareItem.IsEquipped = false;
             }
 
             //Equip the new wetware
@@ -1302,6 +1321,27 @@ namespace RogueBasin
             wetwareToEquipAsEquippable.Equip(this);
 
             return true;
+        }
+
+        private void UnequipWetware()
+        {
+            var currentlyEquippedWetware = GetEquippedWetware();
+            if (currentlyEquippedWetware != null)
+            {
+                var currentlyEquippedWetwareItem = currentlyEquippedWetware as Item;
+                currentlyEquippedWetware.UnEquip(this);
+                currentlyEquippedWetwareItem.IsEquipped = false;
+
+                EquipmentSlotInfo wetwareSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Wetware);
+
+                if (wetwareSlot == null)
+                {
+                    LogFile.Log.LogEntryDebug("Can't find wetware slot - bug ", LogDebugLevel.High);
+                    return;
+                }
+
+                wetwareSlot.equippedItem = null;
+            }
         }
 
 
@@ -2035,13 +2075,33 @@ namespace RogueBasin
         /// </summary>
         internal void PreTurnActions()
         {
+            UseEnergyForWetware();
             RegenerateStatsPerTurn();
 
             ShieldWasDamagedThisTurn = false;
             HitpointsWasDamagedThisTurn = false;
+            EnergyWasDamagedThisTurn = false;
             
             if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
                 Game.Dungeon.Player.CalculateCombatStats();
+        }
+
+        private void UseEnergyForWetware()
+        {
+            var equippedWetware = GetEquippedWetware();
+
+            if (equippedWetware != null)
+            {
+                var energyDrain = equippedWetware.GetEnergyDrain();
+                Energy -= Math.Min(energyDrain, Energy);
+                if (energyDrain > 0)
+                    EnergyWasDamagedThisTurn = true;
+
+                if (Energy == 0)
+                {
+                    UnequipWetware();
+                }
+            }
         }
 
         private void RegenerateStatsPerTurn()
