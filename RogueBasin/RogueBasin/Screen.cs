@@ -1406,8 +1406,8 @@ namespace RogueBasin {
             Point missionOffset = new Point(baseOffset, 1);
             hitpointsOffset = new Point(baseOffset, 4);
             Point shieldOffset = new Point(baseOffset, 5);
-            Point weaponOffset = new Point(baseOffset, 7);
-            Point utilityOffset = new Point(baseOffset, 11);
+            Point weaponOffset = new Point(baseOffset, 8);
+            Point utilityOffset = new Point(baseOffset, 13);
             Point viewOffset = new Point(baseOffset, 19);
             Point gameDataOffset = new Point(baseOffset, 24);
 
@@ -1437,25 +1437,14 @@ namespace RogueBasin {
 
             //Draw shield
 
-            int shieldBarLength = 10;
+            int shieldBarLength = 20;
             double playerShieldRatio = player.Shield / (double)player.MaxShield;
             int shieldBarEntries = (int)Math.Ceiling(shieldBarLength * playerShieldRatio);
 
             PrintLine("SD: ", statsDisplayTopLeft.x + shieldOffset.x, statsDisplayTopLeft.y + shieldOffset.y, LineAlignment.Left);
 
-            for (int i = 0; i < hpBarLength; i++)
-            {
-                if (i < shieldBarEntries)
-                {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.DarkCyan);
-                }
-                else
-                {
-                    Color shieldColor = player.ShieldIsDisabled ? ColorPresets.Red : ColorPresets.Gray;
-
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', shieldColor);
-                }
-            }
+            DrawShieldBar(player, shieldOffset, shieldBarEntries - 10);
+            DrawShieldBar(player, shieldOffset + new Point(0, 1), Math.Min(shieldBarEntries, 10));
 
             //Draw equipped weapon
 
@@ -1526,7 +1515,22 @@ namespace RogueBasin {
                 PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left, nothingColor);
             }
             
+            //Draw energy bar and use keys
 
+            int energyBarLength = 20;
+            double playerEnergyRatio = player.Energy / (double)player.MaxEnergy;
+            int energyBarEntries = (int)Math.Ceiling(energyBarLength * playerEnergyRatio);
+
+            PrintLine("EN: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left);
+
+            DrawEnergyBar(player, utilityOffset, energyBarEntries - 10);
+            DrawEnergyBar(player, utilityOffset + new Point(0, 1), Math.Min(energyBarEntries, 10));
+
+            //Draw all available wetware
+            DrawWetwareChar(utilityOffset + new Point(0, 2), typeof(Items.ShieldWare), "[S]", 0);
+            DrawWetwareChar(utilityOffset + new Point(3, 2), typeof(Items.StealthWare), "[D]", 0);
+
+            /*
             //Draw equipped utility
 
             Item utility = Game.Dungeon.Player.GetEquippedUtilityAsItem();
@@ -1601,7 +1605,7 @@ namespace RogueBasin {
                     }
                 }
 
-            }
+            }*/
 
             //Draw what we can see
             
@@ -1673,8 +1677,8 @@ namespace RogueBasin {
             }
             else
             {
-                utilityStr = "None";
-                PrintLine(utilityStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, nothingColor);
+                //utilityStr = "None";
+                //PrintLine(utilityStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, nothingColor);
             }
 
             //Game data
@@ -1694,6 +1698,59 @@ namespace RogueBasin {
             for (int i = 0; i < noAborts; i++)
             {
                 PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X',ColorPresets.Red);
+            }
+        }
+
+        private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetWareStr, int wetWareOffset)
+        {
+            Inventory inv = Game.Dungeon.Player.Inventory;
+            var equippedWetware = Game.Dungeon.Player.GetEquippedWetware();
+
+            if (inv.ContainsItemOfType(wetWareType))
+            {
+                Color colorToUse;
+                if (equippedWetware != null && equippedWetware.GetType() == wetWareType)
+                {
+                    colorToUse = ColorPresets.LimeGreen;
+                }
+                else
+                {
+                    colorToUse = ColorPresets.Green;
+                }
+
+                PrintLine(wetWareStr, statsDisplayTopLeft.x + utilityOffset.x + wetWareOffset, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
+            }
+        }
+
+        private void DrawShieldBar(Player player, Point shieldOffset, int shieldBarFirstBar)
+        {
+            for (int i = 0; i < shieldBarFirstBar; i++)
+            {
+                if (i < shieldBarFirstBar)
+                {
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.DarkCyan);
+                }
+                else
+                {
+                    Color shieldColor = player.ShieldIsDisabled ? ColorPresets.Red : ColorPresets.Gray;
+
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', shieldColor);
+                }
+            }
+        }
+
+        private void DrawEnergyBar(Player player, Point shieldOffset, int shieldBarFirstBar)
+        {
+            for (int i = 0; i < shieldBarFirstBar; i++)
+            {
+                if (i < shieldBarFirstBar)
+                {
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.Blue);
+                }
+                else
+                {
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.Gray);
+                }
             }
         }
 

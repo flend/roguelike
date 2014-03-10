@@ -301,6 +301,7 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     break;
 
+                                    /*
                                 case 'S':
                                     //Save the game
                                     timeAdvances = true;
@@ -313,7 +314,7 @@ namespace RogueBasin
                                     Game.Dungeon.RunMainLoop = false;
 
                                     break;
-
+                                    */
                                 case 'F':
                                     //Full screen switch
                                     timeAdvances = false;
@@ -455,6 +456,16 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
 
                                     break;
+
+                                    //WETWARE
+                                case 'S':
+                                    timeAdvances = Game.Dungeon.Player.EquipWetware(typeof(Items.ShieldWare));
+                                    break;
+
+                                case 'D':
+                                    timeAdvances = Game.Dungeon.Player.EquipWetware(typeof(Items.StealthWare));
+                                    break;
+
                                     /*
                                 case 'd':
                                 case 'D':

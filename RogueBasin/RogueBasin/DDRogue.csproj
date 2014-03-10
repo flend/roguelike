@@ -242,6 +242,8 @@
     <Compile Include="Items\PotionSuperSpeedUp.cs" />
     <Compile Include="Items\PotionToHitUp.cs" />
     <Compile Include="Items\PotionSpeedUp.cs" />
+    <Compile Include="Items\StealthWare.cs" />
+    <Compile Include="Items\ShieldWare.cs" />
     <Compile Include="Items\Shotgun.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -298,6 +300,7 @@
     <Compile Include="Player.cs" />
     <Compile Include="PlayerEffect.cs" />
     <Compile Include="PlayerEffectInstant.cs" />
+    <Compile Include="PlayerEffectNoDuration.cs" />
     <Compile Include="PlayerEffectSimpleDuration.cs">
       <SubType>Code</SubType>
     </Compile>

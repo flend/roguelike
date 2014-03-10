@@ -50,6 +50,23 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Add an item without adding it to the dungeon first
+        /// </summary>
+        /// <param name="itemToAdd"></param>
+        public void AddItemNotFromDungeon(Item itemToAdd)
+        {
+            itemToAdd.InInventory = true;
+
+            //Add to inventory
+            items.Add(itemToAdd);
+
+            totalWeight += itemToAdd.GetWeight();
+
+            //Refresh the listing
+            RefreshInventoryListing();
+        }
+
+        /// <summary>
         /// Removes an item from the inventory. Does NOT set InInventory = false. This should be done by the object that possesses the inventory (so it can update the position correctly)
         /// Now adds from the dungeon master item list (to stop replication when serializing). If the caller forgets to set InInventory = false the item will not be displayed
         /// </summary>
@@ -107,6 +124,44 @@ namespace RogueBasin
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Do we contain an item of the same type (i.e. class)
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <returns></returns>
+        public bool ContainsItemOfType(Type thisType)
+        {
+            foreach (var thisItem in items)
+            {
+                if (thisItem.GetType() == thisType)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Do we contain an item of the same type (i.e. class)
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <returns></returns>
+        public List<Item> GetItemsOfType(Type thisType)
+        {
+            var toRet = new List<Item>();
+
+            foreach (var thisItem in items)
+            {
+                if (thisItem.GetType() == thisType)
+                {
+                    toRet.Add(thisItem);
+                }
+            }
+
+            return toRet;
         }
 
         /// <summary>

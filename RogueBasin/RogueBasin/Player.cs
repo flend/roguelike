@@ -49,9 +49,15 @@ namespace RogueBasin
 
         public int MaxShield { get; set; }
 
+        public int Energy { get; set; }
+
+        public int MaxEnergy { get; set; }
+
         public bool ShieldWasDamagedThisTurn { get; set; }
 
         public bool HitpointsWasDamagedThisTurn { get; set; }
+
+        public bool EnergyWasDamagedThisTurn { get; set; }
 
         public bool ShieldIsDisabled { get; private set; }
 
@@ -62,6 +68,8 @@ namespace RogueBasin
         private const int TurnsToRegenerateShield = 20;
 
         private const int TurnsToRegenerateHP = 20;
+
+        private const int TurnsToRegenerateEnergy = 10;
 
         /// <summary>
         /// Player level
@@ -175,6 +183,7 @@ namespace RogueBasin
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Utility));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Wetware));
 
             //Set initial HP
             SetupInitialStats();
@@ -195,6 +204,9 @@ namespace RogueBasin
 
             MaxShield = 100;
             Shield = MaxShield;
+
+            MaxEnergy = 100;
+            Energy = MaxEnergy;
         }
 
         /// <summary>
@@ -1254,6 +1266,44 @@ namespace RogueBasin
             return true;
         }
 
+        internal bool EquipWetware(Type wetwareTypeToEquip)
+        {
+            //Check if we have this item
+            var wetwareOfTypeInInventory = Inventory.GetItemsOfType(wetwareTypeToEquip);
+
+            if (wetwareOfTypeInInventory.Count == 0)
+            {
+                LogFile.Log.LogEntryDebug("Do not have wetware of type: " + wetwareTypeToEquip.ToString(), LogDebugLevel.Medium);
+                return false;
+            }
+
+            //Unequip any item in the wetware slot
+            var currentlyEquippedWetware = GetEquippedWetware();
+            if (currentlyEquippedWetware != null)
+            {
+                var currentlyEquippedWetwareItem = currentlyEquippedWetware as Item;
+                currentlyEquippedWetware.UnEquip(this);
+                currentlyEquippedWetwareItem.IsEquipped = false;
+            }
+
+            //Equip the new wetware
+            EquipmentSlotInfo wetwareSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Wetware);
+
+            if (wetwareSlot == null)
+            {
+                LogFile.Log.LogEntryDebug("Can't find wetware slot - bug ", LogDebugLevel.High);
+                return false;
+            }
+
+            var wetwareToEquip = wetwareOfTypeInInventory[0];
+            var wetwareToEquipAsEquippable = wetwareToEquip as IEquippableItem;
+            wetwareToEquip.IsEquipped = true;
+            wetwareSlot.equippedItem = wetwareToEquip;
+            wetwareToEquipAsEquippable.Equip(this);
+
+            return true;
+        }
+
 
         /// <summary>
         /// Drop an item at a specific point. Equippable items never exist in the inventory in FlatlineRL
@@ -1458,6 +1508,23 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// TraumaRL - return equipped wetware or null
+        /// </summary>
+        /// <returns></returns>
+        public IEquippableItem GetEquippedWetware()
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Wetware);
+
+            if (weaponSlot == null)
+            {
+                LogFile.Log.LogEntryDebug("Can't find wetware slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem as IEquippableItem;
+        }
+
+        /// <summary>
         /// FlatlineRL - return equipped weapon or null
         /// </summary>
         /// <returns></returns>
@@ -1519,6 +1586,12 @@ namespace RogueBasin
             }
 
             return weaponSlot.equippedItem;
+        }
+
+        public void GiveAllWetware()
+        {
+            Inventory.AddItemNotFromDungeon(new Items.StealthWare());
+            Inventory.AddItemNotFromDungeon(new Items.ShieldWare());
         }
 
         /// <summary>
@@ -1765,6 +1838,8 @@ namespace RogueBasin
         internal void StartGameSetup()
         {
             CalculateCombatStats();
+
+            GiveAllWetware();
         }
 
         /// <summary>
@@ -1960,7 +2035,7 @@ namespace RogueBasin
         /// </summary>
         internal void PreTurnActions()
         {
-            RegenerateShieldsAndHitpointsPerTurn();
+            RegenerateStatsPerTurn();
 
             ShieldWasDamagedThisTurn = false;
             HitpointsWasDamagedThisTurn = false;
@@ -1969,10 +2044,8 @@ namespace RogueBasin
                 Game.Dungeon.Player.CalculateCombatStats();
         }
 
-        private void RegenerateShieldsAndHitpointsPerTurn()
+        private void RegenerateStatsPerTurn()
         {
-            double shieldRegenRate = MaxShield / (double)TurnsToRegenerateShield;
-            double hpRegenRate = MaxHitpoints / (double)TurnsToRegenerateHP;
 
             if (ShieldIsDisabled)
             {
@@ -1987,6 +2060,7 @@ namespace RogueBasin
 
             if (!ShieldIsDisabled && !ShieldWasDamagedThisTurn)
             {
+                double shieldRegenRate = MaxShield / (double)TurnsToRegenerateShield;
                 Shield += (int)Math.Ceiling(shieldRegenRate);
 
                 if (Shield > MaxShield)
@@ -1995,9 +2069,18 @@ namespace RogueBasin
 
             if (!HitpointsWasDamagedThisTurn)
             {
+                double hpRegenRate = MaxHitpoints / (double)TurnsToRegenerateHP;
                 Hitpoints += (int)Math.Ceiling(hpRegenRate);
                 if (Hitpoints > MaxHitpoints)
                     Hitpoints = MaxHitpoints;
+            }
+
+            if (!EnergyWasDamagedThisTurn)
+            {
+                double energyRegenRate = MaxEnergy / (double)TurnsToRegenerateEnergy;
+                Energy += (int)Math.Ceiling(energyRegenRate);
+                if (Energy > MaxEnergy)
+                    Energy = MaxEnergy;
             }
         }
 
@@ -2005,5 +2088,7 @@ namespace RogueBasin
         {
             SetupInitialStats();
         }
+
+        
     }
 }

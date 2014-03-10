@@ -6,6 +6,6 @@ namespace RogueBasin
 {
     public enum EquipmentSlot
     {
-        Weapon, Utility
+        Weapon, Utility, Wetware
     }
 }

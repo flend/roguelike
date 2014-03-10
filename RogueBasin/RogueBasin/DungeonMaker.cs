@@ -2329,7 +2329,8 @@ namespace RogueBasin
         {
             List<int> dungeonLevelsToTest = new List<int>();
 
-            for (int i = 0; i < 15; i++)
+            int totalLevels = 5; //15
+            for (int i = 0; i < totalLevels; i++)
             {
                 dungeonLevelsToTest.Add(i);
             }
