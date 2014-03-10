@@ -173,9 +173,6 @@ namespace RogueBasin.Spells
 
             string combatResultsMsg = "PvP Fire Ball: Dam: 1d" + damageBase + " mod " + damageMod + " -> " + damage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-            //Apply damage
-            player.ApplyDamageToPlayer(damage);
         }
         override public int MPCost()
         {

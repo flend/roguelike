@@ -554,7 +554,7 @@ namespace RogueBasin
             {
                 int monsterOrigHP = player.Hitpoints;
 
-                player.Hitpoints -= damage;
+                player.ApplyDamageToPlayer(damage);
 
                 //Is the player dead, if so kill it?
                 if (player.Hitpoints <= 0)
@@ -569,7 +569,7 @@ namespace RogueBasin
                     Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
-                    Game.Dungeon.SetPlayerDeath("was knocked out by a " + this.SingleDescription);
+                    //Game.Dungeon.SetPlayerDeath("was knocked out by a " + this.SingleDescription);
 
                     return CombatResults.DefenderDied;
                 }

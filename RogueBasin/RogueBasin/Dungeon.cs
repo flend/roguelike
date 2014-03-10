@@ -4343,7 +4343,7 @@ namespace RogueBasin
         {
 
             //Heal the player
-            player.AddEffect(new PlayerEffects.Healing(player.MaxHitpoints));
+            player.ResetAfterDeath();
 
             //Remove all effects
             player.RemoveAllEffects();

@@ -1405,7 +1405,8 @@ namespace RogueBasin {
             //Mission
             Point missionOffset = new Point(baseOffset, 1);
             hitpointsOffset = new Point(baseOffset, 4);
-            Point weaponOffset = new Point(baseOffset, 6);
+            Point shieldOffset = new Point(baseOffset, 5);
+            Point weaponOffset = new Point(baseOffset, 7);
             Point utilityOffset = new Point(baseOffset, 11);
             Point viewOffset = new Point(baseOffset, 19);
             Point gameDataOffset = new Point(baseOffset, 24);
@@ -1419,9 +1420,6 @@ namespace RogueBasin {
             int hpBarLength = 10;
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
             int hpBarEntries = (int)Math.Ceiling(hpBarLength * playerHPRatio);
-            
-            //It's easy for the player - make sure we're exact
-            hpBarEntries = player.Hitpoints;
 
             PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
 
@@ -1434,6 +1432,28 @@ namespace RogueBasin {
                 else
                 {
                     PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*', ColorPresets.Gray);
+                }
+            }
+
+            //Draw shield
+
+            int shieldBarLength = 10;
+            double playerShieldRatio = player.Shield / (double)player.MaxShield;
+            int shieldBarEntries = (int)Math.Ceiling(shieldBarLength * playerShieldRatio);
+
+            PrintLine("SD: ", statsDisplayTopLeft.x + shieldOffset.x, statsDisplayTopLeft.y + shieldOffset.y, LineAlignment.Left);
+
+            for (int i = 0; i < hpBarLength; i++)
+            {
+                if (i < shieldBarEntries)
+                {
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.DarkCyan);
+                }
+                else
+                {
+                    Color shieldColor = player.ShieldIsDisabled ? ColorPresets.Red : ColorPresets.Gray;
+
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', shieldColor);
                 }
             }
 

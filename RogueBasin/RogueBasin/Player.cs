@@ -45,6 +45,24 @@ namespace RogueBasin
         /// </summary>
         int maxHitpoints;
 
+        public int Shield { get; set; }
+
+        public int MaxShield { get; set; }
+
+        public bool ShieldWasDamagedThisTurn { get; set; }
+
+        public bool HitpointsWasDamagedThisTurn { get; set; }
+
+        public bool ShieldIsDisabled { get; private set; }
+
+        private int TurnsSinceShieldDisabled { get; set; }
+
+        private const int TurnsForShieldToTurnBackOn = 20;
+
+        private const int TurnsToRegenerateShield = 20;
+
+        private const int TurnsToRegenerateHP = 20;
+
         /// <summary>
         /// Player level
         /// </summary>
@@ -159,10 +177,7 @@ namespace RogueBasin
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
             //Set initial HP
-            SetupInitialHP();
-
-            //Setup initial training stats
-            SetupInitialTrainingStats();
+            SetupInitialStats();
 
             SightRadius = NormalSightRadius;
 
@@ -172,33 +187,14 @@ namespace RogueBasin
             TurnCount = 0;
         }
 
-        private void SetupInitialTrainingStats()
-        {
-            MaxHitpointsStat = 50;
-            HitpointsStat = 50;
-            MagicPoints = 10;
-            MaxMagicPoints = 10;
-            SpeedStat = 10;
-            AttackStat = 10;
-            CharmStat = 10;
-            MagicStat = 10;
-            
-            
-            //Debug
-            /*
-            AttackStat = 100;
-            MagicStat = 100;
-            HitpointsStat = 60;
-            MaxHitpointsStat = 60;
-            CharmStat = 120;
-             */
-        }
-
-        private void SetupInitialHP()
+        private void SetupInitialStats()
         {
             //CalculateCombatStats();
-            maxHitpoints = 10;
+            maxHitpoints = 50;
             hitpoints = maxHitpoints;
+
+            MaxShield = 100;
+            Shield = MaxShield;
         }
 
         /// <summary>
@@ -710,56 +706,6 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             return ApplyDamageToMonster(monster, baseDamage, false, false);
-        }
-
-        /// <summary>
-        /// Only here and the Monster equivalent are places where the player can get damaged. Should unify them.
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        public CombatResults ApplyDamageToPlayer(int damage)
-        {
-                //Do we hit the player?
-            if (damage > 0)
-            {
-                Hitpoints -= damage;
-
-                //Is the player dead, if so kill it?
-                if (Hitpoints <= 0)
-                {
-                    Game.Dungeon.SetPlayerDeath("was knocked out by a themselves");
-
-                    //Message queue string
-                    string combatResultsMsg = "PvP Damage " + damage;
-
-
-                    //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
-                    string playerMsg = "You knocked yourself out.";
-                    Game.MessageQueue.AddMessage(playerMsg);
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    return CombatResults.DefenderDied;
-                }
-
-                //Debug string
-                //string combatResultsMsg3 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
-                //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
-                string combatResultsMsg2 = "PvP Damage " + damage;
-                Game.MessageQueue.AddMessage("Ouch, you hurt yourself.");
-                LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
-
-                return CombatResults.DefenderDamaged;
-            }
-
-            //Miss
-            //string combatResultsMsg2 = "MvP ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
-            //string playerMsg2 = "The " + this.SingleDescription + " misses you.";
-            string combatResultsMsg3 = "PvP Damage " + damage;
-            string playerMsg2 = "You avoid damaging yourself";
-            Game.MessageQueue.AddMessage(playerMsg2);
-            LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
-
-            return CombatResults.DefenderUnhurt;
         }
 
         /// <summary>
@@ -1965,6 +1911,99 @@ namespace RogueBasin
             }
 
             return destination;
+        }
+
+        public void ApplyDamageToPlayer(int damage)
+        {
+            var remainingDamage = damage;
+            int shieldAbsorbs = 0;
+            int hpAbsorbs = 0;
+
+            //Shield absorbs damage first
+            if (Shield > 0)
+            {
+                shieldAbsorbs = Math.Min(Shield, remainingDamage);
+                Shield -= shieldAbsorbs;
+                remainingDamage -= shieldAbsorbs;
+
+                ShieldWasDamagedThisTurn = true;
+            }
+
+            if (Shield == 0)
+            {
+                ShieldIsDisabled = true;
+            }
+
+            //Through to health
+            //Unless we lost our shield this turn, in which case we get a 1 turn grace
+            if (remainingDamage > 0 && !ShieldWasDamagedThisTurn)
+            {
+                hpAbsorbs = Math.Min(Hitpoints, remainingDamage);
+                Hitpoints -= remainingDamage;
+
+                HitpointsWasDamagedThisTurn = true;
+            }
+
+            if (Hitpoints <= 0)
+            {
+                //Player died
+                Game.Dungeon.SetPlayerDeath("Took damage");
+
+                LogFile.Log.LogEntry("Player takes " + damage + " damage and dies.");
+            }
+
+            LogFile.Log.LogEntryDebug("Player takes " + shieldAbsorbs + " damage " + hpAbsorbs + " hitpoint damage.", LogDebugLevel.Medium);
+        }
+
+        /// <summary>
+        /// Carry out all pre-turn checks and sets
+        /// </summary>
+        internal void PreTurnActions()
+        {
+            RegenerateShieldsAndHitpointsPerTurn();
+
+            ShieldWasDamagedThisTurn = false;
+            HitpointsWasDamagedThisTurn = false;
+            
+            if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
+                Game.Dungeon.Player.CalculateCombatStats();
+        }
+
+        private void RegenerateShieldsAndHitpointsPerTurn()
+        {
+            double shieldRegenRate = MaxShield / (double)TurnsToRegenerateShield;
+            double hpRegenRate = MaxHitpoints / (double)TurnsToRegenerateHP;
+
+            if (ShieldIsDisabled)
+            {
+                TurnsSinceShieldDisabled++;
+
+                if (TurnsSinceShieldDisabled >= TurnsForShieldToTurnBackOn)
+                {
+                    ShieldIsDisabled = false;
+                    TurnsSinceShieldDisabled = 0;
+                }
+            }
+
+            if (!ShieldIsDisabled && !ShieldWasDamagedThisTurn)
+            {
+                Shield += (int)Math.Ceiling(shieldRegenRate);
+
+                if (Shield > MaxShield)
+                    Shield = MaxShield;
+            }
+
+            if (!HitpointsWasDamagedThisTurn)
+            {
+                Hitpoints += (int)Math.Ceiling(hpRegenRate);
+                if (Hitpoints > MaxHitpoints)
+                    Hitpoints = MaxHitpoints;
+            }
+        }
+
+        internal void ResetAfterDeath()
+        {
+            SetupInitialStats();
         }
     }
 }

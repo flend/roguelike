@@ -191,16 +191,14 @@ namespace RogueBasin
                                 {
                                     Game.Dungeon.ShowCreatureFOVOnMap(monster);
                                 }
+
+                                Game.Dungeon.ShowSoundsOnMap();
                             }
-
-                            Game.Dungeon.ShowSoundsOnMap();
-
 
                             ProfileEntry("Post Monster POV");
 
-                            //For effects that end to update the screen correctly
-                            if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
-                                Game.Dungeon.Player.CalculateCombatStats();
+                            //For effects that end to update the screen correctly etc.
+                            player.PreTurnActions();
 
                             //Check the 'on' status of special moves - now unnecessary?
                             //Game.Dungeon.CheckSpecialMoveValidity();
