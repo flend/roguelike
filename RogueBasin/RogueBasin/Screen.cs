@@ -1526,9 +1526,23 @@ namespace RogueBasin {
             DrawEnergyBar(player, utilityOffset, energyBarEntries - 10);
             DrawEnergyBar(player, utilityOffset + new Point(0, 1), Math.Min(energyBarEntries, 10));
 
+            //Enable wetware name
+            var equippedWetware = player.GetEquippedWetware();
+
+            var wetwareStr = "None";
+
+            if (equippedWetware != null)
+            {
+                wetwareStr = (equippedWetware as Item).SingleItemDescription;
+            }
+
             //Draw all available wetware
-            DrawWetwareChar(utilityOffset + new Point(0, 2), typeof(Items.ShieldWare), "[S]", 0);
-            DrawWetwareChar(utilityOffset + new Point(3, 2), typeof(Items.StealthWare), "[D]", 0);
+            var wetwareOptionRow = 3;
+            DrawWetwareChar(utilityOffset + new Point(0, wetwareOptionRow), typeof(Items.ShieldWare), "[S]", 0);
+            DrawWetwareChar(utilityOffset + new Point(3, wetwareOptionRow), typeof(Items.StealthWare), "[D]", 0);
+            DrawWetwareChar(utilityOffset + new Point(6, wetwareOptionRow), typeof(Items.AimWare), "[A]", 0);
+
+            PrintLine(wetwareStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
 
             /*
             //Draw equipped utility
@@ -1620,6 +1634,9 @@ namespace RogueBasin {
                 String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
                 PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
 
+                //Combat vs monster
+                PrintLine("Attk: " + player.CalculateAttackModifiersOnMonster(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+
                 //Monster hp
 
                 int mhpBarLength = 10;
@@ -1677,8 +1694,9 @@ namespace RogueBasin {
             }
             else
             {
-                //utilityStr = "None";
-                //PrintLine(utilityStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, nothingColor);
+                //Just base combat
+                PrintLine("Attk: " + player.CalculateAttackModifiersOnMonster(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+
             }
 
             //Game data

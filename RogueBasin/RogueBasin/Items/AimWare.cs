@@ -6,9 +6,9 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    class StealthWare : Item, IEquippableItem
+    class AimWare : Item, IEquippableItem
     {
-        public StealthWare()
+        public AimWare()
         {
 
         }
@@ -29,20 +29,20 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("StealthWare equipped", LogDebugLevel.Medium);
-
+            LogFile.Log.LogEntryDebug("AimWare equipped", LogDebugLevel.Medium);
+            
             Player player = user as Player;
-            player.AddEffect(new PlayerEffects.StealthField());
+            player.AddEffect(new PlayerEffects.AimEnhance(1));
 
             return true;
         }
 
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("StealthWare unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("AimWare unequipped", LogDebugLevel.Low);
 
             Player player = user as Player;
-            player.RemoveEffect(typeof(PlayerEffects.StealthField));
+            player.RemoveEffect(typeof(PlayerEffects.AimEnhance));
 
             return true;
         }
@@ -57,7 +57,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "StealthWare v1"; }
+            get { return "AimWare v1"; }
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "StealthWare v1"; }
+            get { return "AimWare v1"; }
         }
 
         protected override char GetRepresentation()

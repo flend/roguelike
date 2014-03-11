@@ -244,6 +244,7 @@
     <Compile Include="Items\PotionSuperSpeedUp.cs" />
     <Compile Include="Items\PotionToHitUp.cs" />
     <Compile Include="Items\PotionSpeedUp.cs" />
+    <Compile Include="Items\AimWare.cs" />
     <Compile Include="Items\StealthWare.cs" />
     <Compile Include="Items\ShieldWare.cs" />
     <Compile Include="Items\Shotgun.cs">
@@ -261,6 +262,7 @@
     <Compile Include="ITurnAI.cs" />
     <Compile Include="ItemEffect.cs" />
     <Compile Include="ItemEffectSimpleDuration.cs" />
+    <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />

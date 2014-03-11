@@ -2012,6 +2012,7 @@ namespace RogueBasin
         internal bool PCMove(int x, int y, bool runTriggersAlways)
         {
             Point newPCLocation = new Point(Player.LocationMap.x + x, Player.LocationMap.y + y);
+            Point deltaMove = newPCLocation - Player.LocationMap;
 
             //Moves off the map don't work
 
@@ -2027,6 +2028,11 @@ namespace RogueBasin
 
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
             SpecialMove moveDone = DoSpecialMove(newPCLocation);
+
+            if (deltaMove == new Point(0, 0))
+                player.AddTurnWithoutMoving();
+            else
+                player.ResetTurnsWithoutMoving();
 
             bool okToMoveIntoSquare = true;
 
@@ -2094,8 +2100,6 @@ namespace RogueBasin
                         {
                             okToMoveIntoSquare = false;
                         }
-                        player.RemoveEffect(typeof(PlayerEffects.StealthField));
-
                     }
                     else
                     {
@@ -2109,7 +2113,6 @@ namespace RogueBasin
                         {
                             okToMoveIntoSquare = false;
                         }
-                        player.RemoveEffect(typeof(PlayerEffects.StealthField));
                     }
                 }
 

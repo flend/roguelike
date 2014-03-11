@@ -475,6 +475,10 @@ namespace RogueBasin
                                     timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
                                     break;
 
+                                case 'A':
+                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.AimWare));
+                                    break;
+
                                     /*
                                 case 'd':
                                 case 'D':
@@ -628,8 +632,8 @@ namespace RogueBasin
 
                                 case 'v':
                                     //Add a healing event on the player
-                                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(10);
-                                    Game.Dungeon.Player.AddEffect(healing);
+                                    Game.Dungeon.Player.AddShield(100);
+                                    Game.Dungeon.Player.HealPlayer(100);
                                     Screen.Instance.Update();
                                     break;
                                

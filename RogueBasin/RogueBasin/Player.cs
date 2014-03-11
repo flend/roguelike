@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
+using System.Linq;
 
 namespace RogueBasin
 {
@@ -72,6 +73,8 @@ namespace RogueBasin
         private const int TurnsToRegenerateHP = 20;
 
         private const int TurnsToRegenerateEnergy = 10;
+
+        public int TurnsWithoutMoving { get; private set; }
 
         /// <summary>
         /// Player level
@@ -379,7 +382,15 @@ namespace RogueBasin
             //CalculateSightRadius();
         }
 
+        public void AddTurnWithoutMoving()
+        {
+            TurnsWithoutMoving++;
+        }
 
+        public void ResetTurnsWithoutMoving()
+        {
+            TurnsWithoutMoving = 0;
+        }
 
         /// <summary>
         /// Calculate the derived (used by other functions) sight radius based on the player's NormalSightRadius and the light level of the dungeon level the player is on
@@ -653,7 +664,37 @@ namespace RogueBasin
             return success;
         }
 
-         /// <summary>
+        public double CalculateAimBonus()
+        {
+            var aimBonus = 0.1;
+
+            var aimEffect = GetActiveEffects(typeof(PlayerEffects.AimEnhance));
+
+            if(aimEffect.Count() > 0)
+            {
+                aimBonus = ((PlayerEffects.AimEnhance)aimEffect.First()).aimEnhanceAmount * 0.3;
+            }
+
+            return Math.Min(TurnsWithoutMoving, 3) * aimBonus;
+        }
+
+        public double CalculateAttackModifiersOnMonster(Monster target)
+        {
+            var damageModifier = 1.0;
+
+            //Aiming
+            damageModifier += CalculateAimBonus();
+
+            //Enemy moving
+            if (target != null && target.TurnsMoving > 0)
+            {
+                damageModifier -= 0.2;
+            }
+
+            return damageModifier;
+        }
+
+        /// <summary>
         /// Normal attack on a monster. Takes care of killing them off if required.
         /// </summary>
         /// <param name="monster"></param>
@@ -717,6 +758,8 @@ namespace RogueBasin
 
             string combatResultsMsg = "PvM (melee) " + monster.Representation + " = " + baseDamage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+            RemoveEffect(typeof(PlayerEffects.StealthField));
 
             return ApplyDamageToMonster(monster, baseDamage, false, false);
         }
@@ -1280,6 +1323,14 @@ namespace RogueBasin
 
         public bool ToggleEquipWetware(Type wetwareTypeToEquip)
         {
+            var wetwareOfTypeInInventory = Inventory.GetItemsOfType(wetwareTypeToEquip);
+
+            if (wetwareOfTypeInInventory.Count == 0)
+            {
+                LogFile.Log.LogEntryDebug("Do not have wetware of type: " + wetwareTypeToEquip.ToString(), LogDebugLevel.Medium);
+                return false;
+            }
+
             var justUnequip = false;
             var currentlyEquippedWetware = GetEquippedWetware();
             if (currentlyEquippedWetware != null && currentlyEquippedWetware.GetType() == wetwareTypeToEquip)
@@ -1565,6 +1616,16 @@ namespace RogueBasin
             return weaponSlot.equippedItem as IEquippableItem;
         }
 
+        public bool IsWetwareTypeEquipped(Type wetwareType)
+        {
+            var equippedWetware = GetEquippedWetware();
+
+            if (equippedWetware != null && equippedWetware.GetType() == wetwareType)
+                return true;
+
+            return false;
+        }
+
         /// <summary>
         /// FlatlineRL - return equipped weapon or null
         /// </summary>
@@ -1633,6 +1694,7 @@ namespace RogueBasin
         {
             Inventory.AddItemNotFromDungeon(new Items.StealthWare());
             Inventory.AddItemNotFromDungeon(new Items.ShieldWare());
+            Inventory.AddItemNotFromDungeon(new Items.AimWare());
         }
 
         /// <summary>
@@ -2038,8 +2100,16 @@ namespace RogueBasin
             //Shield absorbs damage first
             if (Shield > 0)
             {
-                shieldAbsorbs = Math.Min(Shield, remainingDamage);
-                Shield -= shieldAbsorbs;
+                var shieldEffect = GetActiveEffects(typeof(PlayerEffects.ShieldEnhance));
+
+                int shieldEnhance = 1;
+                if (shieldEffect.Count() > 0)
+                {
+                     shieldEnhance += (shieldEffect.First() as PlayerEffects.ShieldEnhance).shieldEnhanceAmount;
+                }
+
+                shieldAbsorbs = Math.Min(Shield * shieldEnhance, remainingDamage);
+                Shield -= shieldAbsorbs / shieldEnhance;
                 remainingDamage -= shieldAbsorbs;
 
                 ShieldWasDamagedThisTurn = true;

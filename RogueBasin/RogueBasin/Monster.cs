@@ -114,6 +114,8 @@ namespace RogueBasin
 
         public bool Unique { get; set; }
 
+        public int TurnsMoving { get; private set; }
+
         /// <summary>
         /// Current hitpoints
         /// </summary>
@@ -219,6 +221,16 @@ namespace RogueBasin
         virtual protected bool WakesOnBeingSeen()
         {
             return true;
+        }
+
+        public void AddTurnsMoving()
+        {
+            TurnsMoving++;
+        }
+
+        public void ResetTurnsMoving()
+        {
+            TurnsMoving = 0;
         }
 
         /// <summary>
