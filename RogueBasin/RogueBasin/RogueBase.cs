@@ -114,6 +114,15 @@ namespace RogueBasin
 
                         //ProfileEntry("Pre monster");
 
+                        foreach (Item item in Game.Dungeon.Items)
+                        {
+                            //Only process items on the same level as the player
+                            if (item.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                            {
+                                item.IncrementTurnTime();
+                            }
+                        }
+
                         foreach (Monster creature in Game.Dungeon.Monsters)
                         {
                             try
@@ -2197,69 +2206,6 @@ namespace RogueBasin
             bool usedSuccessfully = Game.Dungeon.Player.EquipItem(selectedGroup);
 
             return usedSuccessfully;
-        }
-
-        /// <summary>
-        /// Pick up an item if there is one in this square
-        /// </summary>
-        /// <returns></returns>
-        static public bool PickUpItem()
-        {
-            Dungeon dungeon = Game.Dungeon;
-            Player player = dungeon.Player;
-
-            Item itemToPickUp = dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap);
-
-            if (itemToPickUp == null)
-                return false;
-
-            //Policy for DDRogue is that all equippable items are automatically equipped and never appear in the inventory
-            IEquippableItem equipItem = itemToPickUp as IEquippableItem;
-
-            if (equipItem != null)
-            {
-                //The item is equippable
-
-                //Place in an equipment slot and drop the old item
-                player.EquipAndReplaceItem(itemToPickUp);
-            }
-            else
-            {
-                //Add item to PC inventory
-                //Better on player
-                player.PickUpItem(itemToPickUp);
-
-                //Play help movie
-                if (Game.Dungeon.Player.PlayItemMovies && Game.Dungeon.Player.TempItemHelpMovieSeen == false)
-                {
-                    Screen.Instance.PlayMovie("helptempitems", true);
-                    Game.Dungeon.Player.TempItemHelpMovieSeen = true;
-                }
-
-
-                //Message
-
-                //Tell the player if there's something behind it...!
-
-                //Use a hidden name if required
-                string itemName;
-                if (itemToPickUp.UseHiddenName)
-                {
-                    itemName = Game.Dungeon.GetHiddenName(itemToPickUp);
-                }
-                else
-                    itemName = itemToPickUp.SingleItemDescription;
-
-                if (dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
-                {
-                    Game.MessageQueue.AddMessage(itemName + " picked up. There's something behind it!");
-                }
-                else
-                    Game.MessageQueue.AddMessage(itemName + " picked up.");
-
-                LogFile.Log.LogEntry(itemName + " picked up.");
-            }
-            return true;
         }
 
         private void EquipPickedUpItem()

@@ -2124,7 +2124,7 @@ namespace RogueBasin
                 {
                     //Pick up first item only
                     //Might help if the player makes a massive pile
-                    RogueBase.PickUpItem();
+                    PickUpItemInSpace();
                 }
             }
 
@@ -2515,6 +2515,70 @@ namespace RogueBasin
             {
                 monsters.Remove(monster);
             }
+        }
+
+        /// <summary>
+        /// Pick up an item if there is one in this square
+        /// </summary>
+        /// <returns></returns>
+        public bool PickUpItemInSpace()
+        {
+            Player player = Player;
+
+            Item itemToPickUp = ItemAtSpace(player.LocationLevel, player.LocationMap);
+
+            if (itemToPickUp == null)
+                return false;
+
+            itemToPickUp.OnPickup(player);
+
+            //Policy for DDRogue is that all equippable items are automatically equipped and never appear in the inventory
+            IEquippableItem equipItem = itemToPickUp as IEquippableItem;
+
+            if (equipItem != null)
+            {
+                //The item is equippable
+
+                //Place in an equipment slot and drop the old item
+                player.EquipAndReplaceItem(itemToPickUp);
+            }
+            else
+            {
+                //Add item to PC inventory
+                //Better on player
+                player.PickUpItem(itemToPickUp);
+
+                //Play help movie
+                if (Game.Dungeon.Player.PlayItemMovies && Game.Dungeon.Player.TempItemHelpMovieSeen == false)
+                {
+                    Screen.Instance.PlayMovie("helptempitems", true);
+                    Game.Dungeon.Player.TempItemHelpMovieSeen = true;
+                }
+
+
+                //Message
+
+                //Tell the player if there's something behind it...!
+
+                //Use a hidden name if required
+                string itemName;
+                if (itemToPickUp.UseHiddenName)
+                {
+                    itemName = Game.Dungeon.GetHiddenName(itemToPickUp);
+                }
+                else
+                    itemName = itemToPickUp.SingleItemDescription;
+
+                if (ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
+                {
+                    Game.MessageQueue.AddMessage(itemName + " picked up. There's something behind it!");
+                }
+                else
+                    Game.MessageQueue.AddMessage(itemName + " picked up.");
+
+                LogFile.Log.LogEntry(itemName + " picked up.");
+            }
+            return true;
         }
 
         /// <summary>
@@ -3092,12 +3156,21 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Removes an item from the master list.
+        /// Removes an item from the game entirely.
         /// </summary>
         /// <param name="itemToUse"></param>
-        internal void RemoveItem(Item itemToUse)
+        public void RemoveItem(Item itemToUse)
         {
             items.Remove(itemToUse);
+        }
+
+        /// <summary>
+        /// Hides an item so it can't be interacted with
+        /// </summary>
+        /// <param name="itemToUse"></param>
+        public void HideItem(Item itemToUse)
+        {
+            itemToUse.InInventory = true;
         }
 
         /// <summary>

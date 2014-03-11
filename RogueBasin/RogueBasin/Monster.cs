@@ -80,7 +80,7 @@ namespace RogueBasin
         /// <summary>
         /// Effects current active on this monster
         /// </summary>
-        public List<MonsterEffect> effects { get; set; }
+        public List<MonsterEffect> effects { get; private set; }
 
         public Monster()
         {

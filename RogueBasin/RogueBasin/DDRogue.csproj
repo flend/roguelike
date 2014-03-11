@@ -216,6 +216,7 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="ItemEffects\Decay.cs" />
     <Compile Include="Items\Clue.cs" />
     <Compile Include="Items\FragGrenade.cs">
       <SubType>Code</SubType>
@@ -258,6 +259,9 @@
     <Compile Include="Items\TacticalOverlay.cs" />
     <Compile Include="Items\Vibroblade.cs" />
     <Compile Include="ITurnAI.cs" />
+    <Compile Include="ItemEffect.cs" />
+    <Compile Include="ItemEffectSimpleDuration.cs" />
+    <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />
     <Compile Include="LastMapGeneratorFromASCIIFile.cs" />
@@ -777,4 +781,5 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
+  <ItemGroup />
 </Project>

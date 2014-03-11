@@ -5,16 +5,18 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class ShieldPack : Item, IUseableItem
+    public class ShieldPack : UseableItemUseOnPickup
     {
         bool usedUp;
+
+        const int decayDuration = 10;
 
         public ShieldPack()
         {
             usedUp = false;
         }
 
-        public bool Use(Creature user)
+        public override bool Use(Creature user)
         {
             //Currently healing is implemented as a player effect so we need to check the user is a player
             Player player = user as Player;
@@ -39,6 +41,19 @@ namespace RogueBasin.Items
             return true;
         }
 
+        public override bool OnDrop(Creature droppingCreature)
+        {
+            this.AddEffect(new ItemEffects.Decay(decayDuration));
+
+            return true;
+        }
+
+        public override bool UsedUp
+        {
+            get { return usedUp;  }
+            set { usedUp = value;  }
+        }
+
         public override int GetWeight()
         {
             return 10;
@@ -57,12 +72,6 @@ namespace RogueBasin.Items
         public override libtcodWrapper.Color GetColour()
         {
             return ColorPresets.LightBlue;
-        }
-
-        public bool UsedUp
-        {
-            set { usedUp = value; }
-            get { return usedUp; }
         }
 
         protected override char GetRepresentation()

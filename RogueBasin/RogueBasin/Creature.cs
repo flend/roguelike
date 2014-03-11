@@ -223,11 +223,18 @@ namespace RogueBasin
         {
             inventory.RemoveItem(itemToDrop);
 
+            ProcessDroppedItem(itemToDrop);
+
+            return true;
+        }
+
+        private void ProcessDroppedItem(Item itemToDrop)
+        {
             itemToDrop.LocationLevel = this.LocationLevel;
             itemToDrop.LocationMap = this.LocationMap;
             itemToDrop.InInventory = false;
 
-            return true;
+            itemToDrop.OnDrop(this);
         }
 
 
@@ -241,9 +248,7 @@ namespace RogueBasin
         {
             foreach (Item item in inventory.Items)
             {
-                item.LocationLevel = this.LocationLevel;
-                item.LocationMap = this.LocationMap;
-                item.InInventory = false;
+                ProcessDroppedItem(item);
             }
 
             inventory.RemoveAllItems();

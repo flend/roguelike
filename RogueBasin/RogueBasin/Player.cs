@@ -10,7 +10,7 @@ namespace RogueBasin
         /// <summary>
         /// Effects that are active on the player
         /// </summary>
-        public List<PlayerEffect> effects { get; set; }
+        public List<PlayerEffect> effects { get; private set; }
 
         public List<Monster> Kills { get; set;}
 
@@ -61,11 +61,13 @@ namespace RogueBasin
 
         public bool ShieldIsDisabled { get; private set; }
 
+        public bool DoesShieldRecharge { get; private set; }
+
         private int TurnsSinceShieldDisabled { get; set; }
 
         private const int TurnsForShieldToTurnBackOn = 20;
 
-        private const int TurnsToRegenerateShield = 20000000;
+        private const int TurnsToRegenerateShield = 20;
 
         private const int TurnsToRegenerateHP = 20;
 
@@ -190,9 +192,6 @@ namespace RogueBasin
 
             SightRadius = NormalSightRadius;
 
-            //Setup combat parameters
-            //CalculateCombatStats();
-
             TurnCount = 0;
         }
 
@@ -207,6 +206,8 @@ namespace RogueBasin
 
             MaxEnergy = 100;
             Energy = MaxEnergy;
+
+            DoesShieldRecharge = false;
         }
 
         /// <summary>
@@ -2118,7 +2119,7 @@ namespace RogueBasin
                 }
             }
 
-            if (!ShieldIsDisabled && !ShieldWasDamagedThisTurn)
+            if (!ShieldIsDisabled && !ShieldWasDamagedThisTurn && DoesShieldRecharge)
             {
                 double shieldRegenRate = MaxShield / (double)TurnsToRegenerateShield;
                 AddShield((int)Math.Ceiling(shieldRegenRate));

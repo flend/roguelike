@@ -51,7 +51,14 @@ namespace RogueBasin
             IsEquipped = false;
 
             IsFound = false;
+
+            Effects = new List<ItemEffect>();
         }
+
+        /// <summary>
+        /// Effects current active on this monster
+        /// </summary>
+        public List<ItemEffect> Effects { get; private set; }
 
         /// <summary>
         /// Is this in a creature's inventory
@@ -130,6 +137,83 @@ namespace RogueBasin
         public virtual Item CloneItem()
         {
             return this.MemberwiseClone() as Item;
+        }
+
+        public virtual bool OnPickup(Creature pickupCreature)
+        {
+            return false;
+        }
+
+        public virtual bool OnDrop(Creature droppingCreature)
+        {
+            return false;
+        }
+
+        internal virtual bool IncrementTurnTime()
+        {
+            IncrementEventTime();
+
+            //We don't really have an action
+            return false;
+        }
+
+        /// <summary>
+        /// Increment time on all monster events. Events that expire will run their onExit() routines and then delete themselves from the list
+        /// </summary>
+        public void IncrementEventTime()
+        {
+            //Increment time on events and remove finished ones
+            List<ItemEffect> finishedEffects = new List<ItemEffect>();
+
+            foreach (ItemEffect effect in Effects)
+            {
+                effect.IncrementTime(this);
+
+                if (effect.HasEnded())
+                {
+                    finishedEffects.Add(effect);
+                }
+            }
+
+            //Remove finished effects
+            foreach (ItemEffect effect in finishedEffects)
+            {
+                Effects.Remove(effect);
+            }
+        }
+
+        /// <summary>
+        /// Run an effect on the monster. Calls the effect's onStart and adds it to the current effects queue
+        /// </summary>
+        /// <param name="effect"></param>
+        internal void AddEffect(ItemEffect effect)
+        {
+            Effects.Add(effect);
+
+            effect.OnStart(this);
+        }
+
+        /// <summary>
+        /// Remove all existing effects
+        /// </summary>
+        public void RemoveAllEffects()
+        {
+            //Increment time on events and remove finished ones
+            List<ItemEffect> finishedEffects = new List<ItemEffect>();
+
+            foreach (ItemEffect effect in Effects)
+            {
+                if (!effect.HasEnded())
+                    effect.OnEnd(this);
+
+                finishedEffects.Add(effect);
+            }
+
+            //Remove finished effects
+            foreach (ItemEffect effect in finishedEffects)
+            {
+                Effects.Remove(effect);
+            }
         }
     }
 }
