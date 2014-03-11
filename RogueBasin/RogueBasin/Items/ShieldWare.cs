@@ -8,9 +8,12 @@ namespace RogueBasin.Items
 {
     class ShieldWare : Item, IEquippableItem
     {
-        public ShieldWare()
-        {
 
+        int level;
+
+        public ShieldWare(int level)
+        {
+            this.level = level;
         }
 
         /// <summary>
@@ -29,7 +32,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("ShieldWare equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug(SingleItemDescription + " equipped", LogDebugLevel.Medium);
             
             Player player = user as Player;
             player.AddEffect(new PlayerEffects.ShieldEnhance(1));
@@ -39,7 +42,7 @@ namespace RogueBasin.Items
 
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("ShieldWare unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug(SingleItemDescription +  " unequipped", LogDebugLevel.Low);
 
             Player player = user as Player;
             player.RemoveEffect(typeof(PlayerEffects.ShieldEnhance));
@@ -57,7 +60,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "ShieldWare v1"; }
+            get { return "ShieldWare v" + level; }
         }
 
         /// <summary>
@@ -65,7 +68,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "ShieldWare v1"; }
+            get { return "ShieldWare v" + level; }
         }
 
         protected override char GetRepresentation()

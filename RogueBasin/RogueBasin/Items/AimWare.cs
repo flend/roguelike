@@ -8,9 +8,11 @@ namespace RogueBasin.Items
 {
     class AimWare : Item, IEquippableItem
     {
-        public AimWare()
-        {
+        int level;
 
+        public AimWare(int level)
+        {
+            this.level = level;
         }
 
         /// <summary>
@@ -29,17 +31,17 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("AimWare equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug(SingleItemDescription + " equipped", LogDebugLevel.Medium);
             
             Player player = user as Player;
-            player.AddEffect(new PlayerEffects.AimEnhance(1));
+            player.AddEffect(new PlayerEffects.AimEnhance(level));
 
             return true;
         }
 
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("AimWare unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug(SingleItemDescription + " unequipped", LogDebugLevel.Medium);
 
             Player player = user as Player;
             player.RemoveEffect(typeof(PlayerEffects.AimEnhance));
@@ -57,7 +59,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "AimWare v1"; }
+            get { return "AimWare v" + level; }
         }
 
         /// <summary>
@@ -65,7 +67,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "AimWare v1"; }
+            get { return "AimWare v" + level; }
         }
 
         protected override char GetRepresentation()

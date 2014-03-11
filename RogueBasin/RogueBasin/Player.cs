@@ -76,6 +76,11 @@ namespace RogueBasin
 
         public int TurnsWithoutMoving { get; private set; }
 
+        private Dictionary<Item, int> wetwareDisabledTurns = new Dictionary<Item, int>();
+
+        //4 ticks per turn currently
+        private const int turnsToDisableStealthWareAfterAttack = 80;
+
         /// <summary>
         /// Player level
         /// </summary>
@@ -211,6 +216,61 @@ namespace RogueBasin
             Energy = MaxEnergy;
 
             DoesShieldRecharge = false;
+        }
+
+
+        internal bool IsWetwareTypeAvailable(Type wetWareType)
+        {
+            var wetwareInInventory = Inventory.GetItemsOfType(wetWareType);
+
+            if (wetwareInInventory == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        internal bool IsWetwareTypeDisabled(Type wetwareType)
+        {
+            var wetwareInInventory = Inventory.GetItemsOfType(wetwareType);
+
+            if (wetwareInInventory == null)
+            {
+                return false;
+            }
+
+            var thisWetware = wetwareInInventory.First();
+
+            if (wetwareDisabledTurns.ContainsKey(thisWetware) && wetwareDisabledTurns[thisWetware] > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        public void DisableWetware(Type wetwareToDisable, int turnsToDisable)
+        {
+            var wetwareInInventory = Inventory.GetItemsOfType(wetwareToDisable);
+
+            if (wetwareInInventory == null)
+            {
+                LogFile.Log.LogEntryDebug("Can't disable wetware " + wetwareToDisable + " not in inventory", LogDebugLevel.Medium);
+                return;
+            }
+
+            var thisWetware = wetwareInInventory.First();
+
+            var currentlyDisableTurns = 0;
+
+            if (wetwareDisabledTurns.ContainsKey(thisWetware))
+                currentlyDisableTurns = wetwareDisabledTurns[thisWetware];
+
+            if (currentlyDisableTurns > turnsToDisable)
+                return;
+
+            wetwareDisabledTurns[thisWetware] = turnsToDisable;
         }
 
         /// <summary>
@@ -759,9 +819,19 @@ namespace RogueBasin
             string combatResultsMsg = "PvM (melee) " + monster.Representation + " = " + baseDamage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
-            RemoveEffect(typeof(PlayerEffects.StealthField));
+            CancelStealthDueToAttack();
 
             return ApplyDamageToMonster(monster, baseDamage, false, false);
+        }
+
+        private void CancelStealthDueToAttack()
+        {
+            //Forceably unequip any StealthWare and disable for some time
+            if (IsWetwareTypeEquipped(typeof(Items.StealthWare)))
+            {
+                UnequipWetware();
+                DisableWetware(typeof(Items.StealthWare), turnsToDisableStealthWareAfterAttack);
+            }
         }
 
         /// <summary>
@@ -1153,7 +1223,19 @@ namespace RogueBasin
 
             OverdriveHitpointDecay();
 
+            DecreaseWetwareDisabledCounts();
+
             return base.IncrementTurnTime();
+        }
+
+        private void DecreaseWetwareDisabledCounts()
+        {
+            //yuck
+            var allKeys = wetwareDisabledTurns.Keys.ToList();
+            for (int i = 0; i < allKeys.Count; i++)
+            {
+                wetwareDisabledTurns[allKeys[i]] = Math.Max(wetwareDisabledTurns[allKeys[i]] - 1, 0);
+            }
         }
 
 
@@ -1323,10 +1405,7 @@ namespace RogueBasin
 
         public bool ToggleEquipWetware(Type wetwareTypeToEquip)
         {
-            var wetwareOfTypeInInventory = Inventory.GetItemsOfType(wetwareTypeToEquip);
-
-            if (wetwareOfTypeInInventory.Count == 0)
-            {
+            if(!IsWetwareTypeAvailable(wetwareTypeToEquip)) {
                 LogFile.Log.LogEntryDebug("Do not have wetware of type: " + wetwareTypeToEquip.ToString(), LogDebugLevel.Medium);
                 return false;
             }
@@ -1357,6 +1436,18 @@ namespace RogueBasin
                 return false;
             }
 
+            //Check if it is disabled
+            var wetwareToEquip = wetwareOfTypeInInventory[0];
+
+            if (wetwareDisabledTurns.ContainsKey(wetwareToEquip))
+            {
+                if (wetwareDisabledTurns[wetwareToEquip] > 0)
+                {
+                    LogFile.Log.LogEntryDebug("Can't enable wetware, is disabled for " + wetwareDisabledTurns[wetwareToEquip] + "turns", LogDebugLevel.Medium);
+                    return false;
+                }
+            }
+
             //Equip the new wetware
             EquipmentSlotInfo wetwareSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Wetware);
 
@@ -1365,8 +1456,7 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Can't find wetware slot - bug ", LogDebugLevel.High);
                 return false;
             }
-
-            var wetwareToEquip = wetwareOfTypeInInventory[0];
+            
             var wetwareToEquipAsEquippable = wetwareToEquip as IEquippableItem;
             wetwareToEquip.IsEquipped = true;
             wetwareSlot.equippedItem = wetwareToEquip;
@@ -1693,8 +1783,8 @@ namespace RogueBasin
         public void GiveAllWetware()
         {
             Inventory.AddItemNotFromDungeon(new Items.StealthWare());
-            Inventory.AddItemNotFromDungeon(new Items.ShieldWare());
-            Inventory.AddItemNotFromDungeon(new Items.AimWare());
+            Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
+            Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
         }
 
         /// <summary>
@@ -2229,5 +2319,8 @@ namespace RogueBasin
             if (Shield > MaxShield)
                 Shield = MaxShield;
         }
+
+
+
     }
 }

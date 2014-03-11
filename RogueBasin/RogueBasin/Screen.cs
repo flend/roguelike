@@ -1721,13 +1721,18 @@ namespace RogueBasin {
 
         private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetWareStr, int wetWareOffset)
         {
-            Inventory inv = Game.Dungeon.Player.Inventory;
+            var availableWetware = Game.Dungeon.Player.IsWetwareTypeAvailable(wetWareType);
             var equippedWetware = Game.Dungeon.Player.GetEquippedWetware();
+            var disabledWetware = Game.Dungeon.Player.IsWetwareTypeDisabled(wetWareType);
 
-            if (inv.ContainsItemOfType(wetWareType))
+            if (availableWetware)
             {
                 Color colorToUse;
-                if (equippedWetware != null && equippedWetware.GetType() == wetWareType)
+                if (disabledWetware)
+                {
+                    colorToUse = ColorPresets.DarkGreen;
+                }
+                else if (equippedWetware != null && equippedWetware.GetType() == wetWareType)
                 {
                     colorToUse = ColorPresets.LimeGreen;
                 }
