@@ -43,7 +43,8 @@ namespace RogueBasin
             totalWeight += itemToAdd.GetWeight();
 
             //Remove from dungeon list
-            Game.Dungeon.RemoveItem(itemToAdd);
+            if(Game.Dungeon.Items.Contains(itemToAdd))
+                Game.Dungeon.RemoveItem(itemToAdd);
 
             //Refresh the listing
             RefreshInventoryListing();

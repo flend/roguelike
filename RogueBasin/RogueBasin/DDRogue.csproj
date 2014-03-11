@@ -226,6 +226,7 @@
     <Compile Include="Items\Laser.cs" />
     <Compile Include="Items\NanoRepair.cs" />
     <Compile Include="Items\Pistol.cs" />
+    <Compile Include="Items\ShieldPack.cs" />
     <Compile Include="Items\Potion.cs">
       <SubType>Code</SubType>
     </Compile>

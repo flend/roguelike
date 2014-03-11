@@ -48,7 +48,7 @@ namespace RogueBasin
         public int Shield { get; set; }
 
         public int MaxShield { get; set; }
-
+        
         public int Energy { get; set; }
 
         public int MaxEnergy { get; set; }
@@ -65,7 +65,7 @@ namespace RogueBasin
 
         private const int TurnsForShieldToTurnBackOn = 20;
 
-        private const int TurnsToRegenerateShield = 20;
+        private const int TurnsToRegenerateShield = 20000000;
 
         private const int TurnsToRegenerateHP = 20;
 
@@ -276,11 +276,11 @@ namespace RogueBasin
             */
             //Speed
 
-            int speedDelta = SpeedStat - 10;
+            //int speedDelta = SpeedStat - 10;
 
-            speedDelta = speedDelta * 2;
+            //speedDelta = speedDelta * 2;
 
-            Speed = 100 + speedDelta;
+            Speed = 100;// +speedDelta;
 
             //To Hit
 
@@ -2121,7 +2121,7 @@ namespace RogueBasin
             if (!ShieldIsDisabled && !ShieldWasDamagedThisTurn)
             {
                 double shieldRegenRate = MaxShield / (double)TurnsToRegenerateShield;
-                Shield += (int)Math.Ceiling(shieldRegenRate);
+                AddShield((int)Math.Ceiling(shieldRegenRate));
 
                 if (Shield > MaxShield)
                     Shield = MaxShield;
@@ -2149,6 +2149,14 @@ namespace RogueBasin
             SetupInitialStats();
         }
 
-        
+
+
+        internal void AddShield(int shieldBonus)
+        {
+            Shield += shieldBonus;
+
+            if (Shield > MaxShield)
+                Shield = MaxShield;
+        }
     }
 }
