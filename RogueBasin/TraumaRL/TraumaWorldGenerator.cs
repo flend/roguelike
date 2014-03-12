@@ -22,6 +22,7 @@ namespace RogueBasin
         ConnectivityMap connectivityMap = null;
 
         ConnectivityMap levelLinks;
+        List<int> gameLevels;
         Dictionary<int, string> levelNaming;
 
         public TraumaWorldGenerator()
@@ -262,8 +263,7 @@ namespace RogueBasin
                 levelLinks.AddRoomConnection(leafLevels.RandomElement(), level);
             }
 
-            levelLinks = new ConnectivityMap();
-            levelLinks.AddRoomConnection(0, 1);
+            gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
         }
 
         public class LevelInfo
@@ -304,41 +304,54 @@ namespace RogueBasin
 
                     Dictionary<int, LevelInfo> levelInfo = new Dictionary<int, LevelInfo>();
 
-                    var medicalInfo = GenerateMedicalLevel(medicalLevel);
-                    levelInfo[medicalLevel] = medicalInfo;
+                    //var medicalInfo = GenerateMedicalLevel(medicalLevel);
+                    //levelInfo[medicalLevel] = medicalInfo;
 
-                    var lowerAtriumInfo = GenerateStandardLevel(lowerAtriumLevel, 100);
-                    levelInfo[lowerAtriumLevel] = lowerAtriumInfo;
+                    foreach (var level in gameLevels)
+                    {
+                        var thisLevelInfo = GenerateStandardLevel(level, level * 100);
+                        levelInfo[level] = thisLevelInfo;
+                    }
 
                     //Build the room graph containing all levels
 
-                    //Build and add the start map
+                    //Build and add the start level
 
                     var mapInfoBuilder = new MapInfoBuilder();
                     var startRoom = 0;
-                    mapInfoBuilder.AddConstructedLevel(0, medicalInfo.LevelGenerator.ConnectivityMap, medicalInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                        medicalInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
+                    var startLevelInfo = levelInfo[medicalLevel];
+                    mapInfoBuilder.AddConstructedLevel(0, startLevelInfo.LevelGenerator.ConnectivityMap, startLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
+                        startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
 
-                    //Build and add each connected map
-                    var allNonStartMapLevels = levelInfo.Keys.Except(new List<int>{medicalLevel});
+                    //Build and add each connected level
+                    var levelsAdded = new HashSet<int> { medicalLevel };
 
-                    foreach (var thisLevel in allNonStartMapLevels)
+                    foreach (var kv in levelInfo)
                     {
-                        var thisLevelInfo = levelInfo[thisLevel];
+                        var thisLevel = kv.Key;
+                        var thisLevelInfo = kv.Value;
 
+                        //Since links to other levels are bidirectional, ensure we only add each level once
                         foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
                         {
-                            var thisLevelElevator = connectionToOtherLevel.Value.Target;
-                            var otherLevelElevator = levelInfo[connectionToOtherLevel.Key].ConnectionsToOtherLevels[thisLevel].Target;
+                            var otherLevel = connectionToOtherLevel.Key;
+                            var otherLevelInfo = levelInfo[otherLevel];
 
-                            //bidirectional
+                            var thisLevelElevator = connectionToOtherLevel.Value.Target;
+                            var otherLevelElevator = otherLevelInfo.ConnectionsToOtherLevels[thisLevel].Target;
+
                             var levelConnection = new Connection(thisLevelElevator, otherLevelElevator);
 
-                            mapInfoBuilder.AddConstructedLevel(thisLevel, thisLevelInfo.LevelGenerator.ConnectivityMap, thisLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                                thisLevelInfo.LevelGenerator.GetDoorsInMapCoords(), levelConnection);
+                            if (!levelsAdded.Contains(otherLevel))
+                            {
+                                mapInfoBuilder.AddConstructedLevel(otherLevel, otherLevelInfo.LevelGenerator.ConnectivityMap, otherLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
+                                otherLevelInfo.LevelGenerator.GetDoorsInMapCoords(), levelConnection);
 
-                            LogFile.Log.LogEntryDebug("Adding level connection " + thisLevelInfo.LevelNo + ":" + connectionToOtherLevel.Key + " via nodes" +
-                                thisLevelElevator + "->" + otherLevelElevator, LogDebugLevel.Medium);
+                                LogFile.Log.LogEntryDebug("Adding level connection " + thisLevelInfo.LevelNo + ":" + connectionToOtherLevel.Key + " via nodes" +
+                                    thisLevelElevator + "->" + otherLevelElevator, LogDebugLevel.Medium);
+
+                                levelsAdded.Add(otherLevel);
+                            }
                         }
                     }
 
