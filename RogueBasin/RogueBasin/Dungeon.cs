@@ -121,6 +121,9 @@ namespace RogueBasin
         /// </summary>
         public int MaxAborts { get; set; }
 
+        Dictionary<int, string> levelNaming = new Dictionary<int, string>();
+
+
         //public List<bool> level3UniqueStatus;
         //public List<bool> level4UniqueStatus;
 
@@ -333,65 +336,18 @@ namespace RogueBasin
             }
         }
 
+        public Dictionary<int, string> LevelNaming { get { return levelNaming; } set { levelNaming = value; }}
+  
         /// <summary>
         /// Names for the areas
         /// </summary>
         /// <param name="level"></param>
         /// <returns></returns>
-        internal static string LookupMissionName(int level)
+        internal string LookupMissionName(int level)
         {
-            switch (level)
-            {
-                case 0:
-                    return "Outer hanger";
-
-                case 1:
-                    return "Inner hanger";
-
-                case 2:
-                    return "Cargo storage";
-
-                case 3:
-                    return "Upper cargo";
-
-                case 4:
-                    return "Maintenance";
-
-                case 5:
-                    return "Clean storage";
-
-
-                case 6:
-                    return "Recreation";
-
-                case 7:
-                    return "Residential";
-
-                case 8:
-                    return "Research";
-
-                case 9:
-                    return "Engineering";
-
-                case 10:
-                    return "Security";
-                    
-
-                case 11:
-                    return "Medical";
-                    
-                case 12:
-                    return "Battle bridge";
-
-                case 13:
-                    return "Bridge";
-
-                case 14:
-                    return "Computer Core";
-
-                default:
-                    return "Default";
-            }
+            if(LevelNaming.ContainsKey(level))
+                return LevelNaming[level];
+            return "";
         }
     }
 
@@ -490,11 +446,17 @@ namespace RogueBasin
         /// </summary>
         List<SoundEffect> effects;
 
+        
         Color defaultPCColor = ColorPresets.White;
 
         public DungeonMaker DungeonMaker { get; set; }
 
         public Dungeon()
+        {
+            SetupDungeon();
+        }
+
+        private void SetupDungeon()
         {
             levels = new List<Map>();
             monsters = new List<Monster>();
@@ -535,6 +497,12 @@ namespace RogueBasin
             SaveScumming = true;
 
             Profiling = true;
+        }
+
+        public Dungeon(DungeonInfo info)
+        {
+            SetupDungeon();
+            dungeonInfo = info;
         }
 
         /// <summary>
@@ -3957,7 +3925,7 @@ namespace RogueBasin
             DungeonActionsBetweenMissions();
 
             string fmt = "00";
-            Game.MessageQueue.AddMessage("Re-entering ZONE " + (Player.LocationLevel + 1).ToString(fmt) + " : " + DungeonInfo.LookupMissionName(Player.LocationLevel) +".");
+            Game.MessageQueue.AddMessage("Re-entering ZONE " + (Player.LocationLevel + 1).ToString(fmt) + " : " + Game.Dungeon.DungeonInfo.LookupMissionName(Player.LocationLevel) + ".");
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0);
@@ -4378,7 +4346,7 @@ namespace RogueBasin
             player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
 
             string fmt = "00";
-            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
+            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + Game.Dungeon.DungeonInfo.LookupMissionName(newMissionLevel) + ".");
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0, true);
@@ -4455,7 +4423,7 @@ namespace RogueBasin
             //Message
 
             string fmt = "00";
-            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + DungeonInfo.LookupMissionName(newMissionLevel) + ".");
+            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + Game.Dungeon.DungeonInfo.LookupMissionName(newMissionLevel) + ".");
 
             //Run a normal turn to set off any triggers
             Game.Dungeon.PCMove(0, 0, true);

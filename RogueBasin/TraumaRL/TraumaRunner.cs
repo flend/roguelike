@@ -33,7 +33,7 @@ namespace TraumaRL
 
             VisualiseConnectivityGraph(mapInfo.Model);
 
-            VisualiseLevelConnectivityGraph(new MapModel(templateGen.LevelLinks, 0), templateGen.LevelNaming);
+            VisualiseLevelConnectivityGraph(new MapModel(templateGen.LevelLinks, 0), TraumaWorldGenerator.LevelNaming);
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel)
@@ -68,7 +68,9 @@ namespace TraumaRL
             rb = new RogueBase();
             rb.SetupSystem();
 
-            Game.Dungeon = new Dungeon();
+            var dungeonInfo = new DungeonInfo();
+            dungeonInfo.LevelNaming = TraumaWorldGenerator.LevelNaming;
+            Game.Dungeon = new Dungeon(dungeonInfo);
 
             Game.Dungeon.Player.StartGameSetup();
 

@@ -23,22 +23,26 @@ namespace RogueBasin
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
-        Dictionary<int, string> levelNaming;
+        static Dictionary<int, string> levelNaming;
 
         public TraumaWorldGenerator()
         {
             BuildTerrainMapping();
+        }
+
+        static TraumaWorldGenerator() { 
+            
             BuildLevelNaming();
         }
 
-        const int medicalLevel = 0;
-        const int lowerAtriumLevel = 1;
-        const int scienceLevel = 2;
-        const int storageLevel = 3;
-        const int flightDeck = 4;
-        const int reactorLevel = 5;
-        const int arcologyLevel = 6;
-        const int commercialLevel = 7;
+        public const int medicalLevel = 0;
+        public const int lowerAtriumLevel = 1;
+        public const int scienceLevel = 2;
+        public const int storageLevel = 3;
+        public const int flightDeck = 4;
+        public const int reactorLevel = 5;
+        public const int arcologyLevel = 6;
+        public const int commercialLevel = 7;
 
         //Quest important rooms / vaults
         Connection escapePodsConnection;
@@ -47,7 +51,7 @@ namespace RogueBasin
         Dictionary<MapTerrain, List<MapTerrain>> brickTerrainMapping;
         Dictionary<MapTerrain, List<MapTerrain>> panelTerrainMapping;
 
-        private void BuildLevelNaming()
+        private static void BuildLevelNaming()
         {
             levelNaming = new Dictionary<int, string>();
             levelNaming[medicalLevel] = "Medical";
@@ -102,7 +106,7 @@ namespace RogueBasin
 
         public ConnectivityMap LevelLinks { get { return levelLinks; } }
 
-        public Dictionary<int, string> LevelNaming { get { return levelNaming; } }
+        public static Dictionary<int, string> LevelNaming { get { return levelNaming; } }
 
         /** Build a map using templated rooms */
         public Map GenerateMap()
