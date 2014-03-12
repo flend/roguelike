@@ -217,6 +217,7 @@
     <Compile Include="InventoryListing.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="ItemEffects\Decay.cs" />
+    <Compile Include="ItemMapping.cs" />
     <Compile Include="Items\Clue.cs" />
     <Compile Include="Items\FragGrenade.cs">
       <SubType>Code</SubType>

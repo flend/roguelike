@@ -2535,15 +2535,15 @@ namespace RogueBasin
 
             itemToPickUp.OnPickup(player);
 
-            //Policy for DDRogue is that all equippable items are automatically equipped and never appear in the inventory
             IEquippableItem equipItem = itemToPickUp as IEquippableItem;
 
             if (equipItem != null)
             {
                 //The item is equippable
+                player.PickUpItem(itemToPickUp);
 
                 //Place in an equipment slot and drop the old item
-                player.EquipAndReplaceItem(itemToPickUp);
+                player.EquipAndReplaceItem(itemToPickUp, false);
             }
             else
             {

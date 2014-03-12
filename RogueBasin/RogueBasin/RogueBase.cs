@@ -467,7 +467,7 @@ namespace RogueBasin
                                     break;
 
                                     //WETWARE
-                                case 'S':
+                                /*case 'S':
                                     timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.ShieldWare));
                                     break;
 
@@ -478,7 +478,7 @@ namespace RogueBasin
                                 case 'A':
                                     timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.AimWare));
                                     break;
-
+                                    */
                                     /*
                                 case 'd':
                                 case 'D':
@@ -777,6 +777,37 @@ namespace RogueBasin
                                 UpdateScreen();
                                 break;
                                 */
+                            }
+                        }
+
+                        //Handle wetware
+                        if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                        {
+                            char keyCode = (char)userKey.Character;
+
+                            foreach (var kv in ItemMapping.WetwareMapping)
+                            {
+                                if (keyCode == kv.Key)
+                                {
+                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(kv.Value);
+                                    functionPressed = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        //Handle weapons
+                        int numberPressed = GetNumberFromNonKeypadKeyPress(userKey);
+                        if (numberPressed != -1)
+                        {
+                            foreach (var kv in ItemMapping.WeaponMapping)
+                            {
+                                if (numberPressed == kv.Key)
+                                {
+                                    timeAdvances = Game.Dungeon.Player.EquipInventoryItemType(kv.Value);
+                                    functionPressed = true;
+                                    break;
+                                }
                             }
                         }
 
@@ -1166,6 +1197,43 @@ namespace RogueBasin
             Arrow
         }
 
+        private int GetNumberFromNonKeypadKeyPress(KeyPress userKey)
+        {
+            switch (userKey.KeyCode)
+                {
+                    case KeyCode.TCODK_0:
+                        return 0;
+
+                    case KeyCode.TCODK_1:
+                        return 1;
+
+                    case KeyCode.TCODK_2:
+                        return 2;
+
+                    case KeyCode.TCODK_3:
+                        return 3;
+
+                    case KeyCode.TCODK_4:
+                        return 4;
+
+                    case KeyCode.TCODK_5:
+                        return 5;
+
+                    case KeyCode.TCODK_6:
+                        return 6;
+
+                    case KeyCode.TCODK_7:
+                        return 7;
+
+                    case KeyCode.TCODK_8:
+                        return 8;
+
+                    case KeyCode.TCODK_9:
+                        return 9;
+            }
+
+            return -1;
+        }
 
         /// <summary>
         /// Get a direction from a keypress. Will return false if not valid. Otherwise in parameter.

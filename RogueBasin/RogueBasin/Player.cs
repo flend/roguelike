@@ -218,12 +218,21 @@ namespace RogueBasin
             DoesShieldRecharge = false;
         }
 
+        internal bool IsWeaponTypeAvailable(Type weaponType)
+        {
+            return IsInventoryTypeAvailable(weaponType);
+        }
 
         internal bool IsWetwareTypeAvailable(Type wetWareType)
         {
+            return IsInventoryTypeAvailable(wetWareType);
+        }
+
+        internal bool IsInventoryTypeAvailable(Type wetWareType)
+        {
             var wetwareInInventory = Inventory.GetItemsOfType(wetWareType);
 
-            if (wetwareInInventory == null)
+            if (wetwareInInventory.Count() == 0)
             {
                 return false;
             }
@@ -235,7 +244,7 @@ namespace RogueBasin
         {
             var wetwareInInventory = Inventory.GetItemsOfType(wetwareType);
 
-            if (wetwareInInventory == null)
+            if (wetwareInInventory.Count() == 0)
             {
                 return false;
             }
@@ -254,7 +263,7 @@ namespace RogueBasin
         {
             var wetwareInInventory = Inventory.GetItemsOfType(wetwareToDisable);
 
-            if (wetwareInInventory == null)
+            if (wetwareInInventory.Count() == 0)
             {
                 LogFile.Log.LogEntryDebug("Can't disable wetware " + wetwareToDisable + " not in inventory", LogDebugLevel.Medium);
                 return;
@@ -1494,8 +1503,8 @@ namespace RogueBasin
         /// <returns></returns>
         public bool DropEquippableItem(Item itemToDrop, int levelToDropAt, Point locToDropAt)
         {
-            //Add back to the dungeon store
-            Game.Dungeon.Items.Add(itemToDrop);
+            //Remove from inventory
+            Inventory.RemoveItem(itemToDrop);
 
             itemToDrop.LocationLevel = levelToDropAt;
             itemToDrop.LocationMap = locToDropAt;
@@ -1511,33 +1520,29 @@ namespace RogueBasin
         /// <returns></returns>
         public bool DropEquippableItem(Item itemToDrop)
         {
-            //Add back to the dungeon store
             return DropEquippableItem(itemToDrop, this.LocationLevel, this.LocationMap);
         }
 
-        /// <summary>
-        /// Pick up an item. Equippable items never exist in the inventory in FlatlineRL
-        /// </summary>
-        /// <param name="itemToDrop"></param>
-        /// <returns></returns>
-        public bool PickupEquippableItem(Item itemToPickup)
+        internal bool EquipInventoryItemType(Type itemType)
         {
-            //Remove from the dungeon store, to avoid duplication on serialization
-            Game.Dungeon.Items.Remove(itemToPickup);
+            if (!IsInventoryTypeAvailable(itemType))
+            {
+                LogFile.Log.LogEntryDebug("Can't equip inventory type " + itemType + " - not in inventory", LogDebugLevel.Medium);
+                return false;
+            }
 
-            itemToPickup.InInventory = true;
-
-            return true;
+            return EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
         }
 
         /// <summary>
         /// Equip an item into a relevant slot.
         /// Will unequip and drop an item in the same slot.
         /// Returns true if operation successful
+        /// Should be called after picking item up
         /// </summary>
         /// <param name="selectedGroup"></param>
         /// <returns></returns>
-        public bool EquipAndReplaceItem(Item itemToUse)
+        public bool EquipAndReplaceItem(Item itemToUse, bool dropOldItem)
         {
             //Check if this item is equippable
             IEquippableItem equippableItem = itemToUse as IEquippableItem;
@@ -1548,6 +1553,13 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
                 return false;
             }
+            
+            //Check item is in inventory
+            if (!Inventory.ContainsItem(itemToUse))
+            {
+                LogFile.Log.LogEntryDebug("Can't equip item, not in inventory: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
+                return false;
+            };
 
             //Find all matching slots available on the player
 
@@ -1592,10 +1604,11 @@ namespace RogueBasin
                     return false;
                 }
 
-                LogFile.Log.LogEntryDebug("Dropping old item " + oldItem.SingleItemDescription, LogDebugLevel.Medium);
+                if (dropOldItem)
+                    UnequipAndDropItem(oldItem);
+                else
+                    UnequipItem(oldItem);
 
-                UnequipAndDropItem(oldItem);
-                
                 //This slot is now free
                 freeSlot = matchingEquipSlots[0];
             }
@@ -1606,8 +1619,6 @@ namespace RogueBasin
             matchingEquipSlots[0].equippedItem = itemToUse;
             equippableItem.Equip(this);
             itemToUse.IsEquipped = true;
-
-            PickupEquippableItem(itemToUse);
 
             LogFile.Log.LogEntryDebug("Equipping new item " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
 
@@ -1630,8 +1641,23 @@ namespace RogueBasin
         /// </summary>
         public void UnequipAndDropItem(Item item, int levelToDrop, Point toDropLoc)
         {
+            UnequipItem(item);
+
+            //Drop the old item
+            DropEquippableItem(item, levelToDrop, toDropLoc);
+        }
+
+        private void UnequipItem(Item item)
+        {
             //Run unequip routine
             IEquippableItem equipItem = item as IEquippableItem;
+
+            if (equipItem == null)
+            {
+                LogFile.Log.LogEntryDebug("UnequipItem - item not equippable " + item.SingleItemDescription, LogDebugLevel.High);
+                return;
+            }
+
             equipItem.UnEquip(this);
             item.IsEquipped = false;
 
@@ -1645,10 +1671,6 @@ namespace RogueBasin
             {
                 oldSlot.equippedItem = null;
             }
-
-            //Drop the old item
-            DropEquippableItem(item, levelToDrop, toDropLoc);
-
         }
 
         public void UnequipAndDestoryAllItems()
@@ -1785,6 +1807,14 @@ namespace RogueBasin
             Inventory.AddItemNotFromDungeon(new Items.StealthWare());
             Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
             Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
+        }
+
+        public void GiveAllWeapons()
+        {
+            Inventory.AddItemNotFromDungeon(new Items.Pistol());
+            Inventory.AddItemNotFromDungeon(new Items.Shotgun());
+            Inventory.AddItemNotFromDungeon(new Items.Laser());
+            Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
         }
 
         /// <summary>
@@ -2033,6 +2063,7 @@ namespace RogueBasin
             CalculateCombatStats();
 
             GiveAllWetware();
+            GiveAllWeapons();
         }
 
         /// <summary>
@@ -2319,8 +2350,5 @@ namespace RogueBasin
             if (Shield > MaxShield)
                 Shield = MaxShield;
         }
-
-
-
     }
 }

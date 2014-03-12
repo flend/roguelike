@@ -1464,7 +1464,7 @@ namespace RogueBasin {
                 //Ammo
                 if (weaponE.HasFireAction())
                 {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
         
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -1475,11 +1475,11 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*', ColorPresets.Blue);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, '*', ColorPresets.Blue);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, '*', ColorPresets.Gray);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, '*', ColorPresets.Gray);
                         }
                     }
                 }
@@ -1507,12 +1507,19 @@ namespace RogueBasin {
                     uses += "(u)se";
                 }
 
-                PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
+                PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
             }
             else
             {
                 weaponStr = "None";
                 PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left, nothingColor);
+            }
+
+            //Draw weapon choices
+            var weaponOptionRow = 2;
+            foreach (var kv in ItemMapping.WeaponMapping)
+            {
+                DrawWeaponChar(weaponOffset + new Point(kv.Key, weaponOptionRow), kv.Value, kv.Key.ToString());
             }
             
             //Draw energy bar and use keys
@@ -1538,9 +1545,12 @@ namespace RogueBasin {
 
             //Draw all available wetware
             var wetwareOptionRow = 3;
-            DrawWetwareChar(utilityOffset + new Point(0, wetwareOptionRow), typeof(Items.ShieldWare), "[S]", 0);
-            DrawWetwareChar(utilityOffset + new Point(3, wetwareOptionRow), typeof(Items.StealthWare), "[D]", 0);
-            DrawWetwareChar(utilityOffset + new Point(6, wetwareOptionRow), typeof(Items.AimWare), "[A]", 0);
+            int offset = 0;
+            foreach (var kv in ItemMapping.WetwareMapping)
+            {
+                DrawWetwareChar(utilityOffset + new Point(offset * 3, wetwareOptionRow), kv.Value, "[" + kv.Key + "]");
+                offset++;
+            }
 
             PrintLine(wetwareStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
 
@@ -1719,7 +1729,7 @@ namespace RogueBasin {
             }
         }
 
-        private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetWareStr, int wetWareOffset)
+        private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetWareStr)
         {
             var availableWetware = Game.Dungeon.Player.IsWetwareTypeAvailable(wetWareType);
             var equippedWetware = Game.Dungeon.Player.GetEquippedWetware();
@@ -1741,9 +1751,35 @@ namespace RogueBasin {
                     colorToUse = ColorPresets.Green;
                 }
 
-                PrintLine(wetWareStr, statsDisplayTopLeft.x + utilityOffset.x + wetWareOffset, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
+                PrintLine(wetWareStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
             }
         }
+
+        private void DrawWeaponChar(Point utilityOffset, Type weaponType, string weaponStr)
+        {
+            var availableWetware = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType);
+            var equippedWeapon = Game.Dungeon.Player.GetEquippedWeapon();
+
+
+            Color colorToUse;
+            if (!availableWetware)
+            {
+                colorToUse = ColorPresets.DarkGray;
+            }
+            else if (equippedWeapon != null && equippedWeapon.GetType() == weaponType)
+            {
+                colorToUse = ColorPresets.LimeGreen;
+            }
+            else
+            {
+                colorToUse = ColorPresets.Green;
+            }
+
+            PrintLine(weaponStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
+
+        }
+
+
 
         private void DrawShieldBar(Player player, Point shieldOffset, int shieldBarFirstBar)
         {
