@@ -278,6 +278,7 @@ namespace RogueBasin
 
                 ConnectionsToOtherLevels = new Dictionary<int, Connection>();
                 ReplaceableVaultConnections = new List<Connection>();
+                ReplaceableVaultConnectionsUsed = new List<Connection>();
             }
 
             public int LevelNo { get; private set; }
@@ -289,6 +290,7 @@ namespace RogueBasin
 
             //Replaceable vault at target
             public List<Connection> ReplaceableVaultConnections { get; set; }
+            public List<Connection> ReplaceableVaultConnectionsUsed { get; set; }
         }
 
         /** Build a map using templated rooms */
@@ -310,6 +312,8 @@ namespace RogueBasin
 
                     //var medicalInfo = GenerateMedicalLevel(medicalLevel);
                     //levelInfo[medicalLevel] = medicalInfo;
+
+                    //Make other levels generically
 
                     foreach (var level in gameLevels)
                     {
@@ -360,50 +364,9 @@ namespace RogueBasin
                     }
 
                     mapInfo = new MapInfo(mapInfoBuilder);
-                    var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
 
-                    /*
-
-                    //MAIN QUEST
-
-                    //Escape pod door
-                    //  - bridge self-destruct
-
-                    mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(escapePodsConnection, "escape"), bridgeMainBridgeConnection.Target);
-
-                    //MAIN QUEST SUPPORT
-
-                    //Level-local lock on bridge level on critical path to main bridge. Place clue a reasonable distance away, not on critical path (if possible)
-
-                    var bridgeCriticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(bridgeTransitConnection.Target, bridgeMainBridgeConnection.Target);
-                    var bridgeCriticalConnection = bridgeCriticalPath.ElementAt(bridgeCriticalPath.Count() / 2);
-
-                    var allRoomsForCriticalClue = mapInfo.Model.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(bridgeCriticalConnection);
-                    var bridgeRooms = mapInfo.GetRoomIndicesForLevel(1);
-                    var bridgeCriticalPathRooms = bridgeCriticalPath.Select(c => c.Source).Union(bridgeCriticalPath.Select(c => c.Target));
-
-                    var allowedBridgeRoomsNotOnCriticalPath = allRoomsForCriticalClue.Intersect(bridgeRooms).Except(bridgeCriticalPathRooms);
-
-                    int roomForCriticalBridgeClue;
-                    if (allowedBridgeRoomsNotOnCriticalPath.Count() > 0)
-                    {
-                        var distancesBetweenClueAndDoor = mapInfo.Model.GetDistanceOfVerticesFromParticularVertexInReducedMap(bridgeCriticalConnection.Source, allowedBridgeRoomsNotOnCriticalPath);
-
-                        //Get room that is half maximum distance from door
-                        var verticesByDistance = distancesBetweenClueAndDoor.OrderByDescending(kv => kv.Value).Select(kv => kv.Key);
-                        roomForCriticalBridgeClue = verticesByDistance.ElementAt(verticesByDistance.Count() / 2);
-
-                        //Or as far away as possible
-                        roomForCriticalBridgeClue = MaxEntry(distancesBetweenClueAndDoor).Key;
-                    }
-                    else
-                        roomForCriticalBridgeClue = allRoomsForCriticalClue.RandomElement();
-
-                    mapInfo.Model.DoorAndClueManager.PlaceDoorAndClue(new DoorRequirements(bridgeCriticalConnection, "green"), roomForCriticalBridgeClue);
-
-                    LogFile.Log.LogEntryDebug("L0 Critical Path, candidates: " + allowedBridgeRoomsNotOnCriticalPath.Count() + " lock at: " + bridgeCriticalConnection + " clue at " + roomForCriticalBridgeClue, LogDebugLevel.High);
-
-                    */
+                    //Generate quests at mapmodel level
+                    GenerateQuests(mapInfo, levelInfo, startRoom);
                     
                     //Add maps to the dungeon
                     foreach (var kv in levelInfo)
@@ -425,43 +388,14 @@ namespace RogueBasin
                     Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
                     //Add elevator features to link the maps
-
-                    var elevatorLocations = new Dictionary<Tuple<int, int>, Point>();
-
-                    foreach (var kv in levelInfo)
-                    {
-                        var thisLevelNo = kv.Key;
-                        var thisLevelInfo = kv.Value;
-
-                        foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
-                        {
-                            var elevatorLoc = mapInfo.GetRandomPointInRoomOfTerrain(connectionToOtherLevel.Value.Target, RoomTemplateTerrain.Floor);
-                            elevatorLocations[new Tuple<int, int>(thisLevelNo, connectionToOtherLevel.Key)] = elevatorLoc;
-                        }
-                    }
-
-                    foreach(var kv in elevatorLocations) {
-
-                        var sourceLevel = kv.Key.Item1;
-                        var targetLevel = kv.Key.Item2;
-
-                        var sourceToTargetElevator = kv.Value;
-                        var targetToSourceElevator = elevatorLocations[new Tuple<int, int>(targetLevel, sourceLevel)];
-
-                        Game.Dungeon.AddFeature(new Features.Elevator(targetLevel, targetToSourceElevator), sourceLevel, sourceToTargetElevator);
-
-                        LogFile.Log.LogEntryDebug("Adding elevator connection " + sourceLevel + ":" + targetLevel + " via points" +
-                            sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);
-                    }
+                    AddElevatorFeatures(mapInfo, levelInfo);
 
                     //Add non-interactable features
-                    /*
-                    var bridgeRoomOnMap = mapInfo.GetRoom(bridgeMainBridgeConnection.Target);
-                    AddStandardDecorativeFeaturesToRoom(1, bridgeRoomOnMap, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
+                    
                     var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     AddStandardDecorativeFeaturesToRoom(0, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
-                    */
-
+                    
+                    //Add clues and locks at dungeon engine level
                     AddCluesAndLocks(mapInfo);
 
                     break;
@@ -478,6 +412,106 @@ namespace RogueBasin
             return mapInfo;
         }
 
+
+        /*private IEnumerable<Connection> GetCriticalRouteBetweenElevators(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startLevel, int endLevel)
+        {
+            var 
+
+            return mapInfo.Model.GetPathBetweenVerticesInReducedMap(bridgeTransitConnection.Target, bridgeMainBridgeConnection.Target);
+        }*/
+
+        private IEnumerable<int> RoomsInConnectionSet(IEnumerable<int> testRooms, IEnumerable<Connection> connectionSet)
+        {
+            return connectionSet.Where(c => testRooms.Contains(c.Source) && testRooms.Contains(c.Target)).SelectMany(c => new List<int>{c.Source, c.Target}).Distinct();
+        }
+
+        private IEnumerable<Connection> ConnectionsWithinRoomSet(IEnumerable<int> testRooms, IEnumerable<Connection> connectionSet)
+        {
+            return connectionSet.Where(c => testRooms.Contains(c.Source) && testRooms.Contains(c.Target));
+        }
+
+        private IEnumerable<int> RoomsInDescendingDistanceFromSource(MapInfo mapInfo, int sourceRoom, IEnumerable<int> testRooms)
+        {
+            var deadEndDistancesFromStartRoom = mapInfo.Model.GetDistanceOfVerticesFromParticularVertexInFullMap(sourceRoom, testRooms);
+            var verticesByDistance = deadEndDistancesFromStartRoom.OrderByDescending(kv => kv.Value).Select(kv => kv.Key);
+
+            return verticesByDistance;
+        }
+
+        private void GenerateQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom)
+        {
+            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
+            var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
+            var deadEndRooms = roomConnectivityMap[0];
+
+            //MAIN QUEST
+
+            //Escape pod door
+            //Requires enabling self-destruct and fueling pods
+
+            escapePodsConnection = levelInfo[flightDeck].ReplaceableVaultConnections[0];
+            levelInfo[flightDeck].ReplaceableVaultConnectionsUsed.Add(escapePodsConnection);
+
+            //TODO: replace vault in map
+
+            mapInfo.Model.DoorAndClueManager.PlaceDoor(new DoorRequirements(escapePodsConnection, "escape", 2));
+
+            //Self destruct requires captain's id
+            int selfDestructLevel = medicalLevel;
+            var selfDestructLevelIndices = mapInfo.GetRoomIndicesForLevel(selfDestructLevel);
+            var deadEndsInMedical = RoomsInConnectionSet(selfDestructLevelIndices, deadEndRooms);
+            var roomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, startRoom, deadEndsInMedical);
+            var roomsFarFromStart = roomsInDistanceOrderFromStart.ElementAt(0);
+
+            mapInfo.Model.DoorAndClueManager.PlaceObjective(new ObjectiveRequirements(roomsFarFromStart, "self-destruct", 1, new List<string> { "escape" }));
+
+            //Captain's id
+            int captainIdLevel = lowerAtriumLevel;
+            var captainIdLevelIndices = mapInfo.GetRoomIndicesForLevel(captainIdLevel);
+            var randomRoomForCaptainId = captainIdLevelIndices.RandomElement();
+
+            mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective("self-destruct", new List<int> { randomRoomForCaptainId });
+
+            //Fueling system
+            int fuelingLevel = lowerAtriumLevel;
+            var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
+            var randomRoomForFueling = fuelingLevelIndices.RandomElement();
+
+            mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
+        }
+
+        private static void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        {
+            var elevatorLocations = new Dictionary<Tuple<int, int>, Point>();
+
+            foreach (var kv in levelInfo)
+            {
+                var thisLevelNo = kv.Key;
+                var thisLevelInfo = kv.Value;
+
+                foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
+                {
+                    var elevatorLoc = mapInfo.GetRandomPointInRoomOfTerrain(connectionToOtherLevel.Value.Target, RoomTemplateTerrain.Floor);
+                    elevatorLocations[new Tuple<int, int>(thisLevelNo, connectionToOtherLevel.Key)] = elevatorLoc;
+                }
+            }
+
+            foreach (var kv in elevatorLocations)
+            {
+
+                var sourceLevel = kv.Key.Item1;
+                var targetLevel = kv.Key.Item2;
+
+                var sourceToTargetElevator = kv.Value;
+                var targetToSourceElevator = elevatorLocations[new Tuple<int, int>(targetLevel, sourceLevel)];
+
+                Game.Dungeon.AddFeature(new Features.Elevator(targetLevel, targetToSourceElevator), sourceLevel, sourceToTargetElevator);
+
+                LogFile.Log.LogEntryDebug("Adding elevator connection " + sourceLevel + ":" + targetLevel + " via points" +
+                    sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);
+            }
+        }
+
         private static void AddCluesAndLocks(MapInfo mapInfo)
         {
 
@@ -489,15 +523,27 @@ namespace RogueBasin
                 foreach (var clue in cluesAtVertex.Value)
                 {
                     var possibleRooms = clue.PossibleClueRoomsInFullMap;
-                    var randomRoom = possibleRooms[Game.Random.Next(possibleRooms.Count)];
+                    var randomRoom = possibleRooms.RandomElement();
+                    var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
+
+                    var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
+                    var allWalkablePoints = Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints);
 
                     bool placedItem = false;
-                    do
+                    foreach (Point p in allWalkablePoints)
                     {
-                        var pointInRoom = mapInfo.GetRandomPointInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
+                        placedItem = Game.Dungeon.AddItem(new Items.Clue(clue), levelForRandomRoom, p);
+                        
+                        if (placedItem)
+                            break;
+                    }
 
-                        placedItem = Game.Dungeon.AddItem(new Items.Clue(clue), mapInfo.GetLevelForRoomIndex(randomRoom), pointInRoom);
-                    } while (!placedItem);
+                    if (!placedItem)
+                    {
+                        var str = "Can't place clue " + clue.OpenLockIndex;
+                        LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
+                        throw new ApplicationException(str);
+                    }
                 }
 
             }
@@ -514,6 +560,37 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Lock door level " + lockedDoor.LocationLevel + " loc: " + doorInfo.MapLocation, LogDebugLevel.High);
 
                 Game.Dungeon.AddLock(lockedDoor);
+            }
+
+            //Add objectives to dungeon as simple objectives
+
+            foreach (var objAtVertex in mapInfo.Model.DoorAndClueManager.ObjectiveRoomMap)
+            {
+                foreach (var obj in objAtVertex.Value)
+                {
+                    var possibleRooms = obj.PossibleClueRoomsInFullMap;
+                    var randomRoom = possibleRooms.RandomElement();
+                    var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
+
+                    var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
+                    var allWalkablePoints = Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints);
+
+                    bool placedItem = false;
+                    foreach (Point p in allWalkablePoints)
+                    {
+                        placedItem = Game.Dungeon.AddFeature(new Features.SimpleObjective(obj, obj.OpenLockIndex.Select(o => mapInfo.Model.DoorAndClueManager.GetLockIdByIndex(o))), levelForRandomRoom, p);
+
+                        if (placedItem)
+                            break;
+                    }
+
+                    if (!placedItem)
+                    {
+                        var str = "Can't place objective " + obj.Id;
+                        LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
+                        throw new ApplicationException(str);
+                    }
+                }
             }
         }
 

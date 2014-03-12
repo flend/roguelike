@@ -190,6 +190,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Features\DockBay.cs" />
+    <Compile Include="Features\SimpleObjective.cs" />
     <Compile Include="Features\Elevator.cs" />
     <Compile Include="Features\StandardDecorativeFeature.cs" />
     <Compile Include="Features\StaircaseEntry.cs" />

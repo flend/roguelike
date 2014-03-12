@@ -183,6 +183,13 @@ namespace RogueBasin
             return new Point(rooms[roomIndex].Location + roomRelativePoint);
         }
 
+        public IEnumerable<Point> GetAllPointsInRoomOfTerrain(int roomIndex, RoomTemplateTerrain terrainToFind)
+        {
+            var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, terrainToFind);
+
+            return roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
+        }
+
         public IEnumerable<int> GetRoomIndicesForLevel(int level)
         {
             return roomListForLevel[level];

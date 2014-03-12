@@ -15,12 +15,23 @@ namespace RogueBasin.Items
         public Clue(GraphMap.Clue mapClue)
         {
             this.mapClue = mapClue;
-            this.id = mapClue.LockedDoor.Id;
+            string parentId;
+
+            if (mapClue.LockedDoor != null)
+            {
+                this.id = "door-clue-" + mapClue.LockedDoor.Id;
+                parentId = mapClue.LockedDoor.Id;
+            }
+            else
+            {
+                this.id = "obj-clue-" + mapClue.LockedObjective.Id;
+                parentId = mapClue.LockedObjective.Id;
+            }
 
             color = ColorPresets.Magenta;
 
             //Map id to color
-            switch (id)
+            switch (parentId)
             {
                 case "red":
                     color = ColorPresets.Red;
@@ -33,6 +44,12 @@ namespace RogueBasin.Items
                     break;
                 case "yellow":
                     color = ColorPresets.Yellow;
+                    break;
+                case "escape":
+                    color = ColorPresets.Yellow;
+                    break;
+                case "self-destruct":
+                    color = ColorPresets.LimeGreen;
                     break;
             }
         }

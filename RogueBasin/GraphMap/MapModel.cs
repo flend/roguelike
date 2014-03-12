@@ -147,6 +147,14 @@ namespace GraphMap
             PossibleClueRoomsInFullMap = possibleRooms;
         }
 
+        public bool CanBeOpenedWithClues(IEnumerable<Clue> clues)
+        {
+            var applicableClues = clues.Where(c => c.OpenLockIndex == LockIndex);
+            if(applicableClues.Count() >= NumCluesRequired)
+                return true;
+            return false;
+        }
+
         public List<int> PossibleClueRoomsInFullMap
         {
             get;

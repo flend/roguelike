@@ -602,13 +602,13 @@ namespace RogueBasin
 
                                 case 'Y':
                                     //next mission
-                                    Game.Dungeon.MoveToNextMission();
+                                    Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
                                     timeAdvances = true;
                                     break;
 
-                                case 'E':
-                                    //next mission
-                                    Game.Dungeon.MoveToNextMission();
+                                case 'G':
+                                    //last mission
+                                    Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
                                     timeAdvances = true;
                                     break;
                                     /*

@@ -4353,6 +4353,36 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Move player to next mission
+        /// </summary>
+        public void MoveToLevel(int levelNo)
+        {
+            if(levelNo < 0 || levelNo >= levels.Count)
+                return;
+
+            //Find any elevator that goes here
+            var elevator = features.Where(f => f.GetType() == typeof(Features.Elevator) && (f as Features.Elevator).DestLevel == levelNo);
+            if (elevator.Count() == 0)
+            {
+                LogFile.Log.LogEntryDebug("Failed to find elevator to get to on level " + levelNo, LogDebugLevel.Medium);
+                return;
+            }
+
+            var preferredElevator = elevator.Where(f => f.GetType() == typeof(Features.Elevator) && (f as Features.Elevator).LocationLevel == player.LocationLevel);
+
+            if (preferredElevator.Count() > 0)
+            {
+                var elevatorToUse = preferredElevator.ElementAt(0) as Features.Elevator;
+                elevatorToUse.PlayerInteraction(player);
+            }
+            else
+            {
+                var elevatorToUse = elevator.ElementAt(0) as Features.Elevator;
+                elevatorToUse.PlayerInteraction(player);
+            }
+        }
+
+        /// <summary>
         /// Bit of a hack, override the tileset per level
         /// </summary>
         private void SelectTilesetForMission(int level)
@@ -4536,6 +4566,11 @@ namespace RogueBasin
             }
 
             return adjacentSqFree;
+        }
+
+        public IEnumerable<Point> GetWalkablePointsFromSet(int level, IEnumerable<Point> allPossiblePoints)
+        {
+            return allPossiblePoints.SelectMany(p => MapSquareIsWalkable(level, p) ? new List<Point> {p} : new List<Point>());
         }
     }
 }

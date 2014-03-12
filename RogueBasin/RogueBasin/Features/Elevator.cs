@@ -31,6 +31,9 @@ namespace RogueBasin.Features
             return true;
         }
 
+        public int DestLevel { get { return destLevel;  } }
+        public Point DestLocation { get { return destLocation; } }
+
         protected override char GetRepresentation()
         {
             return '%';

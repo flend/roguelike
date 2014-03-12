@@ -36,6 +36,54 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void ObjectivesCantBeOpenedWithNoClues()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1));
+            var obj1 = manager.GetObjectiveById("obj1");
+
+            Assert.IsFalse(obj1.CanBeOpenedWithClues(new List<Clue>()));
+        }
+
+        [TestMethod]
+        public void ObjectivesCanBeOpenedWithCorrectClue()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1));
+            var obj1 = manager.GetObjectiveById("obj1");
+            var clues = manager.AddCluesToExistingObjective("obj1", new List<int>{2});
+
+            Assert.IsTrue(obj1.CanBeOpenedWithClues(clues));
+        }
+
+        [TestMethod]
+        public void ObjectivesCanBeOpenedWithCorrectClues()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 2));
+            var obj1 = manager.GetObjectiveById("obj1");
+            var clues = manager.AddCluesToExistingObjective("obj1", new List<int> { 2, 3 });
+
+            Assert.IsTrue(obj1.CanBeOpenedWithClues(clues));
+        }
+
+        [TestMethod]
+        public void ObjectivesCantBeOpenedWithWrongClues()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 2));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj2", 2));
+            var obj1 = manager.GetObjectiveById("obj1");
+            var clues = manager.AddCluesToExistingObjective("obj2", new List<int> { 2, 3 });
+
+            Assert.IsFalse(obj1.CanBeOpenedWithClues(clues));
+        }
+
+        [TestMethod]
         public void CluesForObjectivesCanBePlacedAndRetrievedByRoom()
         {
             var manager = BuildStandardManager();
