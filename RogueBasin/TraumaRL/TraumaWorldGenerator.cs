@@ -577,7 +577,11 @@ namespace RogueBasin
                 if (placedClues.Contains(clue))
                     continue;
 
-                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue);
+
+                if (!roomsForClue.Item2.Any())
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
 
@@ -617,6 +621,25 @@ namespace RogueBasin
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
             
+            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+        }
+
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue)
+        {
+            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+
+            //Must be on the same level
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(possibleRooms.First());
+
+            var allWalkablePoints = new List<Point>();
+
+            //Hmm, could be quite expensive
+            foreach (var room in possibleRooms)
+            {
+                var allPossiblePoints = mapInfo.GetBoundaryPointsInRoomOfTerrain(room);
+                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
+            }
+
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 

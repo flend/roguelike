@@ -202,6 +202,60 @@ namespace RogueBasin
             return candidatePoints;
         }
 
+        public static List<Point> GetBoundaryFloorPointsInRoom(RoomTemplate room)
+        {
+            var candidatePoints = new List<Point>();
+
+            for (int i = 0; i < room.Width; i++)
+            {
+                for (int j = 0; j < room.Height; j++)
+                {
+                    if(room.terrainMap[i, j] == RoomTemplateTerrain.Floor &&
+                        HasWallButNoDoorNeighbours(room, new Point(i, j)))
+                        candidatePoints.Add(new Point(i,j));
+                }
+            }
+
+            return candidatePoints;
+        }
+
+        private static bool HasWallButNoDoorNeighbours(RoomTemplate room, Point p)
+        {
+            List<Point> adjacentSq = new List<Point>();
+
+            adjacentSq.Add(p + new Point(-1, -1));
+            adjacentSq.Add(p + new Point(-1, 0));
+            adjacentSq.Add(p + new Point(-1, 1));
+            adjacentSq.Add(p + new Point(0, -1));
+            adjacentSq.Add(p + new Point(0, 1));
+            adjacentSq.Add(p + new Point(1, -1));
+            adjacentSq.Add(p + new Point(1, 0));
+            adjacentSq.Add(p + new Point(1, 1));
+
+            bool foundWall = false;
+
+            foreach (var pt in adjacentSq)
+            {
+                if (pt.x < 0 || pt.y < 0 || pt.x >= room.Width || pt.y >= room.Height)
+                    continue;
+
+                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.Wall)
+                    foundWall = true;
+
+                //This isn't great because it works on the pre-filled in terrain
+                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.WallWithPossibleDoor)
+                    return false;
+
+                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.OpenWithPossibleDoor)
+                    return false;
+            }
+
+            if (foundWall)
+                return true;
+
+            return false;
+        }
+
         /** Stretches a corridor template into a full sized corridor of length.
          *  Template must be n x 1 (1 row deep).*/
         static public RoomTemplate ExpandCorridorTemplate(bool switchToHorizontal, int length, RoomTemplate corridorTemplate)
