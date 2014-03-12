@@ -785,5 +785,15 @@ namespace RogueBasin
         {
             return;
         }
+
+        internal virtual Color GetCorpseRepresentationColour()
+        {
+            return ColorPresets.White;
+        }
+
+        internal virtual char GetCorpseRepresentation()
+        {
+            return '%';
+        }
     }
 }

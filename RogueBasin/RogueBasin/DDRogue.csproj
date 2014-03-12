@@ -57,6 +57,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Creatures\AlertBot.cs" />
     <Compile Include="Creatures\CombatBot.cs" />
+    <Compile Include="Creatures\Camera.cs" />
     <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
     <Compile Include="Creatures\Ferret.cs">
@@ -219,6 +220,7 @@
     <Compile Include="Item.cs" />
     <Compile Include="ItemEffects\Decay.cs" />
     <Compile Include="ItemMapping.cs" />
+    <Compile Include="Items\ClueAutoPickup.cs" />
     <Compile Include="Items\Clue.cs" />
     <Compile Include="Items\FragGrenade.cs">
       <SubType>Code</SubType>

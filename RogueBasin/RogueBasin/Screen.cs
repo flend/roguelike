@@ -138,7 +138,7 @@ namespace RogueBasin {
         int DeathWidth { get; set; }
         int DeathHeight { get; set; }
 
-        Point movieTL = new Point(5, 5);
+        Point movieTL = new Point(0, 0);
         int movieWidth = 80;
         int movieHeight = 25;
         uint movieMSBetweenFrames = 500;
@@ -226,8 +226,8 @@ namespace RogueBasin {
 
             //Max 60 * 25 map
 
-            movieWidth = 60;
-            movieHeight = 25;
+            movieWidth = 40;
+            movieHeight = 20;
 
             mapTopLeftBase = new Point(2, 6);
             mapBotRightBase = new Point(38, 32);
@@ -595,20 +595,25 @@ namespace RogueBasin {
         {
             int frameNo = 0;
 
+            int width = Width - movieTL.x;
+            int height = Height - movieTL.y - 5;
+            Point frameTL = new Point(5, 5);
+
             //Draw each frame of the movie
             foreach (MovieFrame frame in movieFrames)
             {
                 //Flatline - centre on each frame
-                int width = frame.width;
-                int height = frame.height;
+                 width = frame.width;
+                 height = frame.height;
 
-                int xOffset = (movieWidth - width) / 2;
-                int yOffset = (movieHeight - height) / 2;
+                int xOffset = (Width - movieTL.x * 2 - width) / 2;
+                int yOffset = (Height - movieTL.y * 2 - height) / 2;
 
-                Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
+                frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
+                int frameOffset = 2;
 
                 //Draw frame
-                DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
+                DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true);
 
                 //Draw content
                 List<string> scanLines = frame.scanLines;
@@ -629,7 +634,7 @@ namespace RogueBasin {
                     //Don't ask for a key press if it's the last frame, one will happen below automatically
                     if (frameNo != movieFrames.Count - 1)
                     {
-                        PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                        PrintLineRect("Press any key to continue", frameTL.x + width / 2, frameTL.y + height + 2, width, 1, LineAlignment.Center);
                         Screen.Instance.FlushConsole();
                         KeyPress userKey = Keyboard.WaitForKeyPress(true);
                     }
@@ -646,7 +651,7 @@ namespace RogueBasin {
             }
 
             //Print press any key
-            PrintLineRect("Press ENTER to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+            PrintLineRect("Press ENTER to continue", frameTL.x + width / 2, frameTL.y + height + 1, width, 1, LineAlignment.Center);
 
             Screen.Instance.FlushConsole();
 

@@ -637,6 +637,16 @@ namespace RogueBasin
             return closestCreature;
         }
 
+        public int CalculateLevelSecurity(int level)
+        {
+            var camerasOnThisLevel = monsters.Where(m => m.LocationLevel == level && m.GetType() == typeof(Creatures.Camera));
+            var aliveCamerasOnThisLevel = camerasOnThisLevel.Where(m => m.Alive);
+
+            int levelSecurity = (int)Math.Ceiling((aliveCamerasOnThisLevel.Count() / (double)camerasOnThisLevel.Count()) * 100);
+
+            return levelSecurity;
+        }
+
         /// <summary>
         /// Find the hostile creature to the map object
         /// </summary>
@@ -2062,10 +2072,7 @@ namespace RogueBasin
                         Screen.Instance.CreatureToView = contents.monster;
 
                         Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
-                        if (results == CombatResults.DefenderDied)
-                        {
-                            okToMoveIntoSquare = false;
-                        }
+                        okToMoveIntoSquare = false;
                     }
                     else
                     {
@@ -2075,10 +2082,7 @@ namespace RogueBasin
                         Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
                         Screen.Instance.CreatureToView = contents.monster;
 
-                        if (results == CombatResults.DefenderDied)
-                        {
-                            okToMoveIntoSquare = false;
-                        }
+                        okToMoveIntoSquare = false;
                     }
                 }
 
@@ -2378,13 +2382,13 @@ namespace RogueBasin
 
             //Leave a corpse
             if (!autoKill)
-                 AddDecorationFeature(new Features.Corpse(), monster.LocationLevel, monster.LocationMap);
+                 AddDecorationFeature(new Features.Corpse(monster.GetCorpseRepresentation(), monster.GetCorpseRepresentationColour()), monster.LocationLevel, monster.LocationMap);
 
             //Deal with special death effects, but not on an autokill
             if (!autoKill)
             {
                 monster.OnKilledSpecialEffects();
-
+                /*
                 if (monster.Unique)
                 {
                     //We killed an objective
@@ -2420,8 +2424,8 @@ namespace RogueBasin
                         }
                         
                     }
-
-                }
+                
+                }*/
 
                 //No monsters left on level?
 

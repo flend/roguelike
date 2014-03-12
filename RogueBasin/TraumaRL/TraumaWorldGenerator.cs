@@ -496,7 +496,7 @@ namespace RogueBasin
 
             var clues = manager.AddCluesToExistingDoor(doorId, roomsToPlaceMonsters);
 
-            PlaceCreatureClues<Creatures.ComputerNode>(mapInfo, clues);
+            PlaceCreatureClues<Creatures.Camera>(mapInfo, clues, true);
         }
 
         private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -570,7 +570,7 @@ namespace RogueBasin
             }
         }
 
-        private void PlaceCreatureClues<T>(MapInfo mapInfo, List<Clue> monsterCluesToPlace) where T : Monster, new()
+        private void PlaceCreatureClues<T>(MapInfo mapInfo, List<Clue> monsterCluesToPlace, bool autoPickup) where T : Monster, new()
         {
             foreach (var clue in monsterCluesToPlace)
             {
@@ -588,7 +588,13 @@ namespace RogueBasin
                 bool placedItem = false;
 
                 var newMonster = new T();
-                newMonster.PickUpItem(new Items.Clue(clue));
+                Item clueItem;
+                if (autoPickup)
+                    clueItem = new Items.ClueAutoPickup(clue);
+                else
+                    clueItem = new Items.Clue(clue);
+
+                newMonster.PickUpItem(clueItem);
                 
                 foreach (Point p in allWalkablePoints)
                 {

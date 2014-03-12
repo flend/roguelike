@@ -922,8 +922,6 @@ namespace RogueBasin
                 //Is the monster dead, if so kill it?
                 if (monsterDead)
                 {
-                    Game.Dungeon.KillMonster(monster, false);
-
                     //Add it to our list of kills (simply adding the whole object here)
                     KillCount++;
                     Kills.Add(monster);
@@ -936,11 +934,11 @@ namespace RogueBasin
 
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
-   
-                    //No XP in flatline
-                    //Add XP
-                    //AddXPPlayerAttack(monster, magicUse);
 
+                    Game.Dungeon.KillMonster(monster, false);
+
+                    //No XP in flatline
+                    
                     return CombatResults.DefenderDied;
                 }
 

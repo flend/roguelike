@@ -36,7 +36,7 @@ namespace RogueBasin.Features
 
         protected override char GetRepresentation()
         {
-            return '%';
+            return (char)538;
         }
     }
 }
