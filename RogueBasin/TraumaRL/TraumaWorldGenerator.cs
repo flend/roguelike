@@ -9,7 +9,7 @@ using System.Text;
 namespace RogueBasin
 {
 
-    public class MapGeneratorTemplated
+    public class TraumaWorldGenerator
     {
         /// <summary>
         /// Mapping from template terrain to real terrain on the map
@@ -21,7 +21,29 @@ namespace RogueBasin
 
         ConnectivityMap connectivityMap = null;
 
-        public MapGeneratorTemplated()
+        ConnectivityMap levelLinks;
+        Dictionary<int, string> levelNaming;
+
+        public TraumaWorldGenerator()
+        {
+            BuildTerrainMapping();
+            BuildLevelNaming();
+        }
+
+        private void BuildLevelNaming()
+        {
+            levelNaming = new Dictionary<int, string>();
+            levelNaming[0] = "Medical";
+            levelNaming[1] = "Lower Atrium";
+            levelNaming[2] = "Science";
+            levelNaming[3] = "Storage";
+            levelNaming[4] = "Flight deck";
+            levelNaming[5] = "Reactor";
+            levelNaming[6] = "Arcology";
+            levelNaming[7] = "Commercial";
+        }
+
+        private void BuildTerrainMapping()
         {
             terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
             terrainMapping[RoomTemplateTerrain.Wall] = MapTerrain.Wall;
@@ -52,6 +74,10 @@ namespace RogueBasin
                 return connectivityMap;
             }
         }
+
+        public ConnectivityMap LevelLinks { get { return levelLinks; } }
+
+        public Dictionary<int, string> LevelNaming { get { return levelNaming; } }
 
         /** Build a map using templated rooms */
         public Map GenerateMap()
@@ -376,9 +402,48 @@ namespace RogueBasin
 
         }
 
+
+        /// <summary>
+        /// Build a level->level map showing how the levels are connected
+        /// </summary>
+        private void GenerateLevelLinks()
+        {
+            levelLinks = new ConnectivityMap();
+
+            //Player starts in medical which links to the lower atrium
+            int medicalLevel = 0;
+            int lowerAtriumLevel = 1;
+
+            levelLinks.AddRoomConnection(new Connection(medicalLevel, lowerAtriumLevel));
+
+            int arcologyLevel = 6;
+            int reactorLevel = 5;
+            var standardLowerLevels = new List<int> { 2, 3, 4, arcologyLevel, 7 };
+
+            //3 of these branch from the lower atrium
+            var directLinksFromLowerAtrium = standardLowerLevels.RandomElements(3);
+
+            foreach (var level in directLinksFromLowerAtrium)
+                levelLinks.AddRoomConnection(lowerAtriumLevel, level);
+
+            //The remainder branch from other levels (except the arcology)
+            var leafLevels = directLinksFromLowerAtrium.Select(x => x);
+            leafLevels.Except(new List<int> { arcologyLevel });
+
+            var allLowerLevelsToPlace = standardLowerLevels.Except(directLinksFromLowerAtrium).Union(new List<int> { reactorLevel });
+            foreach (var level in allLowerLevelsToPlace)
+            {
+                levelLinks.AddRoomConnection(leafLevels.RandomElement(), level);
+            }
+        }
+
+
+
         /** Build a map using templated rooms */
         public MapInfo GenerateDungeonWithStory()
         {
+
+            GenerateLevelLinks();
 
             //Load standard room types
             RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
@@ -876,58 +941,6 @@ namespace RogueBasin
         public static KeyValuePair<int, int> MaxEntry(Dictionary<int, int> dict)
         {
             return dict.Aggregate((a, b) => a.Value > b.Value ? a : b);
-        }
-    }
-
-    public static class ShuffleExtension
-    {
-
-        public static T RandomElement<T>(this IEnumerable<T> enumerable)
-        {
-            return RandomElementUsing<T>(enumerable, Game.Random);
-        }
-
-        public static T RandomElementUsing<T>(this IEnumerable<T> enumerable, Random rand)
-        {
-            int index = rand.Next(0, enumerable.Count());
-            return enumerable.ElementAt(index);
-        }
-
-        public static List<T> RandomElements<T>(this IEnumerable<T> enumerable, int numberOfItemsMax)
-        {
-            return RandomElementsUsing(enumerable, numberOfItemsMax, Game.Random);
-        }
-
-        public static List<T> RandomElementsUsing<T>(this IEnumerable<T> enumerable, int numberOfItemsMax, Random rand)
-        {
-            var allIndices = new HashSet<int>(Enumerable.Range(0, numberOfItemsMax));
-            var indicesPicked = new List<T>();
-
-            for (int i = 0; i < numberOfItemsMax; i++)
-            {
-                var index = rand.Next(0, allIndices.Count());
-                indicesPicked.Add(enumerable.ElementAt(index));
-                allIndices.Remove(index);
-
-                if (allIndices.Count() == 0)
-                    break;
-            }
-
-            return indicesPicked;
-        }
-
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng)
-        {
-            T[] elements = source.ToArray();
-            for (int i = elements.Length - 1; i >= 0; i--)
-            {
-                // Swap element "i" with a random earlier element it (or itself)
-                // ... except we don't really need to swap it fully, as we can
-                // return it immediately, and afterwards it's irrelevant.
-                int swapIndex = rng.Next(i + 1);
-                yield return elements[swapIndex];
-                elements[swapIndex] = elements[i];
-            }
         }
     }
 }

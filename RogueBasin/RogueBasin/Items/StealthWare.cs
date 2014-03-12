@@ -70,12 +70,12 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return (char)278;
+            return (char)582;
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.LawnGreen;
+            return ColorPresets.Silver;
         }
 
         public int ArmourClassModifier()

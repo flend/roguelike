@@ -11,10 +11,17 @@ namespace GraphMap
     public class DoorClueGraphvizExport
     {
         private MapModel model;
+        private Dictionary<int, string> vertexMapping = new Dictionary<int,string>();
 
         public DoorClueGraphvizExport(MapModel m)
         {
             this.model = m;
+        }
+
+        public DoorClueGraphvizExport(MapModel m, Dictionary<int, string> vertexMapping)
+        {
+            this.model = m;
+            this.vertexMapping = vertexMapping;
         }
 
         /// <summary>
@@ -145,6 +152,9 @@ namespace GraphMap
             int vertexNo = e.Vertex;
 
             string vertexLabel = vertexNo.ToString();
+
+            if (vertexMapping.ContainsKey(vertexNo))
+                vertexLabel = vertexMapping[vertexNo];
 
             //If there is a clue here, append clue
             var clues = model.DoorAndClueManager.GetObjectiveAndClueIdsAtVertex(vertexNo);

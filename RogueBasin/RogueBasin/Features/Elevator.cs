@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RogueBasin.Features
 {
-    class Elevator : UseableFeature
+    public class Elevator : UseableFeature
     {
         int destLevel;
         Point destLocation;

@@ -2058,7 +2058,7 @@ namespace RogueBasin
         /// <summary>
         /// Do setup just before the game starts. Dungeons etc. all ready to go.
         /// </summary>
-        internal void StartGameSetup()
+        public void StartGameSetup()
         {
             CalculateCombatStats();
 

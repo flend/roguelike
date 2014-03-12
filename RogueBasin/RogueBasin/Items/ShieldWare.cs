@@ -11,6 +11,11 @@ namespace RogueBasin.Items
 
         int level;
 
+        public ShieldWare()
+        {
+            this.level = 1;
+        }
+
         public ShieldWare(int level)
         {
             this.level = level;
@@ -73,12 +78,12 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return (char)278;
+            return (char)576;
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.LawnGreen;
+            return ColorPresets.Cyan;
         }
 
         public int ArmourClassModifier()

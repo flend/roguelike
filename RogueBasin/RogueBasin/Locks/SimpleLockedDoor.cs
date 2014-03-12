@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RogueBasin.Locks
 {
-    class SimpleLockedDoor : Lock
+    public class SimpleLockedDoor : Lock
     {
         private GraphMap.Door mapDoor;
 

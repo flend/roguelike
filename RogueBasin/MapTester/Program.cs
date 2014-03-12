@@ -132,8 +132,6 @@ namespace MapTester
         {
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
-            Game.Dungeon.RefreshAllLevelPathingAndFOV();
-
             rb.MainLoop(false);
         }
     }

@@ -1517,9 +1517,10 @@ namespace RogueBasin {
 
             //Draw weapon choices
             var weaponOptionRow = 2;
+            var weaponIconXOffset = -2;
             foreach (var kv in ItemMapping.WeaponMapping)
             {
-                DrawWeaponChar(weaponOffset + new Point(kv.Key, weaponOptionRow), kv.Value, kv.Key.ToString());
+                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + kv.Key * 2, weaponOptionRow), kv.Value, kv.Key.ToString());
             }
             
             //Draw energy bar and use keys
@@ -1548,7 +1549,7 @@ namespace RogueBasin {
             int offset = 0;
             foreach (var kv in ItemMapping.WetwareMapping)
             {
-                DrawWetwareChar(utilityOffset + new Point(offset * 3, wetwareOptionRow), kv.Value, "[" + kv.Key + "]");
+                DrawWetwareChar(utilityOffset + new Point(offset * 2, wetwareOptionRow), kv.Value, kv.Key.ToString());
                 offset++;
             }
 
@@ -1752,6 +1753,9 @@ namespace RogueBasin {
                 }
 
                 PrintLine(wetWareStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
+                //+evil points
+                Item instance = (Item)Activator.CreateInstance(wetWareType);
+                PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, instance.GetColour());
             }
         }
 
@@ -1760,6 +1764,7 @@ namespace RogueBasin {
             var availableWetware = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType);
             var equippedWeapon = Game.Dungeon.Player.GetEquippedWeapon();
 
+            
 
             Color colorToUse;
             if (!availableWetware)
@@ -1777,6 +1782,9 @@ namespace RogueBasin {
 
             PrintLine(weaponStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
 
+            //+evil points
+            Item instance = (Item)Activator.CreateInstance(weaponType);
+            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, instance.GetColour());
         }
 
 

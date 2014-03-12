@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    static class MapTerrainRandomizer
+    static public class MapTerrainRandomizer
     {
         /** Produce a new map with randomized terrain. Its pathing and sight may need to be recalculated */
         static public Map RandomizeTerrainInMap(Map mapToRandomize, Dictionary<MapTerrain, List<MapTerrain>> randomizeMapping)
