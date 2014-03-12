@@ -929,5 +929,10 @@ namespace RogueBasin
                 elements[swapIndex] = elements[i];
             }
         }
+
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
+        {
+            return Shuffle(source, Game.Random);
+        }
     }
 }

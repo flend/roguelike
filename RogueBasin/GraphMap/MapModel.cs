@@ -24,6 +24,14 @@ namespace GraphMap
         {
         }
 
+        public bool IncludesVertex(int v)
+        {
+            if (Source == v || Target == v)
+                return true;
+
+            return false;
+        }
+
         /// <summary>
         /// Return the lowest index first
         /// </summary>
