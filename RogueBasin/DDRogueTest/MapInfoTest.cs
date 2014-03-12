@@ -82,6 +82,14 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void CorridorsCanBeFilteredOut()
+        {
+            var mapInfo = new MapInfo(GetStandardMapInfoBuilderForTemplates());
+            var filteredRooms = mapInfo.FilterOutCorridors(new List<int> { 0, 1, 2 }).ToList();
+            CollectionAssert.AreEqual(new List<int>{2}, filteredRooms);
+        }
+
+        [TestMethod]
         public void CyclesOnSeparateLevelsCanBeReturned()
         {
             var builder = new MapInfoBuilder();
@@ -175,6 +183,31 @@ namespace DDRogueTest
             builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, l1DoorDict, 1);
             builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, l2DoorDict, new Connection(3, 5));
 
+            return builder;
+        }
+
+        private MapInfoBuilder GetStandardMapInfoBuilderForTemplates()
+        {
+            var builder = new MapInfoBuilder();
+
+            var l1ConnectivityMap = new ConnectivityMap();
+            l1ConnectivityMap.AddRoomConnection(1, 2);
+            l1ConnectivityMap.AddRoomConnection(2, 3);
+
+            var corridor1 = new RoomTemplateTerrain[1,3];
+            var corridor2 = new RoomTemplateTerrain[3, 1];
+            var room1 = new RoomTemplateTerrain[4, 4];
+
+            var l1RoomList = new List<TemplatePositioned>();
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, new RoomTemplate(corridor1), 0));
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, new RoomTemplate(corridor2), 1));
+            l1RoomList.Add(new TemplatePositioned(1, 1, 0, new RoomTemplate(room1), 2));
+            
+            var l1DoorDict = new Dictionary<Connection, Point>();
+            l1DoorDict.Add(new Connection(2, 3), new Point(5, 5));
+
+            builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, l1DoorDict, 1);
+            
             return builder;
         }
     }

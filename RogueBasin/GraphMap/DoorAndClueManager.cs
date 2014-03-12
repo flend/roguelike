@@ -313,7 +313,7 @@ namespace GraphMap
         /// Does no checking at all, so impossible situations can be created
         /// Only really public for tests
         /// </summary>
-        public IEnumerable<Clue> PlaceDoorAndCluesNoChecks(DoorRequirements doorReq, List<int> clueVertices)
+        public IEnumerable<Clue> PlaceDoorAndCluesNoChecks(DoorRequirements doorReq, IEnumerable<int> clueVertices)
         {
             Door thisDoor = PlaceDoorAndUpdateDependencyGraph(doorReq);
             var clues = PlaceCluesAndUpdateDependencyGraph(clueVertices, thisDoor, null);
@@ -355,7 +355,7 @@ namespace GraphMap
             }
         }
 
-        private List<Clue> PlaceCluesAndUpdateDependencyGraph(List<int> clueVertices, Door doorLockedByClues, Objective objectiveLockedByClues)
+        private List<Clue> PlaceCluesAndUpdateDependencyGraph(IEnumerable<int> clueVertices, Door doorLockedByClues, Objective objectiveLockedByClues)
         {
             //Add clues
             var clues = new List<Clue>();
@@ -421,10 +421,10 @@ namespace GraphMap
         /// <param name="edge"></param>
         /// <param name="doorId"></param>
         /// <param name="clueVertex"></param>
-        public IEnumerable<Clue> PlaceDoorAndClues(DoorRequirements doorReq, List<int> clueVertices)
+        public IEnumerable<Clue> PlaceDoorAndClues(DoorRequirements doorReq, IEnumerable<int> clueVertices)
         {
             //Check all clues are in the valid placement area
-            if (GetValidRoomsToPlaceClueForDoor(doorReq.Location).Intersect(clueVertices).Count() < clueVertices.Count())
+            if (clueVertices.Except(GetValidRoomsToPlaceClueForDoor(doorReq.Location)).Any())
                 throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClueForDoor(doorReq.Location).Except(clueVertices).ToString(), doorReq.Location.Source, doorReq.Location.Target));
 
             return PlaceDoorAndCluesNoChecks(doorReq, clueVertices);
@@ -741,27 +741,27 @@ namespace GraphMap
             return allowedMap.MapComponent(allowedMap.RoomComponentIndex(startVertex));
         }
 
-        public List<Clue> AddCluesToExistingDoor(string doorId, List<int> newClueVertices)
+        public List<Clue> AddCluesToExistingDoor(string doorId, IEnumerable<int> newClueVertices)
         {
             var door = GetDoorById(doorId);
             if (door == null)
                 throw new ApplicationException("Can't find door id " + doorId);
 
             var validRoomsToPlaceClues = GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap);
-            if (validRoomsToPlaceClues.Intersect(newClueVertices).Count() < newClueVertices.Count())
+            if (newClueVertices.Except(validRoomsToPlaceClues).Any())
                 throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap).Except(newClueVertices).ToString(), door.DoorConnectionReducedMap.Source, door.DoorConnectionReducedMap.Target));
 
             return PlaceCluesAndUpdateDependencyGraph(newClueVertices, door, null);
         }
 
-        public List<Clue> AddCluesToExistingObjective(string objectiveId, List<int> newClueVertices)
+        public List<Clue> AddCluesToExistingObjective(string objectiveId, IEnumerable<int> newClueVertices)
         {
             var objective = GetObjectiveById(objectiveId);
             if (objective == null)
                 throw new ApplicationException("Can't find obj id " + objectiveId);
 
             var validRoomsForObjectiveClues = GetValidRoomsToPlaceClueForObjective(objective.OpenLockIndex);
-            if (validRoomsForObjectiveClues.Intersect(newClueVertices).Count() < newClueVertices.Count())
+            if (newClueVertices.Except(validRoomsForObjectiveClues).Any())
                 throw new ApplicationException(String.Format("Can't put clues: {0}, for objective at {1}", validRoomsForObjectiveClues.Except(newClueVertices).ToString(), objective.Vertex));
 
             return PlaceCluesAndUpdateDependencyGraph(newClueVertices, null, objective);

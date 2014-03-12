@@ -277,6 +277,26 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void CluesCanBeAddedToExistingDoorsIfThereAreMoreCluesThanRoomsAvailable()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(1, 2), "lock0"));
+            
+            Assert.IsNotNull(manager.AddCluesToExistingDoor("lock0", new List<int> { 1, 1 }));
+        }
+
+        [TestMethod]
+        public void CluesCanBeAddedToExistingObjectivesIfThereAreMoreCluesThanRoomsAvailable()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 50));
+
+            Assert.IsNotNull(manager.AddCluesToExistingObjective("obj1", Enumerable.Repeat(1, 100)));
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void ObjectivesCannotBeAddedToExistingDoorsIfTheObjectiveIsBehindTheDoorItself()
         {

@@ -9,7 +9,7 @@ namespace RogueBasin.Locks
 {
     public class SimpleLockedDoor : Lock
     {
-        private GraphMap.Door mapDoor;
+        protected GraphMap.Door mapDoor;
 
         public SimpleLockedDoor(GraphMap.Door door)
         {
@@ -18,10 +18,7 @@ namespace RogueBasin.Locks
 
         public override bool OpenLock(Player player)
         {
-            var allPlayerClueItems = player.Inventory.GetItemsOfType<Items.Clue>();
-            var allPlayerClues = allPlayerClueItems.Select(i => i.MapClue);
-
-            bool canDoorBeOpened = mapDoor.CanDoorBeUnlockedWithClues(allPlayerClues);
+            bool canDoorBeOpened = CanDoorBeOpenedWithClues(player);
 
             if (!canDoorBeOpened)
             {
@@ -34,6 +31,15 @@ namespace RogueBasin.Locks
                 isOpen = true;
                 return true;
             }
+        }
+
+        public bool CanDoorBeOpenedWithClues(Player player)
+        {
+            var allPlayerClueItems = player.Inventory.GetItemsOfType<Items.Clue>();
+            var allPlayerClues = allPlayerClueItems.Select(i => i.MapClue);
+
+            bool canDoorBeOpened = mapDoor.CanDoorBeUnlockedWithClues(allPlayerClues);
+            return canDoorBeOpened;
         }
 
         public override bool CloseLock(Player player)

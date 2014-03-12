@@ -264,6 +264,7 @@
     <Compile Include="ITurnAI.cs" />
     <Compile Include="ItemEffect.cs" />
     <Compile Include="ItemEffectSimpleDuration.cs" />
+    <Compile Include="Locks\SimpleLockedDoorWithMovie.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
@@ -784,6 +785,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <EmbeddedResource Include="bin\Debug\movies\t_medicalsecurityunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\t_medicalsecuritylocked0.amf" />
   </ItemGroup>
   <ItemGroup />
 </Project>

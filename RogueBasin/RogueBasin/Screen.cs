@@ -545,6 +545,20 @@ namespace RogueBasin {
         /// 
         Color normalMovieColor = ColorPresets.White;
         Color flashMovieColor = ColorPresets.Red;
+        
+        public void PlayMovie(List<MovieFrame> frames, bool keypressBetweenFrames)
+        {
+            try
+            {
+                movieFrames = frames;
+
+                PlayMovieFrames(keypressBetweenFrames);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to play movie from frames " + ex.Message);
+            }
+        }
 
         public void PlayMovie(string filenameRoot, bool keypressBetweenFrames)
         {
@@ -569,74 +583,77 @@ namespace RogueBasin {
                     return;
                 }
 
-                
-                
-                int frameNo = 0;
-
-                //Draw each frame of the movie
-                foreach (MovieFrame frame in movieFrames)
-                {
-                    //Flatline - centre on each frame
-                    int width = frame.width;
-                    int height = frame.height;
-
-                    int xOffset = (movieWidth - width) / 2;
-                    int yOffset = (movieHeight - height) / 2;
-
-                    Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
-
-                    //Draw frame
-                    DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
-
-                    //Draw content
-                    List<string> scanLines = frame.scanLines;
-
-                    bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL, width, true);
-
-                    if (hasFlashingChars)
-                    {
-                        //Wait and then redraw without the highlight to make a flash effect
-                        Screen.Instance.FlushConsole();
-                        TCODSystem.Sleep(movieMSBetweenFrames);
-                        DrawMovieFrame(frame.scanLines, frameTL, width, false);
-                    }
-
-                    
-                    if (keypressBetweenFrames == true)
-                    {
-                        //Don't ask for a key press if it's the last frame, one will happen below automatically
-                        if (frameNo != movieFrames.Count - 1)
-                        {
-                            PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
-                            Screen.Instance.FlushConsole();
-                            KeyPress userKey = Keyboard.WaitForKeyPress(true);
-                        }
-                    }
-                    else
-                    {
-                        //Wait for the specified time
-
-                        Screen.Instance.FlushConsole();
-                        TCODSystem.Sleep(movieMSBetweenFrames);
-                    }
-
-                    frameNo++;
-                }
-
-                //Print press any key
-                PrintLineRect("Press ENTER to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
-
-                Screen.Instance.FlushConsole();
-
-                //Await keypress then redraw normal screen
-                WaitForEnterKey();
-
-                UpdateNoMsgQueue();
+                PlayMovieFrames(keypressBetweenFrames);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to play movie: " + filenameRoot + " : " + ex.Message);
             }
+        }
+
+        private void PlayMovieFrames(bool keypressBetweenFrames)
+        {
+            int frameNo = 0;
+
+            //Draw each frame of the movie
+            foreach (MovieFrame frame in movieFrames)
+            {
+                //Flatline - centre on each frame
+                int width = frame.width;
+                int height = frame.height;
+
+                int xOffset = (movieWidth - width) / 2;
+                int yOffset = (movieHeight - height) / 2;
+
+                Point frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
+
+                //Draw frame
+                DrawFrame(movieTL.x, movieTL.y, movieWidth, movieHeight, true);
+
+                //Draw content
+                List<string> scanLines = frame.scanLines;
+
+                bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL, width, true);
+
+                if (hasFlashingChars)
+                {
+                    //Wait and then redraw without the highlight to make a flash effect
+                    Screen.Instance.FlushConsole();
+                    TCODSystem.Sleep(movieMSBetweenFrames);
+                    DrawMovieFrame(frame.scanLines, frameTL, width, false);
+                }
+
+
+                if (keypressBetweenFrames == true)
+                {
+                    //Don't ask for a key press if it's the last frame, one will happen below automatically
+                    if (frameNo != movieFrames.Count - 1)
+                    {
+                        PrintLineRect("Press any key to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+                        Screen.Instance.FlushConsole();
+                        KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                    }
+                }
+                else
+                {
+                    //Wait for the specified time
+
+                    Screen.Instance.FlushConsole();
+                    TCODSystem.Sleep(movieMSBetweenFrames);
+                }
+
+                frameNo++;
+            }
+
+            //Print press any key
+            PrintLineRect("Press ENTER to continue", movieTL.x + movieWidth / 2, movieTL.y + movieHeight - 2, movieWidth, 1, LineAlignment.Center);
+
+            Screen.Instance.FlushConsole();
+
+            //Await keypress then redraw normal screen
+            WaitForEnterKey();
+
+            UpdateNoMsgQueue();
         }
 
         /// <summary>

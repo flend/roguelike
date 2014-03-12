@@ -25,6 +25,10 @@ namespace RogueBasin
         List<int> gameLevels;
         static Dictionary<int, string> levelNaming;
 
+        HashSet<Clue> placedClues = new HashSet<Clue>();
+        HashSet<Objective> placedObjectives = new HashSet<Objective>();
+        HashSet<Door> placedDoors = new HashSet<Door>();
+
         public TraumaWorldGenerator()
         {
             BuildTerrainMapping();
@@ -302,6 +306,11 @@ namespace RogueBasin
             
             do
             {
+                //Reset shared state
+                placedClues = new HashSet<Clue>();
+                placedDoors = new HashSet<Door>();
+                placedObjectives = new HashSet<Objective>();
+
                 try
                 {
                     //Generate the overall level structure
@@ -366,9 +375,6 @@ namespace RogueBasin
 
                     mapInfo = new MapInfo(mapInfoBuilder);
 
-                    //Generate quests at mapmodel level
-                    GenerateQuests(mapInfo, levelInfo, startRoom);
-                    
                     //Add maps to the dungeon
                     foreach (var kv in levelInfo)
                     {
@@ -391,13 +397,15 @@ namespace RogueBasin
                     //Add elevator features to link the maps
                     AddElevatorFeatures(mapInfo, levelInfo);
 
+                    //Generate quests at mapmodel level
+                    GenerateQuests(mapInfo, levelInfo, startRoom);
+
+                    //Add clues and locks at dungeon engine level
+                    AddSimpleCluesAndLocks(mapInfo);
+
                     //Add non-interactable features
-                    
                     var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
-                    
-                    //Add clues and locks at dungeon engine level
-                    AddCluesAndLocks(mapInfo);
 
                     break;
                 }
@@ -443,8 +451,57 @@ namespace RogueBasin
         {
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
-            var deadEndRooms = roomConnectivityMap[0];
 
+            BuildMainQuest(mapInfo, levelInfo, startRoom, roomConnectivityMap);
+
+            BuildMedicalLevelQuests(mapInfo, levelInfo, startRoom, roomConnectivityMap);
+        }
+        
+        private void BuildMedicalLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom, Dictionary<int, List<Connection>> roomConnectivityMap)
+        {
+            //Lock the door to the elevator and require a certain number of monsters to be killed
+            var elevatorConnection = levelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
+
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            var doorId = "medical-security";
+            int objectsToPlace = 20;
+            int objectsToDestroy = 2;
+
+            //Place door
+            manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
+            var door = manager.GetDoorById(doorId);
+
+            var lockedDoor = new Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked");
+            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
+            lockedDoor.LocationLevel = doorInfo.LevelNo;
+            lockedDoor.LocationMap = doorInfo.MapLocation;
+
+            Game.Dungeon.AddLock(lockedDoor);
+
+            placedDoors.Add(door);
+
+            //Place monsters (not in corridors)
+
+            //This will be restricted to the medical level since we cut off the door
+            var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
+            allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
+            var roomsToPlaceMonsters = new List<int>();
+            
+            while(roomsToPlaceMonsters.Count() < objectsToPlace) {
+                foreach(var room in allowedRoomsForClues.Shuffle()) {
+                    roomsToPlaceMonsters.Add(room);
+                }
+            }
+
+            var clues = manager.AddCluesToExistingDoor(doorId, roomsToPlaceMonsters);
+
+            PlaceCreatureClues<Creatures.ComputerNode>(mapInfo, clues);
+        }
+
+        private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom, Dictionary<int, List<Connection>> roomConnectivityMap)
+        {
+            var deadEndRooms = roomConnectivityMap[0];
             //MAIN QUEST
 
             //Escape pod door
@@ -500,7 +557,6 @@ namespace RogueBasin
 
             foreach (var kv in elevatorLocations)
             {
-
                 var sourceLevel = kv.Key.Item1;
                 var targetLevel = kv.Key.Item2;
 
@@ -514,9 +570,74 @@ namespace RogueBasin
             }
         }
 
-        private static void AddCluesAndLocks(MapInfo mapInfo)
+        private void PlaceCreatureClues<T>(MapInfo mapInfo, List<Clue> monsterCluesToPlace) where T : Monster, new()
         {
+            foreach (var clue in monsterCluesToPlace)
+            {
+                if (placedClues.Contains(clue))
+                    continue;
 
+                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+                var levelForClue = roomsForClue.Item1;
+                var allWalkablePoints = roomsForClue.Item2;
+
+                bool placedItem = false;
+
+                var newMonster = new T();
+                newMonster.PickUpItem(new Items.Clue(clue));
+                
+                foreach (Point p in allWalkablePoints)
+                {
+                    placedItem = Game.Dungeon.AddMonster(newMonster, levelForClue, p);
+
+                    if (placedItem)
+                        break;
+                }
+
+                if (!placedItem)
+                    throw new ApplicationException("Nowhere to place monster");
+
+                placedClues.Add(clue);
+            }
+        }
+
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue)
+        {
+            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+
+            //Must be on the same level
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(possibleRooms.First());
+
+            var allWalkablePoints = new List<Point>();
+
+            //Hmm, could be quite expensive
+            foreach (var room in possibleRooms)
+            {
+                var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
+                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
+            }
+            
+            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+        }
+
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceObjective(MapInfo mapInfo, Objective clue)
+        {
+            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+            var randomRoom = possibleRooms.RandomElement();
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
+
+            var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
+            var allWalkablePoints = Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints);
+
+            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints);
+        }
+
+        /// <summary>
+        /// Add any remaining clues, locks and objectives as simple types (to ensure we don't miss anything)
+        /// </summary>
+        /// <param name="mapInfo"></param>
+        private void AddSimpleCluesAndLocks(MapInfo mapInfo)
+        {
             //Add clues
 
             //Find a random room corresponding to a vertex with a clue and place a clue there
@@ -524,12 +645,12 @@ namespace RogueBasin
             {
                 foreach (var clue in cluesAtVertex.Value)
                 {
-                    var possibleRooms = clue.PossibleClueRoomsInFullMap;
-                    var randomRoom = possibleRooms.RandomElement();
-                    var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
+                    if (placedClues.Contains(clue))
+                        continue;
 
-                    var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
-                    var allWalkablePoints = Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints);
+                    var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+                    var levelForRandomRoom = roomsForClue.Item1;
+                    var allWalkablePoints = roomsForClue.Item2;
 
                     bool placedItem = false;
                     foreach (Point p in allWalkablePoints)
@@ -546,6 +667,8 @@ namespace RogueBasin
                         LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
                         throw new ApplicationException(str);
                     }
+
+                    placedClues.Add(clue);
                 }
 
             }
@@ -554,6 +677,9 @@ namespace RogueBasin
 
             foreach (var door in mapInfo.Model.DoorAndClueManager.DoorMap.Values)
             {
+                if (placedDoors.Contains(door))
+                    continue;
+
                 var lockedDoor = new Locks.SimpleLockedDoor(door);
                 var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
                 lockedDoor.LocationLevel = doorInfo.LevelNo;
@@ -562,6 +688,8 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Lock door level " + lockedDoor.LocationLevel + " loc: " + doorInfo.MapLocation, LogDebugLevel.High);
 
                 Game.Dungeon.AddLock(lockedDoor);
+
+                placedDoors.Add(door);
             }
 
             //Add objectives to dungeon as simple objectives
@@ -570,6 +698,10 @@ namespace RogueBasin
             {
                 foreach (var obj in objAtVertex.Value)
                 {
+
+                    if (placedObjectives.Contains(obj))
+                        continue;
+
                     var possibleRooms = obj.PossibleClueRoomsInFullMap;
                     var randomRoom = possibleRooms.RandomElement();
                     var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
@@ -593,6 +725,8 @@ namespace RogueBasin
                         LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
                         throw new ApplicationException(str);
                     }
+
+                    placedObjectives.Add(obj);
                 }
             }
         }

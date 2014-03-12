@@ -190,6 +190,11 @@ namespace RogueBasin
             return roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
         }
 
+        public IEnumerable<int> FilterOutCorridors(IEnumerable<int> roomIndices)
+        {
+            return roomIndices.Where(r => rooms[r].Room.Height > 3 && rooms[r].Room.Width > 3);
+        }
+
         public IEnumerable<int> GetRoomIndicesForLevel(int level)
         {
             return roomListForLevel[level];
