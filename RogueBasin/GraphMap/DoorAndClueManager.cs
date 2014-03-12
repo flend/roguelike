@@ -798,5 +798,22 @@ namespace GraphMap
             //b) locking these clues with a virtual door that is the objective
             AddLockDependencyToExistingLocks(objective.LockIndex, objective.OpenLockIndex);
         }
+
+        public List<Clue> GetClueObjectsLiberatedByAnObjective(Objective obj) {
+            
+            var possibleRooms = mapNoCycles.roomMappingNoCycleToFullMap[obj.Vertex];
+            var clues = new List<Clue>();
+
+            //For the engine we need to generate the Clue()s that objectives produce beforehand so they can be stored in the objective object
+            foreach(var lockIndex in obj.OpenLockIndex) {
+                if(DoorMap.ContainsKey(lockIndex)) {
+                    clues.Add(new Clue(DoorMap[lockIndex], possibleRooms));
+                }
+                if(ObjectiveMap.ContainsKey(lockIndex)) {
+                    clues.Add(new Clue(ObjectiveMap[lockIndex], possibleRooms));
+                }
+            }
+            return clues;
+        }
     }
 }

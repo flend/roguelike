@@ -1,4 +1,5 @@
-﻿using libtcodWrapper;
+﻿using GraphMap;
+using libtcodWrapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,17 +12,12 @@ namespace RogueBasin.Features
     {
         GraphMap.Objective obj;
         bool isComplete;
-        IEnumerable<string> objectiveProducesKeyIds = new List<string>();
+        IEnumerable<Clue> objectiveProducesClues;
 
-        public SimpleObjective(GraphMap.Objective objective)
+        public SimpleObjective(GraphMap.Objective objective, IEnumerable<Clue> objectiveProducesClues)
         {
             this.obj = objective;
-        }
-
-        public SimpleObjective(GraphMap.Objective objective, IEnumerable<string> objectiveProducesKeyIds)
-        {
-            this.obj = objective;
-            this.objectiveProducesKeyIds = objectiveProducesKeyIds;
+            this.objectiveProducesClues = objectiveProducesClues;
         }
 
         public override bool PlayerInteraction(Player player)
@@ -46,8 +42,16 @@ namespace RogueBasin.Features
             }
             else
             {
+                //Add clues directly into player's inventory
+                foreach (var producedClue in objectiveProducesClues)
+                {
+                    var clue = new Items.Clue(producedClue);
+                    player.Inventory.AddItemNotFromDungeon(clue);
+                }
+
                 var keysYouGet = new StringBuilder();
-                foreach(var id in objectiveProducesKeyIds) {
+                foreach (var id in objectiveProducesClues.Select(c => c.LockedDoor != null ? c.LockedDoor.Id : c.LockedObjective.Id))
+                {
                     keysYouGet.Append(id);
                     keysYouGet.Append(" ");
                 }

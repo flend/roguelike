@@ -931,6 +931,9 @@ namespace RogueBasin {
             if (ShowMsgHistory)
                 DrawMsgHistory();
 
+            if (ShowClueList)
+                DrawCluesList();
+
         }
 
         /// <summary>
@@ -1154,6 +1157,8 @@ namespace RogueBasin {
 
         public bool ShowMsgHistory { get; set; }
 
+        public bool ShowClueList { get; set; }
+
         enum Direction { up, down, none };
 
         void ClearScreen()
@@ -1288,9 +1293,44 @@ namespace RogueBasin {
             LinkedList<string> msgHistory = Game.MessageQueue.messageHistory;
 
             //Display list
+            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, msgHistory);
+        }
+
+        /// <summary>
+        /// Draw the msg history and allow the player to scroll
+        /// </summary>
+        private void DrawCluesList()
+        {
+            //Draw frame - same as inventory
+            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            PrintLineRect("Clue List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Active area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            var allPlayerClueItems = Game.Dungeon.Player.Inventory.GetItemsOfType<Items.Clue>();
+            var allPlayerClues = allPlayerClueItems.Select(i => i.MapClue.LockedDoor != null ? i.MapClue.LockedDoor.Id : i.MapClue.LockedObjective.Id);
+            var noCluesForDoors = allPlayerClues.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
+
+            var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")" + kv.Key);
+            
+            //Display list
+            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(cluesForDoorsAsStrings));
+        }
+
+        private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory)
+        {
             LinkedListNode<string> displayedMsg;
             LinkedListNode<string> topLineDisplayed = null;
-            
+
             LinkedListNode<string> bottomTopLineDisplayed = msgHistory.Last;
 
             if (msgHistory.Count > 0)

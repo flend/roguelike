@@ -542,6 +542,14 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
+                                case 'C':
+                                    SetClueScreen();
+                                    Screen.Instance.Update();
+                                    DisableClueScreen();
+                                    Screen.Instance.Update();
+                                    timeAdvances = false;
+                                    break;
+
                                 case '?':
                                     Screen.Instance.PlayMovie("helpkeys", true);
                                     timeAdvances = false;
@@ -1480,20 +1488,24 @@ namespace RogueBasin
         }
 
 
-        /// <summary>
-        /// Set state as movie screen
-        /// </summary>
         private void SetMsgHistoryScreen()
         {
             Screen.Instance.ShowMsgHistory = true;
         }
 
-        /// <summary>
-        /// Disables state as movie screen
-        /// </summary>
         private void DisableMsgHistoryScreen()
         {
             Screen.Instance.ShowMsgHistory = false;
+        }
+
+        private void SetClueScreen()
+        {
+            Screen.Instance.ShowClueList = true;
+        }
+
+        private void DisableClueScreen()
+        {
+            Screen.Instance.ShowClueList = false;
         }
 
 

@@ -96,6 +96,50 @@ namespace TestGraphMap
         }
 
         [TestMethod]
+        public void CluesThatObjectivesProduceForObjectivesCanBeMadeIntoConcreteObjects()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj2", 1, new List<string>{"obj1"}));
+
+            var concreteClues = manager.GetClueObjectsLiberatedByAnObjective(manager.GetObjectiveById("obj2"));
+            Assert.AreEqual(1, concreteClues.Count());
+            Assert.IsNull(concreteClues.ElementAt(0).LockedDoor);
+            Assert.AreEqual("obj1", concreteClues.ElementAt(0).LockedObjective.Id);
+        }
+
+        [TestMethod]
+        public void CluesThatObjectivesProduceForDoorsCanBeMadeIntoConcreteObjects()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(5, 6), "door1"));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj2", 1, new List<string> { "door1" }));
+
+            var concreteClues = manager.GetClueObjectsLiberatedByAnObjective(manager.GetObjectiveById("obj2"));
+            Assert.AreEqual(1, concreteClues.Count());
+            Assert.IsNull(concreteClues.ElementAt(0).LockedObjective);
+            Assert.AreEqual("door1", concreteClues.ElementAt(0).LockedDoor.Id);
+        }
+
+        [TestMethod]
+        public void MultipleCluesThatObjectivesProduceForDoorsCanBeMadeIntoConcreteObjects()
+        {
+            var manager = BuildStandardManager();
+
+            manager.PlaceDoor(new DoorRequirements(new Connection(5, 6), "door1"));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj1", 1));
+            manager.PlaceObjective(new ObjectiveRequirements(2, "obj2", 1, new List<string> { "door1", "obj1" }));
+
+            var concreteClues = manager.GetClueObjectsLiberatedByAnObjective(manager.GetObjectiveById("obj2"));
+            Assert.AreEqual(2, concreteClues.Count());
+            //Ordering is too strict here
+            Assert.AreEqual("door1", concreteClues.ElementAt(0).LockedDoor.Id);
+            Assert.AreEqual("obj1", concreteClues.ElementAt(1).LockedObjective.Id);
+        }
+
+        [TestMethod]
         public void GetDoorForEdgeWorksInEitherOrientation()
         {
             var manager = BuildStandardManager();

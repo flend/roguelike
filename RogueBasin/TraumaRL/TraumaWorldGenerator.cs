@@ -46,6 +46,7 @@ namespace RogueBasin
 
         //Quest important rooms / vaults
         Connection escapePodsConnection;
+        int escapePodsLevel;
 
         //Wall mappings
         Dictionary<MapTerrain, List<MapTerrain>> brickTerrainMapping;
@@ -393,7 +394,7 @@ namespace RogueBasin
                     //Add non-interactable features
                     
                     var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
-                    AddStandardDecorativeFeaturesToRoom(0, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
+                    AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
                     
                     //Add clues and locks at dungeon engine level
                     AddCluesAndLocks(mapInfo);
@@ -450,6 +451,7 @@ namespace RogueBasin
             //Requires enabling self-destruct and fueling pods
 
             escapePodsConnection = levelInfo[flightDeck].ReplaceableVaultConnections[0];
+            escapePodsLevel = flightDeck;
             levelInfo[flightDeck].ReplaceableVaultConnectionsUsed.Add(escapePodsConnection);
 
             //TODO: replace vault in map
@@ -578,7 +580,8 @@ namespace RogueBasin
                     bool placedItem = false;
                     foreach (Point p in allWalkablePoints)
                     {
-                        placedItem = Game.Dungeon.AddFeature(new Features.SimpleObjective(obj, obj.OpenLockIndex.Select(o => mapInfo.Model.DoorAndClueManager.GetLockIdByIndex(o))), levelForRandomRoom, p);
+                        var objectiveFeature = new Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
+                        placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
 
                         if (placedItem)
                             break;
