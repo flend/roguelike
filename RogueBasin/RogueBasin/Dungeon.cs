@@ -621,8 +621,6 @@ namespace RogueBasin
             }
         }
 
-        
-
         /// <summary>
         /// Finds a currently alive monster by type. Returns first creature found, or null if none.
         /// </summary>
@@ -2399,7 +2397,7 @@ namespace RogueBasin
             monster.NotifyMonsterDeath();
 
             //Drop its inventory (including plot items we gave it)
-            monster.DropAllItems();
+            monster.DropAllItems(monster.LocationLevel, GetFreeAdjacentSquares(monster.LocationLevel, monster.LocationMap));
 
             //Drop any insta-create treasure
             //Not used at present
@@ -4559,6 +4557,9 @@ namespace RogueBasin
                     {
                         continue;
                     }
+
+                    if (contents.player != null)
+                        continue;
 
                     //Empty and walkable
                     adjacentSqFree.Add(p);

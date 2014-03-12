@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
+using System.Linq;
 
 namespace RogueBasin
 {
@@ -230,8 +231,13 @@ namespace RogueBasin
 
         private void ProcessDroppedItem(Item itemToDrop)
         {
-            itemToDrop.LocationLevel = this.LocationLevel;
-            itemToDrop.LocationMap = this.LocationMap;
+            ProcessDroppedItem(itemToDrop, this.LocationLevel, this.LocationMap);
+        }
+
+        private void ProcessDroppedItem(Item itemToDrop, int locationLevel, Point locationMap)
+        {
+            itemToDrop.LocationLevel = locationLevel;
+            itemToDrop.LocationMap = locationMap;
             itemToDrop.InInventory = false;
 
             itemToDrop.OnDrop(this);
@@ -249,6 +255,36 @@ namespace RogueBasin
             foreach (Item item in inventory.Items)
             {
                 ProcessDroppedItem(item);
+            }
+
+            inventory.RemoveAllItems();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Drop all inventory (perhaps you died). Currently drops all items on the floor, could extend by looking at surrounding squares. Use the dig algorithm
+        /// </summary>
+        /// <param name="itemToDrop"></param>
+        /// <returns></returns>
+        public virtual bool DropAllItems(int level, IEnumerable<Point> pointsToDrop)
+        {
+            var pointsLeft = pointsToDrop.Select(x => x).ToList();
+
+            if (pointsToDrop.Count() == 0)
+            {
+                //Default to monster's location
+                return DropAllItems();
+            }
+
+            foreach (Item item in inventory.Items)
+            {
+                var randomPoint = pointsToDrop.RandomElement();
+                pointsLeft.Remove(randomPoint);
+                ProcessDroppedItem(item, level, randomPoint);
+
+                if(pointsLeft.Count() == 0)
+                    pointsLeft = pointsToDrop.Select(x => x).ToList();
             }
 
             inventory.RemoveAllItems();

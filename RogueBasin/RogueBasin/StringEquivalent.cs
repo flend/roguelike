@@ -50,9 +50,13 @@ namespace RogueBasin
 
         private static void SetupTerrainChars()
         {
+            int shroomWallStartRow = 21;
+            int shroomWallSkip = 7;
+            int rowLength = 16;
+
             TerrainChars.Add(MapTerrain.Empty, (char)250);
             TerrainChars.Add(MapTerrain.Void, '\xb0');
-            TerrainChars.Add(MapTerrain.Wall, (char)320);
+            TerrainChars.Add(MapTerrain.Wall, (char)((shroomWallStartRow + 7) * rowLength + 0));
 
             TerrainChars.Add(MapTerrain.NonWalkableFeature, (char)250);
             TerrainChars.Add(MapTerrain.NonWalkableFeatureLightBlocking, (char)250);
@@ -74,11 +78,7 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.Gravestone, '+');
             TerrainChars.Add(MapTerrain.BarDoor, '|');
             TerrainChars.Add(MapTerrain.DockWall, (char)368);
-
-            int shroomWallStartRow = 21;
-            int shroomWallSkip = 7;
-            int rowLength = 16;
-
+            
             TerrainChars.Add(MapTerrain.ClosedDoor, (char)((shroomWallStartRow + 1) * rowLength + 2));
             TerrainChars.Add(MapTerrain.OpenDoor, (char)((shroomWallStartRow + 1) * rowLength + 3));
 
@@ -107,6 +107,11 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.SecurityWall3, (char)((shroomWallStartRow + 4) * rowLength + shroomWallSkip + 2));
             TerrainChars.Add(MapTerrain.SecurityWall4, (char)((shroomWallStartRow + 4) * rowLength + shroomWallSkip + 3));
             TerrainChars.Add(MapTerrain.SecurityWall5, (char)((shroomWallStartRow + 4) * rowLength + shroomWallSkip + 4));
+            TerrainChars.Add(MapTerrain.BioWall1, (char)((shroomWallStartRow + 7) * rowLength + 0));
+            TerrainChars.Add(MapTerrain.BioWall2, (char)((shroomWallStartRow + 7) * rowLength + shroomWallSkip + 1));
+            TerrainChars.Add(MapTerrain.BioWall3, (char)((shroomWallStartRow + 7) * rowLength + shroomWallSkip + 2));
+            TerrainChars.Add(MapTerrain.BioWall4, (char)((shroomWallStartRow + 7) * rowLength + shroomWallSkip + 3));
+            TerrainChars.Add(MapTerrain.BioWall5, (char)((shroomWallStartRow + 7) * rowLength + shroomWallSkip + 4));
         }
 
         private static void SetupTerrainColors()

@@ -9,7 +9,7 @@ namespace RogueBasin.Items
     {
         bool usedUp;
 
-        const int decayDuration = 10;
+        const int decayDuration = 100;
 
         public ShieldPack()
         {
@@ -76,7 +76,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return (char)308;
+            return (char)561;
         }
 
         public override bool UseHiddenName { get { return false; } }
