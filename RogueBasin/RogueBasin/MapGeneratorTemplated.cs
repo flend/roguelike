@@ -905,7 +905,7 @@ namespace RogueBasin
 
             for (int i = 0; i < numberOfItemsMax; i++)
             {
-                var index = rand.Next(0, allIndices.Count());
+                var index = allIndices.ElementAt(rand.Next(0, allIndices.Count()));
                 indicesPicked.Add(enumerable.ElementAt(index));
                 allIndices.Remove(index);
 
