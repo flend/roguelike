@@ -199,7 +199,7 @@ namespace RogueBasin
 
         public IEnumerable<int> FilterOutCorridors(IEnumerable<int> roomIndices)
         {
-            return roomIndices.Where(r => rooms[r].Room.Height > 3 && rooms[r].Room.Width > 3);
+            return roomIndices.Where(r => (rooms[r].Room.Height > 3 && rooms[r].Room.Width > 3) && !rooms[r].Room.IsCorridor);
         }
 
         public IEnumerable<int> GetRoomIndicesForLevel(int level)

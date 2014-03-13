@@ -617,10 +617,10 @@ namespace RogueBasin
                 if (placedClues.Contains(clue))
                     continue;
 
-                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue);
+                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, true);
 
                 if (!roomsForClue.Item2.Any())
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true);
 
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -661,10 +661,10 @@ namespace RogueBasin
                 if (placedClues.Contains(clue))
                     continue;
 
-                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue);
+                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, true);
 
                 if (!roomsForClue.Item2.Any())
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true);
 
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -688,17 +688,20 @@ namespace RogueBasin
             }
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue)
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
+            IEnumerable<int> candidateRooms = possibleRooms;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(possibleRooms);
 
             //Must be on the same level
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(possibleRooms.First());
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
             var allWalkablePoints = new List<Point>();
 
             //Hmm, could be quite expensive
-            foreach (var room in possibleRooms)
+            foreach (var room in candidateRooms)
             {
                 var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
@@ -707,17 +710,20 @@ namespace RogueBasin
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue)
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
+            IEnumerable<int> candidateRooms = possibleRooms;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(possibleRooms);
 
             //Must be on the same level
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(possibleRooms.First());
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
             var allWalkablePoints = new List<Point>();
 
             //Hmm, could be quite expensive
-            foreach (var room in possibleRooms)
+            foreach (var room in candidateRooms)
             {
                 var allPossiblePoints = mapInfo.GetBoundaryPointsInRoomOfTerrain(room);
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
@@ -754,7 +760,7 @@ namespace RogueBasin
                     if (placedClues.Contains(clue))
                         continue;
 
-                    var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+                    var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, false);
                     var levelForRandomRoom = roomsForClue.Item1;
                     var allWalkablePoints = roomsForClue.Item2;
 

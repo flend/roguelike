@@ -25,6 +25,7 @@ namespace RogueBasin
             Top = 0, Left = 1, Bottom = 2, Right = 3
         }
 
+        public bool IsCorridor { get; private set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -59,6 +60,12 @@ namespace RogueBasin
         public RoomTemplate(RoomTemplateTerrain[,] terrain)
         {
             SetMapRelatedMembers(terrain);
+        }
+
+        public RoomTemplate(RoomTemplateTerrain[,] terrain, bool isCorridor)
+        {
+            SetMapRelatedMembers(terrain);
+            IsCorridor = isCorridor;
         }
 
         private void SetMapRelatedMembers(RoomTemplateTerrain[,] terrain)
@@ -288,7 +295,7 @@ namespace RogueBasin
                 }
             }
 
-            return new RoomTemplate(newRoom);
+            return new RoomTemplate(newRoom, true);
         }
 
         /// <summary>
@@ -380,7 +387,7 @@ namespace RogueBasin
 
             if (mirroring == 0)
             {
-                templateToReturn = new RoomTemplate(newRoom);
+                templateToReturn = new RoomTemplate(newRoom, true);
                 startPointToRet = startPoint;
                 endPointToRet = endPoint;
             }
@@ -396,7 +403,7 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
                     }
                 }
-                templateToReturn = new RoomTemplate(mirrorRoom);
+                templateToReturn = new RoomTemplate(mirrorRoom, true);
                 startPointToRet = new Point(newRoom.GetLength(0) - 1 - startPoint.x, startPoint.y);
                 endPointToRet = new Point(newRoom.GetLength(0) - 1 - endPoint.x, endPoint.y);
             }
@@ -413,7 +420,7 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(1) - 1 - j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
                     }
                 }
-                templateToReturn = new RoomTemplate(mirrorRoom);
+                templateToReturn = new RoomTemplate(mirrorRoom, true);
                 startPointToRet = new Point(newRoom.GetLength(1) - 1 - startPoint.y, newRoom.GetLength(0) - 1 - startPoint.x);
                 endPointToRet = new Point(newRoom.GetLength(1) - 1 - endPoint.y, newRoom.GetLength(0) - 1 - endPoint.x);
             }
@@ -430,7 +437,7 @@ namespace RogueBasin
                         mirrorRoom[j, newRoom.GetLength(0) - 1 - i] = newRoom[i, j];
                     }
                 }
-                templateToReturn = new RoomTemplate(mirrorRoom);
+                templateToReturn = new RoomTemplate(mirrorRoom, true);
                 startPointToRet = new Point(startPoint.y, newRoom.GetLength(0) - 1 - startPoint.x);
                 endPointToRet = new Point(endPoint.y, newRoom.GetLength(0) - 1 - endPoint.x);
             }
@@ -485,7 +492,7 @@ namespace RogueBasin
 
             if (mirroring == 0)
             {
-                mapToReturn = new RoomTemplate(newRoom);
+                mapToReturn = new RoomTemplate(newRoom, true);
                 startPointMirror = startPoint;
                 endPointMirror = endPoint;
             }
@@ -501,7 +508,7 @@ namespace RogueBasin
                         mirrorRoom[newRoom.GetLength(0) - 1 - i, j] = newRoom[i, j];
                     }
                 }
-                mapToReturn = new RoomTemplate(mirrorRoom);
+                mapToReturn = new RoomTemplate(mirrorRoom, true);
                 startPointMirror = new Point(newRoom.GetLength(0) - 1 - startPoint.x, startPoint.y);
                 endPointMirror = new Point(newRoom.GetLength(0) - 1 - endPoint.x, endPoint.y);
             }
@@ -518,7 +525,7 @@ namespace RogueBasin
                         mirrorRoom[i, j] = newRoom[newRoom.GetLength(0) - 1 - i, newRoom.GetLength(1) - 1 - j];
                     }
                 }
-                mapToReturn =  new RoomTemplate(mirrorRoom);
+                mapToReturn = new RoomTemplate(mirrorRoom, true);
                 startPointMirror = new Point(newRoom.GetLength(0) - 1 - startPoint.x, newRoom.GetLength(1) - 1 - startPoint.y);
                 endPointMirror = new Point(newRoom.GetLength(0) - 1 - endPoint.x, newRoom.GetLength(1) - 1 - endPoint.y);
             }
@@ -535,7 +542,7 @@ namespace RogueBasin
                         mirrorRoom[i, newRoom.GetLength(1) - 1 - j] = newRoom[i, j];
                     }
                 }
-                mapToReturn = new RoomTemplate(mirrorRoom);
+                mapToReturn = new RoomTemplate(mirrorRoom, true);
                 startPointMirror = new Point(startPoint.x, newRoom.GetLength(1) - 1 - startPoint.y);
                 endPointMirror = new Point(endPoint.x, newRoom.GetLength(1) - 1 - endPoint.y);
             }
