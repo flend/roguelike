@@ -803,6 +803,10 @@
     <EmbeddedResource Include="bin\Debug\vaults\medical_bay1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\tshape1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\xshape1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\lshape2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\lshape_asymmetric2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\largeconnectingvault1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\largeconnectingvault2.room" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

@@ -133,6 +133,12 @@ namespace RogueBasin
         {
             try
             {
+                if (connectionDoors.ContainsKey(new Connection(firstDoor.OwnerRoomIndex, secondDoor.OwnerRoomIndex).Ordered))
+                {
+                    LogFile.Log.LogEntryDebug("No allowing 2nd connection between rooms for now - revisit past 7DRL", LogDebugLevel.High);
+                    return false;
+                }
+
                 var firstDoorLoc = RoomTemplateUtilities.GetDoorLocation(firstDoor.OwnerRoom.Room, firstDoor.DoorIndexInRoom);
                 var secondDoorLoc = RoomTemplateUtilities.GetDoorLocation(secondDoor.OwnerRoom.Room, secondDoor.DoorIndexInRoom);
 

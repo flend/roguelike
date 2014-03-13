@@ -574,6 +574,84 @@ namespace RogueBasin
             return new Tuple<RoomTemplate, Point>(expandedTemplate, corridorEndPoint);
         }
 
+        public static RoomTemplate BuildRectangularRoom(int width, int height, List<Point> doors)
+        {
+            var newRoom = new RoomTemplateTerrain[width, height];
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    newRoom[i, j] = RoomTemplateTerrain.Floor;
+                }
+            }
+
+            for (int i = 0; i < width; i++)
+            {
+                newRoom[i, 0] = RoomTemplateTerrain.Wall;
+                newRoom[i, height - 1] = RoomTemplateTerrain.Wall;
+            }
+
+            for (int i = 1; i < height - 1; i++)
+            {
+                newRoom[0, i] = RoomTemplateTerrain.Wall;
+                newRoom[width - 1, i] = RoomTemplateTerrain.Wall;
+            }
+
+            foreach (Point p in doors)
+            {
+                newRoom[p.x, p.y] = RoomTemplateTerrain.WallWithPossibleDoor;
+            }
+
+            return new RoomTemplate(newRoom);
+        }
+
+        public static RoomTemplate BuildRandomRectangularRoom(int minWidth, int maxWidth, int minHeight, int maxHeight, int minDoors, int maxDoors)
+        {
+            var width = Game.Random.Next(minWidth, maxWidth);
+            var height = Game.Random.Next(minHeight, maxHeight);
+
+            var doors = Game.Random.Next(minDoors, maxDoors);
+
+            //Boundary squares (excluding corners)
+            var boundarySquares = new List<Point>();
+
+            for (int i = 1; i < width - 1; i++)
+            {
+                boundarySquares.Add(new Point(i, 0));
+                boundarySquares.Add(new Point(i, height - 1));
+            }
+
+            for (int i = 1; i < height - 1; i++)
+            {
+                boundarySquares.Add(new Point(0, i));
+                boundarySquares.Add(new Point(width - 1, i));
+            }
+
+            var doorRate = boundarySquares.Count() / (double)doors;
+
+            var pointsForDoors = boundarySquares.Shuffle().ToList();
+            double rateCum = 0.0;
+            var pointsDecided = new List<Point>();
+
+            for (int i = 0; i < pointsForDoors.Count(); i++)
+            {
+                rateCum += doorRate;
+                if (doorRate > 1.0)
+                {
+                    pointsDecided.Add(pointsForDoors[i]);
+                    doorRate -= 1.0;
+                }
+            }
+
+            if (pointsDecided.Count() < pointsDecided.Count())
+            {
+                pointsDecided.Add(pointsForDoors.Except(pointsDecided).Shuffle().First());
+            }
+
+            return BuildRectangularRoom(width, height, pointsDecided);
+        }
+
         private static Tuple<RoomTemplateTerrain[,], Point, Point> GenerateBaseCorridorBend(int xOffset, int yOffset, int lTransition, RoomTemplate corridorTemplate)
         {
             var absXOffset = Math.Abs(xOffset);
