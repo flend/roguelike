@@ -296,21 +296,6 @@ namespace RogueBasin.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-        ///,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,^^^^,,,^^^^^^^,,^^^,,,,,,,,,,,,,,,,,,,,,,,,
-        ///,,,,,,,,,,,,,,,,,,,,,,,,,,,,^^^^,,,,,^,,^^,,,^^,,,^^^^^^^,,,,,,,,,,,,,,,,,,,,,,,
-        ///,,,,,,,,,,,,,,,,,,,,,,,,,,,,,^,,,,,,,^^^^^,,,,^^^^^,,^^^,,,,,,,,,,,,,,,,,,,,,,,,
-        ///,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,^^,,,,,,^^^^^^^,,,^^,^^^^^,,,,,,,,,,,,,,,,,,,,,,,,
-        ///,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,^^,^,^^^^^^^^,^^,,^,^^^^^,^,,,,,,,,,,,,,,,,,,,,,,,
-        ///,,,,,,,,,,,,,,,,,,,, [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string last {
-            get {
-                return ResourceManager.GetString("last", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] lichBattle0 {

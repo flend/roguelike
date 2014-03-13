@@ -172,9 +172,6 @@
   <data name="introSettings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\bin\Debug\text\introSettings.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="last" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\bin\Debug\last.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
-  </data>
   <data name="lichBattle0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\bin\Debug\movies\lichBattle0.amf;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

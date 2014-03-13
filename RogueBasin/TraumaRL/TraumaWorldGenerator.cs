@@ -29,6 +29,8 @@ namespace RogueBasin
         HashSet<Objective> placedObjectives = new HashSet<Objective>();
         HashSet<Door> placedDoors = new HashSet<Door>();
 
+        LogGenerator logGen = new LogGenerator();
+
         public TraumaWorldGenerator()
         {
             BuildTerrainMapping();
@@ -488,15 +490,48 @@ namespace RogueBasin
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
             var roomsToPlaceMonsters = new List<int>();
             
-            while(roomsToPlaceMonsters.Count() < objectsToPlace) {
-                foreach(var room in allowedRoomsForClues.Shuffle()) {
+            var roomsForMonsters = GetRandomRoomsForClues(objectsToPlace, allowedRoomsForClues);
+            var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
+
+            PlaceCreatureClues<Creatures.Camera>(mapInfo, clues, true);
+
+            //Place log entries explaining the puzzle
+            //These will not be turned into in-engine clue items, so they can't be used to open the door
+            //They are added though, to ensure that they are readable before the door is opened
+
+            var roomsForLogs = GetRandomRoomsForClues(2, allowedRoomsForClues);
+            var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
+
+            //try
+            //{
+                var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateElevatorLogEntry(medicalLevel, lowerAtriumLevel), logClues[0]);
+                var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateArbitaryLogEntry("qe_medicalsecurity"), logClues[1]);
+                PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 });
+            //}
+           // catch (Exception)
+            //{
+                //Ignore log problems
+            //}
+        }
+
+        private List<int> GetRandomRoomsForClues(int objectsToPlace, IEnumerable<int> allowedRoomsForClues)
+        {
+            if (allowedRoomsForClues.Count() == 0)
+                throw new ApplicationException("Not enough rooms to place clues");
+
+            var roomsToPlaceMonsters = new List<int>();
+
+            while (roomsToPlaceMonsters.Count() < objectsToPlace)
+            {
+                foreach (var room in allowedRoomsForClues.Shuffle())
+                {
                     roomsToPlaceMonsters.Add(room);
+                    if (roomsToPlaceMonsters.Count() == objectsToPlace)
+                        break;
                 }
             }
 
-            var clues = manager.AddCluesToExistingDoor(doorId, roomsToPlaceMonsters);
-
-            PlaceCreatureClues<Creatures.Camera>(mapInfo, clues, true);
+            return roomsToPlaceMonsters;
         }
 
         private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -606,6 +641,43 @@ namespace RogueBasin
 
                 if (!placedItem)
                     throw new ApplicationException("Nowhere to place monster");
+
+                placedClues.Add(clue);
+            }
+        }
+
+        private void PlaceLogClues(MapInfo mapInfo, List<Tuple<LogEntry, Clue>> logCluesToPlace)
+        {
+            foreach (var t in logCluesToPlace)
+            {
+                var clue = t.Item2;
+                var logEntry = t.Item1;
+
+                if (placedClues.Contains(clue))
+                    continue;
+
+                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue);
+
+                if (!roomsForClue.Item2.Any())
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue);
+
+                var levelForClue = roomsForClue.Item1;
+                var allWalkablePoints = roomsForClue.Item2;
+
+                bool placedItem = false;
+
+                var logItem = new Items.Log(logEntry);
+
+                foreach (Point p in allWalkablePoints)
+                {
+                    placedItem = Game.Dungeon.AddItem(logItem, levelForClue, p);
+
+                    if (placedItem)
+                        break;
+                }
+
+                if (!placedItem)
+                    throw new ApplicationException("Nowhere to place item");
 
                 placedClues.Add(clue);
             }

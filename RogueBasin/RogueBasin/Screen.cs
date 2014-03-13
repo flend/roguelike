@@ -139,8 +139,6 @@ namespace RogueBasin {
         int DeathHeight { get; set; }
 
         Point movieTL = new Point(0, 0);
-        int movieWidth = 80;
-        int movieHeight = 25;
         uint movieMSBetweenFrames = 500;
 
         /// <summary>
@@ -223,11 +221,6 @@ namespace RogueBasin {
             MessageQueueWidth = (uint)(msgDisplayBotRight.y - msgDisplayBotRight.x);
 
             msgDisplayNumLines = 3;
-
-            //Max 60 * 25 map
-
-            movieWidth = 40;
-            movieHeight = 20;
 
             mapTopLeftBase = new Point(2, 6);
             mapBotRightBase = new Point(38, 32);
@@ -553,6 +546,45 @@ namespace RogueBasin {
                 movieFrames = frames;
 
                 PlayMovieFrames(keypressBetweenFrames);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to play movie from frames " + ex.Message);
+            }
+        }
+
+        private Tuple<int, int> CalculateWidthHeightFromLines(List<string> lines)
+        {
+            int width = 0;
+
+            foreach (string row in lines)
+            {
+                if (row.Length > width)
+                    width = row.Length;
+            }
+
+            var height = lines.Count;
+
+            return new Tuple<int, int>(width, height);
+        }
+
+        public void PlayLog(LogEntry logEntry)
+        {
+            try
+            {
+                movieFrames = new List<MovieFrame>();
+                var logFrame = new MovieFrame();
+                var allLines = new List<string>();
+                allLines.Add(logEntry.title);
+                allLines.AddRange(logEntry.lines);
+                logFrame.scanLines = allLines;
+                var dimensions = CalculateWidthHeightFromLines(allLines);
+                logFrame.width = dimensions.Item1;
+                logFrame.height = dimensions.Item2;
+
+                movieFrames.Add(logFrame);
+
+                PlayMovieFrames(false);
             }
             catch (Exception ex)
             {
