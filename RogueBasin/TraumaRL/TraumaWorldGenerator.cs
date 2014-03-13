@@ -137,7 +137,7 @@ namespace RogueBasin
 
             //Add some extra connections, if doors are available
             var totalExtraConnections = 500;
-            AddCorridorsBetweenOpenDoors(templatedGenerator, totalExtraConnections);
+            AddCorridorsBetweenOpenDoors(templatedGenerator, totalExtraConnections, new List<RoomTemplate>{corridor1});
 
             Map masterMap = mapBuilder.MergeTemplatesIntoMap(terrainMapping);
 
@@ -175,7 +175,7 @@ namespace RogueBasin
 
             //Add some extra connections, if doors are available
             var totalExtraConnections = 500;
-            AddCorridorsBetweenOpenDoors(templatedGenerator, totalExtraConnections);
+            AddCorridorsBetweenOpenDoors(templatedGenerator, totalExtraConnections, new List<RoomTemplate> { corridor1 });
 
             //Replace spare doors with walls
             templatedGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
@@ -226,7 +226,7 @@ namespace RogueBasin
             PlaceRandomConnectedRooms(templatedGenerator, 10, chamber1Doors, corridor1, 0, 0);
 
             //Add some extra connections, if doors are available
-            AddCorridorsBetweenOpenDoors(templatedGenerator, 10);
+            AddCorridorsBetweenOpenDoors(templatedGenerator, 10, new List<RoomTemplate> { corridor1 });
 
             //Replace spare doors with walls
             templatedGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
@@ -301,7 +301,7 @@ namespace RogueBasin
         }
 
         /** Build a map using templated rooms */
-        public MapInfo GenerateDungeonWithStory()
+        public MapInfo GenerateTraumaLevels()
         {
             //We catch exceptions on generation and keep looping
             MapInfo mapInfo;
@@ -322,12 +322,14 @@ namespace RogueBasin
 
                     Dictionary<int, LevelInfo> levelInfo = new Dictionary<int, LevelInfo>();
 
-                    //var medicalInfo = GenerateMedicalLevel(medicalLevel);
-                    //levelInfo[medicalLevel] = medicalInfo;
+                    var medicalInfo = GenerateMedicalLevel(medicalLevel);
+                    levelInfo[medicalLevel] = medicalInfo;
 
                     //Make other levels generically
 
-                    foreach (var level in gameLevels)
+                    var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel });
+
+                    foreach (var level in standardGameLevels)
                     {
                         var thisLevelInfo = GenerateStandardLevel(level, level * 100);
                         levelInfo[level] = thisLevelInfo;
@@ -489,8 +491,8 @@ namespace RogueBasin
             var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
             var roomsToPlaceMonsters = new List<int>();
-            
-            var roomsForMonsters = GetRandomRoomsForClues(objectsToPlace, allowedRoomsForClues);
+
+            var roomsForMonsters = GetRandomRoomsForClues(mapInfo, objectsToPlace, allowedRoomsForClues);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
             PlaceCreatureClues<Creatures.Camera>(mapInfo, clues, true);
@@ -499,7 +501,7 @@ namespace RogueBasin
             //These will not be turned into in-engine clue items, so they can't be used to open the door
             //They are added though, to ensure that they are readable before the door is opened
 
-            var roomsForLogs = GetRandomRoomsForClues(2, allowedRoomsForClues);
+            var roomsForLogs = GetRandomRoomsForClues(mapInfo, 2, allowedRoomsForClues);
             var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
 
             //try
@@ -514,16 +516,19 @@ namespace RogueBasin
             //}
         }
 
-        private List<int> GetRandomRoomsForClues(int objectsToPlace, IEnumerable<int> allowedRoomsForClues)
+        private List<int> GetRandomRoomsForClues(MapInfo info, int objectsToPlace, IEnumerable<int> allowedRoomsForClues)
         {
             if (allowedRoomsForClues.Count() == 0)
                 throw new ApplicationException("Not enough rooms to place clues");
+
+            //To get an even distribution we need to take into account how many nodes are in each group node
+            var expandedAllowedRoomForClues = allowedRoomsForClues.SelectMany(r => Enumerable.Repeat(r, info.Model.GraphNoCycles.roomMappingNoCycleToFullMap[r].Count()));
 
             var roomsToPlaceMonsters = new List<int>();
 
             while (roomsToPlaceMonsters.Count() < objectsToPlace)
             {
-                foreach (var room in allowedRoomsForClues.Shuffle())
+                foreach (var room in expandedAllowedRoomForClues.Shuffle())
                 {
                     roomsToPlaceMonsters.Add(room);
                     if (roomsToPlaceMonsters.Count() == objectsToPlace)
@@ -838,7 +843,12 @@ namespace RogueBasin
             
             //Load standard room types
 
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate lshapeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate lshapeAsymmetric = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape_asymmetric1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate tshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.tshape1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate deadEnd = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber3x3_1door.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate medicalBay = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.medical_bay1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
@@ -849,8 +859,14 @@ namespace RogueBasin
             var cargoTemplateGenerator = new TemplatedMapGenerator(cargoMapBuilder);
             medicalInfo.LevelGenerator = cargoTemplateGenerator;
 
-            PlaceOriginRoom(cargoTemplateGenerator, room1);
-            PlaceRandomConnectedRooms(cargoTemplateGenerator, 4, room1, corridor1, 5, 10);
+            PlaceOriginRoom(cargoTemplateGenerator, medicalBay);
+            var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
+                new Tuple<int, RoomTemplate>(50, lshapeRoom),
+                new Tuple<int, RoomTemplate>(50, lshapeAsymmetric),
+                new Tuple<int, RoomTemplate>(200, tshape),
+                new Tuple<int, RoomTemplate>(100, xshape) };
+
+            PlaceRandomConnectedRooms(cargoTemplateGenerator, 10, allRoomsToPlace, corridor1, 4, 6);
 
             //Add connections to other levels
 
@@ -866,11 +882,11 @@ namespace RogueBasin
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(cargoTemplateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
 
-            //Add escape pods
-            escapePodsConnection = AddRoomToRandomOpenDoor(cargoTemplateGenerator, placeHolderVault, corridor1, 3);
+            //Add extra corridors
+            AddCorridorsBetweenOpenDoors(cargoTemplateGenerator, 5, new List<RoomTemplate> { corridor1 });
 
             //Tidy terrain
-            cargoTemplateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            //cargoTemplateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             return medicalInfo;
         }
@@ -915,14 +931,14 @@ namespace RogueBasin
             return medicalInfo;
         }
 
-        private List<Tuple<int, Connection>> AddConnectionsToOtherLevels(int levelNo, LevelInfo medicalInfo, RoomTemplate corridor1, RoomTemplate replacementVault, TemplatedMapGenerator cargoTemplateGenerator)
+        private List<Tuple<int, Connection>> AddConnectionsToOtherLevels(int levelNo, LevelInfo medicalInfo, RoomTemplate corridor1, RoomTemplate elevatorVault, TemplatedMapGenerator cargoTemplateGenerator)
         {
             var otherLevelConnections = LevelLinks.GetAllConnections().Where(c => c.IncludesVertex(levelNo)).Select(c => c.Source == levelNo ? c.Target : c.Source);
             var connectionsToReturn = new List<Tuple<int, Connection>>();
 
             foreach (var otherLevel in otherLevelConnections)
             {
-                var connectingRoom = AddRoomToRandomOpenDoor(cargoTemplateGenerator, replacementVault, corridor1, 3);
+                var connectingRoom = AddRoomToRandomOpenDoor(cargoTemplateGenerator, elevatorVault, corridor1, 3);
                 connectionsToReturn.Add(new Tuple<int, Connection>(otherLevel, connectingRoom));
             }
 
@@ -1029,7 +1045,7 @@ namespace RogueBasin
         }
 
 
-        private void AddCorridorsBetweenOpenDoors(TemplatedMapGenerator templatedGenerator, int totalExtraConnections)
+        private void AddCorridorsBetweenOpenDoors(TemplatedMapGenerator templatedGenerator, int totalExtraConnections, List<RoomTemplate> corridorsToUse)
         {
             var extraConnections = 0;
 
@@ -1048,6 +1064,12 @@ namespace RogueBasin
                                               && d1.OwnerRoomIndex != d2.OwnerRoomIndex
                                         select new { origin = d1, target = d2 };
 
+            var allStraightDoorPossibilities = from d1 in allDoors
+                                        from d2 in allDoors
+                                        where RoomTemplateUtilities.CanBeConnectedWithStraightCorridor(d1.MapCoords, d1.DoorLocation, d2.MapCoords, d2.DoorLocation)
+                                              && d1.OwnerRoomIndex != d2.OwnerRoomIndex
+                                        select new { origin = d1, target = d2 };
+
             var allOverlappingDoorPossibilities = from d1 in allDoors
                                                   from d2 in allDoors
                                                   where d1.MapCoords == d2.MapCoords
@@ -1057,7 +1079,7 @@ namespace RogueBasin
 
             //Materialize for speed
 
-            var allMatchingDoorPossibilities = allBendDoorPossibilities.Union(allLDoorPossibilities).Union(allOverlappingDoorPossibilities).ToList();
+            var allMatchingDoorPossibilities = allBendDoorPossibilities.Union(allLDoorPossibilities).Union(allOverlappingDoorPossibilities).Union(allStraightDoorPossibilities).ToList();
             //var allMatchingDoorPossibilities = allLDoorPossibilities;
             //var allMatchingDoorPossibilities = allBendDoorPossibilities;
 
@@ -1070,7 +1092,7 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntryDebug("Trying door " + doorsToTry.origin.MapCoords + " to " + doorsToTry.target.MapCoords, LogDebugLevel.Medium);
 
-                bool success = templatedGenerator.JoinDoorsWithCorridor(doorsToTry.origin, doorsToTry.target, RandomCorridor());
+                bool success = templatedGenerator.JoinDoorsWithCorridor(doorsToTry.origin, doorsToTry.target, corridorsToUse.RandomElement());
                 if (success)
                     extraConnections++;
 
@@ -1138,11 +1160,28 @@ namespace RogueBasin
         {
             return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, roomToPlace, corridorToPlace, minCorridorLength, maxCorridorLength, null);
         }
+        
+        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, List<RoomTemplate> roomToPlaces, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
+        {
+            var tuples = roomToPlaces.Select(r => new Tuple<int, RoomTemplate>(1, r));
+            return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, tuples, corridorToPlace, minCorridorLength, maxCorridorLength, null);
+        }
+
+        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, List<Tuple<int,RoomTemplate>> roomToPlaceWithWeights, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
+        {
+            return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, roomToPlaceWithWeights, corridorToPlace, minCorridorLength, maxCorridorLength, null);
+        }
+
+
+        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength, Func<int> doorPicker)
+        {
+            return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, new List<Tuple<int,RoomTemplate>> { new Tuple<int, RoomTemplate>(1, roomToPlace) }, corridorToPlace, minCorridorLength, maxCorridorLength, doorPicker);
+        }
 
         /// <summary>
         /// Failure mode is placing fewer rooms than requested
         /// </summary>
-        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength, Func<int> doorPicker)
+        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, IEnumerable<Tuple<int, RoomTemplate>> roomsToPlaceWithWeights, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength, Func<int> doorPicker)
         {
             int roomsPlaced = 0;
             int attempts = 0;
@@ -1154,6 +1193,22 @@ namespace RogueBasin
             do
             {
                 //Find a random potential door and try to grow a random room off this
+                
+                //Find room using weights
+                var totalWeight = roomsToPlaceWithWeights.Select(t => t.Item1).Sum();
+                var randomNumber = Game.Random.Next(totalWeight);
+
+                int weightSoFar = 0;
+                RoomTemplate roomToPlace = roomsToPlaceWithWeights.First().Item2;
+                foreach (var t in roomsToPlaceWithWeights)
+                {
+                    weightSoFar += t.Item1;
+                    if (weightSoFar > randomNumber)
+                    {
+                        roomToPlace = t.Item2;
+                        break;
+                    }
+                }
 
                 //Use a random door, or the function passed in
                 int randomNewDoorIndex;

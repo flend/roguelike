@@ -27,7 +27,7 @@ namespace TraumaRL
             //Setup a single test level
             TraumaWorldGenerator templateGen = new TraumaWorldGenerator();
 
-            var mapInfo = templateGen.GenerateDungeonWithStory();
+            var mapInfo = templateGen.GenerateTraumaLevels();
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 

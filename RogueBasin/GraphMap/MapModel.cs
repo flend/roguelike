@@ -770,7 +770,8 @@ namespace GraphMap
 
             roomMappingFullToNoCycleMap = roomMappingToNoCyclesWork.AsReadOnly();
             //Reverse the above mapping
-            roomMappingNoCycleToFullMap = roomMappingToNoCyclesWork.GroupBy(kv => kv.Value).ToDictionary(g => g.Key, g => g.Select(kv => kv.Key).ToList()).AsReadOnly();
+            var roomMappingFullToNoCycleGrouped = roomMappingToNoCyclesWork.GroupBy(kv => kv.Value);
+            roomMappingNoCycleToFullMap = roomMappingFullToNoCycleGrouped.ToDictionary(g => g.Key, g => g.Select(kv => kv.Key).ToList()).AsReadOnly();
                 
             if (CycleDebug)
                 Console.WriteLine(String.Format("Cycle reduction - Cycles removed: {2}, Vertices before: {0}, vertices after: {1}", baseGraph.Vertices.Count(), mapNoCycles.Vertices.Count(), componentCount));

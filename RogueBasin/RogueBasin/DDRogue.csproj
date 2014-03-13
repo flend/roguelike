@@ -791,6 +791,18 @@
     <EmbeddedResource Include="bin\Debug\logentries\el_broken.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\el_transit.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_medicalsecurity.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\longvault1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\longvault_corners1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\central_pillars1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\branchroom_thin1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\branchroom_thin2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\chamber3x3_1door.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\lshape1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\lshape_asymmetric1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\square_4way.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\medical_bay1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\tshape1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\xshape1.room" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
