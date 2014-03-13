@@ -436,10 +436,10 @@ namespace RogueBasin
                     AddElevatorFeatures(mapInfo, levelInfo);
 
                     //Generate quests at mapmodel level
-                    //GenerateQuests(mapInfo, levelInfo, startRoom);
+                    GenerateQuests(mapInfo, levelInfo);
 
                     //Add clues and locks at dungeon engine level
-                    //AddSimpleCluesAndLocks(mapInfo);
+                    AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
@@ -485,17 +485,67 @@ namespace RogueBasin
             return verticesByDistance;
         }
 
-        private void GenerateQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom)
+        private void GenerateQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
-            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, startRoom);
+            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
-            BuildMainQuest(mapInfo, levelInfo, startRoom, roomConnectivityMap);
+            //BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
 
-            BuildMedicalLevelQuests(mapInfo, levelInfo, startRoom, roomConnectivityMap);
+            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+
+            try
+            {
+                BlockElevatorPaths(mapInfo, levelInfo, roomConnectivityMap, lowerAtriumLevel, 1);
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntryDebug("Elevator Exception: " + ex, LogDebugLevel.High);
+            }
+        }
+
+        private bool BlockElevatorPaths(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap, 
+            int levelForBlocks, int maxDoorsToMake)
+        {
+            var connectionsFromThisLevel = levelInfo[levelForBlocks].ConnectionsToOtherLevels;
+
+            var pairs = Utility.GetPermutations<int>(connectionsFromThisLevel.Keys, 2);
+
+            if (pairs.Count() == 0)
+            {
+                LogFile.Log.LogEntryDebug("Can't find pair of elevators to connection", LogDebugLevel.High);
+                return false;
+            }
+
+            var pairsLeft = pairs.Select(s => s);
+
+            int doorsMade = 0;
+            while (doorsMade < maxDoorsToMake && pairsLeft.Count() > 0)
+            {
+                var pairToTry = pairsLeft.RandomElement();
+
+                var sourceElevatorConnection = levelInfo[levelForBlocks].ConnectionsToOtherLevels[pairToTry.ElementAt(0)];
+                var targetElevatorConnection = levelInfo[levelForBlocks].ConnectionsToOtherLevels[pairToTry.ElementAt(1)];
+
+                var startDoor = sourceElevatorConnection.Source;
+                var endDoor = targetElevatorConnection.Source;
+
+                var doorId = "atrium" + doorsMade;
+
+                LogFile.Log.LogEntryDebug("Blocking elevators " + pairToTry.ElementAt(0) + " to " + pairToTry.ElementAt(1) + " with " + doorId, LogDebugLevel.High);
+
+                BlockPathBetweenRoomsWithSimpleDoor(mapInfo, levelInfo, roomConnectivityMap,
+                    doorId, 1, startDoor, endDoor,
+                    0.5, false, CluePath.NotOnCriticalPath, true,
+                    true, CluePath.OnCriticalPath, true);
+
+                doorsMade++;
+            }
+
+            return true;
         }
         
-        private void BuildMedicalLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom, Dictionary<int, List<Connection>> roomConnectivityMap)
+        private void BuildMedicalLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
             //Lock the door to the elevator and require a certain number of monsters to be killed
             var elevatorConnection = levelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
@@ -542,12 +592,154 @@ namespace RogueBasin
             //{
                 var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateElevatorLogEntry(medicalLevel, lowerAtriumLevel), logClues[0]);
                 var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateArbitaryLogEntry("qe_medicalsecurity"), logClues[1]);
-                PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 });
+                PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
             //}
            // catch (Exception)
             //{
                 //Ignore log problems
             //}
+        }
+
+        /*
+        private void BlockPathBetweenElevatorsWithSimpleDoor(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap, 
+            string doorId, int cluesForDoor, int sourceRoom, int endRoom, 
+            double distanceFromSourceRatio, bool enforceClueOnDestLevel, CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
+            bool hasLogClue, CluePath logOnCriticalPath, bool logNotInCorridors)
+        {
+            BlockPathBetweenRoomsWithSimpleDoor(mapInfo, levelInfo, roomConnectivityMap,
+            doorId, cluesForDoor, sourceRoom, endRoom,
+            distanceFromSourceRatio, enforceClueOnDestLevel, clueNotOnCriticalPath, clueNotInCorridors,
+            hasLogClue, logOnCriticalPath, logNotInCorridors);
+        }*/
+
+        private void BlockPathBetweenRoomsWithSimpleDoor(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap, 
+            string doorId, int cluesForDoor, int sourceRoom, int endRoom, 
+            double distanceFromSourceRatio, bool enforceClueOnDestLevel, CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
+            bool hasLogClue, CluePath logOnCriticalPath, bool logNotInCorridors)
+        {
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(sourceRoom, endRoom);
+            var criticalConnectionForDoor = criticalPath.ElementAt((int)Math.Min(criticalPath.Count() * distanceFromSourceRatio, criticalPath.Count() - 1));
+
+            criticalConnectionForDoor = CheckAndReplaceConnectionIfOccupied(manager, criticalPath, criticalConnectionForDoor);
+
+            //Place door
+
+            manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, cluesForDoor));
+            var door = manager.GetDoorById(doorId);
+
+            var lockedDoor = new Locks.SimpleLockedDoor(door, doorId);
+            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
+            lockedDoor.LocationLevel = doorInfo.LevelNo;
+            lockedDoor.LocationMap = doorInfo.MapLocation;
+
+            Game.Dungeon.AddLock(lockedDoor);
+
+            placedDoors.Add(door);
+
+            //Place clues
+
+            var allRoomsForClue = manager.GetValidRoomsToPlaceClueForDoor(doorId);
+            var preferredRooms = FilterClueRooms(mapInfo, allRoomsForClue, criticalPath, enforceClueOnDestLevel, clueNotOnCriticalPath, clueNotInCorridors);
+
+            var roomsForClues = GetRandomRoomsForClues(mapInfo, cluesForDoor, preferredRooms);
+            var clues = manager.AddCluesToExistingDoor(doorId, roomsForClues);
+
+            var clueLocations = PlaceClueItem(mapInfo, clues, clueNotInCorridors);
+
+            //Place log entries explaining the puzzle
+
+            if (hasLogClue)
+            {
+                //Put major clue on the critical path
+
+                var preferredRoomsForLogs = FilterClueRooms(mapInfo, allRoomsForClue, criticalPath, false, logOnCriticalPath, logNotInCorridors);
+                var roomsForLogs = GetRandomRoomsForClues(mapInfo, 1, preferredRoomsForLogs);
+                var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
+
+                //Put minor clue somewhere else
+                var preferredRoomsForLogsNonCritical = FilterClueRooms(mapInfo, allRoomsForClue, criticalPath, false, CluePath.Any, logNotInCorridors);
+
+                var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 1, preferredRoomsForLogsNonCritical);
+                var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
+
+                //try
+                //{
+                var coupledLogs = logGen.GenerateCoupledDoorLogEntry(doorId, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
+                    clueLocations.First().Item1);
+                var log1 = new Tuple<LogEntry, Clue>(coupledLogs[0], logClues[0]);
+                var log2 = new Tuple<LogEntry, Clue>(coupledLogs[1], logCluesNonCritical[0]);
+                PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
+                //}
+                // catch (Exception)
+                //{
+                //Ignore log problems
+                //}
+            }
+        }
+
+        private Connection CheckAndReplaceConnectionIfOccupied(DoorAndClueManager manager, IEnumerable<Connection> criticalPath, Connection connectionCandidate)
+        {
+            if (manager.GetDoorsForEdge(connectionCandidate).Count() > 0)
+            {
+                //Try another edge
+                var possibleEdges = criticalPath.Shuffle();
+                Connection foundEdge = null;
+                foreach (var edge in possibleEdges)
+                {
+                    if (manager.GetDoorsForEdge(connectionCandidate).Count() == 0)
+                    {
+                        foundEdge = edge;
+                        break;
+                    }
+                }
+
+                if (foundEdge == null)
+                {
+                    throw new ApplicationException("No free doors to place lock.");
+                }
+
+                return foundEdge;
+            }
+
+            return connectionCandidate;
+        }
+
+        private enum CluePath
+        {
+            OnCriticalPath, NotOnCriticalPath, Any
+        }
+
+        private IEnumerable<int> FilterClueRooms(MapInfo mapInfo, IEnumerable<int> allCandidateRooms, IEnumerable<Connection> criticalPath, bool enforceClueOnDestLevel, CluePath clueCriticalPath, bool clueNotInCorridors)
+        {
+            var candidateRooms = allCandidateRooms;
+            if (enforceClueOnDestLevel)
+                candidateRooms = allCandidateRooms.Intersect(mapInfo.GetRoomIndicesForLevel(mapInfo.GetLevelForRoomIndex(criticalPath.Last().Target)));
+
+            var preferredRooms = candidateRooms;
+            if (clueCriticalPath == CluePath.NotOnCriticalPath)
+            {
+                preferredRooms = candidateRooms.Except(criticalPath.SelectMany(c => new List<int> { c.Source, c.Target }));
+                if (preferredRooms.Count() == 0)
+                    preferredRooms = candidateRooms;
+            }
+            else if (clueCriticalPath == CluePath.OnCriticalPath)
+            {
+                preferredRooms = candidateRooms.Intersect(criticalPath.SelectMany(c => new List<int> { c.Source, c.Target }));
+                if (preferredRooms.Count() == 0)
+                    preferredRooms = candidateRooms;
+            }
+
+            var preferredRoomsIncludingType = preferredRooms;
+            if (clueNotInCorridors)
+            {
+                preferredRoomsIncludingType = mapInfo.FilterOutCorridors(preferredRooms);
+                if (preferredRoomsIncludingType.Count() == 0)
+                    preferredRoomsIncludingType = preferredRooms;
+            }
+
+            return preferredRoomsIncludingType;
         }
 
         private List<int> GetRandomRoomsForClues(MapInfo info, int objectsToPlace, IEnumerable<int> allowedRoomsForClues)
@@ -562,7 +754,8 @@ namespace RogueBasin
 
             while (roomsToPlaceMonsters.Count() < objectsToPlace)
             {
-                foreach (var room in expandedAllowedRoomForClues.Shuffle())
+                var shuffledRooms = expandedAllowedRoomForClues.Shuffle();
+                foreach (var room in shuffledRooms)
                 {
                     roomsToPlaceMonsters.Add(room);
                     if (roomsToPlaceMonsters.Count() == objectsToPlace)
@@ -573,7 +766,7 @@ namespace RogueBasin
             return roomsToPlaceMonsters;
         }
 
-        private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startRoom, Dictionary<int, List<Connection>> roomConnectivityMap)
+        private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
             var deadEndRooms = roomConnectivityMap[0];
             //MAIN QUEST
@@ -593,7 +786,7 @@ namespace RogueBasin
             int selfDestructLevel = medicalLevel;
             var selfDestructLevelIndices = mapInfo.GetRoomIndicesForLevel(selfDestructLevel);
             var deadEndsInMedical = RoomsInConnectionSet(selfDestructLevelIndices, deadEndRooms);
-            var roomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, startRoom, deadEndsInMedical);
+            var roomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, deadEndsInMedical);
             var roomsFarFromStart = roomsInDistanceOrderFromStart.ElementAt(0);
 
             mapInfo.Model.DoorAndClueManager.PlaceObjective(new ObjectiveRequirements(roomsFarFromStart, "self-destruct", 1, new List<string> { "escape" }));
@@ -685,7 +878,7 @@ namespace RogueBasin
             }
         }
 
-        private void PlaceLogClues(MapInfo mapInfo, List<Tuple<LogEntry, Clue>> logCluesToPlace)
+        private void PlaceLogClues(MapInfo mapInfo, List<Tuple<LogEntry, Clue>> logCluesToPlace, bool boundariesPreferred, bool cluesNotInCorridors)
         {
             foreach (var t in logCluesToPlace)
             {
@@ -695,10 +888,16 @@ namespace RogueBasin
                 if (placedClues.Contains(clue))
                     continue;
 
-                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, true);
+                Tuple<int, IEnumerable<Point>> roomsForClue;
+                if (boundariesPreferred)
+                {
+                    roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors);
 
-                if (!roomsForClue.Item2.Any())
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true);
+                    if (!roomsForClue.Item2.Any())
+                        roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors);
+                }
+                else
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors);
 
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -794,25 +993,8 @@ namespace RogueBasin
                     if (placedClues.Contains(clue))
                         continue;
 
-                    var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, false);
-                    var levelForRandomRoom = roomsForClue.Item1;
-                    var allWalkablePoints = roomsForClue.Item2;
-
-                    bool placedItem = false;
-                    foreach (Point p in allWalkablePoints)
-                    {
-                        placedItem = Game.Dungeon.AddItem(new Items.Clue(clue), levelForRandomRoom, p);
-                        
-                        if (placedItem)
-                            break;
-                    }
-
-                    if (!placedItem)
-                    {
-                        var str = "Can't place clue " + clue.OpenLockIndex;
-                        LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
-                        throw new ApplicationException(str);
-                    }
+                    bool avoidCorridors = false;
+                    PlaceClueItem(mapInfo, clue, avoidCorridors);
 
                     placedClues.Add(clue);
                 }
@@ -875,6 +1057,46 @@ namespace RogueBasin
                     placedObjectives.Add(obj);
                 }
             }
+        }
+
+        private void PlaceClueItem(MapInfo mapInfo, Clue clue, bool avoidCorridors)
+        {
+            PlaceClueItem(mapInfo, new List<Clue> { clue }, avoidCorridors);
+        }
+        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, List<Clue> clues, bool avoidCorridors)
+        {
+            var toRet = new List<Tuple<int, Point>>();
+
+            foreach (var clue in clues)
+            {
+                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, avoidCorridors);
+                var levelForRandomRoom = roomsForClue.Item1;
+                var allWalkablePoints = roomsForClue.Item2;
+
+                bool placedItem = false;
+                Point pointToPlace = null;
+                foreach (Point p in allWalkablePoints)
+                {
+                    placedItem = Game.Dungeon.AddItem(new Items.Clue(clue), levelForRandomRoom, p);
+                    pointToPlace = p;
+
+                    if (placedItem)
+                        break;
+                }
+
+                placedClues.Add(clue);
+
+                if (!placedItem)
+                {
+                    var str = "Can't place clue " + clue.OpenLockIndex;
+                    LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
+                    throw new ApplicationException(str);
+                }
+
+                toRet.Add(new Tuple<int, Point>(levelForRandomRoom, pointToPlace));
+            }
+
+            return toRet;
         }
 
         private LevelInfo GenerateMedicalLevel(int levelNo)
@@ -992,7 +1214,7 @@ namespace RogueBasin
             //AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
 
             //Tidy terrain
-            //templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             //Wall type
             levelInfo.TerrainMapping = lineTerrainMapping;

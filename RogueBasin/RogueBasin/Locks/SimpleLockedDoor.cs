@@ -10,10 +10,18 @@ namespace RogueBasin.Locks
     public class SimpleLockedDoor : Lock
     {
         protected GraphMap.Door mapDoor;
+        private string idToReport;
+
+        public SimpleLockedDoor(GraphMap.Door door, string idToReport)
+        {
+            this.mapDoor = door;
+            this.idToReport = idToReport;
+        }
 
         public SimpleLockedDoor(GraphMap.Door door)
         {
             this.mapDoor = door;
+            this.idToReport = door.Id;
         }
 
         public override bool OpenLock(Player player)
@@ -22,12 +30,18 @@ namespace RogueBasin.Locks
 
             if (!canDoorBeOpened)
             {
-                Game.MessageQueue.AddMessage("You can't open the door. You need " + mapDoor.NumCluesRequired + " " + mapDoor.Id + " keys.");
+                if (mapDoor.NumCluesRequired == 1)
+                    Game.MessageQueue.AddMessage("The door won't open. It needs a " + idToReport);
+                else
+                    Game.MessageQueue.AddMessage("The door won't open. It needs " + mapDoor.NumCluesRequired + " " + idToReport + "s");
                 return false;
             }
             else
             {
-                Game.MessageQueue.AddMessage("You open the door with your " + mapDoor.NumCluesRequired + " " + mapDoor.Id + " keys.");
+                if (mapDoor.NumCluesRequired == 1)
+                    Game.MessageQueue.AddMessage("You open the door with your " + idToReport);
+                else
+                    Game.MessageQueue.AddMessage("You open the door with your " + idToReport + "s.");
                 isOpen = true;
                 return true;
             }

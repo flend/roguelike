@@ -10,6 +10,28 @@ namespace DDRogueTest
     public class UtilityTest
     {
         [TestMethod]
+
+        public void QuickPermReturnsCorrectly()
+        {
+            var list = new List<int> { 1, 2, 3 };
+            var outputList = Utility.GetPermutations<int>(list, 2);
+
+            var output1 = outputList.ElementAt(0).ToList();
+            var output2 = outputList.ElementAt(1).ToList();
+            var output3 = outputList.ElementAt(2).ToList();
+
+            Assert.AreEqual(3, outputList.Count());
+
+            CollectionAssert.AreEquivalent(new List<int>{1, 2}, output1);
+            CollectionAssert.AreEquivalent(new List<int>{1, 3}, output2);
+            CollectionAssert.AreEquivalent(new List<int>{2, 3}, output3);
+        }
+
+        public static IEnumerable<Tuple<int, int>> CartesianExclusiveCombinations(IEnumerable<int> list)
+        {
+            return list.SelectMany(k => list.SelectMany(ik => ik != k ? new List<Tuple<int, int>> { new Tuple<int, int>(k, ik) } : new List<Tuple<int, int>>()));
+        }
+        [TestMethod]
         public void GetPointsOnLineReturnsCorrectPointsForNegativeX()
         {
             Point start = new Point(5, 10);

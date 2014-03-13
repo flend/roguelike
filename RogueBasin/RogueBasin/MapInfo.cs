@@ -160,6 +160,8 @@ namespace RogueBasin
             BuildRoomIndices();
         }
 
+        public int StartRoom { get { return startRoom; } }
+
         private void BuildRoomIndices()
         {
             roomListForLevel = new Dictionary<int,List<int>>();

@@ -819,6 +819,8 @@
     <EmbeddedResource Include="bin\Debug\vaults\branchroom2.room" />
     <EmbeddedResource Include="bin\Debug\vaults\chamber6x4_2door.room" />
     <EmbeddedResource Include="bin\Debug\vaults\chamber6x4_1door.room" />
+    <EmbeddedResource Include="bin\Debug\logentries\dr_droppedid1.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\dr_droppedid2.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

@@ -14,19 +14,7 @@ namespace RogueBasin.Items
 
         public Clue(GraphMap.Clue mapClue)
         {
-            this.mapClue = mapClue;
-            string parentId;
-
-            if (mapClue.LockedDoor != null)
-            {
-                this.id = "door-clue-" + mapClue.LockedDoor.Id;
-                parentId = mapClue.LockedDoor.Id;
-            }
-            else
-            {
-                this.id = "obj-clue-" + mapClue.LockedObjective.Id;
-                parentId = mapClue.LockedObjective.Id;
-            }
+            string parentId = Setup(mapClue);
 
             color = ColorPresets.Magenta;
 
@@ -54,6 +42,32 @@ namespace RogueBasin.Items
             }
         }
 
+        public Clue(GraphMap.Clue mapClue, Color lockColour)
+        {
+            string parentId = Setup(mapClue);
+
+            color = lockColour;
+
+        }
+
+        private string Setup(GraphMap.Clue mapClue)
+        {
+            this.mapClue = mapClue;
+            string parentId;
+
+            if (mapClue.LockedDoor != null)
+            {
+                this.id = mapClue.LockedDoor.Id;
+                parentId = mapClue.LockedDoor.Id;
+            }
+            else
+            {
+                this.id = mapClue.LockedObjective.Id;
+                parentId = mapClue.LockedObjective.Id;
+            }
+            return parentId;
+        }
+
         public GraphMap.Clue MapClue
         {
             get { return mapClue;  }
@@ -66,12 +80,12 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return id + " key"; }
+            get { return id; }
         }
 
         public override string GroupItemDescription
         {
-            get { return id + " key"; }
+            get { return id; }
         }
 
         public override libtcodWrapper.Color GetColour()
