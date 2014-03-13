@@ -708,7 +708,7 @@ namespace RogueBasin
             manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
             var door = manager.GetDoorById(doorId);
 
-            var lockedDoor = new Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked");
+            var lockedDoor = new Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", doorId, ColorPresets.Red);
             var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;

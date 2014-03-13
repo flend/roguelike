@@ -353,7 +353,11 @@ namespace RogueBasin
 
             var fullString = prefix + lastName + " " + firstName + " DX:" + randomDate + suffix;
 
-            return fullString;
+            var centering = (40 - fullString.Count()) / 2;
+
+            var fullStringWithCentering = new String(' ', centering) + fullString;
+
+            return fullStringWithCentering;
         }
     }
 }

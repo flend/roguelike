@@ -49,7 +49,7 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.DarkSlateBlue;
+            return ColorPresets.LimeGreen;
         }
 
         protected override char GetRepresentation()
