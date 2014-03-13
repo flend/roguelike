@@ -599,14 +599,15 @@ namespace RogueBasin
 
             BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            //BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
         }
 
         private void BuildRandomElevatorQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
             var noLevelsToBlock = 1 + Game.Random.Next(3);
 
-            var candidateLevels = gameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel });
+            var candidateLevels = gameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => levelInfo[l].ConnectionsToOtherLevels.Count() > 1);
+            LogFile.Log.LogEntryDebug("Candidates for elevator quests: " + candidateLevels, LogDebugLevel.Medium);
             var chosenLevels = candidateLevels.RandomElements(noLevelsToBlock);
 
             foreach (var level in chosenLevels)
