@@ -322,7 +322,7 @@ namespace RogueBasin
         {
             string firstName;
 
-            if (Game.Random.Next(1) > 0)
+            if (Game.Random.Next(2) > 0)
                 firstName = maleFirst.RandomElement();
             else
                 firstName = femaleFirst.RandomElement();
@@ -336,7 +336,7 @@ namespace RogueBasin
         {
             string firstName;
 
-            if (Game.Random.Next(1) > 0)
+            if (Game.Random.Next(2) > 0)
                 firstName = maleFirst.RandomElement();
             else
                 firstName = femaleFirst.RandomElement();

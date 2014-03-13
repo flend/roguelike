@@ -900,7 +900,7 @@ namespace RogueBasin
 
         public static List<T> RandomElementsUsing<T>(this IEnumerable<T> enumerable, int numberOfItemsMax, Random rand)
         {
-            var allIndices = new HashSet<int>(Enumerable.Range(0, numberOfItemsMax));
+            var allIndices = new HashSet<int>(Enumerable.Range(0, enumerable.Count()));
             var indicesPicked = new List<T>();
 
             for (int i = 0; i < numberOfItemsMax; i++)
