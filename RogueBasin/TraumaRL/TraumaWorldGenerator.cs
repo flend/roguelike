@@ -640,7 +640,7 @@ namespace RogueBasin
 
             var doorId = "medical-security";
             int objectsToPlace = 10;
-            int objectsToDestroy = 7;
+            int objectsToDestroy = 1;
 
             //Place door
             manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
