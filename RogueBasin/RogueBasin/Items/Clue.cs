@@ -42,11 +42,12 @@ namespace RogueBasin.Items
             }
         }
 
-        public Clue(GraphMap.Clue mapClue, Color lockColour)
+        public Clue(GraphMap.Clue mapClue, Color lockColour, string id)
         {
             string parentId = Setup(mapClue);
 
             color = lockColour;
+            this.id = id;
 
         }
 

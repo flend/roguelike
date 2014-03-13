@@ -31,14 +31,28 @@ namespace RogueBasin
 
         LogGenerator logGen = new LogGenerator();
 
+        static List<Tuple<Color, string>> availableColors;
+        List<Tuple<Color, string>> usedColors = new List<Tuple<Color, string>>();
+
         public TraumaWorldGenerator()
         {
             BuildTerrainMapping();
+            
+        }
+
+        private static void SetupColors()
+        {
+            availableColors = new List<Tuple<Color, string>> {
+                new Tuple<Color, string>(ColorPresets.Red, "red"),
+                new Tuple<Color, string>(ColorPresets.Blue, "blue"),
+                new Tuple<Color, string>(ColorPresets.Orange, "orange"),
+            };
         }
 
         static TraumaWorldGenerator() { 
             
             BuildLevelNaming();
+            SetupColors();
         }
 
         public const int medicalLevel = 0;
@@ -530,12 +544,16 @@ namespace RogueBasin
                 var startDoor = sourceElevatorConnection.Source;
                 var endDoor = targetElevatorConnection.Source;
 
-                var doorId = "atrium" + doorsMade;
+                var colorToUse = GetUnusedColor();
+
+                var doorName = colorToUse.Item2 + " key card";
+                var doorId = Game.Dungeon.DungeonInfo.LevelNaming[levelForBlocks] + Game.Random.Next();
+                var doorColor = colorToUse.Item1;
 
                 LogFile.Log.LogEntryDebug("Blocking elevators " + pairToTry.ElementAt(0) + " to " + pairToTry.ElementAt(1) + " with " + doorId, LogDebugLevel.High);
 
                 BlockPathBetweenRoomsWithSimpleDoor(mapInfo, levelInfo, roomConnectivityMap,
-                    doorId, 1, startDoor, endDoor,
+                    doorId, doorName, doorColor, 1, startDoor, endDoor,
                     0.5, false, CluePath.NotOnCriticalPath, true,
                     true, CluePath.OnCriticalPath, true);
 
@@ -543,6 +561,16 @@ namespace RogueBasin
             }
 
             return true;
+        }
+
+        private Tuple<Color, string> GetUnusedColor()
+        {
+            var unusedColor = availableColors.Except(usedColors);
+
+            if (unusedColor.Count() == 0)
+                return availableColors.RandomElement();
+
+            return unusedColor.RandomElement();
         }
         
         private void BuildMedicalLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -613,7 +641,7 @@ namespace RogueBasin
         }*/
 
         private void BlockPathBetweenRoomsWithSimpleDoor(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap, 
-            string doorId, int cluesForDoor, int sourceRoom, int endRoom, 
+            string doorId, string doorName, Color colorToUse, int cluesForDoor, int sourceRoom, int endRoom, 
             double distanceFromSourceRatio, bool enforceClueOnDestLevel, CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
             bool hasLogClue, CluePath logOnCriticalPath, bool logNotInCorridors)
         {
@@ -646,7 +674,9 @@ namespace RogueBasin
             var roomsForClues = GetRandomRoomsForClues(mapInfo, cluesForDoor, preferredRooms);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForClues);
 
-            var clueLocations = PlaceClueItem(mapInfo, clues, clueNotInCorridors);
+            var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, colorToUse, doorName));
+
+            var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, clueNotInCorridors);
 
             //Place log entries explaining the puzzle
 
@@ -666,7 +696,7 @@ namespace RogueBasin
 
                 //try
                 //{
-                var coupledLogs = logGen.GenerateCoupledDoorLogEntry(doorId, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
+                var coupledLogs = logGen.GenerateCoupledDoorLogEntry(doorName, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
                     clueLocations.First().Item1);
                 var log1 = new Tuple<LogEntry, Clue>(coupledLogs[0], logClues[0]);
                 var log2 = new Tuple<LogEntry, Clue>(coupledLogs[1], logCluesNonCritical[0]);
@@ -994,7 +1024,7 @@ namespace RogueBasin
                         continue;
 
                     bool avoidCorridors = false;
-                    PlaceClueItem(mapInfo, clue, avoidCorridors);
+                    PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(clue, ColorPresets.Magenta, ""), avoidCorridors);
 
                     placedClues.Add(clue);
                 }
@@ -1059,16 +1089,19 @@ namespace RogueBasin
             }
         }
 
-        private void PlaceClueItem(MapInfo mapInfo, Clue clue, bool avoidCorridors)
+        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, Tuple<Clue, Color, string> clues, bool avoidCorridors)
         {
-            PlaceClueItem(mapInfo, new List<Clue> { clue }, avoidCorridors);
+            return PlaceClueItem(mapInfo, new List<Tuple<Clue, Color, string>> {clues}, avoidCorridors);
         }
-        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, List<Clue> clues, bool avoidCorridors)
+
+        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, IEnumerable<Tuple<Clue, Color, string>> clues, bool avoidCorridors)
         {
             var toRet = new List<Tuple<int, Point>>();
 
-            foreach (var clue in clues)
+            foreach (var tp in clues)
             {
+                var clue = tp.Item1;
+
                 var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, avoidCorridors);
                 var levelForRandomRoom = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -1077,7 +1110,7 @@ namespace RogueBasin
                 Point pointToPlace = null;
                 foreach (Point p in allWalkablePoints)
                 {
-                    placedItem = Game.Dungeon.AddItem(new Items.Clue(clue), levelForRandomRoom, p);
+                    placedItem = Game.Dungeon.AddItem(new Items.Clue(clue, tp.Item2, tp.Item3), levelForRandomRoom, p);
                     pointToPlace = p;
 
                     if (placedItem)
