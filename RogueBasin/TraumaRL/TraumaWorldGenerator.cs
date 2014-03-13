@@ -44,8 +44,18 @@ namespace RogueBasin
         {
             availableColors = new List<Tuple<Color, string>> {
                 new Tuple<Color, string>(ColorPresets.Red, "red"),
+                new Tuple<Color, string>(ColorPresets.Coral, "coral"),
                 new Tuple<Color, string>(ColorPresets.Blue, "blue"),
                 new Tuple<Color, string>(ColorPresets.Orange, "orange"),
+                new Tuple<Color, string>(ColorPresets.Yellow, "yellow"),
+                new Tuple<Color, string>(ColorPresets.Khaki, "khaki"),
+                new Tuple<Color, string>(ColorPresets.Chartreuse, "chartreuse"),
+                new Tuple<Color, string>(ColorPresets.Indigo, "indigo"),
+                new Tuple<Color, string>(ColorPresets.Cyan, "cyan"),
+                new Tuple<Color, string>(ColorPresets.Lime, "lime"),
+                new Tuple<Color, string>(ColorPresets.Navy, "navy"),
+                new Tuple<Color, string>(ColorPresets.Tan, "tan"),
+                new Tuple<Color, string>(ColorPresets.Fuchsia, "fuchsia"),
             };
         }
 
@@ -390,12 +400,17 @@ namespace RogueBasin
                         startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
 
                     //Build and add each connected level
+                    //Needs to be done in DFS fashion so we don't add the same level twice
+
                     var levelsAdded = new HashSet<int> { medicalLevel };
 
-                    foreach (var kv in levelInfo)
+                    MapModel levelModel = new MapModel(levelLinks, medicalLevel);
+                    var vertexDFSOrder = levelModel.GraphNoCycles.mapMST.verticesInDFSOrder;
+
+                    foreach (var level in vertexDFSOrder)
                     {
-                        var thisLevel = kv.Key;
-                        var thisLevelInfo = kv.Value;
+                        var thisLevel = level;
+                        var thisLevelInfo = levelInfo[level];
 
                         //Since links to other levels are bidirectional, ensure we only add each level once
                         foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
@@ -459,6 +474,18 @@ namespace RogueBasin
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
+                    //Check we are solvable
+                    var graphSolver = new GraphSolver(mapInfo.Model);
+                    if (!graphSolver.MapCanBeSolved())
+                    {
+                        LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
+                        throw new ApplicationException("It's all over - map can't be solved.");
+                    }
+                    else
+                    {
+                        LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
+                    }
+
                     break;
                 }
                 //This should be all exceptions, we're just failing fast for now
@@ -504,22 +531,49 @@ namespace RogueBasin
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
-            //BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
 
-            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            try
+            BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+
+            //BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+        }
+
+        private void BuildRandomElevatorQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
+        {
+            var noLevelsToBlock = 1 + Game.Random.Next(3);
+
+            var candidateLevels = gameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel });
+            var chosenLevels = candidateLevels.RandomElements(noLevelsToBlock);
+
+            foreach (var level in chosenLevels)
             {
-                BlockElevatorPaths(mapInfo, levelInfo, roomConnectivityMap, lowerAtriumLevel, 1);
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntryDebug("Elevator Exception: " + ex, LogDebugLevel.High);
+                try
+                {
+                    BlockElevatorPaths(mapInfo, levelInfo, roomConnectivityMap, level, 1, Game.Random.Next(2) > 0);
+                }
+                catch (Exception ex)
+                {
+                    LogFile.Log.LogEntryDebug("Random Elevator Exception (level " + level + "): " + ex, LogDebugLevel.High);
+                }
             }
         }
 
-        private bool BlockElevatorPaths(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap, 
-            int levelForBlocks, int maxDoorsToMake)
+        private void BuildAtriumLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
+        {
+            try
+            {
+                BlockElevatorPaths(mapInfo, levelInfo, roomConnectivityMap, lowerAtriumLevel, 2, false);
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntryDebug("Atrium Elevator Exception: " + ex, LogDebugLevel.High);
+            }
+        }
+
+        private bool BlockElevatorPaths(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap,
+            int levelForBlocks, int maxDoorsToMake, bool clueOnElevatorLevel)
         {
             var connectionsFromThisLevel = levelInfo[levelForBlocks].ConnectionsToOtherLevels;
 
@@ -547,17 +601,18 @@ namespace RogueBasin
                 var colorToUse = GetUnusedColor();
 
                 var doorName = colorToUse.Item2 + " key card";
-                var doorId = Game.Dungeon.DungeonInfo.LevelNaming[levelForBlocks] + Game.Random.Next();
+                var doorId = Game.Dungeon.DungeonInfo.LevelNaming[levelForBlocks] + "-" + doorName + Game.Random.Next();
                 var doorColor = colorToUse.Item1;
 
                 LogFile.Log.LogEntryDebug("Blocking elevators " + pairToTry.ElementAt(0) + " to " + pairToTry.ElementAt(1) + " with " + doorId, LogDebugLevel.High);
 
                 BlockPathBetweenRoomsWithSimpleDoor(mapInfo, levelInfo, roomConnectivityMap,
                     doorId, doorName, doorColor, 1, startDoor, endDoor,
-                    0.5, false, CluePath.NotOnCriticalPath, true,
+                    0.5, clueOnElevatorLevel, CluePath.NotOnCriticalPath, true,
                     true, CluePath.OnCriticalPath, true);
 
                 doorsMade++;
+                pairsLeft = pairsLeft.Except(Enumerable.Repeat(pairToTry, 1));
             }
 
             return true;
@@ -566,11 +621,14 @@ namespace RogueBasin
         private Tuple<Color, string> GetUnusedColor()
         {
             var unusedColor = availableColors.Except(usedColors);
+            var colorToReturn = availableColors.RandomElement();
 
-            if (unusedColor.Count() == 0)
-                return availableColors.RandomElement();
+            if (unusedColor.Count() > 0)
+                colorToReturn = unusedColor.RandomElement();
 
-            return unusedColor.RandomElement();
+            usedColors.Add(colorToReturn);
+
+            return colorToReturn;
         }
         
         private void BuildMedicalLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -581,8 +639,8 @@ namespace RogueBasin
             var manager = mapInfo.Model.DoorAndClueManager;
 
             var doorId = "medical-security";
-            int objectsToPlace = 20;
-            int objectsToDestroy = 2;
+            int objectsToPlace = 10;
+            int objectsToDestroy = 7;
 
             //Place door
             manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
@@ -657,7 +715,7 @@ namespace RogueBasin
             manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, cluesForDoor));
             var door = manager.GetDoorById(doorId);
 
-            var lockedDoor = new Locks.SimpleLockedDoor(door, doorId);
+            var lockedDoor = new Locks.SimpleLockedDoor(door, doorName, colorToUse);
             var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;

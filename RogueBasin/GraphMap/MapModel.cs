@@ -535,6 +535,8 @@ namespace GraphMap
         /// </summary>
         public readonly Dictionary<int, TaggedEdge<int, string>> vertexPredecessors = new Dictionary<int, TaggedEdge<int, string>>();
 
+        public readonly List<int> verticesInDFSOrder = new List<int>();
+
         public MapMST(IEnumerable<TaggedEdge<int, string>> edges)
         {
             this.baseGraph = new UndirectedGraph<int, TaggedEdge<int, string>>();
@@ -554,6 +556,8 @@ namespace GraphMap
 
             dfs.TreeEdge += treeEdge;
 
+            dfs.DiscoverVertex += discoverVertex;
+
             //do the search
             dfs.Compute();
 
@@ -563,6 +567,11 @@ namespace GraphMap
             mst.AddVerticesAndEdgeRange(vertexPredecessors.Values);
         }
 
+        private void discoverVertex(int vertex)
+        {
+            verticesInDFSOrder.Add(vertex);
+        }
+
         private void treeEdge(object sender, UndirectedEdgeEventArgs<int, TaggedEdge<int, string>> e)
         {
             var vertexTarget = e.Target;
@@ -570,6 +579,7 @@ namespace GraphMap
             //Associate vertex with predecessor edge
             vertexPredecessors.Add(vertexTarget, e.Edge);
         }
+
     }
 
     /** Immutable one-method class used to reduce cycles from a map */
@@ -596,6 +606,8 @@ namespace GraphMap
         /// </summary>
         public readonly Dictionary<Connection, Connection> edgeMappingNoCycleToFullMap;
 
+        public MapMST mapMST;
+
         private List<List<Connection>> allCycles = new List<List<Connection>>();
 
         public MapCycleReducer(IEnumerable<TaggedEdge<int, string>> edges)
@@ -604,7 +616,7 @@ namespace GraphMap
             baseGraph.AddVerticesAndEdgeRange(edges);
 
             //Find minimum spanning tree
-            MapMST mapMST = new MapMST(baseGraph.Edges);
+            mapMST = new MapMST(baseGraph.Edges);
             
             //Find all cycles within tree
 

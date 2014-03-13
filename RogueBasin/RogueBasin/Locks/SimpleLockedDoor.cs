@@ -11,11 +11,13 @@ namespace RogueBasin.Locks
     {
         protected GraphMap.Door mapDoor;
         private string idToReport;
+        private Color color;
 
-        public SimpleLockedDoor(GraphMap.Door door, string idToReport)
+        public SimpleLockedDoor(GraphMap.Door door, string idToReport, Color color)
         {
             this.mapDoor = door;
             this.idToReport = idToReport;
+            this.color = color;
         }
 
         public SimpleLockedDoor(GraphMap.Door door)
@@ -77,18 +79,7 @@ namespace RogueBasin.Locks
 
         public override libtcodWrapper.Color RepresentationColor()
         {
-            switch (mapDoor.Id)
-            {
-                case "red":
-                    return ColorPresets.Red;
-                case "green":
-                    return ColorPresets.Green;
-                case "blue":
-                    return ColorPresets.Blue;
-                case "yellow":
-                    return ColorPresets.Yellow;
-            }
-            return ColorPresets.Magenta;
+            return color;
         }
     }
 }
