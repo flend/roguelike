@@ -1486,6 +1486,18 @@ namespace RogueBasin {
             } while (keepLooping);
         }
 
+        const char heartChar = (char)567;
+        const char shieldChar = (char)561;
+        const char ammoChar = (char)568;
+        const char batteryChar = (char)308;
+
+        Color orangeActivatedColor = ColorPresets.DarkOrange;
+        Color batteryActivatedColor = ColorPresets.SlateBlue;
+        Color orangeHighlightedColor = ColorPresets.Gold;
+        Color orangeDisactivatedColor = ColorPresets.SaddleBrown;
+        Color disabledColor = ColorPresets.DimGray;
+        Color weaponColor = ColorPresets.LightSteelBlue;
+        Color heartColor = ColorPresets.Crimson;
 
         private void DrawStats(Player player)
         {
@@ -1505,9 +1517,8 @@ namespace RogueBasin {
             Point viewOffset = new Point(baseOffset, 19);
             Point gameDataOffset = new Point(baseOffset, 24);
 
-            PrintLine("ZONE: " + (LevelToDisplay).ToString("00"), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y, LineAlignment.Left);
-            PrintLine(Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay), statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
-            
+            var zoneName = "[" + (LevelToDisplay).ToString("00") + "] " + Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay);
+            PrintLine(zoneName, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
             
             //Draw HP Status
 
@@ -1521,11 +1532,11 @@ namespace RogueBasin {
             {
                 if (i < hpBarEntries)
                 {
-                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*', ColorPresets.Green);
+                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, heartChar, heartColor);
                 }
                 else
                 {
-                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, '*', ColorPresets.Gray);
+                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, heartChar, disabledColor);
                 }
             }
 
@@ -1544,21 +1555,23 @@ namespace RogueBasin {
 
             Item weapon = Game.Dungeon.Player.GetEquippedWeaponAsItem();
 
-            string weaponStr = "Weapon: ";
+            //string weaponStr = "Weapon: ";
 
-            PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left);
+            //PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left);
 
             if (weapon != null)
             {
                 IEquippableItem weaponE = weapon as IEquippableItem;
-                
-                weaponStr = weapon.SingleItemDescription;
-                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left, weapon.GetColour());
+
+                PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, weapon.Representation, weaponColor);
+
+                string weaponStr = weapon.SingleItemDescription;
+                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x + 2, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left, weaponColor);
 
                 //Ammo
                 if (weaponE.HasFireAction())
                 {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
         
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -1569,52 +1582,61 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, '*', ColorPresets.Blue);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, ammoChar, orangeActivatedColor);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, '*', ColorPresets.Gray);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, ammoChar, orangeDisactivatedColor);
                         }
                     }
                 }
 
                 //Uses
+                int useYOffset = 3;
 
                 string uses = "";
                 if (weaponE.HasMeleeAction())
                 {
-                    uses += "melee ";
+                    PrintLine("Melee", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left); 
                 }
-
-                if (weaponE.HasFireAction())
+                else if (weaponE.HasFireAction() && weaponE.HasThrowAction())
                 {
-                    uses += "(f)ire ";
+                    PrintLine("fire   throw", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), ColorPresets.White);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x + 7, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), ColorPresets.White);
                 }
 
-                if (weaponE.HasThrowAction())
+                else if (weaponE.HasFireAction())
                 {
-                    uses += "(t)hrow ";
+                    PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), ColorPresets.White);
                 }
 
-                if (weaponE.HasOperateAction())
+                else if (weaponE.HasThrowAction())
                 {
-                    uses += "(u)se";
+                    PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), ColorPresets.White);
                 }
 
-                PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
+                //if (weaponE.HasOperateAction())
+                //{
+                //    uses += "(u)se";
+                //}
+
+               // PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
             }
             else
             {
-                weaponStr = "None";
-                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 1, LineAlignment.Left, nothingColor);
+                var weaponStr = "None";
+                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left, weaponColor);
             }
 
             //Draw weapon choices
-            var weaponOptionRow = 2;
+            var weaponOptionRow = 1;
             var weaponIconXOffset = -2;
             foreach (var kv in ItemMapping.WeaponMapping)
             {
-                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + kv.Key * 2, weaponOptionRow), kv.Value, kv.Key.ToString());
+                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 3 - 1, weaponOptionRow), kv.Value, kv.Key);
             }
             
             //Draw energy bar and use keys
@@ -1623,31 +1645,38 @@ namespace RogueBasin {
             double playerEnergyRatio = player.Energy / (double)player.MaxEnergy;
             int energyBarEntries = (int)Math.Ceiling(energyBarLength * playerEnergyRatio);
 
-            PrintLine("EN: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left);
+            PrintLine("EN: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
 
-            DrawEnergyBar(player, utilityOffset, energyBarEntries - 10);
-            DrawEnergyBar(player, utilityOffset + new Point(0, 1), Math.Min(energyBarEntries, 10));
+            DrawEnergyBar(player, utilityOffset + new Point(0, 2), energyBarEntries - 10);
+            DrawEnergyBar(player, utilityOffset + new Point(0, 3), Math.Min(energyBarEntries, 10));
 
             //Enable wetware name
             var equippedWetware = player.GetEquippedWetware();
 
-            var wetwareStr = "None";
-
             if (equippedWetware != null)
             {
-                wetwareStr = (equippedWetware as Item).SingleItemDescription;
+                var equippedWetwareItem = (equippedWetware as Item);
+
+                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, equippedWetwareItem.Representation, weaponColor);
+
+                var wetwareStr = equippedWetwareItem.SingleItemDescription;
+                PrintLine(wetwareStr, statsDisplayTopLeft.x + utilityOffset.x + 2, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, weaponColor);
+            }
+            else
+            {
+                PrintLine("None", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, weaponColor);
             }
 
             //Draw all available wetware
-            var wetwareOptionRow = 3;
+            var wetwareOptionRow = 1;
             int offset = 0;
             foreach (var kv in ItemMapping.WetwareMapping)
             {
-                DrawWetwareChar(utilityOffset + new Point(offset * 2, wetwareOptionRow), kv.Value, kv.Key.ToString());
+                DrawWetwareChar(utilityOffset + new Point(offset * 3, wetwareOptionRow), kv.Value, kv.Key.ToString());
                 offset++;
             }
 
-            PrintLine(wetwareStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
+            //
 
             /*
             //Draw equipped utility
@@ -1754,11 +1783,11 @@ namespace RogueBasin {
                 {
                     if (i < mhpBarEntries)
                     {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*', ColorPresets.Red);
+                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, heartChar, heartColor);
                     }
                     else
                     {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, '*', ColorPresets.Gray);
+                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, heartChar, disabledColor);
                     }
                 }
                 
@@ -1804,6 +1833,7 @@ namespace RogueBasin {
 
             }
 
+            /*
             //Game data
             PrintLine("Droids:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
 
@@ -1821,10 +1851,10 @@ namespace RogueBasin {
             for (int i = 0; i < noAborts; i++)
             {
                 PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X',ColorPresets.Red);
-            }
+            }*/
         }
 
-        private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetWareStr)
+        private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetwareChar)
         {
             var availableWetware = Game.Dungeon.Player.IsWetwareTypeAvailable(wetWareType);
             var equippedWetware = Game.Dungeon.Player.GetEquippedWetware();
@@ -1835,53 +1865,73 @@ namespace RogueBasin {
                 Color colorToUse;
                 if (disabledWetware)
                 {
-                    colorToUse = ColorPresets.DarkGreen;
+                    colorToUse = disabledColor;
                 }
                 else if (equippedWetware != null && equippedWetware.GetType() == wetWareType)
                 {
-                    colorToUse = ColorPresets.LimeGreen;
+                    colorToUse = orangeHighlightedColor;
                 }
                 else
                 {
-                    colorToUse = ColorPresets.Green;
+                    colorToUse = orangeActivatedColor;
                 }
 
-                PrintLine(wetWareStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
+                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForLetter(wetwareChar), ColorPresets.White);
                 //+evil points
                 Item instance = (Item)Activator.CreateInstance(wetWareType);
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, instance.GetColour());
+                PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
             }
         }
 
-        private void DrawWeaponChar(Point utilityOffset, Type weaponType, string weaponStr)
+        private void DrawWeaponChar(Point utilityOffset, Type weaponType, int weaponNo)
         {
-            var availableWetware = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType);
+            var availableWeapon = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType);
             var equippedWeapon = Game.Dungeon.Player.GetEquippedWeapon();
 
-            
-
             Color colorToUse;
-            if (!availableWetware)
+            if (!availableWeapon)
             {
-                colorToUse = ColorPresets.DarkGray;
+                colorToUse = disabledColor;
             }
             else if (equippedWeapon != null && equippedWeapon.GetType() == weaponType)
             {
-                colorToUse = ColorPresets.LimeGreen;
+                colorToUse = orangeHighlightedColor;
             }
             else
             {
-                colorToUse = ColorPresets.Green;
+                colorToUse = orangeActivatedColor;
             }
 
-            PrintLine(weaponStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, colorToUse);
+            PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), ColorPresets.White);
 
             //+evil points
             Item instance = (Item)Activator.CreateInstance(weaponType);
-            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, instance.GetColour());
+            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
         }
 
+        private char GetCharIconForNumber(int no)
+        {
+            return (char)(no + 607);
+        }
 
+        private char GetCharIconForLetter(string letter)
+        {
+            switch (letter)
+            {
+                case "A":
+                    return (char)616;
+                case "T":
+                    return (char)615;
+                case "F":
+                    return (char)614;
+                case "S":
+                    return (char)617;
+                case "D":
+                    return (char)618;
+                default:
+                    return (char)616;
+            }
+        }
 
         private void DrawShieldBar(Player player, Point shieldOffset, int shieldBarFirstBar)
         {
@@ -1889,15 +1939,15 @@ namespace RogueBasin {
             {
                 if (i < shieldBarFirstBar)
                 {
-                    Color shieldColor = player.IsEffectActive(typeof(PlayerEffects.ShieldEnhance)) ? ColorPresets.Cyan : ColorPresets.DarkCyan;
+                    Color shieldColor = player.IsEffectActive(typeof(PlayerEffects.ShieldEnhance)) ? ColorPresets.Yellow : orangeActivatedColor;
 
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', shieldColor);
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
                 }
                 else
                 {
-                    Color shieldColor = player.ShieldIsDisabled ? ColorPresets.Red : ColorPresets.Gray;
+                    Color shieldColor = player.ShieldIsDisabled ? orangeActivatedColor : orangeDisactivatedColor;
 
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', shieldColor);
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
                 }
             }
         }
@@ -1908,11 +1958,11 @@ namespace RogueBasin {
             {
                 if (i < shieldBarFirstBar)
                 {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.Blue);
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, batteryChar, batteryActivatedColor);
                 }
                 else
                 {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, '*', ColorPresets.Gray);
+                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, batteryChar, disabledColor);
                 }
             }
         }
@@ -2435,7 +2485,7 @@ namespace RogueBasin {
                         {
                             //Draw the room id (in empty areas only for SRN==1)
 
-                            List<Color> colors = new List<Color>(new Color[] { ColorPresets.Yellow, ColorPresets.Gold, ColorPresets.RosyBrown, ColorPresets.SaddleBrown, ColorPresets.LightGray, ColorPresets.Gray });
+                            List<Color> colors = new List<Color>(new Color[] { ColorPresets.Yellow, ColorPresets.Gold, ColorPresets.RosyBrown, orangeDisactivatedColor, ColorPresets.LightGray, ColorPresets.Gray });
 
                             int roomId = map.roomIdMap[i, j];
 
