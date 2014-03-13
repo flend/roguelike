@@ -535,18 +535,22 @@ namespace RogueBasin
                 roomsInThisLevel = mapInfo.FilterOutCorridors(roomsInThisLevel);
 
                 double chanceToSkip = 0.5;
-                double avConcentration = 0.05;
-                double stdConcentration = 0.1;
+                double avConcentration = 0.1;
+                double stdConcentration = 0.02;
+
+                double featureAv = 10;
+                double featureStd = 100;
 
                 if (!featuresByLevel.ContainsKey(thisLevel))
                     continue;
 
-                var featuresAndWeights = featuresByLevel[thisLevel].Select(f => new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[f]));
-
                 foreach (var room in roomsInThisLevel)
                 {
                     //if (Gaussian.BoxMuller(0, 1) < chanceToSkip)
-                      //  continue;
+                    //  continue;
+
+                    //Bias rooms towards one or two types
+                    var featuresAndWeights = featuresByLevel[thisLevel].Select(f => new Tuple<int, DecorationFeatureDetails.Decoration>((int)Math.Abs(Gaussian.BoxMuller(featureAv, featureStd)), DecorationFeatureDetails.decorationFeatures[f]));
 
                     var thisRoom = mapInfo.GetRoom(room);
                     var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;
@@ -554,7 +558,7 @@ namespace RogueBasin
                     var numberOfFeatures = (int)Math.Abs(Gaussian.BoxMuller(thisRoomArea * avConcentration, thisRoomArea * stdConcentration));
                     LogFile.Log.LogEntryDebug("bm " + numberOfFeatures, LogDebugLevel.Low);
 
-                    AddStandardDecorativeFeaturesToRoom(thisLevel, thisRoom, numberOfFeatures, featuresAndWeights, true);
+                    AddStandardDecorativeFeaturesToRoomUsingGrid(thisLevel, thisRoom, numberOfFeatures, featuresAndWeights, true);
                 }
             }
         }
@@ -1715,6 +1719,39 @@ namespace RogueBasin
                     Game.Dungeon.AddFeatureBlocking(new Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                }
+
+                if (floorPoints.Count() == 0)
+                    break;
+            }
+        }
+
+        private void AddStandardDecorativeFeaturesToRoomUsingGrid(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
+        {
+            //This is probably rather slow
+            var bridgeRouter = new RoomFilling(positionedRoom.Room);
+
+            var floorPoints = RoomTemplateUtilities.GetGridFromRoom(positionedRoom.Room, 2, 1, 0.5);
+
+            for (int i = 0; i < featuresToPlace; i++)
+            {
+                var randomPoint = floorPoints.RandomElement();
+                floorPoints.Remove(randomPoint);
+
+                var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
+                var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
+
+                if (!featureToPlace.isBlocking)
+                {
+                    Game.Dungeon.AddFeature(new Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
+
+                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                }
+                else if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
+                {
+                    Game.Dungeon.AddFeatureBlocking(new Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
+
+                    LogFile.Log.LogEntryDebug("Placing blocking feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
 
                 if (floorPoints.Count() == 0)

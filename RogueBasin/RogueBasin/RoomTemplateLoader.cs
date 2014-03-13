@@ -218,6 +218,10 @@ namespace RogueBasin
                 for (int j = 1; j < room.Height - 1; j+= spacing)
                 {
                     var doJitter = Game.Random.Next(100) * jitterRatio > 1.0;
+
+                    if (room.terrainMap[i, j] != RoomTemplateTerrain.Floor)
+                        continue;
+
                     Point p = new Point(i, j);
                     if (doJitter)
                     {
