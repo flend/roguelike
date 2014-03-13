@@ -807,6 +807,18 @@
     <EmbeddedResource Include="bin\Debug\vaults\lshape_asymmetric2.room" />
     <EmbeddedResource Include="bin\Debug\vaults\largeconnectingvault1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\largeconnectingvault2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\square_4way2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\reactor1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\square_4way3.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\square_4way_1door.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\arcology_vault_big1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\arcology_vault_small1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\arcology_vault_tiny1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\arcology_special1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\arcology_vault_oval1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\branchroom2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\chamber6x4_2door.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\chamber6x4_1door.room" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

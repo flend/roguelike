@@ -57,6 +57,10 @@ namespace RogueBasin
         //Wall mappings
         Dictionary<MapTerrain, List<MapTerrain>> brickTerrainMapping;
         Dictionary<MapTerrain, List<MapTerrain>> panelTerrainMapping;
+        Dictionary<MapTerrain, List<MapTerrain>> securityTerrainMapping;
+        Dictionary<MapTerrain, List<MapTerrain>> irisTerrainMapping;
+        Dictionary<MapTerrain, List<MapTerrain>> bioTerrainMapping;
+        Dictionary<MapTerrain, List<MapTerrain>> lineTerrainMapping;
 
         private static void BuildLevelNaming()
         {
@@ -85,6 +89,18 @@ namespace RogueBasin
 
             panelTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
                 { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.PanelWall1, MapTerrain.PanelWall1, MapTerrain.PanelWall1, MapTerrain.PanelWall2, MapTerrain.PanelWall3, MapTerrain.PanelWall4, MapTerrain.PanelWall5 } }};
+
+            bioTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
+                { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.BioWall1, MapTerrain.BioWall1, MapTerrain.BioWall1, MapTerrain.BioWall2, MapTerrain.BioWall3, MapTerrain.BioWall4, MapTerrain.BioWall5 } }};
+
+            securityTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
+                { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.SecurityWall1, MapTerrain.SecurityWall1, MapTerrain.SecurityWall1, MapTerrain.SecurityWall2, MapTerrain.SecurityWall3, MapTerrain.SecurityWall4, MapTerrain.SecurityWall5 } }};
+
+            lineTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
+                { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.LineWall1, MapTerrain.LineWall1, MapTerrain.LineWall1, MapTerrain.LineWall2, MapTerrain.LineWall3, MapTerrain.LineWall4, MapTerrain.LineWall5 } }};
+
+            irisTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
+                { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.IrisWall1, MapTerrain.IrisWall1, MapTerrain.IrisWall1, MapTerrain.IrisWall2, MapTerrain.IrisWall3, MapTerrain.IrisWall4, MapTerrain.IrisWall5 } }};
 
         }
 
@@ -298,6 +314,8 @@ namespace RogueBasin
             //Replaceable vault at target
             public List<Connection> ReplaceableVaultConnections { get; set; }
             public List<Connection> ReplaceableVaultConnectionsUsed { get; set; }
+
+            public Dictionary<MapTerrain, List<MapTerrain>> TerrainMapping { get; set; }
         }
 
         /** Build a map using templated rooms */
@@ -325,12 +343,21 @@ namespace RogueBasin
                     var medicalInfo = GenerateMedicalLevel(medicalLevel);
                     levelInfo[medicalLevel] = medicalInfo;
 
+                    var scienceInfo = GenerateScienceLevel(scienceLevel, scienceLevel * 100);
+                    levelInfo[scienceLevel] = scienceInfo;
+
                     var storageInfo = GenerateStorageLevel(storageLevel, storageLevel * 100);
                     levelInfo[storageLevel] = storageInfo;
 
+                    var reactorInfo = GenerateReactorLevel(reactorLevel, reactorLevel * 100);
+                    levelInfo[reactorLevel] = reactorInfo;
+
+                    var archologyInfo = GenerateArcologyLevel(arcologyLevel, arcologyLevel * 100);
+                    levelInfo[arcologyLevel] = archologyInfo;
+
                     //Make other levels generically
 
-                    var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel });
+                    var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, arcologyLevel, scienceLevel });
 
                     foreach (var level in standardGameLevels)
                     {
@@ -389,7 +416,11 @@ namespace RogueBasin
 
                         Map masterMap = thisLevelInfo.LevelBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-                        Map randomizedMapL1 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMap, brickTerrainMapping);
+                        Dictionary<MapTerrain, List<MapTerrain>> terrainSubstitution = brickTerrainMapping;
+                        if (thisLevelInfo.TerrainMapping != null)
+                            terrainSubstitution = thisLevelInfo.TerrainMapping;
+
+                        Map randomizedMapL1 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMap, terrainSubstitution);
                         Game.Dungeon.AddMap(randomizedMapL1);
                     }
 
@@ -859,20 +890,20 @@ namespace RogueBasin
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
 
-            var cargoMapBuilder = new TemplatedMapBuilder(100, 100);
-            medicalInfo.LevelBuilder = cargoMapBuilder;
-            var cargoTemplateGenerator = new TemplatedMapGenerator(cargoMapBuilder);
-            medicalInfo.LevelGenerator = cargoTemplateGenerator;
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            medicalInfo.LevelBuilder = mapBuilder;
+            var templateGenerator = new TemplatedMapGenerator(mapBuilder);
+            medicalInfo.LevelGenerator = templateGenerator;
 
-            PlaceOriginRoom(cargoTemplateGenerator, medicalBay);
+            PlaceOriginRoom(templateGenerator, medicalBay);
 
             int numberOfRandomRooms = 10;
 
-            BuildTXShapedRooms(cargoTemplateGenerator, numberOfRandomRooms);
+            BuildTXShapedRooms(templateGenerator, numberOfRandomRooms);
 
             //Add connections to other levels
 
-            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, cargoTemplateGenerator);
+            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
             foreach (var connection in connections)
             {
                 medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
@@ -882,15 +913,91 @@ namespace RogueBasin
             int maxPlaceHolders = 2;
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(cargoTemplateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
 
             //Add extra corridors
-            AddCorridorsBetweenOpenDoors(cargoTemplateGenerator, 5, new List<RoomTemplate> { corridor1 });
+            AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
 
             //Tidy terrain
-            cargoTemplateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            //Wall type
+            medicalInfo.TerrainMapping = irisTerrainMapping;
 
             return medicalInfo;
+        }
+
+        private LevelInfo GenerateScienceLevel(int levelNo, int startVertexIndex)
+        {
+            var levelInfo = new LevelInfo(levelNo);
+
+            //Load standard room types
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            levelInfo.LevelBuilder = mapBuilder;
+            var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
+            levelInfo.LevelGenerator = templateGenerator;
+
+            //Load sample templates
+            RoomTemplate branchRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.branchroom.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate branchRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.branchroom2.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate chamber1Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_1door.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate chamber2Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_2door.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate chamber1Doors2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber6x4_1door.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate chamber2Doors2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber6x4_2door.room", StandardTemplateMapping.terrainMapping);
+
+            //Build a network of branched corridors
+
+            //Place branch rooms to form the initial structure, joined on long axis
+            PlaceOriginRoom(templateGenerator, branchRoom);
+
+            PlaceRandomConnectedRooms(templateGenerator, 3, branchRoom, corridor1, 0, 0, () => Game.Random.Next(1) > 0 ? 3 : 4);
+            PlaceRandomConnectedRooms(templateGenerator, 3, branchRoom2, corridor1, 0, 0, () => Game.Random.Next(1) > 0 ? 2 : 3);
+
+            //Add some 2-door rooms
+            var twoDoorDistribution = new List<Tuple<int, RoomTemplate>> {
+                new Tuple<int, RoomTemplate>(2, chamber1Doors),
+                new Tuple<int, RoomTemplate>(2, chamber1Doors2)
+            };
+
+            PlaceRandomConnectedRooms(templateGenerator, 10, twoDoorDistribution, corridor1, 0, 0);
+
+            //Add some 1-door deadends
+
+            var oneDoorDistribution = new List<Tuple<int, RoomTemplate>> {
+                new Tuple<int, RoomTemplate>(2, chamber2Doors),
+                new Tuple<int, RoomTemplate>(2, chamber2Doors2)
+            };
+            PlaceRandomConnectedRooms(templateGenerator, 10, oneDoorDistribution, corridor1, 0, 0);
+            
+            //Add connections to other levels
+
+            var connections = AddConnectionsToOtherLevels(levelNo, levelInfo, corridor1, replacementVault, templateGenerator);
+            foreach (var connection in connections)
+            {
+                levelInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
+            }
+
+            //Add a small number of place holder holder rooms for vaults
+            int maxPlaceHolders = 2;
+
+            levelInfo.ReplaceableVaultConnections.AddRange(
+                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+
+            //Add extra corridors
+            //AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
+
+            //Tidy terrain
+            //templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            //Wall type
+            levelInfo.TerrainMapping = lineTerrainMapping;
+
+            return levelInfo;
         }
 
         private LevelInfo GenerateStorageLevel(int levelNo, int startVertexIndex)
@@ -899,24 +1006,166 @@ namespace RogueBasin
 
             //Load standard room types
 
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
-
-            RoomTemplate largeRoom1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largeconnectingvault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate largeRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largeconnectingvault2.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
 
-            var cargoMapBuilder = new TemplatedMapBuilder(100, 100);
-            medicalInfo.LevelBuilder = cargoMapBuilder;
-            var cargoTemplateGenerator = new TemplatedMapGenerator(cargoMapBuilder, startVertexIndex);
-            medicalInfo.LevelGenerator = cargoTemplateGenerator;
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            medicalInfo.LevelBuilder = mapBuilder;
+            var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
+            medicalInfo.LevelGenerator = templateGenerator;
 
-            PlaceOriginRoom(cargoTemplateGenerator, originRoom);
+            PlaceOriginRoom(templateGenerator, originRoom);
 
             int numberOfRandomRooms = 12;
 
+            GenerateLargeRooms(templateGenerator, numberOfRandomRooms);
+
+            //Add connections to other levels
+
+            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
+            foreach (var connection in connections)
+            {
+                medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
+            }
+
+            //Add a small number of place holder holder rooms for vaults
+            int maxPlaceHolders = 2;
+
+            medicalInfo.ReplaceableVaultConnections.AddRange(
+                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+
+            //Add extra corridors
+            AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
+
+            //Tidy terrain
+            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            return medicalInfo;
+        }
+
+        private LevelInfo GenerateReactorLevel(int levelNo, int startVertexIndex)
+        {
+            var medicalInfo = new LevelInfo(levelNo);
+
+            //Load standard room types
+
+            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.reactor1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate deadEnd = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way_1door.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            medicalInfo.LevelBuilder = mapBuilder;
+            var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
+            medicalInfo.LevelGenerator = templateGenerator;
+
+            PlaceOriginRoom(templateGenerator, originRoom);
+
+            int numberOfRandomRooms = 20;
+
+            GenerateClosePackedSquareRooms(templateGenerator, numberOfRandomRooms);
+
+            //Add connections to other levels
+
+            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
+            foreach (var connection in connections)
+            {
+                medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
+            }
+
+            //Add a small number of place holder holder rooms for vaults
+            int maxPlaceHolders = 2;
+
+            medicalInfo.ReplaceableVaultConnections.AddRange(
+                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+
+            //If we have any more doors, add a couple of dead ends
+            PlaceRandomConnectedRooms(templateGenerator, 3, deadEnd, corridor1, 0, 0);
+
+            //Add extra corridors
+            AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
+
+            //Tidy terrain
+            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            //Wall type
+            medicalInfo.TerrainMapping = securityTerrainMapping;
+
+            return medicalInfo;
+        }
+
+        private LevelInfo GenerateArcologyLevel(int levelNo, int startVertexIndex)
+        {
+            var medicalInfo = new LevelInfo(levelNo);
+
+            //Load standard room types
+
+            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_special1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate arcologyBig = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_big1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate arcologySmall = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_small1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate arcologyTiny = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_tiny1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate arcologyOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            medicalInfo.LevelBuilder = mapBuilder;
+            var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
+            medicalInfo.LevelGenerator = templateGenerator;
+
+            PlaceOriginRoom(templateGenerator, originRoom);
+
+            int numberOfRandomRooms = 12;
+
+            var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
+                new Tuple<int, RoomTemplate>(100, arcologyBig),
+                new Tuple<int, RoomTemplate>(100, arcologySmall),
+                new Tuple<int, RoomTemplate>(50, arcologyOval)};
+
+            PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 4, 6);
+
+            //Add connections to other levels
+
+            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
+            foreach (var connection in connections)
+            {
+                medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
+            }
+
+            //Add a small number of place holder holder rooms for vaults
+            int maxPlaceHolders = 2;
+
+            medicalInfo.ReplaceableVaultConnections.AddRange(
+                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+
+            //If we have any more doors, add a couple of dead ends
+            PlaceRandomConnectedRooms(templateGenerator, 3, arcologyTiny, corridor1, 0, 0);
+
+            //Add extra corridors
+            AddCorridorsBetweenOpenDoors(templateGenerator, 1, new List<RoomTemplate> { corridor1 });
+
+            //Tidy terrain
+            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            //Wall type
+            medicalInfo.TerrainMapping = bioTerrainMapping;
+
+            return medicalInfo;
+        }
+
+        private void GenerateLargeRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
+        {
+            RoomTemplate largeRoom1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largeconnectingvault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate largeRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largeconnectingvault2.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>>();
 
             for (int i = 0; i < 10; i++)
@@ -927,32 +1176,31 @@ namespace RogueBasin
             allRoomsToPlace.Add(new Tuple<int, RoomTemplate>(4, largeRoom1));
             allRoomsToPlace.Add(new Tuple<int, RoomTemplate>(4, largeRoom2));
 
-            PlaceRandomConnectedRooms(cargoTemplateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 0, 0);
-
-            //Add connections to other levels
-
-            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, cargoTemplateGenerator);
-            foreach (var connection in connections)
-            {
-                medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
-            }
-
-            //Add a small number of place holder holder rooms for vaults
-            int maxPlaceHolders = 2;
-
-            medicalInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(cargoTemplateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
-
-            //Add extra corridors
-            AddCorridorsBetweenOpenDoors(cargoTemplateGenerator, 5, new List<RoomTemplate> { corridor1 });
-
-            //Tidy terrain
-            //cargoTemplateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
-
-            return medicalInfo;
+            PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 0, 0);
         }
 
-        private void BuildTXShapedRooms(TemplatedMapGenerator cargoTemplateGenerator, int numberOfRandomRooms)
+        private void GenerateClosePackedSquareRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
+        {
+            RoomTemplate largeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate smallRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way2.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate tinyRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            var allRoomsToPlace = new List<Tuple<int, RoomTemplate>>();
+
+            //allRoomsToPlace.Add(new Tuple<int, RoomTemplate>(4, largeRoom1));
+            //allRoomsToPlace.Add(new Tuple<int, RoomTemplate>(4, largeRoom2));
+
+            int numberOfLargeRooms = (int)Math.Ceiling(numberOfRandomRooms / 2.0);
+            int numberOfMediumRooms = (int)Math.Ceiling(numberOfRandomRooms / 6.0);
+            int numberOfSmallRooms = numberOfRandomRooms - numberOfLargeRooms - numberOfMediumRooms;
+
+            PlaceRandomConnectedRooms(templateGenerator, numberOfLargeRooms, largeRoom, corridor1, 0, 0);
+            PlaceRandomConnectedRooms(templateGenerator, numberOfMediumRooms, smallRoom, corridor1, 0, 0);
+            PlaceRandomConnectedRooms(templateGenerator, numberOfSmallRooms, tinyRoom, corridor1, 0, 0);
+        }
+
+        private void BuildTXShapedRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
             RoomTemplate lshapeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape2.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate lshapeAsymmetric = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape_asymmetric2.room", StandardTemplateMapping.terrainMapping);
@@ -966,7 +1214,7 @@ namespace RogueBasin
                 new Tuple<int, RoomTemplate>(100, tshape),
                 new Tuple<int, RoomTemplate>(100, xshape) };
 
-            PlaceRandomConnectedRooms(cargoTemplateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 4, 6);
+            PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 4, 6);
         }
 
         private LevelInfo GenerateStandardLevel(int levelNo, int startVertexIndex)
@@ -981,17 +1229,17 @@ namespace RogueBasin
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
 
-            var cargoMapBuilder = new TemplatedMapBuilder(100, 100);
-            medicalInfo.LevelBuilder = cargoMapBuilder;
-            var cargoTemplateGenerator = new TemplatedMapGenerator(cargoMapBuilder, startVertexIndex);
-            medicalInfo.LevelGenerator = cargoTemplateGenerator;
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            medicalInfo.LevelBuilder = mapBuilder;
+            var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
+            medicalInfo.LevelGenerator = templateGenerator;
 
-            PlaceOriginRoom(cargoTemplateGenerator, room1);
-            PlaceRandomConnectedRooms(cargoTemplateGenerator, 4, room1, corridor1, 5, 10);
+            PlaceOriginRoom(templateGenerator, room1);
+            PlaceRandomConnectedRooms(templateGenerator, 4, room1, corridor1, 5, 10);
 
             //Add connections to other levels
 
-            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, cargoTemplateGenerator);
+            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
             foreach (var connection in connections)
             {
                 medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
@@ -1001,35 +1249,35 @@ namespace RogueBasin
             int maxPlaceHolders = 2;
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(cargoTemplateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
 
             //Tidy terrain
-            cargoTemplateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             return medicalInfo;
         }
 
-        private List<Tuple<int, Connection>> AddConnectionsToOtherLevels(int levelNo, LevelInfo medicalInfo, RoomTemplate corridor1, RoomTemplate elevatorVault, TemplatedMapGenerator cargoTemplateGenerator)
+        private List<Tuple<int, Connection>> AddConnectionsToOtherLevels(int levelNo, LevelInfo medicalInfo, RoomTemplate corridor1, RoomTemplate elevatorVault, TemplatedMapGenerator templateGenerator)
         {
             var otherLevelConnections = LevelLinks.GetAllConnections().Where(c => c.IncludesVertex(levelNo)).Select(c => c.Source == levelNo ? c.Target : c.Source);
             var connectionsToReturn = new List<Tuple<int, Connection>>();
 
             foreach (var otherLevel in otherLevelConnections)
             {
-                var connectingRoom = AddRoomToRandomOpenDoor(cargoTemplateGenerator, elevatorVault, corridor1, 3);
+                var connectingRoom = AddRoomToRandomOpenDoor(templateGenerator, elevatorVault, corridor1, 3);
                 connectionsToReturn.Add(new Tuple<int, Connection>(otherLevel, connectingRoom));
             }
 
             return connectionsToReturn;
         }
 
-        private List<Connection> AddReplaceableVaults(TemplatedMapGenerator cargoTemplateGenerator, RoomTemplate corridor1, RoomTemplate placeHolderVault, int maxPlaceHolders)
+        private List<Connection> AddReplaceableVaults(TemplatedMapGenerator templateGenerator, RoomTemplate corridor1, RoomTemplate placeHolderVault, int maxPlaceHolders)
         {
             var vaultsToReturn = new List<Connection>();
             int cargoTotalPlaceHolders = 0;
             do
             {
-                var placeHolderRoom = AddRoomToRandomOpenDoor(cargoTemplateGenerator, placeHolderVault, corridor1, 3);
+                var placeHolderRoom = AddRoomToRandomOpenDoor(templateGenerator, placeHolderVault, corridor1, 3);
                 if (placeHolderRoom != null)
                 {
                     vaultsToReturn.Add(placeHolderRoom);

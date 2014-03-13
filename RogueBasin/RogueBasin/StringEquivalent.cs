@@ -144,9 +144,10 @@ namespace RogueBasin
 
             var brickWallColor = ColorPresets.Gray;
             var panelWallColor = ColorPresets.Purple;
-            var irisWallColor = ColorPresets.Gray;
-            var lineWallColor = ColorPresets.Goldenrod;
+            var irisWallColor = ColorPresets.PowderBlue;
+            var lineWallColor = ColorPresets.Teal;
             var securityWallColor = ColorPresets.DeepSkyBlue;
+            var bioWallColor = ColorPresets.LightCoral;
 
             TerrainColors.Add(MapTerrain.BrickWall1, brickWallColor);
             TerrainColors.Add(MapTerrain.BrickWall2, brickWallColor);
@@ -173,6 +174,11 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.SecurityWall3, securityWallColor);
             TerrainColors.Add(MapTerrain.SecurityWall4, securityWallColor);
             TerrainColors.Add(MapTerrain.SecurityWall5, securityWallColor);
+            TerrainColors.Add(MapTerrain.BioWall1, bioWallColor);
+            TerrainColors.Add(MapTerrain.BioWall2, bioWallColor);
+            TerrainColors.Add(MapTerrain.BioWall3, bioWallColor);
+            TerrainColors.Add(MapTerrain.BioWall4, bioWallColor);
+            TerrainColors.Add(MapTerrain.BioWall5, bioWallColor);
         }
 
         private static void SetupEquipmentSlots()
