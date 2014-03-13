@@ -32,6 +32,7 @@ namespace RogueBasin
         LogGenerator logGen = new LogGenerator();
 
         static List<Tuple<Color, string>> availableColors;
+        static Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>> featuresByLevel;
         List<Tuple<Color, string>> usedColors = new List<Tuple<Color, string>>();
 
         public TraumaWorldGenerator()
@@ -63,6 +64,29 @@ namespace RogueBasin
             
             BuildLevelNaming();
             SetupColors();
+            SetupFeatures();
+        }
+
+        private static void SetupFeatures()
+        {
+            featuresByLevel = new Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>>();
+
+            featuresByLevel[medicalLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            {
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+                DecorationFeatureDetails.DecorationFeatures.Instrument3,
+                DecorationFeatureDetails.DecorationFeatures.Egg1,
+                DecorationFeatureDetails.DecorationFeatures.CoffeePC,
+                DecorationFeatureDetails.DecorationFeatures.DesktopPC,
+                DecorationFeatureDetails.DecorationFeatures.Chair1,
+                DecorationFeatureDetails.DecorationFeatures.Stool,
+                DecorationFeatureDetails.DecorationFeatures.Bin
+            };
         }
 
         public const int medicalLevel = 0;
@@ -471,6 +495,7 @@ namespace RogueBasin
                     AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
+                    AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
@@ -500,6 +525,39 @@ namespace RogueBasin
             return mapInfo;
         }
 
+        private void AddDecorationFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        {
+            foreach (var kv in levelInfo)
+            {
+                var thisLevel = kv.Key;
+
+                var roomsInThisLevel = mapInfo.GetRoomIndicesForLevel(thisLevel);
+                roomsInThisLevel = mapInfo.FilterOutCorridors(roomsInThisLevel);
+
+                double chanceToSkip = 0.5;
+                double avConcentration = 0.05;
+                double stdConcentration = 0.1;
+
+                if (!featuresByLevel.ContainsKey(thisLevel))
+                    continue;
+
+                var featuresAndWeights = featuresByLevel[thisLevel].Select(f => new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[f]));
+
+                foreach (var room in roomsInThisLevel)
+                {
+                    //if (Gaussian.BoxMuller(0, 1) < chanceToSkip)
+                      //  continue;
+
+                    var thisRoom = mapInfo.GetRoom(room);
+                    var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;
+
+                    var numberOfFeatures = (int)Math.Abs(Gaussian.BoxMuller(thisRoomArea * avConcentration, thisRoomArea * stdConcentration));
+                    LogFile.Log.LogEntryDebug("bm " + numberOfFeatures, LogDebugLevel.Low);
+
+                    AddStandardDecorativeFeaturesToRoom(thisLevel, thisRoom, numberOfFeatures, featuresAndWeights, true);
+                }
+            }
+        }
 
         /*private IEnumerable<Connection> GetCriticalRouteBetweenElevators(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startLevel, int endLevel)
         {
@@ -1633,21 +1691,28 @@ namespace RogueBasin
             }
         }
 
-        private static void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, int featuresToPlace, DecorationFeatureDetails.Decoration decorationDetails)
+        private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
         {
+            //This is probably rather slow
             var bridgeRouter = new RoomFilling(positionedRoom.Room);
 
-            var floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
+            var floorPoints = new List<Point>();
+            if(useBoundary)
+                floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
+            else
+                floorPoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(positionedRoom.Room);
 
             for (int i = 0; i < featuresToPlace; i++)
             {
                 var randomPoint = floorPoints.RandomElement();
                 floorPoints.Remove(randomPoint);
 
+                var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
+
                 if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
                     var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
-                    Game.Dungeon.AddFeatureBlocking(new Features.StandardDecorativeFeature(decorationDetails.representation, decorationDetails.colour), level, featureLocationInMapCoords, true);
+                    Game.Dungeon.AddFeatureBlocking(new Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
@@ -1817,6 +1882,26 @@ namespace RogueBasin
             return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, new List<Tuple<int,RoomTemplate>> { new Tuple<int, RoomTemplate>(1, roomToPlace) }, corridorToPlace, minCorridorLength, maxCorridorLength, doorPicker);
         }
 
+        private T ChooseItemFromWeights<T>(IEnumerable<Tuple<int, T>> itemsWithWeights)
+        {
+            var totalWeight = itemsWithWeights.Select(t => t.Item1).Sum();
+            var randomNumber = Game.Random.Next(totalWeight);
+
+            int weightSoFar = 0;
+            T roomToPlace = itemsWithWeights.First().Item2;
+            foreach (var t in itemsWithWeights)
+            {
+                weightSoFar += t.Item1;
+                if (weightSoFar > randomNumber)
+                {
+                    roomToPlace = t.Item2;
+                    break;
+                }
+            }
+
+            return roomToPlace;
+        }
+
         /// <summary>
         /// Failure mode is placing fewer rooms than requested
         /// </summary>
@@ -1834,20 +1919,7 @@ namespace RogueBasin
                 //Find a random potential door and try to grow a random room off this
                 
                 //Find room using weights
-                var totalWeight = roomsToPlaceWithWeights.Select(t => t.Item1).Sum();
-                var randomNumber = Game.Random.Next(totalWeight);
-
-                int weightSoFar = 0;
-                RoomTemplate roomToPlace = roomsToPlaceWithWeights.First().Item2;
-                foreach (var t in roomsToPlaceWithWeights)
-                {
-                    weightSoFar += t.Item1;
-                    if (weightSoFar > randomNumber)
-                    {
-                        roomToPlace = t.Item2;
-                        break;
-                    }
-                }
+                var roomToPlace = ChooseItemFromWeights<RoomTemplate>(roomsToPlaceWithWeights);
 
                 //Use a random door, or the function passed in
                 int randomNewDoorIndex;

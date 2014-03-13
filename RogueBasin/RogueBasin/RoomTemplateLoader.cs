@@ -209,6 +209,32 @@ namespace RogueBasin
             return candidatePoints;
         }
 
+        public static List<Point> GetGridFromRoom(RoomTemplate room, int spacing, int jitterSize, double jitterRatio) 
+        {
+            List<Point> candidatePoints = new List<Point>(); ;
+
+            for (int i = 1; i < room.Width - 1; i+= spacing)
+            {
+                for (int j = 1; j < room.Height - 1; j+= spacing)
+                {
+                    var doJitter = Game.Random.Next(100) * jitterRatio > 1.0;
+                    Point p = new Point(i, j);
+                    if (doJitter)
+                    {
+                        Point jp = p + new Point(Game.Random.Next(jitterSize + 1), Game.Random.Next(jitterSize + 1));
+                        if (jp.x > 1 && jp.y > 1 && jp.x < room.Width - 2 && jp.y < room.Height - 2)
+                        {
+                            p = jp;
+                        }
+                    }
+
+                    candidatePoints.Add(p);
+                }
+            }
+
+            return candidatePoints;
+        }
+
         public static List<Point> GetBoundaryFloorPointsInRoom(RoomTemplate room)
         {
             var candidatePoints = new List<Point>();

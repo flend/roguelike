@@ -92,7 +92,7 @@ namespace RogueBasin
                 if (CountsAsWalkable(thisMap.getCell(thisNode.x, thisNode.y)))
                 {
                     foundPathablePoints.Add(thisNode);
-                    var neighbours = Get8WayNeighbours(thisNode);
+                    var neighbours = Get4WayNeighbours(thisNode);
                     foreach (var p in neighbours)
                         workNodes.Push(p);
                 }
@@ -116,6 +116,18 @@ namespace RogueBasin
             toRet.AddRange(ReturnNeighbourIfValid(origin + new Point(1, -1)));
             toRet.AddRange(ReturnNeighbourIfValid(origin + new Point(1, 0)));
             toRet.AddRange(ReturnNeighbourIfValid(origin + new Point(1, 1)));
+
+            return toRet;
+        }
+
+        private List<Point> Get4WayNeighbours(Point origin)
+        {
+            var toRet = new List<Point>();
+
+            toRet.AddRange(ReturnNeighbourIfValid(origin + new Point(-1, 0)));
+            toRet.AddRange(ReturnNeighbourIfValid(origin + new Point(0, -1)));
+            toRet.AddRange(ReturnNeighbourIfValid(origin + new Point(0, 1)));
+            toRet.AddRange(ReturnNeighbourIfValid(origin + new Point(1, 0)));
 
             return toRet;
         }
