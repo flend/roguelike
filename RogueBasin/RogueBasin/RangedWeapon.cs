@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using libtcodWrapper;
+
+namespace RogueBasin
+{
+    public abstract class RangedWeapon : Item
+    {
+
+        /// <summary>
+        /// Public for serialization
+        /// </summary>
+        public int Ammo { get; set; }
+
+        public RangedWeapon()
+        {
+            Ammo = MaxAmmo();
+        }
+
+        /// <summary>
+        /// not used in this game
+        /// </summary>
+        public override int GetWeight()
+        {
+            return 50;
+        }
+
+        public override int ItemCost()
+        {
+            return 10;
+        }
+
+        public abstract int MaxAmmo();
+
+        public int RemainingAmmo() {
+            return Ammo;
+
+        }
+    }
+}

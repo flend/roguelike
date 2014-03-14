@@ -2299,18 +2299,30 @@ namespace RogueBasin {
 
                             if (isViewVisible(headingLoc))
                             {
-                                int terrainChar = tileMapLayer(TileLevel.Terrain)[ViewRelative(headingLoc)].TileID;
+                                int featureChar = tileMapLayer(TileLevel.Features)[ViewRelative(headingLoc)].TileID;
 
-                                if (terrainChar != -1)
+                                if (featureChar != -1)
                                 {
-                                    char charToOverwrite = (char)terrainChar;
-                                    //Dot is too hard to see
-                                    if (charToOverwrite == StringEquivalent.TerrainChars[MapTerrain.Empty])
-                                        charToOverwrite = (char)7;
-
+                                    char charToOverwrite = (char)featureChar;
 
                                     tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)] = new TileEngine.TileCell(charToOverwrite);
                                     tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
+                                }
+                                else
+                                {
+                                    int terrainChar = tileMapLayer(TileLevel.Terrain)[ViewRelative(headingLoc)].TileID;
+
+                                    if (terrainChar != -1)
+                                    {
+                                        char charToOverwrite = (char)terrainChar;
+                                        //Dot is too hard to see
+                                        if (charToOverwrite == StringEquivalent.TerrainChars[MapTerrain.Empty])
+                                            charToOverwrite = (char)7;
+
+
+                                        tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)] = new TileEngine.TileCell(charToOverwrite);
+                                        tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
+                                    }
                                 }
                             }
                         }

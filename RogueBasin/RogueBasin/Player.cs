@@ -2358,5 +2358,17 @@ namespace RogueBasin
             if (Shield > MaxShield)
                 Shield = MaxShield;
         }
+
+        internal void FullAmmo()
+        {
+            foreach (var i in Inventory.Items)
+            {
+                var item = i as RangedWeapon;
+
+                if (item != null)
+                    item.Ammo = item.MaxAmmo();
+
+            }
+        }
     }
 }

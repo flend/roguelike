@@ -5,13 +5,10 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Shotgun : Item, IEquippableItem
+    public class Shotgun : RangedWeapon, IEquippableItem
     {
-        public int Ammo { get; set; }
-
         public Shotgun()
         {
-            Ammo = MaxAmmo();
         }
 
         /// <summary>
@@ -70,10 +67,7 @@ namespace RogueBasin.Items
 
             return true;
         }
- 
-        /// <summary>
-        /// Equipment slots where we can be equipped
-        /// </summary>
+
         public List<EquipmentSlot> EquipmentSlots
         {
             get
@@ -115,6 +109,15 @@ namespace RogueBasin.Items
             return true;
         }
 
+        public bool HasMeleeAction()
+        {
+            return false;
+        }
+
+        public bool HasFireAction()
+        {
+            return true;
+        }
 
         /// <summary>
         /// Throws the item
@@ -190,44 +193,9 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public bool HasMeleeAction()
-        {
-            return false;
-        }
-
-
-        public bool HasFireAction()
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Can be thrown
-        /// </summary>
-        /// <returns></returns>
-        public bool HasThrowAction()
-        {
-
-            return true;
-        }
-
-        /// <summary>
-        /// Can be operated
-        /// </summary>
-        /// <returns></returns>
-        public bool HasOperateAction()
-        {
-            return false;
-        }
-
-        public int MaxAmmo()
+        public override int MaxAmmo()
         {
             return 2;
-        }
-
-        public int RemainingAmmo()
-        {
-            return Ammo;
         }
 
         /// <summary>
@@ -322,7 +290,22 @@ namespace RogueBasin.Items
         {
             return 25;
         }
+        /// Can be thrown
+        /// </summary>
+        /// <returns></returns>
+        public bool HasThrowAction()
+        {
+            return false;
+        }
 
+        /// <summary>
+        /// Can be operated
+        /// </summary>
+        /// <returns></returns>
+        public bool HasOperateAction()
+        {
+            return false;
+        }
         /// <summary>
         /// Destroyed on use
         /// </summary>

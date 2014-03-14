@@ -234,6 +234,7 @@
     <Compile Include="Items\Log.cs" />
     <Compile Include="Items\NanoRepair.cs" />
     <Compile Include="Items\Fists.cs" />
+    <Compile Include="RangedWeapon.cs" />
     <Compile Include="Items\Pistol.cs" />
     <Compile Include="Items\ShieldPack.cs" />
     <Compile Include="Items\Potion.cs">

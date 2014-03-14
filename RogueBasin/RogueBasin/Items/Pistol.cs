@@ -5,32 +5,14 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Pistol : Item, IEquippableItem
+    public class Pistol : RangedWeapon, IEquippableItem
     {
-
-        /// <summary>
-        /// Public for serialization
-        /// </summary>
-        public int Ammo { get; set; }
 
         public Pistol()
         {
-            Ammo = MaxAmmo();
         }
 
-        /// <summary>
-        /// Equipment slots where we can be equipped
-        /// </summary>
-        public List<EquipmentSlot> EquipmentSlots
-        {
-            get
-            {
-                List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
 
-                return retList;
-            }
-        }
 
         public bool Equip(Creature user)
         {
@@ -62,6 +44,17 @@ namespace RogueBasin.Items
             return true;
         }
 
+        public List<EquipmentSlot> EquipmentSlots
+        {
+            get
+            {
+                List<EquipmentSlot> retList = new List<EquipmentSlot>();
+                retList.Add(EquipmentSlot.Weapon);
+
+                return retList;
+            }
+        }
+
         /// <summary>
         /// not used in this game
         /// </summary>
@@ -78,6 +71,23 @@ namespace RogueBasin.Items
         public override int GetWeight()
         {
             return 50;
+        }
+
+        /// Can be thrown
+        /// </summary>
+        /// <returns></returns>
+        public bool HasThrowAction()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Can be operated
+        /// </summary>
+        /// <returns></returns>
+        public bool HasOperateAction()
+        {
+            return false;
         }
 
         public override string SingleItemDescription
@@ -124,49 +134,24 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public bool HasMeleeAction()
-        {
-            return false;
-        }
-
         public override int ItemCost()
         {
             return 10;
         }
 
-
-        public bool HasFireAction()
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Can be thrown
-        /// </summary>
-        /// <returns></returns>
-        public bool HasThrowAction()
-        {
-
-            return true;
-        }
-
-        /// <summary>
-        /// Can be operated
-        /// </summary>
-        /// <returns></returns>
-        public bool HasOperateAction()
-        {
-            return false;
-        }
-
-        public int MaxAmmo()
+        public override int MaxAmmo()
         {
             return 3;
         }
 
-        public int RemainingAmmo()
+        public bool HasMeleeAction()
         {
-            return Ammo;
+            return false;
+        }
+
+        public bool HasFireAction()
+        {
+            return true;
         }
 
         List<Point> targetSquares = null;

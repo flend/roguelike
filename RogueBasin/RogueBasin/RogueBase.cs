@@ -649,6 +649,7 @@ namespace RogueBasin
                                 case 'v':
                                     //Add a healing event on the player
                                     Game.Dungeon.Player.HealCompletely();
+                                    Game.Dungeon.Player.FullAmmo();
                                     Screen.Instance.Update();
                                     break;
                                
