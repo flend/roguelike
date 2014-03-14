@@ -2350,6 +2350,108 @@ namespace RogueBasin
                 Screen.Instance.Update();
             }
         }
+        /// <summary>
+        /// Generic throw method for most grenade items
+        /// Should sync with above method
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, double size, int damage)
+        {
+            Item itemAsItem = item as Item;
+
+            LogFile.Log.LogEntryDebug("Throwing " + itemAsItem.SingleItemDescription, LogDebugLevel.Medium);
+
+            Player player = Game.Dungeon.Player;
+
+            //Find target
+
+            List<Point> targetSquares = Game.Dungeon.CalculateTrajectory(target);
+            Monster monster = Game.Dungeon.FirstMonsterInTrajectory(targetSquares);
+
+            //Find where it landed
+
+            //Destination will be the last square in trajectory
+            Point destination;
+            if (targetSquares.Count > 0)
+                destination = targetSquares[targetSquares.Count - 1];
+            else
+                //Threw it on themselves!
+                destination = player.LocationMap;
+
+
+            //Stopped by a monster
+            if (monster != null)
+            {
+                destination = monster.LocationMap;
+            }
+
+            //Make throwing sound AT target location
+            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), Game.Dungeon.Player.LocationLevel, destination);
+
+            //Work out grenade splash and damage
+            DoGrenadeExplosion(level, target, size, damage, null);
+
+            return (destination);
+
+        }
+
+        /// <summary>
+        /// Do a grenade explosion. If this originated on a monster pass that in
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="p"></param>
+        /// <param name="size"></param>
+        /// <param name="damage"></param>
+        /// <param name="originMonster"></param>
+        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Monster originMonster)
+        {
+            //Work out grenade splash and damage
+
+            List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, ColorPresets.Chocolate);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in grenadeAffects)
+            {
+                SquareContents squareContents = Game.Dungeon.MapSquareContents(level, sq);
+
+                Monster m = squareContents.monster;
+
+                //Don't attack ourself -will loop
+                if (m == originMonster)
+                    continue;
+
+                if (m!=null && !m.Alive)
+                    continue;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Grenade: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    //make this a player attack to avoid AI being confused by monster attack that disappears
+                    Game.Dungeon.Player.AttackMonsterRanged(squareContents.monster, damage);
+                }
+            }
+
+            //And the player
+
+            if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
+            {
+                //Apply damage (uses damage base)
+                if(originMonster != null)
+                    originMonster.AttackPlayer(Game.Dungeon.Player, damage);
+                else
+                    player.AttackPlayer(damage);
+            }
+        }
 
         /// <summary>
         /// Kill a monster. This monster won't get any further turns.

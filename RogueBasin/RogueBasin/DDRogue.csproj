@@ -78,6 +78,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\PerimeterBotLinear.cs" />
+    <Compile Include="Creatures\ExplosiveBarrel.cs" />
     <Compile Include="Creatures\RollingBomb.cs" />
     <Compile Include="Creatures\RotatingTurret.cs" />
     <Compile Include="Creatures\MaintBot.cs" />

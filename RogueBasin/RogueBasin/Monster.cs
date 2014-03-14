@@ -561,6 +561,16 @@ namespace RogueBasin
             //Calculate damage from a normal attack
             int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
 
+            return AttackPlayer(player, damage);
+        }
+
+        /// <summary>
+        /// Important to keep this the only place where the player gets injured
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public virtual CombatResults AttackPlayer(Player player, int damage)
+        {
             //Do we hit the player?
             if (damage > 0)
             {

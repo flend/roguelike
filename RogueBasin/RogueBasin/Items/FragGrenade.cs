@@ -62,106 +62,11 @@ namespace RogueBasin.Items
         {
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
-            Point dest = FragGrenade.ThrowItemGrenadeLike(this, target, 4, 4);
+            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4.0, 4);
             
             return dest;
         }
-
         
-         /// <summary>
-        /// Generic throw method for most grenade items
-        /// Should sync with above method
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
-        public static Point ThrowItemGrenadeLike(IEquippableItem item, Point target, double size, int damage) {
-
-            Item itemAsItem = item as Item;
-
-            LogFile.Log.LogEntryDebug("Throwing " + itemAsItem.SingleItemDescription, LogDebugLevel.Medium);
-
-            Player player = Game.Dungeon.Player;
-
-            //Find target
-
-            List<Point> targetSquares = Game.Dungeon.CalculateTrajectory(target);
-            Monster monster = Game.Dungeon.FirstMonsterInTrajectory(targetSquares);
-
-            //Find where it landed
-
-            //Destination will be the last square in trajectory
-            Point destination;
-            if (targetSquares.Count > 0)
-                destination = targetSquares[targetSquares.Count - 1];
-            else
-                //Threw it on themselves!
-                destination = player.LocationMap;
-           
-             
-            //Stopped by a monster
-            if (monster != null)
-            {
-                destination = monster.LocationMap;
-            }
-
-            //Make throwing sound AT target location
-            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), Game.Dungeon.Player.LocationLevel, destination);
-
-            //Work out grenade splash and damage
-            
-            List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, size);
-
-            //Use a TCODFov to check for walls between the grenade and the target square
-            WrappedFOV currentFOV = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, destination, (int)size + 2);
-
-            List<Point> newGrenadeAffects = new List<Point>();
-
-            foreach (Point sq in grenadeAffects)
-            {
-                //We need to check for walls so the grenade doens't go through them.
-                if (!currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationLevel, sq))
-                    continue;
-
-                newGrenadeAffects.Add(sq);
-            }
-
-            //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(newGrenadeAffects, ColorPresets.Firebrick);
-
-            //Attack all monsters in the area
-            foreach (Point sq in newGrenadeAffects)
-            {
-
-                SquareContents squareContents = Game.Dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Grenade: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
-
-            //And the player
-
-            if (newGrenadeAffects.Find(p => p.x == player.LocationMap.x && p.y == player.LocationMap.y) != null)
-            {
-                //Apply damage
-                player.AttackPlayer(damage);
-            }
-            
-            return(destination);
-
-        }
-
-
-
         /// <summary>
         /// not used in this game
         /// </summary>

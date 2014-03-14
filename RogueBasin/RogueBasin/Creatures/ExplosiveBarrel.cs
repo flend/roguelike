@@ -1,4 +1,5 @@
-﻿using System;using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
 
@@ -7,10 +8,10 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Swarmer. Light melee with wide FOV. Responds to sounds.
     /// </summary>
-    public class RollingBomb : MonsterThrowAndRunAI
+    public class ExplosiveBarrel : MonsterNullAI
     {
 
-        public RollingBomb()
+        public ExplosiveBarrel()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -19,34 +20,21 @@ namespace RogueBasin.Creatures
             NormalSightRadius = 8;
         }
 
-        protected override bool UseSpecialAbility()
-        {
-            
-            Explode();
-
-            //true to avoid 2 explosions!
-            Game.Dungeon.KillMonster(this, true);
-            return true;
-        }
-
-        private void Explode() {
-
-            Game.Dungeon.AddSoundEffect(1.0, LocationLevel, LocationMap);
-            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 3.0, 50, this);
-        }
         /// <summary>
-        /// Only explodes when next to you
+        /// Bombs explode as grenades
         /// </summary>
-        /// <returns></returns>
-        protected override double GetMissileRange()
+        protected void Explode()
         {
-            return 1.0;
+            double size = 4.0;
+            int damage = 50;
+
+            //Make explosion sound AT target location
+            Game.Dungeon.AddSoundEffect(1, LocationLevel, LocationMap);
+
+            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, size, damage, this);
         }
 
-        protected override string GetWeaponName()
-        {
-            return "explodes!";
-        }
+
 
         public override void InventoryDrop()
         {
@@ -57,7 +45,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new RollingBomb();
+            return new ExplosiveBarrel();
         }
 
         protected override int ClassMaxHitpoints()
@@ -75,75 +63,23 @@ namespace RogueBasin.Creatures
             return CreatureFOV.CreatureFOVType.Triangular;
         }
 
-        public override PatrolType GetPatrolType()
-        {
-            return PatrolType.Rotate;
-        }
-
-        //Rotation makes them look alive (even though they have base FOV)
-        protected override double GetPatrolRotationAngle()
-        {
-            return Math.PI / 2;
-        }
-
-        protected override int GetPatrolRotationSpeed()
-        {
-            return 2;
-        }
-
-
-        protected override bool WillInvestigateSounds()
-        {
-            return true;
-        }
-
-        protected override bool WillPursue()
-        {
-            return true;
-        }
-
-        //Makes them more effective swarmers
-        public override bool CanOpenDoors()
-        {
-            return true;
-        }
-
 
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Rolling Bomb"; } }
+        public override string SingleDescription { get { return "Explosive Barrel"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Rolling Bombs"; } }
+        public override string GroupDescription { get { return "Explosive Barrel"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)258;
+            return (char)304;
         }
 
-        protected override int GetChanceToRecover()
-        {
-            return 20;
-        }
-
-        protected override int GetChanceToRecoverOnBeingHit()
-        {
-            return 50;
-        }
-
-        protected override int GetChanceToFlee()
-        {
-            return 0;
-        }
-
-        protected override int GetMaxHPWillFlee()
-        {
-            return 8;
-        }
         public override int CreatureCost()
         {
             return 20;
