@@ -37,38 +37,11 @@ namespace RogueBasin
 
         static DecorationFeatureDetails()
         {
-            var boneColor = ColorPresets.Ivory;
+            var boneColor = ColorPresets.Khaki;
             var blockingColor = ColorPresets.BlueViolet;
             var nonBlockingColor = ColorPresets.RosyBrown;
+            var corpseColor = ColorPresets.Maroon;
 
-            decorationFeatures.Add(DecorationFeatures.Bone, new Decoration((char)314, boneColor, false));
-            decorationFeatures.Add(DecorationFeatures.Skeleton, new Decoration((char)315, boneColor, false));
-            decorationFeatures.Add(DecorationFeatures.Bin, new Decoration((char)349, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Filing, new Decoration((char)350, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Filing2, new Decoration((char)351, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.CoffeePC, new Decoration((char)365, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Machine, new Decoration((char)366, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Machine2, new Decoration((char)367, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.SquarePC, new Decoration((char)381, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.DesktopPC, new Decoration((char)382, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Stool, new Decoration((char)383, nonBlockingColor, false));
-            decorationFeatures.Add(DecorationFeatures.Chair1, new Decoration((char)397, nonBlockingColor, false));
-            decorationFeatures.Add(DecorationFeatures.Chair2, new Decoration((char)398, nonBlockingColor, false));
-            decorationFeatures.Add(DecorationFeatures.EggChair, new Decoration((char)399, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Instrument1, new Decoration((char)413, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Instrument2, new Decoration((char)414, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Instrument3, new Decoration((char)415, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Plant1, new Decoration((char)429, nonBlockingColor, false));
-            decorationFeatures.Add(DecorationFeatures.Plant2, new Decoration((char)430, nonBlockingColor, false));
-            decorationFeatures.Add(DecorationFeatures.HighTechBench, new Decoration((char)431, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Plant3, new Decoration((char)445, nonBlockingColor, false));
-            decorationFeatures.Add(DecorationFeatures.Safe1, new Decoration((char)446, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Safe2, new Decoration((char)447, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Egg1, new Decoration((char)445, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Egg2, new Decoration((char)446, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Egg3, new Decoration((char)447, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.HumanCorpse, new Decoration((char)510, boneColor, false));
-            decorationFeatures.Add(DecorationFeatures.HumanCorpse2, new Decoration((char)511, boneColor, false));
             decorationFeatures.Add(DecorationFeatures.Bone, new Decoration((char)314, boneColor, false));
             decorationFeatures.Add(DecorationFeatures.Skeleton, new Decoration((char)315, boneColor, false));
             decorationFeatures.Add(DecorationFeatures.Bin, new Decoration((char)349, blockingColor, true));
@@ -110,7 +83,7 @@ namespace RogueBasin
             decorationFeatures.Add(DecorationFeatures.Screen4, new Decoration((char)544, blockingColor, true));
             decorationFeatures.Add(DecorationFeatures.AutomatMachine, new Decoration((char)545, blockingColor, true));
             decorationFeatures.Add(DecorationFeatures.MedicalAutomat, new Decoration((char)546, blockingColor, true));
-            decorationFeatures.Add(DecorationFeatures.Screen5, new Decoration((char)547, bblockingColor, true));
+            decorationFeatures.Add(DecorationFeatures.Screen5, new Decoration((char)547, blockingColor, true));
             decorationFeatures.Add(DecorationFeatures.MachinePart1, new Decoration((char)548, blockingColor, true));
             decorationFeatures.Add(DecorationFeatures.MachinePart2, new Decoration((char)549, blockingColor, true));
             decorationFeatures.Add(DecorationFeatures.MachinePart3, new Decoration((char)550, blockingColor, true));

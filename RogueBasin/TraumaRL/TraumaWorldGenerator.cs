@@ -366,10 +366,10 @@ namespace TraumaRL
                     AddElevatorFeatures(mapInfo, levelInfo);
 
                     //Generate quests at mapmodel level
-                    //GenerateQuests(mapInfo, levelInfo);
+                    GenerateQuests(mapInfo, levelInfo);
 
                     //Add clues and locks at dungeon engine level
-                    //AddSimpleCluesAndLocks(mapInfo);
+                    AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
                     AddDecorationFeatures(mapInfo, levelInfo);
