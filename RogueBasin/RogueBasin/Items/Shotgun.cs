@@ -254,7 +254,7 @@ namespace RogueBasin.Items
         /// Noise mag of this weapon on firing
         /// </summary>
         /// <returns></returns>
-        public double FireSoundMagnitude()
+        public override double FireSoundMagnitude()
         {
             return 1.0;
         }

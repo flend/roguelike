@@ -239,6 +239,11 @@ namespace RogueBasin
             return true;
         }
 
+        internal int InventoryQuantityAvailable(Type wetWareType)
+        {
+            return Inventory.GetItemsOfType(wetWareType).Count();
+        }
+
         internal bool IsWetwareTypeDisabled(Type wetwareType)
         {
             var wetwareInInventory = Inventory.GetItemsOfType(wetwareType);
@@ -774,15 +779,24 @@ namespace RogueBasin
         {
             var damageModifier = 1.0;
 
+            var speedEffect = GetActiveEffects(typeof(PlayerEffects.SpeedBoost));
+
+            var speedModifier = 1.0;
+
+            if (speedEffect.Count() > 0)
+            {
+                speedModifier += ((PlayerEffects.SpeedBoost)speedEffect.First()).Level;
+            }
+
             if(TurnsMoving > 0)
             {
-                damageModifier -= 0.2;
+                damageModifier -= 0.2 * speedModifier;
             }
 
             if (target != null)
             {
                 //Test cover
-                var coverItems = Game.Dungeon.GetNumberOfCoverItemsBetweenPoints(target.LocationLevel, target.LocationMap, LocationLevel, LocationMap);
+                var coverItems = GetPlayerCover(target);
                 var hardCover = coverItems.Item1;
                 var softCover = coverItems.Item2;
 
@@ -792,7 +806,13 @@ namespace RogueBasin
                     damageModifier -= 0.1;
             }
 
-            return damageModifier;
+            return Math.Max(0.0, damageModifier);
+        }
+
+        public Tuple<int, int> GetPlayerCover(Monster target)
+        {
+            var coverItems = Game.Dungeon.GetNumberOfCoverItemsBetweenPoints(target.LocationLevel, target.LocationMap, LocationLevel, LocationMap);
+            return coverItems;
         }
 
         /// <summary>
@@ -871,6 +891,7 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             CancelStealthDueToAttack();
+            ResetTurnsMoving();
 
             return ApplyDamageToMonster(monster, modifiedDamage, false, false);
         }
@@ -1872,8 +1893,15 @@ namespace RogueBasin
             Inventory.AddItemNotFromDungeon(new Items.Shotgun());
             Inventory.AddItemNotFromDungeon(new Items.Laser());
             Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
+            Inventory.AddItemNotFromDungeon(new Items.AssaultRifle());
+            for (int i = 0; i < 5; i++)
+            {
+                Inventory.AddItemNotFromDungeon(new Items.FragGrenade());
+                Inventory.AddItemNotFromDungeon(new Items.StunGrenade());
+                Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
+            }
 
-            //Start with fists
+            //Start with fists equipped
             Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[1]);
         }
 

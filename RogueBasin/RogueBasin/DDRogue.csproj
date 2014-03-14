@@ -237,6 +237,7 @@
     <Compile Include="Items\NanoRepair.cs" />
     <Compile Include="Items\Fists.cs" />
     <Compile Include="Items\BoostWare.cs" />
+    <Compile Include="Items\AssualtRifle.cs" />
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
     <Compile Include="PlayerEffects\StealthBoost.cs" />
     <Compile Include="RangedWeapon.cs" />

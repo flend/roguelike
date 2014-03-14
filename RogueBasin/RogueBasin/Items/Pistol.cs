@@ -141,7 +141,7 @@ namespace RogueBasin.Items
 
         public override int MaxAmmo()
         {
-            return 3;
+            return 10;
         }
 
         public bool HasMeleeAction()
@@ -164,44 +164,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            //Should be guaranteed in range by caller
-
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-
-            LogFile.Log.LogEntryDebug("Firing pistol", LogDebugLevel.Medium);
-
-            //Remove 1 ammo
-            Ammo--;
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Find monster target
-
-            targetSquares = Game.Dungeon.CalculateTrajectory(target);
-            Monster monster = Game.Dungeon.FirstMonsterInTrajectory(targetSquares);
-
-            if(monster == null) {
-                LogFile.Log.LogEntryDebug("No monster in target for Pistol.Ammo used anyway.", LogDebugLevel.Medium);
-                return true;
-            }
-
-            //Draw attack
-
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
-
-            //Damage monster
-            
-            int damageBase = 20;
-
-            string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 3";
-            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-            //Apply damage
-            player.AttackMonsterRanged(monster, damageBase);
-
-            return true;
+            return Game.Dungeon.FirePistolLineWeapon(target, this, 20);
         }
 
         /// <summary>
@@ -262,7 +225,7 @@ namespace RogueBasin.Items
             return 8;
         }
 
-        public double FireSoundMagnitude()
+        public override double FireSoundMagnitude()
         {
             return 0.4;
         }

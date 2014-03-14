@@ -1569,6 +1569,7 @@ namespace RogueBasin {
         const char heartChar = (char)567;
         const char shieldChar = (char)561;
         const char ammoChar = (char)568;
+        const char grenadeChar = (char)297;
         const char batteryChar = (char)308;
 
         Color orangeActivatedColor = ColorPresets.DarkOrange;
@@ -1667,6 +1668,27 @@ namespace RogueBasin {
                         else
                         {
                             PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, ammoChar, orangeDisactivatedColor);
+                        }
+                    }
+                }
+                else if (weaponE.HasThrowAction())
+                {
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+
+                    //TODO infinite ammo?
+                    int ammoBarLength = 10;
+                    double weaponAmmoRatio = Math.Min(player.InventoryQuantityAvailable(weapon.GetType()), 10);
+                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
+
+                    for (int i = 0; i < ammoBarLength; i++)
+                    {
+                        if (i < ammoBarEntries)
+                        {
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, grenadeChar, orangeActivatedColor);
+                        }
+                        else
+                        {
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, grenadeChar, orangeDisactivatedColor);
                         }
                     }
                 }
@@ -1852,7 +1874,7 @@ namespace RogueBasin {
                 PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
                 //Combat vs player
                 PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
-                var cover = Game.Dungeon.GetNumberOfCoverItemsBetweenPoints(player.LocationLevel, player.LocationMap, CreatureToView.LocationLevel, CreatureToView.LocationMap);
+                var cover = player.GetPlayerCover(CreatureToView);
                 PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
 
                 //Monster hp
@@ -2006,14 +2028,16 @@ namespace RogueBasin {
             switch (letter)
             {
                 case "A":
-                    return (char)616;
+                    return (char)621;
                 case "T":
-                    return (char)615;
+                    return (char)620;
                 case "F":
-                    return (char)614;
+                    return (char)619;
                 case "S":
-                    return (char)617;
+                    return (char)622;
                 case "D":
+                    return (char)623;
+                case "B":
                     return (char)618;
                 default:
                     return (char)616;

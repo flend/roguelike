@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Utility);
+                retList.Add(EquipmentSlot.Weapon);
 
                 return retList;
             }
@@ -176,7 +176,7 @@ namespace RogueBasin.Items
 
         protected override char GetRepresentation()
         {
-            return (char)280;
+            return (char)298;
         }
 
         public override libtcodWrapper.Color GetColour()

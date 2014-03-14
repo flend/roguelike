@@ -563,6 +563,43 @@ namespace RogueBasin
             return (int)Math.Ceiling(total);
         }
 
+        public bool FirePistolLineWeapon(Point target, RangedWeapon item, int damageBase) {
+
+            Player player = Player;
+
+            LogFile.Log.LogEntryDebug("Firing pistol", LogDebugLevel.Medium);
+
+            //Remove 1 ammo
+            item.Ammo--;
+
+            //Make firing sound
+            AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Find monster target
+
+            var targetSquares = CalculateTrajectory(target);
+            Monster monster = FirstMonsterInTrajectory(targetSquares);
+
+            if(monster == null) {
+                LogFile.Log.LogEntryDebug("No monster in target for Pistol. Ammo used anyway.", LogDebugLevel.Medium);
+                return true;
+            }
+
+            //Draw attack
+
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
+
+            //Damage monster
+
+            string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 3";
+            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+            //Apply damage
+            player.AttackMonsterRanged(monster, damageBase);
+
+            return true;
+        }
+
         /// <summary>
         /// Create obfuscated names for the potions etc.
         /// </summary>

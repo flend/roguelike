@@ -5,26 +5,16 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class FragGrenade : Item, IEquippableItem
+    public class AssaultRifle : RangedWeapon, IEquippableItem
     {
- 
-        /// <summary>
-        /// Equipment slots where we can be equipped
-        /// </summary>
-        public List<EquipmentSlot> EquipmentSlots
-        {
-            get
-            {
-                List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
 
-                return retList;
-            }
+        public AssaultRifle()
+        {
         }
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("FragGrenade equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Assault rifle equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -46,27 +36,23 @@ namespace RogueBasin.Items
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
             //Screen.Instance.PlayMovie("multiattack", false);
 
-            //Add any equipped (actually permanent) effectsf
+            //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
 
-        /// <summary>
-        /// Throws the item. Can use generic, it's just 
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public Point ThrowItem(Point target)
+        public List<EquipmentSlot> EquipmentSlots
         {
-            //Stun for 0 rounds
-            Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
-            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4.0, 4);
-            
-            return dest;
+            get
+            {
+                List<EquipmentSlot> retList = new List<EquipmentSlot>();
+                retList.Add(EquipmentSlot.Weapon);
+
+                return retList;
+            }
         }
-        
+
         /// <summary>
         /// not used in this game
         /// </summary>
@@ -74,7 +60,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Frag Grenade unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Assault rifle unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -85,9 +71,26 @@ namespace RogueBasin.Items
             return 50;
         }
 
+        /// Can be thrown
+        /// </summary>
+        /// <returns></returns>
+        public bool HasThrowAction()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Can be operated
+        /// </summary>
+        /// <returns></returns>
+        public bool HasOperateAction()
+        {
+            return false;
+        }
+
         public override string SingleItemDescription
         {
-            get { return "Frag grenade"; }
+            get { return "Assault rifle"; }
         }
 
         /// <summary>
@@ -95,17 +98,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Frag grenades"; }
+            get { return "Assault rifles"; }
         }
 
         protected override char GetRepresentation()
         {
-            return (char)297;
+            return (char)275;
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Red;
+            return ColorPresets.HotPink;
         }
 
         public int ArmourClassModifier()
@@ -129,9 +132,14 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public bool HasFireAction()
+        public override int ItemCost()
         {
-            return false;
+            return 10;
+        }
+
+        public override int MaxAmmo()
+        {
+            return 5;
         }
 
         public bool HasMeleeAction()
@@ -139,35 +147,9 @@ namespace RogueBasin.Items
             return false;
         }
 
-
-        /// <summary>
-        /// Can be thrown
-        /// </summary>
-        /// <returns></returns>
-        public bool HasThrowAction()
+        public bool HasFireAction()
         {
-
             return true;
-        }
-
-        /// <summary>
-        /// Can be operated
-        /// </summary>
-        /// <returns></returns>
-        public bool HasOperateAction()
-        {
-            return false;
-        }
-
-        public int RemainingAmmo()
-        {
-
-            return 0;
-        }
-
-        public int MaxAmmo()
-        {
-            return 0;
         }
 
         /// <summary>
@@ -178,10 +160,20 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            return false;
+            return Game.Dungeon.FirePistolLineWeapon(target, this, 50);
         }
 
-
+        /// <summary>
+        /// Throws the item
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public Point ThrowItem(Point target)
+        {
+            return Game.Dungeon.Player.ThrowItemGeneric(this, target, 3, true);
+        }       
+       
         /// <summary>
         /// Operates the item - definitely a method
         /// </summary>
@@ -217,7 +209,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 10;
+            return 5;
         }
 
         /// <summary>
@@ -226,25 +218,20 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 5;
+            return 8;
         }
 
-        /// <summary>
-        /// Noise mag of this weapon on firing
-        /// </summary>
-        /// <returns></returns>
-        public double FireSoundMagnitude()
+        public override double FireSoundMagnitude()
         {
-            return 0.0;
+            return 0.4;
         }
 
         /// <summary>
         /// Noise mag of this weapon on throwing
         /// </summary>
         /// <returns></returns>
-        public double ThrowSoundMagnitude()
-        {
-            return 1;
+        public double ThrowSoundMagnitude() {
+            return 0.2;   
         }
 
         /// <summary>
@@ -253,7 +240,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool DestroyedOnThrow()
         {
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -262,7 +249,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 0;
+            return 5;
         }
 
         /// <summary>
@@ -274,11 +261,6 @@ namespace RogueBasin.Items
             return 0.0;
         }
 
-        public override int ItemCost()
-        {
-            return 8;
-        }
-
         /// <summary>
         /// Destroyed on use
         /// </summary>
@@ -287,6 +269,7 @@ namespace RogueBasin.Items
         {
             return false;
         }
+
         public int GetEnergyDrain()
         {
             return 0;

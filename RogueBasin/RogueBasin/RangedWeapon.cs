@@ -31,6 +31,11 @@ namespace RogueBasin
             return 10;
         }
 
+        public virtual double FireSoundMagnitude()
+        {
+            return 0.4;
+        }
+
         public abstract int MaxAmmo();
 
         public int RemainingAmmo() {
