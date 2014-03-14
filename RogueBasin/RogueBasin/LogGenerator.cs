@@ -207,7 +207,8 @@ namespace RogueBasin
 
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
                 { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
-                { "<idtype>", doorId }
+                { "<idtype>", doorId },
+                { "<item>", "random goody"}
             });
 
             }

@@ -823,6 +823,10 @@
     <EmbeddedResource Include="bin\Debug\logentries\dr_droppedid2.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gd_stash.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gd_delivery.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\dr_lostid.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gd_crate.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gd_mishap.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gd_robots.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
