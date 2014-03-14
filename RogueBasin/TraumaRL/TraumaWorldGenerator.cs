@@ -464,15 +464,14 @@ namespace RogueBasin
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
-            //BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
-
-            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
             
-            //BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            
+            BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            //BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            //needs some attention
             BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
         }
 

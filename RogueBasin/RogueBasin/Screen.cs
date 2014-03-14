@@ -988,6 +988,9 @@ namespace RogueBasin {
             if (ShowClueList)
                 DrawCluesList();
 
+            if (ShowLogList)
+                DrawLogList();
+
         }
 
         /// <summary>
@@ -1213,6 +1216,8 @@ namespace RogueBasin {
 
         public bool ShowClueList { get; set; }
 
+        public bool ShowLogList { get; set; }
+
         enum Direction { up, down, none };
 
         void ClearScreen()
@@ -1380,6 +1385,48 @@ namespace RogueBasin {
             DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(cluesForDoorsAsStrings));
         }
 
+        /// <summary>
+        /// Draw the msg history and allow the player to scroll
+        /// </summary>
+        private void DrawLogList()
+        {
+            //Draw frame - same as inventory
+            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+
+            //Draw title
+            PrintLineRect("Log List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Draw instructions
+            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+
+            //Active area is slightly reduced from frame
+            int inventoryListX = inventoryTL.x + 2;
+            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
+            int inventoryListY = inventoryTL.y + 2;
+            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
+
+            var allPlayerLogItems = Game.Dungeon.Player.Inventory.GetItemsOfType<Items.Log>();
+            var allPlayerLogEntriesSortedByLevel = allPlayerLogItems.GroupBy(i => i.LocationLevel).ToDictionary(gr => gr.Key, gr => gr.Select(i => i.LogEntry));
+            
+            List<string> clueLines = new List<string>();
+            foreach (var kv in allPlayerLogEntriesSortedByLevel)
+            {
+                var level = kv.Key;
+                clueLines.Add("-+-+-+-" + Game.Dungeon.DungeonInfo.LevelNaming[level].ToUpper() + "-+-+-+-");
+                clueLines.Add("");
+
+                foreach (var logEntry in kv.Value)
+                {
+                    clueLines.Add(logEntry.title);
+                    clueLines.AddRange(logEntry.lines);
+                    clueLines.Add("");
+                }
+            }
+
+            //Display list
+            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(clueLines));
+        }
+
         private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory)
         {
             LinkedListNode<string> displayedMsg;
@@ -1417,6 +1464,7 @@ namespace RogueBasin {
                 //Get user input
                 KeyPress userKey = Keyboard.WaitForKeyPress(true);
                 Direction dir = Direction.none;
+                bool page = false;
 
                 //Each state has different keys
 
@@ -1452,6 +1500,16 @@ namespace RogueBasin {
                         case KeyCode.TCODK_DOWN:
                             dir = Direction.down;
                             break;
+
+                        case KeyCode.TCODK_PAGEUP:
+                            dir = Direction.up;
+                            page = true;
+                            break;
+
+                        case KeyCode.TCODK_PAGEDOWN:
+                            dir = Direction.down;
+                            page = true;
+                            break;
                     }
                 }
 
@@ -1459,13 +1517,23 @@ namespace RogueBasin {
                 {
                     if (dir == Direction.up)
                     {
-                        if (topLineDisplayed.Previous != null)
-                            topLineDisplayed = topLineDisplayed.Previous;
+                        var iterations = 1;
+                        if (page)
+                            iterations = 20;
+
+                        for (int i = 0; i < iterations;i++)
+                            if (topLineDisplayed.Previous != null)
+                                topLineDisplayed = topLineDisplayed.Previous;
                     }
                     else if (dir == Direction.down)
                     {
-                        if (topLineDisplayed != bottomTopLineDisplayed)
-                            topLineDisplayed = topLineDisplayed.Next;
+                        var iterations = 1;
+                        if (page)
+                            iterations = 20;
+
+                        for (int i = 0; i < iterations; i++)
+                            if (topLineDisplayed != bottomTopLineDisplayed)
+                                topLineDisplayed = topLineDisplayed.Next;
                     }
 
                     //Clear the rectangle

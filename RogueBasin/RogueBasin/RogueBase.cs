@@ -550,6 +550,14 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
+                                case 'L':
+                                    SetLogScreen();
+                                    Screen.Instance.Update();
+                                    DisableLogScreen();
+                                    Screen.Instance.Update();
+                                    timeAdvances = false;
+                                    break;
+
                                 case '?':
                                     Screen.Instance.PlayMovie("helpkeys", true);
                                     timeAdvances = false;
@@ -1506,6 +1514,16 @@ namespace RogueBasin
         private void DisableClueScreen()
         {
             Screen.Instance.ShowClueList = false;
+        }
+
+        private void SetLogScreen()
+        {
+            Screen.Instance.ShowLogList = true;
+        }
+
+        private void DisableLogScreen()
+        {
+            Screen.Instance.ShowLogList = false;
         }
 
 
