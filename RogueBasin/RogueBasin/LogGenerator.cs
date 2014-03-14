@@ -8,7 +8,7 @@ using System.Text;
 namespace RogueBasin
 {
     public enum LogType {
-        Elevator, QuestArbitrary, SimpleLockedDoor
+        Elevator, QuestArbitrary, SimpleLockedDoor, GoodyDoor
     }
 
     public class LogExtract {
@@ -38,7 +38,8 @@ namespace RogueBasin
         Dictionary<string, LogType> logPrefixMapping = new Dictionary<string, LogType>() {
             { "el", LogType.Elevator },
             { "qe", LogType.QuestArbitrary },
-            { "dr", LogType.SimpleLockedDoor }
+            { "dr", LogType.SimpleLockedDoor },
+            { "gd", LogType.GoodyDoor }
         };
 
         public LogGenerator()
@@ -183,6 +184,36 @@ namespace RogueBasin
             catch (Exception)
             {
              //Not to worry
+            }
+
+            entry.lines = logEntryLines;
+
+            return entry;
+        }
+
+        public LogEntry GenerateGoodyRoomLogEntry(string doorId, int levelForDoor)
+        {
+            var entry = new LogEntry();
+
+            entry.title = GenerateRandomTitle();
+
+            var randomLog = logDatabase[LogType.GoodyDoor].RandomElement();
+            var substitutedLog = randomLog.Value.First();
+            List<string> logEntryLines = substitutedLog.lines;
+
+            try
+            {
+                logEntryLines = ApplyStandardSubstitutions(logEntryLines);
+
+                logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
+                { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
+                { "<idtype>", doorId }
+            });
+
+            }
+            catch (Exception)
+            {
+                //Not to worry
             }
 
             entry.lines = logEntryLines;
@@ -359,5 +390,6 @@ namespace RogueBasin
 
             return fullStringWithCentering;
         }
+
     }
 }

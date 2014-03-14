@@ -19,6 +19,8 @@ namespace RogueBasin
         List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
         List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
 
+        List<int> allReplaceableVaults = new List<int>();
+
         ConnectivityMap connectivityMap = null;
 
         ConnectivityMap levelLinks;
@@ -482,6 +484,9 @@ namespace RogueBasin
                     var firstRoom = mapInfo.GetRoom(0);
                     Game.Dungeon.Levels[0].PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
                     
+                    //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
+                    allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
+
                     //Recalculate walkable to allow placing objects
                     Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
@@ -596,10 +601,13 @@ namespace RogueBasin
             BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
 
             BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
-
+            
             BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
             BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+
+            //needs some attention
+            //BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
         }
 
         private void BuildRandomElevatorQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -692,6 +700,78 @@ namespace RogueBasin
             usedColors.Add(colorToReturn);
 
             return colorToReturn;
+        }
+
+        private void BuildGoodyQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
+        {
+            //Ensure that we have a goody room on every level that will support it
+            var replaceableVaultsForLevels = levelInfo.ToDictionary(kv => kv.Key, kv => kv.Value.ReplaceableVaultConnections.Except(kv.Value.ReplaceableVaultConnectionsUsed));
+
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            foreach (var kv in replaceableVaultsForLevels)
+            {
+                var thisLevel = kv.Key;
+                var thisConnection = kv.Value.RandomElement();
+                var thisRoom = thisConnection.Target;
+
+                LogFile.Log.LogEntryDebug("Placing goody room at: level: " + thisLevel + " room: " + thisRoom, LogDebugLevel.Medium);
+
+                //Place door
+                var doorReadableId = Game.Dungeon.DungeonInfo.LevelNaming[thisLevel] + " armory";
+                var doorId = doorReadableId + Game.Random.Next();
+                manager.PlaceDoor(new DoorRequirements(thisConnection, doorId, 1));
+                var door = manager.GetDoorById(doorId);
+
+                var unusedColor = GetUnusedColor();
+                var lockedDoor = new Locks.SimpleLockedDoor(door, doorReadableId, unusedColor.Item1);
+                var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
+                lockedDoor.LocationLevel = doorInfo.LevelNo;
+                lockedDoor.LocationMap = doorInfo.MapLocation;
+
+                Game.Dungeon.AddLock(lockedDoor);
+
+                placedDoors.Add(door);
+
+                //Clue
+                var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
+
+                //Assume a critical path from the lower level elevator
+                var lowerLevelFloor = levelInfo[thisLevel].ConnectionsToOtherLevels.Min(level => level.Key);
+                var elevatorFromLowerLevel = levelInfo[thisLevel].ConnectionsToOtherLevels[lowerLevelFloor].Target;
+                var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(elevatorFromLowerLevel, thisRoom);
+
+                var filteredRooms = FilterClueRooms(mapInfo, allowedRoomsForClues, criticalPath, true, CluePath.NotOnCriticalPath, true);
+                var roomsToPlaceMonsters = new List<int>();
+
+                var roomsForMonsters = GetRandomRoomsForClues(mapInfo, 1, filteredRooms);
+                var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
+
+                var clueName = unusedColor.Item2 + " key card";
+                var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, unusedColor.Item1, clueName));
+                var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, true);
+
+                //Logs - try placing them on the critical path from the start of the game!
+
+                var criticalPathFromStart = mapInfo.Model.GetPathBetweenVerticesInReducedMap(0, thisRoom);
+                var preferredRoomsForLogsNonCritical = FilterClueRooms(mapInfo, allowedRoomsForClues, criticalPath, false, CluePath.OnCriticalPath, true);
+
+                var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 1, preferredRoomsForLogsNonCritical);
+
+                var roomsForLogs = GetRandomRoomsForClues(mapInfo, 2, roomsForLogsNonCritical);
+                var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
+                var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGoodyRoomLogEntry(clueName, thisLevel), logClues[0]);
+                PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1 }, true, true);
+
+                //Best to do this after we know exceptions won't be thrown
+                var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
+                //try
+                //{
+                
+                //Vault is used
+                levelInfo[thisLevel].ReplaceableVaultConnectionsUsed.Add(thisConnection);
+            }
+        
         }
         
         private void BuildMedicalLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -864,7 +944,7 @@ namespace RogueBasin
 
         private IEnumerable<int> FilterClueRooms(MapInfo mapInfo, IEnumerable<int> allCandidateRooms, IEnumerable<Connection> criticalPath, bool enforceClueOnDestLevel, CluePath clueCriticalPath, bool clueNotInCorridors)
         {
-            var candidateRooms = allCandidateRooms;
+            var candidateRooms = allCandidateRooms.Except(allReplaceableVaults);
             if (enforceClueOnDestLevel)
                 candidateRooms = allCandidateRooms.Intersect(mapInfo.GetRoomIndicesForLevel(mapInfo.GetLevelForRoomIndex(criticalPath.Last().Target)));
 
@@ -899,7 +979,7 @@ namespace RogueBasin
                 throw new ApplicationException("Not enough rooms to place clues");
 
             //To get an even distribution we need to take into account how many nodes are in each group node
-            var expandedAllowedRoomForClues = allowedRoomsForClues.SelectMany(r => Enumerable.Repeat(r, info.Model.GraphNoCycles.roomMappingNoCycleToFullMap[r].Count()));
+            var expandedAllowedRoomForClues = allowedRoomsForClues.Except(allReplaceableVaults).SelectMany(r => Enumerable.Repeat(r, info.Model.GraphNoCycles.roomMappingNoCycleToFullMap[r].Count()));
 
             var roomsToPlaceMonsters = new List<int>();
 
@@ -935,7 +1015,7 @@ namespace RogueBasin
 
             //Self destruct requires captain's id
             int selfDestructLevel = medicalLevel;
-            var selfDestructLevelIndices = mapInfo.GetRoomIndicesForLevel(selfDestructLevel);
+            var selfDestructLevelIndices = mapInfo.GetRoomIndicesForLevel(selfDestructLevel).Except(allReplaceableVaults);
             var deadEndsInMedical = RoomsInConnectionSet(selfDestructLevelIndices, deadEndRooms);
             var roomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, deadEndsInMedical);
             var roomsFarFromStart = roomsInDistanceOrderFromStart.ElementAt(0);
@@ -945,14 +1025,14 @@ namespace RogueBasin
             //Captain's id
             int captainIdLevel = lowerAtriumLevel;
             var captainIdLevelIndices = mapInfo.GetRoomIndicesForLevel(captainIdLevel);
-            var randomRoomForCaptainId = captainIdLevelIndices.RandomElement();
+            var randomRoomForCaptainId = captainIdLevelIndices.Except(allReplaceableVaults).RandomElement();
 
             mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective("self-destruct", new List<int> { randomRoomForCaptainId });
 
             //Fueling system
             int fuelingLevel = lowerAtriumLevel;
             var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
-            var randomRoomForFueling = fuelingLevelIndices.RandomElement();
+            var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
 
             mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
         }
@@ -1075,7 +1155,7 @@ namespace RogueBasin
         private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
-            IEnumerable<int> candidateRooms = possibleRooms;
+            IEnumerable<int> candidateRooms = possibleRooms.Except(allReplaceableVaults);
             if (filterCorridors)
                 candidateRooms = mapInfo.FilterOutCorridors(possibleRooms);
 
@@ -1097,7 +1177,7 @@ namespace RogueBasin
         private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
-            IEnumerable<int> candidateRooms = possibleRooms;
+            IEnumerable<int> candidateRooms = possibleRooms.Except(allReplaceableVaults);
             if (filterCorridors)
                 candidateRooms = mapInfo.FilterOutCorridors(possibleRooms);
 
@@ -1118,7 +1198,7 @@ namespace RogueBasin
 
         private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceObjective(MapInfo mapInfo, Objective clue)
         {
-            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+            var possibleRooms = clue.PossibleClueRoomsInFullMap.Except(allReplaceableVaults);
             var randomRoom = possibleRooms.RandomElement();
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
 
