@@ -80,6 +80,9 @@ namespace RogueBasin
         private const int turnsToDisableStealthWareAfterAttack = 80;
         private const int turnsToDisableBoostWareAfterAttack = 80;
 
+        private const int turnsToDisableStealthWareAfterUnequip = 20;
+        private const int turnsToDisableBoostWareAfterUnequip = 20;
+
         /// <summary>
         /// Player level
         /// </summary>
@@ -916,6 +919,19 @@ namespace RogueBasin
             }
         }
 
+        public void CancelStealthDueToUnequip()
+        {
+
+            DisableWetware(typeof(Items.StealthWare), turnsToDisableStealthWareAfterUnequip);
+        }
+
+        public void CancelBoostDueToUnequip()
+        {
+
+            DisableWetware(typeof(Items.BoostWare), turnsToDisableBoostWareAfterUnequip);
+
+        }
+
         /// <summary>
         /// Apply stun damage (miss n-turns) to monster. All stun attacks are routed through here
         /// </summary>
@@ -1499,6 +1515,12 @@ namespace RogueBasin
             
             UnequipWetware();
 
+            if (currentlyEquippedWetware is Items.StealthWare)
+                CancelStealthDueToUnequip();
+
+            if (currentlyEquippedWetware is Items.BoostWare)
+                CancelBoostDueToUnequip();
+
             if (justUnequip)
                 //return true;
                 return false;
@@ -1565,6 +1587,7 @@ namespace RogueBasin
                 }
 
                 wetwareSlot.equippedItem = null;
+
             }
 
             CalculateCombatStats();
