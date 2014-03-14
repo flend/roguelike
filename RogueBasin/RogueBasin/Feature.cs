@@ -18,10 +18,9 @@ namespace RogueBasin
 
         public Feature()
         {
-
+            IsBlocking = false;
         }
 
-       
-        
+        public bool IsBlocking { get; set; }
     }
 }

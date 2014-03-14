@@ -23,7 +23,7 @@ namespace RogueBasin
         /// <summary>
         /// For 1.0 magnitude sounds
         /// </summary>
-        public const double soundMaxRadius = 15.0;
+        public const double soundMaxRadius = 12.0;
 
         public SoundEffect(int id, Dungeon eventReceiver, long soundTime, double soundMagnitude, int soundLevel, Point soundLocation)
         {

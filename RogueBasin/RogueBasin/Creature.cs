@@ -147,6 +147,40 @@ namespace RogueBasin
             }
         }
 
+        public void AddTurnsMoving()
+        {
+            TurnsMoving++;
+        }
+
+        public void ResetTurnsMoving()
+        {
+            TurnsMoving = 0;
+        }
+
+        public int TurnsMoving { get; private set; }
+        public int TurnsInactive { get; private set; }
+        public int TurnsSinceAction { get; private set; }
+
+        public void AddTurnsInactive()
+        {
+            TurnsInactive++;
+        }
+
+        public void ResetTurnsInactive()
+        {
+            TurnsInactive = 0;
+        }
+
+        public void AddTurnsSinceAction()
+        {
+            TurnsSinceAction++;
+        }
+
+        public void ResetTurnsSinceAction()
+        {
+            TurnsSinceAction = 0;
+        }
+
         public Creature()
         {
             alive = true;

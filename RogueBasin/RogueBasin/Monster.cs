@@ -114,8 +114,6 @@ namespace RogueBasin
 
         public bool Unique { get; set; }
 
-        public int TurnsMoving { get; private set; }
-
         /// <summary>
         /// Current hitpoints
         /// </summary>
@@ -221,16 +219,6 @@ namespace RogueBasin
         virtual protected bool WakesOnBeingSeen()
         {
             return true;
-        }
-
-        public void AddTurnsMoving()
-        {
-            TurnsMoving++;
-        }
-
-        public void ResetTurnsMoving()
-        {
-            TurnsMoving = 0;
         }
 
         /// <summary>
@@ -576,15 +564,16 @@ namespace RogueBasin
             {
                 int monsterOrigHP = player.Hitpoints;
 
-                player.ApplyDamageToPlayer(damage);
+                var modifiedDamaged = (int)Math.Floor(player.CalculateDamageModifierForAttacksOnPlayer(this) * damage);
+
+                player.ApplyDamageToPlayer(modifiedDamaged);
 
                 //Is the player dead, if so kill it?
                 if (player.Hitpoints <= 0)
                 {
                     
                     //Message queue string
-                    string combatResultsMsg = "MvP " + this.Representation + " ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
-                    
+                    string combatResultsMsg = "MvP " + this.Representation + " Dam: base: " + damage + " mod: " + modifiedDamaged + " HP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
                     
                     //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
                     string playerMsg = HitsPlayerCombatString() + " R. E. E. D. DESTROYED!";
@@ -597,7 +586,8 @@ namespace RogueBasin
                 }
 
                 //Debug string
-                string combatResultsMsg3 = "MvP " + this.Representation + " ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
+
+                string combatResultsMsg3 = "MvP " + this.Representation + " Dam: base: " + damage + " mod: " + modifiedDamaged + " HP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
                 //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
                 string playerMsg3 = HitsPlayerCombatString();
                 Game.MessageQueue.AddMessage(playerMsg3);
@@ -607,7 +597,7 @@ namespace RogueBasin
             }
 
             //Miss
-            string combatResultsMsg2 = "MvP "  + this.Representation + " ToHit: " + toHitRoll + " AC: " + player.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + player.Hitpoints + " miss";
+            string combatResultsMsg2 = "MvP "  + this.Representation + " Dam: base: " + damage + " mod: " + damageModifier + " HP: " + player.Hitpoints + " miss";
             //string playerMsg2 = "The " + this.SingleDescription + " misses you.";
             string playerMsg2 = MissesPlayerCombatString();
             Game.MessageQueue.AddMessage(playerMsg2);

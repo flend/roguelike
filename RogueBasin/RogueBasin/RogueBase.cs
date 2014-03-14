@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Xml.Serialization;
 using System.IO.Compression;
+using System.Linq;
 
 namespace RogueBasin
 {
@@ -188,7 +189,7 @@ namespace RogueBasin
                             ProfileEntry("Pre PC POV");
 
                             //Calculate the player's FOV
-                            Game.Dungeon.CalculatePlayerFOV();
+                            var playerFOV = Game.Dungeon.CalculatePlayerFOV();
 
                             ProfileEntry("Pre Monster POV");
 
@@ -212,6 +213,10 @@ namespace RogueBasin
                             //Check the 'on' status of special moves - now unnecessary?
                             //Game.Dungeon.CheckSpecialMoveValidity();
 
+                            //Target if enemies nearby
+                            if(!TargetSelected())
+                                TargetItemsCloseToPlayer(5.0, playerFOV);
+
                             ProfileEntry("Pre Screen Update");
 
                             //Update screen just before PC's turn
@@ -228,6 +233,7 @@ namespace RogueBasin
                                 var inputResult = UserInput();
                                 timeAdvances = inputResult.Item1;
                                 centreOnPC = inputResult.Item2;
+
                                 //timeAdvances = true;
                             } while (!timeAdvances);
 
@@ -613,6 +619,7 @@ namespace RogueBasin
                                 case 'V':
                                     //screen debug mode
                                     Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
+                                    Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
                                     Screen.Instance.Update();
                                     break;
 
@@ -807,6 +814,8 @@ namespace RogueBasin
                                 {
                                     timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(kv.Value);
                                     functionPressed = true;
+                                    //Just update the screen each time
+                                    Screen.Instance.Update();
                                     break;
                                 }
                             }
@@ -822,6 +831,8 @@ namespace RogueBasin
                                 {
                                     timeAdvances = Game.Dungeon.Player.EquipInventoryItemType(kv.Value);
                                     functionPressed = true;
+                                    //Just update the screen each time
+                                    Screen.Instance.Update();
                                     break;
                                 }
                             }
@@ -1758,7 +1769,7 @@ namespace RogueBasin
             Point destinationSq = toThrow.ThrowItem(target);
 
             //Remove stealth
-            player.RemoveEffect(typeof(PlayerEffects.StealthField));
+            RemoveEffectsDueToThrowing(player);
             
             //Destroy it if required
             if (toThrow.DestroyedOnThrow())
@@ -1795,6 +1806,11 @@ namespace RogueBasin
             return true;
         }
 
+        private static void RemoveEffectsDueToThrowing(Player player)
+        {
+            //player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
+        }
+
         /// <summary>
         /// Examine using the target. Returns if time passes.
         /// </summary>
@@ -1818,6 +1834,18 @@ namespace RogueBasin
             }
 
             return false;
+        }
+
+        private bool TargetSelected()
+        {
+            if (Screen.Instance.CreatureToView != null)
+            {
+                if(!Screen.Instance.CreatureToView.Alive)
+                    return false;
+                return true;
+            }
+
+            return Screen.Instance.ItemToView != null;
         }
 
 
@@ -1887,7 +1915,7 @@ namespace RogueBasin
 
             if (success)
             {
-                player.RemoveEffect(typeof(PlayerEffects.StealthField));
+                RemoveEffectsDueToFiringWeapon(player);
             }
 
             //Store details for a recast
@@ -1909,6 +1937,14 @@ namespace RogueBasin
 
             //Time only goes past if successfully cast
             return success;
+        }
+
+        private static void RemoveEffectsDueToFiringWeapon(Player player)
+        {
+            //player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
+            //player.RemoveEffect(typeof(PlayerEffects.SpeedBoost));
+            player.CancelBoostDueToAttack();
+            player.CancelStealthDueToAttack();
         }
 
         /// <summary>
@@ -2092,6 +2128,13 @@ namespace RogueBasin
             //Start on the nearest creature
             Creature closeCreature = Game.Dungeon.FindClosestHostileCreatureInFOV(player);
 
+            if (closeCreature == null)
+            {
+                var allCreatures = Game.Dungeon.FindClosestCreaturesInPlayerFOV();
+                if (allCreatures.Any())
+                    closeCreature = allCreatures.First();
+            }
+
             //If no nearby creatures, start on the player
             if (closeCreature == null)
                 closeCreature = Game.Dungeon.Player;
@@ -2128,6 +2171,29 @@ namespace RogueBasin
 
             return GetTargetFromPlayer(startPoint, out target, targetType, range, spreadAngle, confirmChar, currentFOV);
         }
+
+        private void TargetItemsCloseToPlayer(double range, CreatureFOV currentFOV)
+        {
+            Player player = Game.Dungeon.Player;
+            Point start = player.LocationMap;
+            var candidates = Game.Dungeon.GetNearbyCreaturesInOrderOfRange(range, currentFOV, player.LocationLevel, player.LocationMap);
+            var candidatesInFOV = candidates.Where(c => currentFOV.CheckTileFOV(c.Item2.LocationMap));
+
+            if (candidatesInFOV.Count() == 0)
+            {
+                ResetViewPanel();
+                return;
+            }
+
+            var hostiles = candidatesInFOV.Where(c => c.Item2.InPursuit());
+
+            if(hostiles.Count() > 0)
+                SetViewPanelToTargetAtSquare(hostiles.First().Item2.LocationMap);
+            else
+                SetViewPanelToTargetAtSquare(candidatesInFOV.First().Item2.LocationMap);
+        }
+
+        
 
         /// <summary>
         /// Gets a target from the player. false showed an escape. otherwise target is the target selected.
@@ -2244,6 +2310,12 @@ namespace RogueBasin
             else
                 Screen.Instance.ItemToView = null;
             return sqC;
+        }
+
+        private static void ResetViewPanel()
+        {
+            Screen.Instance.CreatureToView = null;
+            Screen.Instance.ItemToView = null;
         }
 
         /// <summary>

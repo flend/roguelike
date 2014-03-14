@@ -59,6 +59,10 @@ namespace RogueBasin
             this.overrideLocation = overrideLocation;
         }
 
+        public bool CheckTileFOV(Point p)
+        {
+            return CheckTileFOV(p.x, p.y);
+        }
 
         public bool CheckTileFOV(int x, int y)
         {

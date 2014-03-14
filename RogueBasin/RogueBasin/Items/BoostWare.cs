@@ -6,11 +6,18 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    class StealthWare : Item, IEquippableItem
+    class BoostWare : Item, IEquippableItem
     {
-        public StealthWare()
+        int level;
+
+        public BoostWare()
         {
 
+        }
+
+        public BoostWare(int level)
+        {
+            this.level = level;
         }
 
         /// <summary>
@@ -29,20 +36,20 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("StealthWare equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("BoostWare equipped", LogDebugLevel.Medium);
 
             Player player = user as Player;
-            player.AddEffect(new PlayerEffects.StealthBoost());
+            player.AddEffect(new PlayerEffects.SpeedBoost(level));
 
             return true;
         }
 
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("StealthWare unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("BoostWare unequipped", LogDebugLevel.Low);
 
             Player player = user as Player;
-            player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
+            player.RemoveEffect(typeof(PlayerEffects.SpeedBoost));
 
             return true;
         }
@@ -57,7 +64,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "StealthWare v1"; }
+            get { return "BoostWare v1"; }
         }
 
         /// <summary>
@@ -65,12 +72,12 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "StealthWare v1"; }
+            get { return "BoostWare v1"; }
         }
 
         protected override char GetRepresentation()
         {
-            return (char)582;
+            return (char)583;
         }
 
         public override libtcodWrapper.Color GetColour()

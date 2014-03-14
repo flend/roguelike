@@ -74,12 +74,11 @@ namespace RogueBasin
 
         private const int TurnsToRegenerateEnergy = 10;
 
-        public int TurnsWithoutMoving { get; private set; }
-
         private Dictionary<Item, int> wetwareDisabledTurns = new Dictionary<Item, int>();
 
         //4 ticks per turn currently
         private const int turnsToDisableStealthWareAfterAttack = 80;
+        private const int turnsToDisableBoostWareAfterAttack = 80;
 
         /// <summary>
         /// Player level
@@ -212,7 +211,7 @@ namespace RogueBasin
             MaxShield = 100;
             Shield = MaxShield;
 
-            MaxEnergy = 100;
+            MaxEnergy = 200;
             Energy = MaxEnergy;
 
             DoesShieldRecharge = false;
@@ -449,16 +448,6 @@ namespace RogueBasin
             //Calculate sight radius (depends on dungeon light level)
 
             //CalculateSightRadius();
-        }
-
-        public void AddTurnWithoutMoving()
-        {
-            TurnsWithoutMoving++;
-        }
-
-        public void ResetTurnsWithoutMoving()
-        {
-            TurnsWithoutMoving = 0;
         }
 
         /// <summary>
@@ -744,10 +733,14 @@ namespace RogueBasin
                 aimBonus = ((PlayerEffects.AimEnhance)aimEffect.First()).aimEnhanceAmount * 0.3;
             }
 
-            return Math.Min(TurnsWithoutMoving, 3) * aimBonus;
+            var stationaryBonus = Math.Min(TurnsInactive, 3) * aimBonus;
+
+            var nonFireBonus = Math.Min(TurnsSinceAction, 3) * aimBonus / 2;
+
+            return stationaryBonus + nonFireBonus;
         }
 
-        public double CalculateAttackModifiersOnMonster(Monster target)
+        public double CalculateRangedAttackModifiersOnMonster(Monster target)
         {
             var damageModifier = 1.0;
 
@@ -758,6 +751,45 @@ namespace RogueBasin
             if (target != null && target.TurnsMoving > 0)
             {
                 damageModifier -= 0.2;
+            }
+
+            return damageModifier;
+        }
+
+        public double CalculateMeleeAttackModifiersOnMonster(Monster target)
+        {
+            var meleeEffect = GetActiveEffects(typeof(PlayerEffects.SpeedBoost));
+
+            var meleeMultiplier = 1.0;
+
+            if (meleeEffect.Count() > 0)
+            {
+                meleeMultiplier = ((PlayerEffects.SpeedBoost)meleeEffect.First()).Level * 0.5 + 1;
+            }
+
+            return meleeMultiplier;
+        }
+
+        public double CalculateDamageModifierForAttacksOnPlayer(Monster target)
+        {
+            var damageModifier = 1.0;
+
+            if(TurnsMoving > 0)
+            {
+                damageModifier -= 0.2;
+            }
+
+            if (target != null)
+            {
+                //Test cover
+                var coverItems = Game.Dungeon.GetNumberOfCoverItemsBetweenPoints(target.LocationLevel, target.LocationMap, LocationLevel, LocationMap);
+                var hardCover = coverItems.Item1;
+                var softCover = coverItems.Item2;
+
+                if (hardCover > 0)
+                    damageModifier -= 0.5;
+                if (softCover > 0)
+                    damageModifier -= 0.1;
             }
 
             return damageModifier;
@@ -799,10 +831,14 @@ namespace RogueBasin
 
         public CombatResults AttackMonsterRanged(Monster monster, int damage)
         {
-            string combatResultsMsg = "PvM (ranged) " + monster.Representation + " = " + damage;
+            var modifiedDamage = (int)Math.Ceiling(CalculateRangedAttackModifiersOnMonster(monster) * damage);
+            string combatResultsMsg = "PvM (ranged) " + monster.Representation + "base " + damage + " modified " + modifiedDamage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
-            return ApplyDamageToMonster(monster, damage, false, false);
+            CancelStealthDueToAttack();
+            CancelBoostDueToAttack();
+
+            return ApplyDamageToMonster(monster, modifiedDamage, false, false);
         }
 
         public CombatResults AttackMonsterThrown(Monster monster, int damage)
@@ -810,11 +846,15 @@ namespace RogueBasin
             string combatResultsMsg = "PvM (thrown) " + monster.Representation + " = " + damage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
+            CancelStealthDueToAttack();
+            CancelBoostDueToAttack();
+
             return ApplyDamageToMonster(monster, damage, false, false);
         }
 
         public CombatResults AttackMonsterMelee(Monster monster)
         {
+
             //Flatline has a rather simple combat system
             IEquippableItem item = GetEquippedWeapon();
 
@@ -825,21 +865,33 @@ namespace RogueBasin
                 baseDamage = item.MeleeDamage();
             }
 
-            string combatResultsMsg = "PvM (melee) " + monster.Representation + " = " + baseDamage;
+            var modifiedDamage = (int)Math.Ceiling(CalculateMeleeAttackModifiersOnMonster(monster) * baseDamage);
+
+            string combatResultsMsg = "PvM (melee) " + monster.Representation + " base " + baseDamage + " mod " + modifiedDamage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             CancelStealthDueToAttack();
 
-            return ApplyDamageToMonster(monster, baseDamage, false, false);
+            return ApplyDamageToMonster(monster, modifiedDamage, false, false);
         }
 
-        private void CancelStealthDueToAttack()
+        public void CancelStealthDueToAttack()
         {
             //Forceably unequip any StealthWare and disable for some time
             if (IsWetwareTypeEquipped(typeof(Items.StealthWare)))
             {
                 UnequipWetware();
                 DisableWetware(typeof(Items.StealthWare), turnsToDisableStealthWareAfterAttack);
+            }
+        }
+
+        public void CancelBoostDueToAttack()
+        {
+            //Forceably unequip any SpeedWare and disable for some time
+            if (IsWetwareTypeEquipped(typeof(Items.BoostWare)))
+            {
+                UnequipWetware();
+                DisableWetware(typeof(Items.BoostWare), turnsToDisableBoostWareAfterAttack);
             }
         }
 
@@ -1427,9 +1479,11 @@ namespace RogueBasin
             UnequipWetware();
 
             if (justUnequip)
-                return true;
+                //return true;
+                return false;
 
-            return EquipWetware(wetwareTypeToEquip);
+            var equipTime = EquipWetware(wetwareTypeToEquip);
+            return false;
         }
 
         internal bool EquipWetware(Type wetwareTypeToEquip)
@@ -1491,6 +1545,8 @@ namespace RogueBasin
 
                 wetwareSlot.equippedItem = null;
             }
+
+            CalculateCombatStats();
         }
 
 
@@ -1529,7 +1585,8 @@ namespace RogueBasin
                 return false;
             }
 
-            return EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
+            var equipTime = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
+            return false;
         }
 
         /// <summary>
@@ -1805,6 +1862,7 @@ namespace RogueBasin
             Inventory.AddItemNotFromDungeon(new Items.StealthWare());
             Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
             Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
+            Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
         }
 
         public void GiveAllWeapons()
@@ -2133,7 +2191,7 @@ namespace RogueBasin
 
         internal bool isStealthed()
         {
-            if (IsEffectActive(typeof(PlayerEffects.StealthField)))
+            if (IsEffectActive(typeof(PlayerEffects.StealthBoost)))
                 return true;
 
             return false;
@@ -2278,6 +2336,7 @@ namespace RogueBasin
             
             if (Game.Dungeon.Player.RecalculateCombatStatsRequired)
                 Game.Dungeon.Player.CalculateCombatStats();
+
         }
 
         private void UseEnergyForWetware()
@@ -2302,6 +2361,7 @@ namespace RogueBasin
         {
             Hitpoints = MaxHitpoints;
             Shield = MaxShield;
+            Energy = MaxEnergy;
         }
 
         private void RegenerateStatsPerTurn()

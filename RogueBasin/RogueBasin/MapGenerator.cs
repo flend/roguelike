@@ -111,6 +111,12 @@ namespace RogueBasin
             this.StartRoom = roomCoords;
         }
 
+        public CreaturePatrol(Point startPos, List<Point> waypoints)
+        {
+            this.StartPos = startPos;
+            this.Waypoints = waypoints;
+        }
+
     }
     
     /// <summary>

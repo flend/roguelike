@@ -124,6 +124,8 @@ namespace RogueBasin
 
             Random rand = Game.Random;
 
+            Point startOfTurnLocation = LocationMap;
+
             //RESTORE STATE AFTER SAVE
             //Creature references may be circular, and will crash serialization, so an index is used instead
 
@@ -169,6 +171,8 @@ namespace RogueBasin
             {
                 StunnedTurns--;
                 LogFile.Log.LogEntryDebug(this.Representation + " is stunned for " + StunnedTurns + " more turns", LogDebugLevel.Low);
+
+                ResetTurnsMoving();
                 return;
             }
 
@@ -239,8 +243,10 @@ namespace RogueBasin
 
             //If we're still sleeping then skip this go
             if (Sleeping)
+            {
+                ResetTurnsMoving();
                 return;
-
+            }
             //RETURNING - used when a charmed creature gets a long way from the PC
 
             if (AIState == SimpleAIStates.Returning)
@@ -504,6 +510,18 @@ namespace RogueBasin
                         AIState = SimpleAIStates.Pursuit;
                         ChaseCreature(closestCreature);
                     }
+                }
+
+                //This is so we don't have to instrument each state
+                if (LocationMap == startOfTurnLocation)
+                {
+                    ResetTurnsMoving();
+                    AddTurnsInactive();
+                }
+                else
+                {
+                    ResetTurnsInactive();
+                    AddTurnsMoving();
                 }
             }
 
@@ -1183,7 +1201,7 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug(this.Representation + " opened door", LogDebugLevel.Medium);
             }
 
-             LocationMap = nextStep;
+            LocationMap = nextStep;
         }
 
         public void RecoverOnBeingHit()

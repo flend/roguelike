@@ -688,6 +688,41 @@ namespace RogueBasin
             }
         }
 
+        public IEnumerable<Tuple<double, Monster>> GetNearbyCreaturesInOrderOfRange(double range, CreatureFOV currentFOV, int level, Point start) {
+            var rangeRoundedUp = (int)Math.Ceiling(range);
+
+            var candidates = new List<Tuple<double, Monster>>();
+
+            for (int i = start.x - rangeRoundedUp; i < start.x + rangeRoundedUp; i++)
+            {
+                for (int j = start.y - rangeRoundedUp; j < start.y + rangeRoundedUp; j++)
+                {
+
+                    if (i > 0 && j > 0 && i < Game.Dungeon.Levels[level].width && j < Game.Dungeon.Levels[level].height)
+                    {
+                        foreach (var c in Game.Dungeon.Monsters)
+                        {
+                            if (c.LocationLevel != level)
+                                continue;
+
+                            if (currentFOV.CheckTileFOV(i, j))
+                            {
+                                candidates.Add(new Tuple<double, Monster>(Utility.GetDistanceBetween(start, c.LocationMap), c));
+                            }
+                        }
+                    }
+                }
+            }
+            return candidates.OrderBy(c => c.Item1);
+        }
+
+        public IEnumerable<Monster> FindClosestCreaturesInPlayerFOV()
+        {
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            var creatures = GetNearbyCreaturesInOrderOfRange(10.0, currentFOV, player.LocationLevel, player.LocationMap).Select(c => c.Item2);
+            return creatures.Where(c => currentFOV.CheckTileFOV(c.LocationMap));
+        }
+
         /// <summary>
         /// Find the hostile creature to the map object
         /// </summary>
@@ -1330,6 +1365,8 @@ namespace RogueBasin
             var addFeatureSuccess = AddFeature(feature, level, location);
             if (!addFeatureSuccess)
                 return false;
+
+            feature.IsBlocking = true;
 
             SetTerrainAtPoint(level, location, blocksLight ? MapTerrain.NonWalkableFeatureLightBlocking : MapTerrain.NonWalkableFeature);
 
@@ -2005,11 +2042,6 @@ namespace RogueBasin
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
             SpecialMove moveDone = DoSpecialMove(newPCLocation);
 
-            if (deltaMove == new Point(0, 0))
-                player.AddTurnWithoutMoving();
-            else
-                player.ResetTurnsWithoutMoving();
-
             bool okToMoveIntoSquare = true;
 
             //If there's no special move, do a conventional move
@@ -2091,6 +2123,18 @@ namespace RogueBasin
                     return true;
 
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y, runTriggersAlways);
+
+                player.AddTurnsSinceAction();
+                if (deltaMove == new Point(0, 0))
+                {
+                    player.ResetTurnsMoving();
+                    player.AddTurnsInactive();
+                }
+                else
+                {
+                    player.ResetTurnsInactive();
+                    player.AddTurnsMoving();
+                }
 
                 //Auto-pick up any items
                 if (contents.items.Count > 0)
@@ -2951,7 +2995,7 @@ namespace RogueBasin
         /// Recalculate the players FOV. Subsequent accesses to the TCODMap of the player's level will have his FOV
         /// Note that the maps may get hijacked by other creatures
         /// </summary>
-        internal void CalculatePlayerFOV()
+        internal CreatureFOV CalculatePlayerFOV()
         {
             //Get TCOD to calculate the player's FOV
             Map currentMap = levels[Player.LocationLevel];
@@ -2974,6 +3018,8 @@ namespace RogueBasin
                     }
                 }
             }
+
+            return tcodFOV;
         }
 
         
@@ -3337,6 +3383,10 @@ namespace RogueBasin
         /// </summary>
         internal void PCActionNoMove()
         {
+            player.ResetTurnsInactive();
+            player.ResetTurnsMoving();
+            player.ResetTurnsSinceAction();
+
             //Check special moves.
 
             foreach (SpecialMove move in specialMoves)
@@ -4683,6 +4733,53 @@ namespace RogueBasin
         public IEnumerable<Point> GetWalkablePointsFromSet(int level, IEnumerable<Point> allPossiblePoints)
         {
             return allPossiblePoints.SelectMany(p => MapSquareIsWalkable(level, p) ? new List<Point> {p} : new List<Point>());
+        }
+
+        /// <summary>
+        /// Source is the person firing
+        /// </summary>
+        /// <param name="sourceLevel"></param>
+        /// <param name="source"></param>
+        /// <param name="destLevel"></param>
+        /// <param name="dest"></param>
+        /// <returns></returns>
+        internal Tuple<int, int> GetNumberOfCoverItemsBetweenPoints(int sourceLevel, Point source, int destLevel, Point dest)
+        {
+            if (sourceLevel != destLevel)
+                return new Tuple<int,int>(0,0);
+
+            //Any intervening cover. Stuff we're sitting on doesn't count
+            var pointsOnLine = Utility.GetPointsOnLine(source, dest).Except(new List<Point>{source, dest});
+
+            var hardCover = 0;
+            var softCover = 0;
+
+            foreach (Point p in pointsOnLine)
+            {
+                var terrain = GetTerrainAtPoint(sourceLevel, p);
+
+                if (!IsTerrainWalkable(terrain))
+                    hardCover++;
+            }
+
+            //Check for any blocking features
+            //Is checked by terrain above
+            /*
+            foreach (var f in features)
+            {
+                if (f.LocationLevel != sourceLevel)
+                    continue;
+
+                if (pointsOnLine.Contains(f.LocationMap))
+                {
+                    if (f.IsBlocking)
+                        hardCover += 1;
+                    else
+                        softCover += 1;
+                }
+            }*/
+
+            return new Tuple<int, int>(hardCover, softCover);
         }
     }
 }

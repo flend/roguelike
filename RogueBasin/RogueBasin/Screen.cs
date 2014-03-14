@@ -1849,7 +1849,11 @@ namespace RogueBasin {
                 PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
 
                 //Combat vs monster
-                PrintLine("Attk: " + player.CalculateAttackModifiersOnMonster(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+                //Combat vs player
+                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                var cover = Game.Dungeon.GetNumberOfCoverItemsBetweenPoints(player.LocationLevel, player.LocationMap, CreatureToView.LocationLevel, CreatureToView.LocationMap);
+                PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
 
                 //Monster hp
 
@@ -1857,17 +1861,17 @@ namespace RogueBasin {
                 double mplayerHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
                 int mhpBarEntries = (int)Math.Ceiling(mhpBarLength * mplayerHPRatio);
 
-                PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
 
                 for (int i = 0; i < mhpBarLength; i++)
                 {
                     if (i < mhpBarEntries)
                     {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, heartChar, heartColor);
+                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 4, heartChar, heartColor);
                     }
                     else
                     {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 2, heartChar, disabledColor);
+                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 4, heartChar, disabledColor);
                     }
                 }
                 
@@ -1876,18 +1880,18 @@ namespace RogueBasin {
 
                 if (CreatureToView.StunnedTurns > 0)
                 {
-                    PrintLine("(Stunned: " + CreatureToView.StunnedTurns + ")", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, stunnedBackground);
+                    PrintLine("(Stunned: " + CreatureToView.StunnedTurns + ")", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, stunnedBackground);
                 }
                 else if (CreatureToView.InPursuit())
                 {
-                    PrintLine("(In Pursuit)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, pursuitBackground);
+                    PrintLine("(Hostile)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, pursuitBackground);
                 }
                 else if (!CreatureToView.OnPatrol())
                 {
-                    PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, investigateBackground);
+                    PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, investigateBackground);
                 }
                 else {
-                    PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                    PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left);
                 }
             }
             else if (ItemToView != null)
@@ -1900,18 +1904,21 @@ namespace RogueBasin {
                 {
                     EquipmentSlot weaponSlot = itemE.EquipmentSlots.Find(x => x == EquipmentSlot.Weapon);
                     if(weaponSlot != null) {
-                        PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                        PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
                     }
                     else
-                        PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                        PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
                 }
             }
             else
             {
                 //Just base combat
-                PrintLine("Attk: " + player.CalculateAttackModifiersOnMonster(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
 
             }
+
+            
 
             /*
             //Game data

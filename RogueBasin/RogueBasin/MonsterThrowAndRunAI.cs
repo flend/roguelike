@@ -17,18 +17,25 @@ namespace RogueBasin
             double range = Utility.GetDistanceBetween(this, newTarget);
 
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+            CreatureFOV playerFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             bool backAwayFromTarget = false;
 
             //Back away if we are too close & can see the target
             //If we can't see the target, don't back away
             if(range < GetMissileRange() / 2.0 && currentFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y)) {
-                
-                 //Check our chance to back away. For a hard/clever creature this is 100. For a stupid creature it is 0.
-                 if (Game.Random.Next(100) < GetChanceToBackAway())
-                 {
-                     backAwayFromTarget = true;
-                 }
+
+                //Enforce a symmetry FOV
+                if (newTarget != Game.Dungeon.Player ||
+                    (newTarget == Game.Dungeon.Player && playerFOV.CheckTileFOV(this.LocationMap)))
+                {
+
+                    //Check our chance to back away. For a hard/clever creature this is 100. For a stupid creature it is 0.
+                    if (Game.Random.Next(100) < GetChanceToBackAway())
+                    {
+                        backAwayFromTarget = true;
+                    }
+                }
             }
 
             if(backAwayFromTarget && CanMove() && WillPursue()) {
@@ -183,6 +190,13 @@ namespace RogueBasin
 
                 //Check FOV. If not in FOV, chase the player.
                 if (!currentFOV.CheckTileFOV(newTarget.LocationMap.x, newTarget.LocationMap.y))
+                {
+                    ContinueChasing(newTarget);
+                    return;
+                }
+
+                //Enforce a symmetry FOV
+                if (newTarget == Game.Dungeon.Player && !playerFOV.CheckTileFOV(this.LocationMap))
                 {
                     ContinueChasing(newTarget);
                     return;

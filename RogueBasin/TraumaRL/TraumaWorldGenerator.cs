@@ -90,6 +90,11 @@ namespace TraumaRL
                 DecorationFeatureDetails.DecorationFeatures.Stool,
                 DecorationFeatureDetails.DecorationFeatures.Bin
             };
+            //Set all others to the same for now
+            for (int i = 1; i < 10; i++)
+            {
+                featuresByLevel[i] = featuresByLevel[0];
+            }
         }
 
         public const int medicalLevel = 0;
