@@ -1645,7 +1645,7 @@ namespace TraumaRL
                 if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
                     var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
-                    Game.Dungeon.AddFeatureBlocking(new T(), level, featureLocationInMapCoords, true);
+                    Game.Dungeon.AddFeatureBlocking(new T(), level, featureLocationInMapCoords, false);
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
@@ -1676,7 +1676,7 @@ namespace TraumaRL
                 if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
                     var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
-                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
+                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
@@ -1709,7 +1709,7 @@ namespace TraumaRL
                 }
                 else if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
-                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
+                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
 
                     LogFile.Log.LogEntryDebug("Placing blocking feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }

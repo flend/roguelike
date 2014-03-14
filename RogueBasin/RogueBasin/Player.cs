@@ -198,7 +198,7 @@ namespace RogueBasin
             //Set initial HP
             SetupInitialStats();
 
-            SightRadius = NormalSightRadius;
+            SightRadius = 0;
 
             TurnCount = 0;
         }

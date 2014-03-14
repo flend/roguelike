@@ -612,7 +612,7 @@ namespace RogueBasin
 
                                 case 'V':
                                     //screen debug mode
-                                    Game.Dungeon.Player.AddEffect(new PlayerEffects.SightRadiusUp(2000, 1));
+                                    Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
                                     Screen.Instance.Update();
                                     break;
 
