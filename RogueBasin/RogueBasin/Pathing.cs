@@ -53,7 +53,7 @@ namespace RogueBasin
         /// <param name="dest"></param>
         /// <param name="allDoorsAsOpen">Assume doors are walkable</param>
         /// <returns></returns>
-        internal Point GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen)
+        internal Point GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen, bool attackDestination)
         {
 
             //Try to walk the path
@@ -111,8 +111,21 @@ namespace RogueBasin
                         continue;
 
                     //Is it at the destination? If so, that's the target creature and it is our goal.
-                    if (creature.LocationMap == dest)
-                        continue;
+                    if (creature.LocationMap == dest && nextStep == dest)
+                    {
+                        //All OK, continue, we will return these coords
+                        if (attackDestination)
+                            continue;
+                        else
+                        {
+                            //Otherwise we are temporarily blocked
+                            nextStep = origin;
+                            goodPath = true;
+                            blockingCreature = creature;
+                            //Exits loop and allows cleanup
+                            continue;
+                        }
+                    }
 
                     //Another creature is blocking
                     if (creature.LocationMap == theNextStep)
@@ -135,7 +148,7 @@ namespace RogueBasin
                 //Check if there is a blocking lock
                 var locksInSquare = dungeon.NonOpenLocksAtLocation(level, theNextStep);
 
-                //If no blocking creature or lock, the path is good
+                //If no blocking creature or lock (or we found our target), the path is good
                 if (blockingCreature == null && !locksInSquare)
                 {
                     goodPath = true;
@@ -236,7 +249,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, false, false);
         }
 
         /// <summary>
@@ -258,7 +271,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, true);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, true, false);
         }
 
         /// <summary>
@@ -279,7 +292,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, true);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, true, true);
         }
 
         /// <summary>
@@ -301,7 +314,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, false, false);
         }
 
     }
