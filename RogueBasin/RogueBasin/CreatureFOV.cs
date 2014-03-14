@@ -78,7 +78,13 @@ namespace RogueBasin
                     break;
 
                 case CreatureFOVType.Triangular:
-                    gameFOVPass = TriangularFOV(origin, creature.Heading, creature.SightRadius, x, y, Math.PI / 3.6);
+                    
+                    //This allows 0 to still be see everything
+                    var sightRadiusToUse = creature.SightRadius;
+                    if (creature.SightRadius == 0)
+                        sightRadiusToUse = creature.NormalSightRadius;
+
+                    gameFOVPass = TriangularFOV(origin, creature.Heading, sightRadiusToUse, x, y, Math.PI / 3.6);
                     break;
             }
 

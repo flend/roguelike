@@ -40,7 +40,8 @@ namespace RogueBasin.Creatures
         /// <returns></returns>
         protected override double GetMissileRange()
         {
-            return 1.0;
+            //Can explode diagonally!
+            return 1.9;
         }
 
         protected override string GetWeaponName()
