@@ -55,12 +55,12 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void RoomWithDiagonalGapConnectingWalkableAreasIsConnected()
+        public void RoomWithDiagonalGapConnectingWalkableAreasNotConnected()
         {
             RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testfilling_diagonalconnected.room");
             var filler = new RoomFilling(roomTemplate);
 
-            Assert.IsTrue(filler.Connected);
+            Assert.IsFalse(filler.Connected);
         }
 
         [TestMethod]
@@ -107,9 +107,8 @@ namespace DDRogueTest
             var filler = new RoomFilling(roomTemplate);
 
             filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(1, 1));
-            filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(1, 2));
             
-            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(1, 3)));
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(1, 2)));
         }
 
         [TestMethod]

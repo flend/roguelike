@@ -1809,10 +1809,14 @@ namespace RogueBasin
 
         public void GiveAllWeapons()
         {
+            Inventory.AddItemNotFromDungeon(new Items.Fists());
             Inventory.AddItemNotFromDungeon(new Items.Pistol());
             Inventory.AddItemNotFromDungeon(new Items.Shotgun());
             Inventory.AddItemNotFromDungeon(new Items.Laser());
             Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
+
+            //Start with fists
+            Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[1]);
         }
 
         /// <summary>
@@ -2292,6 +2296,12 @@ namespace RogueBasin
                     UnequipWetware();
                 }
             }
+        }
+
+        public void HealCompletely()
+        {
+            Hitpoints = MaxHitpoints;
+            Shield = MaxShield;
         }
 
         private void RegenerateStatsPerTurn()

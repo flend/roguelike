@@ -132,7 +132,7 @@ namespace RogueBasin
                                 {
                                     if (creature.IncrementTurnTime())
                                     {
-                                        //dungeon.ShowCreatureFOVOnMap(creature);
+                                        dungeon.ShowCreatureFOVOnMap(creature);
 
                                         //Creatures may be killed by other creatures so check they are alive before processing
                                         if (creature.Alive)
@@ -648,8 +648,7 @@ namespace RogueBasin
 
                                 case 'v':
                                     //Add a healing event on the player
-                                    Game.Dungeon.Player.AddShield(100);
-                                    Game.Dungeon.Player.HealPlayer(100);
+                                    Game.Dungeon.Player.HealCompletely();
                                     Screen.Instance.Update();
                                     break;
                                

@@ -1111,12 +1111,24 @@ namespace RogueBasin {
 
             char toDraw = '.';
             int monsterIdInSquare = tileMapLayer(TileLevel.Creatures)[ViewRelative(Target)].TileID;
-
+            var monsterColorInSquare = tileMapLayer(TileLevel.Creatures)[ViewRelative(Target)].TileFlag as LibtcodColorFlags;
+            if (monsterIdInSquare == -1)
+            {
+                monsterIdInSquare = tileMapLayer(TileLevel.Features)[ViewRelative(Target)].TileID;
+                monsterColorInSquare = tileMapLayer(TileLevel.Terrain)[ViewRelative(Target)].TileFlag as LibtcodColorFlags;
+            }
+            if (monsterIdInSquare == -1)
+            {
+                monsterIdInSquare = tileMapLayer(TileLevel.Terrain)[ViewRelative(Target)].TileID;
+                monsterColorInSquare = tileMapLayer(TileLevel.Terrain)[ViewRelative(Target)].TileFlag as LibtcodColorFlags;
+            }
+            
             if (monsterIdInSquare != -1)
                 toDraw = (char)monsterIdInSquare;
 
             tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(toDraw);
-            tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(ColorPresets.Red, backgroundColor);
+            if(monsterColorInSquare != null)
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(monsterColorInSquare.BackgroundColor, monsterColorInSquare.ForegroundColor);
             
         }
 
@@ -1704,7 +1716,7 @@ namespace RogueBasin {
             var weaponIconXOffset = -2;
             foreach (var kv in ItemMapping.WeaponMapping)
             {
-                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 3 - 1, weaponOptionRow), kv.Value, kv.Key);
+                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 2, weaponOptionRow), kv.Value, kv.Key);
             }
             
             //Draw energy bar and use keys

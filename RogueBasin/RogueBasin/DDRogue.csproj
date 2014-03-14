@@ -80,6 +80,7 @@
     <Compile Include="Creatures\PerimeterBotLinear.cs" />
     <Compile Include="Creatures\RollingBomb.cs" />
     <Compile Include="Creatures\RotatingTurret.cs" />
+    <Compile Include="Creatures\MaintBot.cs" />
     <Compile Include="Creatures\Swarmer.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -231,6 +232,7 @@
     <Compile Include="Items\Laser.cs" />
     <Compile Include="Items\Log.cs" />
     <Compile Include="Items\NanoRepair.cs" />
+    <Compile Include="Items\Fists.cs" />
     <Compile Include="Items\Pistol.cs" />
     <Compile Include="Items\ShieldPack.cs" />
     <Compile Include="Items\Potion.cs">

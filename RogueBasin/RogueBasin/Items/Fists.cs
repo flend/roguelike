@@ -5,19 +5,9 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Pistol : Item, IEquippableItem
+    public class Fists : Item, IEquippableItem
     {
-
-        /// <summary>
-        /// Public for serialization
-        /// </summary>
-        public int Ammo { get; set; }
-
-        public Pistol()
-        {
-            Ammo = MaxAmmo();
-        }
-
+ 
         /// <summary>
         /// Equipment slots where we can be equipped
         /// </summary>
@@ -34,7 +24,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Pistol equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Fists equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -45,7 +35,7 @@ namespace RogueBasin.Items
             }
 
             //Messages
-            //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
+            //Game.MessageQueue.AddMessage("Vibro-blade.");
 
             //Screen.Instance.PlayMovie("plotbadge", true);
 
@@ -63,13 +53,26 @@ namespace RogueBasin.Items
         }
 
         /// <summary>
+        /// Throws the item. Can use generic, it's just 
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public Point ThrowItem(Point target)
+        {
+            //Damage for 5 pts
+            Point dest = Game.Dungeon.Player.ThrowItemGeneric(this, target, 5, false);
+            return dest;
+        }
+
+        /// <summary>
         /// not used in this game
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Pistol unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Fists 'unequipped'", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -82,7 +85,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Pistol"; }
+            get { return "Fists"; }
         }
 
         /// <summary>
@@ -90,17 +93,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Pistols"; }
+            get { return "Fists"; }
         }
 
         protected override char GetRepresentation()
         {
-            return (char)272;
+            return (char)278;
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.HotPink;
+            return ColorPresets.LawnGreen;
         }
 
         public int ArmourClassModifier()
@@ -126,18 +129,12 @@ namespace RogueBasin.Items
 
         public bool HasMeleeAction()
         {
-            return false;
+            return true;
         }
-
-        public override int ItemCost()
-        {
-            return 10;
-        }
-
 
         public bool HasFireAction()
         {
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -147,7 +144,7 @@ namespace RogueBasin.Items
         public bool HasThrowAction()
         {
 
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -159,17 +156,17 @@ namespace RogueBasin.Items
             return false;
         }
 
-        public int MaxAmmo()
-        {
-            return 3;
-        }
-
         public int RemainingAmmo()
         {
-            return Ammo;
+
+            return 0;
         }
 
-        List<Point> targetSquares = null;
+        public int MaxAmmo()
+        {
+            return 0;
+        }
+
 
         /// <summary>
         /// Fires the item - probably should be a method
@@ -179,57 +176,10 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            //Should be guaranteed in range by caller
-
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-
-            LogFile.Log.LogEntryDebug("Firing pistol", LogDebugLevel.Medium);
-
-            //Remove 1 ammo
-            Ammo--;
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Find monster target
-
-            targetSquares = Game.Dungeon.CalculateTrajectory(target);
-            Monster monster = Game.Dungeon.FirstMonsterInTrajectory(targetSquares);
-
-            if(monster == null) {
-                LogFile.Log.LogEntryDebug("No monster in target for Pistol.Ammo used anyway.", LogDebugLevel.Medium);
-                return true;
-            }
-
-            //Draw attack
-
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
-
-            //Damage monster
-            
-            int damageBase = 20;
-
-            string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 3";
-            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-            //Apply damage
-            player.AttackMonsterRanged(monster, damageBase);
-
-            return true;
+            return false;
         }
 
-        /// <summary>
-        /// Throws the item
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public Point ThrowItem(Point target)
-        {
-            return Game.Dungeon.Player.ThrowItemGeneric(this, target, 3, true);
-        }       
-       
+
         /// <summary>
         /// Operates the item - definitely a method
         /// </summary>
@@ -274,20 +224,25 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 8;
+            return 5;
         }
 
+        /// <summary>
+        /// Noise mag of this weapon on firing
+        /// </summary>
+        /// <returns></returns>
         public double FireSoundMagnitude()
         {
-            return 0.4;
+            return 0.0;
         }
 
         /// <summary>
         /// Noise mag of this weapon on throwing
         /// </summary>
         /// <returns></returns>
-        public double ThrowSoundMagnitude() {
-            return 0.2;   
+        public double ThrowSoundMagnitude()
+        {
+            return 0.1;
         }
 
         /// <summary>
@@ -305,7 +260,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 5;
+            return 10;
         }
 
         /// <summary>
@@ -315,6 +270,11 @@ namespace RogueBasin.Items
         public virtual double ShotgunSpreadAngle()
         {
             return 0.0;
+        }
+
+        public override int ItemCost()
+        {
+            return 20;
         }
 
         /// <summary>
@@ -330,5 +290,6 @@ namespace RogueBasin.Items
         {
             return 0;
         }
+
     }
 }

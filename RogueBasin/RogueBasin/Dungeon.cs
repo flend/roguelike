@@ -2800,13 +2800,14 @@ namespace RogueBasin
             CreatureFOV creatureFov = Game.Dungeon.CalculateCreatureFOV(creature);
 
             //Only check sightRadius around the creature
-            /*
-            int xl = creature.LocationMap.x - creature.SightRadius;
-            int xr = creature.LocationMap.x + creature.SightRadius;
 
-            int yt = creature.LocationMap.y - creature.SightRadius;
-            int yb = creature.LocationMap.y + creature.SightRadius;
-            */
+            int sightRangeMax = 20;
+            int xl = creature.LocationMap.x - sightRangeMax;
+            int xr = creature.LocationMap.x + sightRangeMax;
+
+            int yt = creature.LocationMap.y - sightRangeMax;
+            int yb = creature.LocationMap.y + sightRangeMax;
+            
             //If sight is infinite, check all the map
             //if (creature.SightRadius == 0)
             //{
@@ -2817,10 +2818,11 @@ namespace RogueBasin
 
             //According to profiling this is *BY FAR* the slowest thing in the game
 
+            /*
             int xl = 0;
             int xr = currentMap.width;
             int yt = 0;
-            int yb = currentMap.height;
+            int yb = currentMap.height;*/
 
             if (xl < 0)
                 xl = 0;
@@ -3299,6 +3301,10 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Player killed", LogDebugLevel.Medium);
 
                 DungeonInfo.NoDeaths++;
+
+                //For now, we just healup the player
+                Game.Dungeon.Player.HealCompletely();
+                return;
 
                 if (DungeonInfo.NoDeaths == DungeonInfo.MaxDeaths)
                 {

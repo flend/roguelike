@@ -1,15 +1,16 @@
 ﻿using GraphMap;
 using libtcodWrapper;
+using RogueBasin;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace RogueBasin
+namespace TraumaRL
 {
 
-    public class TraumaWorldGenerator
+    public partial class TraumaWorldGenerator
     {
         /// <summary>
         /// Mapping from template terrain to real terrain on the map
@@ -349,8 +350,8 @@ namespace RogueBasin
                     //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
                     allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
 
-                    //Recalculate walkable to allow placing objects
-                    Game.Dungeon.RefreshAllLevelPathingAndFOV();
+                    //Set maps in engine (needs to be done before placing items and monsters)
+                    SetupMapsInEngine();
 
                     var visualiser = new DoorClueGraphvizExport(mapInfo.Model);
                     visualiser.OutputFullGraph("bsptree-full");
@@ -360,15 +361,18 @@ namespace RogueBasin
                     AddElevatorFeatures(mapInfo, levelInfo);
 
                     //Generate quests at mapmodel level
-                    GenerateQuests(mapInfo, levelInfo);
+                    //GenerateQuests(mapInfo, levelInfo);
 
                     //Add clues and locks at dungeon engine level
-                    AddSimpleCluesAndLocks(mapInfo);
+                    //AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
                     AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
+
+                    //Add monsters
+                    CreateMonstersForLevels(mapInfo);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);
@@ -394,6 +398,16 @@ namespace RogueBasin
             } while (true);
 
             return mapInfo;
+        }
+
+        private void SetupMapsInEngine()
+        {
+            Game.Dungeon.RefreshAllLevelPathingAndFOV();
+
+            foreach (var level in gameLevels)
+            {
+                Game.Dungeon.Levels[level].LightLevel = 0;
+            }
         }
 
         private void AddDecorationFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -589,7 +603,7 @@ namespace RogueBasin
                 var door = manager.GetDoorById(doorId);
 
                 var unusedColor = GetUnusedColor();
-                var lockedDoor = new Locks.SimpleLockedDoor(door, doorReadableId, unusedColor.Item1);
+                var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, doorReadableId, unusedColor.Item1);
                 var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
                 lockedDoor.LocationLevel = doorInfo.LevelNo;
                 lockedDoor.LocationMap = doorInfo.MapLocation;
@@ -648,7 +662,7 @@ namespace RogueBasin
             manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
             var door = manager.GetDoorById(doorId);
 
-            var lockedDoor = new Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", doorId, ColorPresets.Red);
+            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", doorId, ColorPresets.Red);
             var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;
@@ -667,7 +681,7 @@ namespace RogueBasin
             var roomsForMonsters = GetRandomRoomsForClues(mapInfo, objectsToPlace, allowedRoomsForClues);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
-            PlaceCreatureClues<Creatures.Camera>(mapInfo, clues, true);
+            PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, clues, true);
 
             //Place log entries explaining the puzzle
             //These will not be turned into in-engine clue items, so they can't be used to open the door
@@ -717,7 +731,7 @@ namespace RogueBasin
             manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, cluesForDoor));
             var door = manager.GetDoorById(doorId);
 
-            var lockedDoor = new Locks.SimpleLockedDoor(door, doorName, colorToUse);
+            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, doorName, colorToUse);
             var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;
@@ -923,7 +937,7 @@ namespace RogueBasin
                 var sourceToTargetElevator = kv.Value;
                 var targetToSourceElevator = elevatorLocations[new Tuple<int, int>(targetLevel, sourceLevel)];
 
-                Game.Dungeon.AddFeature(new Features.Elevator(targetLevel, targetToSourceElevator), sourceLevel, sourceToTargetElevator);
+                Game.Dungeon.AddFeature(new RogueBasin.Features.Elevator(targetLevel, targetToSourceElevator), sourceLevel, sourceToTargetElevator);
 
                 LogFile.Log.LogEntryDebug("Adding elevator connection " + sourceLevel + ":" + targetLevel + " via points" +
                     sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);
@@ -950,9 +964,9 @@ namespace RogueBasin
                 var newMonster = new T();
                 Item clueItem;
                 if (autoPickup)
-                    clueItem = new Items.ClueAutoPickup(clue);
+                    clueItem = new RogueBasin.Items.ClueAutoPickup(clue);
                 else
-                    clueItem = new Items.Clue(clue);
+                    clueItem = new RogueBasin.Items.Clue(clue);
 
                 newMonster.PickUpItem(clueItem);
                 
@@ -997,7 +1011,7 @@ namespace RogueBasin
 
                 bool placedItem = false;
 
-                var logItem = new Items.Log(logEntry);
+                var logItem = new RogueBasin.Items.Log(logEntry);
 
                 foreach (Point p in allWalkablePoints)
                 {
@@ -1104,7 +1118,7 @@ namespace RogueBasin
                 if (placedDoors.Contains(door))
                     continue;
 
-                var lockedDoor = new Locks.SimpleLockedDoor(door);
+                var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door);
                 var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
                 lockedDoor.LocationLevel = doorInfo.LevelNo;
                 lockedDoor.LocationMap = doorInfo.MapLocation;
@@ -1136,7 +1150,7 @@ namespace RogueBasin
                     bool placedItem = false;
                     foreach (Point p in allWalkablePoints)
                     {
-                        var objectiveFeature = new Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
+                        var objectiveFeature = new RogueBasin.Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
                         placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
 
                         if (placedItem)
@@ -1176,7 +1190,7 @@ namespace RogueBasin
                 Point pointToPlace = null;
                 foreach (Point p in allWalkablePoints)
                 {
-                    placedItem = Game.Dungeon.AddItem(new Items.Clue(clue, tp.Item2, tp.Item3), levelForRandomRoom, p);
+                    placedItem = Game.Dungeon.AddItem(new RogueBasin.Items.Clue(clue, tp.Item2, tp.Item3), levelForRandomRoom, p);
                     pointToPlace = p;
 
                     if (placedItem)
@@ -1662,7 +1676,7 @@ namespace RogueBasin
                 if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
                     var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
-                    Game.Dungeon.AddFeatureBlocking(new Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
+                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
@@ -1689,13 +1703,13 @@ namespace RogueBasin
 
                 if (!featureToPlace.isBlocking)
                 {
-                    Game.Dungeon.AddFeature(new Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
+                    Game.Dungeon.AddFeature(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
                 else if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
-                    Game.Dungeon.AddFeatureBlocking(new Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
+                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, true);
 
                     LogFile.Log.LogEntryDebug("Placing blocking feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
@@ -1932,10 +1946,10 @@ namespace RogueBasin
             //Add items
             var dungeon = Game.Dungeon;
 
-            dungeon.AddItem(new Items.Pistol(), 0, new Point(1, 1));
-            dungeon.AddItem(new Items.Shotgun(), 0, new Point(2, 1));
-            dungeon.AddItem(new Items.Laser(), 0, new Point(3, 1));
-            dungeon.AddItem(new Items.Vibroblade(), 0, new Point(4, 1));
+            dungeon.AddItem(new RogueBasin.Items.Pistol(), 0, new Point(1, 1));
+            dungeon.AddItem(new RogueBasin.Items.Shotgun(), 0, new Point(2, 1));
+            dungeon.AddItem(new RogueBasin.Items.Laser(), 0, new Point(3, 1));
+            dungeon.AddItem(new RogueBasin.Items.Vibroblade(), 0, new Point(4, 1));
 
             //Set map for visualisation
             return mapInfo;

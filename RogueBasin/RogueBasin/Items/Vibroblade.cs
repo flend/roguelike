@@ -60,8 +60,8 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public Point ThrowItem(Point target)
         {
-            //Damage for 5 pts
-            Point dest = Game.Dungeon.Player.ThrowItemGeneric(this, target, 5, false);
+            //Damage for 50 pts
+            Point dest = Game.Dungeon.Player.ThrowItemGeneric(this, target, 50, false);
             return dest;
         }
 
@@ -260,7 +260,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 3;
+            return 30;
         }
 
         /// <summary>

@@ -1026,7 +1026,6 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("No rooms: " + noRooms + " Total monsters to place (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
 
             //Distribution amongst rooms, mostly evenly
-            //(better to use a norm dist here)
 
             double[] roomMonsterRatio = new double[noRooms];
 
@@ -1049,12 +1048,10 @@ namespace RogueBasin
    
             for (int i = 0; i < noRooms; i++)
             {
-
-                //In monster levels. A level 3 monster will cost 3 of these.
                 double monsterBudget = roomMonsterRatio[i] * ratioToTotalMonsterBudget + remainder;
 
                 double actualMonstersToPlace = Math.Floor(monsterBudget);
-                //This is a historic bug - should be actualMonstersToPlace not monstersOfThisLevel. Still, the game is now balanced to this so I can't change it!
+
                 double levelBudgetSpent = actualMonstersToPlace;
 
                 double levelBudgetLeftOver = monsterBudget - levelBudgetSpent;

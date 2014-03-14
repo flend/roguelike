@@ -9,10 +9,11 @@ namespace RogueBasin
     {
         public static readonly Dictionary<int, Type> WeaponMapping = new Dictionary<int, Type> {
             
-            { 1, typeof(Items.Vibroblade)},
-            { 2, typeof(Items.Pistol) },
-            { 3, typeof(Items.Shotgun) },
-            { 4, typeof(Items.Laser) },
+            { 1, typeof(Items.Fists)},
+            { 2, typeof(Items.Vibroblade)},
+            { 3, typeof(Items.Pistol) },
+            { 4, typeof(Items.Shotgun) },
+            { 5, typeof(Items.Laser) },
         };
 
         public static readonly Dictionary<char, Type> WetwareMapping = new Dictionary<char, Type> {

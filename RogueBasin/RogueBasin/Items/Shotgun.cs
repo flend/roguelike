@@ -55,7 +55,7 @@ namespace RogueBasin.Items
                 {
                     //Calculate range
                     int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(player.LocationMap, m.LocationMap));
-                    int damage = 10 - rangeToMonster;
+                    int damage = 100 - rangeToMonster * 10;
 
                     string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
@@ -315,7 +315,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 0;
+            return 5;
         }
 
         public override int ItemCost()

@@ -8,16 +8,16 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Swarmer. Light melee with wide FOV. Responds to sounds.
     /// </summary>
-    public class Swarmer : MonsterFightAndRunAI
+    public class MaintBot : MonsterFightAndRunAI
     {
 
-        public Swarmer()
+        public MaintBot()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
-            //More fun to move these guys around with a lower radius
-            NormalSightRadius = 5;
+            //Start in the passive state
+            this.Passive = true;
         }
 
         public override void InventoryDrop()
@@ -29,7 +29,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Swarmer();
+            return new MaintBot();
         }
 
         protected override int ClassMaxHitpoints()
@@ -49,7 +49,7 @@ namespace RogueBasin.Creatures
 
         public override PatrolType GetPatrolType()
         {
-            return PatrolType.Rotate;
+            return PatrolType.RandomWalk;
         }
 
         //Rotation makes them look alive (even though they have base FOV)
@@ -66,18 +66,18 @@ namespace RogueBasin.Creatures
 
         protected override bool WillInvestigateSounds()
         {
-            return true;
+            return false;
         }
 
         protected override bool WillPursue()
         {
-            return true;
+            return false;
         }
 
         //Makes them more effective swarmers
         public override bool CanOpenDoors()
         {
-            return true;
+            return false;
         }
 
 
@@ -85,16 +85,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Swarmer"; } }
+        public override string SingleDescription { get { return "Maint Bot"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Swarmers"; } }
+        public override string GroupDescription { get { return "Maint Bots"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)261;
+            return (char)258;
         }
 
         protected override int GetChanceToRecover()
