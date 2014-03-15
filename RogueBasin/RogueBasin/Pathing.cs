@@ -189,6 +189,9 @@ namespace RogueBasin
             //if (levels[level].GuaranteedConnected)
             //    return true;
 
+            //na
+            return true;
+
             //Find downstairs
             Features.StaircaseUp upStairs = null;
             Features.StaircaseExit entryStairs = null;

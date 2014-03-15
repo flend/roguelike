@@ -71,7 +71,7 @@ namespace RogueBasin
                     logFile = new StreamWriter(logFilename, true, Encoding.Default);
 
                 logFile.WriteLine(datedEntry);
-                Close();
+                logFile.Flush();
             }
             catch (Exception)
             {

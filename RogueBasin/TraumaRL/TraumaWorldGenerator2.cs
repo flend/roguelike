@@ -222,5 +222,185 @@ namespace TraumaRL
         {
             mon.PickUpItem(new RogueBasin.Items.ShieldPack());
         }
+
+        Dictionary<int, int> levelDifficulty;
+
+        private void CalculateLevelDifficulty()
+        {
+            var levelsToHandleSeparately = new List<int> { medicalLevel, arcologyLevel, computerCoreLevel, bridgeLevel };
+
+            levelDifficulty = new Dictionary<int, int>(levelDepths);
+            levelDifficulty[reactorLevel] = 4;
+            levelDifficulty[arcologyLevel] = 4;
+            levelDifficulty[computerCoreLevel] = 5;
+            levelDifficulty[bridgeLevel] = 5;
+
+        }
+
+        private void PlaceLoot(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        {
+            CalculateLevelDifficulty();
+
+            var level1Ware = new List<Item> { new RogueBasin.Items.BoostWare(1), new RogueBasin.Items.AimWare(1), new RogueBasin.Items.ShieldWare(1) };
+
+            var lootLevels = new Dictionary<int, List<Item>>();
+
+            lootLevels[0] = new List<Item> { new RogueBasin.Items.Pistol(), new RogueBasin.Items.Vibroblade() };
+            lootLevels[0].AddRange(level1Ware);
+
+            lootLevels[1] = new List<Item> { new RogueBasin.Items.Shotgun(), new RogueBasin.Items.Laser()  };
+
+            lootLevels[2] = new List<Item> {  new RogueBasin.Items.AimWare(2), new RogueBasin.Items.ShieldWare(2) };
+
+            lootLevels[3] = new List<Item> { new RogueBasin.Items.HeavyPistol(), new RogueBasin.Items.BoostWare(2), new RogueBasin.Items.StealthWare() };
+
+            lootLevels[4] = new List<Item> { new RogueBasin.Items.AssaultRifle(), new RogueBasin.Items.HeavyLaser(),  new RogueBasin.Items.HeavyShotgun(), new RogueBasin.Items.BoostWare(3), 
+                new RogueBasin.Items.AimWare(3), new RogueBasin.Items.ShieldWare(3), };
+
+            var itemsPlaced = new List<Item>();
+
+            itemsPlaced.AddRange(PlayerInitialItems(level1Ware));
+
+            //Guarantee on medical, at least 1 ware and a pistol or vibroblade
+            var randomWare = level1Ware.Except(itemsPlaced).RandomElement();
+            PlaceItems(mapInfo, new List<Item> { randomWare }, new List<int> { goodyRooms[medicalLevel] }, false, true);
+            itemsPlaced.Add(randomWare);
+
+            PlaceItems(mapInfo, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[medicalLevel] }, false, true);
+            itemsPlaced.Add(lootLevels[0][0]);
+            PlaceItems(mapInfo, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[medicalLevel] }, false, true);
+            itemsPlaced.Add(lootLevels[0][1]);
+
+            var levelsToHandleSeparately = new List<int> { medicalLevel };
+
+            var totalLoot = lootLevels.SelectMany(kv => kv.Value).Except(itemsPlaced).Count();
+            var totalRooms = goodyRooms.Select(kv => kv.Key).Except(levelsToHandleSeparately).Count();
+
+            double lootPerRoom = totalLoot / (double)totalRooms;
+            int lootPerRoomInt = (int)Math.Floor(lootPerRoom);
+
+            int lootPlaced = 0;
+            int roomsDone = 0;
+
+            foreach (var kv in goodyRooms.OrderBy(k => k.Key))
+            {
+                var level = kv.Key;
+                var room = kv.Value;
+
+                if (levelsToHandleSeparately.Contains(level))
+                    continue;
+
+                var possibleLoot = lootLevels.Where(l => l.Key <= levelDifficulty[level]).SelectMany(l => l.Value).Except(itemsPlaced);
+
+                var lootInRoom = 0;
+                while (lootInRoom < lootPerRoomInt)
+                {
+                    if (!possibleLoot.Any())
+                        break;
+
+                    var lootToPlace = possibleLoot.RandomElement();
+                    
+                    PlaceItems(mapInfo, new List<Item>{lootToPlace}, new List<int> {room}, false, true);
+                    LogFile.Log.LogEntryDebug("Placing item: " + lootToPlace.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+
+                    itemsPlaced.Add(lootToPlace);
+                    lootInRoom++;
+                    lootPlaced++;
+                }
+
+                roomsDone++;
+
+                //If we are below our quota
+                var behindLoot = (int)Math.Floor(roomsDone * lootPerRoom - lootPlaced);
+
+                var behindLootPlaced = 0;
+                while (behindLootPlaced < behindLoot)
+                {
+                    if (!possibleLoot.Any())
+                        break;
+
+                    var lootToPlace = possibleLoot.RandomElement();
+
+                    PlaceItems(mapInfo, new List<Item> { lootToPlace }, new List<int> { room }, false, true);
+                    LogFile.Log.LogEntryDebug("Placing item (catchup): " + lootToPlace.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+
+                    itemsPlaced.Add(lootToPlace);
+                    lootPlaced++;
+                    behindLootPlaced++;
+                }
+            }
+
+
+            //If we have loot remaining
+            if (lootPlaced < totalLoot)
+            {
+                var possibleLoot = lootLevels.SelectMany(l => l.Value).Except(itemsPlaced);
+
+                //Place at random
+                foreach (var i in possibleLoot)
+                {
+                    var randomRoom = goodyRooms.RandomElement();
+                    PlaceItems(mapInfo, new List<Item> { i }, new List<int> { randomRoom.Value }, false, true);
+                    itemsPlaced.Add(i);
+                    lootPlaced++;
+                    LogFile.Log.LogEntryDebug("Placing item (final): " + i.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[randomRoom.Key], LogDebugLevel.Medium);
+                }
+            }
+
+            LogFile.Log.LogEntryDebug("Total items placed  " + itemsPlaced.Count() + " of " + lootLevels.SelectMany(kv => kv.Value).Count(), LogDebugLevel.Medium);
+
+            //Add extra standard loot
+            foreach (var kv in goodyRooms.OrderBy(k => k.Key))
+            {
+                var level = kv.Key;
+                var room = kv.Value;
+
+                var randomMedKits = ProduceMultipleItems<RogueBasin.Items.NanoRepair>(levelDifficulty[level] / 2 + Game.Random.Next(2));
+                PlaceItems(mapInfo, randomMedKits, new List<int> { room }, false, true);
+
+                var totalGrenades = Game.Random.Next(2 * levelDifficulty[level], 3 * levelDifficulty[level]);
+
+                var totalExposiveGrenades = totalGrenades / 2;
+                var totalStunGrenades = Game.Random.Next(totalGrenades - totalExposiveGrenades);
+                var totalSoundGrenades = totalGrenades - totalExposiveGrenades - totalStunGrenades;
+
+                var fragGrenades = ProduceMultipleItems<RogueBasin.Items.FragGrenade>(1 + Game.Random.Next(levelDifficulty[level]));
+                var stunGrenades = ProduceMultipleItems<RogueBasin.Items.StunGrenade>(1 + Game.Random.Next(levelDifficulty[level]));
+                var soundGrenades = ProduceMultipleItems<RogueBasin.Items.SoundGrenade>(1 + Game.Random.Next(levelDifficulty[level]));
+
+                PlaceItems(mapInfo, fragGrenades, new List<int> { room }, false, true);
+                PlaceItems(mapInfo, stunGrenades, new List<int> { room }, false, true);
+                PlaceItems(mapInfo, soundGrenades, new List<int> { room }, false, true);
+            }
+            
+        }
+
+        private List<Item> ProduceMultipleItems<T>(int count) where T : Item, new() {
+
+            List<Item> toReturn = new List<Item>();
+            for(int i=0;i<count;i++) {
+                toReturn.Add(new T());
+            }
+
+            return toReturn;
+        }
+
+        private IEnumerable<Item> PlayerInitialItems(List<Item> level1Ware)
+        {
+            var itemsGiven = new List<Item>();
+
+            var player = Game.Dungeon.Player;
+            player.GiveItemNotFromDungeon(new RogueBasin.Items.Fists());
+
+            var level1WareToGive = level1Ware.RandomElement();
+
+            itemsGiven.Add(level1WareToGive);
+
+            player.GiveItemNotFromDungeon(level1WareToGive);
+
+            return itemsGiven;
+        }
     }
+
+
 }

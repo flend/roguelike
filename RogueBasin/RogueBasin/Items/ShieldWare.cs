@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    class ShieldWare : Item, IEquippableItem
+    public class ShieldWare : Item, IEquippableItem
     {
 
         int level;

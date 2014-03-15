@@ -5,18 +5,79 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class NanoRepair : Item, IEquippableItem
+    public class HeavyLaser : RangedWeapon, IEquippableItem
     {
- 
+
+        public HeavyLaser()
+        {
+        }
+
+
         /// <summary>
-        /// Equipment slots where we can be equipped
+        /// Fires the item - probably should be a method
         /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public bool FireItem(Point target)
+        {
+            //Should be guaranteed in range by caller
+
+            Player player = Game.Dungeon.Player;
+            Dungeon dungeon = Game.Dungeon;
+
+            LogFile.Log.LogEntryDebug("Firing heavy laser", LogDebugLevel.Medium);
+
+            //The shotgun fires towards its target and does same damage with range
+
+            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
+
+            //Calculate a huge FOV
+
+            Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
+
+            WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
+            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Magenta);
+
+            //Make firing sound
+            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in targetSquares)
+            {
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    int damage = 200;
+
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    player.AttackMonsterRanged(squareContents.monster, damage);
+                }
+            }
+
+            //Remove 1 ammo
+            Ammo--;
+
+            return true;
+        }
+
         public List<EquipmentSlot> EquipmentSlots
         {
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Utility);
+                retList.Add(EquipmentSlot.Weapon);
 
                 return retList;
             }
@@ -24,7 +85,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            //LogFile.Log.LogEntryDebug( "", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Heavy laser equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -51,6 +112,44 @@ namespace RogueBasin.Items
 
             return true;
         }
+        /// Can be thrown
+        /// </summary>
+        /// <returns></returns>
+        public bool HasThrowAction()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Can be operated
+        /// </summary>
+        /// <returns></returns>
+        public bool HasOperateAction()
+        {
+            return false;
+        }
+
+        public bool HasMeleeAction()
+        {
+            return false;
+        }
+
+        public bool HasFireAction()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Throws the item
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public Point ThrowItem(Point target)
+        {
+            //Stun for 3 turns
+            return Game.Dungeon.Player.ThrowItemGeneric(this, target, 3, true);
+        }
 
         /// <summary>
         /// not used in this game
@@ -59,7 +158,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            //LogFile.Log.LogEntryDebug("Stealth cloak unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Heavy Laser unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -72,7 +171,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Nano-repair kit"; }
+            get { return "Heavy Laser"; }
         }
 
         /// <summary>
@@ -80,17 +179,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Nano-repair kits"; }
+            get { return "Heavy Lasers"; }
         }
 
         protected override char GetRepresentation()
         {
-            return '\x6';
+            return (char)276;
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.LightSteelBlue;
+            return ColorPresets.Magenta;
         }
 
         public int ArmourClassModifier()
@@ -114,68 +213,9 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public bool HasFireAction()
+        public override int MaxAmmo()
         {
-            return false;
-        }
-
-        public bool HasMeleeAction()
-        {
-
-            return false;
-        }
-
-        /// <summary>
-        /// Can be thrown
-        /// </summary>
-        /// <returns></returns>
-        public bool HasThrowAction()
-        {
-
-            return false;
-        }
-
-        /// <summary>
-        /// Can be operated
-        /// </summary>
-        /// <returns></returns>
-        public bool HasOperateAction()
-        {
-            return true;
-        }
-
-        public int RemainingAmmo()
-        {
-
-            return 0;
-        }
-        
-        public int MaxAmmo()
-        {
-            return 0;
-        }
-
-
-        /// <summary>
-        /// Fires the item - probably should be a method
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public bool FireItem(Point target)
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// Throws the item - check if we can't pull this out
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public Point ThrowItem(Point target)
-        {
-            return null;
+            return 2;
         }
 
         /// <summary>
@@ -186,34 +226,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool OperateItem()
         {
-            //Repair some damage
-            /*
-            if (Game.Dungeon.Player.Hitpoints < Game.Dungeon.Player.MaxHitpoints)
-            {
-                LogFile.Log.LogEntryDebug("Using nano-repair", LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("The nano-bots swarm over your droid, repairing damage.");
-                Game.Dungeon.Player.HealPlayer(10);
-                return true;
-            }
-            else
-            {
-                LogFile.Log.LogEntryDebug("Not using nano-repair", LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("No damage to repair. The nano-bots return to the kit.");
-                return false;
-            }*/
-
-            if (Game.Dungeon.Player.NeedsHealing())
-            {
-                Game.MessageQueue.AddMessage("The nano-repair kit restores your health, shields and energy.");
-                Game.Dungeon.Player.HealCompletely();
-                return true;
-            }
-            else
-            {
-                Game.MessageQueue.AddMessage("No need to heal at this time.");
-                return false;
-            }
-            
+            return false;
         }
 
         /// <summary>
@@ -231,7 +244,12 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public virtual TargettingType TargetTypeFire()
         {
-            return TargettingType.Line;
+            return TargettingType.LineThrough;
+        }
+
+        public virtual double ShotgunSpreadAngle()
+        {
+            return Math.PI / 4;
         }
 
         /// <summary>
@@ -240,7 +258,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 5;
+            return 3;
         }
 
         /// <summary>
@@ -249,16 +267,16 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 5;
+            return 20;
         }
 
         /// <summary>
         /// Noise mag of this weapon on firing
         /// </summary>
         /// <returns></returns>
-        public double FireSoundMagnitude()
+        public override double FireSoundMagnitude()
         {
-            return 0.0;
+            return 0.66;
         }
 
         /// <summary>
@@ -267,7 +285,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double ThrowSoundMagnitude()
         {
-            return 0.05;
+            return 0.3;
         }
 
         /// <summary>
@@ -285,21 +303,12 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 0;
-        }
-
-        /// <summary>
-        /// Spread for shotgun target
-        /// </summary>
-        /// <returns></returns>
-        public virtual double ShotgunSpreadAngle()
-        {
-            return 0.0;
+            return 5;
         }
 
         public override int ItemCost()
         {
-            return 25;
+            return 20;
         }
 
         /// <summary>

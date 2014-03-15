@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RogueBasin.Items
 {
-    class BoostWare : Item, IEquippableItem
+    public class BoostWare : Item, IEquippableItem
     {
         int level;
 
@@ -64,7 +64,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "BoostWare v1"; }
+            get { return "BoostWare v" + level; }
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "BoostWare v1"; }
+            get { return "BoostWare v" + level; }
         }
 
         protected override char GetRepresentation()

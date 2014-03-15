@@ -570,6 +570,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //Generate quests at mapmodel level
                     GenerateQuests(mapInfo, levelInfo);
 
+                    //Place loot
+                    PlaceLoot(mapInfo, levelInfo);
+
                     //Add clues and locks at dungeon engine level
                     //AddSimpleCluesAndLocks(mapInfo);
 
@@ -899,7 +902,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var roomsForMonsters = GetRandomRoomsForClues(mapInfo, objectsToPlace, allowedRoomsForClues);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
-            PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, clues, true);
+            PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, clues, true, false);
 
             //Place log entries explaining the puzzle
             //These will not be turned into in-engine clue items, so they can't be used to open the door
@@ -1219,7 +1222,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var computerCoreVault = computerCoreVaultConnection.Target;
             var computerVaultClue = manager.AddCluesToExistingObjective("prime-self-destruct", new List<int> { computerCoreVault });
 
-            PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, computerVaultClue, true);
+            PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, computerVaultClue, true, true);
 
             UseVault(levelInfo, computerCoreVaultConnection);
         }
@@ -1401,17 +1404,17 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private void PlaceCreatureClues<T>(MapInfo mapInfo, List<Clue> monsterCluesToPlace, bool autoPickup) where T : Monster, new()
+        private void PlaceCreatureClues<T>(MapInfo mapInfo, List<Clue> monsterCluesToPlace, bool autoPickup, bool includeVaults) where T : Monster, new()
         {
             foreach (var clue in monsterCluesToPlace)
             {
                 if (placedClues.Contains(clue))
                     continue;
 
-                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, true);
+                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, true, includeVaults);
 
                 if (!roomsForClue.Item2.Any())
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true, false);
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true, includeVaults);
 
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -1455,7 +1458,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 Tuple<int, IEnumerable<Point>> roomsForClue;
                 if (boundariesPreferred)
                 {
-                    roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors);
+                    roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors, false);
 
                     if (!roomsForClue.Item2.Any())
                         roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors, false);
@@ -1484,6 +1487,41 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 placedClues.Add(clue);
             }
         }
+
+        private void PlaceItems(MapInfo mapInfo, List<Item> items, List<int> rooms, bool boundariesPreferred, bool cluesNotInCorridors)
+        {
+            foreach (var item in items)
+            {
+
+                Tuple<int, IEnumerable<Point>> roomsForClue;
+                if (boundariesPreferred)
+                {
+                    roomsForClue = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms, cluesNotInCorridors);
+
+                    if (!roomsForClue.Item2.Any())
+                        roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, cluesNotInCorridors, cluesNotInCorridors);
+                }
+                else
+                    roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, cluesNotInCorridors, cluesNotInCorridors);
+
+                var levelForClue = roomsForClue.Item1;
+                var allWalkablePoints = roomsForClue.Item2;
+
+                bool placedItem = false;
+
+                foreach (Point p in allWalkablePoints)
+                {
+                    placedItem = Game.Dungeon.AddItem(item, levelForClue, p);
+
+                    if (placedItem)
+                        break;
+                }
+
+                if (!placedItem)
+                    throw new ApplicationException("Nowhere to place item");
+            }
+        }
+
 
         private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
@@ -1543,12 +1581,43 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors)
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, List<int> rooms, bool filterCorridors)
+        {
+            var possibleRooms = rooms;
+            IEnumerable<int> initialRooms = possibleRooms.Except(allReplaceableVaults);
+            var candidateRooms = initialRooms;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(initialRooms);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = initialRooms;
+
+            //Must be on the same level
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
+
+            var allWalkablePoints = new List<Point>();
+
+            //Hmm, could be quite expensive
+            foreach (var room in candidateRooms)
+            {
+                var allPossiblePoints = mapInfo.GetBoundaryPointsInRoomOfTerrain(room);
+                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
+            }
+
+            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+        }
+
+
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
-            IEnumerable<int> candidateRooms = possibleRooms.Except(allReplaceableVaults);
+            IEnumerable<int> initialRooms = possibleRooms;
+            if(!includeVaults)
+                initialRooms = possibleRooms.Except(allReplaceableVaults);
+            var candidateRooms = initialRooms;
             if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(possibleRooms);
+                candidateRooms = mapInfo.FilterOutCorridors(initialRooms);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = initialRooms;
 
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());

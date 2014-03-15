@@ -1909,6 +1909,11 @@ namespace RogueBasin
             Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
         }
 
+        public void GiveItemNotFromDungeon(Item item)
+        {
+            Inventory.AddItemNotFromDungeon(item);
+        }
+
         public void GiveAllWeapons()
         {
             Inventory.AddItemNotFromDungeon(new Items.Fists());
@@ -2413,6 +2418,17 @@ namespace RogueBasin
             Hitpoints = MaxHitpoints;
             Shield = MaxShield;
             Energy = MaxEnergy;
+        }
+
+        public bool NeedsHealing()
+        {
+            if (Hitpoints < MaxHitpoints)
+                return true;
+            if (Shield < MaxShield)
+                return true;
+            if(Energy < MaxEnergy)
+                return true;
+            return false;
         }
 
         private void RegenerateStatsPerTurn()

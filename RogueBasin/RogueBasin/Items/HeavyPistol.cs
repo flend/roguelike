@@ -1,52 +1,70 @@
-﻿using libtcodWrapper;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class StealthWare : Item, IEquippableItem
+    public class HeavyPistol : RangedWeapon, IEquippableItem
     {
-        public StealthWare()
-        {
 
+        public HeavyPistol()
+        {
         }
 
-        /// <summary>
-        /// Equipment slots where we can be equipped
-        /// </summary>
+
+
+        public bool Equip(Creature user)
+        {
+            LogFile.Log.LogEntryDebug("Heavy Pistol equipped", LogDebugLevel.Medium);
+
+            //Give player story. Mention level up if one will occur.
+
+            if (Game.Dungeon.Player.PlayItemMovies)
+            {
+                //Screen.Instance.PlayMovie("plotbadge", true);
+                //Screen.Instance.PlayMovie("multiattack", false);
+            }
+
+            //Messages
+            //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
+
+            //Screen.Instance.PlayMovie("plotbadge", true);
+
+            //Level up?
+            //Game.Dungeon.Player.LevelUp();
+
+            //Add move?
+            //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
+            //Screen.Instance.PlayMovie("multiattack", false);
+
+            //Add any equipped (actually permanent) effects
+            //Game.Dungeon.Player.Speed += 10;
+
+            return true;
+        }
+
         public List<EquipmentSlot> EquipmentSlots
         {
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Wetware);
+                retList.Add(EquipmentSlot.Weapon);
 
                 return retList;
             }
         }
 
-        public bool Equip(Creature user)
-        {
-            LogFile.Log.LogEntryDebug("StealthWare equipped", LogDebugLevel.Medium);
-
-            Player player = user as Player;
-            player.AddEffect(new PlayerEffects.StealthBoost());
-
-            return true;
-        }
-
+        /// <summary>
+        /// not used in this game
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("StealthWare unequipped", LogDebugLevel.Low);
-
-            Player player = user as Player;
-            player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
-
+            LogFile.Log.LogEntryDebug("Heavy Pistol unequipped", LogDebugLevel.Low);
             return true;
         }
-
         /// <summary>
         /// not used in this game
         /// </summary>
@@ -55,9 +73,26 @@ namespace RogueBasin.Items
             return 50;
         }
 
+        /// Can be thrown
+        /// </summary>
+        /// <returns></returns>
+        public bool HasThrowAction()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Can be operated
+        /// </summary>
+        /// <returns></returns>
+        public bool HasOperateAction()
+        {
+            return false;
+        }
+
         public override string SingleItemDescription
         {
-            get { return "StealthWare v1"; }
+            get { return "Heavy Pistol"; }
         }
 
         /// <summary>
@@ -65,17 +100,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "StealthWare v1"; }
+            get { return "Heavy Pistols"; }
         }
 
         protected override char GetRepresentation()
         {
-            return (char)582;
+            return (char)272;
         }
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return ColorPresets.DarkSlateGray;
         }
 
         public int ArmourClassModifier()
@@ -99,6 +134,16 @@ namespace RogueBasin.Items
             return 0;
         }
 
+        public override int ItemCost()
+        {
+            return 10;
+        }
+
+        public override int MaxAmmo()
+        {
+            return 10;
+        }
+
         public bool HasMeleeAction()
         {
             return false;
@@ -106,38 +151,10 @@ namespace RogueBasin.Items
 
         public bool HasFireAction()
         {
-            return false;
+            return true;
         }
 
-        /// <summary>
-        /// Can be thrown
-        /// </summary>
-        /// <returns></returns>
-        public bool HasThrowAction()
-        {
-
-            return false;
-        }
-
-        /// <summary>
-        /// Can be operated
-        /// </summary>
-        /// <returns></returns>
-        public bool HasOperateAction()
-        {
-            return false;
-        }
-
-        public int RemainingAmmo()
-        {
-
-            return 0;
-        }
-
-        public int MaxAmmo()
-        {
-            return 0;
-        }
+        List<Point> targetSquares = null;
 
         /// <summary>
         /// Fires the item - probably should be a method
@@ -147,14 +164,20 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            return false;
+            return Game.Dungeon.FirePistolLineWeapon(target, this, 40);
         }
 
+        /// <summary>
+        /// Throws the item
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
         public Point ThrowItem(Point target)
         {
-            return null;
-        }
-
+            return Game.Dungeon.Player.ThrowItemGeneric(this, target, 3, true);
+        }       
+       
         /// <summary>
         /// Operates the item - definitely a method
         /// </summary>
@@ -199,25 +222,20 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 5;
+            return 8;
         }
 
-        /// <summary>
-        /// Noise mag of this weapon on firing
-        /// </summary>
-        /// <returns></returns>
-        public double FireSoundMagnitude()
+        public override double FireSoundMagnitude()
         {
-            return 0.0;
+            return 0.4;
         }
 
         /// <summary>
         /// Noise mag of this weapon on throwing
         /// </summary>
         /// <returns></returns>
-        public double ThrowSoundMagnitude()
-        {
-            return 0.1;
+        public double ThrowSoundMagnitude() {
+            return 0.2;   
         }
 
         /// <summary>
@@ -235,7 +253,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 0;
+            return 5;
         }
 
         /// <summary>
@@ -245,11 +263,6 @@ namespace RogueBasin.Items
         public virtual double ShotgunSpreadAngle()
         {
             return 0.0;
-        }
-
-        public override int ItemCost()
-        {
-            return 20;
         }
 
         /// <summary>
@@ -263,7 +276,7 @@ namespace RogueBasin.Items
 
         public int GetEnergyDrain()
         {
-            return 10;
+            return 0;
         }
     }
 }
