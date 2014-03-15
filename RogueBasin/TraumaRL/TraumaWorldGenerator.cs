@@ -1087,11 +1087,19 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
 
             var manager = mapInfo.Model.DoorAndClueManager;
 
+            //Escape pod end game
+            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int>{ escapePodsConnection.Target }, true, false);
+
             //Escape pod door
             //Requires enabling self-destruct
+            
+            var colorForEscapePods = GetUnusedColor();
+            var escapedoorName = "escape";
+            var escapedoorId = escapedoorName;
+            var escapedoorColor = colorForEscapePods.Item1;
 
-            manager.PlaceDoor(new DoorRequirements(escapePodsConnection, "escape", 1));
-
+            PlaceDoorOnMap(mapInfo, escapedoorId, escapedoorName, 1, escapedoorColor, escapePodsConnection);
+            
             //Self destruct
             //Requires priming the reactor
 
@@ -1160,9 +1168,53 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             
             //Captain's id
             var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel });
-            PlaceClueForDoorInVault(mapInfo, levelInfo, doorId, colorForCaptainId.Item1, doorName, captainIdIdealLevel);
+            PlaceClueForDoorInVault(mapInfo, levelInfo, doorId, doorColor, doorName, captainIdIdealLevel);
 
 
+            //Computer core lock
+            //Requires computer tech's id
+
+            var colorForComputerTechsId = GetUnusedColor();
+
+            //computer core is a dead end
+            var computerCoreSourceElevatorConnection = levelInfo[computerCoreLevel].ConnectionsToOtherLevels.First();
+            var levelToComputerCore = computerCoreSourceElevatorConnection.Key;
+            var elevatorToComputerCore = levelInfo[levelToComputerCore].ConnectionsToOtherLevels[computerCoreLevel];
+
+            var computerDoorName = "tech's id computer core";
+            var computerDoorId = computerDoorName;
+            var computerDoorColor = colorForComputerTechsId.Item1;
+
+            PlaceDoorOnMap(mapInfo, computerDoorId, computerDoorName, 1, computerDoorColor, elevatorToComputerCore);
+
+            //Tech's id (this should always work)
+            var techIdIdealLevel = new List<int> { arcologyLevel };
+            PlaceClueForDoorInVault(mapInfo, levelInfo, computerDoorId, computerDoorColor, computerDoorName, techIdIdealLevel);
+
+            //Archology lock
+            //Requires bioprotect wetware
+
+            var colorForArcologyLock = GetUnusedColor();
+
+            // arcology is not a dead end, but only the cc and bridge can follow it
+            var arcologyLockSourceElevatorConnections = levelInfo[arcologyLevel].ConnectionsToOtherLevels.Where(c => c.Key != computerCoreLevel && c.Key != bridgeLevel);
+            if (arcologyLockSourceElevatorConnections.Count() != 1)
+                throw new ApplicationException("arcology connectivity is wrong");
+
+            var arcologyLockSourceElevatorConnection = arcologyLockSourceElevatorConnections.First();
+            var levelToArcology = arcologyLockSourceElevatorConnection.Key;
+            var elevatorToArcology = levelInfo[levelToArcology].ConnectionsToOtherLevels[arcologyLevel];
+
+            var arcologyDoorName = "bioware - arcology door lock";
+            var arcologyDoorId = arcologyDoorName;
+            var arcologyDoorColor = colorForArcologyLock.Item1;
+
+            //Need to refactor this to be an optional movie door
+            PlaceDoorOnMap(mapInfo, arcologyDoorId, arcologyDoorName, 1, arcologyDoorColor, elevatorToArcology);
+
+            //Bioware
+            var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel };
+            PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
 
 
             //Fueling system
@@ -1343,6 +1395,35 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
             
+            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+        }
+
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRooms(MapInfo mapInfo, List<int> rooms, bool filterCorridors, bool includeVaults)
+        {
+            var possibleRooms = rooms;
+
+            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
+            if (!includeVaults)
+                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
+
+            IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = possibleRoomMinusVaults;
+
+            //Must be on the same level
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
+
+            var allWalkablePoints = new List<Point>();
+
+            //Hmm, could be quite expensive
+            foreach (var room in candidateRooms)
+            {
+                var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
+                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
+            }
+
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
@@ -1547,6 +1628,36 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             if (!placedItem)
             {
                 var str = "Can't place obj " + obj.Id;
+                LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
+                throw new ApplicationException(str);
+            }
+
+            return new Tuple<int, Point>(levelForRandomRoom, pointToPlace);
+        }
+
+        private Tuple<int, Point> PlaceFeatureInRoom(MapInfo mapInfo, Feature objectiveFeature, List<int> candidateRooms, bool avoidCorridors, bool includeVaults)
+        {
+            var toRet = new List<Tuple<int, Point>>();
+
+            var roomsForClue = GetAllWalkablePointsInRooms(mapInfo, candidateRooms, avoidCorridors, includeVaults);
+            var levelForRandomRoom = roomsForClue.Item1;
+            var allWalkablePoints = roomsForClue.Item2;
+
+            bool placedItem = false;
+            Point pointToPlace = null;
+            foreach (Point p in allWalkablePoints)
+            {
+                placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
+
+                pointToPlace = p;
+
+                if (placedItem)
+                    break;
+            }
+
+            if (!placedItem)
+            {
+                var str = "Can't place obj ";
                 LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
                 throw new ApplicationException(str);
             }

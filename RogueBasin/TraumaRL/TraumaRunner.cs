@@ -74,6 +74,8 @@ namespace TraumaRL
 
             Game.Dungeon.Player.StartGameSetup();
 
+            Game.Dungeon.AllLocksOpen = true;
+
             //Screen.Instance.SeeAllMonsters = true;
             //Screen.Instance.SeeAllMap = true;
         }

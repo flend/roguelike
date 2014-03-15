@@ -30,6 +30,9 @@ namespace RogueBasin.Locks
         {
             bool canDoorBeOpened = CanDoorBeOpenedWithClues(player);
 
+            if (Game.Dungeon.AllLocksOpen)
+                canDoorBeOpened = true;
+
             if (!canDoorBeOpened)
             {
                 if (mapDoor.NumCluesRequired == 1)

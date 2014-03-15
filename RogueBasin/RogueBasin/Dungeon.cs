@@ -4277,7 +4277,7 @@ namespace RogueBasin
 
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
-
+            /*
             int noDeaths = dungeon.DungeonInfo.NoDeaths;
             int noAborts = dungeon.DungeonInfo.TotalAborts;
 
@@ -4358,7 +4358,14 @@ namespace RogueBasin
                 Screen.Instance.PlayMovie("noDeaths", false);
                 clearList.AddRange(Screen.Instance.GetMovieText("noDeaths"));
             }
+            */
+            //The last screen to display
+            List<string> finalScreen = new List<string>();
 
+            //A long list of stuff to put in the obituary
+            List<string> fullObit = new List<string>();
+
+            var wonGame = true;
             //Final stats
 
             List<string> finalStats = new List<string>();
@@ -4374,28 +4381,28 @@ namespace RogueBasin
             }
             finalScreen.Add("");
 
-            finalScreen.Add("Primary objectives " + primaryObjectives + "/" + totalLevels + ": " + primaryObjectiveScore + " pts");
-            finalScreen.Add("Secondary objectives " + secondaryObjectives + "/" + totalLevels + ": " + secondaryObjectiveScore + " pts");
+            //finalScreen.Add("Primary objectives " + primaryObjectives + "/" + totalLevels + ": " + primaryObjectiveScore + " pts");
+            //finalScreen.Add("Secondary objectives " + secondaryObjectives + "/" + totalLevels + ": " + secondaryObjectiveScore + " pts");
             
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
             finalScreen.Add("");
 
-            finalScreen.Add("Robots destroyed " + killRecord.killCount + ": " + killScore + " pts");
+            //finalScreen.Add("Robots destroyed " + killRecord.killCount + ": " + killScore + " pts");
             finalScreen.Add("");
 
-            finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
+            //finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
 
             finalScreen.Add("");
 
-            finalScreen.Add("Aborted Missions: " + noAborts);
+            //finalScreen.Add("Aborted Missions: " + noAborts);
             finalScreen.Add("");
 
-            finalScreen.Add("R. E. E. D.s lost: " + noDeaths);
+            //finalScreen.Add("R. E. E. D.s lost: " + noDeaths);
 
             finalScreen.Add("");
-            finalScreen.Add("Thanks for playing! -flend");
+            finalScreen.Add("Thanks for playing! -flend & shroomarts");
 
             Screen.Instance.DrawEndOfGameInfo(finalScreen);
 
@@ -4818,5 +4825,7 @@ namespace RogueBasin
 
             return new Tuple<int, int>(hardCover, softCover);
         }
+
+        public bool AllLocksOpen { get; set; }
     }
 }
