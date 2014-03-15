@@ -68,10 +68,9 @@ namespace RogueBasin
             {
                 //In case we log again after closing
                 if(logFile == null)
-                    logFile = new StreamWriter(logFilename);
+                    logFile = new StreamWriter(logFilename, true, Encoding.Default);
 
                 logFile.WriteLine(datedEntry);
-
                 Close();
             }
             catch (Exception)

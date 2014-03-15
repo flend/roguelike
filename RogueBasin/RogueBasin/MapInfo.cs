@@ -204,6 +204,11 @@ namespace RogueBasin
             return roomIndices.Where(r => (rooms[r].Room.Height > 3 && rooms[r].Room.Width > 3) && !rooms[r].Room.IsCorridor);
         }
 
+        public IEnumerable<int> FilterRoomsByLevel(IEnumerable<int> roomIndices, IEnumerable<int> levels)
+        {
+            return roomIndices.Where(r => levels.Contains(GetLevelForRoomIndex(r)));
+        }
+
         public IEnumerable<int> GetRoomIndicesForLevel(int level)
         {
             return roomListForLevel[level];

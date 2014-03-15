@@ -74,6 +74,8 @@ namespace TraumaRL
         {
             featuresByLevel = new Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>>();
 
+            featuresByLevel = new Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>>();
+
             featuresByLevel[medicalLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
             {
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
@@ -83,19 +85,175 @@ namespace TraumaRL
                 DecorationFeatureDetails.DecorationFeatures.Instrument1,
                 DecorationFeatureDetails.DecorationFeatures.Instrument2,
                 DecorationFeatureDetails.DecorationFeatures.Instrument3,
-                DecorationFeatureDetails.DecorationFeatures.Egg1,
+DecorationFeatureDetails.DecorationFeatures.MedicalAutomat,
+DecorationFeatureDetails.DecorationFeatures.AutomatMachine,
                 DecorationFeatureDetails.DecorationFeatures.CoffeePC,
                 DecorationFeatureDetails.DecorationFeatures.DesktopPC,
                 DecorationFeatureDetails.DecorationFeatures.Chair1,
+DecorationFeatureDetails.DecorationFeatures.Chair2,
                 DecorationFeatureDetails.DecorationFeatures.Stool,
                 DecorationFeatureDetails.DecorationFeatures.Bin
             };
-            //Set all others to the same for now
-            for (int i = 1; i < 10; i++)
+
+            featuresByLevel[lowerAtriumLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
             {
-                featuresByLevel[i] = featuresByLevel[0];
-            }
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+                DecorationFeatureDetails.DecorationFeatures.Instrument3,
+                DecorationFeatureDetails.DecorationFeatures.Plant1,
+DecorationFeatureDetails.DecorationFeatures.Plant2,
+DecorationFeatureDetails.DecorationFeatures.Plant3,
+DecorationFeatureDetails.DecorationFeatures.Chair1,
+DecorationFeatureDetails.DecorationFeatures.Chair1,
+DecorationFeatureDetails.DecorationFeatures.Safe1,
+DecorationFeatureDetails.DecorationFeatures.Safe2,
+                DecorationFeatureDetails.DecorationFeatures.Statue1,
+DecorationFeatureDetails.DecorationFeatures.Statue2,
+DecorationFeatureDetails.DecorationFeatures.Statue3,
+DecorationFeatureDetails.DecorationFeatures.Statue4,
+DecorationFeatureDetails.DecorationFeatures.AutomatMachine,
+DecorationFeatureDetails.DecorationFeatures.Bin
+            };
+
+            featuresByLevel[scienceLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            {
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+                DecorationFeatureDetails.DecorationFeatures.Instrument3,
+                DecorationFeatureDetails.DecorationFeatures.MedicalAutomat,
+DecorationFeatureDetails.DecorationFeatures.AutomatMachine,
+                DecorationFeatureDetails.DecorationFeatures.CoffeePC,
+                DecorationFeatureDetails.DecorationFeatures.DesktopPC,
+                DecorationFeatureDetails.DecorationFeatures.Chair1,
+DecorationFeatureDetails.DecorationFeatures.Chair2,
+                DecorationFeatureDetails.DecorationFeatures.Stool,
+                DecorationFeatureDetails.DecorationFeatures.Screen6,
+                DecorationFeatureDetails.DecorationFeatures.Screen7,
+                DecorationFeatureDetails.DecorationFeatures.Screen8,
+            };
+
+            featuresByLevel[storageLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            {
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+DecorationFeatureDetails.DecorationFeatures.Crate,
+                DecorationFeatureDetails.DecorationFeatures.Safe1,
+DecorationFeatureDetails.DecorationFeatures.Safe2,
+DecorationFeatureDetails.DecorationFeatures.Machine,
+DecorationFeatureDetails.DecorationFeatures.Machine2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+DecorationFeatureDetails.DecorationFeatures.MachinePart3,
+                DecorationFeatureDetails.DecorationFeatures.Screen1,
+                DecorationFeatureDetails.DecorationFeatures.Screen2,
+                DecorationFeatureDetails.DecorationFeatures.Screen3,
+                DecorationFeatureDetails.DecorationFeatures.Screen4
+            };
+
+            featuresByLevel[flightDeck] = new List<DecorationFeatureDetails.DecorationFeatures>
+            {
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+DecorationFeatureDetails.DecorationFeatures.Crate,
+DecorationFeatureDetails.DecorationFeatures.Machine,
+DecorationFeatureDetails.DecorationFeatures.Machine2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+DecorationFeatureDetails.DecorationFeatures.MachinePart3,
+                DecorationFeatureDetails.DecorationFeatures.Screen1,
+                DecorationFeatureDetails.DecorationFeatures.Screen2,
+                DecorationFeatureDetails.DecorationFeatures.Screen3,
+                DecorationFeatureDetails.DecorationFeatures.Pillar1,
+DecorationFeatureDetails.DecorationFeatures.Pillar2,
+                DecorationFeatureDetails.DecorationFeatures.Pillar3,
+                DecorationFeatureDetails.DecorationFeatures.Pillar4,
+                DecorationFeatureDetails.DecorationFeatures.Screen8
+            };
+
+            featuresByLevel[reactorLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            {
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+                DecorationFeatureDetails.DecorationFeatures.EggChair,
+                DecorationFeatureDetails.DecorationFeatures.Machine,
+                DecorationFeatureDetails.DecorationFeatures.Machine2,
+                                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart3,
+                                DecorationFeatureDetails.DecorationFeatures.Screen1,
+                                DecorationFeatureDetails.DecorationFeatures.Screen2,
+                                DecorationFeatureDetails.DecorationFeatures.Screen3,
+                                DecorationFeatureDetails.DecorationFeatures.Screen4,
+                DecorationFeatureDetails.DecorationFeatures.Screen5,
+                DecorationFeatureDetails.DecorationFeatures.Screen6,
+                DecorationFeatureDetails.DecorationFeatures.Screen7,
+                DecorationFeatureDetails.DecorationFeatures.Screen8
+            };
+
+            featuresByLevel[arcologyLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            {
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+                DecorationFeatureDetails.DecorationFeatures.Egg1,
+                DecorationFeatureDetails.DecorationFeatures.Egg2,
+                DecorationFeatureDetails.DecorationFeatures.Egg3,
+                DecorationFeatureDetails.DecorationFeatures.Spike,
+                DecorationFeatureDetails.DecorationFeatures.CorpseinGoo,
+                DecorationFeatureDetails.DecorationFeatures.Machine,
+                DecorationFeatureDetails.DecorationFeatures.Machine2,
+                                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart3
+              
+            };
+
+            featuresByLevel[commercialLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            {
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
+                DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
+                DecorationFeatureDetails.DecorationFeatures.Bone,
+                DecorationFeatureDetails.DecorationFeatures.Skeleton,
+                DecorationFeatureDetails.DecorationFeatures.Instrument1,
+                DecorationFeatureDetails.DecorationFeatures.Instrument2,
+                DecorationFeatureDetails.DecorationFeatures.Egg1,
+                DecorationFeatureDetails.DecorationFeatures.Egg2,
+                DecorationFeatureDetails.DecorationFeatures.Egg3,
+                DecorationFeatureDetails.DecorationFeatures.Spike,
+                DecorationFeatureDetails.DecorationFeatures.CorpseinGoo,
+                DecorationFeatureDetails.DecorationFeatures.Machine,
+                DecorationFeatureDetails.DecorationFeatures.Machine2,
+                                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart3
+              
+            };
+
         }
+
 
         public const int medicalLevel = 0;
         public const int lowerAtriumLevel = 1;
@@ -105,6 +263,8 @@ namespace TraumaRL
         public const int reactorLevel = 5;
         public const int arcologyLevel = 6;
         public const int commercialLevel = 7;
+        public const int computerCoreLevel = 8;
+        public const int bridgeLevel = 9;
 
         //Quest important rooms / vaults
         Connection escapePodsConnection;
@@ -129,6 +289,8 @@ namespace TraumaRL
             levelNaming[reactorLevel] = "Reactor";
             levelNaming[arcologyLevel] = "Arcology";
             levelNaming[commercialLevel] = "Commercial";
+            levelNaming[bridgeLevel] = "Bridge";
+            levelNaming[computerCoreLevel] = "Computer Core";
         }
 
         private void BuildTerrainMapping()
@@ -178,6 +340,8 @@ namespace TraumaRL
 
         public static Dictionary<int, string> LevelNaming { get { return levelNaming; } }
 
+        MapModel levelMap;
+        Dictionary<int, int> levelDepths;
 
         /// <summary>
         /// Build a level->level map showing how the levels are connected
@@ -199,7 +363,7 @@ namespace TraumaRL
 
             //The remainder branch from other levels (except the arcology)
             var leafLevels = directLinksFromLowerAtrium.Select(x => x);
-            leafLevels.Except(new List<int> { arcologyLevel });
+            leafLevels = leafLevels.Except(new List<int> { arcologyLevel });
 
             var allLowerLevelsToPlace = standardLowerLevels.Except(directLinksFromLowerAtrium).Union(new List<int> { reactorLevel });
             foreach (var level in allLowerLevelsToPlace)
@@ -207,7 +371,23 @@ namespace TraumaRL
                 levelLinks.AddRoomConnection(leafLevels.RandomElement(), level);
             }
 
+            //Bridge and computer core are also leaves
+            var allLaterLevels = standardLowerLevels.Except(directLinksFromLowerAtrium);
+            var finalLevelsToPlace = new List<int> { computerCoreLevel, bridgeLevel };
+            foreach (var level in finalLevelsToPlace)
+            {
+                levelLinks.AddRoomConnection(allLaterLevels.RandomElement(), level);
+            }
+
             gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
+
+            //Calculate some data about the levels
+            levelMap = new MapModel(levelLinks, medicalLevel);
+            levelDepths = levelMap.GetDistanceOfVerticesFromParticularVertexInFullMap(medicalLevel, gameLevels);
+            foreach (var kv in levelDepths)
+            {
+                LogFile.Log.LogEntryDebug("Level " + kv.Key + " depth " + kv.Value, LogDebugLevel.Medium);
+            }
         }
 
         public class LevelInfo
@@ -267,6 +447,9 @@ namespace TraumaRL
                     var storageInfo = GenerateStorageLevel(storageLevel, storageLevel * 100);
                     levelInfo[storageLevel] = storageInfo;
 
+                    var flightInfo = GenerateFlightDeckLevel(flightDeck, flightDeck * 100);
+                    levelInfo[flightDeck] = flightInfo;
+
                     var reactorInfo = GenerateReactorLevel(reactorLevel, reactorLevel * 100);
                     levelInfo[reactorLevel] = reactorInfo;
 
@@ -275,7 +458,7 @@ namespace TraumaRL
 
                     //Make other levels generically
 
-                    var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, arcologyLevel, scienceLevel });
+                    var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel });
 
                     foreach (var level in standardGameLevels)
                     {
@@ -369,22 +552,22 @@ namespace TraumaRL
                     GenerateQuests(mapInfo, levelInfo);
 
                     //Add clues and locks at dungeon engine level
-                    AddSimpleCluesAndLocks(mapInfo);
+                    //AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
-                    AddDecorationFeatures(mapInfo, levelInfo);
+                    //AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                     //Add monsters
-                    CreateMonstersForLevels(mapInfo);
+                    //CreateMonstersForLevels(mapInfo);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);
                     if (!graphSolver.MapCanBeSolved())
                     {
                         LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
-                        throw new ApplicationException("It's all over - map can't be solved.");
+                        //throw new ApplicationException("It's all over - map can't be solved.");
                     }
                     else
                     {
@@ -485,13 +668,13 @@ namespace TraumaRL
 
             BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
             
-            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
             
-            BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            //BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+            //BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
+            //BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
         }
 
         private void BuildRandomElevatorQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -633,7 +816,7 @@ namespace TraumaRL
 
                 var clueName = unusedColor.Item2 + " key card";
                 var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, unusedColor.Item1, clueName));
-                var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, true);
+                var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, true, false);
 
                 //Logs - try placing them on the critical path from the start of the game!
 
@@ -733,17 +916,7 @@ namespace TraumaRL
 
             //Place door
 
-            manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, cluesForDoor));
-            var door = manager.GetDoorById(doorId);
-
-            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, doorName, colorToUse);
-            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-            lockedDoor.LocationLevel = doorInfo.LevelNo;
-            lockedDoor.LocationMap = doorInfo.MapLocation;
-
-            Game.Dungeon.AddLock(lockedDoor);
-
-            placedDoors.Add(door);
+            PlaceDoorOnMap(mapInfo, doorId, doorName, cluesForDoor, colorToUse, criticalConnectionForDoor);
 
             //Place clues
 
@@ -755,7 +928,7 @@ namespace TraumaRL
 
             var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, colorToUse, doorName));
 
-            var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, clueNotInCorridors);
+            var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, clueNotInCorridors, false);
 
             //Place log entries explaining the puzzle
 
@@ -786,6 +959,25 @@ namespace TraumaRL
                 //Ignore log problems
                 //}
             }
+        }
+
+        private Door PlaceDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, Color colorToUse, Connection criticalConnectionForDoor)
+        {
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, numberOfCluesForDoor));
+            var door = manager.GetDoorById(doorId);
+
+            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, doorName, colorToUse);
+            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
+            lockedDoor.LocationLevel = doorInfo.LevelNo;
+            lockedDoor.LocationMap = doorInfo.MapLocation;
+
+            Game.Dungeon.AddLock(lockedDoor);
+
+            placedDoors.Add(door);
+
+            return door;
         }
 
         private Connection CheckAndReplaceConnectionIfOccupied(DoorAndClueManager manager, IEnumerable<Connection> criticalPath, Connection connectionCandidate)
@@ -878,44 +1070,93 @@ namespace TraumaRL
             return roomsToPlaceMonsters;
         }
 
+        int selfDestructRoom;
+
         private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
             var deadEndRooms = roomConnectivityMap[0];
+            
             //MAIN QUEST
+
+
+            //escapePodsConnection = levelInfo[flightDeck].ReplaceableVaultConnections.Except(levelInfo[flightDeck].ReplaceableVaultConnectionsUsed).RandomElement();
+            //escapePodsLevel = flightDeck;
+            //levelInfo[flightDeck].ReplaceableVaultConnectionsUsed.Add(escapePodsConnection);
+
+            //TODO: replace vault in map
+
+            var manager = mapInfo.Model.DoorAndClueManager;
 
             //Escape pod door
             //Requires enabling self-destruct and fueling pods
 
-            escapePodsConnection = levelInfo[flightDeck].ReplaceableVaultConnections[0];
-            escapePodsLevel = flightDeck;
-            levelInfo[flightDeck].ReplaceableVaultConnectionsUsed.Add(escapePodsConnection);
+            manager.PlaceDoor(new DoorRequirements(escapePodsConnection, "escape", 2));
 
-            //TODO: replace vault in map
+            //Self destruct requires priming the reactor
 
-            mapInfo.Model.DoorAndClueManager.PlaceDoor(new DoorRequirements(escapePodsConnection, "escape", 2));
+            int selfDestructLevel = bridgeLevel;
+            var replaceableVaultsInBridge = levelInfo[selfDestructLevel].ReplaceableVaultConnections.Except(levelInfo[selfDestructLevel].ReplaceableVaultConnectionsUsed);
+            var bridgeRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, levelInfo[bridgeLevel].ConnectionsToOtherLevels.First().Value.Target, replaceableVaultsInBridge.Select(c => c.Target));
+            selfDestructRoom = bridgeRoomsInDistanceOrderFromStart.ElementAt(0);
+            var selfDestructConnection = replaceableVaultsInBridge.Where(c => c.Target == selfDestructRoom).First();
 
-            //Self destruct requires captain's id
-            int selfDestructLevel = medicalLevel;
-            var selfDestructLevelIndices = mapInfo.GetRoomIndicesForLevel(selfDestructLevel).Except(allReplaceableVaults);
-            var deadEndsInMedical = RoomsInConnectionSet(selfDestructLevelIndices, deadEndRooms);
-            var roomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, deadEndsInMedical);
-            var roomsFarFromStart = roomsInDistanceOrderFromStart.ElementAt(0);
+            manager.PlaceObjective(new ObjectiveRequirements(selfDestructRoom, "self-destruct", 1, new List<string> { "escape" }));
+            var selfDestructObjective = manager.GetObjectiveById("self-destruct");
+            PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
 
-            mapInfo.Model.DoorAndClueManager.PlaceObjective(new ObjectiveRequirements(roomsFarFromStart, "self-destruct", 1, new List<string> { "escape" }));
+            levelInfo[selfDestructLevel].ReplaceableVaultConnectionsUsed.Add(selfDestructConnection);
 
+            LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
+
+            //Lock the bridge on the captain's id
+
+            var colorForCaptainId = GetUnusedColor();
+
+            //bridge is a dead end
+            var sourceElevatorConnection = levelInfo[bridgeLevel].ConnectionsToOtherLevels.First();
+            var connectingLevel = sourceElevatorConnection.Key;
+            var elevatorToBridge = levelInfo[connectingLevel].ConnectionsToOtherLevels[bridgeLevel];
+
+            var doorName = "captain's id bridge";
+            var doorId = doorName;
+            var doorColor = colorForCaptainId.Item1;
+
+            PlaceDoorOnMap(mapInfo, doorId, doorName, 1, doorColor, elevatorToBridge);
+            
             //Captain's id
-            int captainIdLevel = lowerAtriumLevel;
-            var captainIdLevelIndices = mapInfo.GetRoomIndicesForLevel(captainIdLevel);
-            var randomRoomForCaptainId = captainIdLevelIndices.Except(allReplaceableVaults).RandomElement();
+            var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel });
 
-            mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective("self-destruct", new List<int> { randomRoomForCaptainId });
+            var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForDoor(doorName);
+            var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
+            
+            var roomsOnRequestedLevels = mapInfo.FilterRoomsByLevel(possibleVaultsForCaptainsId, captainIdIdealLevel);
+
+            if (!roomsOnRequestedLevels.Any())
+                roomsOnRequestedLevels = possibleVaultsForCaptainsId;
+
+            var captainIdRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, roomsOnRequestedLevels);
+            var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);
+
+            var captainsIdConnection = GetAllVaults(levelInfo).Where(c => c.Target == captainIdRoom).First();
+            var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainIdRoom);
+
+            levelInfo[captainsIdLevel].ReplaceableVaultConnectionsUsed.Add(captainsIdConnection);
+
+            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
+            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, colorForCaptainId.Item1, "Captain's Id"), true, true);
+
+            LogFile.Log.LogEntryDebug("Placing captain's id on level " + captainsIdLevel + " in room " + captainIdRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
+
+            //Self destruct objective in reactor
+
+
 
             //Fueling system
-            int fuelingLevel = lowerAtriumLevel;
-            var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
-            var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
+            //int fuelingLevel = lowerAtriumLevel;
+            //var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
+            //var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
 
-            mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
+            //mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
         }
 
         private static void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -959,7 +1200,7 @@ namespace TraumaRL
                 var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, true);
 
                 if (!roomsForClue.Item2.Any())
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true);
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true, false);
 
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -1006,10 +1247,10 @@ namespace TraumaRL
                     roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors);
 
                     if (!roomsForClue.Item2.Any())
-                        roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors);
+                        roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors, false);
                 }
                 else
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors);
+                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors,false);
 
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -1033,10 +1274,14 @@ namespace TraumaRL
             }
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors)
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
-            IEnumerable<int> possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
+
+            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
+            if(!includeVaults)
+                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
+
             IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
             if (filterCorridors)
                 candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
@@ -1080,14 +1325,29 @@ namespace TraumaRL
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceObjective(MapInfo mapInfo, Objective clue)
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceObjective(MapInfo mapInfo, Objective clue, bool filterCorridors, bool includeVaults)
         {
-            var possibleRooms = clue.PossibleClueRoomsInFullMap.Except(allReplaceableVaults);
-            var randomRoom = possibleRooms.RandomElement();
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
+            IEnumerable<int> possibleRooms = clue.PossibleClueRoomsInFullMap;
 
-            var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
-            var allWalkablePoints = Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints);
+            if(!includeVaults)
+                possibleRooms = possibleRooms.Except(allReplaceableVaults);
+            var candidateRooms = possibleRooms;
+
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(possibleRooms);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = possibleRooms;
+
+             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
+
+            var allWalkablePoints = new List<Point>();
+
+            //Hmm, could be quite expensive
+            foreach (var room in candidateRooms)
+            {
+                var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
+                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
+            }
 
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints);
         }
@@ -1109,7 +1369,7 @@ namespace TraumaRL
                         continue;
 
                     bool avoidCorridors = false;
-                    PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(clue, ColorPresets.Magenta, ""), avoidCorridors);
+                    PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(clue, ColorPresets.Magenta, ""), avoidCorridors, false);
 
                     placedClues.Add(clue);
                 }
@@ -1174,12 +1434,12 @@ namespace TraumaRL
             }
         }
 
-        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, Tuple<Clue, Color, string> clues, bool avoidCorridors)
+        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, Tuple<Clue, Color, string> clues, bool avoidCorridors, bool includeVaults)
         {
-            return PlaceClueItem(mapInfo, new List<Tuple<Clue, Color, string>> {clues}, avoidCorridors);
+            return PlaceClueItem(mapInfo, new List<Tuple<Clue, Color, string>> { clues }, avoidCorridors, includeVaults);
         }
 
-        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, IEnumerable<Tuple<Clue, Color, string>> clues, bool avoidCorridors)
+        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, IEnumerable<Tuple<Clue, Color, string>> clues, bool avoidCorridors,  bool includeVaults)
         {
             var toRet = new List<Tuple<int, Point>>();
 
@@ -1187,7 +1447,7 @@ namespace TraumaRL
             {
                 var clue = tp.Item1;
 
-                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, avoidCorridors);
+                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
                 var levelForRandomRoom = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
 
@@ -1215,6 +1475,40 @@ namespace TraumaRL
             }
 
             return toRet;
+        }
+
+        private Tuple<int, Point> PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults)
+        {
+            var toRet = new List<Tuple<int, Point>>();
+
+            var roomsForClue = GetAllWalkablePointsToPlaceObjective(mapInfo, obj, avoidCorridors, includeVaults);
+            var levelForRandomRoom = roomsForClue.Item1;
+            var allWalkablePoints = roomsForClue.Item2;
+
+            bool placedItem = false;
+            Point pointToPlace = null;
+            foreach (Point p in allWalkablePoints)
+            {
+                if (objectiveFeature == null)
+                    objectiveFeature = new RogueBasin.Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
+                placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
+
+                pointToPlace = p;
+
+                if (placedItem)
+                    break;
+            }
+
+            placedObjectives.Add(obj);
+
+            if (!placedItem)
+            {
+                var str = "Can't place obj " + obj.Id;
+                LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
+                throw new ApplicationException(str);
+            }
+
+            return new Tuple<int, Point>(levelForRandomRoom, pointToPlace);
         }
 
         private LevelInfo GenerateMedicalLevel(int levelNo)
@@ -1250,7 +1544,7 @@ namespace TraumaRL
             }
 
             //Add a small number of place holder holder rooms for vaults
-            int maxPlaceHolders = 2;
+            int maxPlaceHolders = 3;
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
@@ -1323,7 +1617,7 @@ namespace TraumaRL
             }
 
             //Add a small number of place holder holder rooms for vaults
-            int maxPlaceHolders = 2;
+            int maxPlaceHolders = 3;
 
             levelInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
@@ -1372,7 +1666,59 @@ namespace TraumaRL
             }
 
             //Add a small number of place holder holder rooms for vaults
-            int maxPlaceHolders = 2;
+            int maxPlaceHolders = 3;
+
+            medicalInfo.ReplaceableVaultConnections.AddRange(
+                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+
+            //Add extra corridors
+            AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
+
+            //Tidy terrain
+            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+
+            return medicalInfo;
+        }
+
+        private LevelInfo GenerateFlightDeckLevel(int levelNo, int startVertexIndex)
+        {
+            var medicalInfo = new LevelInfo(levelNo);
+
+            //Load standard room types
+
+            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            RoomTemplate escapePodVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.escape_pod1.room", StandardTemplateMapping.terrainMapping);
+
+            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+
+            var mapBuilder = new TemplatedMapBuilder(100, 100);
+            medicalInfo.LevelBuilder = mapBuilder;
+            var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
+            medicalInfo.LevelGenerator = templateGenerator;
+
+            PlaceOriginRoom(templateGenerator, originRoom);
+
+            int numberOfRandomRooms = 12;
+
+            GenerateLargeRooms(templateGenerator, numberOfRandomRooms);
+
+            //Add connections to other levels
+
+            var connections = AddConnectionsToOtherLevels(levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
+            foreach (var connection in connections)
+            {
+                medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
+            }
+
+            //Add the escape pods
+            escapePodsConnection = AddRoomToRandomOpenDoor(templateGenerator, escapePodVault, corridor1, 2);
+            escapePodsLevel = levelNo;
+
+            //Add a small number of place holder holder rooms for vaults
+            int maxPlaceHolders = 3;
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
@@ -1419,7 +1765,7 @@ namespace TraumaRL
             }
 
             //Add a small number of place holder holder rooms for vaults
-            int maxPlaceHolders = 2;
+            int maxPlaceHolders = 3;
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
@@ -1480,7 +1826,7 @@ namespace TraumaRL
             }
 
             //Add a small number of place holder holder rooms for vaults
-            int maxPlaceHolders = 2;
+            int maxPlaceHolders = 3;
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
@@ -1498,6 +1844,21 @@ namespace TraumaRL
             medicalInfo.TerrainMapping = bioTerrainMapping;
 
             return medicalInfo;
+        }
+
+        private IEnumerable<Connection> GetAllUsedVaults(Dictionary<int, LevelInfo> levelInfo)
+        {
+            return gameLevels.SelectMany(l => levelInfo[l].ReplaceableVaultConnectionsUsed);
+        }
+
+        private IEnumerable<Connection> GetAllAvailableVaults(Dictionary<int, LevelInfo> levelInfo)
+        {
+            return GetAllVaults(levelInfo).Except(GetAllUsedVaults(levelInfo));
+        }
+
+        private IEnumerable<Connection> GetAllVaults(Dictionary<int, LevelInfo> levelInfo)
+        {
+            return gameLevels.SelectMany(l => levelInfo[l].ReplaceableVaultConnections);
         }
 
         private void GenerateLargeRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
@@ -1586,7 +1947,7 @@ namespace TraumaRL
             }
 
             //Add a small number of place holder holder rooms for vaults
-            int maxPlaceHolders = 2;
+            int maxPlaceHolders = 3;
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));

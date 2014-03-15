@@ -837,6 +837,7 @@
     <EmbeddedResource Include="bin\Debug\logentries\gd_crate.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gd_mishap.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gd_robots.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\escape_pod1.room" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
