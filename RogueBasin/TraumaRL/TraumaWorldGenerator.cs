@@ -668,13 +668,13 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
 
             BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
             
-            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
             
             //BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
             //BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            //BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
         }
 
         private void BuildRandomElevatorQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -769,15 +769,24 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             return colorToReturn;
         }
 
+        Dictionary<int, int> goodyRooms;
+
         private void BuildGoodyQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
             //Ensure that we have a goody room on every level that will support it
             var replaceableVaultsForLevels = levelInfo.ToDictionary(kv => kv.Key, kv => kv.Value.ReplaceableVaultConnections.Except(kv.Value.ReplaceableVaultConnectionsUsed));
+            goodyRooms = new Dictionary<int,int>();
 
             var manager = mapInfo.Model.DoorAndClueManager;
 
             foreach (var kv in replaceableVaultsForLevels)
             {
+                if (kv.Value.Count() == 0)
+                {
+                    LogFile.Log.LogEntryDebug("No vaults left for armory on level " + kv.Key, LogDebugLevel.High);
+                    continue;
+                }
+
                 var thisLevel = kv.Key;
                 var thisConnection = kv.Value.RandomElement();
                 var thisRoom = thisConnection.Target;
@@ -799,6 +808,8 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
                 Game.Dungeon.AddLock(lockedDoor);
 
                 placedDoors.Add(door);
+
+                goodyRooms[thisLevel] = thisRoom;
 
                 //Clue
                 var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
