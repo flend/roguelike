@@ -1122,13 +1122,19 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
 
             //Computer core to destroy
             var unusedVaultsInComputerLevel = GetAllAvailableVaults(levelInfo).Where(c => mapInfo.GetLevelForRoomIndex(c.Target) == computerCoreLevel);
-            var computerCoreVaultConnection = unusedVaultsInComputerLevel.First();
+
+            var unusedVaultsInComputerLevelOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, unusedVaultsInComputerLevel.Select(c => c.Target));
+            var computerClueRoom = unusedVaultsInComputerLevelOrderFromStart.ElementAt(0);
+            var computerCoreVaultConnection = GetAllVaults(levelInfo).Where(c => c.Target == computerClueRoom).First();
+
             var computerCoreVault = computerCoreVaultConnection.Target;
             var computerVaultClue = manager.AddCluesToExistingObjective("prime-self-destruct", new List<int> {computerCoreVault});
 
             PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, computerVaultClue, true);
 
             UseVault(levelInfo, computerCoreVaultConnection);
+
+
             /*
              * //standard clue placing
             var reactorColor = GetUnusedColor();
@@ -1194,6 +1200,7 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
 
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
         }
+
 
         private static void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
