@@ -19,23 +19,23 @@ namespace TraumaRL
 
             //For testing
             bool retry = false;
-            do
-            {
-                try
-                {
+           // do
+         //   {
+         //       try
+         //       {
                     StandardGameSetup();
 
                     GenerateStoryDungeon(retry);
 
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    retry = false;
-                    LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
+                 //   break;
+           //     }
+                //catch (Exception ex)
+               // {
+               //     retry = false;
+               //     LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
 
-                }
-            } while (true);
+              //  }
+           // } while (false);
 
             RunGame();
         }

@@ -880,6 +880,10 @@
     <EmbeddedResource Include="bin\Debug\vaults\tshape2.room" />
     <EmbeddedResource Include="bin\Debug\vaults\lshape_asymmetric3.room" />
     <EmbeddedResource Include="bin\Debug\vaults\lshape3.room" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_antennae1.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_antennae2.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_antennae3.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_antennae4.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

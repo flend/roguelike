@@ -222,6 +222,36 @@ namespace RogueBasin
             return entry;
         }
 
+        public LogEntry GenerateGeneralQuestLogEntry(string logname, int levelForDoor, int levelForClue)
+        {
+            var entry = new LogEntry();
+
+            entry.title = GenerateRandomTitle();
+
+            var randomLog = logDatabaseByFilename[logname];
+            var substitutedLog = randomLog;
+            List<string> logEntryLines = substitutedLog.lines;
+
+            try
+            {
+                logEntryLines = ApplyStandardSubstitutions(logEntryLines);
+
+                logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
+                { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
+                { "<cluelevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForClue] }
+            });
+
+            }
+            catch (Exception)
+            {
+                //Not to worry
+            }
+
+            entry.lines = logEntryLines;
+
+            return entry;
+        }
+
         public List<LogEntry> GenerateCoupledDoorLogEntry(string doorId, int levelForDoor, int levelForClue)
         {
             

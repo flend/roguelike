@@ -608,7 +608,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                     //Add monsters
-                    CreateMonstersForLevels(mapInfo);
+                    //CreateMonstersForLevels(mapInfo);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);
@@ -711,7 +711,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
             
-            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
             
             //BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
@@ -1351,8 +1351,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var antennaeVaultConnection = GetAllVaults(levelInfo).Where(c => c.Target == antennaeRoom).First();
 
             var antennaeVault = antennaeVaultConnection.Target;
-            manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, "antennae", 1));
-            var antennaeObj = manager.GetObjectiveById("antennae");
+            var antennaeName = "antennae";
+            manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, antennaeName, 1));
+            var antennaeObj = manager.GetObjectiveById(antennaeName);
             PlaceObjective(mapInfo, antennaeObj, null, true, true);
 
             UseVault(levelInfo, antennaeVaultConnection);
@@ -1361,7 +1362,33 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var colorForAntennae =  GetUnusedColor();
 
-            PlaceClueForObjectiveInVault(mapInfo, levelInfo, "antennae", colorForAntennae.Item1, "clue-antennae", new List<int> { scienceLevel, storageLevel });
+            var servoRoom = PlaceClueForObjectiveInVault(mapInfo, levelInfo, antennaeName, colorForAntennae.Item1, "clue-antennae", new List<int> { scienceLevel, storageLevel });
+
+            //Logs
+
+            var antennaeLevel = mapInfo.GetLevelForRoomIndex(antennaeVault);
+
+            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(antennaeName);
+
+            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, antennaeVault);
+
+            var preferredRoomsForLogsCritical = FilterClueRooms(mapInfo, allowedRoomsForLogs, criticalPath, false, CluePath.OnCriticalPath, true);
+            var preferredRoomsForLogsNonCritical = FilterClueRooms(mapInfo, allowedRoomsForLogs, criticalPath, false, CluePath.Any, true);
+
+            var roomsForLogsCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsNonCritical);
+
+            var logCluesCritical = manager.AddCluesToExistingObjective(antennaeName, roomsForLogsCritical);
+            var logCluesNonCritical = manager.AddCluesToExistingObjective(antennaeName, roomsForLogsNonCritical);
+
+            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae2", antennaeLevel, servoRoom), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae3", antennaeLevel, servoRoom), logCluesCritical[1]);
+
+            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae1", antennaeLevel, servoRoom), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae4", antennaeLevel, servoRoom), logCluesNonCritical[1]);
+
+            PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
+            
         }
 
         private void PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
@@ -1392,7 +1419,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
         }
 
-        private void PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
+        private int PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1418,6 +1445,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
+
+            return captainIdRoom;
         }
 
 
