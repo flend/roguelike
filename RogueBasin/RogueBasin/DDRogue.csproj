@@ -199,6 +199,7 @@
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
+    <Compile Include="Features\AntennaeObjective.cs" />
     <Compile Include="Features\Corpse.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -233,6 +234,7 @@
     <Compile Include="Item.cs" />
     <Compile Include="ItemEffects\Decay.cs" />
     <Compile Include="ItemMapping.cs" />
+    <Compile Include="Items\MovieClue.cs" />
     <Compile Include="Items\ClueAutoPickup.cs" />
     <Compile Include="Items\Clue.cs" />
     <Compile Include="Items\FragGrenade.cs">
@@ -884,6 +886,10 @@
     <EmbeddedResource Include="bin\Debug\logentries\qe_antennae2.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_antennae3.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_antennae4.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\antennaeunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\antennaelocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\antennaeunlocked1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\interface_demod0.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

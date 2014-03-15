@@ -10,9 +10,9 @@ namespace RogueBasin.Features
 {
     public class SimpleObjective : UseableFeature
     {
-        GraphMap.Objective obj;
-        bool isComplete;
-        IEnumerable<Clue> objectiveProducesClues;
+        protected GraphMap.Objective obj;
+        protected bool isComplete;
+        protected IEnumerable<Clue> objectiveProducesClues;
 
         public SimpleObjective(GraphMap.Objective objective, IEnumerable<Clue> objectiveProducesClues)
         {
@@ -29,11 +29,8 @@ namespace RogueBasin.Features
             }
 
             Dungeon dungeon = Game.Dungeon;
-            
-            var allPlayerClueItems = player.Inventory.GetItemsOfType<Items.Clue>();
-            var allPlayerClues = allPlayerClueItems.Select(i => i.MapClue);
 
-            bool canDoorBeOpened = obj.CanBeOpenedWithClues(allPlayerClues);
+            bool canDoorBeOpened = ObjectiveCanBeOpenedWithClues(player);
 
             if (!canDoorBeOpened)
             {
@@ -43,11 +40,7 @@ namespace RogueBasin.Features
             else
             {
                 //Add clues directly into player's inventory
-                foreach (var producedClue in objectiveProducesClues)
-                {
-                    var clue = new Items.Clue(producedClue);
-                    player.Inventory.AddItemNotFromDungeon(clue);
-                }
+                GivePlayerObjectiveClues(player);
 
                 var keysYouGet = new StringBuilder();
                 foreach (var id in objectiveProducesClues.Select(c => c.LockedDoor != null ? c.LockedDoor.Id : c.LockedObjective.Id))
@@ -59,6 +52,24 @@ namespace RogueBasin.Features
                 isComplete = true;
                 return true;
             }
+        }
+
+        protected void GivePlayerObjectiveClues(Player player)
+        {
+            foreach (var producedClue in objectiveProducesClues)
+            {
+                var clue = new Items.Clue(producedClue);
+                player.Inventory.AddItemNotFromDungeon(clue);
+            }
+        }
+
+        protected bool ObjectiveCanBeOpenedWithClues(Player player)
+        {
+            var allPlayerClueItems = player.Inventory.GetItemsOfType<Items.Clue>();
+            var allPlayerClues = allPlayerClueItems.Select(i => i.MapClue);
+
+            bool canDoorBeOpened = obj.CanBeOpenedWithClues(allPlayerClues);
+            return canDoorBeOpened;
         }
 
         protected override char GetRepresentation()

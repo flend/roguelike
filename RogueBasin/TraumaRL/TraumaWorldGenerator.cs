@@ -1351,24 +1351,23 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var antennaeVaultConnection = GetAllVaults(levelInfo).Where(c => c.Target == antennaeRoom).First();
 
             var antennaeVault = antennaeVaultConnection.Target;
-            var antennaeName = "antennae";
-            manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, antennaeName, 1));
-            var antennaeObj = manager.GetObjectiveById(antennaeName);
-            PlaceObjective(mapInfo, antennaeObj, null, true, true);
+            var antennaeObjName = "antennae";
+            manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, antennaeObjName, 1));
+            var antennaeObj = manager.GetObjectiveById(antennaeObjName);
+            PlaceObjective(mapInfo, antennaeObj, new RogueBasin.Features.AntennaeObjective(antennaeObj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(antennaeObj)), true, true);
 
             UseVault(levelInfo, antennaeVaultConnection);
 
             //Servo motor
 
-            var colorForAntennae =  GetUnusedColor();
-
-            var servoRoom = PlaceClueForObjectiveInVault(mapInfo, levelInfo, antennaeName, colorForAntennae.Item1, "clue-antennae", new List<int> { scienceLevel, storageLevel });
+            var servoRoom = PlaceMovieClueForObjectiveInVault(mapInfo, levelInfo, antennaeObjName, (char)307, "interface_demod", new List<int> { scienceLevel, storageLevel });
 
             //Logs
 
             var antennaeLevel = mapInfo.GetLevelForRoomIndex(antennaeVault);
+            var servoLevel = mapInfo.GetLevelForRoomIndex(servoRoom);
 
-            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(antennaeName);
+            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(antennaeObjName);
 
             var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, antennaeVault);
 
@@ -1378,14 +1377,14 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var roomsForLogsCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsCritical);
             var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsNonCritical);
 
-            var logCluesCritical = manager.AddCluesToExistingObjective(antennaeName, roomsForLogsCritical);
-            var logCluesNonCritical = manager.AddCluesToExistingObjective(antennaeName, roomsForLogsNonCritical);
+            var logCluesCritical = manager.AddCluesToExistingObjective(antennaeObjName, roomsForLogsCritical);
+            var logCluesNonCritical = manager.AddCluesToExistingObjective(antennaeObjName, roomsForLogsNonCritical);
 
-            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae2", antennaeLevel, servoRoom), logCluesCritical[0]);
-            var log3 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae3", antennaeLevel, servoRoom), logCluesCritical[1]);
+            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae2", antennaeLevel, servoLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae3", antennaeLevel, servoLevel), logCluesCritical[1]);
 
-            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae1", antennaeLevel, servoRoom), logCluesNonCritical[0]);
-            var log4 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae4", antennaeLevel, servoRoom), logCluesNonCritical[1]);
+            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae1", antennaeLevel, servoLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_antennae4", antennaeLevel, servoLevel), logCluesNonCritical[1]);
 
             PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
             
@@ -1445,6 +1444,37 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
+
+            return captainIdRoom;
+        }
+
+        private int PlaceMovieClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string objectiveId, char representation, string pickupMovie, IEnumerable<int> idealLevelsForClue)
+        {
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForObjective(objectiveId);
+            var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
+
+            var roomsOnRequestedLevels = mapInfo.FilterRoomsByLevel(possibleVaultsForCaptainsId, idealLevelsForClue);
+
+            if (!roomsOnRequestedLevels.Any())
+                roomsOnRequestedLevels = possibleVaultsForCaptainsId;
+
+            // var captainIdRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, roomsOnRequestedLevels);
+            // var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);
+            //above is not performing, since it always sticks everything in level 8 as far away from everything as it can
+            var captainIdRoom = roomsOnRequestedLevels.RandomElement();
+
+            var captainsIdConnection = GetAllVaults(levelInfo).Where(c => c.Target == captainIdRoom).First();
+            var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainIdRoom);
+
+            UseVault(levelInfo, captainsIdConnection);
+
+            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(objectiveId, new List<int> { captainIdRoom }).First();
+            Item clueItemToPlace = new RogueBasin.Items.MovieClue(captainIdClue, representation, pickupMovie);
+            PlaceClueItem(mapInfo, new List<Tuple<Clue,Item>>{new Tuple<Clue, Item>(captainIdClue, clueItemToPlace)}, true, true);
+
+            LogFile.Log.LogEntryDebug("Placing " + clueItemToPlace.SingleItemDescription + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
             return captainIdRoom;
         }
@@ -1842,6 +1872,45 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 foreach (Point p in allWalkablePoints)
                 {
                     placedItem = Game.Dungeon.AddItem(new RogueBasin.Items.Clue(clue, tp.Item2, tp.Item3), levelForRandomRoom, p);
+                    pointToPlace = p;
+
+                    if (placedItem)
+                        break;
+                }
+
+                placedClues.Add(clue);
+
+                if (!placedItem)
+                {
+                    var str = "Can't place clue " + clue.OpenLockIndex;
+                    LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
+                    throw new ApplicationException(str);
+                }
+
+                toRet.Add(new Tuple<int, Point>(levelForRandomRoom, pointToPlace));
+            }
+
+            return toRet;
+        }
+
+        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, List<Tuple<Clue, Item>> clueItem, bool avoidCorridors, bool includeVaults)
+        {
+            var toRet = new List<Tuple<int, Point>>();
+
+            foreach (var tp in clueItem)
+            {
+                var clue = tp.Item1;
+                var item = tp.Item2;
+
+                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
+                var levelForRandomRoom = roomsForClue.Item1;
+                var allWalkablePoints = roomsForClue.Item2;
+
+                bool placedItem = false;
+                Point pointToPlace = null;
+                foreach (Point p in allWalkablePoints)
+                {
+                    placedItem = Game.Dungeon.AddItem(item, levelForRandomRoom, p);
                     pointToPlace = p;
 
                     if (placedItem)
