@@ -86,12 +86,16 @@ namespace TraumaRL
                 DecorationFeatureDetails.DecorationFeatures.Instrument2,
                 DecorationFeatureDetails.DecorationFeatures.Instrument3,
 DecorationFeatureDetails.DecorationFeatures.MedicalAutomat,
-DecorationFeatureDetails.DecorationFeatures.AutomatMachine,
-                DecorationFeatureDetails.DecorationFeatures.CoffeePC,
+DecorationFeatureDetails.DecorationFeatures.CoffeePC,
                 DecorationFeatureDetails.DecorationFeatures.DesktopPC,
                 DecorationFeatureDetails.DecorationFeatures.Chair1,
 DecorationFeatureDetails.DecorationFeatures.Chair2,
                 DecorationFeatureDetails.DecorationFeatures.Stool,
+DecorationFeatureDetails.DecorationFeatures.Plant1,
+DecorationFeatureDetails.DecorationFeatures.Plant2,
+DecorationFeatureDetails.DecorationFeatures.Plant3,
+DecorationFeatureDetails.DecorationFeatures.CleaningDevice,
+DecorationFeatureDetails.DecorationFeatures.Wheelchair,
                 DecorationFeatureDetails.DecorationFeatures.Bin
             };
 
@@ -125,19 +129,24 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
                 DecorationFeatureDetails.DecorationFeatures.Bone,
                 DecorationFeatureDetails.DecorationFeatures.Skeleton,
+DecorationFeatureDetails.DecorationFeatures.CleaningDevice,
                 DecorationFeatureDetails.DecorationFeatures.Instrument1,
                 DecorationFeatureDetails.DecorationFeatures.Instrument2,
                 DecorationFeatureDetails.DecorationFeatures.Instrument3,
                 DecorationFeatureDetails.DecorationFeatures.MedicalAutomat,
-DecorationFeatureDetails.DecorationFeatures.AutomatMachine,
-                DecorationFeatureDetails.DecorationFeatures.CoffeePC,
+DecorationFeatureDetails.DecorationFeatures.CoffeePC,
                 DecorationFeatureDetails.DecorationFeatures.DesktopPC,
                 DecorationFeatureDetails.DecorationFeatures.Chair1,
 DecorationFeatureDetails.DecorationFeatures.Chair2,
                 DecorationFeatureDetails.DecorationFeatures.Stool,
-                DecorationFeatureDetails.DecorationFeatures.Screen6,
-                DecorationFeatureDetails.DecorationFeatures.Screen7,
+DecorationFeatureDetails.DecorationFeatures.Plant1,
+DecorationFeatureDetails.DecorationFeatures.Plant2,
+DecorationFeatureDetails.DecorationFeatures.Plant3,
+DecorationFeatureDetails.DecorationFeatures.Wheelchair,
+                DecorationFeatureDetails.DecorationFeatures.Screen1,
+                DecorationFeatureDetails.DecorationFeatures.Screen2,
                 DecorationFeatureDetails.DecorationFeatures.Screen8,
+                DecorationFeatureDetails.DecorationFeatures.Screen9
             };
 
             featuresByLevel[storageLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
@@ -182,7 +191,6 @@ DecorationFeatureDetails.DecorationFeatures.MachinePart3,
                 DecorationFeatureDetails.DecorationFeatures.Pillar1,
 DecorationFeatureDetails.DecorationFeatures.Pillar2,
                 DecorationFeatureDetails.DecorationFeatures.Pillar3,
-                DecorationFeatureDetails.DecorationFeatures.Pillar4,
                 DecorationFeatureDetails.DecorationFeatures.Screen8
             };
 
@@ -194,17 +202,17 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
                 DecorationFeatureDetails.DecorationFeatures.Skeleton,
                 DecorationFeatureDetails.DecorationFeatures.Instrument1,
                 DecorationFeatureDetails.DecorationFeatures.Instrument2,
-                DecorationFeatureDetails.DecorationFeatures.EggChair,
-                DecorationFeatureDetails.DecorationFeatures.Machine,
-                DecorationFeatureDetails.DecorationFeatures.Machine2,
-                                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
-                DecorationFeatureDetails.DecorationFeatures.MachinePart2,
-                DecorationFeatureDetails.DecorationFeatures.MachinePart3,
-                                DecorationFeatureDetails.DecorationFeatures.Screen1,
-                                DecorationFeatureDetails.DecorationFeatures.Screen2,
-                                DecorationFeatureDetails.DecorationFeatures.Screen3,
-                                DecorationFeatureDetails.DecorationFeatures.Screen4,
-                DecorationFeatureDetails.DecorationFeatures.Screen5,
+DecorationFeatureDetails.DecorationFeatures.EggChair,
+DecorationFeatureDetails.DecorationFeatures.Machine,
+DecorationFeatureDetails.DecorationFeatures.Machine2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+DecorationFeatureDetails.DecorationFeatures.MachinePart3,
+                DecorationFeatureDetails.DecorationFeatures.Screen1,
+                DecorationFeatureDetails.DecorationFeatures.Screen2,
+                DecorationFeatureDetails.DecorationFeatures.Screen3,
+                DecorationFeatureDetails.DecorationFeatures.Screen4,
+DecorationFeatureDetails.DecorationFeatures.Screen6,
                 DecorationFeatureDetails.DecorationFeatures.Screen6,
                 DecorationFeatureDetails.DecorationFeatures.Screen7,
                 DecorationFeatureDetails.DecorationFeatures.Screen8
@@ -219,15 +227,15 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
                 DecorationFeatureDetails.DecorationFeatures.Instrument1,
                 DecorationFeatureDetails.DecorationFeatures.Instrument2,
                 DecorationFeatureDetails.DecorationFeatures.Egg1,
-                DecorationFeatureDetails.DecorationFeatures.Egg2,
-                DecorationFeatureDetails.DecorationFeatures.Egg3,
-                DecorationFeatureDetails.DecorationFeatures.Spike,
-                DecorationFeatureDetails.DecorationFeatures.CorpseinGoo,
-                DecorationFeatureDetails.DecorationFeatures.Machine,
-                DecorationFeatureDetails.DecorationFeatures.Machine2,
-                                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
-                DecorationFeatureDetails.DecorationFeatures.MachinePart2,
-                DecorationFeatureDetails.DecorationFeatures.MachinePart3
+DecorationFeatureDetails.DecorationFeatures.Egg2,
+DecorationFeatureDetails.DecorationFeatures.Egg3,
+DecorationFeatureDetails.DecorationFeatures.Spike,
+DecorationFeatureDetails.DecorationFeatures.CorpseinGoo,
+DecorationFeatureDetails.DecorationFeatures.Machine,
+DecorationFeatureDetails.DecorationFeatures.Machine2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+DecorationFeatureDetails.DecorationFeatures.MachinePart3
               
             };
 
@@ -239,16 +247,27 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
                 DecorationFeatureDetails.DecorationFeatures.Skeleton,
                 DecorationFeatureDetails.DecorationFeatures.Instrument1,
                 DecorationFeatureDetails.DecorationFeatures.Instrument2,
-                DecorationFeatureDetails.DecorationFeatures.Egg1,
-                DecorationFeatureDetails.DecorationFeatures.Egg2,
-                DecorationFeatureDetails.DecorationFeatures.Egg3,
-                DecorationFeatureDetails.DecorationFeatures.Spike,
-                DecorationFeatureDetails.DecorationFeatures.CorpseinGoo,
-                DecorationFeatureDetails.DecorationFeatures.Machine,
-                DecorationFeatureDetails.DecorationFeatures.Machine2,
-                                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
-                DecorationFeatureDetails.DecorationFeatures.MachinePart2,
-                DecorationFeatureDetails.DecorationFeatures.MachinePart3
+DecorationFeatureDetails.DecorationFeatures.Crate,
+                DecorationFeatureDetails.DecorationFeatures.Safe1,
+DecorationFeatureDetails.DecorationFeatures.Safe2,
+                DecorationFeatureDetails.DecorationFeatures.MachinePart1,
+DecorationFeatureDetails.DecorationFeatures.MachinePart2,
+DecorationFeatureDetails.DecorationFeatures.MachinePart3,
+DecorationFeatureDetails.DecorationFeatures.ShopAutomat1,
+DecorationFeatureDetails.DecorationFeatures.ShopAutomat2,
+DecorationFeatureDetails.DecorationFeatures.Statue1,
+DecorationFeatureDetails.DecorationFeatures.Statue2,
+DecorationFeatureDetails.DecorationFeatures.Statue3,
+DecorationFeatureDetails.DecorationFeatures.Statue4,
+DecorationFeatureDetails.DecorationFeatures.AutomatMachine,
+DecorationFeatureDetails.DecorationFeatures.Plant1,
+DecorationFeatureDetails.DecorationFeatures.Plant2,
+DecorationFeatureDetails.DecorationFeatures.Plant3,
+DecorationFeatureDetails.DecorationFeatures.Pillar1,
+DecorationFeatureDetails.DecorationFeatures.Pillar2,
+                DecorationFeatureDetails.DecorationFeatures.Pillar3,
+DecorationFeatureDetails.DecorationFeatures.CleaningDevice,
+DecorationFeatureDetails.DecorationFeatures.Bin
               
             };
 
@@ -555,7 +574,7 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
                     //AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
-                    //AddDecorationFeatures(mapInfo, levelInfo);
+                    AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
@@ -1284,6 +1303,8 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, "antennae", 1));
             var antennaeObj = manager.GetObjectiveById("antennae");
             PlaceObjective(mapInfo, antennaeObj, null, true, true);
+
+            UseVault(levelInfo, antennaeVaultConnection);
 
             //Servo motor
 
