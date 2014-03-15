@@ -104,7 +104,7 @@ namespace RogueBasin {
 
         Color headingColor = ColorPresets.Yellow;
 
-        Color messageColor = ColorPresets.White;
+        Color messageColor = ColorPresets.CadetBlue;
 
         Color soundColor = ColorPresets.Yellow;
 
@@ -1671,28 +1671,29 @@ namespace RogueBasin {
                         }
                     }
                 }
-                else if (weaponE.HasThrowAction())
+                else if (weaponE.HasThrowAction() || weaponE.HasOperateAction())
                 {
                     PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
 
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
-                    double weaponAmmoRatio = Math.Min(player.InventoryQuantityAvailable(weapon.GetType()), 10);
-                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
+                    int ammoBarEntries = Math.Min(player.InventoryQuantityAvailable(weapon.GetType()), 10);
+                    //int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
 
                     for (int i = 0; i < ammoBarLength; i++)
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, grenadeChar, orangeActivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, weapon.Representation, orangeActivatedColor);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, grenadeChar, orangeDisactivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, weapon.Representation, orangeDisactivatedColor);
                         }
                     }
                 }
-
+                
+                /*
                 //Uses
                 int useYOffset = 3;
 
@@ -1718,7 +1719,7 @@ namespace RogueBasin {
                 {
                     PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
                     PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), ColorPresets.White);
-                }
+                }*/
 
                 //if (weaponE.HasOperateAction())
                 //{
@@ -1738,6 +1739,8 @@ namespace RogueBasin {
             var weaponIconXOffset = -2;
             foreach (var kv in ItemMapping.WeaponMapping)
             {
+                Type weaponType = Game.Dungeon.Player.HeavyWeaponTranslation(kv.Value);
+
                 DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 2, weaponOptionRow), kv.Value, kv.Key);
             }
             

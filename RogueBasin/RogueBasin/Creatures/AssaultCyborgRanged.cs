@@ -6,9 +6,9 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
 
-    public class ServoCyborgRanged : MonsterThrowAndRunAI
+    public class AssaultCyborgRanged : MonsterThrowAndRunAI
     {
-        public ServoCyborgRanged()
+        public AssaultCyborgRanged()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -18,12 +18,12 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 20;
+            return 200;
         }
 
         public override int DamageBase()
         {
-            return 10;
+            return 30;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
@@ -70,16 +70,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Servo Cyborg"; } }
+        public override string SingleDescription { get { return "Assault Cyborg"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Servo Cyborgs"; } }
+        public override string GroupDescription { get { return "Assault Cyborgs"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)530;
+            return (char)264;
         }
 
         protected override int GetChanceToRecover()
@@ -109,12 +109,12 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new ServoCyborgRanged();
+            return new AssaultCyborgRanged();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.MediumVioletRed;
+            return ColorPresets.Chartreuse;
         }
 
         public override int GetCombatXP()

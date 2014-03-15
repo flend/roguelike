@@ -114,7 +114,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.MediumVioletRed;
+            return ColorPresets.Chartreuse;
         }
 
         public override int GetCombatXP()

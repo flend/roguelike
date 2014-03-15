@@ -879,7 +879,7 @@ namespace RogueBasin
         {
 
             //Flatline has a rather simple combat system
-            IEquippableItem item = GetEquippedWeapon();
+            IEquippableItem item = GetBestMeleeWeapon();
 
             int baseDamage = 2;
 
@@ -1621,15 +1621,46 @@ namespace RogueBasin
             return DropEquippableItem(itemToDrop, this.LocationLevel, this.LocationMap);
         }
 
-        internal bool EquipInventoryItemType(Type itemType)
+
+
+        internal Type HeavyWeaponTranslation(Type itemType)
         {
+            if (itemType == typeof(Items.Fists) && IsInventoryTypeAvailable(typeof(Items.Vibroblade)))
+                itemType = typeof(Items.Vibroblade);
+
+            //Do weapon translations
+            if (itemType == typeof(Items.Pistol) && IsInventoryTypeAvailable(typeof(Items.HeavyPistol)))
+                itemType = typeof(Items.HeavyPistol);
+
+            if (itemType == typeof(Items.Shotgun) && IsInventoryTypeAvailable(typeof(Items.HeavyShotgun)))
+                itemType = typeof(Items.HeavyShotgun);
+
+            if (itemType == typeof(Items.Laser) && IsInventoryTypeAvailable(typeof(Items.HeavyLaser)))
+                itemType = typeof(Items.HeavyLaser);
+
+            if (itemType == typeof(Items.Fists) && IsInventoryTypeAvailable(typeof(Items.Vibroblade)))
+                itemType = typeof(Items.Vibroblade);
+
+            return itemType;
+        }
+
+        internal bool EquipInventoryItemType(Type itemType, bool reequip=false)
+        {
+            itemType = HeavyWeaponTranslation(itemType);
+
             if (!IsInventoryTypeAvailable(itemType))
             {
                 LogFile.Log.LogEntryDebug("Can't equip inventory type " + itemType + " - not in inventory", LogDebugLevel.Medium);
                 return false;
             }
 
-            var equipTime = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
+            var equipSuccess = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
+
+            if (equipSuccess == false && reequip == false)
+            {
+                //Try to reequip melee
+                EquipBestMeleeWeapon();
+            }
             return false;
         }
 
@@ -1806,6 +1837,7 @@ namespace RogueBasin
             }
 
             //Delete the old item
+            Inventory.RemoveItemAndDestroy(item);
             //There should now be no references to it
 
         }
@@ -1903,10 +1935,15 @@ namespace RogueBasin
 
         public void GiveAllWetware()
         {
+            //Inventory.AddItemNotFromDungeon(new Items.StealthWare());
+           // Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
+            //Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
+            //Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
+
             Inventory.AddItemNotFromDungeon(new Items.StealthWare());
-            Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
-            Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
-            Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
+            Inventory.AddItemNotFromDungeon(new Items.ShieldWare(2));
+            Inventory.AddItemNotFromDungeon(new Items.AimWare(2));
+            Inventory.AddItemNotFromDungeon(new Items.BoostWare(2));
         }
 
         public void GiveItemNotFromDungeon(Item item)
@@ -1917,9 +1954,14 @@ namespace RogueBasin
         public void GiveAllWeapons()
         {
             Inventory.AddItemNotFromDungeon(new Items.Fists());
+            //Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
+           // Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
+            //Inventory.AddItemNotFromDungeon(new Items.HeavyLaser());
+
             Inventory.AddItemNotFromDungeon(new Items.Pistol());
             Inventory.AddItemNotFromDungeon(new Items.Shotgun());
             Inventory.AddItemNotFromDungeon(new Items.Laser());
+
             Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
             Inventory.AddItemNotFromDungeon(new Items.AssaultRifle());
             for (int i = 0; i < 5; i++)
@@ -1927,6 +1969,7 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.FragGrenade());
                 Inventory.AddItemNotFromDungeon(new Items.StunGrenade());
                 Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
+                Inventory.AddItemNotFromDungeon(new Items.NanoRepair());
             }
 
             //Start with fists equipped
@@ -2232,6 +2275,20 @@ namespace RogueBasin
             return CombatResults.DefenderUnhurt;
         }
 
+        public IEquippableItem GetBestMeleeWeapon()
+        {
+            Type bestMeleeType = HeavyWeaponTranslation(typeof(Items.Fists));
+
+            var meleeWeapon = Inventory.GetItemsOfType(bestMeleeType).First() as IEquippableItem;
+
+            return meleeWeapon;
+        }
+
+        public void EquipBestMeleeWeapon()
+        {
+            EquipInventoryItemType(typeof(Items.Fists), true);
+        }
+
         /// <summary>
         /// Heal the player by a quantity. Won't exceed max HP.
         /// </summary>
@@ -2505,6 +2562,7 @@ namespace RogueBasin
             if (equippedWeapon != null && equippedWeapon.RemainingAmmo() < equippedWeapon.MaxAmmo())
             {
                 equippedWeapon.Ammo = equippedWeapon.MaxAmmo();
+                Game.MessageQueue.AddMessage(equippedWeapon.SingleItemDescription + " reloaded.");
                 LogFile.Log.LogEntryDebug("Giving ammo to " + equippedWeapon.SingleItemDescription, LogDebugLevel.Medium);
             }
             else
@@ -2517,13 +2575,15 @@ namespace RogueBasin
                     if (item != null)
                     {
                         item.Ammo = item.MaxAmmo();
+                        Game.MessageQueue.AddMessage(item.SingleItemDescription + " reloaded.");
                         LogFile.Log.LogEntryDebug("Giving ammo to " + item.SingleItemDescription, LogDebugLevel.Medium);
+                        break;
                     }
                 }
             }
 
             
         }
-    
+
     }
 }

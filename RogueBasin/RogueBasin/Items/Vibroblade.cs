@@ -144,7 +144,7 @@ namespace RogueBasin.Items
         public bool HasThrowAction()
         {
 
-            return true;
+            return false;
         }
 
         /// <summary>

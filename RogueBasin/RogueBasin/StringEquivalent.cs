@@ -54,7 +54,7 @@ namespace RogueBasin
             int shroomWallSkip = 7;
             int rowLength = 16;
 
-            TerrainChars.Add(MapTerrain.Empty, (char)250);
+            TerrainChars.Add(MapTerrain.Empty, (char)482);
             TerrainChars.Add(MapTerrain.Void, '\xb0');
             TerrainChars.Add(MapTerrain.Wall, (char)((shroomWallStartRow + 7) * rowLength + 0));
 
@@ -126,7 +126,7 @@ namespace RogueBasin
 
         private static void SetupTerrainColors()
         {
-            TerrainColors.Add(MapTerrain.Empty, ColorPresets.White);
+            TerrainColors.Add(MapTerrain.Empty, ColorPresets.Gray);
             TerrainColors.Add(MapTerrain.Wall, ColorPresets.DarkSlateGray);
 
             TerrainColors.Add(MapTerrain.NonWalkableFeature, ColorPresets.White);

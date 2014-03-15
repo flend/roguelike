@@ -15,19 +15,37 @@ namespace TraumaRL
 
         public void TemplatedMapTest()
         {
-            StandardGameSetup();
+            RandomSetup();
 
-            GenerateStoryDungeon();
+            //For testing
+            bool retry = false;
+            do
+            {
+                try
+                {
+                    StandardGameSetup();
+
+                    GenerateStoryDungeon(retry);
+
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    retry = false;
+                    LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
+
+                }
+            } while (true);
 
             RunGame();
         }
-
-        private void GenerateStoryDungeon()
+   
+        private void GenerateStoryDungeon(bool retry)
         {
             //Setup a single test level
             TraumaWorldGenerator templateGen = new TraumaWorldGenerator();
 
-            var mapInfo = templateGen.GenerateTraumaLevels();
+            var mapInfo = templateGen.GenerateTraumaLevels(retry);
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
@@ -58,12 +76,14 @@ namespace TraumaRL
             GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
         }
 
-        private void StandardGameSetup()
-        {
-
-            //int seedToUse = 150;
+        private void RandomSetup() {
+                        //int seedToUse = 150;
             //Game.Random = new Random(seedToUse);
             Game.Random = new Random();
+        }
+    
+        private void StandardGameSetup()
+        {
 
             rb = new RogueBase();
             rb.SetupSystem();

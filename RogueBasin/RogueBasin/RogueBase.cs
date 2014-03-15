@@ -366,7 +366,22 @@ namespace RogueBasin
                                 case 'f':
                                 //case 'Z':
                                     //Fire weapon
-                                    timeAdvances = FireWeapon();
+                                    if (Game.Dungeon.Player.GetEquippedWeapon() == null)
+                                        break;
+
+                                    if (Game.Dungeon.Player.GetEquippedWeapon().HasFireAction())
+                                    {
+                                        timeAdvances = FireWeapon();
+                                    }
+                                    else if (Game.Dungeon.Player.GetEquippedWeapon().HasThrowAction())
+                                    {
+                                        timeAdvances = ThrowWeapon();
+                                    }
+                                    else if (Game.Dungeon.Player.GetEquippedWeapon().HasOperateAction())
+                                    {
+                                        timeAdvances = UseWeapon();
+                                    }
+
                                     if (!timeAdvances)
                                         Screen.Instance.Update();
                                     if (timeAdvances)
@@ -1720,7 +1735,7 @@ namespace RogueBasin
             IEquippableItem toThrow = null;
             Item toThrowItem = null;
 
-            char confirmChar = 't';
+            char confirmChar = 'f';
             if (isWeapon)
             {
                 toThrow = player.GetEquippedWeapon();
@@ -1775,6 +1790,10 @@ namespace RogueBasin
             if (toThrow.DestroyedOnThrow())
             {
                 player.UnequipAndDestroyItem(toThrowItem);
+
+                //Try to reequip if we have more
+                player.EquipInventoryItemType(toThrow.GetType());
+
                 return true;
             }
 

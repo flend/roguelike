@@ -40,9 +40,9 @@ namespace RogueBasin
         static DecorationFeatureDetails()
         {
             var boneColor = ColorPresets.Khaki;
-            var blockingColor = ColorPresets.BlueViolet;
-            var nonBlockingColor = ColorPresets.RosyBrown;
-            var corpseColor = ColorPresets.Maroon;
+            var blockingColor = ColorPresets.SandyBrown;
+            var nonBlockingColor = ColorPresets.DarkSlateGray;
+            var corpseColor = ColorPresets.Firebrick;
 
             decorationFeatures.Add(DecorationFeatures.Bone, new Decoration((char)314, boneColor, false));
             decorationFeatures.Add(DecorationFeatures.Skeleton, new Decoration((char)315, boneColor, false));

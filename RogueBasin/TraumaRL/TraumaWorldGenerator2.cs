@@ -13,10 +13,19 @@ namespace TraumaRL
         {
             public List<Tuple<int, Monster>> monsterSet;
             public int difficulty;
+            public double scaling;
         
-            public MonsterSet(int difficulty) {
+            public MonsterSet(int difficulty, double scaling) {
                 this.difficulty = difficulty;
+                this.scaling = scaling;
                 monsterSet = new List<Tuple<int,Monster>>();
+            }
+
+            public MonsterSet(int difficulty)
+            {
+                this.difficulty = difficulty;
+                this.scaling = 1.0;
+                monsterSet = new List<Tuple<int, Monster>>();
             }
             public void AddMonsterType(int weighting, Monster monsterType) {
                 monsterSet.Add(new Tuple<int, Monster>(weighting, monsterType));
@@ -29,7 +38,7 @@ namespace TraumaRL
         {
             monsterSets = new List<MonsterSet>();
 
-            var zeroDifficultySet = new MonsterSet(0);
+            var zeroDifficultySet = new MonsterSet(0, 0.6);
 
             zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.Swarmer());
             zeroDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.MaintBot());
@@ -61,13 +70,29 @@ namespace TraumaRL
 
             monsterSets.Add(twoDiffSet1);
 
-            var twoDiffSet2 = new MonsterSet(1);
+            var twoDifficultySet3 = new MonsterSet(2, 2.0);
+
+            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
+            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(twoDifficultySet3);
+
+            var twoDiffSet2 = new MonsterSet(2);
 
             twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.RotatingTurret());
             twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.PatrolBotRanged());
             twoDiffSet2.AddMonsterType(5, new RogueBasin.Creatures.RollingBomb());
 
             monsterSets.Add(twoDiffSet2);
+
+            var threeDiffSet3 = new MonsterSet(3, 1.5);
+
+            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
+            threeDiffSet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
+            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(threeDiffSet3);
 
             var fourDifficultySet = new MonsterSet(4);
 
@@ -76,6 +101,28 @@ namespace TraumaRL
             fourDifficultySet.AddMonsterType(30, new RogueBasin.Creatures.ExplosiveBarrel());
 
             monsterSets.Add(fourDifficultySet);
+
+            var fiveDifficultySet = new MonsterSet(5);
+
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgRanged());
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgMelee());
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            var fiveDifficultySet2 = new MonsterSet(5);
+
+            fiveDifficultySet2.AddMonsterType(50, new RogueBasin.Creatures.HeavyBotRanged());
+            fiveDifficultySet2.AddMonsterType(50, new RogueBasin.Creatures.HeavyTurret());
+
+            monsterSets.Add(fiveDifficultySet2);
+
+            var fiveDifficultySet3 = new MonsterSet(5);
+
+            fiveDifficultySet3.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgMelee());
+            fiveDifficultySet3.AddMonsterType(50, new RogueBasin.Creatures.HeavyTurret());
+            fiveDifficultySet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
+
+            monsterSets.Add(fiveDifficultySet3);
+
 
             /*
             var monsterTypesToPlace = new List<Tuple<int, Monster>> {
@@ -99,7 +146,7 @@ namespace TraumaRL
             foreach (var level in gameLevels)
             {
                 var roomVertices = mapInfo.FilterOutCorridors(mapInfo.GetRoomIndicesForLevel(level));
-                var floorAreaForLevel = roomVertices.Sum(v => mapInfo.GetAllPointsInRoomOfTerrain(v, RoomTemplateTerrain.Floor).Count());
+                var floorAreaForLevel = roomVertices.Sum(v => mapInfo.GetAllPointsInRoomOfTerrain(v, RoomTemplateTerrain.Floor).Count() + mapInfo.GetAllPointsInRoomOfTerrain(v, RoomTemplateTerrain.Wall).Count());
                 LogFile.Log.LogEntryDebug("Floor area for level: " + level + ": " + floorAreaForLevel, LogDebugLevel.Medium);
 
                 //0.05 is a bit high
@@ -159,7 +206,7 @@ namespace TraumaRL
         private void AddMonstersToRoomsOnLevelGaussianDistribution(MapInfo mapInfo, int level, IEnumerable<Monster> monster)
         {
             //Get the number of rooms
-            var allRoomsAndCorridors = mapInfo.GetRoomIndicesForLevel(level).Except(allReplaceableVaults);
+            var allRoomsAndCorridors = mapInfo.GetRoomIndicesForLevel(level).Except(allReplaceableVaults).Except(new List<int>{mapInfo.StartRoom});
             var rooms = mapInfo.FilterOutCorridors(allRoomsAndCorridors).ToList();
 
             var monstersToPlaceRandomized = monster.Shuffle().ToList();
@@ -175,7 +222,7 @@ namespace TraumaRL
 
             for (int i = 0; i < noRooms; i++)
             {
-                roomMonsterRatio[i] = 1;//Math.Max(0, Gaussian.BoxMuller(5, 0));
+                roomMonsterRatio[i] = Math.Max(0, Gaussian.BoxMuller(5, 3));
             }
 
             double totalMonsterRatio = 0.0;

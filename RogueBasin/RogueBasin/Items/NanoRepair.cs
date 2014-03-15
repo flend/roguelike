@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Utility);
+                retList.Add(EquipmentSlot.Weapon);
 
                 return retList;
             }
@@ -90,7 +90,7 @@ namespace RogueBasin.Items
 
         public override libtcodWrapper.Color GetColour()
         {
-            return ColorPresets.LightSteelBlue;
+            return ColorPresets.Lime;
         }
 
         public int ArmourClassModifier()

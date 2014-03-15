@@ -62,7 +62,7 @@ namespace RogueBasin.Items
         {
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
-            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4.0, 4);
+            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4.0, 50);
             
             return dest;
         }

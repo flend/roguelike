@@ -6,9 +6,9 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
 
-    public class ServoCyborgRanged : MonsterThrowAndRunAI
+    public class HeavyBotRanged : MonsterThrowAndRunAI
     {
-        public ServoCyborgRanged()
+        public HeavyBotRanged()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -18,17 +18,17 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 20;
+            return 300;
         }
 
         public override int DamageBase()
         {
-            return 10;
+            return 30;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Base;
+            return CreatureFOV.CreatureFOVType.Triangular;
         }
 
         public override PatrolType GetPatrolType()
@@ -38,7 +38,7 @@ namespace RogueBasin.Creatures
 
         protected override bool WillInvestigateSounds()
         {
-            return true;
+            return false;
         }
 
         protected override bool WillPursue()
@@ -70,16 +70,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Servo Cyborg"; } }
+        public override string SingleDescription { get { return "Heavy Bot"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Servo Cyborgs"; } }
+        public override string GroupDescription { get { return "Heavy Bots"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)530;
+            return (char)263;
         }
 
         protected override int GetChanceToRecover()
@@ -109,12 +109,12 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new ServoCyborgRanged();
+            return new HeavyBotRanged();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.MediumVioletRed;
+            return ColorPresets.SlateBlue;
         }
 
         public override int GetCombatXP()

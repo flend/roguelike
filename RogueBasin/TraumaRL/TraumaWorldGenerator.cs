@@ -20,17 +20,17 @@ namespace TraumaRL
         //List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
         //List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
 
-        List<int> allReplaceableVaults = new List<int>();
+        List<int> allReplaceableVaults;
 
-        ConnectivityMap connectivityMap = null;
+        ConnectivityMap connectivityMap;
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
         static Dictionary<int, string> levelNaming;
 
-        HashSet<Clue> placedClues = new HashSet<Clue>();
-        HashSet<Objective> placedObjectives = new HashSet<Objective>();
-        HashSet<Door> placedDoors = new HashSet<Door>();
+        HashSet<Clue> placedClues;
+        HashSet<Objective> placedObjectives;
+        HashSet<Door> placedDoors;
 
         LogGenerator logGen = new LogGenerator();
 
@@ -54,12 +54,16 @@ namespace TraumaRL
                 new Tuple<Color, string>(ColorPresets.Yellow, "yellow"),
                 new Tuple<Color, string>(ColorPresets.Khaki, "khaki"),
                 new Tuple<Color, string>(ColorPresets.Chartreuse, "chartreuse"),
-                new Tuple<Color, string>(ColorPresets.Indigo, "indigo"),
+                new Tuple<Color, string>(ColorPresets.HotPink, "hot pink"),
                 new Tuple<Color, string>(ColorPresets.Cyan, "cyan"),
                 new Tuple<Color, string>(ColorPresets.Lime, "lime"),
                 new Tuple<Color, string>(ColorPresets.Navy, "navy"),
                 new Tuple<Color, string>(ColorPresets.Tan, "tan"),
                 new Tuple<Color, string>(ColorPresets.Fuchsia, "fuchsia"),
+                new Tuple<Color, string>(ColorPresets.GhostWhite, "ghost"),
+                new Tuple<Color, string>(ColorPresets.Teal, "teal"),
+                new Tuple<Color, string>(ColorPresets.Plum, "plum"),
+                new Tuple<Color, string>(ColorPresets.Plum, "wheat")
             };
         }
 
@@ -72,7 +76,6 @@ namespace TraumaRL
 
         private static void SetupFeatures()
         {
-            featuresByLevel = new Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>>();
 
             featuresByLevel = new Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>>();
 
@@ -276,6 +279,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
               
             };
 
+            featuresByLevel[computerCoreLevel] = featuresByLevel[reactorLevel];
+
+            featuresByLevel[bridgeLevel] = featuresByLevel[flightDeck];
+
         }
 
 
@@ -447,21 +454,17 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         }
 
         /** Build a map using templated rooms */
-        public MapInfo GenerateTraumaLevels()
+        public MapInfo GenerateTraumaLevels(bool retry)
         {
             //We catch exceptions on generation and keep looping
             MapInfo mapInfo;
             
-            do
-            {
                 //Reset shared state
                 placedClues = new HashSet<Clue>();
                 placedDoors = new HashSet<Door>();
                 placedObjectives = new HashSet<Objective>();
                 usedColors = new List<Tuple<Color, string>>();
 
-                try
-                {
                     //Generate the overall level structure
                     GenerateLevelLinks();
 
@@ -619,16 +622,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                         LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
                     }
 
-                    break;
-                }
-                //This should be all exceptions, we're just failing fast for now
-                catch (OutOfMemoryException ex)
-                {
-                    LogFile.Log.LogEntryDebug("Failed to create dungeon: " + ex.Message, LogDebugLevel.High);
-                    //Try again
-                }
+                    if (retry)
+                    {
+                        throw new ApplicationException("It happened!");
+                    }
 
-            } while (true);
 
             return mapInfo;
         }
@@ -2407,6 +2405,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             int numberOfRandomRooms = 16;
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
+                new Tuple<int, RoomTemplate>(250, originRoom),
                 new Tuple<int, RoomTemplate>(100, tshape),
                 new Tuple<int, RoomTemplate>(100, xshape),
                 new Tuple<int, RoomTemplate>(100, arcologySmall),

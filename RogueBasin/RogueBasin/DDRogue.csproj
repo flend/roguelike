@@ -70,10 +70,15 @@
     <Compile Include="Creatures\Orc.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\HeavyBotRanged.cs" />
+    <Compile Include="Creatures\HeavyTurret.cs" />
     <Compile Include="Creatures\ServoCyborgMelee.cs" />
     <Compile Include="Creatures\PatrolBotRanged.cs" />
+    <Compile Include="Creatures\AssaultCyborgMelee.cs" />
+    <Compile Include="Creatures\UberSwarmer.cs" />
     <Compile Include="Creatures\WarriorCyborgMelee.cs" />
     <Compile Include="Creatures\ServoCyborgRanged.cs" />
+    <Compile Include="Creatures\AssaultCyborgRanged.cs" />
     <Compile Include="Creatures\WarriorCyborgRanged.cs" />
     <Compile Include="Creatures\PatrolBot.cs">
       <SubType>Code</SubType>
