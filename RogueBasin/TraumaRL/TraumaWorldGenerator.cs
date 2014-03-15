@@ -567,7 +567,7 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
                     if (!graphSolver.MapCanBeSolved())
                     {
                         LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
-                        //throw new ApplicationException("It's all over - map can't be solved.");
+                        throw new ApplicationException("It's all over - map can't be solved.");
                     }
                     else
                     {
@@ -1088,11 +1088,12 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             var manager = mapInfo.Model.DoorAndClueManager;
 
             //Escape pod door
-            //Requires enabling self-destruct and fueling pods
+            //Requires enabling self-destruct
 
-            manager.PlaceDoor(new DoorRequirements(escapePodsConnection, "escape", 2));
+            manager.PlaceDoor(new DoorRequirements(escapePodsConnection, "escape", 1));
 
-            //Self destruct requires priming the reactor
+            //Self destruct
+            //Requires priming the reactor
 
             int selfDestructLevel = bridgeLevel;
             var replaceableVaultsInBridge = levelInfo[selfDestructLevel].ReplaceableVaultConnections.Except(levelInfo[selfDestructLevel].ReplaceableVaultConnectionsUsed);
@@ -1108,7 +1109,14 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
 
             LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
 
-            //Lock the bridge on the captain's id
+            //Self destruct objective in reactor
+            var reactorColor = GetUnusedColor();
+            var allowedRoomsForClue = manager.GetValidRoomsToPlaceClueForObjective("self-destruct");
+            var reactorClue = manager.AddCluesToExistingObjective("self-destruct", new List<int> { allowedRoomsForClue.RandomElement() }).First();
+            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(reactorClue, reactorColor.Item1, "self-destruct-" + reactorColor.Item2), false, false);
+
+            //Bridge lock
+            //Requires captain's id
 
             var colorForCaptainId = GetUnusedColor();
 
@@ -1125,11 +1133,27 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             
             //Captain's id
             var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel });
+            PlaceClueForDoorInVaultFarFromStart(mapInfo, levelInfo, doorId, colorForCaptainId.Item1, doorName, captainIdIdealLevel);
 
-            var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForDoor(doorName);
+
+
+
+            //Fueling system
+            //int fuelingLevel = lowerAtriumLevel;
+            //var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
+            //var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
+
+            //mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
+        }
+
+        private void PlaceClueForDoorInVaultFarFromStart(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
+        {
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
-            
-            var roomsOnRequestedLevels = mapInfo.FilterRoomsByLevel(possibleVaultsForCaptainsId, captainIdIdealLevel);
+
+            var roomsOnRequestedLevels = mapInfo.FilterRoomsByLevel(possibleVaultsForCaptainsId, idealLevelsForClue);
 
             if (!roomsOnRequestedLevels.Any())
                 roomsOnRequestedLevels = possibleVaultsForCaptainsId;
@@ -1143,20 +1167,9 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             levelInfo[captainsIdLevel].ReplaceableVaultConnectionsUsed.Add(captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
-            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, colorForCaptainId.Item1, "Captain's Id"), true, true);
+            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
 
-            LogFile.Log.LogEntryDebug("Placing captain's id on level " + captainsIdLevel + " in room " + captainIdRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
-
-            //Self destruct objective in reactor
-
-
-
-            //Fueling system
-            //int fuelingLevel = lowerAtriumLevel;
-            //var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
-            //var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
-
-            //mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
+            LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
         }
 
         private static void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -1732,6 +1745,8 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             return medicalInfo;
         }
 
+        Connection connectionFromReactorOriginRoom;
+
         private LevelInfo GenerateReactorLevel(int levelNo, int startVertexIndex)
         {
             var medicalInfo = new LevelInfo(levelNo);
@@ -1741,6 +1756,7 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.reactor1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate deadEnd = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way_1door.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate largeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping);
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
@@ -1751,6 +1767,8 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             medicalInfo.LevelGenerator = templateGenerator;
 
             PlaceOriginRoom(templateGenerator, originRoom);
+
+            connectionFromReactorOriginRoom = AddRoomToRandomOpenDoor(templateGenerator, largeRoom, corridor1, 2);
 
             int numberOfRandomRooms = 20;
 
@@ -2175,9 +2193,9 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
 
         }
 
-        private void PlaceOriginRoom(TemplatedMapGenerator templatedGenerator, RoomTemplate roomToPlace)
+        private int PlaceOriginRoom(TemplatedMapGenerator templatedGenerator, RoomTemplate roomToPlace)
         {
-             templatedGenerator.PlaceRoomTemplateAtPosition(roomToPlace, new Point(0, 0));
+             return templatedGenerator.PlaceRoomTemplateAtPosition(roomToPlace, new Point(0, 0));
         }
 
         private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
