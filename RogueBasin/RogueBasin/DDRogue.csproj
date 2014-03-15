@@ -869,6 +869,12 @@
     <EmbeddedResource Include="bin\Debug\logentries\qe_mastervault2.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_mastervault3.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_mastervault4.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\square_2way3.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\armory1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\xshape2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\tshape2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\lshape_asymmetric3.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\lshape3.room" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
