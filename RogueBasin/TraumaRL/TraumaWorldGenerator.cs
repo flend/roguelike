@@ -1088,21 +1088,70 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             var manager = mapInfo.Model.DoorAndClueManager;
 
             //Escape pod end game
-            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int>{ escapePodsConnection.Target }, true, false);
+            EscapePod(mapInfo);
+            
+            //Self destruct
+            //Requires priming the reactor
+
+            SelfDestruct(mapInfo, levelInfo, manager);
+
+            //Computer core to destroy
+            ComputerCore(mapInfo, levelInfo, manager);
+
+
+            /*
+             * //standard clue placing
+            var reactorColor = GetUnusedColor();
+            var allowedRoomsForClue = manager.GetValidRoomsToPlaceClueForObjective("self-destruct");
+            var reactorClue = manager.AddCluesToExistingObjective("self-destruct", new List<int> { allowedRoomsForClue.RandomElement() }).First();
+            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(reactorClue, reactorColor.Item1, "self-destruct-" + reactorColor.Item2), false, false);
+            */
+            //Bridge lock
+            //Requires captain's id
+            BridgeLock(mapInfo, levelInfo);
+
+
+            //Computer core lock
+            //Requires computer tech's id
+
+            ComputerCoreId(mapInfo, levelInfo);
+
+            //Archology lock
+            //Requires bioprotect wetware
+
+            ArcologyLock(mapInfo, levelInfo);
+
+            //Antanae
+            //Requires servo motor
+            AntennaeQuest(mapInfo, levelInfo, manager);
+
+
+
+            //Fueling system
+            //int fuelingLevel = lowerAtriumLevel;
+            //var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
+            //var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
+
+            //mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
+        }
+
+        private void EscapePod(MapInfo mapInfo)
+        {
+            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> { escapePodsConnection.Target }, true, false);
 
             //Escape pod door
             //Requires enabling self-destruct
-            
+
             var colorForEscapePods = GetUnusedColor();
             var escapedoorName = "escape";
             var escapedoorId = escapedoorName;
             var escapedoorColor = colorForEscapePods.Item1;
 
             PlaceDoorOnMap(mapInfo, escapedoorId, escapedoorName, 1, escapedoorColor, escapePodsConnection);
-            
-            //Self destruct
-            //Requires priming the reactor
+        }
 
+        private void SelfDestruct(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, DoorAndClueManager manager)
+        {
             int selfDestructLevel = bridgeLevel;
             var replaceableVaultsInBridge = levelInfo[selfDestructLevel].ReplaceableVaultConnections.Except(levelInfo[selfDestructLevel].ReplaceableVaultConnectionsUsed);
             var bridgeRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, levelInfo[bridgeLevel].ConnectionsToOtherLevels.First().Value.Target, replaceableVaultsInBridge.Select(c => c.Target));
@@ -1127,8 +1176,10 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", 1, new List<string> { "self-destruct" }));
             var selfDestructPrimeObjective = manager.GetObjectiveById("prime-self-destruct");
             PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
+        }
 
-            //Computer core to destroy
+        private void ComputerCore(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, DoorAndClueManager manager)
+        {
             var unusedVaultsInComputerLevel = GetAllAvailableVaults(levelInfo).Where(c => mapInfo.GetLevelForRoomIndex(c.Target) == computerCoreLevel);
 
             var unusedVaultsInComputerLevelOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, unusedVaultsInComputerLevel.Select(c => c.Target));
@@ -1136,22 +1187,15 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             var computerCoreVaultConnection = GetAllVaults(levelInfo).Where(c => c.Target == computerClueRoom).First();
 
             var computerCoreVault = computerCoreVaultConnection.Target;
-            var computerVaultClue = manager.AddCluesToExistingObjective("prime-self-destruct", new List<int> {computerCoreVault});
+            var computerVaultClue = manager.AddCluesToExistingObjective("prime-self-destruct", new List<int> { computerCoreVault });
 
             PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, computerVaultClue, true);
 
             UseVault(levelInfo, computerCoreVaultConnection);
+        }
 
-
-            /*
-             * //standard clue placing
-            var reactorColor = GetUnusedColor();
-            var allowedRoomsForClue = manager.GetValidRoomsToPlaceClueForObjective("self-destruct");
-            var reactorClue = manager.AddCluesToExistingObjective("self-destruct", new List<int> { allowedRoomsForClue.RandomElement() }).First();
-            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(reactorClue, reactorColor.Item1, "self-destruct-" + reactorColor.Item2), false, false);
-            */
-            //Bridge lock
-            //Requires captain's id
+        private void BridgeLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        {
 
             var colorForCaptainId = GetUnusedColor();
 
@@ -1165,15 +1209,14 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             var doorColor = colorForCaptainId.Item1;
 
             PlaceDoorOnMap(mapInfo, doorId, doorName, 1, doorColor, elevatorToBridge);
-            
+
             //Captain's id
             var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel });
             PlaceClueForDoorInVault(mapInfo, levelInfo, doorId, doorColor, doorName, captainIdIdealLevel);
+        }
 
-
-            //Computer core lock
-            //Requires computer tech's id
-
+        private void ComputerCoreId(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        {
             var colorForComputerTechsId = GetUnusedColor();
 
             //computer core is a dead end
@@ -1190,10 +1233,10 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             //Tech's id (this should always work)
             var techIdIdealLevel = new List<int> { arcologyLevel };
             PlaceClueForDoorInVault(mapInfo, levelInfo, computerDoorId, computerDoorColor, computerDoorName, techIdIdealLevel);
+        }
 
-            //Archology lock
-            //Requires bioprotect wetware
-
+        private void ArcologyLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        {
             var colorForArcologyLock = GetUnusedColor();
 
             // arcology is not a dead end, but only the cc and bridge can follow it
@@ -1215,14 +1258,27 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             //Bioware
             var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel };
             PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
+        }
 
+        private void AntennaeQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, DoorAndClueManager manager)
+        {
+            var levelsForAntennae = new List<int> { scienceLevel, storageLevel };
+            var unusedVaultsInAntennaeLevel = GetAllAvailableVaults(levelInfo).Where(c => levelsForAntennae.Contains(mapInfo.GetLevelForRoomIndex(c.Target)));
 
-            //Fueling system
-            //int fuelingLevel = lowerAtriumLevel;
-            //var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
-            //var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
+            var unusedVaultsInnAntennaeLevelOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, unusedVaultsInAntennaeLevel.Select(c => c.Target));
+            var antennaeRoom = unusedVaultsInnAntennaeLevelOrderFromStart.ElementAt(0);
+            var antennaeVaultConnection = GetAllVaults(levelInfo).Where(c => c.Target == antennaeRoom).First();
 
-            //mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
+            var antennaeVault = antennaeVaultConnection.Target;
+            manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, "antennae", 1));
+            var antennaeObj = manager.GetObjectiveById("antennae");
+            PlaceObjective(mapInfo, antennaeObj, null, true, true);
+
+            //Servo motor
+
+            var colorForAntennae =  GetUnusedColor();
+
+            PlaceClueForObjectiveInVault(mapInfo, levelInfo, "antennae", colorForAntennae.Item1, "clue-antennae", new List<int> { scienceLevel, storageLevel });
         }
 
         private void PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
@@ -1251,6 +1307,34 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
+        }
+
+        private void PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
+        {
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForObjective(doorId);
+            var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
+
+            var roomsOnRequestedLevels = mapInfo.FilterRoomsByLevel(possibleVaultsForCaptainsId, idealLevelsForClue);
+
+            if (!roomsOnRequestedLevels.Any())
+                roomsOnRequestedLevels = possibleVaultsForCaptainsId;
+
+            // var captainIdRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, roomsOnRequestedLevels);
+            // var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);
+            //above is not performing, since it always sticks everything in level 8 as far away from everything as it can
+            var captainIdRoom = roomsOnRequestedLevels.RandomElement();
+
+            var captainsIdConnection = GetAllVaults(levelInfo).Where(c => c.Target == captainIdRoom).First();
+            var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainIdRoom);
+
+            UseVault(levelInfo, captainsIdConnection);
+
+            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(doorId, new List<int> { captainIdRoom }).First();
+            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
+
+            LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
         }
 
 
