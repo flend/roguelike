@@ -107,6 +107,16 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.SecurityWall3, (char)((shroomWallStartRow + 4) * rowLength + shroomWallSkip + 2));
             TerrainChars.Add(MapTerrain.SecurityWall4, (char)((shroomWallStartRow + 4) * rowLength + shroomWallSkip + 3));
             TerrainChars.Add(MapTerrain.SecurityWall5, (char)((shroomWallStartRow + 4) * rowLength + shroomWallSkip + 4));
+            TerrainChars.Add(MapTerrain.CutWall1, (char)((shroomWallStartRow + 5 ) * rowLength + 0));
+            TerrainChars.Add(MapTerrain.CutWall2, (char)((shroomWallStartRow + 5) * rowLength + shroomWallSkip + 1));
+            TerrainChars.Add(MapTerrain.CutWall3, (char)((shroomWallStartRow + 5) * rowLength + shroomWallSkip + 2));
+            TerrainChars.Add(MapTerrain.CutWall4, (char)((shroomWallStartRow + 5) * rowLength + shroomWallSkip + 3));
+            TerrainChars.Add(MapTerrain.CutWall5, (char)((shroomWallStartRow + 5) * rowLength + shroomWallSkip + 4));
+            TerrainChars.Add(MapTerrain.DipWall1, (char)((shroomWallStartRow + 6) * rowLength + 0));
+            TerrainChars.Add(MapTerrain.DipWall2, (char)((shroomWallStartRow + 6) * rowLength + shroomWallSkip + 1));
+            TerrainChars.Add(MapTerrain.DipWall3, (char)((shroomWallStartRow + 6) * rowLength + shroomWallSkip + 2));
+            TerrainChars.Add(MapTerrain.DipWall4, (char)((shroomWallStartRow + 6) * rowLength + shroomWallSkip + 3));
+            TerrainChars.Add(MapTerrain.DipWall5, (char)((shroomWallStartRow + 6) * rowLength + shroomWallSkip + 4));
             TerrainChars.Add(MapTerrain.BioWall1, (char)((shroomWallStartRow + 7) * rowLength + 0));
             TerrainChars.Add(MapTerrain.BioWall2, (char)((shroomWallStartRow + 7) * rowLength + shroomWallSkip + 1));
             TerrainChars.Add(MapTerrain.BioWall3, (char)((shroomWallStartRow + 7) * rowLength + shroomWallSkip + 2));
@@ -148,6 +158,8 @@ namespace RogueBasin
             var lineWallColor = ColorPresets.Teal;
             var securityWallColor = ColorPresets.DeepSkyBlue;
             var bioWallColor = ColorPresets.LightCoral;
+            var DipWallColor = ColorPresets.DarkOliveGreen;
+            var CutWallColor = ColorPresets.DarkRed;
 
             TerrainColors.Add(MapTerrain.BrickWall1, brickWallColor);
             TerrainColors.Add(MapTerrain.BrickWall2, brickWallColor);
@@ -179,6 +191,16 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.BioWall3, bioWallColor);
             TerrainColors.Add(MapTerrain.BioWall4, bioWallColor);
             TerrainColors.Add(MapTerrain.BioWall5, bioWallColor);
+            TerrainColors.Add(MapTerrain.DipWall1, DipWallColor);
+            TerrainColors.Add(MapTerrain.DipWall2, DipWallColor);
+            TerrainColors.Add(MapTerrain.DipWall3, DipWallColor);
+            TerrainColors.Add(MapTerrain.DipWall4, DipWallColor);
+            TerrainColors.Add(MapTerrain.DipWall5, DipWallColor);
+            TerrainColors.Add(MapTerrain.CutWall1, CutWallColor);
+            TerrainColors.Add(MapTerrain.CutWall2, CutWallColor);
+            TerrainColors.Add(MapTerrain.CutWall3, CutWallColor);
+            TerrainColors.Add(MapTerrain.CutWall4, CutWallColor);
+            TerrainColors.Add(MapTerrain.CutWall5, CutWallColor);
         }
 
         private static void SetupEquipmentSlots()

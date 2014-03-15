@@ -153,7 +153,17 @@ namespace RogueBasin
         BioWall2, //not walkable
         BioWall3, //not walkable
         BioWall4, //not walkable
-        BioWall5 //not walkable
+        BioWall5,//not walkable
+        CutWall1, //not walkable
+        CutWall2, //not walkable
+        CutWall3, //not walkable
+        CutWall4, //not walkable
+        CutWall5, //not walkable
+        DipWall1, //not walkable
+        DipWall2, //not walkable
+        DipWall3, //not walkable
+        DipWall4, //not walkable
+        DipWall5 //not walkable
 
      }
 
