@@ -237,9 +237,15 @@ namespace TraumaRL
 
         }
 
-        private void PlaceLoot(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        Dictionary<int, List<Item>> itemsInArmory;
+
+        private void PlaceLootInArmory(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
-            CalculateLevelDifficulty();
+            itemsInArmory = new Dictionary<int, List<Item>>();
+            
+            foreach(var l in gameLevels) {
+                itemsInArmory[l] = new List<Item>();
+            }
 
             var level1Ware = new List<Item> { new RogueBasin.Items.BoostWare(1), new RogueBasin.Items.AimWare(1), new RogueBasin.Items.ShieldWare(1) };
 
@@ -265,11 +271,14 @@ namespace TraumaRL
             var randomWare = level1Ware.Except(itemsPlaced).RandomElement();
             PlaceItems(mapInfo, new List<Item> { randomWare }, new List<int> { goodyRooms[medicalLevel] }, false, true);
             itemsPlaced.Add(randomWare);
+            itemsInArmory[0].Add(randomWare);
 
             PlaceItems(mapInfo, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[medicalLevel] }, false, true);
             itemsPlaced.Add(lootLevels[0][0]);
+            itemsInArmory[0].Add(lootLevels[0][0]);
             PlaceItems(mapInfo, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[medicalLevel] }, false, true);
             itemsPlaced.Add(lootLevels[0][1]);
+            itemsInArmory[0].Add(lootLevels[0][0]);
 
             var levelsToHandleSeparately = new List<int> { medicalLevel };
 
@@ -304,6 +313,7 @@ namespace TraumaRL
                     LogFile.Log.LogEntryDebug("Placing item: " + lootToPlace.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
+                    itemsInArmory[level].Add(lootToPlace);
                     lootInRoom++;
                     lootPlaced++;
                 }
@@ -325,6 +335,7 @@ namespace TraumaRL
                     LogFile.Log.LogEntryDebug("Placing item (catchup): " + lootToPlace.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
+                    itemsInArmory[level].Add(lootToPlace);
                     lootPlaced++;
                     behindLootPlaced++;
                 }
@@ -342,6 +353,7 @@ namespace TraumaRL
                     var randomRoom = goodyRooms.RandomElement();
                     PlaceItems(mapInfo, new List<Item> { i }, new List<int> { randomRoom.Value }, false, true);
                     itemsPlaced.Add(i);
+                    itemsInArmory[randomRoom.Key].Add(i);
                     lootPlaced++;
                     LogFile.Log.LogEntryDebug("Placing item (final): " + i.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[randomRoom.Key], LogDebugLevel.Medium);
                 }

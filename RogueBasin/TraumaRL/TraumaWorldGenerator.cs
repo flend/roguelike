@@ -571,13 +571,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     GenerateQuests(mapInfo, levelInfo);
 
                     //Place loot
-                    PlaceLoot(mapInfo, levelInfo);
+                    CalculateLevelDifficulty();
+                    PlaceLootInArmory(mapInfo, levelInfo);
 
+                    AddGoodyQuestLogClues(mapInfo, levelInfo);
                     //Add clues and locks at dungeon engine level
                     //AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
-                    AddDecorationFeatures(mapInfo, levelInfo);
+                    //AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
@@ -688,9 +690,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
-            BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
+            //BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
             
-            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
             
             //BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
@@ -792,12 +794,14 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         }
 
         Dictionary<int, int> goodyRooms;
+        Dictionary<int, string> goodyRoomKeyNames;
 
         private void BuildGoodyQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
             //Ensure that we have a goody room on every level that will support it
             var replaceableVaultsForLevels = levelInfo.ToDictionary(kv => kv.Key, kv => kv.Value.ReplaceableVaultConnections.Except(kv.Value.ReplaceableVaultConnectionsUsed));
             goodyRooms = new Dictionary<int,int>();
+            goodyRoomKeyNames = new Dictionary<int, string>();
 
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -817,7 +821,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 //Place door
                 var doorReadableId = Game.Dungeon.DungeonInfo.LevelNaming[thisLevel] + " armory";
-                var doorId = doorReadableId + Game.Random.Next();
+                var doorId = doorReadableId;
                 manager.PlaceDoor(new DoorRequirements(thisConnection, doorId, 1));
                 var door = manager.GetDoorById(doorId);
 
@@ -848,8 +852,35 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
                 var clueName = unusedColor.Item2 + " key card";
+                goodyRoomKeyNames[thisLevel] = clueName;
                 var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, unusedColor.Item1, clueName));
                 var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, true, false);
+
+                //Vault is used
+                levelInfo[thisLevel].ReplaceableVaultConnectionsUsed.Add(thisConnection);
+            }
+        
+        }
+
+        private void AddGoodyQuestLogClues(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        {
+            //Ensure that we have a goody room on every level that will support it
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            foreach (var kv in goodyRooms)
+            {
+                var thisLevel = kv.Key;
+                var thisRoom = kv.Value;
+                
+                var doorId = Game.Dungeon.DungeonInfo.LevelNaming[thisLevel] + " armory";
+
+                //Clue
+                var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
+
+                //Assume a critical path from the lower level elevator
+                var lowerLevelFloor = levelInfo[thisLevel].ConnectionsToOtherLevels.Min(level => level.Key);
+                var elevatorFromLowerLevel = levelInfo[thisLevel].ConnectionsToOtherLevels[lowerLevelFloor].Target;
+                var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(elevatorFromLowerLevel, thisRoom);
 
                 //Logs - try placing them on the critical path from the start of the game!
 
@@ -859,13 +890,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 1, preferredRoomsForLogsNonCritical);
 
                 var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
-                var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGoodyRoomLogEntry(clueName, thisLevel), logClues[0]);
+                var clueName = goodyRoomKeyNames[thisLevel];
+                var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGoodyRoomLogEntry(clueName, thisLevel, itemsInArmory[thisLevel]), logClues[0]);
                 PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1 }, true, true);
-
-                //Vault is used
-                levelInfo[thisLevel].ReplaceableVaultConnectionsUsed.Add(thisConnection);
             }
-        
+
         }
         
         private void BuildMedicalLevelQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)

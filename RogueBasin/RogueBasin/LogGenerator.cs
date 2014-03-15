@@ -39,7 +39,7 @@ namespace RogueBasin
             { "el", LogType.Elevator },
             { "qe", LogType.QuestArbitrary },
             { "dr", LogType.SimpleLockedDoor },
-            { "gd", LogType.GoodyDoor }
+            { "gds", LogType.GoodyDoor }
         };
 
         public LogGenerator()
@@ -131,7 +131,7 @@ namespace RogueBasin
                     if (numberSuffix)
                         logShortfilename = logShortfilename.Substring(0, logShortfilename.Count() - 1);
 
-                    var logPrefix = logShortfilename.Substring(0, 2);
+                    var logPrefix = logShortfilename.Substring(0, logShortfilename.IndexOf('_'));
                     var logType = logPrefixMapping[logPrefix];
                     
                     var logExtract = new LogExtract();
@@ -191,7 +191,7 @@ namespace RogueBasin
             return entry;
         }
 
-        public LogEntry GenerateGoodyRoomLogEntry(string doorId, int levelForDoor)
+        public LogEntry GenerateGoodyRoomLogEntry(string doorId, int levelForDoor, List<Item> itemsInRoom)
         {
             var entry = new LogEntry();
 
@@ -208,7 +208,7 @@ namespace RogueBasin
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
                 { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
                 { "<idtype>", doorId },
-                { "<item>", "random goody"}
+                { "<item>", itemsInRoom.RandomElement().SingleItemDescription }
             });
 
             }
