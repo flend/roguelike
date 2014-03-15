@@ -1105,16 +1105,37 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             var selfDestructObjective = manager.GetObjectiveById("self-destruct");
             PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
 
-            levelInfo[selfDestructLevel].ReplaceableVaultConnectionsUsed.Add(selfDestructConnection);
+            UseVault(levelInfo, selfDestructConnection);
 
             LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
 
             //Self destruct objective in reactor
+            //Requires destruction of computer core
+            var unusedVaultsInReactorLevel = GetAllAvailableVaults(levelInfo).Where(c => mapInfo.GetLevelForRoomIndex(c.Target) == reactorLevel);
+            var reactorSelfDestructVaultConnection = unusedVaultsInReactorLevel.First();
+            var reactorSelfDestructVault = reactorSelfDestructVaultConnection.Target;
+            UseVault(levelInfo, reactorSelfDestructVaultConnection);
+
+            manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", 1, new List<string> { "self-destruct" }));
+            var selfDestructPrimeObjective = manager.GetObjectiveById("prime-self-destruct");
+            PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
+
+            //Computer core to destroy
+            var unusedVaultsInComputerLevel = GetAllAvailableVaults(levelInfo).Where(c => mapInfo.GetLevelForRoomIndex(c.Target) == computerCoreLevel);
+            var computerCoreVaultConnection = unusedVaultsInComputerLevel.First();
+            var computerCoreVault = computerCoreVaultConnection.Target;
+            var computerVaultClue = manager.AddCluesToExistingObjective("prime-self-destruct", new List<int> {computerCoreVault});
+
+            PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, computerVaultClue, true);
+
+            UseVault(levelInfo, computerCoreVaultConnection);
+            /*
+             * //standard clue placing
             var reactorColor = GetUnusedColor();
             var allowedRoomsForClue = manager.GetValidRoomsToPlaceClueForObjective("self-destruct");
             var reactorClue = manager.AddCluesToExistingObjective("self-destruct", new List<int> { allowedRoomsForClue.RandomElement() }).First();
             PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(reactorClue, reactorColor.Item1, "self-destruct-" + reactorColor.Item2), false, false);
-
+            */
             //Bridge lock
             //Requires captain's id
 
@@ -1133,7 +1154,7 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             
             //Captain's id
             var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel });
-            PlaceClueForDoorInVaultFarFromStart(mapInfo, levelInfo, doorId, colorForCaptainId.Item1, doorName, captainIdIdealLevel);
+            PlaceClueForDoorInVault(mapInfo, levelInfo, doorId, colorForCaptainId.Item1, doorName, captainIdIdealLevel);
 
 
 
@@ -1146,7 +1167,7 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             //mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
         }
 
-        private void PlaceClueForDoorInVaultFarFromStart(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
+        private void PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1158,13 +1179,15 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
             if (!roomsOnRequestedLevels.Any())
                 roomsOnRequestedLevels = possibleVaultsForCaptainsId;
 
-            var captainIdRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, roomsOnRequestedLevels);
-            var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);
+           // var captainIdRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, roomsOnRequestedLevels);
+           // var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);
+            //above is not performing, since it always sticks everything in level 8 as far away from everything as it can
+            var captainIdRoom = roomsOnRequestedLevels.RandomElement();
 
             var captainsIdConnection = GetAllVaults(levelInfo).Where(c => c.Target == captainIdRoom).First();
             var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainIdRoom);
 
-            levelInfo[captainsIdLevel].ReplaceableVaultConnectionsUsed.Add(captainsIdConnection);
+            UseVault(levelInfo, captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
             PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
@@ -1877,6 +1900,12 @@ DecorationFeatureDetails.DecorationFeatures.Pillar2,
         private IEnumerable<Connection> GetAllVaults(Dictionary<int, LevelInfo> levelInfo)
         {
             return gameLevels.SelectMany(l => levelInfo[l].ReplaceableVaultConnections);
+        }
+
+        private void UseVault(Dictionary<int, LevelInfo> levelInfo, Connection vaultConnection) {
+            var levelForVault = gameLevels.Where(l => levelInfo[l].ReplaceableVaultConnections.Contains(vaultConnection)).First();
+
+            levelInfo[levelForVault].ReplaceableVaultConnectionsUsed.Add(vaultConnection);
         }
 
         private void GenerateLargeRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
