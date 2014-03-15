@@ -6,9 +6,9 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
 
-    public class WarriorCyborgMelee : MonsterFightAndRunAI
+    public class ServoCyborgRanged : MonsterThrowAndRunAI
     {
-        public WarriorCyborgMelee()
+        public ServoCyborgRanged()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -23,7 +23,7 @@ namespace RogueBasin.Creatures
 
         public override int DamageBase()
         {
-            return 30;
+            return 20;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
@@ -46,6 +46,21 @@ namespace RogueBasin.Creatures
             return true;
         }
 
+        protected override double GetMissileRange()
+        {
+            return 5.0;
+        }
+
+        protected override int GetChanceToBackAway()
+        {
+            return 0;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "fires a carbine";
+        }
+
         public override bool CanOpenDoors()
         {
             return true;
@@ -55,16 +70,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Warrior Cyborg"; } }
+        public override string SingleDescription { get { return "Servo Cyborg"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Warrior Cyborgs"; } }
+        public override string GroupDescription { get { return "Servo Cyborgs"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)264;
+            return (char)530;
         }
 
         protected override int GetChanceToRecover()
@@ -94,12 +109,12 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new WarriorCyborgMelee();
+            return new ServoCyborgRanged();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.OrangeRed;
+            return ColorPresets.MediumVioletRed;
         }
 
         public override int GetCombatXP()

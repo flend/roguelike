@@ -6,9 +6,9 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
 
-    public class WarriorCyborgMelee : MonsterFightAndRunAI
+    public class PatrolBotRanged : MonsterThrowAndRunAI
     {
-        public WarriorCyborgMelee()
+        public PatrolBotRanged()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -18,17 +18,17 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 100;
+            return 50;
         }
 
         public override int DamageBase()
         {
-            return 30;
+            return 10;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Base;
+            return CreatureFOV.CreatureFOVType.Triangular;
         }
 
         public override PatrolType GetPatrolType()
@@ -38,12 +38,27 @@ namespace RogueBasin.Creatures
 
         protected override bool WillInvestigateSounds()
         {
-            return true;
+            return false;
         }
 
         protected override bool WillPursue()
         {
             return true;
+        }
+
+        protected override double GetMissileRange()
+        {
+            return 5.0;
+        }
+
+        protected override int GetChanceToBackAway()
+        {
+            return 0;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "fires a carbine";
         }
 
         public override bool CanOpenDoors()
@@ -55,16 +70,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Warrior Cyborg"; } }
+        public override string SingleDescription { get { return "Patrol Bot"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Warrior Cyborgs"; } }
+        public override string GroupDescription { get { return "Patrol Bots"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)264;
+            return (char)260;
         }
 
         protected override int GetChanceToRecover()
@@ -94,12 +109,12 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new WarriorCyborgMelee();
+            return new PatrolBotRanged();
         }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.OrangeRed;
+            return ColorPresets.SlateBlue;
         }
 
         public override int GetCombatXP()

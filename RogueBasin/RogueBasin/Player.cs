@@ -2497,5 +2497,33 @@ namespace RogueBasin
 
             }
         }
+
+        internal void AddAmmoToCurrentWeapon()
+        {
+            var equippedWeapon = GetEquippedWeaponAsItem() as RangedWeapon;
+
+            if (equippedWeapon != null && equippedWeapon.RemainingAmmo() < equippedWeapon.MaxAmmo())
+            {
+                equippedWeapon.Ammo = equippedWeapon.MaxAmmo();
+                LogFile.Log.LogEntryDebug("Giving ammo to " + equippedWeapon.SingleItemDescription, LogDebugLevel.Medium);
+            }
+            else
+            {
+                //Apply to a random weapon item
+                foreach (var i in Inventory.Items)
+                {
+                    var item = i as RangedWeapon;
+
+                    if (item != null)
+                    {
+                        item.Ammo = item.MaxAmmo();
+                        LogFile.Log.LogEntryDebug("Giving ammo to " + item.SingleItemDescription, LogDebugLevel.Medium);
+                    }
+                }
+            }
+
+            
+        }
+    
     }
 }

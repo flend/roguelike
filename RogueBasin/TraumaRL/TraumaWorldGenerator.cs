@@ -579,12 +579,12 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
-                    //AddDecorationFeatures(mapInfo, levelInfo);
+                    AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                     //Add monsters
-                    //CreateMonstersForLevels(mapInfo);
+                    CreateMonstersForLevels(mapInfo);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);
@@ -690,9 +690,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
-            //BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
             
-            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
             
             //BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 

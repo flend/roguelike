@@ -9,8 +9,75 @@ namespace TraumaRL
 {
     public partial class TraumaWorldGenerator
     {
-        private void CreateMonstersForLevels(MapInfo mapInfo)
+        public class MonsterSet
         {
+            public List<Tuple<int, Monster>> monsterSet;
+            public int difficulty;
+        
+            public MonsterSet(int difficulty) {
+                this.difficulty = difficulty;
+                monsterSet = new List<Tuple<int,Monster>>();
+            }
+            public void AddMonsterType(int weighting, Monster monsterType) {
+                monsterSet.Add(new Tuple<int, Monster>(weighting, monsterType));
+            }
+        }
+
+        List<MonsterSet> monsterSets;
+
+        private void SetupMonsterWeightings()
+        {
+            monsterSets = new List<MonsterSet>();
+
+            var zeroDifficultySet = new MonsterSet(0);
+
+            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.Swarmer());
+            zeroDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.MaintBot());
+            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.RotatingTurret());
+
+            monsterSets.Add(zeroDifficultySet);
+
+            var oneDifficultySet = new MonsterSet(1);
+
+            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
+            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(oneDifficultySet);
+
+            var oneDifficultySet2 = new MonsterSet(1);
+
+            oneDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgMelee());
+            oneDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgRanged());
+            oneDifficultySet2.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
+
+            monsterSets.Add(oneDifficultySet2);
+
+            var twoDiffSet1 = new MonsterSet(2);
+
+            twoDiffSet1.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgMelee());
+            twoDiffSet1.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgRanged());
+            twoDiffSet1.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
+
+            monsterSets.Add(twoDiffSet1);
+
+            var twoDiffSet2 = new MonsterSet(1);
+
+            twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.RotatingTurret());
+            twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.PatrolBotRanged());
+            twoDiffSet2.AddMonsterType(5, new RogueBasin.Creatures.RollingBomb());
+
+            monsterSets.Add(twoDiffSet2);
+
+            var fourDifficultySet = new MonsterSet(4);
+
+            fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgRanged());
+            fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgMelee());
+            fourDifficultySet.AddMonsterType(30, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(fourDifficultySet);
+
+            /*
             var monsterTypesToPlace = new List<Tuple<int, Monster>> {
                //new Tuple<int, Monster>(1, new RogueBasin.Creatures.AlertBot()),
                new Tuple<int, Monster>(1, new RogueBasin.Creatures.Swarmer()),
@@ -20,7 +87,14 @@ namespace TraumaRL
                new Tuple<int, Monster>(50, new RogueBasin.Creatures.WarriorCyborgMelee()),
                new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel()),
                new Tuple<int, Monster>(1, new RogueBasin.Creatures.RollingBomb())
-            };
+            };*/
+        }
+
+        private void CreateMonstersForLevels(MapInfo mapInfo)
+        {
+            SetupMonsterWeightings();
+            
+            var monsterSetsUsed = new List<MonsterSet>();
 
             foreach (var level in gameLevels)
             {
@@ -28,11 +102,29 @@ namespace TraumaRL
                 var floorAreaForLevel = roomVertices.Sum(v => mapInfo.GetAllPointsInRoomOfTerrain(v, RoomTemplateTerrain.Floor).Count());
                 LogFile.Log.LogEntryDebug("Floor area for level: " + level + ": " + floorAreaForLevel, LogDebugLevel.Medium);
 
-                double areaScaling = 0.05;
+                //0.05 is a bit high
+                double areaScaling = 0.03;
                 var monstersForLevel = (int)Math.Floor(floorAreaForLevel * areaScaling);
 
-                //todo - number of monsters on level size?
-                AddMonstersToLevelGaussianDistribution(mapInfo, level, monsterTypesToPlace, monstersForLevel);
+                var monsterSetsForLevel = monsterSets.Where(s => s.difficulty == levelDifficulty[level]);
+
+                if (!monsterSetsForLevel.Any())
+                {
+                    monsterSetsForLevel = monsterSets.Where(s => s.difficulty <= levelDifficulty[level]);
+                }
+
+                var newSets = monsterSetsForLevel.Except(monsterSetsUsed);
+                var setsToPick = newSets;
+                if (!newSets.Any())
+                    setsToPick = monsterSetsForLevel;
+
+                var setToUse = setsToPick.RandomElement();
+
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+
+                monsterSetsUsed.Add(setToUse);
+
+                AddMonstersToLevelGaussianDistribution(mapInfo, level, setToUse.monsterSet, monstersForLevel);
 
                 //Not working for the time being - maybe check tomorrow morning 
                 /*
@@ -217,10 +309,30 @@ namespace TraumaRL
 
             return true;
         }
-        
+
+        private bool Chance(int outOf)
+        {
+            if (Game.Random.Next(outOf) == 0)
+                return true;
+            return false;
+        }
+
         private void GiveMonsterStandardItems(Monster mon)
         {
             mon.PickUpItem(new RogueBasin.Items.ShieldPack());
+
+            if(Chance(2))
+                mon.PickUpItem(new RogueBasin.Items.AmmoPack());
+
+            if (Chance(20))
+                mon.PickUpItem(new RogueBasin.Items.FragGrenade());
+            if (Chance(20))
+                mon.PickUpItem(new RogueBasin.Items.StunGrenade());
+            if (Chance(20))
+                mon.PickUpItem(new RogueBasin.Items.SoundGrenade());
+
+            if (Chance(50))
+                mon.PickUpItem(new RogueBasin.Items.NanoRepair());
         }
 
         Dictionary<int, int> levelDifficulty;

@@ -70,7 +70,10 @@
     <Compile Include="Creatures\Orc.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Creatures\ServoCyborgMelee.cs" />
+    <Compile Include="Creatures\PatrolBotRanged.cs" />
     <Compile Include="Creatures\WarriorCyborgMelee.cs" />
+    <Compile Include="Creatures\ServoCyborgRanged.cs" />
     <Compile Include="Creatures\WarriorCyborgRanged.cs" />
     <Compile Include="Creatures\PatrolBot.cs">
       <SubType>Code</SubType>
@@ -242,6 +245,7 @@
     <Compile Include="Items\AssualtRifle.cs" />
     <Compile Include="Items\HeavyShotgun.cs" />
     <Compile Include="Items\HeavyPistol.cs" />
+    <Compile Include="Items\AmmoPack.cs" />
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
     <Compile Include="PlayerEffects\StealthBoost.cs" />
     <Compile Include="RangedWeapon.cs" />
