@@ -1592,16 +1592,19 @@ namespace RogueBasin {
             int baseOffset = 2;
 
             //Mission
-            Point missionOffset = new Point(baseOffset, 1);
+            Point missionOffset = new Point(baseOffset, 0);
             hitpointsOffset = new Point(baseOffset, 4);
             Point shieldOffset = new Point(baseOffset, 5);
             Point weaponOffset = new Point(baseOffset, 8);
             Point utilityOffset = new Point(baseOffset, 13);
             Point viewOffset = new Point(baseOffset, 19);
+            Point cmbtOffset = new Point(baseOffset, 17);
             Point gameDataOffset = new Point(baseOffset, 24);
 
-            var zoneName = "[" + (LevelToDisplay).ToString("00") + "] " + Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay);
+            var zoneName = "[" + (LevelToDisplay).ToString("00") + "] ";
+            var zoneName2 = Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay);
             PrintLine(zoneName, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left, statsColor);
+            PrintLine(zoneName2, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 2, LineAlignment.Left, statsColor);
             
             //Draw HP Status
 
@@ -1867,22 +1870,33 @@ namespace RogueBasin {
             //Creature takes precidence
 
 
-            string viewStr = "Target: ";
-            PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left, statsColor);
+            //string viewStr = "Target: ";
+            //PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left, statsColor);
 
             if (CreatureToView != null && CreatureToView.Alive == true)
             {
-                String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left, statsColor);
 
-                //Combat vs monster
-                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, statsColor);
-                //Combat vs player
-                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left, statsColor);
+                               //Combat vs player
+
                 var cover = player.GetPlayerCover(CreatureToView);
-                PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left,statsColor);
+                if (cover.Item1 > 0)
+                {
+                    PrintLine("(hard cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, ColorPresets.Gold);
+                }
+                else if (cover.Item2 > 0)
+                {
+                    PrintLine("(soft cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
+                }
+
+                //PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, statsColor);
+                //var cover = player.GetPlayerCover(CreatureToView);
+                //PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
 
                 //Monster hp
+
+                String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
+                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, statsColor);
+
 
                 int mhpBarLength = 10;
                 double mplayerHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
@@ -1939,13 +1953,42 @@ namespace RogueBasin {
             }
             else
             {
-                //Just base combat
-                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, statsColor);
-                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left, statsColor);
-
             }
 
-            
+            //Combat stats
+                string bonusStr = "";
+
+                if (player.HasMeleeWeaponEquipped())
+                {
+                    var meleeBonus = player.CalculateMeleeAttackModifiersOnMonster(null);
+                    bonusStr = meleeBonus.ToString("#.#") + "x";
+                }
+                else if (player.HasThrownWeaponEquipped())
+                {
+                    bonusStr = "";
+                }
+                else
+                {
+                    var rangedBonus = player.CalculateRangedAttackModifiersOnMonster(null);
+                    bonusStr = rangedBonus.ToString("#.#") + "x";
+                }
+
+                PrintLine("Attk: " + bonusStr, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 1, LineAlignment.Left, statsColor);
+                
+                //Defence
+                var dodgeBonus = player.CalculateDamageModifierForAttacksOnPlayer(null);
+
+                if (dodgeBonus < 0.71)
+                {
+                    PrintLine("(s. dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, ColorPresets.Gold);
+                }
+
+                else if (dodgeBonus < 0.81)
+                {
+                    PrintLine("(dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, statsColor);
+                }
+                
+               
 
             /*
             //Game data
@@ -2021,7 +2064,7 @@ namespace RogueBasin {
             }
 
             if (weaponNo > 5)
-                utilityOffset = utilityOffset + new Point(-15, 1);
+                utilityOffset = utilityOffset + new Point(-15, 2);
 
             PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), ColorPresets.White);
            

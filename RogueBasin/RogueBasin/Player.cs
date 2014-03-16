@@ -813,8 +813,20 @@ namespace RogueBasin
             return Math.Max(0.0, damageModifier);
         }
 
+        public Tuple<int, int> GetPlayerCover()
+        {
+            var nearestMonster = Game.Dungeon.FindClosestHostileCreatureInFOV(this) as Monster;
+            if (nearestMonster == null)
+                return new Tuple<int, int>(0, 0);
+
+            return GetPlayerCover(nearestMonster);
+        }
+
         public Tuple<int, int> GetPlayerCover(Monster target)
         {
+            if (target == null)
+                return new Tuple<int, int>(0, 0);
+
             var coverItems = Game.Dungeon.GetNumberOfCoverItemsBetweenPoints(target.LocationLevel, target.LocationMap, LocationLevel, LocationMap);
             return coverItems;
         }
@@ -1923,6 +1935,28 @@ namespace RogueBasin
 
             return weaponSlot.equippedItem as IEquippableItem;
         }
+
+        public bool HasMeleeWeaponEquipped()
+        {
+            var currentWeapon = GetEquippedWeapon();
+
+            if (currentWeapon.GetType() == typeof(Items.Fists) || currentWeapon.GetType() == typeof(Items.Vibroblade))
+                return true;
+
+            return false;
+        }
+
+        public bool HasThrownWeaponEquipped()
+        {
+            var currentWeapon = GetEquippedWeapon();
+
+            if (currentWeapon.GetType() == typeof(Items.FragGrenade) || currentWeapon.GetType() == typeof(Items.StunGrenade) || currentWeapon.GetType() == typeof(Items.SoundGrenade))
+                return true;
+
+            return false;
+        }
+
+
 
         /// <summary>
         /// FlatlineRL - return equipped weapon as item reference (always works)

@@ -238,7 +238,7 @@ namespace TraumaRL
                 if(Game.Dungeon.Difficulty == GameDifficulty.Easy)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.5);
                 else if(Game.Dungeon.Difficulty == GameDifficulty.Medium)
-                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.75);
+                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.9);
                 else if(Game.Dungeon.Difficulty == GameDifficulty.Hard)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.25);
 

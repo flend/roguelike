@@ -215,8 +215,8 @@ namespace RogueBasin
                             //Game.Dungeon.CheckSpecialMoveValidity();
 
                             //Target if enemies nearby
-                            if(!TargetSelected())
-                                TargetItemsCloseToPlayer(5.0, playerFOV);
+                            //if(!TargetSelected())
+                            //    TargetItemsCloseToPlayer(5.0, playerFOV);
 
                             ProfileEntry("Pre Screen Update");
 
