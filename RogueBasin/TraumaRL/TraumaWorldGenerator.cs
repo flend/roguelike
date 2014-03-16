@@ -715,14 +715,14 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             
             BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            //BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
 
             BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
         }
 
         private void BuildRandomElevatorQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
-            var noLevelsToBlock = 1 + Game.Random.Next(3);
+            var noLevelsToBlock = 1 + Game.Random.Next(1);
 
             var candidateLevels = gameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => levelInfo[l].ConnectionsToOtherLevels.Count() > 1);
             LogFile.Log.LogEntryDebug("Candidates for elevator quests: " + candidateLevels, LogDebugLevel.Medium);
@@ -1356,7 +1356,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Bioware
             var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel, flightDeck };
-            PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
+            //PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
+            PlaceClueItemForDoorInVault(mapInfo, levelInfo, arcologyDoorId, new RogueBasin.Items.BioWare(), arcologyDoorName, biowareIdIdealLevel);
 
 
             //Wrap the arcology door in another door that depends on the antennae
@@ -1475,6 +1476,35 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
+        }
+
+        private void PlaceClueItemForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Item itemToPlace, string clueName, IEnumerable<int> idealLevelsForClue)
+        {
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForDoor(doorId);
+            var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
+
+            var roomsOnRequestedLevels = mapInfo.FilterRoomsByLevel(possibleVaultsForCaptainsId, idealLevelsForClue);
+
+            if (!roomsOnRequestedLevels.Any())
+                roomsOnRequestedLevels = possibleVaultsForCaptainsId;
+
+            // var captainIdRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, roomsOnRequestedLevels);
+            // var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);
+            //above is not performing, since it always sticks everything in level 8 as far away from everything as it can
+            var captainIdRoom = roomsOnRequestedLevels.RandomElement();
+
+            var captainsIdConnection = GetAllVaults(levelInfo).Where(c => c.Target == captainIdRoom).First();
+            var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainIdRoom);
+
+            UseVault(levelInfo, captainsIdConnection);
+
+            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
+            var roomsForItem = GetAllRoomsToPlaceClue(mapInfo, captainIdClue, true, true);
+            PlaceItems(mapInfo, new List<Item> { itemToPlace }, roomsForItem, true, true, true);
+
+            LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
         }
 
         private int PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
@@ -1654,7 +1684,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private void PlaceItems(MapInfo mapInfo, List<Item> items, List<int> rooms, bool boundariesPreferred, bool cluesNotInCorridors)
+        private void PlaceItems(MapInfo mapInfo, IEnumerable<Item> items, IEnumerable<int> rooms, bool boundariesPreferred, bool notInCorridors, bool includeVaults)
         {
             foreach (var item in items)
             {
@@ -1662,13 +1692,13 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 Tuple<int, IEnumerable<Point>> roomsForClue;
                 if (boundariesPreferred)
                 {
-                    roomsForClue = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms, cluesNotInCorridors);
+                    roomsForClue = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms, notInCorridors, includeVaults);
 
                     if (!roomsForClue.Item2.Any())
-                        roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, cluesNotInCorridors, cluesNotInCorridors);
+                        roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, notInCorridors, includeVaults);
                 }
                 else
-                    roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, cluesNotInCorridors, cluesNotInCorridors);
+                    roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, notInCorridors, includeVaults);
 
                 var levelForClue = roomsForClue.Item1;
                 var allWalkablePoints = roomsForClue.Item2;
@@ -1718,7 +1748,24 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRooms(MapInfo mapInfo, List<int> rooms, bool filterCorridors, bool includeVaults)
+        private IEnumerable<int> GetAllRoomsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        {
+            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+
+            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
+            if (!includeVaults)
+                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
+
+            IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = possibleRoomMinusVaults;
+
+            return candidateRooms;
+        }
+
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRooms(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = rooms;
 
@@ -1747,15 +1794,16 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, List<int> rooms, bool filterCorridors)
+        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = rooms;
-            IEnumerable<int> initialRooms = possibleRooms.Except(allReplaceableVaults);
-            var candidateRooms = initialRooms;
+            if(!includeVaults)
+                possibleRooms = possibleRooms.Except(allReplaceableVaults);
+            var candidateRooms = possibleRooms;
             if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(initialRooms);
+                candidateRooms = mapInfo.FilterOutCorridors(candidateRooms);
             if (candidateRooms.Count() == 0)
-                candidateRooms = initialRooms;
+                candidateRooms = possibleRooms;
 
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
