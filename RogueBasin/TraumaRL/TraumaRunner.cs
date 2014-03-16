@@ -49,6 +49,8 @@ namespace TraumaRL
 
             var mapInfo = templateGen.GenerateTraumaLevels(retry);
 
+            Game.Dungeon.MapInfo = mapInfo;
+
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             VisualiseConnectivityGraph(mapInfo.Model);

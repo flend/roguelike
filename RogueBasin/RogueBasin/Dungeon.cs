@@ -4873,5 +4873,428 @@ namespace RogueBasin
         public bool AllLocksOpen { get; set; }
 
         public MapInfo MapInfo { get; set; }
+
+
+
+        public class MonsterSet
+        {
+            public List<Tuple<int, Monster>> monsterSet;
+            public int difficulty;
+            public double scaling;
+
+            public MonsterSet(int difficulty, double scaling)
+            {
+                this.difficulty = difficulty;
+                this.scaling = scaling;
+                monsterSet = new List<Tuple<int, Monster>>();
+            }
+
+            public MonsterSet(int difficulty)
+            {
+                this.difficulty = difficulty;
+                this.scaling = 1.0;
+                monsterSet = new List<Tuple<int, Monster>>();
+            }
+            public void AddMonsterType(int weighting, Monster monsterType)
+            {
+                monsterSet.Add(new Tuple<int, Monster>(weighting, monsterType));
+            }
+        }
+
+        List<MonsterSet> monsterSets;
+
+        private void SetupMonsterWeightings()
+        {
+            monsterSets = new List<MonsterSet>();
+
+            var zeroDifficultySet = new MonsterSet(0, 0.6);
+
+            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.Swarmer());
+            zeroDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.MaintBot());
+            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.RotatingTurret());
+
+            monsterSets.Add(zeroDifficultySet);
+
+            var oneDifficultySet = new MonsterSet(1);
+
+            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
+            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(oneDifficultySet);
+
+            var oneDifficultySet2 = new MonsterSet(1);
+
+            oneDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgMelee());
+            oneDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgRanged());
+            oneDifficultySet2.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
+
+            monsterSets.Add(oneDifficultySet2);
+
+            var twoDiffSet1 = new MonsterSet(2);
+
+            twoDiffSet1.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgMelee());
+            twoDiffSet1.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgRanged());
+            twoDiffSet1.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
+
+            monsterSets.Add(twoDiffSet1);
+
+            var twoDifficultySet3 = new MonsterSet(2, 2.0);
+
+            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
+            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(twoDifficultySet3);
+
+            var twoDiffSet2 = new MonsterSet(2);
+
+            twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.RotatingTurret());
+            twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.PatrolBotRanged());
+            twoDiffSet2.AddMonsterType(5, new RogueBasin.Creatures.RollingBomb());
+
+            monsterSets.Add(twoDiffSet2);
+
+            var threeDiffSet3 = new MonsterSet(3, 1.5);
+
+            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
+            threeDiffSet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
+            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(threeDiffSet3);
+
+            var fourDifficultySet = new MonsterSet(4);
+
+            fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgRanged());
+            fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgMelee());
+            fourDifficultySet.AddMonsterType(30, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(fourDifficultySet);
+
+            var fiveDifficultySet = new MonsterSet(5);
+
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgRanged());
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgMelee());
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            var fiveDifficultySet2 = new MonsterSet(5);
+
+            fiveDifficultySet2.AddMonsterType(50, new RogueBasin.Creatures.HeavyBotRanged());
+            fiveDifficultySet2.AddMonsterType(50, new RogueBasin.Creatures.HeavyTurret());
+
+            monsterSets.Add(fiveDifficultySet2);
+
+            var fiveDifficultySet3 = new MonsterSet(5);
+
+            fiveDifficultySet3.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgMelee());
+            fiveDifficultySet3.AddMonsterType(50, new RogueBasin.Creatures.HeavyTurret());
+            fiveDifficultySet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
+
+            monsterSets.Add(fiveDifficultySet3);
+
+
+            /*
+            var monsterTypesToPlace = new List<Tuple<int, Monster>> {
+               //new Tuple<int, Monster>(1, new RogueBasin.Creatures.AlertBot()),
+               new Tuple<int, Monster>(1, new RogueBasin.Creatures.Swarmer()),
+               new Tuple<int, Monster>(1, new RogueBasin.Creatures.MaintBot()),
+               new Tuple<int, Monster>(1, new RogueBasin.Creatures.RotatingTurret()),
+               new Tuple<int, Monster>(50, new RogueBasin.Creatures.WarriorCyborgRanged()),
+               new Tuple<int, Monster>(50, new RogueBasin.Creatures.WarriorCyborgMelee()),
+               new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel()),
+               new Tuple<int, Monster>(1, new RogueBasin.Creatures.RollingBomb())
+            };*/
+        }
+
+        public void CreateMonstersForLevels(MapInfo mapInfo, int level, int levelDifficulty)
+        {
+            SetupMonsterWeightings();
+
+            var monsterSetsUsed = new List<MonsterSet>();
+
+                var roomVertices = mapInfo.FilterOutCorridors(mapInfo.GetRoomIndicesForLevel(level));
+                var floorAreaForLevel = roomVertices.Sum(v => mapInfo.GetAllPointsInRoomOfTerrain(v, RoomTemplateTerrain.Floor).Count() + mapInfo.GetAllPointsInRoomOfTerrain(v, RoomTemplateTerrain.Wall).Count());
+                LogFile.Log.LogEntryDebug("Floor area for level: " + level + ": " + floorAreaForLevel, LogDebugLevel.Medium);
+
+                //0.05 is a bit high
+                double areaScaling = 0.03;
+                var monstersForLevel = (int)Math.Floor(floorAreaForLevel * areaScaling);
+
+                var monsterSetsForLevel = monsterSets.Where(s => s.difficulty == levelDifficulty);
+
+                if (!monsterSetsForLevel.Any())
+                {
+                    monsterSetsForLevel = monsterSets.Where(s => s.difficulty <= levelDifficulty);
+                }
+
+                var newSets = monsterSetsForLevel.Except(monsterSetsUsed);
+                var setsToPick = newSets;
+                if (!newSets.Any())
+                    setsToPick = monsterSetsForLevel;
+
+                var setToUse = setsToPick.RandomElement();
+
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+
+                monsterSetsUsed.Add(setToUse);
+
+                AddMonstersToLevelGaussianDistribution(mapInfo, level, setToUse.monsterSet, monstersForLevel);
+
+                //Not working for the time being - maybe check tomorrow morning 
+                /*
+                //var heurestics = new MapHeuristics(mapInfo.Model.GraphNoCycles, 0);
+
+                for (int i = 0; i < 10; i++)
+                {
+                    AddMonsterLinearPatrol(mapInfo, new RogueBasin.Creatures.PatrolBot(), terminalBranchNodes, level);
+                }*/
+
+
+        }
+
+
+        private void AddMonstersToLevelGaussianDistribution(MapInfo mapInfo, int levelNo, List<Tuple<int, Monster>> monsterTypesForLevel, int totalMonsters)
+        {
+            var monstersToPlace = CreateGaussianDistributionOfMonsterTypes(monsterTypesForLevel, totalMonsters);
+            AddMonstersToRoomsOnLevelGaussianDistribution(mapInfo, levelNo, monstersToPlace);
+        }
+
+        private IEnumerable<Monster> CreateGaussianDistributionOfMonsterTypes(List<Tuple<int, Monster>> typesToPlace, int totalMonsters)
+        {
+            int weightAverage = 10;
+            int weightStdDev = 30;
+
+            var monstersAndWeights = typesToPlace.Select(f => new Tuple<int, Monster>((int)Math.Abs(Gaussian.BoxMuller(weightAverage, weightStdDev)) * f.Item1, f.Item2));
+
+            var monsterTypesDistributionExpanded = Enumerable.Range(0, totalMonsters).Select(i => ChooseItemFromWeights<Monster>(monstersAndWeights));
+
+            return monsterTypesDistributionExpanded.Select(m => m.NewCreatureOfThisType());
+        }
+        private T ChooseItemFromWeights<T>(IEnumerable<Tuple<int, T>> itemsWithWeights)
+        {
+            var totalWeight = itemsWithWeights.Select(t => t.Item1).Sum();
+            var randomNumber = Game.Random.Next(totalWeight);
+
+            int weightSoFar = 0;
+            T roomToPlace = itemsWithWeights.First().Item2;
+            foreach (var t in itemsWithWeights)
+            {
+                weightSoFar += t.Item1;
+                if (weightSoFar > randomNumber)
+                {
+                    roomToPlace = t.Item2;
+                    break;
+                }
+            }
+
+            return roomToPlace;
+        }
+
+        private void AddMonstersToRoomsOnLevelGaussianDistribution(MapInfo mapInfo, int level, IEnumerable<Monster> monster)
+        {
+            //Get the number of rooms
+            var allRoomsAndCorridors = mapInfo.GetRoomIndicesForLevel(level).Except(new List<int> { mapInfo.StartRoom });
+            var rooms = mapInfo.FilterOutCorridors(allRoomsAndCorridors).ToList();
+
+            var monstersToPlaceRandomized = monster.Shuffle().ToList();
+
+            int noMonsters = monstersToPlaceRandomized.Count;
+            int noRooms = rooms.Count();
+
+            LogFile.Log.LogEntryDebug("No rooms: " + noRooms + " Total monsters to place (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
+
+            //Distribution amongst rooms, mostly evenly
+
+            double[] roomMonsterRatio = new double[noRooms];
+
+            for (int i = 0; i < noRooms; i++)
+            {
+                roomMonsterRatio[i] = Math.Max(0, Gaussian.BoxMuller(5, 3));
+            }
+
+            double totalMonsterRatio = 0.0;
+
+            for (int i = 0; i < noRooms; i++)
+            {
+                totalMonsterRatio += roomMonsterRatio[i];
+            }
+
+            double ratioToTotalMonsterBudget = noMonsters / totalMonsterRatio;
+
+            int[] monstersPerRoom = new int[noRooms];
+            double remainder = 0.0;
+
+            for (int i = 0; i < noRooms; i++)
+            {
+                double monsterBudget = roomMonsterRatio[i] * ratioToTotalMonsterBudget + remainder;
+
+                double actualMonstersToPlace = Math.Floor(monsterBudget);
+
+                double levelBudgetSpent = actualMonstersToPlace;
+
+                double levelBudgetLeftOver = monsterBudget - levelBudgetSpent;
+
+                monstersPerRoom[i] = (int)actualMonstersToPlace;
+                remainder = levelBudgetLeftOver;
+
+                //Any left over monster ratio gets added to the next level up
+            }
+
+            //Calculate actual number of monster levels placed
+
+            int totalMonsters = 0;
+            for (int i = 0; i < noRooms; i++)
+            {
+                totalMonsters += monstersPerRoom[i];
+            }
+
+            LogFile.Log.LogEntryDebug("Total monsters actually placed (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
+
+            //Place monsters in rooms
+
+            Dungeon dungeon = Game.Dungeon;
+
+            int monsterPos = 0;
+
+            for (int r = 0; r < noRooms; r++)
+            {
+                int monstersToPlaceInRoom = monstersPerRoom[r];
+
+                var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(rooms[r], RoomTemplateTerrain.Floor).Shuffle();
+
+                for (int m = 0; m < monstersToPlaceInRoom; m++)
+                {
+                    if (monsterPos >= monstersToPlaceRandomized.Count)
+                    {
+                        LogFile.Log.LogEntryDebug("Trying to place too many monsters", LogDebugLevel.High);
+                        monsterPos++;
+                        continue;
+                    }
+
+                    Monster mon = monstersToPlaceRandomized[monsterPos];
+                    GiveMonsterStandardItems(mon);
+
+                    foreach (var p in candidatePointsInRoom)
+                    {
+
+                        bool placedSuccessfully = Game.Dungeon.AddMonster(mon, level, p);
+                        if (placedSuccessfully)
+                        {
+                            monsterPos++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private int AddMonstersToRoom(MapInfo mapInfo, int level, int roomId, IEnumerable<Monster> monsters)
+        {
+            var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(roomId, RoomTemplateTerrain.Floor).Shuffle();
+
+            int monstersPlaced = 0;
+
+            Monster mon = monsters.ElementAt(monstersPlaced);
+
+            foreach (Point p in candidatePointsInRoom)
+            {
+                bool placedSuccessfully = Game.Dungeon.AddMonster(mon, level, p);
+
+                if (placedSuccessfully)
+                {
+
+                    GiveMonsterStandardItems(mon);
+                    monstersPlaced++;
+
+                    if (monstersPlaced == monsters.Count())
+                        break;
+
+                    mon = monsters.ElementAt(monstersPlaced);
+                }
+            }
+            return monstersPlaced;
+        }
+
+        private bool AddMonsterLinearPatrol(MapInfo mapInfo, MonsterFightAndRunAI monster, Dictionary<int, List<int>> terminalBranchNodes, int level)
+        {
+            var roomsOnLevel = mapInfo.FilterOutCorridors(mapInfo.GetRoomIndicesForLevel(level));
+
+            var roomsWithNeigbours = terminalBranchNodes.Where(tb => tb.Key > 1).SelectMany(tb => tb.Value).Intersect(roomsOnLevel);
+
+            var sourceRooms = roomsWithNeigbours.Shuffle();
+
+            //May be expensive
+            Point startPoint = null;
+            List<Point> waypoints = new List<Point>();
+
+            foreach (var room in sourceRooms)
+            {
+                var distanceToOtherRooms = mapInfo.Model.GetDistanceOfVerticesFromParticularVertexInFullMap(room, roomsWithNeigbours);
+
+                var sisterRooms = distanceToOtherRooms.Where(kv => kv.Value == 2).Select(kv => kv.Key);
+
+                if (!sisterRooms.Any())
+                    continue;
+
+                var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor).Shuffle();
+
+                bool success = false;
+                foreach (var p in candidatePointsInRoom)
+                {
+                    success = Game.Dungeon.AddMonster(monster, level, p);
+
+                    if (success)
+                    {
+                        startPoint = p;
+                        break;
+                    }
+                }
+
+                if (!success)
+                {
+                    //Failure
+                    continue;
+                }
+
+                foreach (var sisterRoom in sisterRooms)
+                {
+                    var candidatePointInSisterRoom = mapInfo.GetAllPointsInRoomOfTerrain(sisterRoom, RoomTemplateTerrain.Floor).RandomElement();
+                    waypoints.Add(candidatePointInSisterRoom);
+                }
+
+                monster.Waypoints = waypoints;
+                break;
+            }
+
+            if (startPoint == null)
+                return false;
+
+            return true;
+        }
+
+        private bool Chance(int outOf)
+        {
+            if (Game.Random.Next(outOf) == 0)
+                return true;
+            return false;
+        }
+
+        private void GiveMonsterStandardItems(Monster mon)
+        {
+            mon.PickUpItem(new RogueBasin.Items.ShieldPack());
+
+            if (Chance(2))
+                mon.PickUpItem(new RogueBasin.Items.AmmoPack());
+
+            if (Chance(20))
+                mon.PickUpItem(new RogueBasin.Items.FragGrenade());
+            if (Chance(20))
+                mon.PickUpItem(new RogueBasin.Items.StunGrenade());
+            if (Chance(20))
+                mon.PickUpItem(new RogueBasin.Items.SoundGrenade());
+
+            if (Chance(50))
+                mon.PickUpItem(new RogueBasin.Items.NanoRepair());
+        }
     }
 }
