@@ -1954,13 +1954,13 @@ namespace RogueBasin
         public void GiveAllWeapons()
         {
             Inventory.AddItemNotFromDungeon(new Items.Fists());
-            //Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
-           // Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
-            //Inventory.AddItemNotFromDungeon(new Items.HeavyLaser());
+            Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
+           Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
+            Inventory.AddItemNotFromDungeon(new Items.HeavyLaser());
 
-            Inventory.AddItemNotFromDungeon(new Items.Pistol());
-            Inventory.AddItemNotFromDungeon(new Items.Shotgun());
-            Inventory.AddItemNotFromDungeon(new Items.Laser());
+            //Inventory.AddItemNotFromDungeon(new Items.Pistol());
+            //Inventory.AddItemNotFromDungeon(new Items.Shotgun());
+            //Inventory.AddItemNotFromDungeon(new Items.Laser());
 
             Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
             Inventory.AddItemNotFromDungeon(new Items.AssaultRifle());

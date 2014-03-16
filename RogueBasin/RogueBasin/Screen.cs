@@ -1999,15 +1999,18 @@ namespace RogueBasin {
 
         private void DrawWeaponChar(Point utilityOffset, Type weaponType, int weaponNo)
         {
-            var availableWeapon = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType);
+            var heavyWeaponType = Game.Dungeon.Player.HeavyWeaponTranslation(weaponType);
+
+            var availableWeapon = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType) || Game.Dungeon.Player.IsWeaponTypeAvailable(heavyWeaponType);
             var equippedWeapon = Game.Dungeon.Player.GetEquippedWeapon();
+            var thisWeaponEquipped = equippedWeapon.GetType() == weaponType || equippedWeapon.GetType() == heavyWeaponType;
 
             Color colorToUse;
             if (!availableWeapon)
             {
                 colorToUse = disabledColor;
             }
-            else if (equippedWeapon != null && equippedWeapon.GetType() == weaponType)
+            else if (thisWeaponEquipped)
             {
                 colorToUse = orangeHighlightedColor;
             }
