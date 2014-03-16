@@ -76,14 +76,19 @@ namespace RogueBasin.Items
             return 10;
         }
 
-        public override string SingleItemDescription
+        public string ClueDescription
         {
             get { return id + "(" + parentId + ")"; }
         }
 
+        public override string SingleItemDescription
+        {
+            get { return id; }
+        }
+
         public override string GroupItemDescription
         {
-            get { return id + "(" + parentId + ")"; }
+            get { return id; }
         }
 
         public override libtcodWrapper.Color GetColour()

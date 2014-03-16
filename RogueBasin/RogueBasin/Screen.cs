@@ -1390,7 +1390,7 @@ namespace RogueBasin {
             int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
 
             var allPlayerClueItems = Game.Dungeon.Player.Inventory.GetItemsOfType<Items.Clue>();
-            var allPlayerClues = allPlayerClueItems.Select(i => i.MapClue.LockedDoor != null ? i.MapClue.LockedDoor.Id : i.MapClue.LockedObjective.Id);
+            var allPlayerClues = allPlayerClueItems.Select(i => i.ClueDescription);
             var noCluesForDoors = allPlayerClues.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
 
             var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")" + kv.Key);
