@@ -924,6 +924,8 @@
     <EmbeddedResource Include="bin\Debug\movies\reactorunlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\selfdestructlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\selfdestructunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\escapepodlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\escapepodunlocked0.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

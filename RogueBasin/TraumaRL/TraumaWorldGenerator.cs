@@ -1248,7 +1248,17 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void EscapePod(MapInfo mapInfo)
         {
-            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> { escapePodsConnection.Target }, true, false);
+            var escapePodRoom = escapePodsConnection.Target;
+            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> { escapePodRoom }, true, false);
+
+            var escapePodDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MedicalAutomat]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Pillar1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Pillar2])
+            };
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(escapePodRoom), mapInfo.GetRoom(escapePodRoom), 20, escapePodDecorations, false);
 
             //Escape pod door
             //Requires enabling self-destruct
@@ -1258,7 +1268,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var escapedoorId = escapedoorName;
             var escapedoorColor = colorForEscapePods.Item1;
 
-            PlaceDoorOnMap(mapInfo, escapedoorId, escapedoorName, 1, escapedoorColor, escapePodsConnection);
+            PlaceMovieDoorOnMap(mapInfo, escapedoorId, escapedoorName, 1, escapedoorColor, "escapepodunlocked", "escapepodlocked", escapePodsConnection);
         }
 
         private void SelfDestruct(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, DoorAndClueManager manager)
@@ -1272,10 +1282,18 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             manager.PlaceObjective(new ObjectiveRequirements(selfDestructRoom, "self-destruct", 1, new List<string> { "escape" }));
             var selfDestructObjective = manager.GetObjectiveById("self-destruct");
             //PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
-            PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
-
-
+            var bridgeLocation = PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+            
             UseVault(levelInfo, selfDestructConnection);
+
+            var bridgeDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer3]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Screen1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HighTechBench])
+            };
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(selfDestructRoom), mapInfo.GetRoom(selfDestructRoom), 20, bridgeDecorations, true);
+
 
             LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
 
@@ -1289,7 +1307,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", 1, new List<string> { "self-destruct" }));
             var selfDestructPrimeObjective = manager.GetObjectiveById("prime-self-destruct");
             //PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
-            PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+            var reactorLocation = PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+
+            var reactorDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument3])
+            };
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.GetRoom(reactorSelfDestructVault), 20, reactorDecorations, true);
 
         }
 
