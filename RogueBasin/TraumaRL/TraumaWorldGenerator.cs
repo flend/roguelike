@@ -2049,8 +2049,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            medicalInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+            AddStandardPlaceholderVaults(medicalInfo, templateGenerator, maxPlaceHolders);
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
@@ -2122,8 +2121,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            levelInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+            AddStandardPlaceholderVaults(levelInfo, templateGenerator, maxPlaceHolders);
 
             //Add extra corridors
             //AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
@@ -2195,8 +2193,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            levelInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+            AddStandardPlaceholderVaults(levelInfo, templateGenerator, maxPlaceHolders);
 
             //Add extra corridors
             //AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
@@ -2244,8 +2241,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            medicalInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+            AddStandardPlaceholderVaults(medicalInfo, templateGenerator, maxPlaceHolders);
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
@@ -2268,7 +2264,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             RoomTemplate escapePodVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.escape_pod1.room", StandardTemplateMapping.terrainMapping);
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -2296,8 +2291,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            medicalInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+            AddStandardPlaceholderVaults(medicalInfo, templateGenerator, maxPlaceHolders);
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
@@ -2308,6 +2302,17 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             medicalInfo.TerrainMapping = cutTerrainMapping;
 
             return medicalInfo;
+        }
+
+        private void AddStandardPlaceholderVaults(LevelInfo medicalInfo, TemplatedMapGenerator templateGenerator, int maxPlaceHolders)
+        {
+            RoomTemplate armory1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.armory1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate armory2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.armory2.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate armory3 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.armory3.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+
+            medicalInfo.ReplaceableVaultConnections.AddRange(
+                AddReplaceableVaults(templateGenerator, corridor1, new List<RoomTemplate> { armory1, armory2, armory3 }, maxPlaceHolders));
         }
 
         Connection connectionFromReactorOriginRoom;
@@ -2540,8 +2545,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            medicalInfo.ReplaceableVaultConnections.AddRange(
-                AddReplaceableVaults(templateGenerator, corridor1, placeHolderVault, maxPlaceHolders));
+            AddStandardPlaceholderVaults(medicalInfo, templateGenerator, maxPlaceHolders);
 
             //If we have any more doors, add a couple of dead ends
             PlaceRandomConnectedRooms(templateGenerator, 3, armoryVault, corridor1, 0, 0);
@@ -2734,11 +2738,16 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private List<Connection> AddReplaceableVaults(TemplatedMapGenerator templateGenerator, RoomTemplate corridor1, RoomTemplate placeHolderVault, int maxPlaceHolders)
         {
+            return AddReplaceableVaults(templateGenerator, corridor1, new List<RoomTemplate> {placeHolderVault}, maxPlaceHolders);
+        }
+
+        private List<Connection> AddReplaceableVaults(TemplatedMapGenerator templateGenerator, RoomTemplate corridor1, List<RoomTemplate> placeHolderVault, int maxPlaceHolders)
+        {
             var vaultsToReturn = new List<Connection>();
             int cargoTotalPlaceHolders = 0;
             do
             {
-                var placeHolderRoom = AddRoomToRandomOpenDoor(templateGenerator, placeHolderVault, corridor1, 3);
+                var placeHolderRoom = AddRoomToRandomOpenDoor(templateGenerator, placeHolderVault.RandomElement(), corridor1, 3);
                 if (placeHolderRoom != null)
                 {
                     vaultsToReturn.Add(placeHolderRoom);
