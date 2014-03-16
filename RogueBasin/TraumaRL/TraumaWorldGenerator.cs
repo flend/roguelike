@@ -603,12 +603,12 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
-                    //AddDecorationFeatures(mapInfo, levelInfo);
+                    AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                     //Add monsters
-                    //CreateMonstersForLevels(mapInfo);
+                    CreateMonstersForLevels(mapInfo);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);
@@ -2725,7 +2725,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 new Tuple<int, RoomTemplate>(100, arcologySmall),
                 new Tuple<int, RoomTemplate>(50, arcologyOval)};
 
-            PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 4, 6);
+            PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 2, 4);
 
             //Add connections to other levels
 

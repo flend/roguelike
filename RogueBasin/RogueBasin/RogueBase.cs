@@ -688,6 +688,24 @@ namespace RogueBasin
                                     Game.Dungeon.Player.FullAmmo();
                                     Screen.Instance.Update();
                                     break;
+
+                                case 'B':
+                                    Game.Dungeon.Player.GiveAllWeapons(1);
+                                    Game.Dungeon.Player.GiveAllWetware(1);
+                                    Screen.Instance.Update();
+                                    break;
+
+                                case 'H':
+                                    Game.Dungeon.Player.GiveAllWeapons(1);
+                                    Game.Dungeon.Player.GiveAllWetware(2);
+                                    Screen.Instance.Update();
+                                    break;
+
+                                case 'U':
+                                    Game.Dungeon.Player.GiveAllWeapons(2);
+                                    Game.Dungeon.Player.GiveAllWetware(3);
+                                    Screen.Instance.Update();
+                                    break;
                                
                                 /*
                             case 'k':

@@ -14,6 +14,8 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 8;
 
+            this.Speed = 75;
+
         }
 
         protected override int ClassMaxHitpoints()

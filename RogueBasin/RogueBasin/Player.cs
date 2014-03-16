@@ -1936,17 +1936,32 @@ namespace RogueBasin
             return weaponSlot.equippedItem;
         }
 
-        public void GiveAllWetware()
+        public void GiveAllWetware(int level)
         {
-            //Inventory.AddItemNotFromDungeon(new Items.StealthWare());
-           // Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
-            //Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
-            //Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
-            
-            Inventory.AddItemNotFromDungeon(new Items.StealthWare());
-            Inventory.AddItemNotFromDungeon(new Items.ShieldWare(2));
-            Inventory.AddItemNotFromDungeon(new Items.AimWare(2));
-            Inventory.AddItemNotFromDungeon(new Items.BoostWare(2));
+            if (level == 3)
+            {
+                Inventory.AddItemNotFromDungeon(new Items.StealthWare());
+                Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
+                Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
+                Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
+            }
+
+            if (level == 2)
+            {
+                Inventory.AddItemNotFromDungeon(new Items.StealthWare());
+                Inventory.AddItemNotFromDungeon(new Items.ShieldWare(2));
+                Inventory.AddItemNotFromDungeon(new Items.AimWare(2));
+                Inventory.AddItemNotFromDungeon(new Items.BoostWare(2));
+            }
+
+            if (level == 1)
+            {
+                Inventory.AddItemNotFromDungeon(new Items.StealthWare());
+                Inventory.AddItemNotFromDungeon(new Items.ShieldWare(1));
+                Inventory.AddItemNotFromDungeon(new Items.AimWare(1));
+                Inventory.AddItemNotFromDungeon(new Items.BoostWare(1));
+            }
+
             Inventory.AddItemNotFromDungeon(new Items.BioWare());
         }
 
@@ -1955,19 +1970,27 @@ namespace RogueBasin
             Inventory.AddItemNotFromDungeon(item);
         }
 
-        public void GiveAllWeapons()
+        public void GiveAllWeapons(int level)
         {
+            if (level == 1)
+            {
+                Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
+                Inventory.AddItemNotFromDungeon(new Items.AssaultRifle());
+                Inventory.AddItemNotFromDungeon(new Items.Pistol());
+                Inventory.AddItemNotFromDungeon(new Items.Shotgun());
+                Inventory.AddItemNotFromDungeon(new Items.Laser());
             
-            Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
-           Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
-            Inventory.AddItemNotFromDungeon(new Items.HeavyLaser());
+                
+            }
 
-            //Inventory.AddItemNotFromDungeon(new Items.Pistol());
-            //Inventory.AddItemNotFromDungeon(new Items.Shotgun());
-            //Inventory.AddItemNotFromDungeon(new Items.Laser());
+            if (level == 2)
+            {
 
-            Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
-            Inventory.AddItemNotFromDungeon(new Items.AssaultRifle());
+                Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
+                Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
+                Inventory.AddItemNotFromDungeon(new Items.HeavyLaser());
+            }
+
             for (int i = 0; i < 5; i++)
             {
                 Inventory.AddItemNotFromDungeon(new Items.FragGrenade());
@@ -1975,7 +1998,14 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
                 Inventory.AddItemNotFromDungeon(new Items.NanoRepair());
             }
+
+            //Inventory.AddItemNotFromDungeon(new Items.Pistol());
+            //Inventory.AddItemNotFromDungeon(new Items.Shotgun());
+            //Inventory.AddItemNotFromDungeon(new Items.Laser());
+
             
+        }
+        public void EquipStartupWeapons() {
             //Non debug from here
             //Start with fists equipped
             Inventory.AddItemNotFromDungeon(new Items.Fists());
@@ -2227,8 +2257,8 @@ namespace RogueBasin
         {
             CalculateCombatStats();
 
-            GiveAllWetware();
-            GiveAllWeapons();
+            //keep this
+            EquipStartupWeapons();
         }
 
         /// <summary>

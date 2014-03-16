@@ -173,6 +173,13 @@ namespace TraumaRL
 
                 AddMonstersToLevelGaussianDistribution(mapInfo, level, setToUse.monsterSet, monstersForLevel);
 
+                var monsterSetContainsBarrels = setToUse.monsterSet.Where(t => t.Item2.GetType() == typeof(RogueBasin.Creatures.ExplosiveBarrel));
+
+                if(monsterSetContainsBarrels.Any())
+                {
+                    AddMonstersToLevelGaussianDistribution(mapInfo, level, new List<Tuple<int, Monster>>{new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel())}, monstersForLevel / 2);
+                }
+
                 //Not working for the time being - maybe check tomorrow morning 
                 /*
                 //var heurestics = new MapHeuristics(mapInfo.Model.GraphNoCycles, 0);
