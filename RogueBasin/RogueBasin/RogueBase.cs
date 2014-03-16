@@ -362,7 +362,7 @@ namespace RogueBasin
                                     break;
                                     */
                                     //Repeatidly closing doors and lurking behind them was kind of abusive
-                                    /*
+                                    
                                 case 'f':
                                 //case 'Z':
                                     //Fire weapon
@@ -387,7 +387,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-
+                                    /*
                                 case 't':
                                     //Throw weapon
                                     timeAdvances = ThrowWeapon();

@@ -1947,7 +1947,7 @@ namespace RogueBasin
             Inventory.AddItemNotFromDungeon(new Items.ShieldWare(2));
             Inventory.AddItemNotFromDungeon(new Items.AimWare(2));
             Inventory.AddItemNotFromDungeon(new Items.BoostWare(2));
-             
+            Inventory.AddItemNotFromDungeon(new Items.BioWare());
         }
 
         public void GiveItemNotFromDungeon(Item item)
@@ -1957,8 +1957,7 @@ namespace RogueBasin
 
         public void GiveAllWeapons()
         {
-            /*
-            Inventory.AddItemNotFromDungeon(new Items.Fists());
+            
             Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
            Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
             Inventory.AddItemNotFromDungeon(new Items.HeavyLaser());
@@ -1976,7 +1975,8 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
                 Inventory.AddItemNotFromDungeon(new Items.NanoRepair());
             }
-            */
+            
+            //Non debug from here
             //Start with fists equipped
             Inventory.AddItemNotFromDungeon(new Items.Fists());
             Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[1]);
@@ -2427,10 +2427,22 @@ namespace RogueBasin
 
             //Through to health
             //Unless we lost our shield this turn, in which case we get a 1 turn grace
-            if (remainingDamage > 0 && !ShieldWasDamagedThisTurn)
+            if (!ShieldWasDamagedThisTurn)
             {
-                hpAbsorbs = Math.Min(Hitpoints, remainingDamage);
-                Hitpoints -= remainingDamage;
+                hpAbsorbs = ApplyDamageToPlayerHitpoints(remainingDamage);
+            }
+
+            LogFile.Log.LogEntryDebug("Player takes " + shieldAbsorbs + " damage " + hpAbsorbs + " hitpoint damage.", LogDebugLevel.Medium);
+        }
+
+        public int ApplyDamageToPlayerHitpoints(int damage)
+        {
+            int hpAbsorbs = 0;
+
+            if (damage > 0)
+            {
+                hpAbsorbs = Math.Min(Hitpoints, damage);
+                Hitpoints -= damage;
 
                 HitpointsWasDamagedThisTurn = true;
             }
@@ -2442,8 +2454,7 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntry("Player takes " + damage + " damage and dies.");
             }
-
-            LogFile.Log.LogEntryDebug("Player takes " + shieldAbsorbs + " damage " + hpAbsorbs + " hitpoint damage.", LogDebugLevel.Medium);
+            return hpAbsorbs;
         }
 
         /// <summary>

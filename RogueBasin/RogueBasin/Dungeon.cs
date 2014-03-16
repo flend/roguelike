@@ -2101,6 +2101,15 @@ namespace RogueBasin
 
             bool okToMoveIntoSquare = true;
 
+            //Apply environmental effects
+            if (Game.Dungeon.DungeonInfo.LevelNaming[player.LocationLevel] == "Arcology")
+            {
+                if (!player.IsEffectActive(typeof(PlayerEffects.BioProtect)))
+                {
+                    player.ApplyDamageToPlayerHitpoints(2);
+                }
+            }
+
             //If there's no special move, do a conventional move
             if (moveDone == null)
             {

@@ -2040,6 +2040,8 @@ namespace RogueBasin {
                     return (char)621;
                 case "t":
                     return (char)620;
+                case "c":
+                    return 'c';
                 case "f":
                     return (char)619;
                 case "s":

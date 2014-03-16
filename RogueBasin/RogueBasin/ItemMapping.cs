@@ -25,7 +25,8 @@ namespace RogueBasin
             { 'd', typeof(Items.StealthWare) },
             { 's', typeof(Items.ShieldWare) },
             { 'a', typeof(Items.AimWare) },
-            { 'z', typeof(Items.BoostWare) }
+            { 'z', typeof(Items.BoostWare) },
+            { 'c', typeof(Items.BioWare) }
         };
     }
 }

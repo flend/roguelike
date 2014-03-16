@@ -253,8 +253,10 @@
     <Compile Include="Items\HeavyShotgun.cs" />
     <Compile Include="Items\HeavyPistol.cs" />
     <Compile Include="Items\AmmoPack.cs" />
+    <Compile Include="Items\BioWare.cs" />
     <Compile Include="Locks\SimpleOptionalLockedDoorWithMovie.cs" />
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
+    <Compile Include="PlayerEffects\BioProtect.cs" />
     <Compile Include="PlayerEffects\StealthBoost.cs" />
     <Compile Include="RangedWeapon.cs" />
     <Compile Include="Items\Pistol.cs" />
