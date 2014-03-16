@@ -56,6 +56,7 @@
     <Compile Include="ArrayCache.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Creatures\AlertBot.cs" />
+    <Compile Include="Creatures\Captain.cs" />
     <Compile Include="Creatures\CombatBot.cs" />
     <Compile Include="Creatures\Camera.cs" />
     <Compile Include="Creatures\ComputerNode.cs" />
@@ -904,6 +905,11 @@
     <EmbeddedResource Include="bin\Debug\logentries\qe_arcology2.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_arcology3.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_arcology4.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\bridgelocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\bridgeunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\computercorelocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\computercoreunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\arcology_vault_small_deadend1.room" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

@@ -301,13 +301,13 @@ namespace TraumaRL
             }
         }
 
-        private int AddMonstersToRoom(MapInfo mapInfo, int level, int roomId, List<Monster> monsters)
+        private int AddMonstersToRoom(MapInfo mapInfo, int level, int roomId, IEnumerable<Monster> monsters)
         {
             var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(roomId, RoomTemplateTerrain.Floor).Shuffle();
 
             int monstersPlaced = 0;
 
-            Monster mon = monsters[monstersPlaced];
+            Monster mon = monsters.ElementAt(monstersPlaced);
 
             foreach (Point p in candidatePointsInRoom)
             {
@@ -322,7 +322,7 @@ namespace TraumaRL
                     if (monstersPlaced == monsters.Count())
                         break;
 
-                    mon = monsters[monstersPlaced];
+                    mon = monsters.ElementAt(monstersPlaced);
                 }
             }
             return monstersPlaced;

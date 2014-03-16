@@ -1061,6 +1061,25 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return door;
         }
 
+        private Door PlaceMovieDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, Color colorToUse, string openMovie, string cantOpenMovie, Connection criticalConnectionForDoor)
+        {
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, numberOfCluesForDoor));
+            var door = manager.GetDoorById(doorId);
+
+            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, openMovie, cantOpenMovie, doorName, colorToUse);
+            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
+            lockedDoor.LocationLevel = doorInfo.LevelNo;
+            lockedDoor.LocationMap = doorInfo.MapLocation;
+
+            Game.Dungeon.AddLock(lockedDoor);
+
+            placedDoors.Add(door);
+
+            return door;
+        }
+
         private void PlaceDoorOnMap(MapInfo mapInfo, Lock lockedDoor, Door door)
         {
             var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
@@ -1288,7 +1307,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void BridgeLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
-
             var colorForCaptainId = GetUnusedColor();
 
             //bridge is a dead end
@@ -1300,11 +1318,21 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var doorId = doorName;
             var doorColor = colorForCaptainId.Item1;
 
-            PlaceDoorOnMap(mapInfo, doorId, doorName, 1, doorColor, elevatorToBridge);
+            PlaceMovieDoorOnMap(mapInfo, doorId, doorName, 1, doorColor, "bridgelocked", "bridgeunlocked", elevatorToBridge);
 
             //Captain's id
-            var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel });
-            PlaceClueForDoorInVault(mapInfo, levelInfo, doorId, doorColor, doorName, captainIdIdealLevel);
+            var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel, medicalLevel, storageLevel, scienceLevel });
+            var captainsIdRoom = PlaceClueForDoorInVault(mapInfo, levelInfo, doorId, doorColor, doorName, captainIdIdealLevel);
+
+            //Add monsters - nice to put ID on captain but not for now
+            var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainsIdRoom);
+            var monstersToPlace = new List<Monster> { new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.AssaultCyborgRanged(), new RogueBasin.Creatures.Captain() };
+            AddMonstersToRoom(mapInfo, captainsIdLevel, captainsIdRoom, monstersToPlace);
+
+            var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),
+                new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant3])};
+            AddStandardDecorativeFeaturesToRoom(captainsIdLevel, mapInfo.GetRoom(captainsIdRoom), 10, decorations, true);
         }
 
         private void ComputerCoreId(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -1320,11 +1348,21 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var computerDoorId = computerDoorName;
             var computerDoorColor = colorForComputerTechsId.Item1;
 
-            PlaceDoorOnMap(mapInfo, computerDoorId, computerDoorName, 1, computerDoorColor, elevatorToComputerCore);
+            PlaceMovieDoorOnMap(mapInfo, computerDoorId, computerDoorName, 1, computerDoorColor, "computercorelocked", "computercorelocked", elevatorToComputerCore);
 
             //Tech's id (this should always work)
             var techIdIdealLevel = new List<int> { arcologyLevel };
-            PlaceClueForDoorInVault(mapInfo, levelInfo, computerDoorId, computerDoorColor, computerDoorName, techIdIdealLevel);
+            var techIdRoom = PlaceClueForDoorInVault(mapInfo, levelInfo, computerDoorId, computerDoorColor, computerDoorName, techIdIdealLevel);
+            var techIdLevel = mapInfo.GetLevelForRoomIndex(techIdRoom);
+
+            //A slaughter
+            var bioDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Egg1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.CorpseinGoo]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton])
+            };
+            AddStandardDecorativeFeaturesToRoom(techIdLevel, mapInfo.GetRoom(techIdRoom), 20, bioDecorations, true);
         }
 
         private void ArcologyLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -1476,7 +1514,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             
         }
 
-        private void PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
+        private int PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1502,6 +1540,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
+
+            return captainIdRoom;
         }
 
         private int PlaceClueItemForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Item itemToPlace, string clueName, IEnumerable<int> idealLevelsForClue)
@@ -2561,7 +2601,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_tiny_deadend1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_small_deadend1.room", StandardTemplateMapping.terrainMapping);
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
