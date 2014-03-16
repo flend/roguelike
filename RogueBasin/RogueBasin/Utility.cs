@@ -210,13 +210,15 @@ namespace RogueBasin
                     }
 
                     //Do we need to wrap
-                    if (width <= maxWidth)
+                    if (width <= maxWidth || true)
                     {
                         //No, set height and return
                         height = inputLines.Count;
 
                         return inputLines;
                     }
+
+                    
 
                     //Yes, wrap
 

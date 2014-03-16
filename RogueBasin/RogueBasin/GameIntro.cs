@@ -24,7 +24,7 @@ namespace RogueBasin
         /// </summary>
         public void ShowIntroScreen() {
 
-            OpeningScreen();
+            //OpeningScreen();
 
             PlayerNameScreen();
         }
@@ -62,10 +62,11 @@ namespace RogueBasin
             } while(PlayerName.Contains(" ") || PlayerName == "");
 
             //Check if this save game exists. If so we can exit now and the game will be loaded
+            /*
             if (Utility.DoesSaveGameExist(PlayerName))
             {
                 return;
-            }
+            }*/
 
             //Settings text
             int settingsYCoord = nameYCoord + 2;
@@ -79,16 +80,15 @@ namespace RogueBasin
             }
 
             //Ask settings questions
-            ShowMovies = Screen.Instance.YesNoQuestion("Show help? (recommended):", new Point(settingsTL.x, settingsTL.y + height + 1));
-
-            rootConsole.PrintLineRect("Generating dungeons...", settingsTL.x, settingsTL.y + settingsText.Count + 5, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
+            ShowMovies = Screen.Instance.YesNoQuestionWithFrame("Show logs on pickup (recommended)", 8);
 
             rootConsole.Flush();
 
             //Ask settings questions
-            //Difficulty = Screen.Instance.DifficultyQuestion("Game difficulty: Easy / Medium / Hard?", new Point(settingsTL.x, settingsTL.y + height + 3));
+            Difficulty = Screen.Instance.DifficultyQuestionWithFrame("Game difficulty: Easy / Medium / Hard?", 8);
             Difficulty = GameDifficulty.Easy;
 
+            rootConsole.PrintLineRect("Generating the station...", settingsTL.x, settingsTL.y + settingsText.Count + 5, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
         }
 
         /// <summary>

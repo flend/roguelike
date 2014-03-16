@@ -671,6 +671,7 @@ namespace RogueBasin {
                         PrintLineRect("Press any key to continue", frameTL.x + width / 2, frameTL.y + height + 2, width, 1, LineAlignment.Center);
                         Screen.Instance.FlushConsole();
                         KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                        Screen.Instance.Update();
                     }
                 }
                 else
@@ -1462,7 +1463,7 @@ namespace RogueBasin {
                 displayedMsg = topLineDisplayed;
                 for (int i = 0; i < inventoryListH; i++)
                 {
-                    PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+                    PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, normalMovieColor);
                     displayedMsg = displayedMsg.Next;
                     if (displayedMsg == null)
                         break;
@@ -3040,7 +3041,7 @@ namespace RogueBasin {
             return null;
         }
 
-        public bool YesNoQuestionWithFrame(string introMessage)
+        public bool YesNoQuestionWithFrame(string introMessage, int extrayOffset = 0)
         {
             var width = introMessage.Count() + 7;
             var height = 1;
@@ -3048,7 +3049,7 @@ namespace RogueBasin {
             int xOffset = (Width - movieTL.x * 2 - width) / 2;
             int yOffset = (Height - movieTL.y * 2 - height) / 2;
 
-            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
+            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset + extrayOffset);
             int frameOffset = 2;
 
             //Draw frame
@@ -3057,6 +3058,25 @@ namespace RogueBasin {
             FlushConsole();
 
             return YesNoQuestion(introMessage, new Point(frameTL.x, frameTL.y));
+        }
+
+        public GameDifficulty DifficultyQuestionWithFrame(string introMessage, int extrayOffset = 0)
+        {
+            var width = introMessage.Count() + 7;
+            var height = 1;
+
+            int xOffset = (Width - movieTL.x * 2 - width) / 2;
+            int yOffset = (Height - movieTL.y * 2 - height) / 2;
+
+            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset + extrayOffset);
+            int frameOffset = 2;
+
+            //Draw frame
+            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true);
+
+            FlushConsole();
+
+            return DifficultyQuestion(introMessage, new Point(frameTL.x, frameTL.y));
         }
 
         internal bool YesNoQuestion(string introMessage, Point topLeft)
@@ -3089,6 +3109,42 @@ namespace RogueBasin {
                    }
                 }
             } while(true);
+        }
+
+        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft) {
+            
+            PrintMessage(introMessage, topLeft, introMessage.Length + 8);
+            FlushConsole();
+
+            do
+            {
+                //Get user input
+                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+
+                //Each state has different keys
+
+                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+                {
+
+                    char keyCode = (char)userKey.Character;
+                    switch (keyCode)
+                    {
+                        case 'e':
+                            ClearMessageLine();
+                            return GameDifficulty.Easy;
+
+                        case 'm':
+                            ClearMessageLine();
+                            return GameDifficulty.Medium;
+
+                        case 'h':
+                            ClearMessageLine();
+                            return GameDifficulty.Hard;
+                    }
+                }
+            } while (true);
+
+            return GameDifficulty.Easy;
         }
 
         internal bool YesNoQuestion(string introMessage)

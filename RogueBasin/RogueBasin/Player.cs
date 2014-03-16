@@ -2060,7 +2060,7 @@ namespace RogueBasin
             //Play help movie
             if (Game.Dungeon.Player.PlayItemMovies && ItemHelpMovieSeen == false)
             {
-                Screen.Instance.PlayMovie("helpitems", true);
+                //Screen.Instance.PlayMovie("helpitems", true);
                 ItemHelpMovieSeen = true;
             }
 

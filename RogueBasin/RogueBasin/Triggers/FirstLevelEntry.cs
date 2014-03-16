@@ -31,12 +31,12 @@ namespace RogueBasin.Triggers
 
             //Initial game entry
 
-            Screen.Instance.PlayMovie("enterflatline", true);
+           // Screen.Instance.PlayMovie("enterflatline", true);
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                Screen.Instance.PlayMovie("helpkeys", true);
-                Screen.Instance.PlayMovie("helpnewuser", true);
+               //// Screen.Instance.PlayMovie("helpkeys", true);
+               // Screen.Instance.PlayMovie("helpnewuser", true);
             }
 
             //Screen.Instance.PlayMovie("mission0", true);

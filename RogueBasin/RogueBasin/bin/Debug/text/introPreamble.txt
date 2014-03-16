@@ -1,8 +1,4 @@
-Welcome to FlatlineRL v1.0! 7DRL 2013 (flend)
-
+Welcome to TraumaRL v1.0! 7DRL 2014 
+       (flend & shroomarts)
 
 Please enter a name for your Soldier below.
-
-(This will load a saved game of that name.)
-(No unusual characters please!)
-

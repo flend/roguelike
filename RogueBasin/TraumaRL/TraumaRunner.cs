@@ -19,16 +19,16 @@ namespace TraumaRL
 
             //For testing
             bool retry = false;
-          /* do
+           do
             {
                 try
-                {*/
+                {
                     StandardGameSetup();
+
+                    IntroScreen();
 
                     GenerateStoryDungeon(retry);
 
-
-            /*
                    break;
                 }
                 catch (Exception ex)
@@ -38,8 +38,18 @@ namespace TraumaRL
 
                 }
             } while (false);
-            */
+            
             RunGame();
+        }
+
+        private void ShowIntroMovies()
+        {
+            Screen.Instance.PlayMovie("qe_start", true);
+
+            if (Game.Dungeon.Player.PlayItemMovies)
+            {
+                Screen.Instance.PlayMovie("helpkeys", true);
+            }
         }
    
         private void GenerateStoryDungeon(bool retry)
@@ -85,6 +95,17 @@ namespace TraumaRL
             //Game.Random = new Random(seedToUse);
             Game.Random = new Random();
         }
+
+        private void IntroScreen()
+        {
+            var gameInfo = new RogueBasin.GameIntro();
+
+            gameInfo.ShowIntroScreen();
+
+            Game.Dungeon.Difficulty = gameInfo.Difficulty;
+            Game.Dungeon.Player.Name = gameInfo.PlayerName;
+            Game.Dungeon.Player.PlayItemMovies = gameInfo.ShowMovies;
+        }
     
         private void StandardGameSetup()
         {
@@ -110,6 +131,8 @@ namespace TraumaRL
         {
             Game.Dungeon.Player.LocationLevel = 0;
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+
+            ShowIntroMovies();
 
             rb.MainLoop(false);
         }

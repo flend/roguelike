@@ -1,4 +1,9 @@
-FlatlineRL contains help screens for new players. It's recommended
-that you leave these on for your first play through.
+TraumaRL has logs scattered around which
+give information on how to play.
+
+It's recommended that you leave these on.
 
 In game, press '?' for keys.
+
+After you answer a few questions, the station
+will be constructed. This may take a few seconds.

@@ -929,6 +929,10 @@
     <EmbeddedResource Include="bin\Debug\movies\traumalose0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\traumawin0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\traumawin1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\qe_start0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\qe_start1.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\qe_start2.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\qe_start3.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
