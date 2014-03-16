@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
 using RogueBasin.LibTCOD;
+using System.Linq;
 
 namespace RogueBasin
 {
@@ -161,6 +162,9 @@ namespace RogueBasin
         /// <returns></returns>
         public List<Point> GetPointsForTriangularTargetInFOV(Point origin, Point target, Map mapLevel, int range, double fovAngle)
         {
+            if (origin == target)
+                return new List<Point>();
+
             List<Point> triangularPoints = new List<Point>();
 
             double angle = DirectionUtil.AngleFromOriginToTarget(origin, target);
@@ -169,6 +173,9 @@ namespace RogueBasin
             {
                 for (int j = origin.y - range; j < origin.y + range; j++)
                 {
+                    if(new Point(i,j) == origin)
+                        continue;
+
                     //Check for creature's FOV
                     //If OK, check to see if it falls within a TriangularFOV (blast radius)
                     if (i >= 0 && i < mapLevel.width && j >= 0 && j < mapLevel.height)

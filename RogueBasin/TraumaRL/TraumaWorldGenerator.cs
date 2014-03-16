@@ -608,7 +608,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                     //Add monsters
-                    //CreateMonstersForLevels(mapInfo);
+                    CreateMonstersForLevels(mapInfo);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);

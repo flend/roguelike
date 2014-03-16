@@ -192,6 +192,8 @@ namespace RogueBasin {
         private int ViewableWidth {get; set; }
         private int ViewableHeight {get; set; }
 
+        char explosionIcon = (char)505;
+
         public int LevelToDisplay
         {
             get; set;
@@ -1020,7 +1022,7 @@ namespace RogueBasin {
                 if (!isViewVisible(p))
                     continue;
 
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell('*');
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, ColorPresets.Black);
             }
 
@@ -1141,7 +1143,7 @@ namespace RogueBasin {
                     continue;
 
                 //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
-                char toDraw = '*';
+                char toDraw = explosionIcon;
                 int monsterIdInSquare = tileMapLayer(TileLevel.Creatures)[ViewRelative(p)].TileID;
 
                 if (monsterIdInSquare != -1)
@@ -1849,11 +1851,11 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*', ColorPresets.Gold);
+                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, ColorPresets.Gold);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, '*', ColorPresets.Gray);
+                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, ColorPresets.Gray);
                         }
                     }
                 }
@@ -3232,7 +3234,7 @@ namespace RogueBasin {
                 {
                     if (isViewVisible(newTarget.LocationMap))
                     {
-                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell('*');
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(explosionIcon);
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
                     }
                 }
