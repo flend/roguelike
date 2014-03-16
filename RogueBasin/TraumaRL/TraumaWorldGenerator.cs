@@ -1271,7 +1271,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             manager.PlaceObjective(new ObjectiveRequirements(selfDestructRoom, "self-destruct", 1, new List<string> { "escape" }));
             var selfDestructObjective = manager.GetObjectiveById("self-destruct");
-            PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
+            //PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
+            PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+
 
             UseVault(levelInfo, selfDestructConnection);
 
@@ -1286,11 +1288,64 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", 1, new List<string> { "self-destruct" }));
             var selfDestructPrimeObjective = manager.GetObjectiveById("prime-self-destruct");
-            PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
+            //PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
+            PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+
         }
 
         private void ComputerCore(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, DoorAndClueManager manager)
         {
+
+            var primeSelfDestructId = "prime-self-destruct";
+            var coresToDestroy = 20;
+
+            var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForObjective(primeSelfDestructId);
+            allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
+            var roomsOnComputerCoreLevel = allowedRoomsForClues.Intersect(mapInfo.GetRoomIndicesForLevel(computerCoreLevel));
+
+            var roomsToPlaceMonsters = new List<int>();
+
+            var roomsForMonsters = GetRandomRoomsForClues(mapInfo, coresToDestroy, roomsOnComputerCoreLevel);
+            var clues = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForMonsters);
+
+            PlaceCreatureClues<RogueBasin.Creatures.ComputerNode>(mapInfo, clues, true, false);
+
+            //Place log entries explaining the puzzle
+            //These will not be turned into in-engine clue items, so they can't be used to open the door
+            //They are added though, to ensure that they are readable before the door is opened
+
+            //CC is a dead end
+            var sourceElevatorConnection = levelInfo[computerCoreLevel].ConnectionsToOtherLevels.First();
+            var connectingLevel = sourceElevatorConnection.Key;
+            var elevatorToCC = levelInfo[connectingLevel].ConnectionsToOtherLevels[computerCoreLevel];
+
+            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(primeSelfDestructId);
+
+            var preferredLevelsForLogs = new List<int>{ arcologyLevel, commercialLevel };
+            var preferredRooms = preferredLevelsForLogs.SelectMany(l => mapInfo.GetRoomIndicesForLevel(l));
+
+            var preferredRoomsForLogs = allowedRoomsForLogs.Intersect(preferredRooms);
+
+            var criticalPathLog = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, elevatorToCC.Source);
+
+            var preferredRoomsForLogsCritical = FilterClueRooms(mapInfo, preferredRoomsForLogs, criticalPathLog, false, CluePath.OnCriticalPath, true);
+            var preferredRoomsForLogsNonCritical = FilterClueRooms(mapInfo, preferredRoomsForLogs, criticalPathLog, false, CluePath.Any, true);
+
+            var roomsForLogsCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsNonCritical);
+
+            var logCluesCritical = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForLogsCritical);
+            var logCluesNonCritical = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForLogsNonCritical);
+
+            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_computer1", connectingLevel, computerCoreLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_computer2", connectingLevel, computerCoreLevel), logCluesCritical[1]);
+
+            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_computer3", connectingLevel, computerCoreLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_computer4", connectingLevel, computerCoreLevel), logCluesNonCritical[1]);
+
+            PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
+
+            /*
             var unusedVaultsInComputerLevel = GetAllAvailableVaults(levelInfo).Where(c => mapInfo.GetLevelForRoomIndex(c.Target) == computerCoreLevel);
 
             var unusedVaultsInComputerLevelOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, unusedVaultsInComputerLevel.Select(c => c.Target));
@@ -1303,6 +1358,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, computerVaultClue, true, true);
 
             UseVault(levelInfo, computerCoreVaultConnection);
+             * */
         }
 
         private void BridgeLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)

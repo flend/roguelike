@@ -200,6 +200,8 @@
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
+    <Compile Include="Features\SelfDestructPrimeObjective.cs" />
+    <Compile Include="Features\SelfDestructObjective.cs" />
     <Compile Include="Features\AntennaeObjective.cs" />
     <Compile Include="Features\Corpse.cs">
       <SubType>Code</SubType>
@@ -914,6 +916,14 @@
     <EmbeddedResource Include="bin\Debug\logentries\qe_captain2.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_captain3.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_captain4.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_computer1.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_computer2.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_computer3.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_computer4.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\reactorlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\reactorunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\selfdestructlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\selfdestructunlocked0.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
