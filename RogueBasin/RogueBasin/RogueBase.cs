@@ -362,7 +362,7 @@ namespace RogueBasin
                                     break;
                                     */
                                     //Repeatidly closing doors and lurking behind them was kind of abusive
-
+                                    /*
                                 case 'f':
                                 //case 'Z':
                                     //Fire weapon
@@ -413,7 +413,7 @@ namespace RogueBasin
                                         Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
-                                    break;
+                                    break;*/
                                     /*
                                 case 'u':
                                     //Use weapon
@@ -474,18 +474,18 @@ namespace RogueBasin
                                     // Don't recentre - useful for viewing
                                     centreOnPC = false;
                                     break;
-                                    
+                                    /*
                                 case '>':
                                 case '<':
                                     //Interact with feature
-                                    timeAdvances = InteractWithFeature();
+                                    timeAdvances = Game.Dungeon.InteractWithFeature();
                                     if (!timeAdvances)
                                         Screen.Instance.Update();
 
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
 
-                                    break;
+                                    break;*/
 
                                     //WETWARE
                                 /*case 'S':
@@ -570,7 +570,20 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     timeAdvances = false;
                                     break;
-
+                                    
+                                case 'K':
+                                    if (!Game.Dungeon.AllLocksOpen)
+                                    {
+                                        Game.Dungeon.AllLocksOpen = true;
+                                        Game.MessageQueue.AddMessage("All locks are now open.");
+                                    }
+                                    else {
+                                        Game.Dungeon.AllLocksOpen = false;
+                                        Game.MessageQueue.AddMessage("All locks are now in their normal state.");
+                                    }
+                                    Screen.Instance.Update();
+                                    break;
+                                    
                                 case 'L':
                                     SetLogScreen();
                                     Screen.Instance.Update();
@@ -589,6 +602,7 @@ namespace RogueBasin
                                     
                                     
                                 //Stats up. Use in town
+                                    /*
                                 case 'w':
                                     Game.Dungeon.Player.AttackStat = 100;
                                     Game.Dungeon.Player.CharmStat = 100;
@@ -603,8 +617,8 @@ namespace RogueBasin
 
                                     //Game.Dungeon.EndOfGame();
 
-                                    break;
-
+                                    break;*/
+                                    /*
                                 case 'K':
                                     //Add a sound at the player's location
                                     Game.Dungeon.AddSoundEffect(1.0, Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
@@ -618,7 +632,7 @@ namespace RogueBasin
                                     Game.Dungeon.ExplodeAllMonsters();
          
                                     break;
-
+                                    */
                                 case 'N':
                                     //screen numbering
                                     Screen.Instance.CycleRoomNumbering();
@@ -1553,25 +1567,7 @@ namespace RogueBasin
         }
 
 
-        private bool InteractWithFeature()
-        {
-            //Preferably just ask the dungeon if there is a feature here, rather than having all the logic in dungeon
-            Dungeon dungeon = Game.Dungeon;
-            Player player = dungeon.Player;
-
-            Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
-
-            UseableFeature useableFeature = featureAtSpace as UseableFeature;
-
-            if (useableFeature == null)
-            {
-                Game.MessageQueue.AddMessage("Nothing to interact with here");
-                return false;
-            }
-
-            //Interact with feature - these will normally put success / failure messages in queue
-            return useableFeature.PlayerInteraction(player);
-        }
+        
 
         Spell lastSpell = null;
         Creature lastSpellTarget = null;
@@ -2595,7 +2591,7 @@ namespace RogueBasin
             //Initial setup
 
             //See all debug messages
-            LogFile.Log.DebugLevel = 4;
+            LogFile.Log.DebugLevel = 0;
 
             //Load config
             Game.Config = new Config("config.txt");

@@ -82,6 +82,9 @@ namespace RogueBasin
             TerrainChars.Add(MapTerrain.ClosedDoor, (char)((shroomWallStartRow + 1) * rowLength + 2));
             TerrainChars.Add(MapTerrain.OpenDoor, (char)((shroomWallStartRow + 1) * rowLength + 3));
 
+            TerrainChars.Add(MapTerrain.ClosedLock, (char)((shroomWallStartRow + 1) * rowLength + 2));
+            TerrainChars.Add(MapTerrain.OpenLock, (char)((shroomWallStartRow + 1) * rowLength + 3));
+
             TerrainChars.Add(MapTerrain.BrickWall1, (char)((shroomWallStartRow + 0) * rowLength + 0));
             TerrainChars.Add(MapTerrain.BrickWall2, (char)((shroomWallStartRow + 0) * rowLength + shroomWallSkip + 1));
             TerrainChars.Add(MapTerrain.BrickWall3, (char)((shroomWallStartRow + 0) * rowLength + shroomWallSkip + 2));
@@ -138,6 +141,8 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.SkeletonWallWhite, ColorPresets.GhostWhite);
             TerrainColors.Add(MapTerrain.ClosedDoor, ColorPresets.DarkGoldenrod);
             TerrainColors.Add(MapTerrain.OpenDoor, ColorPresets.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.ClosedLock, ColorPresets.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.OpenLock, ColorPresets.DarkGoldenrod);
             TerrainColors.Add(MapTerrain.Flooded, ColorPresets.Blue);
             TerrainColors.Add(MapTerrain.Grass, ColorPresets.Green);
             TerrainColors.Add(MapTerrain.River, ColorPresets.Blue);

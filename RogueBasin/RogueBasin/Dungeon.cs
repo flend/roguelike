@@ -1488,10 +1488,12 @@ namespace RogueBasin
                 Point location = newLock.LocationMap;
 
                 //There must be a closed door here
-                if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.ClosedDoor)
-                {
-                    OpenDoor(level, location);
-                }
+                //if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.ClosedDoor)
+                //{
+                //    OpenDoor(level, location);
+                //}
+
+                SetTerrainAtPoint(level, location, MapTerrain.ClosedLock);
 
                 //Otherwise OK
 
@@ -2042,6 +2044,24 @@ namespace RogueBasin
             return specialMoves.Find(x => x.GetType() == specialMove);
         }
 
+        private bool InteractWithFeature()
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
+            Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
+
+            UseableFeature useableFeature = featureAtSpace as UseableFeature;
+            if (useableFeature == null)
+            {
+                //Game.MessageQueue.AddMessage("Nothing to interact with here");
+                return false;
+            }
+
+            //Interact with feature - these will normally put success / failure messages in queue
+            return useableFeature.PlayerInteraction(player);
+        }
+
         /// <summary>
         /// Process a relative PC move, from a keypress
         /// </summary>
@@ -2093,28 +2113,33 @@ namespace RogueBasin
                         OpenDoor(player.LocationLevel, newPCLocation);
                         return true;
                     }
-                    else
+                    else if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedLock)
+                    {
+                        //Is there a lock at the new location? Interact
+                        var locksAtLocation = LocksAtLocation(player.LocationLevel, newPCLocation);
+
+                        //Try to open each lock
+                        foreach (var thisLock in locksAtLocation)
+                        {
+                            bool thisSuccess = true;
+                            if (!thisLock.IsOpen())
+                            {
+                                thisSuccess = thisLock.OpenLock(player);
+                                if(thisSuccess)
+                                    SetTerrainAtPoint(player.LocationLevel, newPCLocation, MapTerrain.OpenLock);
+                            }
+                            //if (!thisSuccess)
+                              //  okToMoveIntoSquare = false;
+                        }
+
+                        //Any failure prevents onward movement
+                        return true;
+
+                    }
                     {
                         //This now costs time since it could be part of a special move
                         return true;
                     }
-                }
-
-                //Is there a lock at the new location? Interact
-                var locksAtLocation = LocksAtLocation(player.LocationLevel, newPCLocation);
-
-                //Try to open each lock
-                foreach (var thisLock in locksAtLocation)
-                {
-                    bool thisSuccess = true;
-                    if (!thisLock.IsOpen())
-                    {
-                        thisSuccess = thisLock.OpenLock(player);
-                    }
-
-                    //Any failure prevents onward movement
-                    if (!thisSuccess)
-                        okToMoveIntoSquare = false;
                 }
 
                 //Check for monsters in the square
@@ -2180,6 +2205,9 @@ namespace RogueBasin
                     //Might help if the player makes a massive pile
                     PickUpItemInSpace();
                 }
+
+                //If there is a feature, auto interact
+                InteractWithFeature();
             }
 
             //Run any entering square messages
@@ -2204,7 +2232,7 @@ namespace RogueBasin
             if (FeatureAtSpace(player.LocationLevel, player.LocationMap) != null &&
                 ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
             {
-                Game.MessageQueue.AddMessage("There is a staircase here.");
+                Game.MessageQueue.AddMessage("There is something behind it.");
             }
 
             return true;
@@ -3283,7 +3311,7 @@ namespace RogueBasin
         /// <returns></returns>
         public static bool IsTerrainWalkable(MapTerrain terrain)
         {
-            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor || terrain == MapTerrain.Grass || terrain == MapTerrain.Road || terrain == MapTerrain.Gravestone || terrain == MapTerrain.Trees || terrain == MapTerrain.Rubble)
+            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor || terrain == MapTerrain.Grass || terrain == MapTerrain.Road || terrain == MapTerrain.Gravestone || terrain == MapTerrain.Trees || terrain == MapTerrain.Rubble || terrain == MapTerrain.OpenLock)
             {
                 return true;
             }
@@ -3307,6 +3335,7 @@ namespace RogueBasin
                 terrain == MapTerrain.Gravestone ||
                 terrain == MapTerrain.Trees ||
                 terrain == MapTerrain.Rubble ||
+                terrain == MapTerrain.OpenLock ||
                 terrain == MapTerrain.NonWalkableFeature)
             {
                 return false;

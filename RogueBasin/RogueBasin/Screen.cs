@@ -538,7 +538,7 @@ namespace RogueBasin {
         /// </summary>
         /// <param name="root"></param>
         /// 
-        Color normalMovieColor = ColorPresets.White;
+        Color normalMovieColor = ColorPresets.MediumSeaGreen;
         Color flashMovieColor = ColorPresets.Red;
         
         public void PlayMovie(List<MovieFrame> frames, bool keypressBetweenFrames)
@@ -769,7 +769,7 @@ namespace RogueBasin {
                 else
                 {
                     //Print whole line
-                    PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left);
+                    PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left, normalMovieColor);
                 }
                 offset++;
             }
@@ -2036,18 +2036,18 @@ namespace RogueBasin {
         {
             switch (letter)
             {
-                case "A":
+                case "a":
                     return (char)621;
-                case "T":
+                case "t":
                     return (char)620;
-                case "F":
+                case "f":
                     return (char)619;
-                case "S":
+                case "s":
                     return (char)622;
-                case "D":
+                case "d":
                     return (char)623;
-                case "B":
-                    return (char)618;
+                case "z":
+                    return 'z';
                 default:
                     return (char)616;
             }

@@ -19,24 +19,24 @@ namespace TraumaRL
 
             //For testing
             bool retry = false;
-           // do
-         //   {
-         //       try
-         //       {
+          /* do
+            {
+                try
+                {*/
                     StandardGameSetup();
 
                     GenerateStoryDungeon(retry);
+            /*
+                   break;
+                }
+                catch (Exception ex)
+                {
+                    retry = false;
+                    LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
 
-                 //   break;
-           //     }
-                //catch (Exception ex)
-               // {
-               //     retry = false;
-               //     LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
-
-              //  }
-           // } while (false);
-
+                }
+            } while (false);
+            */
             RunGame();
         }
    
@@ -88,13 +88,15 @@ namespace TraumaRL
             rb = new RogueBase();
             rb.SetupSystem();
 
+            LogFile.Log.DebugLevel = 4;
+
             var dungeonInfo = new DungeonInfo();
             dungeonInfo.LevelNaming = TraumaWorldGenerator.LevelNaming;
             Game.Dungeon = new Dungeon(dungeonInfo);
 
             Game.Dungeon.Player.StartGameSetup();
 
-            Game.Dungeon.AllLocksOpen = true;
+            Game.Dungeon.AllLocksOpen = false;
 
             //Screen.Instance.SeeAllMonsters = true;
             //Screen.Instance.SeeAllMap = true;
@@ -104,8 +106,6 @@ namespace TraumaRL
         {
             Game.Dungeon.Player.LocationLevel = 0;
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
-
-            Screen.Instance.YesNoQuestionWithFrame("Really start the game?");
 
             rb.MainLoop(false);
         }

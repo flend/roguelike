@@ -1942,11 +1942,12 @@ namespace RogueBasin
            // Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
             //Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
             //Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
-
+            
             Inventory.AddItemNotFromDungeon(new Items.StealthWare());
             Inventory.AddItemNotFromDungeon(new Items.ShieldWare(2));
             Inventory.AddItemNotFromDungeon(new Items.AimWare(2));
             Inventory.AddItemNotFromDungeon(new Items.BoostWare(2));
+             
         }
 
         public void GiveItemNotFromDungeon(Item item)
@@ -1956,6 +1957,7 @@ namespace RogueBasin
 
         public void GiveAllWeapons()
         {
+            /*
             Inventory.AddItemNotFromDungeon(new Items.Fists());
             Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
            Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
@@ -1974,8 +1976,9 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
                 Inventory.AddItemNotFromDungeon(new Items.NanoRepair());
             }
-
+            */
             //Start with fists equipped
+            Inventory.AddItemNotFromDungeon(new Items.Fists());
             Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[1]);
         }
 
