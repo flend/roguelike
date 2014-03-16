@@ -910,6 +910,10 @@
     <EmbeddedResource Include="bin\Debug\movies\computercorelocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\computercoreunlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\vaults\arcology_vault_small_deadend1.room" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_captain1.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_captain2.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_captain3.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_captain4.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

@@ -1333,6 +1333,31 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),
                 new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant3])};
             AddStandardDecorativeFeaturesToRoom(captainsIdLevel, mapInfo.GetRoom(captainsIdRoom), 10, decorations, true);
+
+            //Logs
+
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForDoor(doorId);
+
+            var criticalPathLog = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, elevatorToBridge.Source);
+
+            var preferredRoomsForLogsCritical = FilterClueRooms(mapInfo, allowedRoomsForLogs, criticalPathLog, false, CluePath.OnCriticalPath, true);
+            var preferredRoomsForLogsNonCritical = FilterClueRooms(mapInfo, allowedRoomsForLogs, criticalPathLog, false, CluePath.Any, true);
+
+            var roomsForLogsCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsNonCritical);
+
+            var logCluesCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsCritical);
+            var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
+
+            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_captain1", connectingLevel, captainsIdLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_captain2", connectingLevel, captainsIdLevel), logCluesCritical[1]);
+
+            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_captain3", connectingLevel, captainsIdLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_captain4", connectingLevel, captainsIdLevel), logCluesNonCritical[1]);
+
+            PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
         }
 
         private void ComputerCoreId(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
