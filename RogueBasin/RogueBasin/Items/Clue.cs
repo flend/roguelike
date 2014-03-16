@@ -8,7 +8,7 @@ namespace RogueBasin.Items
     public class Clue : Item
     {
         Color color;
-        string id;
+        string id = "";
         string parentId;
 
         GraphMap.Clue mapClue;

@@ -890,6 +890,8 @@
     <EmbeddedResource Include="bin\Debug\movies\antennaelocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\antennaeunlocked1.amf" />
     <EmbeddedResource Include="bin\Debug\movies\interface_demod0.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\armory2.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\arcology_vault_tiny_deadend1.room" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

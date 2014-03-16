@@ -2003,7 +2003,8 @@ namespace RogueBasin {
 
             var availableWeapon = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType) || Game.Dungeon.Player.IsWeaponTypeAvailable(heavyWeaponType);
             var equippedWeapon = Game.Dungeon.Player.GetEquippedWeapon();
-            var thisWeaponEquipped = equippedWeapon.GetType() == weaponType || equippedWeapon.GetType() == heavyWeaponType;
+
+            var thisWeaponEquipped = equippedWeapon != null && (equippedWeapon.GetType() == weaponType || equippedWeapon.GetType() == heavyWeaponType);
 
             Color colorToUse;
             if (!availableWeapon)
@@ -2305,7 +2306,7 @@ namespace RogueBasin {
 
                 //Heading
 
-                if (creature.ShowHeading())
+                if (creature.ShowHeading() && creature.FOVType() == CreatureFOV.CreatureFOVType.Triangular)
                 {
                     List<Point> headingMarkers;
 

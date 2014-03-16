@@ -1648,13 +1648,16 @@ namespace RogueBasin
         {
             itemType = HeavyWeaponTranslation(itemType);
 
-            if (!IsInventoryTypeAvailable(itemType))
+            var invAvailable = IsInventoryTypeAvailable(itemType);
+            if (!invAvailable)
             {
                 LogFile.Log.LogEntryDebug("Can't equip inventory type " + itemType + " - not in inventory", LogDebugLevel.Medium);
-                return false;
+
             }
 
-            var equipSuccess = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
+            var equipSuccess = false;
+            if(invAvailable)
+                equipSuccess = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
 
             if (equipSuccess == false && reequip == false)
             {
@@ -2237,7 +2240,12 @@ namespace RogueBasin
             {
                 int monsterOrigHP = Hitpoints;
 
-                Hitpoints -= damage;
+                //bypasses cover etc.
+                //var modifiedDamaged = (int)Math.Floor(CalculateDamageModifierForAttacksOnPlayer(this) * damage);
+
+                ApplyDamageToPlayer(damage);
+
+                //Hitpoints -= damage;
 
                 //Is the player dead, if so kill it?
                 if (Hitpoints <= 0)
@@ -2572,7 +2580,7 @@ namespace RogueBasin
                 {
                     var item = i as RangedWeapon;
 
-                    if (item != null)
+                    if (item != null && item.RemainingAmmo() < item.MaxAmmo())
                     {
                         item.Ammo = item.MaxAmmo();
                         Game.MessageQueue.AddMessage(item.SingleItemDescription + " reloaded.");

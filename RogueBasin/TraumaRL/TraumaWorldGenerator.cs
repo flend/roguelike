@@ -711,9 +711,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
             
-            //BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
             
-            //BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
+            BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
             //BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
 
@@ -2439,7 +2439,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_tiny_deadend1.room", StandardTemplateMapping.terrainMapping);
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
