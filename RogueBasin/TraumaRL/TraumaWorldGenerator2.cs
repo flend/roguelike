@@ -425,15 +425,25 @@ namespace TraumaRL
 
         Dictionary<int, List<Item>> itemsInArmory;
 
+        enum Ware
+        {
+            Boost,
+            Shield,
+            Aim,
+            Stealth
+        }
+
         private void PlaceLootInArmory(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
             itemsInArmory = new Dictionary<int, List<Item>>();
+
             
+
             foreach(var l in gameLevels) {
                 itemsInArmory[l] = new List<Item>();
             }
 
-            var level1Ware = new List<Item> { new RogueBasin.Items.BoostWare(1), new RogueBasin.Items.AimWare(1), new RogueBasin.Items.ShieldWare(1) };
+            var level1Ware = new List<Item>();
 
             var lootLevels = new Dictionary<int, List<Item>>();
 
@@ -442,16 +452,53 @@ namespace TraumaRL
 
             lootLevels[1] = new List<Item> { new RogueBasin.Items.Shotgun(), new RogueBasin.Items.Laser()  };
 
-            lootLevels[2] = new List<Item> {  new RogueBasin.Items.AimWare(2), new RogueBasin.Items.ShieldWare(2) };
+            lootLevels[2] = new List<Item>();
+            // {   };
+            lootLevels[3] = new List<Item> { new RogueBasin.Items.HeavyPistol() };
+            //new RogueBasin.Items.BoostWare(2),  new RogueBasin.Items.StealthWare()
 
-            lootLevels[3] = new List<Item> { new RogueBasin.Items.HeavyPistol(), new RogueBasin.Items.BoostWare(2), new RogueBasin.Items.StealthWare() };
-
-            lootLevels[4] = new List<Item> { new RogueBasin.Items.AssaultRifle(), new RogueBasin.Items.HeavyLaser(),  new RogueBasin.Items.HeavyShotgun(), new RogueBasin.Items.BoostWare(3), 
-                new RogueBasin.Items.AimWare(3), new RogueBasin.Items.ShieldWare(3), };
+            lootLevels[4] = new List<Item> { new RogueBasin.Items.AssaultRifle(), new RogueBasin.Items.HeavyLaser(),  new RogueBasin.Items.HeavyShotgun(), };
+            //new RogueBasin.Items.BoostWare(3), new RogueBasin.Items.AimWare(3), new RogueBasin.Items.ShieldWare(3)
 
             var itemsPlaced = new List<Item>();
 
-            itemsPlaced.AddRange(PlayerInitialItems(level1Ware));
+            var wareInGame = new List<Ware> { Ware.Aim, Ware.Shield, Ware.Boost, Ware.Stealth }.RandomElements(3);
+
+            foreach (var ware in Enum.GetValues(typeof(Ware)).Cast<Ware>())
+            {
+                if(!wareInGame.Contains(ware))
+                    continue;
+
+                if (ware == Ware.Aim)
+                {
+                    level1Ware.Add(new RogueBasin.Items.AimWare(1));
+                    lootLevels[2].AddRange(new List<Item> { new RogueBasin.Items.AimWare(2) });
+                    lootLevels[4].AddRange(new List<Item> { new RogueBasin.Items.AimWare(3) });
+                }
+                if (ware == Ware.Shield)
+                {
+                    level1Ware.Add(new RogueBasin.Items.ShieldWare(1));
+                    lootLevels[2].AddRange(new List<Item> { new RogueBasin.Items.ShieldWare(2) });
+                    lootLevels[4].AddRange(new List<Item> { new RogueBasin.Items.ShieldWare(3) });
+                }
+                if (ware == Ware.Boost)
+                {
+                    level1Ware.Add(new RogueBasin.Items.BoostWare(1));
+                    lootLevels[3].AddRange(new List<Item> { new RogueBasin.Items.BoostWare(2) });
+                    lootLevels[4].AddRange(new List<Item> { new RogueBasin.Items.BoostWare(3) });
+                }
+                if (ware == Ware.Stealth)
+                {
+                    lootLevels[3].AddRange(new List<Item> { new RogueBasin.Items.StealthWare() });
+                }
+            }
+
+            //Give 1 ware
+            var itemsGivenToPlayer = PlayerInitialItems(level1Ware);
+
+            itemsPlaced.AddRange(itemsGivenToPlayer);
+
+            lootLevels[0].AddRange(level1Ware.Except(itemsGivenToPlayer));
 
             //Guarantee on medical, at least 1 ware and a pistol or vibroblade
             var randomWare = level1Ware.Except(itemsPlaced).RandomElement();
