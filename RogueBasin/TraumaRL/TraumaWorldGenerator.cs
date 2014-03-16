@@ -1292,7 +1292,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Screen1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HighTechBench])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(selfDestructRoom), mapInfo.GetRoom(selfDestructRoom), 20, bridgeDecorations, true);
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(selfDestructRoom), mapInfo.GetRoom(selfDestructRoom), 20, bridgeDecorations, false);
 
 
             LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
@@ -1315,7 +1315,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument3])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.GetRoom(reactorSelfDestructVault), 20, reactorDecorations, true);
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.GetRoom(reactorSelfDestructVault), 20, reactorDecorations, false);
 
         }
 
@@ -1414,7 +1414,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),
                 new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant3])};
-            AddStandardDecorativeFeaturesToRoom(captainsIdLevel, mapInfo.GetRoom(captainsIdRoom), 10, decorations, true);
+            AddStandardDecorativeFeaturesToRoom(captainsIdLevel, mapInfo.GetRoom(captainsIdRoom), 10, decorations, false);
 
             //Logs
 
@@ -1469,7 +1469,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton])
             };
-            AddStandardDecorativeFeaturesToRoom(techIdLevel, mapInfo.GetRoom(techIdRoom), 20, bioDecorations, true);
+            AddStandardDecorativeFeaturesToRoom(techIdLevel, mapInfo.GetRoom(techIdRoom), 20, bioDecorations, false);
         }
 
         private void ArcologyLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -1509,7 +1509,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.CorpseinGoo]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.EggChair])
             };
-            AddStandardDecorativeFeaturesToRoom(biowareLevel, mapInfo.GetRoom(biowareRoom), 10, bioDecorations, true);
+            AddStandardDecorativeFeaturesToRoom(biowareLevel, mapInfo.GetRoom(biowareRoom), 10, bioDecorations, false);
 
             //Logs
 
@@ -1582,7 +1582,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             AddMonstersToRoom(mapInfo, antennaeLevel, antennaeVault, monstersToPlace);
 
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Antennae]) };
-            AddStandardDecorativeFeaturesToRoom(antennaeLevel, mapInfo.GetRoom(antennaeVault), 10, decorations, true);
+            AddStandardDecorativeFeaturesToRoom(antennaeLevel, mapInfo.GetRoom(antennaeVault), 10, decorations, false);
 
             //Servo motor
 
@@ -1594,7 +1594,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart3])
             };
-            AddStandardDecorativeFeaturesToRoom(servoLevel, mapInfo.GetRoom(servoRoom), 10, servoDecorations, true);
+            AddStandardDecorativeFeaturesToRoom(servoLevel, mapInfo.GetRoom(servoRoom), 10, servoDecorations, false);
 
             //Logs
 

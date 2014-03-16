@@ -926,6 +926,9 @@
     <EmbeddedResource Include="bin\Debug\movies\selfdestructunlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\escapepodlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\escapepodunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\traumalose0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\traumawin0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\traumawin1.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />

@@ -3536,7 +3536,7 @@ namespace RogueBasin
                 if (DungeonInfo.NoDeaths == DungeonInfo.MaxDeaths)
                 {
                     //This is true death
-                    EndOfGame();
+                    EndOfGame(false);
                     return;
                 }
                 else
@@ -4213,7 +4213,7 @@ namespace RogueBasin
             else
             {
                 //OK, it's the end, they're back from the prince mission one way or the other
-                EndOfGame();
+                EndOfGame(false);
             }
         }
 
@@ -4307,9 +4307,15 @@ namespace RogueBasin
         /// <summary>
         /// Run the end of game. Produce and save the obituary.
         /// </summary>
-        public void EndOfGame()
+        public void EndOfGame(bool playerWon)
         {
             //Work out which ending the player gets
+
+            if(playerWon)
+                Screen.Instance.PlayMovie("traumawin", true);
+            else
+                Screen.Instance.PlayMovie("traumalose", true);
+
 
             //Check intrinsics
 
@@ -4565,7 +4571,7 @@ namespace RogueBasin
             if (newMissionLevel == Levels.Count)
             {
                 //Completed the game
-                EndOfGame();
+                EndOfGame(false);
                 return;
             }
 
