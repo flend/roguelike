@@ -301,6 +301,33 @@ namespace TraumaRL
             }
         }
 
+        private int AddMonstersToRoom(MapInfo mapInfo, int level, int roomId, List<Monster> monsters)
+        {
+            var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(roomId, RoomTemplateTerrain.Floor).Shuffle();
+
+            int monstersPlaced = 0;
+
+            Monster mon = monsters[monstersPlaced];
+
+            foreach (Point p in candidatePointsInRoom)
+            {
+                bool placedSuccessfully = Game.Dungeon.AddMonster(mon, level, p);
+
+                if (placedSuccessfully)
+                {
+                    
+                    GiveMonsterStandardItems(mon);
+                    monstersPlaced++;
+
+                    if (monstersPlaced == monsters.Count())
+                        break;
+
+                    mon = monsters[monstersPlaced];
+                }
+            }
+            return monstersPlaced;
+        }
+
         private bool AddMonsterLinearPatrol(MapInfo mapInfo, MonsterFightAndRunAI monster, Dictionary<int, List<int>> terminalBranchNodes, int level)
         {
             var roomsOnLevel = mapInfo.FilterOutCorridors(mapInfo.GetRoomIndicesForLevel(level).Except(allReplaceableVaults));

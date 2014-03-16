@@ -1337,7 +1337,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceDoorOnMap(mapInfo, arcologyDoorId, arcologyDoorName, 1, arcologyDoorColor, elevatorToArcology);
 
             //Bioware
-            var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel };
+            var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel, flightDeck };
             PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
         }
 
@@ -1358,13 +1358,23 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             UseVault(levelInfo, antennaeVaultConnection);
 
+            //Extra stuff
+
+            var antennaeLevel = mapInfo.GetLevelForRoomIndex(antennaeVault);
+
+            var monstersToPlace = new List<Monster> { new RogueBasin.Creatures.RotatingTurret(), new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.PatrolBotRanged(), new RogueBasin.Creatures.PatrolBotRanged()};
+            AddMonstersToRoom(mapInfo, antennaeLevel, antennaeVault, monstersToPlace);
+
+            var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Antennae]) };
+            AddStandardDecorativeFeaturesToRoom(antennaeLevel, mapInfo.GetRoom(antennaeVault), 10, decorations, true);
+
             //Servo motor
 
-            var servoRoom = PlaceMovieClueForObjectiveInVault(mapInfo, levelInfo, antennaeObjName, (char)307, "interface_demod", new List<int> { scienceLevel, storageLevel });
+            var servoRoom = PlaceMovieClueForObjectiveInVault(mapInfo, levelInfo, antennaeObjName, (char)312, "interface_demod", new List<int> { scienceLevel, storageLevel });
 
             //Logs
 
-            var antennaeLevel = mapInfo.GetLevelForRoomIndex(antennaeVault);
+            
             var servoLevel = mapInfo.GetLevelForRoomIndex(servoRoom);
 
             var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(antennaeObjName);

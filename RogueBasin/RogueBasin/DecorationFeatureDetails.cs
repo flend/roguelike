@@ -20,7 +20,7 @@ namespace RogueBasin
             Screen5, MachinePart1, Computer1, MachinePart2, MachinePart3, Statue1, Statue2,
             Statue3, Statue4, Screen6, Screen7, Screen8,
             CleaningDevice, WheelChair, ShopAutomat1, ShopAutomat2, Screen9,
-            Computer2, Computer3
+            Computer2, Computer3, Antennae
         }
         
         public class Decoration {
@@ -43,6 +43,7 @@ namespace RogueBasin
             var blockingColor = ColorPresets.SandyBrown;
             var nonBlockingColor = ColorPresets.DarkSlateGray;
             var corpseColor = ColorPresets.Firebrick;
+            var featureColor = ColorPresets.Gold;
 
             decorationFeatures.Add(DecorationFeatures.Bone, new Decoration((char)314, boneColor, false));
             decorationFeatures.Add(DecorationFeatures.Skeleton, new Decoration((char)315, boneColor, false));
@@ -103,6 +104,7 @@ namespace RogueBasin
             decorationFeatures.Add(DecorationFeatures.Computer2, new Decoration((char)605, blockingColor, true));
             decorationFeatures.Add(DecorationFeatures.Computer3, new Decoration((char)606, blockingColor, true));
 
+            decorationFeatures.Add(DecorationFeatures.Antennae, new Decoration((char)570, featureColor, false));
         }
     }
 }
