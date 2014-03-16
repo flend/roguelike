@@ -915,8 +915,59 @@ namespace RogueBasin {
             if (!isViewVisible(PClocation))
                 return;
 
-            tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)] = new TileEngine.TileCell(player.Representation);
-            tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileFlag = new LibtcodColorFlags(PCDrawColor);
+            char pcRepresentation = player.Representation;
+
+            var weapon = player.GetEquippedWeapon();
+            if (weapon.GetType() == typeof(Items.Fists))
+                pcRepresentation = (char)257;
+
+            if (weapon.GetType() == typeof(Items.Pistol))
+                pcRepresentation = (char)512;
+
+            if (weapon.GetType() == typeof(Items.HeavyPistol))
+                pcRepresentation = (char)513;
+
+            if (weapon.GetType() == typeof(Items.Shotgun))
+                pcRepresentation = (char)514;
+
+            if (weapon.GetType() == typeof(Items.AssaultRifle))
+                pcRepresentation = (char)515;
+
+            if (weapon.GetType() == typeof(Items.HeavyShotgun))
+                pcRepresentation = (char)516;
+
+            if (weapon.GetType() == typeof(Items.Laser))
+                pcRepresentation = (char)517;
+
+            if (weapon.GetType() == typeof(Items.HeavyLaser))
+                pcRepresentation = (char)517;
+
+            if (weapon.GetType() == typeof(Items.Vibroblade))
+                pcRepresentation = (char)518;
+
+            if (weapon.GetType() == typeof(Items.FragGrenade))
+                pcRepresentation = (char)521;
+
+            if (weapon.GetType() == typeof(Items.StunGrenade))
+                pcRepresentation = (char)522;
+
+            if (weapon.GetType() == typeof(Items.SoundGrenade))
+                pcRepresentation = (char)520;
+
+            var colorToUse = PCDrawColor;
+
+            var hasActiveWetware = player.GetEquippedWetware();
+
+            if (hasActiveWetware != null)
+            {
+                colorToUse = ColorPresets.LightSkyBlue;
+
+                if (hasActiveWetware.GetType() == typeof(Items.StealthWare))
+                    pcRepresentation = (char)256;
+            }
+
+            tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)] = new TileEngine.TileCell(pcRepresentation);
+            tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileFlag = new LibtcodColorFlags(colorToUse);
         }
 
 
@@ -1394,6 +1445,7 @@ namespace RogueBasin {
             var noCluesForDoors = allPlayerClues.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
 
             var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")" + kv.Key);
+            //var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")");
             
             //Display list
             DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(cluesForDoorsAsStrings));
@@ -1596,10 +1648,10 @@ namespace RogueBasin {
             hitpointsOffset = new Point(baseOffset, 4);
             Point shieldOffset = new Point(baseOffset, 5);
             Point weaponOffset = new Point(baseOffset, 8);
-            Point utilityOffset = new Point(baseOffset, 13);
-            Point viewOffset = new Point(baseOffset, 19);
-            Point cmbtOffset = new Point(baseOffset, 17);
-            Point gameDataOffset = new Point(baseOffset, 24);
+            Point utilityOffset = new Point(baseOffset, 14);
+            Point viewOffset = new Point(baseOffset, 20);
+            Point cmbtOffset = new Point(baseOffset, 18);
+            Point gameDataOffset = new Point(baseOffset, 25);
 
             var zoneName = "[" + (LevelToDisplay).ToString("00") + "] ";
             var zoneName2 = Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay);
@@ -1657,7 +1709,7 @@ namespace RogueBasin {
                 //Ammo
                 if (weaponE.HasFireAction())
                 {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
         
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -1668,17 +1720,17 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, ammoChar, orangeActivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, ammoChar, orangeActivatedColor);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, ammoChar, orangeDisactivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, ammoChar, orangeDisactivatedColor);
                         }
                     }
                 }
                 else if (weaponE.HasThrowAction() || weaponE.HasOperateAction())
                 {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left, statsColor);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left, statsColor);
 
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -1689,11 +1741,11 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, weapon.Representation, orangeActivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, weapon.Representation, orangeActivatedColor);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, weapon.Representation, orangeDisactivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, weapon.Representation, orangeDisactivatedColor);
                         }
                     }
                 }

@@ -576,8 +576,8 @@ namespace RogueBasin
                     string combatResultsMsg = "MvP " + this.Representation + " Dam: base: " + damage + " mod: " + modifiedDamaged + " HP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
                     
                     //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
-                    string playerMsg = HitsPlayerCombatString() + " R. E. E. D. DESTROYED!";
-                    Game.MessageQueue.AddMessage(playerMsg);
+                    //string playerMsg = HitsPlayerCombatString() + " R. E. E. D. DESTROYED!";
+                    //Game.MessageQueue.AddMessage(playerMsg);
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Game.Dungeon.SetPlayerDeath("was knocked out by a " + this.SingleDescription);
@@ -788,12 +788,12 @@ namespace RogueBasin
 
         internal virtual Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.White;
+            return ColorPresets.Gainsboro;
         }
 
         internal virtual char GetCorpseRepresentation()
         {
-            return '%';
+            return (char)498;
         }
     }
 }

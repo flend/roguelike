@@ -78,7 +78,7 @@ namespace RogueBasin.Items
 
         public string ClueDescription
         {
-            get { return id + "(" + parentId + ")"; }
+            get { return id; }
         }
 
         public override string SingleItemDescription

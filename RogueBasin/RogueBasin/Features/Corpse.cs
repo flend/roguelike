@@ -12,7 +12,7 @@ namespace RogueBasin.Features
 
         public Corpse()
         {
-            representation = '%';
+            representation = (char)479;
             representationColor = ColorPresets.White;
         }
 

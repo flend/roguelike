@@ -23,9 +23,9 @@ namespace RogueBasin.Features
         {
             Dungeon dungeon = Game.Dungeon;
 
-            Game.MessageQueue.AddMessage("You take the escape pod. The game ends");
+            Game.MessageQueue.AddMessage("You take the escape pod. YOU WIN!");
 
-            dungeon.EndOfGame(true);
+            dungeon.EndOfGame(true, false);
 
             return true;
         }

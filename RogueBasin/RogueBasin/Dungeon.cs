@@ -2728,9 +2728,10 @@ namespace RogueBasin
 
             foreach (var item in itemToPickUp)
             {
+                Game.MessageQueue.AddMessage(item.SingleItemDescription + " picked up.");
+                
                 item.OnPickup(player);
                 player.PickUpItem(item);
-                Game.MessageQueue.AddMessage(item.SingleItemDescription + " picked up.");
                 
             }
             return true;
@@ -3488,7 +3489,8 @@ namespace RogueBasin
 
             //In FlatlineRL death is not permanent, but quitting is!
 
-            if(!verb.Contains("quit")) {
+            if (!verb.Contains("quit"))
+            {
 
                 //Reset vars
                 PlayerDeathString = "";
@@ -3497,11 +3499,12 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Player killed", LogDebugLevel.Medium);
 
                 DungeonInfo.NoDeaths++;
+                EndOfGame(false, false);
 
                 //For now, we just healup the player
-                Game.Dungeon.Player.HealCompletely();
-                return;
-
+                //Game.Dungeon.Player.HealCompletely();
+                //return;
+                /*
                 if (DungeonInfo.NoDeaths == DungeonInfo.MaxDeaths)
                 {
                     //This is true death
@@ -3533,10 +3536,16 @@ namespace RogueBasin
                     ResetCurrentMission(true);
 
                     return;
-                }
- 
+                }*/
+
+            }
+            else
+            {
+                EndOfGame(false, true);
             }
 
+
+            /*
             //Right now, only seen on a quit (will be changed too)
 
             int noDeaths = this.DungeonInfo.NoDeaths;
@@ -3619,7 +3628,7 @@ namespace RogueBasin
 
             //Stop the main loop
             RunMainLoop = false;
-
+            */
             
         }
 
@@ -4182,7 +4191,7 @@ namespace RogueBasin
             else
             {
                 //OK, it's the end, they're back from the prince mission one way or the other
-                EndOfGame(false);
+                EndOfGame(false, false);
             }
         }
 
@@ -4276,16 +4285,26 @@ namespace RogueBasin
         /// <summary>
         /// Run the end of game. Produce and save the obituary.
         /// </summary>
-        public void EndOfGame(bool playerWon)
+        public void EndOfGame(bool playerWon, bool playerQuit)
         {
             //Work out which ending the player gets
 
-            if(playerWon)
+            if (playerWon)
                 Screen.Instance.PlayMovie("traumawin", true);
             else
-                Screen.Instance.PlayMovie("traumalose", true);
+            {
+                if (!playerQuit)
+                    Screen.Instance.PlayMovie("traumalose", true);
+                else
+                    Screen.Instance.PlayMovie("traumaquit", true);
+            }
 
+            //RunMainLoop = false;
+            EndOfGameMechanics(playerWon);
+        }
 
+        private void EndOfGameMechanics(bool wonGame)
+        {
             //Check intrinsics
 
             Player player = Game.Dungeon.Player;
@@ -4378,7 +4397,6 @@ namespace RogueBasin
             //A long list of stuff to put in the obituary
             List<string> fullObit = new List<string>();
 
-            var wonGame = true;
             //Final stats
 
             List<string> finalStats = new List<string>();
@@ -4396,7 +4414,7 @@ namespace RogueBasin
 
             //finalScreen.Add("Primary objectives " + primaryObjectives + "/" + totalLevels + ": " + primaryObjectiveScore + " pts");
             //finalScreen.Add("Secondary objectives " + secondaryObjectives + "/" + totalLevels + ": " + secondaryObjectiveScore + " pts");
-            
+
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
@@ -4540,7 +4558,7 @@ namespace RogueBasin
             if (newMissionLevel == Levels.Count)
             {
                 //Completed the game
-                EndOfGame(false);
+                EndOfGame(false, false);
                 return;
             }
 
