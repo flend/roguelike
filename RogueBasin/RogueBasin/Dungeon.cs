@@ -2534,6 +2534,9 @@ namespace RogueBasin
 
             //Attack all monsters in the area
 
+            if (player.LocationLevel >= 6)
+                damage *= 2;
+
             foreach (Point sq in grenadeAffects)
             {
                 SquareContents squareContents = Game.Dungeon.MapSquareContents(level, sq);
@@ -2718,58 +2721,17 @@ namespace RogueBasin
         {
             Player player = Player;
 
-            Item itemToPickUp = ItemAtSpace(player.LocationLevel, player.LocationMap);
+            var itemToPickUp = ItemsAtSpace(player.LocationLevel, player.LocationMap).ToList();
 
-            if (itemToPickUp == null)
+            if (!itemToPickUp.Any())
                 return false;
 
-            itemToPickUp.OnPickup(player);
-
-            IEquippableItem equipItem = itemToPickUp as IEquippableItem;
-
-            if (equipItem != null)
+            foreach (var item in itemToPickUp)
             {
-                //The item is equippable
-                player.PickUpItem(itemToPickUp);
-
-                //Place in an equipment slot and drop the old item
-                player.EquipAndReplaceItem(itemToPickUp, false);
-            }
-            else
-            {
-                //Add item to PC inventory
-                //Better on player
-                player.PickUpItem(itemToPickUp);
-
-                //Play help movie
-                if (Game.Dungeon.Player.PlayItemMovies && Game.Dungeon.Player.TempItemHelpMovieSeen == false)
-                {
-                    //Screen.Instance.PlayMovie("helptempitems", true);
-                    Game.Dungeon.Player.TempItemHelpMovieSeen = true;
-                }
-
-
-                //Message
-
-                //Tell the player if there's something behind it...!
-
-                //Use a hidden name if required
-                string itemName;
-                if (itemToPickUp.UseHiddenName)
-                {
-                    itemName = Game.Dungeon.GetHiddenName(itemToPickUp);
-                }
-                else
-                    itemName = itemToPickUp.SingleItemDescription;
-
-                if (ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
-                {
-                    Game.MessageQueue.AddMessage(itemName + " picked up. There's something behind it!");
-                }
-                else
-                    Game.MessageQueue.AddMessage(itemName + " picked up.");
-
-                LogFile.Log.LogEntry(itemName + " picked up.");
+                item.OnPickup(player);
+                player.PickUpItem(item);
+                Game.MessageQueue.AddMessage(item.SingleItemDescription + " picked up.");
+                
             }
             return true;
         }
@@ -3224,6 +3186,13 @@ namespace RogueBasin
             }
 
             return null;
+        }
+
+        internal IEnumerable<Item> ItemsAtSpace(int locationLevel, Point locationMap)
+        {
+            return items.Where(i => i.IsLocatedAt(locationLevel, locationMap) && !i.InInventory);
+
+            
         }
 
         internal List<Lock> LocksAtLocation(int level, Point mapLocation)
@@ -5274,26 +5243,50 @@ namespace RogueBasin
 
         private bool Chance(int outOf)
         {
-            if (Game.Random.Next(outOf) == 0)
+            if (Game.Random.Next(outOf) < 10)
                 return true;
             return false;
         }
 
         private void GiveMonsterStandardItems(Monster mon)
         {
-            mon.PickUpItem(new RogueBasin.Items.ShieldPack());
 
-            if (Chance(2))
+            int ammoChance = 10;
+            int shieldChance = 10;
+            int nadeChance = 200;
+            int repairChance = 500;
+
+            switch (Game.Dungeon.Difficulty)
+            {
+                case GameDifficulty.Easy:
+                    break;
+                case GameDifficulty.Medium:
+                    ammoChance = 20;
+                    shieldChance = 10;
+                    nadeChance = 300;
+                    break;
+                case GameDifficulty.Hard:
+                    ammoChance = 30;
+                    shieldChance = 30;
+                    nadeChance = 400;
+                    repairChance = 1000;
+                    break;
+            }
+
+            if (Chance(shieldChance))
+                mon.PickUpItem(new RogueBasin.Items.ShieldPack());
+
+            if (Chance(ammoChance))
                 mon.PickUpItem(new RogueBasin.Items.AmmoPack());
 
-            if (Chance(20))
+            if (Chance(nadeChance))
                 mon.PickUpItem(new RogueBasin.Items.FragGrenade());
-            if (Chance(20))
+            if (Chance(nadeChance))
                 mon.PickUpItem(new RogueBasin.Items.StunGrenade());
-            if (Chance(20))
+            if (Chance(nadeChance))
                 mon.PickUpItem(new RogueBasin.Items.SoundGrenade());
 
-            if (Chance(50))
+            if (Chance(repairChance))
                 mon.PickUpItem(new RogueBasin.Items.NanoRepair());
         }
     }

@@ -1212,6 +1212,8 @@ namespace RogueBasin
                 AIState = SimpleAIStates.Pursuit;
                 LogFile.Log.LogEntryDebug(this.Representation + " recovers and returns to the fight", LogDebugLevel.Low);
             }
+            if(StunnedTurns != 6)
+                StunnedTurns = 0;
         }
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace RogueBasin.Creatures
 
         public override int DamageBase()
         {
-            return 20;
+            return 30;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()

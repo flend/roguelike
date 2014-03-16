@@ -227,6 +227,7 @@ namespace RogueBasin
 
         internal bool IsWetwareTypeAvailable(Type wetWareType)
         {
+
             return IsInventoryTypeAvailable(wetWareType);
         }
 
@@ -756,10 +757,10 @@ namespace RogueBasin
             damageModifier += CalculateAimBonus();
 
             //Enemy moving
-            if (target != null && target.TurnsMoving > 0)
+            /*if (target != null && target.TurnsMoving > 0)
             {
                 damageModifier -= 0.2;
-            }
+            }*/
 
             return damageModifier;
         }
@@ -1540,8 +1541,43 @@ namespace RogueBasin
                 return false;
             }
 
+            Item wetwareToEquip = wetwareOfTypeInInventory[0];
+            IEnumerable<Item> wetwareToFind;
+
+            if (wetwareTypeToEquip == typeof(Items.ShieldWare))
+            {
+                wetwareToFind = wetwareOfTypeInInventory.Cast<Items.ShieldWare>().Where(s => s.level == 3);
+                if (!wetwareToFind.Any())
+                    wetwareToFind = wetwareOfTypeInInventory.Cast<Items.ShieldWare>().Where(s => s.level == 2);
+                if (!wetwareToFind.Any())
+                    wetwareToFind = wetwareOfTypeInInventory.Cast<Items.ShieldWare>().Where(s => s.level == 1);
+
+                wetwareToEquip = wetwareToFind.First();
+            }
+
+            if (wetwareTypeToEquip == typeof(Items.BoostWare))
+            {
+                wetwareToFind = wetwareOfTypeInInventory.Cast<Items.BoostWare>().Where(s => s.level == 3);
+                if (!wetwareToFind.Any())
+                    wetwareToFind = wetwareOfTypeInInventory.Cast<Items.BoostWare>().Where(s => s.level == 2);
+                if (!wetwareToFind.Any())
+                    wetwareToFind = wetwareOfTypeInInventory.Cast<Items.BoostWare>().Where(s => s.level == 1);
+
+                wetwareToEquip = wetwareToFind.First();
+            }
+
+            if (wetwareTypeToEquip == typeof(Items.AimWare))
+            {
+                wetwareToFind = wetwareOfTypeInInventory.Cast<Items.AimWare>().Where(s => s.level == 3);
+                if (!wetwareToFind.Any())
+                    wetwareToFind = wetwareOfTypeInInventory.Cast<Items.AimWare>().Where(s => s.level == 2);
+                if (!wetwareToFind.Any())
+                    wetwareToFind = wetwareOfTypeInInventory.Cast<Items.AimWare>().Where(s => s.level == 1);
+
+                wetwareToEquip = wetwareToFind.First();
+            }
+
             //Check if it is disabled
-            var wetwareToEquip = wetwareOfTypeInInventory[0];
 
             if (wetwareDisabledTurns.ContainsKey(wetwareToEquip))
             {

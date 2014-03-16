@@ -46,21 +46,13 @@ namespace TraumaRL
 
             monsterSets.Add(zeroDifficultySet);
 
-            var oneDifficultySet = new MonsterSet(1);
+            var oneDifficultySet = new MonsterSet(1, 2.0);
 
-            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.UltraSwarmer());
             oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
             oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
 
             monsterSets.Add(oneDifficultySet);
-
-            var oneDifficultySet2 = new MonsterSet(1);
-
-            oneDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgMelee());
-            oneDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgRanged());
-            oneDifficultySet2.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
-
-            monsterSets.Add(oneDifficultySet2);
 
             var twoDiffSet1 = new MonsterSet(2);
 
@@ -70,29 +62,55 @@ namespace TraumaRL
 
             monsterSets.Add(twoDiffSet1);
 
-            var twoDifficultySet3 = new MonsterSet(2, 2.0);
+            var twoDiffSet3 = new MonsterSet(1);
 
-            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
-            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
-            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+            twoDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.UltraSwarmer());
+            twoDiffSet3.AddMonsterType(10, new RogueBasin.Creatures.PatrolBotRanged());
+            twoDiffSet3.AddMonsterType(10, new RogueBasin.Creatures.ServoCyborgRanged());
+
+            monsterSets.Add(twoDiffSet3);
+
+            var twoDifficultySet3 = new MonsterSet(2);
+
+            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.UltraSwarmer());
+            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.AlertBot());
+            twoDifficultySet3.AddMonsterType(10, new RogueBasin.Creatures.RollingBomb());
+            twoDifficultySet3.AddMonsterType(1, new RogueBasin.Creatures.ExplosiveBarrel());
 
             monsterSets.Add(twoDifficultySet3);
 
             var twoDiffSet2 = new MonsterSet(2);
 
+            twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgMelee());
             twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.RotatingTurret());
             twoDiffSet2.AddMonsterType(20, new RogueBasin.Creatures.PatrolBotRanged());
-            twoDiffSet2.AddMonsterType(5, new RogueBasin.Creatures.RollingBomb());
+            twoDiffSet2.AddMonsterType(10, new RogueBasin.Creatures.RollingBomb());
 
             monsterSets.Add(twoDiffSet2);
 
-            var threeDiffSet3 = new MonsterSet(3, 1.5);
+            var threeDiffSet3 = new MonsterSet(3);
 
             threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
             threeDiffSet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
             threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.ExplosiveBarrel());
 
-            monsterSets.Add(threeDiffSet3);
+            var threeDiffSet4 = new MonsterSet(3);
+
+            threeDiffSet4.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
+            threeDiffSet4.AddMonsterType(10, new RogueBasin.Creatures.PatrolBotRanged());
+            threeDiffSet4.AddMonsterType(20, new RogueBasin.Creatures.RollingBomb());
+
+            monsterSets.Add(threeDiffSet4);
+
+            var ttDifficultySet = new MonsterSet(3);
+
+            ttDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.WarriorCyborgRanged());
+            ttDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.WarriorCyborgMelee());
+            ttDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgRanged());
+            ttDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.ServoCyborgMelee());
+            ttDifficultySet.AddMonsterType(1, new RogueBasin.Creatures.ExplosiveBarrel());
+
+            monsterSets.Add(ttDifficultySet);
 
             var fourDifficultySet = new MonsterSet(4);
 
@@ -102,16 +120,46 @@ namespace TraumaRL
 
             monsterSets.Add(fourDifficultySet);
 
+            var fourDifficultySet2 = new MonsterSet(4, 1);
+
+            fourDifficultySet2.AddMonsterType(10, new RogueBasin.Creatures.WarriorCyborgRanged());
+            fourDifficultySet2.AddMonsterType(10, new RogueBasin.Creatures.WarriorCyborgMelee());
+            fourDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
+            fourDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.RollingBomb());
+
+            monsterSets.Add(fourDifficultySet2);
+
+            var fourDifficultySet3 = new MonsterSet(4, 1);
+
+            fourDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.WarriorCyborgRanged());
+            fourDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.WarriorCyborgMelee());
+            fourDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
+            fourDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.RollingBomb());
+
+            monsterSets.Add(fourDifficultySet3);
+
+            var fourDifficultySet4 = new MonsterSet(4, 1);
+
+            fourDifficultySet4.AddMonsterType(20, new RogueBasin.Creatures.WarriorCyborgRanged());
+            fourDifficultySet4.AddMonsterType(20, new RogueBasin.Creatures.WarriorCyborgMelee());
+            fourDifficultySet4.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
+            fourDifficultySet4.AddMonsterType(20, new RogueBasin.Creatures.RollingBomb());
+
+            monsterSets.Add(fourDifficultySet4);
+
             var fiveDifficultySet = new MonsterSet(5);
 
             fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgRanged());
             fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgMelee());
             fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.ExplosiveBarrel());
 
+            monsterSets.Add(fiveDifficultySet);
+
             var fiveDifficultySet2 = new MonsterSet(5);
 
             fiveDifficultySet2.AddMonsterType(50, new RogueBasin.Creatures.HeavyBotRanged());
             fiveDifficultySet2.AddMonsterType(50, new RogueBasin.Creatures.HeavyTurret());
+            fiveDifficultySet2.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
 
             monsterSets.Add(fiveDifficultySet2);
 
@@ -122,6 +170,24 @@ namespace TraumaRL
             fiveDifficultySet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
 
             monsterSets.Add(fiveDifficultySet3);
+
+            var fiveDifficultySet4 = new MonsterSet(5, 1.4);
+
+            fiveDifficultySet4.AddMonsterType(15, new RogueBasin.Creatures.AssaultCyborgRanged());
+            fiveDifficultySet4.AddMonsterType(50, new RogueBasin.Creatures.UberSwarmer());
+            fiveDifficultySet4.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
+
+            monsterSets.Add(fiveDifficultySet4);
+
+            var fiveDifficultySet5 = new MonsterSet(5, 1.2);
+
+            fiveDifficultySet5.AddMonsterType(10, new RogueBasin.Creatures.AssaultCyborgRanged());
+            fiveDifficultySet5.AddMonsterType(10, new RogueBasin.Creatures.AssaultCyborgMelee());
+            fiveDifficultySet5.AddMonsterType(10, new RogueBasin.Creatures.UberSwarmer());
+            fiveDifficultySet5.AddMonsterType(10, new RogueBasin.Creatures.HeavyTurret());
+            fiveDifficultySet5.AddMonsterType(10, new RogueBasin.Creatures.HeavyBotRanged());
+
+            monsterSets.Add(fiveDifficultySet5);
 
 
             /*
@@ -167,6 +233,13 @@ namespace TraumaRL
 
                 var setToUse = setsToPick.RandomElement();
 
+                monstersForLevel = (int)Math.Ceiling(monstersForLevel * setToUse.scaling);
+
+                if(Game.Dungeon.Difficulty == GameDifficulty.Easy)
+                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.75);
+                else if(Game.Dungeon.Difficulty == GameDifficulty.Hard)
+                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.5);
+
                 LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
 
                 monsterSetsUsed.Add(setToUse);
@@ -177,7 +250,7 @@ namespace TraumaRL
 
                 if(monsterSetContainsBarrels.Any())
                 {
-                    AddMonstersToLevelGaussianDistribution(mapInfo, level, new List<Tuple<int, Monster>>{new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel())}, monstersForLevel / 2);
+                    AddMonstersToLevelGaussianDistribution(mapInfo, level, new List<Tuple<int, Monster>>{new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel())}, monstersForLevel / 3);
                 }
 
                 //Not working for the time being - maybe check tomorrow morning 
@@ -394,26 +467,50 @@ namespace TraumaRL
 
         private bool Chance(int outOf)
         {
-            if (Game.Random.Next(outOf) == 0)
+            if (Game.Random.Next(outOf) < 10)
                 return true;
             return false;
         }
 
         private void GiveMonsterStandardItems(Monster mon)
         {
-            mon.PickUpItem(new RogueBasin.Items.ShieldPack());
 
-            if(Chance(2))
+            int ammoChance = 10;
+            int shieldChance = 10;
+            int nadeChance = 200;
+            int repairChance = 500;
+
+            switch (Game.Dungeon.Difficulty)
+            {
+                case GameDifficulty.Easy:
+                    break;
+                case GameDifficulty.Medium:
+                    ammoChance = 20;
+                    shieldChance = 10;
+                    nadeChance = 300;
+                    break;
+                case GameDifficulty.Hard:
+                    ammoChance = 30;
+                    shieldChance = 30;
+                    nadeChance = 400;
+                    repairChance = 1000;
+                    break;
+            }
+
+            if (Chance(shieldChance))
+                mon.PickUpItem(new RogueBasin.Items.ShieldPack());
+
+            if (Chance(ammoChance))
                 mon.PickUpItem(new RogueBasin.Items.AmmoPack());
 
-            if (Chance(20))
+            if (Chance(nadeChance))
                 mon.PickUpItem(new RogueBasin.Items.FragGrenade());
-            if (Chance(20))
+            if (Chance(nadeChance))
                 mon.PickUpItem(new RogueBasin.Items.StunGrenade());
-            if (Chance(20))
+            if (Chance(nadeChance))
                 mon.PickUpItem(new RogueBasin.Items.SoundGrenade());
 
-            if (Chance(50))
+            if (Chance(repairChance))
                 mon.PickUpItem(new RogueBasin.Items.NanoRepair());
         }
 
@@ -455,17 +552,17 @@ namespace TraumaRL
 
             var lootLevels = new Dictionary<int, List<Item>>();
 
-            lootLevels[0] = new List<Item> { new RogueBasin.Items.Pistol(), new RogueBasin.Items.Vibroblade() };
+            lootLevels[0] = new List<Item> { new RogueBasin.Items.Shotgun(), new RogueBasin.Items.Vibroblade() };
             lootLevels[0].AddRange(level1Ware);
 
-            lootLevels[1] = new List<Item> { new RogueBasin.Items.Shotgun(), new RogueBasin.Items.Laser()  };
+            lootLevels[1] = new List<Item> { new RogueBasin.Items.Laser(), new RogueBasin.Items.HeavyPistol() };
 
             lootLevels[2] = new List<Item>();
             // {   };
-            lootLevels[3] = new List<Item> { new RogueBasin.Items.HeavyPistol() };
+            lootLevels[3] = new List<Item> { new RogueBasin.Items.HeavyLaser() };
             //new RogueBasin.Items.BoostWare(2),  new RogueBasin.Items.StealthWare()
 
-            lootLevels[4] = new List<Item> { new RogueBasin.Items.AssaultRifle(), new RogueBasin.Items.HeavyLaser(),  new RogueBasin.Items.HeavyShotgun(), };
+            lootLevels[4] = new List<Item> { new RogueBasin.Items.AssaultRifle(), new RogueBasin.Items.HeavyShotgun(), };
             //new RogueBasin.Items.BoostWare(3), new RogueBasin.Items.AimWare(3), new RogueBasin.Items.ShieldWare(3)
 
             var itemsPlaced = new List<Item>();
@@ -481,23 +578,23 @@ namespace TraumaRL
                 {
                     level1Ware.Add(new RogueBasin.Items.AimWare(1));
                     lootLevels[2].AddRange(new List<Item> { new RogueBasin.Items.AimWare(2) });
-                    lootLevels[4].AddRange(new List<Item> { new RogueBasin.Items.AimWare(3) });
+                    lootLevels[3].AddRange(new List<Item> { new RogueBasin.Items.AimWare(3) });
                 }
                 if (ware == Ware.Shield)
                 {
                     level1Ware.Add(new RogueBasin.Items.ShieldWare(1));
                     lootLevels[2].AddRange(new List<Item> { new RogueBasin.Items.ShieldWare(2) });
-                    lootLevels[4].AddRange(new List<Item> { new RogueBasin.Items.ShieldWare(3) });
+                    lootLevels[3].AddRange(new List<Item> { new RogueBasin.Items.ShieldWare(3) });
                 }
                 if (ware == Ware.Boost)
                 {
                     level1Ware.Add(new RogueBasin.Items.BoostWare(1));
-                    lootLevels[3].AddRange(new List<Item> { new RogueBasin.Items.BoostWare(2) });
-                    lootLevels[4].AddRange(new List<Item> { new RogueBasin.Items.BoostWare(3) });
+                    lootLevels[2].AddRange(new List<Item> { new RogueBasin.Items.BoostWare(2) });
+                    lootLevels[3].AddRange(new List<Item> { new RogueBasin.Items.BoostWare(3) });
                 }
                 if (ware == Ware.Stealth)
                 {
-                    lootLevels[3].AddRange(new List<Item> { new RogueBasin.Items.StealthWare() });
+                    lootLevels[2].AddRange(new List<Item> { new RogueBasin.Items.StealthWare() });
                 }
             }
 
@@ -644,6 +741,7 @@ namespace TraumaRL
 
             var player = Game.Dungeon.Player;
             player.GiveItemNotFromDungeon(new RogueBasin.Items.Fists());
+            player.GiveItemNotFromDungeon(new RogueBasin.Items.Pistol());
 
             var level1WareToGive = level1Ware.RandomElement();
 

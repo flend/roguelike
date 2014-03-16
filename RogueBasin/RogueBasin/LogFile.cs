@@ -71,7 +71,7 @@ namespace RogueBasin
                     logFile = new StreamWriter(logFilename, true, Encoding.Default);
 
                 logFile.WriteLine(datedEntry);
-                logFile.Flush();
+                logFile.Flush(); //debug only
             }
             catch (Exception)
             {
@@ -79,7 +79,8 @@ namespace RogueBasin
             }
 
             //To debug console
-            Screen.Instance.ConsoleLine(datedEntry);
+            //debug only
+            //Screen.Instance.ConsoleLine(datedEntry);
         }
 
         public void Close()

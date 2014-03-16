@@ -222,7 +222,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 8;
+            return 7;
         }
 
         public override double FireSoundMagnitude()

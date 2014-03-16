@@ -5,20 +5,36 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-
-    public class ServoCyborgRanged : MonsterThrowAndRunAI
+    /// <summary>
+    /// Swarmer. Light melee with wide FOV. Responds to sounds.
+    /// </summary>
+    public class UltraSwarmer : MonsterFightAndRunAI
     {
-        public ServoCyborgRanged()
+
+        public UltraSwarmer()
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
-            NormalSightRadius = 8;
 
+            //More fun to move these guys around with a lower radius
+            NormalSightRadius = 5;
+        }
+
+        public override void InventoryDrop()
+        {
+            //Nothing to drop
+
+            //Hmm, could use this corpses
+        }
+
+        public override Monster NewCreatureOfThisType()
+        {
+            return new UltraSwarmer();
         }
 
         protected override int ClassMaxHitpoints()
         {
-            return 40;
+            return 40; //Not a 1-hit kill
         }
 
         public override int DamageBase()
@@ -36,6 +52,18 @@ namespace RogueBasin.Creatures
             return PatrolType.Rotate;
         }
 
+        //Rotation makes them look alive (even though they have base FOV)
+        protected override double GetPatrolRotationAngle()
+        {
+            return Math.PI / 2;
+        }
+
+        protected override int GetPatrolRotationSpeed()
+        {
+            return 2;
+        }
+
+
         protected override bool WillInvestigateSounds()
         {
             return true;
@@ -46,45 +74,37 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        protected override double GetMissileRange()
-        {
-            return 7.0;
-        }
-
-        protected override int GetChanceToBackAway()
-        {
-            return 0;
-        }
-
-        protected override string GetWeaponName()
-        {
-            return "fires a carbine";
-        }
-
+        //Makes them more effective swarmers
         public override bool CanOpenDoors()
         {
             return true;
         }
 
+
         /// <summary>
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Servo Cyborg"; } }
+        public override string SingleDescription { get { return "UltraSwarmer"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Servo Cyborgs"; } }
+        public override string GroupDescription { get { return "UltraSwarmers"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)530;
+            return (char)261;
         }
 
         protected override int GetChanceToRecover()
         {
-            return 10;
+            return 20;
+        }
+
+        protected override int GetChanceToRecoverOnBeingHit()
+        {
+            return 50;
         }
 
         protected override int GetChanceToFlee()
@@ -94,9 +114,8 @@ namespace RogueBasin.Creatures
 
         protected override int GetMaxHPWillFlee()
         {
-            return Hitpoints;
+            return 8;
         }
-
         public override int CreatureCost()
         {
             return 10;
@@ -104,27 +123,23 @@ namespace RogueBasin.Creatures
 
         public override int CreatureLevel()
         {
-            return 1;
+            return 3;
         }
 
-        public override Monster NewCreatureOfThisType()
-        {
-            return new ServoCyborgRanged();
-        }
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.MediumVioletRed;
+            return ColorPresets.Gold;
         }
 
         public override int GetCombatXP()
         {
-            return 10;
+            return 40;
         }
 
         public override int GetMagicXP()
         {
-            return 10;
+            return 40;
         }
 
         public override int GetMagicRes()
@@ -134,7 +149,7 @@ namespace RogueBasin.Creatures
 
         public override int GetCharmRes()
         {
-            return 5;
+            return 30;
         }
 
         public override bool CanBeCharmed()
@@ -142,35 +157,27 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        
-
-        public override void InventoryDrop()
-        {
-            //Nothing to drop
-
-            //Hmm, could use this corpses
-        }
 
         /// <summary>
         /// Creature AC. Set by type of creature.
         /// </summary>
         public override int ArmourClass()
         {
-            return 5;
+            return 12;
         }
-
 
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
         public override int DamageModifier()
         {
-            return 0;
+            return 1;
         }
 
         public override int HitModifier()
         {
-            return 0;
+            return 3;
         }
+
     }
 }

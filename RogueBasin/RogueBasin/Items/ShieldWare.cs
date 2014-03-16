@@ -9,7 +9,7 @@ namespace RogueBasin.Items
     public class ShieldWare : Item, IEquippableItem
     {
 
-        int level;
+        public int level;
 
         public ShieldWare()
         {

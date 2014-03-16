@@ -8,7 +8,7 @@ namespace RogueBasin.Items
 {
     public class AimWare : Item, IEquippableItem
     {
-        int level;
+        public int level;
 
         public AimWare()
         {

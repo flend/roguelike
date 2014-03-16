@@ -92,7 +92,7 @@ namespace RogueBasin {
         Color pursuitBackground = ColorPresets.DarkRed;
         Color normalBackground = ColorPresets.Black;
         Color normalForeground = ColorPresets.White;
-        Color targettedBackground = ColorPresets.DarkGray;
+        Color targettedBackground = ColorPresets.DarkSlateGray;
 
         Color frameColor = ColorPresets.Gray;
 
@@ -2457,25 +2457,25 @@ namespace RogueBasin {
 
                     bool newBackground = false;
                     //Set background depending on status
-                    if (creature.Charmed)
-                    {
-                        backgroundColor = charmBackground;
-                        newBackground = true;
-                    }
-                    else if (creature.Passive)
-                    {
-                        backgroundColor = passiveBackground;
-                        newBackground = true;
-                    }
-                    else if (creature == CreatureToView)
+                    if (creature == CreatureToView)
                     {
                         //targetted
                         backgroundColor = targettedBackground;
                         newBackground = true;
                     }
+                    else if (creature.Charmed)
+                    {
+                        //backgroundColor = charmBackground;
+                        newBackground = true;
+                    }
+                    else if (creature.Passive)
+                    {
+                        //backgroundColor = passiveBackground;
+                        newBackground = true;
+                    }
                     else if (creature.StunnedTurns > 0)
                     {
-                        backgroundColor = stunnedBackground;
+                        //backgroundColor = stunnedBackground;
                         newBackground = true;
                     }
 
@@ -2490,7 +2490,7 @@ namespace RogueBasin {
                             //In range firing
                             if (weapon.HasFireAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                             {
-                                backgroundColor = inRangeBackground;
+                                //backgroundColor = inRangeBackground;
                                 newBackground = true;
                             }
                             else
@@ -2498,7 +2498,7 @@ namespace RogueBasin {
                                 //In throwing range
                                 if (weapon.HasThrowAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                                 {
-                                    backgroundColor = inRangeBackground;
+                                    //backgroundColor = inRangeBackground;
                                     newBackground = true;
                                 }
                             }
@@ -2506,7 +2506,7 @@ namespace RogueBasin {
                             //Also agressive
                             if (newBackground == true && creature.InPursuit())
                             {
-                                backgroundColor = inRangeAndAggressiveBackground;
+                                //backgroundColor = inRangeAndAggressiveBackground;
                             }
                         }
                     }
@@ -2515,18 +2515,18 @@ namespace RogueBasin {
                     {
                         if (creature.InPursuit())
                         {
-                            backgroundColor = pursuitBackground;
+                            //backgroundColor = pursuitBackground;
                             newBackground = true;
                         }
                         else if (!creature.OnPatrol())
                         {
-                            backgroundColor = investigateBackground;
+                            //backgroundColor = investigateBackground;
                             newBackground = true;
                         }
-                        else if (creature.Unique)
-                            backgroundColor = uniqueBackground;
-                        else
-                            backgroundColor = normalBackground;
+                       // else if (creature.Unique)
+                            //backgroundColor = uniqueBackground;
+                       // else
+                           // backgroundColor = normalBackground;
                     }
 
                     //Creature

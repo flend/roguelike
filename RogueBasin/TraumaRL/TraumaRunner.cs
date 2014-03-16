@@ -37,7 +37,7 @@ namespace TraumaRL
                     LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
 
                 }
-            } while (false);
+            } while (true);
             
             RunGame();
         }
@@ -63,9 +63,9 @@ namespace TraumaRL
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
-            VisualiseConnectivityGraph(mapInfo.Model);
+            //VisualiseConnectivityGraph(mapInfo.Model);
 
-            VisualiseLevelConnectivityGraph(new MapModel(templateGen.LevelLinks, 0), TraumaWorldGenerator.LevelNaming);
+            //VisualiseLevelConnectivityGraph(new MapModel(templateGen.LevelLinks, 0), TraumaWorldGenerator.LevelNaming);
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel)

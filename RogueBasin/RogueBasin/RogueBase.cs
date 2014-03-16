@@ -133,7 +133,8 @@ namespace RogueBasin
                                 {
                                     if (creature.IncrementTurnTime())
                                     {
-                                        dungeon.ShowCreatureFOVOnMap(creature);
+                                        if(Screen.Instance.DebugMode)
+                                            dungeon.ShowCreatureFOVOnMap(creature);
 
                                         //Creatures may be killed by other creatures so check they are alive before processing
                                         if (creature.Alive)

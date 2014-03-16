@@ -37,7 +37,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 30; //Not a 1-hit kill
+            return 40; //Not a 1-hit kill
         }
 
         public override int DamageBase()
@@ -132,7 +132,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.Gold;
+            return ColorPresets.DeepPink;
         }
 
         public override int GetCombatXP()

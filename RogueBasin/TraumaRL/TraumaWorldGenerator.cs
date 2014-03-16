@@ -745,7 +745,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         {
             try
             {
-                BlockElevatorPaths(mapInfo, levelInfo, roomConnectivityMap, lowerAtriumLevel, 2, false);
+                BlockElevatorPaths(mapInfo, levelInfo, roomConnectivityMap, lowerAtriumLevel, 1, false);
             }
             catch (Exception ex)
             {
@@ -845,7 +845,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var door = manager.GetDoorById(doorId);
 
                 var unusedColor = GetUnusedColor();
-                var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, doorReadableId, unusedColor.Item1);
+                var clueName = unusedColor.Item2 + " key card";
+
+
+                var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, clueName, unusedColor.Item1);
                 var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
                 lockedDoor.LocationLevel = doorInfo.LevelNo;
                 lockedDoor.LocationMap = doorInfo.MapLocation;
@@ -870,7 +873,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var roomsForMonsters = GetRandomRoomsForClues(mapInfo, 1, filteredRooms);
                 var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
-                var clueName = unusedColor.Item2 + " key card";
+                
                 goodyRoomKeyNames[thisLevel] = clueName;
                 var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, unusedColor.Item1, clueName));
                 var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, true, false);
