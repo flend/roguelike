@@ -22,6 +22,9 @@ namespace RogueBasin.Locks
         {
             bool canDoorBeOpened = CanDoorBeOpenedWithClues(player);
 
+            if (Game.Dungeon.AllLocksOpen)
+                canDoorBeOpened = true;
+
             if (!canDoorBeOpened)
             {
                 Screen.Instance.PlayMovie(cantOpenMovie, true);

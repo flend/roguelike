@@ -1061,6 +1061,17 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return door;
         }
 
+        private void PlaceDoorOnMap(MapInfo mapInfo, Lock lockedDoor, Door door)
+        {
+            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
+            lockedDoor.LocationLevel = doorInfo.LevelNo;
+            lockedDoor.LocationMap = doorInfo.MapLocation;
+
+            Game.Dungeon.AddLock(lockedDoor);
+
+            placedDoors.Add(door);
+        }
+
         private Connection CheckAndReplaceConnectionIfOccupied(DoorAndClueManager manager, IEnumerable<Connection> criticalPath, Connection connectionCandidate)
         {
             if (manager.GetDoorsForEdge(connectionCandidate).Count() > 0)
@@ -1333,13 +1344,43 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var arcologyDoorId = arcologyDoorName;
             var arcologyDoorColor = colorForArcologyLock.Item1;
 
-            //Need to refactor this to be an optional movie door
-            PlaceDoorOnMap(mapInfo, arcologyDoorId, arcologyDoorName, 1, arcologyDoorColor, elevatorToArcology);
+            //Place the arcology door
+            var manager = mapInfo.Model.DoorAndClueManager;
+
+            manager.PlaceDoor(new DoorRequirements(elevatorToArcology, arcologyDoorId, 1));
+            var door = manager.GetDoorById(arcologyDoorId);
+            
+            var arcologyDoor = new RogueBasin.Locks.SimpleOptionalLockedDoorWithMovie(door, "arcologyunlocked", "arcologylocked", "Override the security and go in anyway?", arcologyDoorName, arcologyDoorColor);
+
+            PlaceDoorOnMap(mapInfo, arcologyDoor, door);
 
             //Bioware
             var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel, flightDeck };
             PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
+
+
+            //Wrap the arcology door in another door that depends on the antennae
+            //Get critical path to archology door
+
+            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, arcologyLockSourceElevatorConnection.Value.Source);
+
+            //Don't use 2 sincee that's between levels
+            var lastCorridorToArcology = criticalPath.ElementAt(criticalPath.Count() - 4);
+
+            var colorForArcologyAntLock = GetUnusedColor();
+            
+            arcologyAntDoorId = "antennae - arcology door lock";
+            var arcologyAntDoorColor = colorForArcologyAntLock.Item1;
+
+            manager.PlaceDoor(new DoorRequirements(lastCorridorToArcology, arcologyAntDoorId, 1));
+            var door2 = manager.GetDoorById(arcologyAntDoorId);
+
+            var arcologyAntDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door2, "arcologyantunlocked", "arcologyantlocked", arcologyAntDoorId, arcologyAntDoorColor);
+
+            PlaceDoorOnMap(mapInfo, arcologyAntDoor, door2);
         }
+
+        string arcologyAntDoorId;
 
         private void AntennaeQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, DoorAndClueManager manager)
         {
@@ -1352,7 +1393,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var antennaeVault = antennaeVaultConnection.Target;
             var antennaeObjName = "antennae";
-            manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, antennaeObjName, 1));
+            manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, antennaeObjName, 1, new List<string> { arcologyAntDoorId }));
             var antennaeObj = manager.GetObjectiveById(antennaeObjName);
             PlaceObjective(mapInfo, antennaeObj, new RogueBasin.Features.AntennaeObjective(antennaeObj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(antennaeObj)), true, true);
 

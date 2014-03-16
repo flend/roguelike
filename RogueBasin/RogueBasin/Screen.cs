@@ -3038,6 +3038,25 @@ namespace RogueBasin {
             return null;
         }
 
+        public bool YesNoQuestionWithFrame(string introMessage)
+        {
+            var width = introMessage.Count() + 7;
+            var height = 1;
+
+            int xOffset = (Width - movieTL.x * 2 - width) / 2;
+            int yOffset = (Height - movieTL.y * 2 - height) / 2;
+
+            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
+            int frameOffset = 2;
+
+            //Draw frame
+            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true);
+
+            FlushConsole();
+
+            return YesNoQuestion(introMessage, new Point(frameTL.x, frameTL.y));
+        }
+
         internal bool YesNoQuestion(string introMessage, Point topLeft)
         {
             
@@ -3258,5 +3277,6 @@ namespace RogueBasin {
             MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
         }
+
     }
 }
