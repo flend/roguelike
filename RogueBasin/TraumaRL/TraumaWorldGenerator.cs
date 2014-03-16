@@ -1358,7 +1358,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             UseVault(levelInfo, antennaeVaultConnection);
 
-            //Extra stuff
+            //Extra stuff for antenna room
 
             var antennaeLevel = mapInfo.GetLevelForRoomIndex(antennaeVault);
 
@@ -1371,11 +1371,19 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Servo motor
 
             var servoRoom = PlaceMovieClueForObjectiveInVault(mapInfo, levelInfo, antennaeObjName, (char)312, "interface_demod", new List<int> { scienceLevel, storageLevel });
+            var servoLevel = mapInfo.GetLevelForRoomIndex(servoRoom);
+
+            var servoDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart3])
+            };
+            AddStandardDecorativeFeaturesToRoom(servoLevel, mapInfo.GetRoom(servoRoom), 10, servoDecorations, true);
 
             //Logs
 
             
-            var servoLevel = mapInfo.GetLevelForRoomIndex(servoRoom);
+            
 
             var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(antennaeObjName);
 
