@@ -4416,12 +4416,12 @@ namespace RogueBasin
 
             if (wonGame)
             {
-                finalScreen.Add("Private " + Game.Dungeon.player.Name + " did what his Sergeant thought was impossible ");
-                finalScreen.Add("and conquered Space Hulk OE1x1!");
+                finalScreen.Add("Private " + Game.Dungeon.player.Name + " finished what he started and defeated the invasion ");
+                finalScreen.Add("of the machines from Space Hulk OE1x1!");
             }
             else
             {
-                finalScreen.Add("Private " + Game.Dungeon.player.Name + " fought bravely but was finally beaten by Space Hulk OE1x1.");
+                finalScreen.Add("Private " + Game.Dungeon.player.Name + " fought bravely but was finally overcome.");
             }
             finalScreen.Add("");
 
@@ -4871,5 +4871,7 @@ namespace RogueBasin
         }
 
         public bool AllLocksOpen { get; set; }
+
+        public MapInfo MapInfo { get; set; }
     }
 }

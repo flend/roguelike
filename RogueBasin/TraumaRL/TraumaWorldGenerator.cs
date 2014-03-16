@@ -603,12 +603,12 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //AddSimpleCluesAndLocks(mapInfo);
 
                     //Add non-interactable features
-                    AddDecorationFeatures(mapInfo, levelInfo);
+                    //AddDecorationFeatures(mapInfo, levelInfo);
                     //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                     //Add monsters
-                    CreateMonstersForLevels(mapInfo);
+                    //CreateMonstersForLevels(mapInfo);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);
@@ -924,8 +924,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var manager = mapInfo.Model.DoorAndClueManager;
 
             var doorId = "medical-security";
-            int objectsToPlace = 10;
-            int objectsToDestroy = 1;
+            int objectsToPlace = 15;
+            int objectsToDestroy = 10;
 
             //Place door
             manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
@@ -1271,6 +1271,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceMovieDoorOnMap(mapInfo, escapedoorId, escapedoorName, 1, escapedoorColor, "escapepodunlocked", "escapepodlocked", escapePodsConnection);
         }
 
+        int computerCoresToDestroy = 15;
+
         private void SelfDestruct(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, DoorAndClueManager manager)
         {
             int selfDestructLevel = bridgeLevel;
@@ -1294,7 +1296,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             };
             AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(selfDestructRoom), mapInfo.GetRoom(selfDestructRoom), 20, bridgeDecorations, false);
 
-
             LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
 
             //Self destruct objective in reactor
@@ -1304,10 +1305,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var reactorSelfDestructVault = reactorSelfDestructVaultConnection.Target;
             UseVault(levelInfo, reactorSelfDestructVaultConnection);
 
-            manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", 1, new List<string> { "self-destruct" }));
+            manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", computerCoresToDestroy, new List<string> { "self-destruct" }));
             var selfDestructPrimeObjective = manager.GetObjectiveById("prime-self-destruct");
             //PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
-            var reactorLocation = PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+            var reactorLocation = PlaceObjective(mapInfo, selfDestructPrimeObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructPrimeObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructPrimeObjective)), true, true);
 
             var reactorDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer2]),
@@ -1323,7 +1324,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         {
 
             var primeSelfDestructId = "prime-self-destruct";
-            var coresToDestroy = 20;
+            var coresToPlace = 20;
 
             var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForObjective(primeSelfDestructId);
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
@@ -1331,7 +1332,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var roomsToPlaceMonsters = new List<int>();
 
-            var roomsForMonsters = GetRandomRoomsForClues(mapInfo, coresToDestroy, roomsOnComputerCoreLevel);
+            var roomsForMonsters = GetRandomRoomsForClues(mapInfo, coresToPlace, roomsOnComputerCoreLevel);
             var clues = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForMonsters);
 
             PlaceCreatureClues<RogueBasin.Creatures.ComputerNode>(mapInfo, clues, true, false);
@@ -1455,7 +1456,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var computerDoorId = computerDoorName;
             var computerDoorColor = colorForComputerTechsId.Item1;
 
-            PlaceMovieDoorOnMap(mapInfo, computerDoorId, computerDoorName, 1, computerDoorColor, "computercorelocked", "computercorelocked", elevatorToComputerCore);
+            PlaceMovieDoorOnMap(mapInfo, computerDoorId, computerDoorName, 1, computerDoorColor, "computercoreunlocked", "computercorelocked", elevatorToComputerCore);
 
             //Tech's id (this should always work)
             var techIdIdealLevel = new List<int> { arcologyLevel };
