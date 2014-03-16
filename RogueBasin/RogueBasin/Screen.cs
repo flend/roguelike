@@ -72,8 +72,7 @@ namespace RogueBasin {
         Color neverSeenFOVTerrainColor;
         Color inMonsterFOVTerrainColor = ColorPresets.Blue;
 
-
-        Color statsColor = ColorPresets.White;
+        Color statsColor = ColorPresets.Khaki;
         Color nothingColor = ColorPresets.Gray;
 
         Color creatureColor = ColorPresets.White;
@@ -94,7 +93,7 @@ namespace RogueBasin {
         Color normalForeground = ColorPresets.White;
         Color targettedBackground = ColorPresets.DarkSlateGray;
 
-        Color frameColor = ColorPresets.Gray;
+        Color frameColor = ColorPresets.MediumSeaGreen;
 
         Color targetBackground = ColorPresets.White;
         Color targetForeground = ColorPresets.Black;
@@ -1602,7 +1601,7 @@ namespace RogueBasin {
             Point gameDataOffset = new Point(baseOffset, 24);
 
             var zoneName = "[" + (LevelToDisplay).ToString("00") + "] " + Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay);
-            PrintLine(zoneName, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left);
+            PrintLine(zoneName, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left, statsColor);
             
             //Draw HP Status
 
@@ -1610,7 +1609,7 @@ namespace RogueBasin {
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
             int hpBarEntries = (int)Math.Ceiling(hpBarLength * playerHPRatio);
 
-            PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left);
+            PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left, statsColor);
 
             for (int i = 0; i < hpBarLength; i++)
             {
@@ -1630,7 +1629,7 @@ namespace RogueBasin {
             double playerShieldRatio = player.Shield / (double)player.MaxShield;
             int shieldBarEntries = (int)Math.Ceiling(shieldBarLength * playerShieldRatio);
 
-            PrintLine("SD: ", statsDisplayTopLeft.x + shieldOffset.x, statsDisplayTopLeft.y + shieldOffset.y, LineAlignment.Left);
+            PrintLine("SD: ", statsDisplayTopLeft.x + shieldOffset.x, statsDisplayTopLeft.y + shieldOffset.y, LineAlignment.Left, statsColor);
 
             DrawShieldBar(player, shieldOffset, shieldBarEntries - 10);
             DrawShieldBar(player, shieldOffset + new Point(0, 1), Math.Min(shieldBarEntries, 10));
@@ -1655,7 +1654,7 @@ namespace RogueBasin {
                 //Ammo
                 if (weaponE.HasFireAction())
                 {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left);
         
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -1666,17 +1665,17 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, ammoChar, orangeActivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, ammoChar, orangeActivatedColor);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, ammoChar, orangeDisactivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, ammoChar, orangeDisactivatedColor);
                         }
                     }
                 }
                 else if (weaponE.HasThrowAction() || weaponE.HasOperateAction())
                 {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 2, LineAlignment.Left);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 3, LineAlignment.Left, statsColor);
 
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -1687,11 +1686,11 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, weapon.Representation, orangeActivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, weapon.Representation, orangeActivatedColor);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 2, weapon.Representation, orangeDisactivatedColor);
+                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 3, weapon.Representation, orangeDisactivatedColor);
                         }
                     }
                 }
@@ -1739,12 +1738,12 @@ namespace RogueBasin {
 
             //Draw weapon choices
             var weaponOptionRow = 1;
-            var weaponIconXOffset = -2;
+            var weaponIconXOffset = -3;
             foreach (var kv in ItemMapping.WeaponMapping)
             {
                 Type weaponType = Game.Dungeon.Player.HeavyWeaponTranslation(kv.Value);
 
-                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 2, weaponOptionRow), kv.Value, kv.Key);
+                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 3, weaponOptionRow), kv.Value, kv.Key);
             }
             
             //Draw energy bar and use keys
@@ -1753,7 +1752,7 @@ namespace RogueBasin {
             double playerEnergyRatio = player.Energy / (double)player.MaxEnergy;
             int energyBarEntries = (int)Math.Ceiling(energyBarLength * playerEnergyRatio);
 
-            PrintLine("EN: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
+            PrintLine("EN: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left, statsColor);
 
             DrawEnergyBar(player, utilityOffset + new Point(0, 2), energyBarEntries - 10);
             DrawEnergyBar(player, utilityOffset + new Point(0, 3), Math.Min(energyBarEntries, 10));
@@ -1869,19 +1868,19 @@ namespace RogueBasin {
 
 
             string viewStr = "Target: ";
-            PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
+            PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left, statsColor);
 
             if (CreatureToView != null && CreatureToView.Alive == true)
             {
                 String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left);
+                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left, statsColor);
 
                 //Combat vs monster
-                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
+                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, statsColor);
                 //Combat vs player
-                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left, statsColor);
                 var cover = player.GetPlayerCover(CreatureToView);
-                PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left);
+                PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left,statsColor);
 
                 //Monster hp
 
@@ -1889,7 +1888,7 @@ namespace RogueBasin {
                 double mplayerHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
                 int mhpBarEntries = (int)Math.Ceiling(mhpBarLength * mplayerHPRatio);
 
-                PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
+                PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left, statsColor);
 
                 for (int i = 0; i < mhpBarLength; i++)
                 {
@@ -1919,7 +1918,7 @@ namespace RogueBasin {
                     PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, investigateBackground);
                 }
                 else {
-                    PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left);
+                    PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, statsColor);
                 }
             }
             else if (ItemToView != null)
@@ -1941,8 +1940,8 @@ namespace RogueBasin {
             else
             {
                 //Just base combat
-                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left);
-                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left);
+                PrintLine("Attk: " + player.CalculateRangedAttackModifiersOnMonster(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, statsColor);
+                PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(null), statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 2, LineAlignment.Left, statsColor);
 
             }
 
@@ -2021,8 +2020,11 @@ namespace RogueBasin {
                 colorToUse = orangeActivatedColor;
             }
 
-            PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), ColorPresets.White);
+            if (weaponNo > 5)
+                utilityOffset = utilityOffset + new Point(-15, 1);
 
+            PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), ColorPresets.White);
+           
             //+evil points
             Item instance = (Item)Activator.CreateInstance(weaponType);
             PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
@@ -2042,7 +2044,7 @@ namespace RogueBasin {
                 case "t":
                     return (char)620;
                 case "c":
-                    return 'c';
+                    return (char)631;
                 case "f":
                     return (char)619;
                 case "s":
@@ -2050,7 +2052,7 @@ namespace RogueBasin {
                 case "d":
                     return (char)623;
                 case "z":
-                    return 'z';
+                    return (char)634;
                 default:
                     return (char)616;
             }
@@ -2575,10 +2577,10 @@ namespace RogueBasin {
             int heightAvail = mapBotRightBase.y - mapTopLeftBase.y;
 
             //Draw frame
-            DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, frameColor);
+            DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, ColorPresets.Khaki);
 
             //Draw frame for msg here too
-            DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false);
+            DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false, ColorPresets.MediumSeaGreen);
 
             //Put the map in the centre
             //mapTopLeft = new Point(mapTopLeftBase.x + (widthAvail - width) / 2, mapTopLeftBase.y + (heightAvail - height) / 2);

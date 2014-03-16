@@ -236,9 +236,11 @@ namespace TraumaRL
                 monstersForLevel = (int)Math.Ceiling(monstersForLevel * setToUse.scaling);
 
                 if(Game.Dungeon.Difficulty == GameDifficulty.Easy)
+                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.5);
+                else if(Game.Dungeon.Difficulty == GameDifficulty.Medium)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.75);
                 else if(Game.Dungeon.Difficulty == GameDifficulty.Hard)
-                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.5);
+                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.25);
 
                 LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
 
@@ -547,7 +549,7 @@ namespace TraumaRL
             foreach(var l in gameLevels) {
                 itemsInArmory[l] = new List<Item>();
             }
-
+            
             var level1Ware = new List<Item>();
 
             var lootLevels = new Dictionary<int, List<Item>>();
