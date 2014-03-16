@@ -221,6 +221,10 @@ namespace RogueBasin
 
             return entry;
         }
+        public LogEntry GenerateGeneralQuestLogEntry(string logname)
+        {
+            return GenerateGeneralQuestLogEntry(logname, 0, 0);
+        }
 
         public LogEntry GenerateGeneralQuestLogEntry(string logname, int levelForDoor, int levelForClue)
         {

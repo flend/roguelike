@@ -1357,8 +1357,37 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Bioware
             var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel, flightDeck };
             //PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
-            PlaceClueItemForDoorInVault(mapInfo, levelInfo, arcologyDoorId, new RogueBasin.Items.BioWare(), arcologyDoorName, biowareIdIdealLevel);
+            var biowareRoom = PlaceClueItemForDoorInVault(mapInfo, levelInfo, arcologyDoorId, new RogueBasin.Items.BioWare(), arcologyDoorName, biowareIdIdealLevel);
+            var biowareLevel = mapInfo.GetLevelForRoomIndex(biowareRoom);
+            var bioDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Egg1]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Egg2]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.CorpseinGoo]),
+            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.EggChair])
+            };
+            AddStandardDecorativeFeaturesToRoom(biowareLevel, mapInfo.GetRoom(biowareRoom), 10, bioDecorations, true);
 
+            //Logs
+
+            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForDoor(arcologyDoorName);
+
+            var criticalPathLog = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, elevatorToArcology.Source);
+
+            var preferredRoomsForLogsCritical = FilterClueRooms(mapInfo, allowedRoomsForLogs, criticalPathLog, false, CluePath.OnCriticalPath, true);
+            var preferredRoomsForLogsNonCritical = FilterClueRooms(mapInfo, allowedRoomsForLogs, criticalPathLog, false, CluePath.Any, true);
+
+            var roomsForLogsCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 2, preferredRoomsForLogsNonCritical);
+
+            var logCluesCritical = manager.AddCluesToExistingDoor(arcologyDoorId, roomsForLogsCritical);
+            var logCluesNonCritical = manager.AddCluesToExistingDoor(arcologyDoorId, roomsForLogsNonCritical);
+
+            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_arcology3", levelToArcology, biowareLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_arcology4", levelToArcology, biowareLevel), logCluesCritical[1]);
+
+            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_arcology1", levelToArcology, biowareLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(logGen.GenerateGeneralQuestLogEntry("qe_arcology2", levelToArcology, biowareLevel), logCluesNonCritical[1]);
+
+            PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
 
             //Wrap the arcology door in another door that depends on the antennae
             //Get critical path to archology door
@@ -1424,9 +1453,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Logs
 
-            
-            
-
             var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(antennaeObjName);
 
             var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, antennaeVault);
@@ -1478,7 +1504,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
         }
 
-        private void PlaceClueItemForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Item itemToPlace, string clueName, IEnumerable<int> idealLevelsForClue)
+        private int PlaceClueItemForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Item itemToPlace, string clueName, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1501,10 +1527,12 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             UseVault(levelInfo, captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
-            var roomsForItem = GetAllRoomsToPlaceClue(mapInfo, captainIdClue, true, true);
-            PlaceItems(mapInfo, new List<Item> { itemToPlace }, roomsForItem, true, true, true);
+
+            PlaceItems(mapInfo, new List<Item> { itemToPlace }, new List<int> {captainIdRoom}, true, true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
+
+            return captainIdRoom;
         }
 
         private int PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)

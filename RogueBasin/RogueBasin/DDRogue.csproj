@@ -900,6 +900,10 @@
     <EmbeddedResource Include="bin\Debug\movies\arcologyunlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\arcologyantlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\arcologyantunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_arcology1.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_arcology2.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_arcology3.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_arcology4.amf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
