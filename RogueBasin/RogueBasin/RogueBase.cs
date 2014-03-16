@@ -634,6 +634,8 @@ namespace RogueBasin
          
                                     break;
                                     */
+
+                                    /*
                                 case 'N':
                                     //screen numbering
                                     Screen.Instance.CycleRoomNumbering();
@@ -664,15 +666,7 @@ namespace RogueBasin
                                     Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
                                     timeAdvances = true;
                                     break;
-                                    /*
-                                case 'Y':
-                                    //Take me to first dungeon
-                                    //Game.Dungeon.DungeonInfo.LastMission = true;
-                                    Game.Dungeon.Player.LocationLevel = 2;
-                                    TeleportToDungeon1Entrance();
-                                    Screen.Instance.Update();
-                                    break;
-                                    */
+             
                                 case 'J':
                                     //change debug level
                                     LogFile.Log.DebugLevel += 1;
@@ -707,7 +701,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.GiveAllWetware(3);
                                     Screen.Instance.Update();
                                     break;
-                               
+                               */
                                 /*
                             case 'k':
                                 //Display the inventory

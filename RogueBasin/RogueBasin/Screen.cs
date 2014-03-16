@@ -1444,7 +1444,7 @@ namespace RogueBasin {
             var allPlayerClues = allPlayerClueItems.Select(i => i.ClueDescription);
             var noCluesForDoors = allPlayerClues.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
 
-            var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")" + kv.Key);
+            var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ") " + kv.Key);
             //var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")");
             
             //Display list

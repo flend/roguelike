@@ -2651,7 +2651,7 @@ namespace RogueBasin
                 }*/
 
                 //No monsters left on level?
-
+                /*
                 Monster livingMonster = monsters.Find(x => x.Alive && x.LocationLevel == player.LocationLevel);
 
                 if (livingMonster == null)
@@ -2687,7 +2687,7 @@ namespace RogueBasin
                     Screen.Instance.PlayMovie("dragondead", true);
 
                     dungeonInfo.DragonDead = true;
-                }
+                }*/
             }
         }
 
