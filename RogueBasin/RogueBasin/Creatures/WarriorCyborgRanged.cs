@@ -48,7 +48,7 @@ namespace RogueBasin.Creatures
 
         protected override double GetMissileRange()
         {
-            return 5.0;
+            return 9.0;
         }
 
         protected override int GetChanceToBackAway()
