@@ -39,12 +39,16 @@ namespace RogueBasin
             //Clear screen
             rootConsole.Clear();
 
+            rootConsole.ForegroundColor = ColorPresets.Khaki;
+
             //Draw frame
             //Why xpos 2 here?
             rootConsole.DrawFrame(1, 4, Screen.Instance.Width - 2, Screen.Instance.Height - 9, true);
 
             //Draw preample
             preambleTL = new Point(5, 7);
+
+            rootConsole.ForegroundColor = ColorPresets.MediumSeaGreen;
 
             int height;
             List<string> preamble = Utility.LoadTextFile("introPreamble", Screen.Instance.Width - 2 * preambleTL.x, out height);
@@ -80,13 +84,12 @@ namespace RogueBasin
             }
 
             //Ask settings questions
-            ShowMovies = Screen.Instance.YesNoQuestionWithFrame("Show logs on pickup (recommended)", 8);
+            ShowMovies = Screen.Instance.YesNoQuestionWithFrame("Show logs on pickup (recommended)", 8, ColorPresets.Khaki, ColorPresets.MediumSeaGreen);
 
             rootConsole.Flush();
 
             //Ask settings questions
-            Difficulty = Screen.Instance.DifficultyQuestionWithFrame("Game difficulty: Easy / Medium / Hard?", 8);
-            Difficulty = GameDifficulty.Easy;
+            Difficulty = Screen.Instance.DifficultyQuestionWithFrame("Game difficulty: (E)asy / (M)edium / (H)ard?", 8, ColorPresets.Khaki, ColorPresets.MediumSeaGreen);
 
             rootConsole.PrintLineRect("Generating the station...", settingsTL.x, settingsTL.y + settingsText.Count + 5, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
         }

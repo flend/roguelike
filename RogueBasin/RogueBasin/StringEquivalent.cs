@@ -157,14 +157,14 @@ namespace RogueBasin
             TerrainColors.Add(MapTerrain.DockWall, ColorPresets.DarkSlateGray);
             TerrainColors.Add(MapTerrain.Void, ColorPresets.Gray);
 
-            var brickWallColor = ColorPresets.Gray;
-            var panelWallColor = ColorPresets.Purple;
-            var irisWallColor = ColorPresets.PowderBlue;
-            var lineWallColor = ColorPresets.Teal;
-            var securityWallColor = ColorPresets.DeepSkyBlue;
-            var bioWallColor = ColorPresets.LightCoral;
+            var brickWallColor = ColorPresets.DarkSlateBlue;
+            var panelWallColor = ColorPresets.Teal;
+            var irisWallColor = ColorPresets.SlateGray;
+            var lineWallColor = ColorPresets.MediumSeaGreen;
+            var securityWallColor = ColorPresets.SteelBlue;
+            var bioWallColor = ColorPresets.Firebrick;
             var DipWallColor = ColorPresets.DarkOliveGreen;
-            var CutWallColor = ColorPresets.DarkRed;
+            var CutWallColor = ColorPresets.Sienna;
 
             TerrainColors.Add(MapTerrain.BrickWall1, brickWallColor);
             TerrainColors.Add(MapTerrain.BrickWall2, brickWallColor);

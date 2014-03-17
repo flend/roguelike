@@ -141,7 +141,7 @@ namespace RogueBasin.Creatures
 
         internal override void OnKilledSpecialEffects()
         {
-            Game.MessageQueue.AddMessage("Level security now: " + Game.Dungeon.CalculateLevelSecurity(LocationLevel) + "%%");
+            //Game.MessageQueue.AddMessage("Level security now: " + Game.Dungeon.CalculateLevelSecurity(LocationLevel) + "%%");
         }
     }
 }

@@ -654,7 +654,7 @@ namespace RogueBasin
                                     Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
                                     Screen.Instance.Update();
                                     break;
-
+                                    
                                 case 'Y':
                                     //next mission
                                     Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
@@ -899,7 +899,7 @@ namespace RogueBasin
                                 Screen.Instance.ScrollViewport(direction);
                                 Screen.Instance.Update();
                             }
-
+                            /*
                             if (wasDirection && mod == KeyModifier.Arrow && userKey.Shift)
                             {
                                 if (direction == new Point(0, -1))
@@ -909,7 +909,7 @@ namespace RogueBasin
                                     ScreenLevelDown();
 
                                 Screen.Instance.Update();
-                            }
+                            }*/
                         }
 
                         break;

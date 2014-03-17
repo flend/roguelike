@@ -4300,10 +4300,10 @@ namespace RogueBasin
             }
 
             //RunMainLoop = false;
-            EndOfGameMechanics(playerWon);
+            EndOfGameMechanics(playerWon, playerQuit);
         }
 
-        private void EndOfGameMechanics(bool wonGame)
+        private void EndOfGameMechanics(bool wonGame, bool quit)
         {
             //Check intrinsics
 
@@ -4408,7 +4408,10 @@ namespace RogueBasin
             }
             else
             {
-                finalScreen.Add("Private " + Game.Dungeon.player.Name + " fought bravely but was finally overcome.");
+                if(quit)
+                    finalScreen.Add("Private " + Game.Dungeon.player.Name + " had pressing business elsewhere.");
+                else
+                    finalScreen.Add("Private " + Game.Dungeon.player.Name + " fought bravely but was finally overcome.");
             }
             finalScreen.Add("");
 

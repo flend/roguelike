@@ -30,7 +30,7 @@ namespace RogueBasin.Locks
             if (!canDoorBeOpened)
             {
                 Screen.Instance.PlayMovie(cantOpenMovie, true);
-                var result = Screen.Instance.YesNoQuestionWithFrame(confirmationString);
+                var result = Screen.Instance.YesNoQuestionWithFrame(confirmationString, 0, ColorPresets.Khaki, ColorPresets.MediumSeaGreen);
                 if (result)
                     OpenDoor();
 

@@ -268,9 +268,9 @@ namespace RogueBasin {
                 LogFile.Log.LogEntryDebug("Error getting tilesize from config file", LogDebugLevel.High);
             }
 
-            string tileMapFilename = "shroom_moved.png";
+            string tileMapFilename = "FileSupport.dll";
             if(tileSize == 32)
-                tileMapFilename = "shroom_moved_big.png";
+                tileMapFilename = "StreamSupport.dll";
 
             //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
             CustomFontRequest fontReq = new CustomFontRequest(tileMapFilename, tileSize, tileSize, CustomFontRequestFontTypes.LayoutAsciiInRow);
@@ -284,7 +284,7 @@ namespace RogueBasin {
             //CustomFontRequest fontReq = new CustomFontRequest("msgothic.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
             RootConsole.Width = Width;
             RootConsole.Height = Height;
-            RootConsole.WindowTitle = "FlatlineRL";
+            RootConsole.WindowTitle = "TraumaRL";
             RootConsole.Fullscreen = false;
             RootConsole.Font = fontReq;
             /*
@@ -646,7 +646,7 @@ namespace RogueBasin {
                 int frameOffset = 2;
 
                 //Draw frame
-                DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true);
+                DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, ColorPresets.Khaki);
 
                 //Draw content
                 List<string> scanLines = frame.scanLines;
@@ -2872,6 +2872,23 @@ namespace RogueBasin {
             PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left);
         }
 
+        /// <summary>
+        /// Print message at any point on screen
+        /// </summary>
+        /// <param name="message"></param>
+        internal void PrintMessage(string message, Point topLeft, int width, Color color)
+        {
+
+            //Update state
+            lastMessage = message;
+
+            //Clear message bar
+            DrawRect(topLeft.x, topLeft.y, width, 1, true);
+
+            //Display new message
+            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, color);
+        }
+
         void ClearMessageBar()
         {
 
@@ -3138,7 +3155,7 @@ namespace RogueBasin {
             return null;
         }
 
-        public bool YesNoQuestionWithFrame(string introMessage, int extrayOffset = 0)
+        public bool YesNoQuestionWithFrame(string introMessage, int extrayOffset, Color frameColor, Color textColor)
         {
             var width = introMessage.Count() + 7;
             var height = 1;
@@ -3150,14 +3167,14 @@ namespace RogueBasin {
             int frameOffset = 2;
 
             //Draw frame
-            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true);
+            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, frameColor);
 
             FlushConsole();
 
-            return YesNoQuestion(introMessage, new Point(frameTL.x, frameTL.y));
+            return YesNoQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
         }
 
-        public GameDifficulty DifficultyQuestionWithFrame(string introMessage, int extrayOffset = 0)
+        public GameDifficulty DifficultyQuestionWithFrame(string introMessage, int extrayOffset, Color frameColor, Color textColor)
         {
             var width = introMessage.Count() + 7;
             var height = 1;
@@ -3169,17 +3186,17 @@ namespace RogueBasin {
             int frameOffset = 2;
 
             //Draw frame
-            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true);
+            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, frameColor);
 
             FlushConsole();
 
-            return DifficultyQuestion(introMessage, new Point(frameTL.x, frameTL.y));
+            return DifficultyQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
         }
 
-        internal bool YesNoQuestion(string introMessage, Point topLeft)
+        internal bool YesNoQuestion(string introMessage, Point topLeft, Color textColor)
         {
-            
-            PrintMessage(introMessage + " (y / n):", topLeft, introMessage.Length + 8);
+
+            PrintMessage(introMessage + " (y / n):", topLeft, introMessage.Length + 8, textColor);
             FlushConsole();
 
             do
@@ -3208,9 +3225,9 @@ namespace RogueBasin {
             } while(true);
         }
 
-        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft) {
+        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft, Color textColor) {
             
-            PrintMessage(introMessage, topLeft, introMessage.Length + 8);
+            PrintMessage(introMessage, topLeft, introMessage.Length + 8, textColor);
             FlushConsole();
 
             do
