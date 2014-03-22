@@ -123,7 +123,8 @@ namespace TraumaRL
             rb = new RogueBase();
             rb.SetupSystem();
 
-            LogFile.Log.DebugLevel = 4;
+            //Minimum debug
+            LogFile.Log.DebugLevel = 1;
 
         }
 
