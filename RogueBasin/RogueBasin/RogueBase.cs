@@ -634,8 +634,8 @@ namespace RogueBasin
          
                                     break;
                                     */
-
-                                    /*
+/*
+                                    
                                 case 'N':
                                     //screen numbering
                                     Screen.Instance.CycleRoomNumbering();

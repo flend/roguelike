@@ -1940,6 +1940,9 @@ namespace RogueBasin
         {
             var currentWeapon = GetEquippedWeapon();
 
+            if (currentWeapon == null)
+                return false;
+
             if (currentWeapon.GetType() == typeof(Items.Fists) || currentWeapon.GetType() == typeof(Items.Vibroblade))
                 return true;
 
@@ -1949,6 +1952,9 @@ namespace RogueBasin
         public bool HasThrownWeaponEquipped()
         {
             var currentWeapon = GetEquippedWeapon();
+
+            if (currentWeapon == null)
+                return false;
 
             if (currentWeapon.GetType() == typeof(Items.FragGrenade) || currentWeapon.GetType() == typeof(Items.StunGrenade) || currentWeapon.GetType() == typeof(Items.SoundGrenade))
                 return true;

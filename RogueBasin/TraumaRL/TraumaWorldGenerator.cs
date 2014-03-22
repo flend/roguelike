@@ -1407,7 +1407,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceMovieDoorOnMap(mapInfo, doorId, doorName, 1, doorColor, "bridgelocked", "bridgeunlocked", elevatorToBridge);
 
             //Captain's id
-            var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { reactorLevel, medicalLevel, storageLevel, scienceLevel });
+            var captainIdIdealLevel = levelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { lowerAtriumLevel, medicalLevel, storageLevel, scienceLevel });
             var captainsIdRoom = PlaceClueForDoorInVault(mapInfo, levelInfo, doorId, doorColor, doorName, captainIdIdealLevel);
 
             //Add monsters - nice to put ID on captain but not for now
