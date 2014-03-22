@@ -944,7 +944,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             placedDoors.Add(door);
 
             //Place monsters (not in corridors)
-
+            
             //This will be restricted to the medical level since we cut off the door
             var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);

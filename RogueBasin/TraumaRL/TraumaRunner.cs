@@ -17,19 +17,21 @@ namespace TraumaRL
         {
             RandomSetup();
 
+            StandardSystemSetup();
+
+            IntroScreen();
+
             //For testing
             bool retry = false;
-           do
+            do
             {
                 try
                 {
-                    StandardGameSetup();
-
-                    IntroScreen();
+                    StandardDungeonSetup();
 
                     GenerateStoryDungeon(retry);
 
-                   break;
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -96,22 +98,26 @@ namespace TraumaRL
             Game.Random = new Random();
         }
 
+        GameDifficulty difficulty;
+        string playerName;
+        bool playItemMovies;
+
         private void IntroScreen()
         {
             var gameInfo = new RogueBasin.GameIntro();
 
             gameInfo.ShowIntroScreen();
 
-            Game.Dungeon.Difficulty = gameInfo.Difficulty;
-            Game.Dungeon.Player.Name = gameInfo.PlayerName;
-            Game.Dungeon.Player.PlayItemMovies = gameInfo.ShowMovies;
+            difficulty = gameInfo.Difficulty;
+            playerName = gameInfo.PlayerName;
+            playItemMovies = gameInfo.ShowMovies;
 
           //  Game.Dungeon.Difficulty = GameDifficulty.Medium;
            //  Game.Dungeon.Player.Name = "Dave";
            //  Game.Dungeon.Player.PlayItemMovies = true;
         }
     
-        private void StandardGameSetup()
+        private void StandardSystemSetup()
         {
 
             rb = new RogueBase();
@@ -119,11 +125,19 @@ namespace TraumaRL
 
             LogFile.Log.DebugLevel = 4;
 
+        }
+
+        private void StandardDungeonSetup()
+        {
             var dungeonInfo = new DungeonInfo();
             dungeonInfo.LevelNaming = TraumaWorldGenerator.LevelNaming;
             Game.Dungeon = new Dungeon(dungeonInfo);
 
             Game.Dungeon.Player.StartGameSetup();
+
+            Game.Dungeon.Difficulty = difficulty;
+            Game.Dungeon.Player.Name = playerName;
+            Game.Dungeon.Player.PlayItemMovies = playItemMovies;
 
             Game.Dungeon.AllLocksOpen = false;
 
