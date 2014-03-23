@@ -9,7 +9,7 @@ namespace RogueBasin.Items
     {
         bool usedUp;
 
-        const int decayDuration = 100;
+        const int decayDuration = 250;
 
         public ShieldPack()
         {
