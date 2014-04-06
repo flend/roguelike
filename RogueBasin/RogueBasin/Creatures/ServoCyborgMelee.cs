@@ -64,7 +64,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return (char)535;
+            return (char)624;
         }
 
         protected override int GetChanceToRecover()
@@ -99,7 +99,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.OrangeRed;
+            return ColorPresets.Red;
         }
 
         public override int GetCombatXP()

@@ -50,7 +50,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 2;
+            return 20;
         }
 
         public override int DamageBase()

@@ -2145,6 +2145,7 @@ namespace RogueBasin
                         stationaryAction = true;
                         okToMoveIntoSquare = false;
                     }
+                    okToMoveIntoSquare = false;
                 }
 
                 //Check for monsters in the square

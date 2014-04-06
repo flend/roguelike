@@ -63,7 +63,7 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 2;
+            return 20;
         }
 
         public override int DamageBase()
@@ -123,7 +123,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return (char)258;
+            return (char)266;
         }
 
         protected override int GetChanceToRecover()
