@@ -926,10 +926,10 @@ namespace RogueBasin {
                     pcRepresentation = (char)257;
 
                 if (weapon.GetType() == typeof(Items.Pistol))
-                    pcRepresentation = (char)512;
+                    pcRepresentation = (char)513;
 
                 if (weapon.GetType() == typeof(Items.HeavyPistol))
-                    pcRepresentation = (char)513;
+                    pcRepresentation = (char)512;
 
                 if (weapon.GetType() == typeof(Items.Shotgun))
                     pcRepresentation = (char)514;
@@ -1800,8 +1800,6 @@ namespace RogueBasin {
             var weaponIconXOffset = -3;
             foreach (var kv in ItemMapping.WeaponMapping)
             {
-                Type weaponType = Game.Dungeon.Player.HeavyWeaponTranslation(kv.Value);
-
                 DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 3, weaponOptionRow), kv.Value, kv.Key);
             }
             
@@ -2125,7 +2123,7 @@ namespace RogueBasin {
             PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), ColorPresets.White);
            
             //+evil points
-            Item instance = (Item)Activator.CreateInstance(weaponType);
+            Item instance = (Item)Activator.CreateInstance(heavyWeaponType);
             PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
         }
 

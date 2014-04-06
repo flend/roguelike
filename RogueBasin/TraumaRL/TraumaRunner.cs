@@ -142,8 +142,8 @@ namespace TraumaRL
 
             Game.Dungeon.AllLocksOpen = false;
 
-            //Screen.Instance.SeeAllMonsters = true;
-            //Screen.Instance.SeeAllMap = true;
+            Screen.Instance.SeeAllMonsters = true;
+            Screen.Instance.SeeAllMap = true;
         }
 
         private void RunGame()

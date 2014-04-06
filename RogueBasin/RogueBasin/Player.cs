@@ -1673,21 +1673,19 @@ namespace RogueBasin
 
         internal Type HeavyWeaponTranslation(Type itemType)
         {
-            if (itemType == typeof(Items.Fists) && IsInventoryTypeAvailable(typeof(Items.Vibroblade)))
-                itemType = typeof(Items.Vibroblade);
 
             //Do weapon translations
             if (itemType == typeof(Items.Pistol) && IsInventoryTypeAvailable(typeof(Items.HeavyPistol)))
-                itemType = typeof(Items.HeavyPistol);
+                return typeof(Items.HeavyPistol);
 
             if (itemType == typeof(Items.Shotgun) && IsInventoryTypeAvailable(typeof(Items.HeavyShotgun)))
-                itemType = typeof(Items.HeavyShotgun);
+                return typeof(Items.HeavyShotgun);
 
             if (itemType == typeof(Items.Laser) && IsInventoryTypeAvailable(typeof(Items.HeavyLaser)))
-                itemType = typeof(Items.HeavyLaser);
+                return typeof(Items.HeavyLaser);
 
             if (itemType == typeof(Items.Fists) && IsInventoryTypeAvailable(typeof(Items.Vibroblade)))
-                itemType = typeof(Items.Vibroblade);
+                return typeof(Items.Vibroblade);
 
             return itemType;
         }

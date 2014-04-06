@@ -601,24 +601,7 @@ namespace RogueBasin
                                     
                                 //Debug events
                                     
-                                    
-                                //Stats up. Use in town
-                                    /*
-                                case 'w':
-                                    Game.Dungeon.Player.AttackStat = 100;
-                                    Game.Dungeon.Player.CharmStat = 100;
-                                    Game.Dungeon.Player.MagicStat = 100;
-                                    Game.Dungeon.Player.HitpointsStat = 200;
-                                    Game.Dungeon.Player.MaxHitpointsStat = 200;
-
-                                    Game.Dungeon.Player.Hitpoints = 100;
-                                    Game.Dungeon.Player.MagicPoints = 100;
-
-                                    //Game.Dungeon.DungeonInfo.DragonDead = false;
-
-                                    //Game.Dungeon.EndOfGame();
-
-                                    break;*/
+    
                                     /*
                                 case 'K':
                                     //Add a sound at the player's location
@@ -634,7 +617,7 @@ namespace RogueBasin
          
                                     break;
                                     */
-/*
+
                                     
                                 case 'N':
                                     //screen numbering
@@ -701,7 +684,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.GiveAllWetware(3);
                                     Screen.Instance.Update();
                                     break;
-                               */
+                               
                                 /*
                             case 'k':
                                 //Display the inventory
@@ -899,7 +882,7 @@ namespace RogueBasin
                                 Screen.Instance.ScrollViewport(direction);
                                 Screen.Instance.Update();
                             }
-                            /*
+                            
                             if (wasDirection && mod == KeyModifier.Arrow && userKey.Shift)
                             {
                                 if (direction == new Point(0, -1))
@@ -909,7 +892,7 @@ namespace RogueBasin
                                     ScreenLevelDown();
 
                                 Screen.Instance.Update();
-                            }*/
+                            }
                         }
 
                         break;
@@ -2602,7 +2585,6 @@ namespace RogueBasin
         public void SetupSystem()
         {
             //Initial setup
-
             //See all debug messages
             LogFile.Log.DebugLevel = 0;
 
