@@ -59,9 +59,12 @@ namespace TraumaRL
 
         private void PlaceLootInArmory(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
-            itemsInArmory = new Dictionary<int, List<Item>>();
+            //Add standard loot
+            AddStandardLootToArmory(mapInfo);
 
-            
+            //Weapons and wetware
+
+            itemsInArmory = new Dictionary<int, List<Item>>();
 
             foreach(var l in gameLevels) {
                 itemsInArmory[l] = new List<Item>();
@@ -218,7 +221,11 @@ namespace TraumaRL
 
             LogFile.Log.LogEntryDebug("Total items placed  " + itemsPlaced.Count() + " of " + lootLevels.SelectMany(kv => kv.Value).Count(), LogDebugLevel.Medium);
 
-            //Add extra standard loot
+            
+        }
+
+        private void AddStandardLootToArmory(MapInfo mapInfo)
+        {
             foreach (var kv in goodyRooms.OrderBy(k => k.Key))
             {
                 var level = kv.Key;
@@ -227,7 +234,7 @@ namespace TraumaRL
                 var randomMedKits = ProduceMultipleItems<RogueBasin.Items.NanoRepair>(1);
                 PlaceItems(mapInfo, randomMedKits, new List<int> { room }, false, true, true);
 
-                var totalGrenades = Game.Random.Next(levelDifficulty[level], 2 * levelDifficulty[level]);
+                var totalGrenades = Game.Random.Next(1, 2 * levelDifficulty[level]);
 
                 var totalExposiveGrenades = totalGrenades / 2;
                 var totalStunGrenades = Game.Random.Next(totalGrenades - totalExposiveGrenades);
@@ -241,7 +248,7 @@ namespace TraumaRL
                 PlaceItems(mapInfo, stunGrenades, new List<int> { room }, false, true, true);
                 PlaceItems(mapInfo, soundGrenades, new List<int> { room }, false, true, true);
             }
-            
+
         }
 
         private List<Item> ProduceMultipleItems<T>(int count) where T : Item, new() {
