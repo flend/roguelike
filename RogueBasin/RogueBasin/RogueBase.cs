@@ -837,8 +837,18 @@ namespace RogueBasin
                             {
                                 if (keyCode == kv.Key)
                                 {
-                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(kv.Value);
+                                    bool changeWorks = Game.Dungeon.Player.ToggleEquipWetware(kv.Value);
                                     functionPressed = true;
+
+                                    if (changeWorks)
+                                    {
+                                        //We changed wetware, counts as an action
+                                        Game.Dungeon.ResetPCTurnCountersOnActionStatonary();
+                                    }
+
+                                    //If we don't set time advances, changing wetware still resets bonuses but the enemies don't get a move
+                                    //timeAdvances = changeWorks;
+
                                     //Just update the screen each time
                                     Screen.Instance.Update();
                                     break;

@@ -1535,11 +1535,11 @@ namespace RogueBasin
                 CancelBoostDueToUnequip();
 
             if (justUnequip)
-                //return true;
-                return false;
+                return true;
+                //return false;
 
             var equipTime = EquipWetware(wetwareTypeToEquip);
-            return false;
+            return equipTime;
         }
 
         internal bool EquipWetware(Type wetwareTypeToEquip)

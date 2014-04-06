@@ -2106,9 +2106,11 @@ namespace RogueBasin
             {
                 if (!player.IsEffectActive(typeof(PlayerEffects.BioProtect)))
                 {
-                    player.ApplyDamageToPlayerHitpoints(2);
+                    player.ApplyDamageToPlayerHitpoints(5);
                 }
             }
+
+            bool stationaryAction = false;
 
             //If there's no special move, do a conventional move
             if (moveDone == null)
@@ -2120,7 +2122,8 @@ namespace RogueBasin
                     if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedDoor)
                     {
                         OpenDoor(player.LocationLevel, newPCLocation);
-                        return true;
+                        stationaryAction = true;
+                        okToMoveIntoSquare = false;
                     }
                     else if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedLock)
                     {
@@ -2137,17 +2140,10 @@ namespace RogueBasin
                                 if(thisSuccess)
                                     SetTerrainAtPoint(player.LocationLevel, newPCLocation, MapTerrain.OpenLock);
                             }
-                            //if (!thisSuccess)
-                              //  okToMoveIntoSquare = false;
                         }
 
-                        //Any failure prevents onward movement
-                        return true;
-
-                    }
-                    {
-                        //This now costs time since it could be part of a special move
-                        return true;
+                        stationaryAction = true;
+                        okToMoveIntoSquare = false;
                     }
                 }
 
@@ -2176,6 +2172,8 @@ namespace RogueBasin
 
                         Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
                         okToMoveIntoSquare = false;
+
+                        stationaryAction = true;
                     }
                     else
                     {
@@ -2186,6 +2184,28 @@ namespace RogueBasin
                         Screen.Instance.CreatureToView = contents.monster;
 
                         okToMoveIntoSquare = false;
+
+                        stationaryAction = true;
+                    }
+                }
+
+                //Apply movement effects to counters
+                if (stationaryAction)
+                {
+                    ResetPCTurnCountersOnActionStatonary();
+                }
+                else
+                {
+                    player.AddTurnsSinceAction();
+                    if (deltaMove == new Point(0, 0))
+                    {
+                        player.ResetTurnsMoving();
+                        player.AddTurnsInactive();
+                    }
+                    else
+                    {
+                        player.ResetTurnsInactive();
+                        player.AddTurnsMoving();
                     }
                 }
 
@@ -2194,18 +2214,6 @@ namespace RogueBasin
                     return true;
 
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y, runTriggersAlways);
-
-                player.AddTurnsSinceAction();
-                if (deltaMove == new Point(0, 0))
-                {
-                    player.ResetTurnsMoving();
-                    player.AddTurnsInactive();
-                }
-                else
-                {
-                    player.ResetTurnsInactive();
-                    player.AddTurnsMoving();
-                }
 
                 //Auto-pick up any items
                 if (contents.items.Count > 0)
@@ -3421,6 +3429,8 @@ namespace RogueBasin
             }
         }
 
+
+
         /// <summary>
         /// Equivalent of PCMove for an action that doesn't have a move.
         /// Tell the special moves that this was a non-move action
@@ -3428,9 +3438,7 @@ namespace RogueBasin
         /// </summary>
         internal void PCActionNoMove()
         {
-            player.ResetTurnsInactive();
-            player.ResetTurnsMoving();
-            player.ResetTurnsSinceAction();
+            ResetPCTurnCountersOnActionStatonary();
 
             //Check special moves.
 
@@ -3464,6 +3472,13 @@ namespace RogueBasin
                     move.ClearMove();
                 }
             }
+        }
+
+        public void ResetPCTurnCountersOnActionStatonary()
+        {
+            player.ResetTurnsInactive();
+            player.ResetTurnsMoving();
+            player.ResetTurnsSinceAction();
         }
 
         public String PlayerDeathString { get; set; }
