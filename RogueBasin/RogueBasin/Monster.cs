@@ -559,6 +559,8 @@ namespace RogueBasin
         /// <returns></returns>
         public virtual CombatResults AttackPlayer(Player player, int damage)
         {
+            player.NotifyAttack(this);
+
             //Do we hit the player?
             if (damage > 0)
             {

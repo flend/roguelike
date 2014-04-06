@@ -2711,5 +2711,13 @@ namespace RogueBasin
             
         }
 
+
+        internal void NotifyAttack(Monster monster)
+        {
+            if (!Screen.Instance.TargetSelected())
+            {
+                Screen.Instance.CreatureToView = monster;
+            }
+        }
     }
 }

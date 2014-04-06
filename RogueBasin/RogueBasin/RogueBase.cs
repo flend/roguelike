@@ -215,7 +215,7 @@ namespace RogueBasin
                             //Game.Dungeon.CheckSpecialMoveValidity();
 
                             //Do any targetting maintenance
-                            if (TargetSelected())
+                            if (Screen.Instance.TargetSelected())
                                 CheckTargetInPlayerFOV(playerFOV);
 
                             ProfileEntry("Pre Screen Update");
@@ -1892,17 +1892,6 @@ namespace RogueBasin
             return false;
         }
 
-        private bool TargetSelected()
-        {
-            if (Screen.Instance.CreatureToView != null)
-            {
-                if(!Screen.Instance.CreatureToView.Alive)
-                    return false;
-                return true;
-            }
-
-            return Screen.Instance.ItemToView != null;
-        }
 
 
         /// <summary>

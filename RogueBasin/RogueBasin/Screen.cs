@@ -297,6 +297,18 @@ namespace RogueBasin {
 
         }
 
+        public bool TargetSelected()
+        {
+            if (CreatureToView != null)
+            {
+                if (!Screen.Instance.CreatureToView.Alive)
+                    return false;
+                return true;
+            }
+
+            return ItemToView != null;
+        }
+
         /// <summary>
         /// Cycle the room number display between different modes
         /// </summary>
