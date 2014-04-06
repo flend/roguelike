@@ -795,5 +795,10 @@ namespace RogueBasin
         {
             return (char)498;
         }
+
+        public virtual int DropChance()
+        {
+            return 10;
+        }
     }
 }

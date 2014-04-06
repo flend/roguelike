@@ -213,5 +213,9 @@ namespace RogueBasin.Creatures
             Explode();
         }
 
+        public override int DropChance()
+        {
+            return 0;
+        }
     }
 }

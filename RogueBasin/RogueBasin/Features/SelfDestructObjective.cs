@@ -42,8 +42,8 @@ namespace RogueBasin.Features
                 GivePlayerObjectiveClues(player);
 
                 //Restock the flight deck and lower atrium levels
-                Game.Dungeon.CreateMonstersForLevels(Game.Dungeon.MapInfo, 2, 6);
-                Game.Dungeon.CreateMonstersForLevels(Game.Dungeon.MapInfo, 4, 6);
+                Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(Game.Dungeon.MapInfo, 2, 6);
+                Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(Game.Dungeon.MapInfo, 4, 6);
 
                 isComplete = true;
                 return true;

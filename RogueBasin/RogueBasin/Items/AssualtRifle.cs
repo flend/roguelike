@@ -160,7 +160,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            return Game.Dungeon.FirePistolLineWeapon(target, this, 80);
+            return Game.Dungeon.FirePistolLineWeapon(target, this, 60);
         }
 
         /// <summary>

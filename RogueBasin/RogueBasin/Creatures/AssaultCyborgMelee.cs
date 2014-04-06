@@ -157,5 +157,10 @@ namespace RogueBasin.Creatures
         {
             return 0;
         }
+
+        public override int DropChance()
+        {
+            return 30;
+        }
     }
 }

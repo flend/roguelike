@@ -608,7 +608,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                     //Add monsters
-                    CreateMonstersForLevels(mapInfo);
+                    Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
 
                     //Check we are solvable
                     var graphSolver = new GraphSolver(mapInfo.Model);
@@ -1413,7 +1413,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add monsters - nice to put ID on captain but not for now
             var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainsIdRoom);
             var monstersToPlace = new List<Monster> { new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.AssaultCyborgRanged(), new RogueBasin.Creatures.Captain() };
-            AddMonstersToRoom(mapInfo, captainsIdLevel, captainsIdRoom, monstersToPlace);
+            Game.Dungeon.MonsterPlacement.AddMonstersToRoom(mapInfo, captainsIdLevel, captainsIdRoom, monstersToPlace);
 
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),
@@ -1583,7 +1583,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var antennaeLevel = mapInfo.GetLevelForRoomIndex(antennaeVault);
 
             var monstersToPlace = new List<Monster> { new RogueBasin.Creatures.RotatingTurret(), new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.PatrolBotRanged(), new RogueBasin.Creatures.PatrolBotRanged()};
-            AddMonstersToRoom(mapInfo, antennaeLevel, antennaeVault, monstersToPlace);
+            Game.Dungeon.MonsterPlacement.AddMonstersToRoom(mapInfo, antennaeLevel, antennaeVault, monstersToPlace);
 
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Antennae]) };
             AddStandardDecorativeFeaturesToRoom(antennaeLevel, mapInfo.GetRoom(antennaeVault), 10, decorations, false);

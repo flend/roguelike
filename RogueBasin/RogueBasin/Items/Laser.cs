@@ -56,7 +56,7 @@ namespace RogueBasin.Items
                 //Hit the monster if it's there
                 if (m != null)
                 {
-                    int damage = 100;
+                    int damage = 75;
 
                     string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
