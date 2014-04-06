@@ -497,24 +497,24 @@ namespace RogueBasin
                     repairChance = 20000;
                     break;
                 case GameDifficulty.Medium:
-                    ammoChance = 150;
-                    shieldChance = 75;
-                    nadeChance = 10000;
+                    ammoChance = 200;
+                    shieldChance = 100;
+                    nadeChance = 5000;
                     repairChance = 20000;
                     break;
                 case GameDifficulty.Hard:
-                    ammoChance = 200;
-                    shieldChance = 150;
-                    nadeChance = 16000;
-                    repairChance = 300000;
+                    ammoChance = 400;
+                    shieldChance = 200;
+                    nadeChance = 5000;
+                    repairChance = 20000;
                     break;
             }
 
             //Alter by monster type
             if (mon.DropChance() > 0)
             {
-                ammoChance = ammoChance * 30 / (double)mon.DropChance();
-                shieldChance = shieldChance * 30 / (double)mon.DropChance();
+                ammoChance = ammoChance * 20 / (double)mon.DropChance();
+                shieldChance = shieldChance * 20 / (double)mon.DropChance();
 
                 if (Chance(ammoChance))
                     mon.PickUpItem(new RogueBasin.Items.AmmoPack());
