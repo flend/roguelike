@@ -74,7 +74,7 @@ namespace RogueBasin
                 if (Game.Dungeon.Difficulty == GameDifficulty.Easy)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.5);
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
-                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 0.9);
+                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.0);
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Hard)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.25);
 
@@ -473,9 +473,9 @@ namespace RogueBasin
             return true;
         }
 
-        private bool Chance(int outOf)
+        private bool Chance(double outOf)
         {
-            if (Game.Random.Next(outOf) < 10)
+            if (Game.Random.Next((int)Math.Floor(outOf)) < 100)
                 return true;
             return false;
         }
@@ -483,43 +483,58 @@ namespace RogueBasin
         public void GiveMonsterStandardItems(Monster mon)
         {
 
-            int ammoChance = 10;
-            int shieldChance = 10;
-            int nadeChance = 200;
-            int repairChance = 500;
+            double ammoChance = 100;
+            double shieldChance = 100;
+            double nadeChance = 2000;
+            double repairChance = 20000;
 
             switch (Game.Dungeon.Difficulty)
             {
                 case GameDifficulty.Easy:
+                    ammoChance = 50;
+                    shieldChance = 50;
+                    nadeChance = 2000;
+                    repairChance = 20000;
                     break;
                 case GameDifficulty.Medium:
-                    ammoChance = 20;
-                    shieldChance = 10;
-                    nadeChance = 300;
+                    ammoChance = 150;
+                    shieldChance = 75;
+                    nadeChance = 10000;
+                    repairChance = 20000;
                     break;
                 case GameDifficulty.Hard:
-                    ammoChance = 30;
-                    shieldChance = 30;
-                    nadeChance = 400;
-                    repairChance = 1000;
+                    ammoChance = 200;
+                    shieldChance = 150;
+                    nadeChance = 16000;
+                    repairChance = 300000;
                     break;
             }
 
-            if (Chance(shieldChance))
-                mon.PickUpItem(new RogueBasin.Items.ShieldPack());
+            //Alter by monster type
+            if (mon.DropChance() > 0)
+            {
+                ammoChance = ammoChance * 30 / (double)mon.DropChance();
+                shieldChance = shieldChance * 30 / (double)mon.DropChance();
 
-            if (Chance(ammoChance))
-                mon.PickUpItem(new RogueBasin.Items.AmmoPack());
+                if (Chance(ammoChance))
+                    mon.PickUpItem(new RogueBasin.Items.AmmoPack());
 
-            if (Chance(nadeChance))
-                mon.PickUpItem(new RogueBasin.Items.FragGrenade());
-            if (Chance(nadeChance))
-                mon.PickUpItem(new RogueBasin.Items.StunGrenade());
-            if (Chance(nadeChance))
-                mon.PickUpItem(new RogueBasin.Items.SoundGrenade());
+                if (Chance(shieldChance))
+                    mon.PickUpItem(new RogueBasin.Items.ShieldPack());
 
-            if (Chance(repairChance))
-                mon.PickUpItem(new RogueBasin.Items.NanoRepair());
+                if (Chance(nadeChance))
+                    mon.PickUpItem(new RogueBasin.Items.FragGrenade());
+                if (Chance(nadeChance))
+                    mon.PickUpItem(new RogueBasin.Items.StunGrenade());
+                if (Chance(nadeChance))
+                    mon.PickUpItem(new RogueBasin.Items.SoundGrenade());
+
+                if (Chance(repairChance))
+                    mon.PickUpItem(new RogueBasin.Items.NanoRepair());
+            }
+            
+
+            
         }
     }
 }

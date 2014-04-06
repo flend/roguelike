@@ -23,6 +23,9 @@ namespace TraumaRL
 
             //For testing
             bool retry = false;
+
+            /*
+            //For release
             do
             {
                 try
@@ -40,7 +43,15 @@ namespace TraumaRL
 
                 }
             } while (true);
+             */
+
+            //Fail fast
+
+            StandardDungeonSetup();
             
+            GenerateStoryDungeon(retry);
+
+            //Run game         
             RunGame();
         }
 

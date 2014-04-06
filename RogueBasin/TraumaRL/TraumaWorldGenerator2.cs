@@ -224,10 +224,10 @@ namespace TraumaRL
                 var level = kv.Key;
                 var room = kv.Value;
 
-                var randomMedKits = ProduceMultipleItems<RogueBasin.Items.NanoRepair>(levelDifficulty[level] / 2 + Game.Random.Next(2));
+                var randomMedKits = ProduceMultipleItems<RogueBasin.Items.NanoRepair>(1);
                 PlaceItems(mapInfo, randomMedKits, new List<int> { room }, false, true, true);
 
-                var totalGrenades = Game.Random.Next(2 * levelDifficulty[level], 3 * levelDifficulty[level]);
+                var totalGrenades = Game.Random.Next(levelDifficulty[level], 2 * levelDifficulty[level]);
 
                 var totalExposiveGrenades = totalGrenades / 2;
                 var totalStunGrenades = Game.Random.Next(totalGrenades - totalExposiveGrenades);
