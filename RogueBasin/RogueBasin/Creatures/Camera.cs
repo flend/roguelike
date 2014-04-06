@@ -17,6 +17,9 @@ namespace RogueBasin.Creatures
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 0;
+
+            //Start in the passive state
+            this.Passive = true;
         }
 
         protected override int ClassMaxHitpoints()
