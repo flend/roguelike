@@ -214,9 +214,9 @@ namespace RogueBasin
                             //Check the 'on' status of special moves - now unnecessary?
                             //Game.Dungeon.CheckSpecialMoveValidity();
 
-                            //Target if enemies nearby
-                            //if(!TargetSelected())
-                            //    TargetItemsCloseToPlayer(5.0, playerFOV);
+                            //Do any targetting maintenance
+                            if (TargetSelected())
+                                CheckTargetInPlayerFOV(playerFOV);
 
                             ProfileEntry("Pre Screen Update");
 
@@ -265,6 +265,41 @@ namespace RogueBasin
 
             //Do any final cleanup
             LogFile.Log.Close();
+        }
+
+        private void CheckTargetInPlayerFOV(CreatureFOV playerFOV)
+        {
+            var targetCreature = Screen.Instance.CreatureToView;
+            var targetItem = Screen.Instance.ItemToView;
+
+            if (targetCreature == null && targetItem == null)
+                return;
+
+            if(targetCreature != null) {
+                if(targetCreature.LocationLevel != Game.Dungeon.Player.LocationLevel) {
+                    ResetViewPanel();
+                    return;
+                }
+                if (!playerFOV.CheckTileFOV(targetCreature.LocationMap))
+                {
+                    ResetViewPanel();
+                    return;
+                }
+            }
+
+            if (targetItem != null)
+            {
+                if (targetItem.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                {
+                    ResetViewPanel();
+                    return;
+                }
+                if (!playerFOV.CheckTileFOV(targetItem.LocationMap))
+                {
+                    ResetViewPanel();
+                    return;
+                }
+            }
         }
 
         private void ProfileEntry(string p)
