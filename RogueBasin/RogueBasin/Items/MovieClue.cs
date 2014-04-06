@@ -9,10 +9,11 @@ namespace RogueBasin.Items
     {
         string pickupMovie;
         char representation;
+        string description;
 
         GraphMap.Clue mapClue;
 
-        public MovieClue(GraphMap.Clue mapClue, char representation, string pickupMovie) : base(mapClue, ColorPresets.LimeGreen, pickupMovie)
+        public MovieClue(GraphMap.Clue mapClue, char representation, string pickupMovie, string description) : base(mapClue, ColorPresets.LimeGreen, pickupMovie)
         {
             Setup(mapClue);
             this.pickupMovie = pickupMovie;
@@ -33,12 +34,12 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return pickupMovie; }
+            get { return description; }
         }
 
         public override string GroupItemDescription
         {
-            get { return pickupMovie; }
+            get { return description; }
         }
 
         public GraphMap.Clue MapClue

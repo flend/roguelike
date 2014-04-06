@@ -1590,7 +1590,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Servo motor
 
-            var servoRoom = PlaceMovieClueForObjectiveInVault(mapInfo, levelInfo, antennaeObjName, (char)312, "interface_demod", new List<int> { scienceLevel, storageLevel });
+            var servoRoom = PlaceMovieClueForObjectiveInVault(mapInfo, levelInfo, antennaeObjName, (char)312, "interface_demod", "Interface Demodulator", new List<int> { scienceLevel, storageLevel });
             var servoLevel = mapInfo.GetLevelForRoomIndex(servoRoom);
 
             var servoDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]),
@@ -1716,7 +1716,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return captainIdRoom;
         }
 
-        private int PlaceMovieClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string objectiveId, char representation, string pickupMovie, IEnumerable<int> idealLevelsForClue)
+        private int PlaceMovieClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string objectiveId, char representation, string pickupMovie, string description, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1739,7 +1739,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             UseVault(levelInfo, captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(objectiveId, new List<int> { captainIdRoom }).First();
-            Item clueItemToPlace = new RogueBasin.Items.MovieClue(captainIdClue, representation, pickupMovie);
+            Item clueItemToPlace = new RogueBasin.Items.MovieClue(captainIdClue, representation, pickupMovie, description);
             PlaceClueItem(mapInfo, new List<Tuple<Clue,Item>>{new Tuple<Clue, Item>(captainIdClue, clueItemToPlace)}, true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueItemToPlace.SingleItemDescription + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
