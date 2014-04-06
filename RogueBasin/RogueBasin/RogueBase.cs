@@ -607,18 +607,6 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
                                     
-                                case 'K':
-                                    if (!Game.Dungeon.AllLocksOpen)
-                                    {
-                                        Game.Dungeon.AllLocksOpen = true;
-                                        Game.MessageQueue.AddMessage("All locks are now open.");
-                                    }
-                                    else {
-                                        Game.Dungeon.AllLocksOpen = false;
-                                        Game.MessageQueue.AddMessage("All locks are now in their normal state.");
-                                    }
-                                    Screen.Instance.Update();
-                                    break;
                                     
                                 case 'L':
                                     SetLogScreen();
@@ -653,7 +641,22 @@ namespace RogueBasin
                                     break;
                                     */
 
-                                    
+
+                                case 'K':
+                                    if (!Game.Dungeon.AllLocksOpen)
+                                    {
+                                        Game.Dungeon.AllLocksOpen = true;
+                                        Game.MessageQueue.AddMessage("All locks are now open.");
+                                    }
+                                    else
+                                    {
+                                        Game.Dungeon.AllLocksOpen = false;
+                                        Game.MessageQueue.AddMessage("All locks are now in their normal state.");
+                                    }
+                                    Screen.Instance.Update();
+                                    break;
+
+
                                 case 'N':
                                     //screen numbering
                                     Screen.Instance.CycleRoomNumbering();
