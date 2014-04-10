@@ -93,7 +93,8 @@ namespace RogueBasin {
         Color normalForeground = ColorPresets.White;
         Color targettedBackground = ColorPresets.DarkSlateGray;
 
-        Color frameColor = ColorPresets.MediumSeaGreen;
+        Color statsFrameColor = ColorPresets.MediumSeaGreen;
+        Color mapFrameColor = ColorPresets.Khaki;
 
         Color targetBackground = ColorPresets.White;
         Color targetForeground = ColorPresets.Black;
@@ -104,9 +105,27 @@ namespace RogueBasin {
         Color headingColor = ColorPresets.Yellow;
 
         Color messageColor = ColorPresets.CadetBlue;
+        Color titleColor = ColorPresets.CadetBlue;
 
         Color soundColor = ColorPresets.Yellow;
 
+        Color normalMovieColor = ColorPresets.MediumSeaGreen;
+        Color flashMovieColor = ColorPresets.Red;
+
+        const char heartChar = (char)567;
+        const char shieldChar = (char)561;
+        const char ammoChar = (char)568;
+        const char grenadeChar = (char)297;
+        const char batteryChar = (char)308;
+
+        Color orangeActivatedColor = ColorPresets.DarkOrange;
+        Color batteryActivatedColor = ColorPresets.SlateBlue;
+        Color orangeHighlightedColor = ColorPresets.Gold;
+        Color orangeDisactivatedColor = ColorPresets.SaddleBrown;
+        Color disabledColor = ColorPresets.DimGray;
+        Color weaponColor = ColorPresets.LightSteelBlue;
+        Color heartColor = ColorPresets.Crimson;
+        
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
 
@@ -549,9 +568,7 @@ namespace RogueBasin {
         /// </summary>
         /// <param name="root"></param>
         /// 
-        Color normalMovieColor = ColorPresets.MediumSeaGreen;
-        Color flashMovieColor = ColorPresets.Red;
-        
+
         public void PlayMovie(List<MovieFrame> frames, bool keypressBetweenFrames)
         {
             try
@@ -658,7 +675,7 @@ namespace RogueBasin {
                 int frameOffset = 2;
 
                 //Draw frame
-                DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, ColorPresets.Khaki);
+                DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, mapFrameColor);
 
                 //Draw content
                 List<string> scanLines = frame.scanLines;
@@ -679,7 +696,7 @@ namespace RogueBasin {
                     //Don't ask for a key press if it's the last frame, one will happen below automatically
                     if (frameNo != movieFrames.Count - 1)
                     {
-                        PrintLineRect("Press any key to continue", frameTL.x + width / 2, frameTL.y + height + 2, width, 1, LineAlignment.Center);
+                        PrintLineRect("Press any key to continue", frameTL.x + width / 2, frameTL.y + height + 2, width, 1, LineAlignment.Center, titleColor);
                         Screen.Instance.FlushConsole();
                         KeyPress userKey = Keyboard.WaitForKeyPress(true);
                         Screen.Instance.Update();
@@ -697,7 +714,7 @@ namespace RogueBasin {
             }
 
             //Print press any key
-            PrintLineRect("Press ENTER to continue", frameTL.x + width / 2, frameTL.y + height + 1, width, 1, LineAlignment.Center);
+            PrintLineRect("Press ENTER to continue", frameTL.x + width / 2, frameTL.y + height + 1, width, 1, LineAlignment.Center, titleColor);
 
             Screen.Instance.FlushConsole();
 
@@ -1234,19 +1251,19 @@ namespace RogueBasin {
             DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
 
             //Draw title
-            PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
 
             //Draw preamble
             int count = 0;
             foreach (string s in stuffToDisplay)
             {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left, normalMovieColor);
                 count++;
             }
 
             //Draw instructions
 
-            PrintLineRect("Press ENTER to continue...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("Press ENTER to continue...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
             FlushConsole();
 
             WaitForEnterKey();
@@ -1416,13 +1433,13 @@ namespace RogueBasin {
         private void DrawMsgHistory()
         {
             //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
 
             //Draw title
-            PrintLineRect("Message History", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Message History", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
 
             //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
 
             //Active area is slightly reduced from frame
             int inventoryListX = inventoryTL.x + 2;
@@ -1433,7 +1450,7 @@ namespace RogueBasin {
             LinkedList<string> msgHistory = Game.MessageQueue.messageHistory;
 
             //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, msgHistory);
+            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, msgHistory, normalMovieColor);
         }
 
         /// <summary>
@@ -1442,13 +1459,13 @@ namespace RogueBasin {
         private void DrawCluesList()
         {
             //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
 
             //Draw title
-            PrintLineRect("Clue List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Clue List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
 
             //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
 
             //Active area is slightly reduced from frame
             int inventoryListX = inventoryTL.x + 2;
@@ -1464,7 +1481,7 @@ namespace RogueBasin {
             //var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")");
             
             //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(cluesForDoorsAsStrings));
+            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(cluesForDoorsAsStrings), normalMovieColor);
         }
 
         /// <summary>
@@ -1473,13 +1490,13 @@ namespace RogueBasin {
         private void DrawLogList()
         {
             //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true);
+            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
 
             //Draw title
-            PrintLineRect("Log List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Log List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
 
             //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center);
+            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
 
             //Active area is slightly reduced from frame
             int inventoryListX = inventoryTL.x + 2;
@@ -1506,10 +1523,10 @@ namespace RogueBasin {
             }
 
             //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(clueLines));
+            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(clueLines), normalMovieColor);
         }
 
-        private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory)
+        private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory, Color textColor)
         {
             LinkedListNode<string> displayedMsg;
             LinkedListNode<string> topLineDisplayed = null;
@@ -1530,7 +1547,7 @@ namespace RogueBasin {
                 displayedMsg = topLineDisplayed;
                 for (int i = 0; i < inventoryListH; i++)
                 {
-                    PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, normalMovieColor);
+                    PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, textColor);
                     displayedMsg = displayedMsg.Next;
                     if (displayedMsg == null)
                         break;
@@ -1625,7 +1642,7 @@ namespace RogueBasin {
                     displayedMsg = topLineDisplayed;
                     for (int i = 0; i < inventoryListH; i++)
                     {
-                        PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left);
+                        PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, textColor);
                         displayedMsg = displayedMsg.Next;
                         if (displayedMsg == null)
                             break;
@@ -1636,26 +1653,12 @@ namespace RogueBasin {
             } while (keepLooping);
         }
 
-        const char heartChar = (char)567;
-        const char shieldChar = (char)561;
-        const char ammoChar = (char)568;
-        const char grenadeChar = (char)297;
-        const char batteryChar = (char)308;
-
-        Color orangeActivatedColor = ColorPresets.DarkOrange;
-        Color batteryActivatedColor = ColorPresets.SlateBlue;
-        Color orangeHighlightedColor = ColorPresets.Gold;
-        Color orangeDisactivatedColor = ColorPresets.SaddleBrown;
-        Color disabledColor = ColorPresets.DimGray;
-        Color weaponColor = ColorPresets.LightSteelBlue;
-        Color heartColor = ColorPresets.Crimson;
-
         private void DrawStats(Player player)
         {
 
             //Blank stats area
             //rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
-            DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false, frameColor);
+            DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false, statsFrameColor);
 
             int baseOffset = 2;
 
@@ -2001,7 +2004,7 @@ namespace RogueBasin {
                     PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, statsColor);
                 }
             }
-            else if (ItemToView != null)
+            else if (ItemToView != null && !ItemToView.InInventory)
             {
                 String nameStr = ItemToView.SingleItemDescription;// +"(" + ItemToView.Representation + ")";
                 PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, ItemToView.GetColour());
@@ -2686,10 +2689,10 @@ namespace RogueBasin {
             int heightAvail = mapBotRightBase.y - mapTopLeftBase.y;
 
             //Draw frame
-            DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, ColorPresets.Khaki);
+            DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, mapFrameColor);
 
             //Draw frame for msg here too
-            DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false, ColorPresets.MediumSeaGreen);
+            DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false, statsFrameColor);
 
             //Put the map in the centre
             //mapTopLeft = new Point(mapTopLeftBase.x + (widthAvail - width) / 2, mapTopLeftBase.y + (heightAvail - height) / 2);
@@ -2875,7 +2878,6 @@ namespace RogueBasin {
         /// <param name="message"></param>
         internal void PrintMessage(string message, Point topLeft, int width)
         {
-
             //Update state
             lastMessage = message;
 
