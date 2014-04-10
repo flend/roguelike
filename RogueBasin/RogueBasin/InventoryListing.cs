@@ -38,6 +38,11 @@ namespace RogueBasin
                 //And for the other group
                 string otherName = inventory.Items[otherListing.itemIndex[0]].SingleItemDescription;
 
+                if (otherName == null)
+                    return 1;
+                if (name == null)
+                    return -1;
+
                 return name.CompareTo(otherName);
             }
             else

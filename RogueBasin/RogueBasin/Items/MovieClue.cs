@@ -18,6 +18,7 @@ namespace RogueBasin.Items
             Setup(mapClue);
             this.pickupMovie = pickupMovie;
             this.representation = representation;
+            this.description = description;
         }
 
         public override bool OnPickup(Creature pickupCreature)
