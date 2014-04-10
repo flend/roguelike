@@ -15,13 +15,11 @@ namespace RogueBasin.Creatures
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
-            //8 is good for triangular
             NormalSightRadius = 8;
         }
 
         protected override bool UseSpecialAbility()
         {
-            
             Explode();
 
             //true to avoid 2 explosions!
@@ -73,7 +71,7 @@ namespace RogueBasin.Creatures
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Triangular;
+            return CreatureFOV.CreatureFOVType.Base;
         }
 
         public override PatrolType GetPatrolType()
