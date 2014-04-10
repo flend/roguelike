@@ -3519,7 +3519,10 @@ namespace RogueBasin
         internal void PlayerDeath(string verb)
         {
             if (PlayerImmortal && !verb.Contains("quit"))
+            {
+                Game.Dungeon.Player.HealCompletely();
                 return;
+            }
 
             //In FlatlineRL death is not permanent, but quitting is!
 
