@@ -2611,7 +2611,7 @@ namespace RogueBasin
             monster.NotifyMonsterDeath();
 
             //Drop its inventory (including plot items we gave it)
-            monster.DropAllItems(monster.LocationLevel, GetFreeAdjacentSquares(monster.LocationLevel, monster.LocationMap));
+            monster.DropAllItems(monster.LocationLevel);
 
             //Drop any insta-create treasure
             //Not used at present
@@ -3209,6 +3209,11 @@ namespace RogueBasin
             }
 
             return null;
+        }
+
+        public bool IsItemAtSpace(int locationLevel, Point locationMap)
+        {
+            return ItemAtSpace(locationLevel, locationMap) != null ? true : false;
         }
 
         internal IEnumerable<Item> ItemsAtSpace(int locationLevel, Point locationMap)
@@ -4798,22 +4803,12 @@ namespace RogueBasin
             return monster;
         }
 
-        public List<Point> GetFreeAdjacentSquares(int locationLevel, Point locationMap)
+        public List<Point> GetWalkableAdjacentSquaresFreeOfCreatures(int locationLevel, Point locationMap)
         {
-
             Map levelMap = levels[locationLevel];
 
-            List<Point> adjacentSq = new List<Point>();
             List<Point> adjacentSqFree = new List<Point>();
-
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y - 1));
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y));
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y - 1));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x, locationMap.y - 1));
+            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
 
             foreach (Point p in adjacentSq)
             {
@@ -4838,11 +4833,64 @@ namespace RogueBasin
 
                     //Empty and walkable
                     adjacentSqFree.Add(p);
-
                 }
             }
 
             return adjacentSqFree;
+        }
+
+        public List<Point> GetWalkableAdjacentSquaresFreeOfCreaturesAndItems(int locationLevel, Point locationMap)
+        {
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSqFree = new List<Point>();
+            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+
+            foreach (Point p in adjacentSq)
+            {
+                if (p.x >= 0 && p.x < levelMap.width
+                    && p.y >= 0 && p.y < levelMap.height)
+                {
+                    if (!MapSquareIsWalkable(locationLevel, p))
+                    {
+                        continue;
+                    }
+
+                    //Check square has nothing else on it
+                    SquareContents contents = MapSquareContents(locationLevel, p);
+
+                    if (contents.monster != null)
+                    {
+                        continue;
+                    }
+
+                    if (contents.player != null)
+                        continue;
+
+                    if (contents.items.Count > 0)
+                        continue;
+
+                    //Empty and walkable
+                    adjacentSqFree.Add(p);
+                }
+            }
+
+            return adjacentSqFree;
+        }
+
+        private static List<Point> GetAdjacentSquares(Point locationMap)
+        {
+            List<Point> adjacentSq = new List<Point>();
+
+            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y - 1));
+            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y));
+            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y + 1));
+            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y - 1));
+            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y));
+            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y + 1));
+            adjacentSq.Add(new Point(locationMap.x, locationMap.y + 1));
+            adjacentSq.Add(new Point(locationMap.x, locationMap.y - 1));
+            return adjacentSq;
         }
 
         public IEnumerable<Point> GetWalkablePointsFromSet(int level, IEnumerable<Point> allPossiblePoints)

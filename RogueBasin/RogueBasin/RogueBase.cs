@@ -1850,7 +1850,7 @@ namespace RogueBasin
                 if (squareContents.monster != null)
                 {
                     //Get surrounding squares
-                    List<Point> freeSqs = dungeon.GetFreeAdjacentSquares(player.LocationLevel, destinationSq);
+                    List<Point> freeSqs = dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(player.LocationLevel, destinationSq);
 
                     if (freeSqs.Count > 0)
                     {

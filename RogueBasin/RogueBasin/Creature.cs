@@ -301,24 +301,29 @@ namespace RogueBasin
         /// </summary>
         /// <param name="itemToDrop"></param>
         /// <returns></returns>
-        public virtual bool DropAllItems(int level, IEnumerable<Point> pointsToDrop)
+        public virtual bool DropAllItems(int level)
         {
-            var pointsLeft = pointsToDrop.Select(x => x).ToList();
+            var numItemsToDrop = inventory.Items.Count;
 
-            if (pointsToDrop.Count() == 0)
-            {
-                //Default to monster's location
-                return DropAllItems();
-            }
+            var completelyFreePoints = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreaturesAndItems(LocationLevel, LocationMap)
+                .Union(new List<Point>{ LocationMap });
+
+            var partiallyFreePoints = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(LocationLevel, LocationMap)
+                .Union(new List<Point> { LocationMap });
+
+            var pointsToUse = numItemsToDrop <= completelyFreePoints.Count() ?
+                completelyFreePoints : partiallyFreePoints;
+
+            var pointsLeft = pointsToUse.ToList();
 
             foreach (Item item in inventory.Items)
             {
-                var randomPoint = pointsToDrop.RandomElement();
+                var randomPoint = pointsLeft.RandomElement();
                 pointsLeft.Remove(randomPoint);
                 ProcessDroppedItem(item, level, randomPoint);
 
                 if(pointsLeft.Count() == 0)
-                    pointsLeft = pointsToDrop.Select(x => x).ToList();
+                    pointsLeft = pointsToUse.Select(x => x).ToList();
             }
 
             inventory.RemoveAllItems();
