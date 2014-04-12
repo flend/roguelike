@@ -568,10 +568,7 @@ namespace RogueBasin
 
         public bool FirePistolLineWeapon(Point target, RangedWeapon item, int damageBase)
         {
-
             Player player = Player;
-
-            LogFile.Log.LogEntryDebug("Firing pistol", LogDebugLevel.Medium);
 
             //Remove 1 ammo
             item.Ammo--;
@@ -586,18 +583,16 @@ namespace RogueBasin
 
             if (monster == null)
             {
-                LogFile.Log.LogEntryDebug("No monster in target for Pistol. Ammo used anyway.", LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("No monster in target for pistol-like weapon. Ammo used anyway.", LogDebugLevel.Medium);
                 return true;
             }
 
+            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) :
+                targetSquares;
+
             //Draw attack
 
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
-
-            //Damage monster
-
-            string combatResultsMsg = "PvM (" + monster.Representation + ")Pistol: Dam: 3";
-            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, ColorPresets.Gray);
 
             //Apply damage
             player.AttackMonsterRanged(monster, damageBase);
