@@ -3262,6 +3262,16 @@ namespace RogueBasin
             return true;
         }
 
+        public Creature CreatureAtSpaceIncludingPlayer(int locationLevel, Point locationMap)
+        {
+            var monsterAtSpace = MonsterAtSpace(locationLevel, locationMap);
+            bool playerAtSpace = (Player.LocationLevel == locationLevel) && (Player.LocationMap == locationMap);
+
+            if (playerAtSpace)
+                return Player;
+            return monsterAtSpace;
+        }
+
         /// <summary>
         /// Return an creature if there is one at the requested square, or return null if not
         /// </summary>
@@ -3317,7 +3327,16 @@ namespace RogueBasin
         /// <returns></returns>
         public static bool IsTerrainWalkable(MapTerrain terrain)
         {
-            if (terrain == MapTerrain.Empty || terrain == MapTerrain.Flooded || terrain == MapTerrain.OpenDoor || terrain == MapTerrain.Corridor || terrain == MapTerrain.Grass || terrain == MapTerrain.Road || terrain == MapTerrain.Gravestone || terrain == MapTerrain.Trees || terrain == MapTerrain.Rubble || terrain == MapTerrain.OpenLock)
+            if (terrain == MapTerrain.Empty ||
+                terrain == MapTerrain.Flooded ||
+                terrain == MapTerrain.OpenDoor ||
+                terrain == MapTerrain.Corridor ||
+                terrain == MapTerrain.Grass ||
+                terrain == MapTerrain.Road ||
+                terrain == MapTerrain.Gravestone ||
+                terrain == MapTerrain.Trees ||
+                terrain == MapTerrain.Rubble ||
+                terrain == MapTerrain.OpenLock)
             {
                 return true;
             }

@@ -71,9 +71,9 @@ namespace RogueBasin
 
                     //Find the square to move to
                     if(!CanOpenDoors())
-                        nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY)).MonsterFinalLocation;
                     else
-                        nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY)).MonsterFinalLocation;
 
                     //Check the square is pathable to
                     if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
@@ -274,25 +274,20 @@ namespace RogueBasin
             }
              
             //Find location of next step on the path towards them
-            Point nextStep;
+            Pathing.PathingResult pathingResult;
             if (!CanOpenDoors())
-                nextStep = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
             else
-                nextStep = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
-
-            bool moveIntoSquare = true;
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
 
             //If this is the same as the target creature's location, we are adjacent. TODO: change our FOV instead of moving. 
             //We are allowed to attack in this case. TODO: more fun if not?
-            if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+            if (pathingResult.MoveIsInteractionWithTarget)
             {
                 LogFile.Log.LogEntryDebug("MonsterThrowAndRunAI: Adjacent to target so changing FOV only ", LogDebugLevel.Low);
                 
                 //This does appear to happen now due to the unusual shaped FOVs (i.e. adjacent but out of FOV)
                 SetHeadingToTarget(newTarget);
-
-                //Setting this flag stops us moving on top of another creature
-                moveIntoSquare = false;
 
                 if (WillAttack())
                 {
@@ -315,20 +310,17 @@ namespace RogueBasin
             }
 
             //If we are permanently blocked, return to patrol state
-            if (nextStep.x == -1 && nextStep.y == -1)
+            if (pathingResult.TerminallyBlocked)
             {
                 LogFile.Log.LogEntryDebug(this.Representation + " permanently blocked (door), returning to patrol ", LogDebugLevel.Medium);
                 AIState = SimpleAIStates.Patrol;
                 return;
-
             }
 
-            //Otherwise (or if the creature died), move towards it (or its corpse)
-            if (moveIntoSquare)
-            {
-                MoveIntoSquare(nextStep);
-                SetHeadingToTarget(newTarget);
-            }
+            //Update position
+            MoveIntoSquare(pathingResult.MonsterFinalLocation);
+            SetHeadingToTarget(newTarget);
+            
         }
 
     }

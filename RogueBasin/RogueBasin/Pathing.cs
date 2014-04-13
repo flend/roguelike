@@ -9,6 +9,11 @@ namespace RogueBasin
     /** Handles all pathing queries. A friend/extension of Dungeon */
     public class Pathing
     {
+        public enum PathingType
+        {
+            Normal, CreaturePass
+        }
+
         LibTCOD.TCODPathFindingWrapper pathFinding;
         Dungeon dungeon;
 
@@ -53,9 +58,8 @@ namespace RogueBasin
         /// <param name="dest"></param>
         /// <param name="allDoorsAsOpen">Assume doors are walkable</param>
         /// <returns></returns>
-        internal Point GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen, bool attackDestination)
+        internal PathingResult GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen, bool attackDestination)
         {
-
             //Try to walk the path
             //If we fail, check if this square occupied by a creature
             //If so, make that square temporarily unwalkable and try to re-route
@@ -64,17 +68,17 @@ namespace RogueBasin
             bool goodPath = false;
             bool pathBlockedByCreatureOrLock = false;
             Point nextStep = new Point(-1, -1);
+            bool interaction = false;
 
             //Check for pathing to own square - return blocked but not terminally
             if (origin == dest)
             {
                 LogFile.Log.LogEntryDebug("Monster trying to path to monster on same square", LogDebugLevel.High);
-                return origin;
+                return new PathingResult(origin, false, false);
             }
 
             do
             {
-
                 //Generate path object
                 //We actually only need the next point here
                 List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, allDoorsAsOpen);
@@ -87,7 +91,7 @@ namespace RogueBasin
                     {
                         //This gets thrown a lot mainly when you cheat
                         LogFile.Log.LogEntryDebug("Path blocked by terrain!", LogDebugLevel.High);
-                        return new Point(-1, -1);
+                        return new PathingResult(origin, false, false);
                     }
                     else
                     {
@@ -111,11 +115,16 @@ namespace RogueBasin
                         continue;
 
                     //Is it at the destination? If so, that's the target creature and it is our goal.
-                    if (creature.LocationMap == dest && nextStep == dest)
+                    if (creature.LocationMap == dest && theNextStep == dest)
                     {
                         //All OK, continue, we will return these coords
                         if (attackDestination)
-                            continue;
+                        {
+                            interaction = true;
+                            nextStep = origin;
+                            goodPath = true;
+                            break;
+                        }
                         else
                         {
                             //Otherwise we are temporarily blocked
@@ -123,7 +132,7 @@ namespace RogueBasin
                             goodPath = true;
                             blockingCreature = creature;
                             //Exits loop and allows cleanup
-                            continue;
+                            break;
                         }
                     }
 
@@ -137,15 +146,35 @@ namespace RogueBasin
                 //Do the same for the player (if the creature is chasing another creature around the player)
                 //Ignore if the player is the target - that's a valid move
 
-                if (!(dungeon.Player.LocationMap == dest))
+                if (dungeon.Player.LocationLevel == level && dungeon.Player.LocationMap == theNextStep)
                 {
-                    if (dungeon.Player.LocationLevel == level && dungeon.Player.LocationMap == theNextStep)
+                    //Is it at the destination? If so, that's the target creature and it is our goal.
+                    if (dungeon.Player.LocationMap == dest && theNextStep == dest)
                     {
-                        blockingCreature = dungeon.Player;
+                        //All OK, continue, we will return these coords
+                        if (attackDestination)
+                        {
+                            interaction = true;
+                            nextStep = origin;
+                            goodPath = true;
+                            break;
+                        }
+                        else
+                        {
+                            //Otherwise we are temporarily blocked
+                            nextStep = origin;
+                            goodPath = true;
+                            blockingCreature = dungeon.Player;
+                            //Exits loop and allows cleanup
+                            break;
+                        }
                     }
-                }
 
+                    blockingCreature = dungeon.Player;
+                }
+                
                 //Check if there is a blocking lock
+                //TODO: I think this is unnecessary
                 var locksInSquare = dungeon.NonOpenLocksAtLocation(level, theNextStep);
 
                 //If no blocking creature or lock (or we found our target), the path is good
@@ -174,7 +203,99 @@ namespace RogueBasin
                 pathFinding.updateMap(level, sq, PathingTerrain.Walkable);
             }
 
-            return nextStep;
+            return new PathingResult(nextStep, interaction, false);
+        }
+
+        public class PathingResult {
+            
+            public Point MonsterFinalLocation { get; private set; }
+            public bool MoveIsInteractionWithTarget { get; private set; }
+            public bool TerminallyBlocked { get; private set; }
+
+            public PathingResult(Point monsterFinalLocation, bool moveIsInteractionWithMonsterAtDest, bool terminallyBlocked) {
+                MonsterFinalLocation = monsterFinalLocation;
+                MoveIsInteractionWithTarget = moveIsInteractionWithMonsterAtDest;
+                TerminallyBlocked = terminallyBlocked;
+            }
+        }
+
+        internal PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, bool allDoorsAsOpen)
+        {
+            //Check for pathing to own square
+            if (origin == dest)
+            {
+                LogFile.Log.LogEntryDebug("Monster trying to path to monster on same square", LogDebugLevel.High);
+                return new PathingResult(origin, false, false);
+            }
+
+            //Generate path object
+            List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, allDoorsAsOpen);
+
+            //No possible path
+            if (pathNodes.Count == 1)
+            {
+                LogFile.Log.LogEntryDebug("Monster Path Passing blocked by terrain!", LogDebugLevel.High);
+                return new PathingResult(origin, false, true);
+            }
+
+            //Run through the path.
+            //We stop at the following conditions:
+
+            //First non-occupied square - place ourselves here
+
+            //Target square: Was last square occupied? If not, go here
+
+            //If so, look for free adjacent squares to the target. Route to the first one of these.
+            //Place ourselves on the first free empty square enroute. We are guaranteed that the target square is empty
+
+            int pathPoint = 1;
+            do
+            {
+                Point theNextStep = pathNodes[pathPoint];
+
+                //Check if that square is occupied
+                Creature blockingCreature = Game.Dungeon.CreatureAtSpaceIncludingPlayer(level, theNextStep);
+
+                if (blockingCreature == null)
+                {
+                    //Free space on the path, stop here
+                    return new PathingResult(theNextStep, false, false);
+                }
+            } while (pathPoint < pathNodes.Count);
+
+            //Path only consists of origin and destination - this can be an attack
+            if (pathNodes.Count() == 2)
+            {
+                return new PathingResult(origin, true, false);
+            }
+
+            //We have a route from the start to our target destination
+            //Find an unoccupied square where we can rest
+
+            //Best idea would be to find all squares adjacent to the monster sea then order by distance from destination
+            //(flood fill style)
+
+            //For now, just look for a free adjacent location next to each of our path nodes (excluding origin)
+            //Case we want is to surround the player
+
+            pathPoint = pathNodes.Count() - 1;
+            do
+            {
+                Point thisPathPoint = pathNodes[pathPoint];
+
+                var possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint);
+
+                if (possibleRestSquares.Any())
+                {
+                    var destSquare = possibleRestSquares.RandomElement();
+                    return new PathingResult(destSquare, false, false);
+                }
+
+                pathPoint--;
+            } while (pathPoint >= 1);
+
+            //We haven't found a node so far, we're temporarily blocked
+            return new PathingResult(origin, false, false);
         }
 
         /// <summary>
@@ -242,7 +363,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal Point GetPathToCreature(Creature originCreature, Creature destCreature)
+        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != destCreature.LocationLevel)
@@ -264,7 +385,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal Point GetPathToPointIgnoreClosedDoors(int level, Monster originCreature, Point dest)
+        internal PathingResult GetPathToPointIgnoreClosedDoors(int level, Monster originCreature, Point dest)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != level)
@@ -285,7 +406,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal Point GetPathToCreatureIgnoreClosedDoors(Creature originCreature, Creature destCreature)
+        internal PathingResult GetPathToCreatureIgnoreClosedDoors(Creature originCreature, Creature destCreature)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != destCreature.LocationLevel)
@@ -307,7 +428,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal Point GetPathFromCreatureToPoint(int level, Monster originCreature, Point dest)
+        internal PathingResult GetPathFromCreatureToPoint(int level, Monster originCreature, Point dest)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != level)

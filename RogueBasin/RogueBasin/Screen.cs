@@ -3466,5 +3466,14 @@ namespace RogueBasin {
             FlushConsole();
         }
 
+
+        internal void ResetViewPanel()
+        {
+            if (!DebugMode)
+            {
+                Screen.Instance.CreatureToView = null;
+                Screen.Instance.ItemToView = null;
+            }
+        }
     }
 }

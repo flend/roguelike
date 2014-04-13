@@ -409,7 +409,7 @@ namespace RogueBasin
                               //  Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
                                 //break;
                             case 'Y':
-                                Game.Dungeon.AddMonster(new Creatures.Lich(), levelNo, new Point(i, row));
+                                //Game.Dungeon.AddMonster(new Creatures.Lich(), levelNo, new Point(i, row));
                                 break;
                             case 'G':
                                 Game.Dungeon.AddMonster(new Creatures.Friend(), levelNo, new Point(i, row));

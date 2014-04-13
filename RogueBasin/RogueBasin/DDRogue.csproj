@@ -138,9 +138,6 @@
     <Compile Include="Creatures\Imp.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creatures\Lich.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Creatures\Maleficarum.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -333,7 +330,6 @@
     <Compile Include="MonsterEffectSimpleDuration.cs" />
     <Compile Include="MonsterEffects\SlowDown.cs" />
     <Compile Include="MonsterFightAndRunAI.cs" />
-    <Compile Include="MonsterLichAI.cs" />
     <Compile Include="MonsterNullAI.cs" />
     <Compile Include="MonsterSimpleAI.cs">
       <SubType>Code</SubType>
@@ -449,9 +445,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Triggers\LeaveByDock.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\LichBattle.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Triggers\Mission11Entry.cs">

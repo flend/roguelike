@@ -29,7 +29,7 @@ namespace RogueBasin
     public class CreatureFOV
     {
         public enum CreatureFOVType { 
-            Base, Triangular
+            Base, Triangular, AlwaysTrue
         }
 
         WrappedFOV fov;
@@ -67,6 +67,11 @@ namespace RogueBasin
 
         public bool CheckTileFOV(int x, int y)
         {
+            if (type == CreatureFOVType.AlwaysTrue)
+            {
+                return true;
+            }
+
             //Check for overriden origin (creature) location
             Point origin = creature.LocationMap;
             if (overrideLocation != null)
@@ -213,7 +218,9 @@ namespace RogueBasin
             return pointsToRet;
         }
 
-
-
+        internal static CreatureFOV PermissiveFOV()
+        {
+            return new CreatureFOV(null, null, CreatureFOVType.AlwaysTrue);
+        }
     }
 }

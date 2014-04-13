@@ -462,7 +462,7 @@ namespace RogueBasin
 
                                 case 'x':
                                     //Examine
-                                    timeAdvances = Examine();
+                                    timeAdvances = Examine(false);
                                     if (!timeAdvances)
                                         Screen.Instance.Update();
                                     if (timeAdvances)
@@ -640,6 +640,16 @@ namespace RogueBasin
          
                                     break;
                                     */
+
+
+                                case 'X':
+                                    //Examine
+                                    timeAdvances = Examine(true);
+                                    if (!timeAdvances)
+                                        Screen.Instance.Update();
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+                                    break;
 
 
                                 case 'K':
@@ -1874,9 +1884,14 @@ namespace RogueBasin
         /// Examine using the target. Returns if time passes.
         /// </summary>
         /// <returns></returns>
-        private bool Examine()
+        private bool Examine(bool permissive)
         {
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            CreatureFOV currentFOV;
+            
+            if(permissive)
+                currentFOV = CreatureFOV.PermissiveFOV();
+            else
+                currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             Point target = new Point();
             bool targettingSuccess = true;
@@ -2360,10 +2375,9 @@ namespace RogueBasin
             return sqC;
         }
 
-        private static void ResetViewPanel()
+        private void ResetViewPanel()
         {
-            Screen.Instance.CreatureToView = null;
-            Screen.Instance.ItemToView = null;
+            Screen.Instance.ResetViewPanel();
         }
 
         /// <summary>

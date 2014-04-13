@@ -648,13 +648,13 @@ namespace RogueBasin
         private bool InvestigateSound()
         {
             //Check the square is pathable to
-            Point nextStep;
+            Pathing.PathingResult pathingResult;
             if(!CanOpenDoors())
-                nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
+                pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
             else
-                nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, currentSound.MapLocation);
+                pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, currentSound.MapLocation);
 
-            if (nextStep.x == -1 && nextStep.y == -1)
+            if (pathingResult.TerminallyBlocked)
             {
                 //Not routeable due to doors etc.
                 LogFile.Log.LogEntryDebug(this.Representation + " permanently blocked on sound " + currentSound + ". Returning to patrol", LogDebugLevel.Medium);
@@ -664,7 +664,7 @@ namespace RogueBasin
                 return false;
             }
 
-            if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
+            if (pathingResult.MonsterFinalLocation == LocationMap)
             {
                 //Temporarily blocked
                 BlockedOnSoundTurns++;
@@ -688,13 +688,13 @@ namespace RogueBasin
             //Only creatures that pursue actually move
             if (WillPursue() && CanMove())
             {
-                SetHeadingToMapSquare(nextStep);
-                MoveIntoSquare(nextStep);
+                SetHeadingToMapSquare(pathingResult.MonsterFinalLocation);
+                MoveIntoSquare(pathingResult.MonsterFinalLocation);
             }
             else
             {
                 //Creature that can't move or don't pursue reset to Patrol now, but get a chance to detect the PC in the next loop
-                SetHeadingToMapSquare(nextStep);
+                SetHeadingToMapSquare(pathingResult.MonsterFinalLocation);
                 LogFile.Log.LogEntryDebug(this.Representation + " (non-pursue) changing heading only for sound " + currentSound, LogDebugLevel.Medium);
                 ResetFollowingSound();
                 headingSetToSound = true;
@@ -704,7 +704,7 @@ namespace RogueBasin
             }
 
             //We made it? Go back to patrol
-            if (nextStep.x == currentSound.MapLocation.x && nextStep.y == currentSound.MapLocation.y)
+            if (pathingResult.MonsterFinalLocation == currentSound.MapLocation)
             {
                 LogFile.Log.LogEntryDebug(this.Representation + " reached source of sound " + currentSound + ". Returning to patrol", LogDebugLevel.Low);
                 ResetFollowingSound();
@@ -806,13 +806,13 @@ namespace RogueBasin
 
                         //Head towards next waypoint
                         //Check the square is pathable to
-                        Point nextStep;
+                        Pathing.PathingResult pathingResult;
                         if(!CanOpenDoors())
-                            nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
+                            pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
                         else
-                            nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
+                            pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
 
-                        if (nextStep.x == -1 && nextStep.y == -1)
+                        if (pathingResult.TerminallyBlocked)
                         {
                             //Pick a random waypoint to continue to
                             CurrentWaypoint = Game.Random.Next(Waypoints.Count);
@@ -823,7 +823,7 @@ namespace RogueBasin
                         }
 
                         //Temporarily blocked
-                        if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
+                        if (pathingResult.MonsterFinalLocation == this.LocationMap)
                         {
                             //Pick a random waypoint to continue to
                             CurrentWaypoint = Game.Random.Next(Waypoints.Count);
@@ -834,11 +834,11 @@ namespace RogueBasin
                         }
                         
                         //Walk towards waypoint
-                        SetHeadingToMapSquare(nextStep);
-                        MoveIntoSquare(nextStep);
+                        SetHeadingToMapSquare(pathingResult.MonsterFinalLocation);
+                        MoveIntoSquare(pathingResult.MonsterFinalLocation);
 
                         //We made it? Go to next waypoint
-                        if (nextStep.x == Waypoints[CurrentWaypoint].x && nextStep.y == Waypoints[CurrentWaypoint].y)
+                        if (pathingResult.MonsterFinalLocation == Waypoints[CurrentWaypoint])
                         {
                             int nextWaypoint;
                             if (HasSquarePatrol())
@@ -936,7 +936,8 @@ namespace RogueBasin
                 bool relaxDirection = false;
                 bool goodPath = false;
 
-                Point nextStep = new Point(0, 0);
+                Pathing.PathingResult pathingResult;
+                Point nextStep = LocationMap;
 
                 int totalFleeLoops = GetTotalFleeLoops();
                 int relaxDirectionAt = RelaxDirectionAt();
@@ -996,11 +997,11 @@ namespace RogueBasin
 
                     //Check the square is pathable to
                     if(!CanOpenDoors())
-                        nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
                     else
-                        nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
 
-                    if (nextStep.x == -1 && nextStep.y == -1)
+                    if (pathingResult.TerminallyBlocked)
                     {
                         counter++;
                         continue;
@@ -1008,9 +1009,8 @@ namespace RogueBasin
 
                     //Otherwise we found it
                     goodPath = true;
+                    nextStep = pathingResult.MonsterFinalLocation;
                     break;
-
-
                 } while (counter < totalFleeLoops);
 
                 //If we found a good path, walk it
@@ -1079,20 +1079,17 @@ namespace RogueBasin
         {
             //Find location of next step on the path towards target
 
-            Point nextStep;
+            Pathing.PathingResult pathingResult;
             if(!CanOpenDoors())
-                nextStep = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
             else
-                nextStep = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
 
-            bool moveIntoSquare = true;
+            Point nextStep = pathingResult.MonsterFinalLocation;
 
             //If this is the same as the target creature's location, we are adjacent and can attack
-            if (nextStep.x == newTarget.LocationMap.x && nextStep.y == newTarget.LocationMap.y)
+            if (pathingResult.MoveIsInteractionWithTarget)
             {
-                //Can't move into square unless we kill the creature
-                moveIntoSquare = false;
-
                 //If we can attack, attack the monster or PC
                 if(WillAttack()) {
 
@@ -1111,21 +1108,16 @@ namespace RogueBasin
                     Screen.Instance.DrawMeleeAttack(this, newTarget, result);
 
                     //If we killed it, move into its square
-                    if (result == CombatResults.DefenderDied)
+                    if (result == CombatResults.DefenderDied &&
+                        !(newTarget == Game.Dungeon.Player && Game.Dungeon.PlayerImmortal))
                     {
-                        moveIntoSquare = true;
-                    }
-
-                    //Exception for immortal player
-                    if (newTarget == Game.Dungeon.Player && Game.Dungeon.PlayerImmortal)
-                    {
-                        moveIntoSquare = false;
+                        nextStep = currentTarget.LocationMap;
                     }
                 }
             }
 
             //If we are permanently blocked, return to patrol state
-            if (nextStep.x == -1 && nextStep.y == -1)
+            if (pathingResult.TerminallyBlocked)
             {
                 LogFile.Log.LogEntryDebug(this.Representation + " permanently blocked (door), returning to patrol ", LogDebugLevel.Medium);
                 AIState = SimpleAIStates.Patrol;
@@ -1137,7 +1129,7 @@ namespace RogueBasin
             if(WillPursue()) {
                 
                 //If we want to pursue, move towards the creature
-                if (moveIntoSquare && CanMove())
+                if (CanMove())
                 {
                     MoveIntoSquare(nextStep);
                     SetHeadingToTarget(newTarget);
@@ -1162,9 +1154,9 @@ namespace RogueBasin
                 return;
 
             //Find location of next step on the path towards them
-            Point nextStep = Game.Dungeon.Pathing.GetPathToCreature(this, player);
+            var pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, player);
 
-            if (nextStep.x == -1 || nextStep.y == -1)
+            if (pathingResult.TerminallyBlocked)
             {
                 //No path
                 //Need to check this really
@@ -1172,20 +1164,8 @@ namespace RogueBasin
                 return;
             }
 
-            bool moveIntoSquare = true;
-
-            //Check we don't walk on top of him
-            if (nextStep.x == player.LocationMap.x && nextStep.y == player.LocationMap.y)
-            {
-                moveIntoSquare = false;
-            }
-
-            //Move into square - seems low level but GetPathTo return no move if not possible
-            if (moveIntoSquare)
-            {
-                MoveIntoSquare(nextStep);
-                SetHeadingToTarget(player);
-            }
+            MoveIntoSquare(pathingResult.MonsterFinalLocation);   
+            SetHeadingToTarget(player);
         }
     
         /// <summary>
