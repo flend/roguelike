@@ -37,6 +37,11 @@ namespace RogueBasin.Creatures
             return 40; //Not a 1-hit kill
         }
 
+        public override Pathing.PathingType PathingType()
+        {
+            return Pathing.PathingType.CreaturePass;
+        }
+
         public override int DamageBase()
         {
             return 10;

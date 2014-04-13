@@ -200,6 +200,9 @@ namespace RogueBasin
 
             //Generate path object
             List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, allDoorsAsOpen);
+            //Remove last node if repeated (happens sometimes)
+            if(pathNodes[pathNodes.Count - 1] == pathNodes[pathNodes.Count - 2])
+                pathNodes.RemoveAt(pathNodes.Count - 1);
 
             //No possible path
             if (pathNodes.Count == 1)
@@ -231,6 +234,9 @@ namespace RogueBasin
                     //Free space on the path, stop here
                     return new PathingResult(theNextStep, false, false);
                 }
+
+                pathPoint++;
+
             } while (pathPoint < pathNodes.Count);
 
             //Path only consists of origin and destination - this can be an attack
@@ -417,7 +423,7 @@ namespace RogueBasin
             {
                 case PathingType.CreaturePass:
 
-                    return GetPathToPoint(level, origin, dest, openClosedDoors);
+                    return GetPathToPointPassThroughMonsters(level, origin, dest, openClosedDoors);
 
                 default:
                     return GetPathToPoint(level, origin, dest, openClosedDoors);

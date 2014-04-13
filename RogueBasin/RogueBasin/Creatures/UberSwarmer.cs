@@ -45,6 +45,11 @@ namespace RogueBasin.Creatures
             return 10;
         }
 
+        public override Pathing.PathingType PathingType()
+        {
+            return Pathing.PathingType.CreaturePass;
+        }
+
         public override CreatureFOV.CreatureFOVType FOVType()
         {
             return CreatureFOV.CreatureFOVType.Base;
