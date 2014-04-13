@@ -352,20 +352,6 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     break;
 
-                                    /*
-                                case 'S':
-                                    //Save the game
-                                    timeAdvances = true;
-                                    Game.MessageQueue.AddMessage("Saving game...");
-                                    Screen.Instance.Update();
-                                    Game.Dungeon.SaveGame();
-                                    Game.MessageQueue.AddMessage("Press any key to exit the game.");
-                                    Screen.Instance.Update();
-                                    userKey = Keyboard.WaitForKeyPress(true);
-                                    Game.Dungeon.RunMainLoop = false;
-
-                                    break;
-                                    */
                                 case 'F':
                                     //Full screen switch
                                     timeAdvances = false;
@@ -373,34 +359,8 @@ namespace RogueBasin
                                     rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
                                     rootConsole.Flush();
                                     break;
-
-                                    //No longer needed
-                                    /*
-                                case 'o':
-                                case 'O':
-                                    //Open door
-                                    timeAdvances = PlayerOpenDoor();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-                                    */
-                                    /*
-                                case 'c':
-                                case 'C':
-                                    //Close door
-                                    timeAdvances = PlayerCloseDoor();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-                                    */
-                                    //Repeatidly closing doors and lurking behind them was kind of abusive
                                     
                                 case 'f':
-                                //case 'Z':
                                     //Fire weapon
                                     if (Game.Dungeon.Player.GetEquippedWeapon() == null)
                                         break;
@@ -423,43 +383,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-                                    /*
-                                case 't':
-                                    //Throw weapon
-                                    timeAdvances = ThrowWeapon();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-
-                                case 'T':
-                                    //Throw utility
-                                    timeAdvances = ThrowUtility();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-
-                                case 'U':
-                                    //Use utility
-                                    timeAdvances = UseUtility();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;*/
-                                    /*
-                                case 'u':
-                                    //Use weapon
-                                    timeAdvances = UseWeapon();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;*/
-
+                                
                                 case 'x':
                                     //Examine
                                     timeAdvances = Examine(false);
@@ -469,127 +393,12 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                    /*
-                                case 'x':
-                                case 'X':
-                                    //Recast last spells
-                                    timeAdvances = RecastSpell();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;*/
-
-                                    /*
-                                case 'c':
-                                case 'C':
-                                    //Charm creature
-                                    timeAdvances = PlayerCharmCreature();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-                                    */
-
-                                    /*
-                                case ',':
-                                case 'g':
-                                    //Pick up item
-                                    timeAdvances = PickUpItem();
-                                    //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;*/
-
                                 case '.':
                                     // Do nothing
                                     timeAdvances = DoNothing();
                                     // Don't recentre - useful for viewing
                                     centreOnPC = false;
                                     break;
-                                    /*
-                                case '>':
-                                case '<':
-                                    //Interact with feature
-                                    timeAdvances = Game.Dungeon.InteractWithFeature();
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-
-                                    break;*/
-
-                                    //WETWARE
-                                /*case 'S':
-                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.ShieldWare));
-                                    break;
-
-                                case 'D':
-                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
-                                    break;
-
-                                case 'A':
-                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.AimWare));
-                                    break;
-                                    */
-                                    /*
-                                case 'd':
-                                case 'D':
-                                    //Drop items if in town
-                                    //DropItems();
-                                    Screen.Instance.Update();
-                                    timeAdvances = false;
-                                    break;*/
-                                    /*
-                                case 'i':
-                                case 'I':
-                                    //Use an inventory item
-                                    SetPlayerInventorySelectScreen();
-                                    Screen.Instance.Update();
-                                    //This uses the generic 'select from inventory' input loop
-                                    //Time advances if the item was used successfully
-                                    timeAdvances = UseItem();
-                                    DisablePlayerInventoryScreen();
-                                    //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-
-
-                                case 'e':
-                                case 'E':
-                                    //Display currently equipped items
-                                    SetPlayerEquippedItemsScreen();
-                                    Screen.Instance.Update();
-                                    timeAdvances = DisplayEquipment();
-                                    DisablePlayerEquippedItemsScreen();
-
-                                    //Using an item can break a special move sequence
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
-
-
-                                case 'm':
-                                
-                                    //Show movies
-                                    SetSpecialMoveMovieScreen();
-                                    Screen.Instance.Update();
-                                    MovieScreenInteraction();
-                                    DisableSpecialMoveMovieScreen();
-                                    Screen.Instance.Update();
-                                    timeAdvances = false;
-                                    break;*/
 
                                 case 'M':
                                     SetMsgHistoryScreen();
@@ -625,23 +434,6 @@ namespace RogueBasin
                                 //Debug events
                                     
     
-                                    /*
-                                case 'K':
-                                    //Add a sound at the player's location
-                                    Game.Dungeon.AddSoundEffect(1.0, Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
-                                    //refresh the sound display
-                                    Game.Dungeon.ShowSoundsOnMap();
-
-                                    Screen.Instance.Update();
-                                    break;
-
-                                case 'z':
-                                    Game.Dungeon.ExplodeAllMonsters();
-         
-                                    break;
-                                    */
-
-
                                 case 'X':
                                     //Examine
                                     timeAdvances = Examine(true);
@@ -732,7 +524,221 @@ namespace RogueBasin
                                     Game.Dungeon.Player.GiveAllWetware(3);
                                     Screen.Instance.Update();
                                     break;
-                               
+
+
+
+                                //OLD EVENTS
+
+                                /*
+                            case 'K':
+                                //Add a sound at the player's location
+                                Game.Dungeon.AddSoundEffect(1.0, Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+                                //refresh the sound display
+                                Game.Dungeon.ShowSoundsOnMap();
+
+                                Screen.Instance.Update();
+                                break;
+
+                            case 'z':
+                                Game.Dungeon.ExplodeAllMonsters();
+         
+                                break;
+                                */
+
+                                /*
+                            case 'x':
+                            case 'X':
+                                //Recast last spells
+                                timeAdvances = RecastSpell();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;*/
+
+                                /*
+                            case 'c':
+                            case 'C':
+                                //Charm creature
+                                timeAdvances = PlayerCharmCreature();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+                                */
+
+                                /*
+                            case ',':
+                            case 'g':
+                                //Pick up item
+                                timeAdvances = PickUpItem();
+                                //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;*/
+                                //No longer needed
+
+                                /*
+                            case 'S':
+                                //Save the game
+                                timeAdvances = true;
+                                Game.MessageQueue.AddMessage("Saving game...");
+                                Screen.Instance.Update();
+                                Game.Dungeon.SaveGame();
+                                Game.MessageQueue.AddMessage("Press any key to exit the game.");
+                                Screen.Instance.Update();
+                                userKey = Keyboard.WaitForKeyPress(true);
+                                Game.Dungeon.RunMainLoop = false;
+
+                                break;
+                                */
+                                /*
+                            case 'o':
+                            case 'O':
+                                //Open door
+                                timeAdvances = PlayerOpenDoor();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+                                */
+                                /*
+                            case 'c':
+                            case 'C':
+                                //Close door
+                                timeAdvances = PlayerCloseDoor();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+                                */
+                                //Repeatidly closing doors and lurking behind them was kind of abusive
+
+                                /*
+                            case 't':
+                                //Throw weapon
+                                timeAdvances = ThrowWeapon();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+
+                            case 'T':
+                                //Throw utility
+                                timeAdvances = ThrowUtility();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+
+                            case 'U':
+                                //Use utility
+                                timeAdvances = UseUtility();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;*/
+                                /*
+                            case 'u':
+                                //Use weapon
+                                timeAdvances = UseWeapon();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;*/
+
+
+
+                                /*
+                            case '>':
+                            case '<':
+                                //Interact with feature
+                                timeAdvances = Game.Dungeon.InteractWithFeature();
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+
+                                break;*/
+
+                                //WETWARE
+                                /*case 'S':
+                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.ShieldWare));
+                                    break;
+
+                                case 'D':
+                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
+                                    break;
+
+                                case 'A':
+                                    timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.AimWare));
+                                    break;
+                                    */
+                                /*
+                            case 'd':
+                            case 'D':
+                                //Drop items if in town
+                                //DropItems();
+                                Screen.Instance.Update();
+                                timeAdvances = false;
+                                break;*/
+                                /*
+                            case 'i':
+                            case 'I':
+                                //Use an inventory item
+                                SetPlayerInventorySelectScreen();
+                                Screen.Instance.Update();
+                                //This uses the generic 'select from inventory' input loop
+                                //Time advances if the item was used successfully
+                                timeAdvances = UseItem();
+                                DisablePlayerInventoryScreen();
+                                //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+
+
+                            case 'e':
+                            case 'E':
+                                //Display currently equipped items
+                                SetPlayerEquippedItemsScreen();
+                                Screen.Instance.Update();
+                                timeAdvances = DisplayEquipment();
+                                DisablePlayerEquippedItemsScreen();
+
+                                //Using an item can break a special move sequence
+                                if (!timeAdvances)
+                                    Screen.Instance.Update();
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+                                break;
+
+
+                            case 'm':
+                                
+                                //Show movies
+                                SetSpecialMoveMovieScreen();
+                                Screen.Instance.Update();
+                                MovieScreenInteraction();
+                                DisableSpecialMoveMovieScreen();
+                                Screen.Instance.Update();
+                                timeAdvances = false;
+                                break;*/
+
                                 /*
                             case 'k':
                                 //Display the inventory
@@ -765,19 +771,12 @@ namespace RogueBasin
                                 UpdateScreen();
                                 timeAdvances = false;
                                 break;
-
-
-
-
-                           
-
-                           
+                          
 
                             case 'B':
                                 Screen.Instance.SaveCurrentLevelToDisk();
                                 break;
-
-                                                                        
+                                                                     
                             case 'U':
                                 //Uncharm creature
                                 timeAdvances = PlayerUnCharmCreature();
@@ -798,9 +797,6 @@ namespace RogueBasin
                                 UpdateScreen();
                                 break;
                                     
-                           
-
-                                /*
                             //Debug events
                             case 'w':
                                 //Select an item to equip
@@ -973,10 +969,6 @@ namespace RogueBasin
                         }
 
                         break;
-
-                    //Select an item in the inventory
-                    //case InputState.InventoryShow:
-                    //    break;
                 }
             }
             catch (Exception ex)
@@ -986,6 +978,7 @@ namespace RogueBasin
             }
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
+
 
         private void ScreenLevelDown()
         {
