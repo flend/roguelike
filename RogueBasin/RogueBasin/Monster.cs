@@ -802,5 +802,10 @@ namespace RogueBasin
         {
             return 10;
         }
+
+        public virtual Pathing.PathingType PathingType()
+        {
+            return Pathing.PathingType.Normal;
+        }
     }
 }

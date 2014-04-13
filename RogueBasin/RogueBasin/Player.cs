@@ -914,6 +914,9 @@ namespace RogueBasin
 
         public void CancelStealthDueToAttack()
         {
+            if (Game.Dungeon.PlayerImmortal)
+                return;
+
             //Forceably unequip any StealthWare and disable for some time
             if (IsWetwareTypeEquipped(typeof(Items.StealthWare)))
             {
@@ -924,6 +927,9 @@ namespace RogueBasin
 
         public void CancelBoostDueToAttack()
         {
+            if (Game.Dungeon.PlayerImmortal)
+                return;
+
             //Forceably unequip any SpeedWare and disable for some time
             if (IsWetwareTypeEquipped(typeof(Items.BoostWare)))
             {
@@ -2419,7 +2425,7 @@ namespace RogueBasin
 
         internal bool isStealthed()
         {
-            if (IsEffectActive(typeof(PlayerEffects.StealthBoost)))
+            if (IsEffectActive(typeof(PlayerEffects.StealthBoost)) || IsEffectActive(typeof(PlayerEffects.StealthField)))
                 return true;
 
             return false;

@@ -71,9 +71,9 @@ namespace RogueBasin
 
                     //Find the square to move to
                     if(!CanOpenDoors())
-                        nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY)).MonsterFinalLocation;
+                        nextStep = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY), PathingType()).MonsterFinalLocation;
                     else
-                        nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY)).MonsterFinalLocation;
+                        nextStep = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY), PathingType()).MonsterFinalLocation;
 
                     //Check the square is pathable to
                     if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
@@ -276,9 +276,9 @@ namespace RogueBasin
             //Find location of next step on the path towards them
             Pathing.PathingResult pathingResult;
             if (!CanOpenDoors())
-                pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType());
             else
-                pathingResult = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget, PathingType());
 
             //If this is the same as the target creature's location, we are adjacent. TODO: change our FOV instead of moving. 
             //We are allowed to attack in this case. TODO: more fun if not?

@@ -650,9 +650,9 @@ namespace RogueBasin
             //Check the square is pathable to
             Pathing.PathingResult pathingResult;
             if(!CanOpenDoors())
-                pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation);
+                pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation, PathingType());
             else
-                pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, currentSound.MapLocation);
+                pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, currentSound.MapLocation, PathingType());
 
             if (pathingResult.TerminallyBlocked)
             {
@@ -680,7 +680,6 @@ namespace RogueBasin
                 }
 
                 return true;
-
             }
 
             //(if temporarily blocked will just attempt to move onto their own square)
@@ -808,9 +807,9 @@ namespace RogueBasin
                         //Check the square is pathable to
                         Pathing.PathingResult pathingResult;
                         if(!CanOpenDoors())
-                            pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
+                            pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint], PathingType());
                         else
-                            pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint]);
+                            pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint], PathingType());
 
                         if (pathingResult.TerminallyBlocked)
                         {
@@ -997,9 +996,9 @@ namespace RogueBasin
 
                     //Check the square is pathable to
                     if(!CanOpenDoors())
-                        pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY), PathingType());
                     else
-                        pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY));
+                        pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY), PathingType());
 
                     if (pathingResult.TerminallyBlocked)
                     {
@@ -1081,13 +1080,13 @@ namespace RogueBasin
 
             Pathing.PathingResult pathingResult;
             if(!CanOpenDoors())
-                pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget);
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType());
             else
-                pathingResult = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget);
+                pathingResult = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget, PathingType());
 
             Point nextStep = pathingResult.MonsterFinalLocation;
 
-            //If this is the same as the target creature's location, we are adjacent and can attack
+            //We are adjacent and can attack
             if (pathingResult.MoveIsInteractionWithTarget)
             {
                 //If we can attack, attack the monster or PC
@@ -1154,7 +1153,7 @@ namespace RogueBasin
                 return;
 
             //Find location of next step on the path towards them
-            var pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, player);
+            var pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, player, PathingType());
 
             if (pathingResult.TerminallyBlocked)
             {

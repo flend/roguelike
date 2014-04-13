@@ -3540,6 +3540,7 @@ namespace RogueBasin
             if (PlayerImmortal && !verb.Contains("quit"))
             {
                 Game.Dungeon.Player.HealCompletely();
+                PlayerDeathOccured = false;
                 return;
             }
 

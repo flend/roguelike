@@ -23,8 +23,8 @@ namespace TraumaRL
 
             //For testing
             bool retry = false;
+            bool failFast = false;
 
-            /*
             //For release
             do
             {
@@ -40,16 +40,12 @@ namespace TraumaRL
                 {
                     retry = false;
                     LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
-
+                    if (failFast)
+                    {
+                        throw ex;
+                    }
                 }
             } while (true);
-             */
-
-            //Fail fast
-
-            StandardDungeonSetup();
-            
-            GenerateStoryDungeon(retry);
 
             //Run game         
             RunGame();
@@ -153,8 +149,9 @@ namespace TraumaRL
 
             Game.Dungeon.AllLocksOpen = false;
 
-            Screen.Instance.SeeAllMonsters = true;
-            Screen.Instance.SeeAllMap = true;
+            //Screen.Instance.SeeAllMonsters = true;
+            //Screen.Instance.SeeAllMap = true;
+            Game.Dungeon.PlayerImmortal = true;
         }
 
         private void RunGame()

@@ -47,18 +47,16 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Master path finding. Finds a route from origin to dest. Will reroute around Creatures.
-        /// Returns the direction to go in (+-xy) for the next step towards the target
-        /// If there's no route at all, return -1, -1
-        /// If there's a route but its blocked by a creature return the originCreature's coords
-        /// 
-        /// Needs a lot of state from Dungeon, so users will call dungeon and get passed through
+        /// General pathing finding function.
+        /// allDoorsAsOpen - assume all doors are open (for creatures who can open doors)
         /// </summary>
+        /// <param name="level"></param>
         /// <param name="origin"></param>
         /// <param name="dest"></param>
-        /// <param name="allDoorsAsOpen">Assume doors are walkable</param>
+        /// <param name="allDoorsAsOpen"></param>
+        /// <param name="attackDestination"></param>
         /// <returns></returns>
-        internal PathingResult GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen, bool attackDestination)
+        internal PathingResult GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen)
         {
             //Try to walk the path
             //If we fail, check if this square occupied by a creature
@@ -97,9 +95,8 @@ namespace RogueBasin
                     {
                         //All paths are blocked by creatures, we will return the origin creature's location
                         nextStep = origin;
-                        goodPath = true;
                         //Exits loop and allows cleanup
-                        continue;
+                        break;
                     }
                 }
 
@@ -114,34 +111,24 @@ namespace RogueBasin
                     if (creature.LocationLevel != level)
                         continue;
 
-                    //Is it at the destination? If so, that's the target creature and it is our goal.
-                    if (creature.LocationMap == dest && theNextStep == dest)
-                    {
-                        //All OK, continue, we will return these coords
-                        if (attackDestination)
-                        {
-                            interaction = true;
-                            nextStep = origin;
-                            goodPath = true;
-                            break;
-                        }
-                        else
-                        {
-                            //Otherwise we are temporarily blocked
-                            nextStep = origin;
-                            goodPath = true;
-                            blockingCreature = creature;
-                            //Exits loop and allows cleanup
-                            break;
-                        }
-                    }
-
-                    //Another creature is blocking
                     if (creature.LocationMap == theNextStep)
                     {
                         blockingCreature = creature;
+
+                        //Is it at the destination? If so, that's the target creature and it is our goal.
+                        if (theNextStep == dest)
+                        {
+                            interaction = true;
+                            goodPath = true;
+                            nextStep = origin;
+                            break;
+                        }
                     }
                 }
+
+                //(above break doesn't break the do, just the foreach)
+                if (goodPath)
+                    break;
 
                 //Do the same for the player (if the creature is chasing another creature around the player)
                 //Ignore if the player is the target - that's a valid move
@@ -149,31 +136,18 @@ namespace RogueBasin
                 if (dungeon.Player.LocationLevel == level && dungeon.Player.LocationMap == theNextStep)
                 {
                     //Is it at the destination? If so, that's the target creature and it is our goal.
-                    if (dungeon.Player.LocationMap == dest && theNextStep == dest)
+                    if (dungeon.Player.LocationMap == theNextStep && theNextStep == dest)
                     {
                         //All OK, continue, we will return these coords
-                        if (attackDestination)
-                        {
-                            interaction = true;
-                            nextStep = origin;
-                            goodPath = true;
-                            break;
-                        }
-                        else
-                        {
-                            //Otherwise we are temporarily blocked
-                            nextStep = origin;
-                            goodPath = true;
-                            blockingCreature = dungeon.Player;
-                            //Exits loop and allows cleanup
-                            break;
-                        }
+                        interaction = true;
+                        nextStep = origin;
+                        break;
                     }
 
                     blockingCreature = dungeon.Player;
                 }
                 
-                //If no blocking creature or lock (or we found our target), the path is good
+                //If no blocking creature, the path is good
                 if (blockingCreature == null)
                 {
                     goodPath = true;
@@ -359,7 +333,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature)
+        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature, PathingType type)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != destCreature.LocationLevel)
@@ -369,7 +343,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, false, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, false);
         }
 
         /// <summary>
@@ -381,7 +355,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal PathingResult GetPathToPointIgnoreClosedDoors(int level, Monster originCreature, Point dest)
+        internal PathingResult GetPathToPointIgnoreClosedDoors(int level, Monster originCreature, Point dest, PathingType type)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != level)
@@ -391,7 +365,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, true, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, true);
         }
 
         /// <summary>
@@ -402,7 +376,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal PathingResult GetPathToCreatureIgnoreClosedDoors(Creature originCreature, Creature destCreature)
+        internal PathingResult GetPathToCreatureIgnoreClosedDoors(Creature originCreature, Creature destCreature, PathingType type)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != destCreature.LocationLevel)
@@ -412,7 +386,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, true, true);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, true);
         }
 
         /// <summary>
@@ -424,7 +398,7 @@ namespace RogueBasin
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
         /// <returns></returns>
-        internal PathingResult GetPathFromCreatureToPoint(int level, Monster originCreature, Point dest)
+        internal PathingResult GetPathFromCreatureToPoint(int level, Monster originCreature, Point dest, PathingType type)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != level)
@@ -434,7 +408,20 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, false, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, false);
+        }
+
+        public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, bool openClosedDoors)
+        {
+            switch (pathingType)
+            {
+                case PathingType.CreaturePass:
+
+                    return GetPathToPoint(level, origin, dest, openClosedDoors);
+
+                default:
+                    return GetPathToPoint(level, origin, dest, openClosedDoors);
+            }
         }
 
     }
