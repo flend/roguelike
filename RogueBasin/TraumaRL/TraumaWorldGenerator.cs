@@ -3081,7 +3081,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
                     Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
 
-                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " size: w:" + positionedRoom.Room.Width + " h:" + positionedRoom.Room.Height + " at location " + featureLocationInMapCoords + " (rel " + randomPoint + ")", LogDebugLevel.Medium);
                 }
 
                 if (floorPoints.Count() == 0)

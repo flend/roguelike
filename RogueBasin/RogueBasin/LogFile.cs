@@ -79,7 +79,7 @@ namespace RogueBasin
             }
 
             //To debug console
-            if(Game.Config.DebugMode)
+            if(Game.Config != null && Game.Config.DebugMode)
                 Screen.Instance.ConsoleLine(datedEntry);
         }
 
