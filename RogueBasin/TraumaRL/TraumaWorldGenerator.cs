@@ -1254,6 +1254,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var escapePodRoom = escapePodsConnection.Target;
             PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> { escapePodRoom }, true, false);
 
+            LogFile.Log.LogEntryDebug("Adding features to escape pod room", LogDebugLevel.Medium);
             var escapePodDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument2]),
@@ -3061,7 +3062,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
         {
             //This is probably rather slow
-            var bridgeRouter = new RoomFilling(positionedRoom.Room);
+            var roomFiller = new RoomFilling(positionedRoom.Room);
+
+            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
 
             var floorPoints = new List<Point>();
             if(useBoundary)
@@ -3076,7 +3079,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
 
-                if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
+                if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
                     var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
                     Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
@@ -3091,8 +3094,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void AddStandardDecorativeFeaturesToRoomUsingGrid(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
         {
-            //This is probably rather slow
-            var bridgeRouter = new RoomFilling(positionedRoom.Room);
+            var roomFiller = new RoomFilling(positionedRoom.Room);
+
+            //Need to account for all current blocking features in room
+            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
 
             var floorPoints = RoomTemplateUtilities.GetGridFromRoom(positionedRoom.Room, 2, 1, 0.5);
 
@@ -3110,7 +3115,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                 }
-                else if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
+                else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
                 {
                     Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
 
@@ -3119,6 +3124,23 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 if (floorPoints.Count() == 0)
                     break;
+            }
+        }
+
+        private static void AddExistingBlockingFeaturesToRoomFiller(int level, TemplatePositioned positionedRoom, RoomFilling bridgeRouter)
+        {
+            var floorPointsInRoom = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor).Select(p => p + positionedRoom.Location);
+            foreach (var roomPoint in floorPointsInRoom)
+            {
+                if (Game.Dungeon.BlockingFeatureAtLocation(level, roomPoint))
+                {
+                    var stillWalkable = bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint - positionedRoom.Location);
+
+                    if (!stillWalkable)
+                    {
+                        LogFile.Log.LogEntryDebug("Room " + positionedRoom.RoomIndex + " appears unconnected.", LogDebugLevel.High);
+                    }
+                }
             }
         }
 

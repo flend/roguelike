@@ -1476,6 +1476,14 @@ namespace RogueBasin
             return true;
         }
 
+        public bool BlockingFeatureAtLocation(int level, Point location)
+        {
+            var terrain = GetTerrainAtPoint(level, location);
+            if (terrain == MapTerrain.NonWalkableFeature || terrain == MapTerrain.NonWalkableFeatureLightBlocking)
+                return true;
+            return false;
+        }
+
         /// <summary>
         /// Add feature to the dungeon
         /// </summary>
