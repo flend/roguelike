@@ -297,6 +297,8 @@ namespace RogueBasin
             //Get the number of rooms
             var allRoomsAndCorridors = mapInfo.GetRoomIndicesForLevel(level).Except(new List<int> { mapInfo.StartRoom });
             var rooms = mapInfo.FilterOutCorridors(allRoomsAndCorridors).ToList();
+            var candidatePointsInRooms = rooms.Select(room => mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor));
+            var roomsAndPointsInRooms = rooms.Zip(candidatePointsInRooms, Tuple.Create);
 
             var monstersToPlaceRandomized = monster.Shuffle().ToList();
 
@@ -305,21 +307,11 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("No rooms: " + noRooms + " Total monsters to place (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
 
-            //Distribution amongst rooms, mostly evenly
+            //Distribution amongst rooms, mostly evenly, scaled by room size
 
-            double[] roomMonsterRatio = new double[noRooms];
+            var roomMonsterRatio = roomsAndPointsInRooms.Select( rp => Math.Max(0, Gaussian.BoxMuller(5, 3)) * rp.Item2.Count());
 
-            for (int i = 0; i < noRooms; i++)
-            {
-                roomMonsterRatio[i] = Math.Max(0, Gaussian.BoxMuller(5, 3));
-            }
-
-            double totalMonsterRatio = 0.0;
-
-            for (int i = 0; i < noRooms; i++)
-            {
-                totalMonsterRatio += roomMonsterRatio[i];
-            }
+            double totalMonsterRatio = roomMonsterRatio.Sum();
 
             double ratioToTotalMonsterBudget = noMonsters / totalMonsterRatio;
 
@@ -328,12 +320,11 @@ namespace RogueBasin
 
             for (int i = 0; i < noRooms; i++)
             {
-                double monsterBudget = roomMonsterRatio[i] * ratioToTotalMonsterBudget + remainder;
+                double monsterBudget = roomMonsterRatio.ElementAt(i) * ratioToTotalMonsterBudget + remainder;
 
                 double actualMonstersToPlace = Math.Floor(monsterBudget);
 
                 double levelBudgetSpent = actualMonstersToPlace;
-
                 double levelBudgetLeftOver = monsterBudget - levelBudgetSpent;
 
                 monstersPerRoom[i] = (int)actualMonstersToPlace;
@@ -344,12 +335,7 @@ namespace RogueBasin
 
             //Calculate actual number of monster levels placed
 
-            int totalMonsters = 0;
-            for (int i = 0; i < noRooms; i++)
-            {
-                totalMonsters += monstersPerRoom[i];
-            }
-
+            int totalMonsters = monstersPerRoom.Sum();
             LogFile.Log.LogEntryDebug("Total monsters actually placed (level: " + level + "): " + noMonsters, LogDebugLevel.Medium);
 
             //Place monsters in rooms
@@ -362,30 +348,30 @@ namespace RogueBasin
             {
                 int monstersToPlaceInRoom = monstersPerRoom[r];
 
-                var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(rooms[r], RoomTemplateTerrain.Floor).Shuffle();
+                var candidatePointsInRoom = roomsAndPointsInRooms.ElementAt(r).Item2.Shuffle();
+                int monstersPlacedInRoom = 0;
 
-                for (int m = 0; m < monstersToPlaceInRoom; m++)
+                foreach (var p in candidatePointsInRoom)
                 {
                     if (monsterPos >= monstersToPlaceRandomized.Count)
                     {
                         LogFile.Log.LogEntryDebug("Trying to place too many monsters", LogDebugLevel.High);
                         monsterPos++;
-                        continue;
+                        break;
                     }
 
                     Monster mon = monstersToPlaceRandomized[monsterPos];
                     GiveMonsterStandardItems(mon);
 
-                    foreach (var p in candidatePointsInRoom)
+                    bool placedSuccessfully = Game.Dungeon.AddMonster(mon, level, p);
+                    if (placedSuccessfully)
                     {
-
-                        bool placedSuccessfully = Game.Dungeon.AddMonster(mon, level, p);
-                        if (placedSuccessfully)
-                        {
-                            monsterPos++;
-                            break;
-                        }
+                        monsterPos++;
+                        monstersPlacedInRoom++;
                     }
+
+                    if (monstersPlacedInRoom >= monstersToPlaceInRoom)
+                        break;
                 }
             }
         }
