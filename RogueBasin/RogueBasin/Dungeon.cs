@@ -566,6 +566,55 @@ namespace RogueBasin
             return (int)Math.Ceiling(total);
         }
 
+        public bool FireShotgunWeapon(Point target, Items.ShotgunTypeWeapon item, int damageBase, int damageDropWithRange)
+        {
+            //The shotgun fires towards its target and does less damage with range
+
+            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
+
+            IEquippableItem equipItem = item as IEquippableItem;
+
+            if (equipItem == null)
+            {
+                LogFile.Log.LogEntryDebug("Shotgun is not equippable", LogDebugLevel.High);
+                return false;
+            }
+
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
+            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, PCMap, equipItem.RangeFire(), item.ShotgunSpreadAngle());
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Chocolate);
+
+            //Make firing sound
+            Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in targetSquares)
+            {
+                SquareContents squareContents = MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    //Calculate range
+                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(player.LocationMap, m.LocationMap));
+                    int damage = damageBase - rangeToMonster * damageDropWithRange;
+
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    player.AttackMonsterRanged(squareContents.monster, damage);
+                }
+            }
+
+            return true;
+        }
+
         public bool FirePistolLineWeapon(Point target, RangedWeapon item, int damageBase)
         {
             Player player = Player;

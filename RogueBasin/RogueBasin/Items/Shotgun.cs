@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Shotgun : RangedWeapon, IEquippableItem
+    public class Shotgun : ShotgunTypeWeapon, IEquippableItem
     {
         public Shotgun()
         {
@@ -21,46 +21,7 @@ namespace RogueBasin.Items
         {
             //Should be guaranteed in range by caller
 
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-
-            LogFile.Log.LogEntryDebug("Firing shotgun", LogDebugLevel.Medium);
-
-            //The shotgun fires towards its target and does less damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, dungeon.PCMap, RangeFire(), ShotgunSpreadAngle());
-            
-            //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Chocolate);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(player.LocationMap, m.LocationMap));
-                    int damage = 100 - rangeToMonster * 10;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
+            Game.Dungeon.FireShotgunWeapon(target, this, 200, 20);
 
             //Remove 1 ammo
             Ammo--;
@@ -82,29 +43,6 @@ namespace RogueBasin.Items
         public bool Equip(Creature user)
         {
             LogFile.Log.LogEntryDebug("Shotgun equipped", LogDebugLevel.Medium);
-
-            //Give player story. Mention level up if one will occur.
-
-            if (Game.Dungeon.Player.PlayItemMovies)
-            {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
-            }
-
-            //Messages
-            //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
-
-            //Screen.Instance.PlayMovie("plotbadge", true);
-
-            //Level up?
-            //Game.Dungeon.Player.LevelUp();
-
-            //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
-
-            //Add any equipped (actually permanent) effects
-            //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
@@ -225,11 +163,6 @@ namespace RogueBasin.Items
         public virtual TargettingType TargetTypeFire()
         {
             return TargettingType.Shotgun;
-        }
-
-        public virtual double ShotgunSpreadAngle()
-        {
-            return Math.PI / 4;
         }
 
         /// <summary>
