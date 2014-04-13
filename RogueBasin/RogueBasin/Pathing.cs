@@ -173,12 +173,8 @@ namespace RogueBasin
                     blockingCreature = dungeon.Player;
                 }
                 
-                //Check if there is a blocking lock
-                //TODO: I think this is unnecessary
-                var locksInSquare = dungeon.NonOpenLocksAtLocation(level, theNextStep);
-
                 //If no blocking creature or lock (or we found our target), the path is good
-                if (blockingCreature == null && !locksInSquare)
+                if (blockingCreature == null)
                 {
                     goodPath = true;
                     nextStep = theNextStep;
