@@ -359,7 +359,7 @@ namespace RogueBasin
                                     rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
                                     rootConsole.Flush();
                                     break;
-                                    
+
                                 case 'f':
                                     //Fire weapon
                                     if (Game.Dungeon.Player.GetEquippedWeapon() == null)
@@ -383,7 +383,7 @@ namespace RogueBasin
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
                                     break;
-                                
+
                                 case 'x':
                                     //Examine
                                     timeAdvances = Examine(false);
@@ -415,8 +415,8 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     timeAdvances = false;
                                     break;
-                                    
-                                    
+
+
                                 case 'L':
                                     SetLogScreen();
                                     Screen.Instance.Update();
@@ -430,100 +430,7 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
 
-                                    
-                                //Debug events
-                                    
-    
-                                case 'X':
-                                    //Examine
-                                    timeAdvances = Examine(true);
-                                    if (!timeAdvances)
-                                        Screen.Instance.Update();
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-                                    break;
 
-
-                                case 'K':
-                                    if (!Game.Dungeon.AllLocksOpen)
-                                    {
-                                        Game.Dungeon.AllLocksOpen = true;
-                                        Game.MessageQueue.AddMessage("All locks are now open.");
-                                    }
-                                    else
-                                    {
-                                        Game.Dungeon.AllLocksOpen = false;
-                                        Game.MessageQueue.AddMessage("All locks are now in their normal state.");
-                                    }
-                                    Screen.Instance.Update();
-                                    break;
-
-
-                                case 'N':
-                                    //screen numbering
-                                    Screen.Instance.CycleRoomNumbering();
-                                    Screen.Instance.Update();
-                                    break;
-
-                                case 'W':
-                                    //screen debug mode
-                                    Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
-                                    Screen.Instance.Update();
-                                    break;
-
-                                case 'V':
-                                    //screen debug mode
-                                    Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
-                                    Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
-                                    Screen.Instance.Update();
-                                    break;
-                                    
-                                case 'Y':
-                                    //next mission
-                                    Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
-                                    timeAdvances = true;
-                                    break;
-
-                                case 'G':
-                                    //last mission
-                                    Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
-                                    timeAdvances = true;
-                                    break;
-             
-                                case 'J':
-                                    //change debug level
-                                    LogFile.Log.DebugLevel += 1;
-                                    if (LogFile.Log.DebugLevel > 3)
-                                        LogFile.Log.DebugLevel = 1;
-
-                                    LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
-                                    
-                                    break;
-
-                                case 'v':
-                                    //Add a healing event on the player
-                                    Game.Dungeon.Player.HealCompletely();
-                                    Game.Dungeon.Player.FullAmmo();
-                                    Screen.Instance.Update();
-                                    break;
-
-                                case 'B':
-                                    Game.Dungeon.Player.GiveAllWeapons(1);
-                                    Game.Dungeon.Player.GiveAllWetware(1);
-                                    Screen.Instance.Update();
-                                    break;
-
-                                case 'H':
-                                    Game.Dungeon.Player.GiveAllWeapons(1);
-                                    Game.Dungeon.Player.GiveAllWetware(2);
-                                    Screen.Instance.Update();
-                                    break;
-
-                                case 'U':
-                                    Game.Dungeon.Player.GiveAllWeapons(2);
-                                    Game.Dungeon.Player.GiveAllWetware(3);
-                                    Screen.Instance.Update();
-                                    break;
 
 
 
@@ -870,6 +777,110 @@ namespace RogueBasin
                                 break;
                                 */
                             }
+
+                            if (Game.Config.DebugMode)
+                            {
+                                switch (keyCode)
+                                {
+                                    //Debug events
+
+
+                                    case 'X':
+                                        //Examine
+                                        timeAdvances = Examine(true);
+                                        if (!timeAdvances)
+                                            Screen.Instance.Update();
+                                        if (timeAdvances)
+                                            SpecialMoveNonMoveAction();
+                                        break;
+
+                                    case 'R':
+                                        //Reload
+                                        Game.Dungeon.Player.RefillWeapons();
+                                        break;
+
+                                    case 'K':
+                                        if (!Game.Dungeon.AllLocksOpen)
+                                        {
+                                            Game.Dungeon.AllLocksOpen = true;
+                                            Game.MessageQueue.AddMessage("All locks are now open.");
+                                        }
+                                        else
+                                        {
+                                            Game.Dungeon.AllLocksOpen = false;
+                                            Game.MessageQueue.AddMessage("All locks are now in their normal state.");
+                                        }
+                                        Screen.Instance.Update();
+                                        break;
+
+
+                                    case 'N':
+                                        //screen numbering
+                                        Screen.Instance.CycleRoomNumbering();
+                                        Screen.Instance.Update();
+                                        break;
+
+                                    case 'W':
+                                        //screen debug mode
+                                        Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
+                                        Screen.Instance.Update();
+                                        break;
+
+                                    case 'V':
+                                        //screen debug mode
+                                        Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
+                                        Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
+                                        Screen.Instance.Update();
+                                        break;
+
+                                    case 'Y':
+                                        //next mission
+                                        Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
+                                        timeAdvances = true;
+                                        break;
+
+                                    case 'G':
+                                        //last mission
+                                        Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
+                                        timeAdvances = true;
+                                        break;
+
+                                    case 'J':
+                                        //change debug level
+                                        LogFile.Log.DebugLevel += 1;
+                                        if (LogFile.Log.DebugLevel > 3)
+                                            LogFile.Log.DebugLevel = 1;
+
+                                        LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
+
+                                        break;
+
+                                    case 'v':
+                                        //Add a healing event on the player
+                                        Game.Dungeon.Player.HealCompletely();
+                                        Game.Dungeon.Player.FullAmmo();
+                                        Screen.Instance.Update();
+                                        break;
+
+                                    case 'B':
+                                        Game.Dungeon.Player.GiveAllWeapons(1);
+                                        Game.Dungeon.Player.GiveAllWetware(1);
+                                        Screen.Instance.Update();
+                                        break;
+
+                                    case 'H':
+                                        Game.Dungeon.Player.GiveAllWeapons(1);
+                                        Game.Dungeon.Player.GiveAllWetware(2);
+                                        Screen.Instance.Update();
+                                        break;
+
+                                    case 'U':
+                                        Game.Dungeon.Player.GiveAllWeapons(2);
+                                        Game.Dungeon.Player.GiveAllWetware(3);
+                                        Screen.Instance.Update();
+                                        break;
+                                }
+                            }
                         }
 
                         //Handle wetware
@@ -936,16 +947,19 @@ namespace RogueBasin
                                 Screen.Instance.ScrollViewport(direction);
                                 Screen.Instance.Update();
                             }
-                            
-                            if (wasDirection && mod == KeyModifier.Arrow && userKey.Shift)
+
+                            if (Game.Config.DebugMode)
                             {
-                                if (direction == new Point(0, -1))
-                                    ScreenLevelUp();
+                                if (wasDirection && mod == KeyModifier.Arrow && userKey.Shift)
+                                {
+                                    if (direction == new Point(0, -1))
+                                        ScreenLevelUp();
 
-                                if (direction == new Point(0, 1))
-                                    ScreenLevelDown();
+                                    if (direction == new Point(0, 1))
+                                        ScreenLevelDown();
 
-                                Screen.Instance.Update();
+                                    Screen.Instance.Update();
+                                }
                             }
                         }
 

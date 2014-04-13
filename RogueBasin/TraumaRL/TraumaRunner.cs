@@ -126,13 +126,14 @@ namespace TraumaRL
     
         private void StandardSystemSetup()
         {
-
             rb = new RogueBase();
             rb.SetupSystem();
 
             //Minimum debug
-            LogFile.Log.DebugLevel = 1;
-
+            if(Game.Config.DebugMode)
+                LogFile.Log.DebugLevel = 4;
+            else
+                LogFile.Log.DebugLevel = 1;
         }
 
         private void StandardDungeonSetup()
@@ -149,9 +150,8 @@ namespace TraumaRL
 
             Game.Dungeon.AllLocksOpen = false;
 
-            //Screen.Instance.SeeAllMonsters = true;
-            //Screen.Instance.SeeAllMap = true;
-            Game.Dungeon.PlayerImmortal = true;
+            if(Game.Config.DebugMode)
+                Game.Dungeon.PlayerImmortal = true;
         }
 
         private void RunGame()

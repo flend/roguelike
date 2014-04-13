@@ -2713,8 +2713,6 @@ namespace RogueBasin
                     }
                 }
             }
-
-            
         }
 
 
@@ -2723,6 +2721,21 @@ namespace RogueBasin
             if (!Screen.Instance.TargetSelected())
             {
                 Screen.Instance.CreatureToView = monster;
+            }
+        }
+
+        internal void RefillWeapons()
+        {
+            foreach (var i in Inventory.Items)
+            {
+                var item = i as RangedWeapon;
+
+                if (item != null && item.RemainingAmmo() < item.MaxAmmo())
+                {
+                    item.Ammo = item.MaxAmmo();
+                    Game.MessageQueue.AddMessage(item.SingleItemDescription + " reloaded.");
+                    LogFile.Log.LogEntryDebug("Giving ammo to " + item.SingleItemDescription, LogDebugLevel.Medium);
+                }
             }
         }
     }

@@ -1,1 +1,2 @@
 tilesize=16
+debug=true

@@ -34,5 +34,13 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Can't open config file: " + filename + " error: " + ex.Message, LogDebugLevel.High);
             }
         }
+
+        public bool DebugMode
+        {
+            get
+            {
+                return Game.Config.Entries.ContainsKey("debug") && Game.Config.Entries["debug"] == "true";
+            }
+        }
     }
 }
