@@ -21,7 +21,7 @@ namespace RogueBasin.Items
         {
             //Should be guaranteed in range by caller
 
-            Game.Dungeon.FireShotgunWeapon(target, this, 200, 20);
+            Game.Dungeon.FireShotgunWeapon(target, this, 100, 10, 10);
 
             //Remove 1 ammo
             Ammo--;

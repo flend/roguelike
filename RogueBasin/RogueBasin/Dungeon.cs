@@ -566,7 +566,7 @@ namespace RogueBasin
             return (int)Math.Ceiling(total);
         }
 
-        public bool FireShotgunWeapon(Point target, Items.ShotgunTypeWeapon item, int damageBase, int damageDropWithRange)
+        public bool FireShotgunWeapon(Point target, Items.ShotgunTypeWeapon item, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
         {
             //The shotgun fires towards its target and does less damage with range
 
@@ -602,13 +602,23 @@ namespace RogueBasin
                 {
                     //Calculate range
                     int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(player.LocationMap, m.LocationMap));
+
+                    //How many monsters between monster and player
+                    var pointsFromPlayerToMonster = Utility.GetPointsOnLine(player.LocationMap, m.LocationMap);
+                    //(exclude player and monster itself)
+                    var numInterveningMonsters = pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(player.LocationLevel, p).monster != null).Count() - 1;
+
+                    LogFile.Log.LogEntryDebug("Shotgun. Monster at " + m.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
+
                     int damage = damageBase - rangeToMonster * damageDropWithRange;
+                    damage = damage - numInterveningMonsters * damageDropWithInterveningMonster;
 
                     string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
+                    if(damage > 0)
+                        player.AttackMonsterRanged(squareContents.monster, damage);
                 }
             }
 
