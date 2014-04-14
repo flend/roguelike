@@ -3078,10 +3078,16 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 floorPoints.Remove(randomPoint);
 
                 var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
+                var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
 
-                if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
+                if (!featureToPlace.isBlocking)
                 {
-                    var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
+                    Game.Dungeon.AddFeature(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
+
+                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                }
+                else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
+                {
                     Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
 
                     LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " size: w:" + positionedRoom.Room.Width + " h:" + positionedRoom.Room.Height + " at location " + featureLocationInMapCoords + " (rel " + randomPoint + ")", LogDebugLevel.Medium);
