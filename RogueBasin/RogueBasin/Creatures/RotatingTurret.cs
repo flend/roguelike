@@ -142,6 +142,16 @@ namespace RogueBasin.Creatures
             return (char)320;
         }
 
+        internal override char GetCorpseRepresentation()
+        {
+            return (char)322;
+        }
+
+        internal override Color GetCorpseRepresentationColour()
+        {
+            return ColorPresets.DarkRed;
+        }
+
         protected override int RelaxDirectionAt()
         {
             return 0;
