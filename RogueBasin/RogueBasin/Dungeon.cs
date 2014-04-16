@@ -3789,7 +3789,6 @@ namespace RogueBasin
                 totalKills++;
                 totalScore += kill.CreatureCost();
 
-                //Check that we are the same type (and therefore sort of item)
                 Type monsterType = kill.GetType();
                 bool foundGroup = false;
 
@@ -3801,10 +3800,7 @@ namespace RogueBasin
                         foundGroup = true;
                         break;
                     }
-
                 }
-                //Look only at the first item in the group (stored by index). All the items in this group must have the same type
-
 
                 //If there is no group, create a new one
                 if (!foundGroup)
@@ -4436,91 +4432,10 @@ namespace RogueBasin
 
             Player player = Game.Dungeon.Player;
             Dungeon dungeon = Game.Dungeon;
-            /*
-            int noDeaths = dungeon.DungeonInfo.NoDeaths;
-            int noAborts = dungeon.DungeonInfo.TotalAborts;
-
-            int totalLevels = 15;
-
-            //How many levels completed?
-            int secondaryObjectives = 0;
-            int primaryObjectives = 0;
-
-            foreach (DungeonProfile profile in dungeon.DungeonInfo.Dungeons)
-            {
-                if (profile.LevelObjectiveComplete)
-                    primaryObjectives++;
-
-                if (profile.LevelObjectiveKillAllMonstersComplete)
-                    secondaryObjectives++;
-            }
-
-            //testable
-            bool wonGame = dungeon.DungeonInfo.Dungeons[totalLevels-1].LevelObjectiveComplete;
-
-            int primaryObjectiveScore = primaryObjectives * 100;
-            int secondaryObjectiveScore = secondaryObjectives * 100;
-            int killScore = (GetKillRecord().killScore);
-
+            
             //The last screen to display
             List<string> finalScreen = new List<string>();
             
-            //A long list of stuff to put in the obituary
-            List<string> fullObit = new List<string>();
-
-            //Show movies as we go along
-
-            //CLEARANCES
-
-            //Screen.Instance.PlayMovie("endactions", false);
-
-            List<string> clearList = new List<string>();
-
-            if (wonGame)
-            {
-                Screen.Instance.PlayMovie("flatlinewon", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("flatlinewon"));
-            }
-            else
-            {
-                Screen.Instance.PlayMovie("flatlinenotwon", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("flatlinenotwon"));
-            }
-
-            //Made it to the final levels
-            if (!wonGame && primaryObjectives >= 11)
-            {
-                Screen.Instance.PlayMovie("halfPrimary", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("halfPrimary"));
-            }
-
-            if (secondaryObjectives >= 14)
-            {
-                Screen.Instance.PlayMovie("allSecondary", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("allSecondary"));
-            }
-            else if (secondaryObjectives >= 7)
-            {
-                Screen.Instance.PlayMovie("halfSecondary", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("halfSecondary"));
-            }
-
-            if (noAborts == 0)
-            {
-                Screen.Instance.PlayMovie("noAborts", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("noAborts"));
-            }
-
-
-            if (noDeaths == 0)
-            {
-                Screen.Instance.PlayMovie("noDeaths", false);
-                clearList.AddRange(Screen.Instance.GetMovieText("noDeaths"));
-            }
-            */
-            //The last screen to display
-            List<string> finalScreen = new List<string>();
-
             //A long list of stuff to put in the obituary
             List<string> fullObit = new List<string>();
 
@@ -4542,18 +4457,19 @@ namespace RogueBasin
             }
             finalScreen.Add("");
 
-            //finalScreen.Add("Primary objectives " + primaryObjectives + "/" + totalLevels + ": " + primaryObjectiveScore + " pts");
-            //finalScreen.Add("Secondary objectives " + secondaryObjectives + "/" + totalLevels + ": " + secondaryObjectiveScore + " pts");
-
             //Total kills
             KillRecord killRecord = GetKillRecord();
 
             finalScreen.Add("");
 
-            //finalScreen.Add("Robots destroyed " + killRecord.killCount + ": " + killScore + " pts");
+            finalScreen.Add("Robots destroyed " + killRecord.killCount + ": " + killRecord.killScore + " pts");
             finalScreen.Add("");
 
             //finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
+
+            var itemInfo = ItemsUsedSummary();
+
+            finalScreen.AddRange(itemInfo.Item2);
 
             finalScreen.Add("");
 
@@ -4588,6 +4504,19 @@ namespace RogueBasin
 
             //Stop the main loop
             RunMainLoop = false;
+        }
+
+        private Tuple<int, List<string>> ItemsUsedSummary()
+        {
+            var shieldsUsed = Player.Inventory.GetItemsOfType<Items.ShieldPack>().Count();
+            var ammoUsed = Player.Inventory.GetItemsOfType<Items.AmmoPack>().Count();
+
+            var itemText = new List<string>();
+            itemText.Add(shieldsUsed + " " + new Items.ShieldPack().GroupItemDescription + " used.");
+
+            itemText.Add(ammoUsed + " " + new Items.AmmoPack().GroupItemDescription + " used.");
+
+            return new Tuple<int, List<string>>(0, itemText);
         }
 
 

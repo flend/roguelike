@@ -149,7 +149,7 @@ namespace RogueBasin.Creatures
 
         internal override Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.LightYellow;
+            return ColorPresets.DarkRed;
         }
 
         protected override int RelaxDirectionAt()
@@ -163,7 +163,7 @@ namespace RogueBasin.Creatures
         }
         public override int CreatureCost()
         {
-            return 20;
+            return 100;
         }
 
         public override int CreatureLevel()
@@ -173,7 +173,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.OrangeRed;
+            return ColorPresets.Yellow;
         }
 
         public override int GetMagicXP()
