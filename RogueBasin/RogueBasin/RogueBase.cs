@@ -797,6 +797,7 @@ namespace RogueBasin
                                     case 'R':
                                         //Reload
                                         Game.Dungeon.Player.RefillWeapons();
+                                        Screen.Instance.Update();
                                         break;
 
                                     case 'K':

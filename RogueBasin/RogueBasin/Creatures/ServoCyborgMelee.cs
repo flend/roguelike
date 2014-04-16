@@ -76,6 +76,7 @@ namespace RogueBasin.Creatures
         {
             return ColorPresets.DarkRed;
         }
+
         protected override int GetChanceToRecover()
         {
             return 10;

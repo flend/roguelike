@@ -52,7 +52,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return (char)268;
+            return (char)271;
         }
 
 
@@ -73,7 +73,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.Red;
+            return ColorPresets.PaleVioletRed;
         }
 
         public override int GetCombatXP()
@@ -134,7 +134,7 @@ namespace RogueBasin.Creatures
 
         internal override char GetCorpseRepresentation()
         {
-            return (char)269;
+            return (char)270;
         }
 
         internal override Color GetCorpseRepresentationColour()

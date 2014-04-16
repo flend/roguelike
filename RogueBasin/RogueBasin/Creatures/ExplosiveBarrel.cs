@@ -80,6 +80,17 @@ namespace RogueBasin.Creatures
             return (char)304;
         }
 
+        internal override char GetCorpseRepresentation()
+        {
+            return (char)569;
+        }
+
+        internal override Color GetCorpseRepresentationColour()
+        {
+            return ColorPresets.DarkRed;
+        }
+
+
         public override int CreatureCost()
         {
             return 20;
