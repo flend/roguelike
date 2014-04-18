@@ -3063,6 +3063,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //This is probably rather slow
             var bridgeRouter = new RoomFilling(positionedRoom.Room);
 
+            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, bridgeRouter);
+
             var floorPoints = new List<Point>();
             if(useBoundary)
                 floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
@@ -3094,6 +3096,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //This is probably rather slow
             var bridgeRouter = new RoomFilling(positionedRoom.Room);
 
+            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, bridgeRouter);
+
             var floorPoints = RoomTemplateUtilities.GetGridFromRoom(positionedRoom.Room, 2, 1, 0.5);
 
             for (int i = 0; i < featuresToPlace; i++)
@@ -3119,6 +3123,23 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 if (floorPoints.Count() == 0)
                     break;
+            }
+        }
+
+        private static void AddExistingBlockingFeaturesToRoomFiller(int level, TemplatePositioned positionedRoom, RoomFilling bridgeRouter)
+        {
+            var floorPointsInRoom = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor).Select(p => p + positionedRoom.Location);
+            foreach (var roomPoint in floorPointsInRoom)
+            {
+                if (Game.Dungeon.BlockingFeatureAtLocation(level, roomPoint))
+                {
+                    var stillWalkable = bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint - positionedRoom.Location);
+
+                    if (!stillWalkable)
+                    {
+                        LogFile.Log.LogEntryDebug("Room " + positionedRoom.RoomIndex + " appears unconnected.", LogDebugLevel.High);
+                    }
+                }
             }
         }
 

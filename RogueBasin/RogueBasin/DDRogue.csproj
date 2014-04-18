@@ -938,8 +938,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\Debug\female_first.txt" />
-    <EmbeddedResource Include="bin\Debug\vaults\shroom_moved.png" />
-    <EmbeddedResource Include="bin\Debug\vaults\shroom_moved_big.png" />
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />
     <EmbeddedResource Include="bin\Debug\logdata\female_first.txt" />
     <EmbeddedResource Include="bin\Debug\logdata\male_first.txt" />
