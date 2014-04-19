@@ -932,7 +932,6 @@
     <EmbeddedResource Include="bin\Debug\movies\traumaquit0.amf" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\female_first.txt" />
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />
     <EmbeddedResource Include="bin\Debug\logdata\female_first.txt" />
     <EmbeddedResource Include="bin\Debug\logdata\male_first.txt" />
