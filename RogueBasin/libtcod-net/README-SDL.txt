@@ -10,4 +10,3 @@ http://www.libsdl.org/
 
 This library is distributed under the terms of the GNU LGPL license:
 http://www.gnu.org/copyleft/lesser.html
-
