@@ -16,8 +16,7 @@ namespace RogueBasin.Creatures
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
-            //8 is good for triangular
-            NormalSightRadius = 8;
+            this.Passive = true;
         }
 
         /// <summary>
@@ -27,6 +26,9 @@ namespace RogueBasin.Creatures
         {
             double size = 4.0;
             int damage = 50;
+
+            if (this.LocationLevel >= 6)
+                damage *= 2;
 
             //Make explosion sound AT target location
             Game.Dungeon.AddSoundEffect(1, LocationLevel, LocationMap);

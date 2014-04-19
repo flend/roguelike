@@ -28,7 +28,6 @@ namespace RogueBasin.Creatures
 
             Unique = true;
 
-            //Start in the passive state
             this.Passive = true;
         }
 

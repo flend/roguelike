@@ -2594,6 +2594,9 @@ namespace RogueBasin
             //Make throwing sound AT target location
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), Game.Dungeon.Player.LocationLevel, destination);
 
+            if (Player.LocationLevel >= 6)
+                damage *= 2;
+
             //Work out grenade splash and damage
             DoGrenadeExplosion(level, target, size, damage, null);
 
@@ -2612,18 +2615,17 @@ namespace RogueBasin
         public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Monster originMonster)
         {
             //Work out grenade splash and damage
-
             List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
 
+            //Use FOV from point of explosion (this means grenades don't go round corners or through walls)
+            WrappedFOV grenadeFOV = Game.Dungeon.CalculateAbstractFOV(level, locationMap, 0);
+
+            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
+
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, ColorPresets.Chocolate);
-
-            //Attack all monsters in the area
-
-            if (player.LocationLevel >= 6)
-                damage *= 2;
-
-            foreach (Point sq in grenadeAffects)
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, ColorPresets.Chocolate);
+           
+            foreach (Point sq in grenadeAffectsFiltered)
             {
                 SquareContents squareContents = Game.Dungeon.MapSquareContents(level, sq);
 

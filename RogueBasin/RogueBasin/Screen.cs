@@ -1085,7 +1085,7 @@ namespace RogueBasin {
         /// <param name="origin"></param>
         /// <param name="target"></param>
         /// <param name="size"></param>
-        public void DrawAreaAttackAnimation(List <Point> targetSquares, Color color)
+        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, Color color)
         {
             //Clone the list since we mangle it
             List<Point> mangledPoints = new List<Point>();

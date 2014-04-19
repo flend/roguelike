@@ -27,9 +27,7 @@ namespace RogueBasin.Items
                 return false;
             }
             
-            Game.MessageQueue.AddMessage("Ammo pack applied.");
-
-            //Apply the healing effect to the player
+            //Game.MessageQueue.AddMessage("Ammo pack applied.");
 
             Game.Dungeon.Player.AddAmmoToCurrentWeapon();
 
