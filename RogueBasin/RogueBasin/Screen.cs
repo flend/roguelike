@@ -223,7 +223,7 @@ namespace RogueBasin {
             Height = 35;
 
             ViewableWidth = 37;
-            ViewableHeight = 30;
+            ViewableHeight = 27;
 
             ViewportScrollSpeed = 1;
 
@@ -521,6 +521,34 @@ namespace RogueBasin {
         public void ScrollViewport(Point delta) {
 
             viewTL += delta * ViewportScrollSpeed;
+
+            RestrictViewpointToMap();
+        }
+
+        private void RestrictViewpointToMap()
+        {
+            Map mapToDisplay = Game.Dungeon.Levels[LevelToDisplay];
+
+            var minX = 1 - ViewableWidth;
+
+            if (viewTL.x < minX)
+                viewTL = new Point(minX, viewTL.y);
+
+            var minY = 1 - ViewableHeight;
+
+            if (viewTL.y < minY)
+                viewTL = new Point(viewTL.x, minY);
+
+            //Player will centre screen, so this can't just be width - ViewableWidth
+            var maxX = mapToDisplay.width - 1;
+
+            if (viewTL.x > maxX)
+                viewTL = new Point(maxX, viewTL.y);
+
+            var maxY = mapToDisplay.height - 1;
+
+            if (viewTL.y > maxY)
+                viewTL = new Point(viewTL.x, maxY);
         }
 
 
