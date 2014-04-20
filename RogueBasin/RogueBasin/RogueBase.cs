@@ -227,6 +227,10 @@ namespace RogueBasin
 
                             ProfileEntry("Post Screen Update");
 
+                            //Catch the player being killed
+                            if (!Game.Dungeon.RunMainLoop)
+                                break;
+
                             //Deal with PCs turn as appropriate
                             bool timeAdvances = false;
                             do
