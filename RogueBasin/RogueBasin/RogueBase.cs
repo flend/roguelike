@@ -275,8 +275,9 @@ namespace RogueBasin
         {
             var targetCreature = Screen.Instance.CreatureToView;
             var targetItem = Screen.Instance.ItemToView;
+            var targetFeature = Screen.Instance.FeatureToView;
 
-            if (targetCreature == null && targetItem == null)
+            if (targetCreature == null && targetItem == null && targetFeature == null)
                 return;
 
             if(targetCreature != null) {
@@ -299,6 +300,20 @@ namespace RogueBasin
                     return;
                 }
                 if (!playerFOV.CheckTileFOV(targetItem.LocationMap))
+                {
+                    ResetViewPanel();
+                    return;
+                }
+            }
+
+            if (targetFeature != null)
+            {
+                if (targetFeature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                {
+                    ResetViewPanel();
+                    return;
+                }
+                if (!playerFOV.CheckTileFOV(targetFeature.LocationMap))
                 {
                     ResetViewPanel();
                     return;
@@ -1911,6 +1926,7 @@ namespace RogueBasin
 
             Monster oldTargetCreature = Screen.Instance.CreatureToView;
             Item oldTargetItem = Screen.Instance.ItemToView;
+            Feature oldFeature = Screen.Instance.FeatureToView;
 
             targettingSuccess = TargetAttack(out target, TargettingType.Line, 0, 'x', currentFOV);
 
@@ -1918,6 +1934,7 @@ namespace RogueBasin
             {
                 Screen.Instance.CreatureToView = oldTargetCreature;
                 Screen.Instance.ItemToView = oldTargetItem;
+                Screen.Instance.FeatureToView = oldFeature;
             }
 
             return false;
@@ -2385,6 +2402,8 @@ namespace RogueBasin
                 Screen.Instance.ItemToView = sqC.items[0];
             else
                 Screen.Instance.ItemToView = null;
+
+            Screen.Instance.FeatureToView = sqC.feature; //may reset to null
             return sqC;
         }
 

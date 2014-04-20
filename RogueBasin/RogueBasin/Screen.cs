@@ -76,7 +76,7 @@ namespace RogueBasin {
         Color nothingColor = ColorPresets.Gray;
 
         Color creatureColor = ColorPresets.White;
-        Color itemColor = ColorPresets.Red ;
+        Color itemColor = ColorPresets.Red;
         Color featureColor = ColorPresets.White;
 
         Color hiddenColor = ColorPresets.Black;
@@ -142,6 +142,7 @@ namespace RogueBasin {
         //For examining
         public Monster CreatureToView { get; set; }
         public Item ItemToView { get; set; }
+        public Feature FeatureToView { get; set; }
 
         const int missileDelay = 250;
         const int meleeDelay = 100;
@@ -1993,22 +1994,14 @@ namespace RogueBasin {
             }
             else if (ItemToView != null && !ItemToView.InInventory)
             {
-                String nameStr = ItemToView.SingleItemDescription;// +"(" + ItemToView.Representation + ")";
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 1, LineAlignment.Left, ItemToView.GetColour());
-
-                IEquippableItem itemE = ItemToView as IEquippableItem;
-                if (itemE != null)
-                {
-                    EquipmentSlot weaponSlot = itemE.EquipmentSlots.Find(x => x == EquipmentSlot.Weapon);
-                    if(weaponSlot != null) {
-                        PrintLine("(Weapon)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
-                    }
-                    else
-                        PrintLine("(Utility)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left);
-                }
+                String nameStr = ItemToView.SingleItemDescription;
+                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, ItemToView.GetColour());
             }
-            else
+            else if(FeatureToView != null)
             {
+                String nameStr = FeatureToView.Description;
+
+                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, FeatureToView.RepresentationColor());
             }
 
             //Combat stats
@@ -3460,6 +3453,7 @@ namespace RogueBasin {
             {
                 Screen.Instance.CreatureToView = null;
                 Screen.Instance.ItemToView = null;
+                Screen.Instance.FeatureToView = null;
             }
         }
     }

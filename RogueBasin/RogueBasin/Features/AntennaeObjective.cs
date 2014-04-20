@@ -48,5 +48,13 @@ namespace RogueBasin.Features
             return (char)570;
         }
 
+        public override string Description
+        {
+            get
+            {
+                return "Comms Antennae";
+            }
+        }
+
     }
 }

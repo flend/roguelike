@@ -31,5 +31,13 @@ namespace RogueBasin.Features
         {
             return representationColor;
         }
+
+        public override string Description
+        {
+            get
+            {
+                return "Corpse";
+            }
+        }
     }
 }

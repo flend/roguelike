@@ -46,6 +46,8 @@ namespace RogueBasin
         /// </summary>
         public Player player = null;
 
+        public Feature feature = null;
+
         public List<Item> items = new List<Item>();
 
         /// <summary>
@@ -1718,6 +1720,17 @@ namespace RogueBasin
                     item.LocationMap.x == location.x && item.LocationMap.y == location.y && item.InInventory == false)
                 {
                     contents.items.Add(item);
+                    break;
+                }
+            }
+
+            //Check features
+            foreach (Feature feature in features)
+            {
+                if (feature.LocationLevel == level &&
+                    feature.LocationMap.x == location.x && feature.LocationMap.y == location.y)
+                {
+                    contents.feature = feature;
                     break;
                 }
             }

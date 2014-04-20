@@ -40,12 +40,12 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return logEntry.title + " log"; }
+            get { return "Log"; }
         }
 
         public override string GroupItemDescription
         {
-            get { return logEntry.title + " logs"; }
+            get { return "Logs"; }
         }
 
         public override libtcodWrapper.Color GetColour()

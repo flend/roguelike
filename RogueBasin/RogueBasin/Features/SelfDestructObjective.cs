@@ -55,5 +55,13 @@ namespace RogueBasin.Features
             return DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer3].representation;
         }
 
+        public override string Description
+        {
+            get
+            {
+                return "Self Destruct";
+            }
+        }
+
     }
 }

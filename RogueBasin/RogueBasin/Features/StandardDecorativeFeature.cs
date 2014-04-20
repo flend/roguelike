@@ -26,5 +26,17 @@ namespace RogueBasin.Features
         {
             return representationColour;
         }
+
+        public override string Description
+        {
+            get
+            {
+                if (IsBlocking)
+                    return "Hard cover";
+                else
+                    return "Soft cover";
+            }
+        }
+
     }
 }

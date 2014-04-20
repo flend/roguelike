@@ -22,5 +22,13 @@ namespace RogueBasin
         }
 
         public bool IsBlocking { get; set; }
+
+        public virtual string Description
+        {
+            get
+            {
+                return "Feature";
+            }
+        }
     }
 }

@@ -38,5 +38,13 @@ namespace RogueBasin.Features
         {
             return (char)538;
         }
+
+        public override string Description
+        {
+            get
+            {
+                return "Elevator";
+            }
+        }
     }
 }
