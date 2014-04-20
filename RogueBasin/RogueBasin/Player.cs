@@ -62,11 +62,17 @@ namespace RogueBasin
 
         public bool ShieldIsDisabled { get; private set; }
 
+        public bool EnergyRechargeIsDisabled { get; private set; }
+
         public bool DoesShieldRecharge { get; private set; }
 
         private int TurnsSinceShieldDisabled { get; set; }
 
+        private int TurnsSinceEnergyRechargeDisabled { get; set; }
+
         private const int TurnsForShieldToTurnBackOn = 20;
+
+        private const int TurnsForEnergyRechargeToTurnBackOn = 5;
 
         private const int TurnsToRegenerateShield = 20;
 
@@ -2700,8 +2706,13 @@ namespace RogueBasin
                 if (Energy == 0)
                 {
                     UnequipWetware();
+                    DisableEnergyRecharge();
                 }
             }
+        }
+
+        public void DisableEnergyRecharge() {
+            EnergyRechargeIsDisabled = true;
         }
 
         public void HealCompletely()
@@ -2724,7 +2735,6 @@ namespace RogueBasin
 
         private void RegenerateStatsPerTurn()
         {
-
             if (ShieldIsDisabled)
             {
                 TurnsSinceShieldDisabled++;
@@ -2753,7 +2763,18 @@ namespace RogueBasin
                     Hitpoints = MaxHitpoints;
             }
 
-            if (!EnergyWasDamagedThisTurn)
+            if (EnergyRechargeIsDisabled)
+            {
+                TurnsSinceEnergyRechargeDisabled++;
+
+                if (TurnsSinceEnergyRechargeDisabled >= TurnsForEnergyRechargeToTurnBackOn)
+                {
+                    EnergyRechargeIsDisabled = false;
+                    TurnsSinceEnergyRechargeDisabled = 0;
+                }
+            }
+
+            if (!EnergyRechargeIsDisabled && !EnergyWasDamagedThisTurn)
             {
                 double energyRegenRate = MaxEnergy / (double)TurnsToRegenerateEnergy;
                 Energy += (int)Math.Ceiling(energyRegenRate);

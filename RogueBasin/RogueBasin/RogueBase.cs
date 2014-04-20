@@ -904,6 +904,7 @@ namespace RogueBasin
                                     {
                                         //We changed wetware, counts as an action
                                         Game.Dungeon.ResetPCTurnCountersOnActionStatonary();
+                                        Game.Dungeon.Player.DisableEnergyRecharge();
                                     }
 
                                     //If we don't set time advances, changing wetware still resets bonuses but the enemies don't get a move

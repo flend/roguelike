@@ -51,7 +51,10 @@ namespace RogueBasin
             rootConsole.ForegroundColor = ColorPresets.MediumSeaGreen;
 
             int height;
-            List<string> preamble = Utility.LoadTextFile("introPreamble", Screen.Instance.Width - 2 * preambleTL.x, out height);
+            List<string> preamble = new List<string>();
+            preamble.Add("Welcome to TraumaRL v" + Game.Version + "! post-7DRL 2014");
+            preamble.Add("flend & shroomarts");
+            preamble.AddRange(Utility.LoadTextFile("introPreamble", Screen.Instance.Width - 2 * preambleTL.x, out height));
 
             for (int i = 0; i < preamble.Count; i++)
             {

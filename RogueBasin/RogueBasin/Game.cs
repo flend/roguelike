@@ -10,6 +10,7 @@ namespace RogueBasin
         static MessageQueue messages = null;
         static Random rand;
         static Config config;
+        static public string Version = "1.1";
 
         static Game()
         {
