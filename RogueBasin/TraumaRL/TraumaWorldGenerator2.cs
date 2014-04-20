@@ -240,9 +240,10 @@ namespace TraumaRL
                 var totalStunGrenades = Game.Random.Next(totalGrenades - totalExposiveGrenades);
                 var totalSoundGrenades = totalGrenades - totalExposiveGrenades - totalStunGrenades;
 
-                var fragGrenades = ProduceMultipleItems<RogueBasin.Items.FragGrenade>(1 + Game.Random.Next(levelDifficulty[level]));
-                var stunGrenades = ProduceMultipleItems<RogueBasin.Items.StunGrenade>(1 + Game.Random.Next(levelDifficulty[level]));
-                var soundGrenades = ProduceMultipleItems<RogueBasin.Items.SoundGrenade>(1 + Game.Random.Next(levelDifficulty[level]));
+                var maxNadesOfType = Math.Max(1, (int)Math.Ceiling(levelDifficulty[level] / 2.0));
+                var fragGrenades = ProduceMultipleItems<RogueBasin.Items.FragGrenade>(Game.Random.Next(1, maxNadesOfType));
+                var stunGrenades = ProduceMultipleItems<RogueBasin.Items.StunGrenade>(Game.Random.Next(1, maxNadesOfType));
+                var soundGrenades = ProduceMultipleItems<RogueBasin.Items.SoundGrenade>(Game.Random.Next(1, maxNadesOfType));
 
                 PlaceItems(mapInfo, fragGrenades, new List<int> { room }, false, true, true);
                 PlaceItems(mapInfo, stunGrenades, new List<int> { room }, false, true, true);

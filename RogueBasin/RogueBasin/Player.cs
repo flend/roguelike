@@ -914,7 +914,7 @@ namespace RogueBasin
 
         public void CancelStealthDueToAttack()
         {
-            if (Game.Dungeon.PlayerImmortal)
+            if (Game.Dungeon.PlayerCheating)
                 return;
 
             //Forceably unequip any StealthWare and disable for some time
@@ -927,7 +927,7 @@ namespace RogueBasin
 
         public void CancelBoostDueToAttack()
         {
-            if (Game.Dungeon.PlayerImmortal)
+            if (Game.Dungeon.PlayerCheating)
                 return;
 
             //Forceably unequip any SpeedWare and disable for some time
@@ -1427,9 +1427,48 @@ namespace RogueBasin
             return effects.FindAll(x => x.GetType() == effectType);
         }
 
-
         protected override char GetRepresentation()
         {
+            var weapon = GetEquippedWeapon();
+
+            if (weapon != null)
+            {
+                if (weapon.GetType() == typeof(Items.Fists))
+                    return (char)257;
+
+                if (weapon.GetType() == typeof(Items.Pistol))
+                    return (char)513;
+
+                if (weapon.GetType() == typeof(Items.HeavyPistol))
+                    return (char)512;
+
+                if (weapon.GetType() == typeof(Items.Shotgun))
+                    return (char)514;
+
+                if (weapon.GetType() == typeof(Items.AssaultRifle))
+                    return (char)515;
+
+                if (weapon.GetType() == typeof(Items.HeavyShotgun))
+                    return (char)516;
+
+                if (weapon.GetType() == typeof(Items.Laser))
+                    return (char)517;
+
+                if (weapon.GetType() == typeof(Items.HeavyLaser))
+                    return (char)517;
+
+                if (weapon.GetType() == typeof(Items.Vibroblade))
+                    return (char)518;
+
+                if (weapon.GetType() == typeof(Items.FragGrenade))
+                    return (char)521;
+
+                if (weapon.GetType() == typeof(Items.StunGrenade))
+                    return (char)522;
+
+                if (weapon.GetType() == typeof(Items.SoundGrenade))
+                    return (char)520;
+            }
             return (char)257;
         }
 
@@ -1709,13 +1748,57 @@ namespace RogueBasin
 
             var equipSuccess = false;
             if(invAvailable)
-                equipSuccess = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First(), false);
+                equipSuccess = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First());
 
             if (equipSuccess == false && reequip == false)
             {
                 //Try to reequip melee
                 EquipBestMeleeWeapon();
             }
+            return false;
+        }
+        
+        public virtual bool PickUpItem(Item itemToPickUp)
+        {
+            base.PickUpItem(itemToPickUp);
+
+            if (AutoequipItem(itemToPickUp))
+            {
+                EquipAndReplaceItem(itemToPickUp);
+            }
+
+            return true;
+        }
+
+        private bool AutoequipItem(Item itemToPickUp)
+        {
+            if (itemToPickUp is Items.Fists)
+                return true;
+
+            if (itemToPickUp is Items.Vibroblade)
+                return true;
+
+            if (itemToPickUp is Items.Pistol)
+                return true;
+
+            if (itemToPickUp is Items.Shotgun)
+                return true;
+
+            if (itemToPickUp is Items.AssaultRifle)
+                return true;
+
+            if (itemToPickUp is Items.Laser)
+                return true;
+
+            if (itemToPickUp is Items.HeavyPistol)
+                return true;
+
+            if (itemToPickUp is Items.HeavyShotgun)
+                return true;
+
+            if (itemToPickUp is Items.HeavyLaser)
+                return true;
+
             return false;
         }
 
@@ -1727,7 +1810,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="selectedGroup"></param>
         /// <returns></returns>
-        public bool EquipAndReplaceItem(Item itemToUse, bool dropOldItem)
+        public bool EquipAndReplaceItem(Item itemToUse)
         {
             //Check if this item is equippable
             IEquippableItem equippableItem = itemToUse as IEquippableItem;
@@ -1789,8 +1872,14 @@ namespace RogueBasin
                     return false;
                 }
 
-                if (dropOldItem)
-                    UnequipAndDropItem(oldItem);
+                //We destroy obselete ware
+                if (IsObselete(oldItem))
+                {
+                    LogFile.Log.LogEntryDebug("Item discarded: " + oldItem.SingleItemDescription, LogDebugLevel.Low);
+                    Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription);
+
+                    UnequipAndDestroyItem(oldItem);
+                }
                 else
                     UnequipItem(oldItem);
 
@@ -1813,6 +1902,20 @@ namespace RogueBasin
 
             return true;
         }
+
+        private bool IsObselete(Item oldItem)
+        {
+            if (oldItem is Items.Pistol && IsWeaponTypeAvailable(typeof(Items.HeavyPistol)))
+                return true;
+
+            if (oldItem is Items.Shotgun && IsWeaponTypeAvailable(typeof(Items.HeavyShotgun)))
+                return true;
+
+            if (oldItem is Items.Laser && IsWeaponTypeAvailable(typeof(Items.HeavyLaser)))
+                return true;
+            return false;
+        }
+
         /// <summary>
         /// FlatlineRL - unequip and item at drop at player loc
         /// </summary>
@@ -1873,7 +1976,6 @@ namespace RogueBasin
         {
             if (item == null)
                 return;
-
 
             //Run unequip routine
             IEquippableItem equipItem = item as IEquippableItem;

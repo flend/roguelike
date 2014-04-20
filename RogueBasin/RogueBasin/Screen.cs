@@ -945,48 +945,7 @@ namespace RogueBasin {
                 return;
 
             char pcRepresentation = player.Representation;
-
-            var weapon = player.GetEquippedWeapon();
-
-            if (weapon != null)
-            {
-
-                if (weapon.GetType() == typeof(Items.Fists))
-                    pcRepresentation = (char)257;
-
-                if (weapon.GetType() == typeof(Items.Pistol))
-                    pcRepresentation = (char)513;
-
-                if (weapon.GetType() == typeof(Items.HeavyPistol))
-                    pcRepresentation = (char)512;
-
-                if (weapon.GetType() == typeof(Items.Shotgun))
-                    pcRepresentation = (char)514;
-
-                if (weapon.GetType() == typeof(Items.AssaultRifle))
-                    pcRepresentation = (char)515;
-
-                if (weapon.GetType() == typeof(Items.HeavyShotgun))
-                    pcRepresentation = (char)516;
-
-                if (weapon.GetType() == typeof(Items.Laser))
-                    pcRepresentation = (char)517;
-
-                if (weapon.GetType() == typeof(Items.HeavyLaser))
-                    pcRepresentation = (char)517;
-
-                if (weapon.GetType() == typeof(Items.Vibroblade))
-                    pcRepresentation = (char)518;
-
-                if (weapon.GetType() == typeof(Items.FragGrenade))
-                    pcRepresentation = (char)521;
-
-                if (weapon.GetType() == typeof(Items.StunGrenade))
-                    pcRepresentation = (char)522;
-
-                if (weapon.GetType() == typeof(Items.SoundGrenade))
-                    pcRepresentation = (char)520;
-            }
+            
             var colorToUse = PCDrawColor;
 
             var hasActiveWetware = player.GetEquippedWetware();
@@ -3445,7 +3404,7 @@ namespace RogueBasin {
                 {
                     if (isViewVisible(newTarget.LocationMap))
                     {
-                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(explosionIcon);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.Representation);
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
                     }
                 }

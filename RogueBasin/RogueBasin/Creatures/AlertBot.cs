@@ -188,6 +188,16 @@ namespace RogueBasin.Creatures
             return "sounds the alert!";
         }
 
+        internal override char GetCorpseRepresentation()
+        {
+            return (char)504;
+        }
+
+        internal override Color GetCorpseRepresentationColour()
+        {
+            return ColorPresets.DarkRed;
+        }
+
         protected override bool UseSpecialAbility()
         {
             //Don't make too many sounds otherwise it will slow the game down

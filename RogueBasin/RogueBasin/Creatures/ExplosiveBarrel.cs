@@ -75,7 +75,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Explosive Barrel"; } }
+        public override string GroupDescription { get { return "Explosive Barrels"; } }
 
         protected override char GetRepresentation()
         {

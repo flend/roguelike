@@ -144,7 +144,7 @@ namespace RogueBasin.Creatures
 
         public override Color RepresentationColor()
         {
-            return ColorPresets.Lime;
+            return ColorPresets.Cyan;
         }
 
         public override int GetCombatXP()
@@ -192,6 +192,11 @@ namespace RogueBasin.Creatures
         public override int HitModifier()
         {
             return 3;
+        }
+
+        public override int DropChance()
+        {
+            return 5;
         }
 
     }

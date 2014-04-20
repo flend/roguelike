@@ -76,7 +76,7 @@ namespace RogueBasin
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Medium)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.0);
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Hard)
-                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.25);
+                    monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.2);
 
                 LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
 
@@ -479,19 +479,19 @@ namespace RogueBasin
                 case GameDifficulty.Easy:
                     ammoChance = 50;
                     shieldChance = 50;
-                    nadeChance = 2000;
+                    nadeChance = 4000;
                     repairChance = 20000;
                     break;
                 case GameDifficulty.Medium:
                     ammoChance = 200;
                     shieldChance = 100;
-                    nadeChance = 5000;
+                    nadeChance = 6000;
                     repairChance = 20000;
                     break;
                 case GameDifficulty.Hard:
                     ammoChance = 400;
                     shieldChance = 200;
-                    nadeChance = 5000;
+                    nadeChance = 6000;
                     repairChance = 20000;
                     break;
             }

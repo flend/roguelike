@@ -127,7 +127,15 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        
+        internal override char GetCorpseRepresentation()
+        {
+            return (char)501;
+        }
+
+        internal override Color GetCorpseRepresentationColour()
+        {
+            return ColorPresets.DarkRed;
+        }
 
         public override void InventoryDrop()
         {

@@ -380,6 +380,7 @@ namespace RogueBasin
         public GameDifficulty Difficulty { get; set; }
 
         public bool PlayerImmortal { get; set; }
+        public bool PlayerCheating { get; set; }
 
         private List<Monster> summonedMonsters; //no need to serialize
 

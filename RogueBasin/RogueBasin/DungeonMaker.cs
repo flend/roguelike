@@ -910,8 +910,6 @@ namespace RogueBasin
 
             bool success = false;
 
-            monster.PickUpItem(new Items.ShieldPack());
-
             do
             {
                 CreaturePatrol patrol = mapGen.CreatureStartPosAndWaypointsSisterRooms(monster.GetPatrolRotationClockwise(), 3);
@@ -997,8 +995,6 @@ namespace RogueBasin
 
             int loops = 0;
             int maxLoops = 50;
-
-            monster.PickUpItem(new Items.ShieldPack());
 
             do
             {
@@ -1094,7 +1090,6 @@ namespace RogueBasin
                     }
 
                     Monster mon = monster[monsterPos];
-                    mon.PickUpItem(new Items.ShieldPack());
 
                     Point location;
                     do
