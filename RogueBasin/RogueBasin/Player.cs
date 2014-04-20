@@ -1876,7 +1876,7 @@ namespace RogueBasin
                 if (IsObselete(oldItem))
                 {
                     LogFile.Log.LogEntryDebug("Item discarded: " + oldItem.SingleItemDescription, LogDebugLevel.Low);
-                    Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription);
+                    Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription + ".");
 
                     UnequipAndDestroyItem(oldItem);
                 }

@@ -392,12 +392,7 @@ namespace RogueBasin
 
         internal static bool TestRange(MapObject x1, MapObject x2, double range)
         {
-            if (Utility.GetDistanceBetween(x1.LocationMap, x2.LocationMap) > range + 0.01)
-            {
-                return false;
-            }
-            else
-                return true;
+            return TestRange(x1.LocationMap, x2.LocationMap, range);
 
         }
 
