@@ -4946,7 +4946,7 @@ namespace RogueBasin
 
             //Check for any blocking features
             //Is checked by terrain above
-            /*
+            
             foreach (var f in features)
             {
                 if (f.LocationLevel != sourceLevel)
@@ -4954,12 +4954,10 @@ namespace RogueBasin
 
                 if (pointsOnLine.Contains(f.LocationMap))
                 {
-                    if (f.IsBlocking)
-                        hardCover += 1;
-                    else
-                        softCover += 1;
+                    if (!f.IsBlocking)
+                        softCover += 1;                        
                 }
-            }*/
+            }
 
             return new Tuple<int, int>(hardCover, softCover);
         }
