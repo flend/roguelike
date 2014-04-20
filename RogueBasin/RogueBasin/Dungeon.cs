@@ -4464,7 +4464,7 @@ namespace RogueBasin
 
             finalScreen.Add("");
 
-            finalScreen.Add("Robots destroyed " + killRecord.killCount + ": " + killRecord.killScore + " pts");
+            finalScreen.Add("Robots destroyed: " + killRecord.killCount + " (" + killRecord.killScore + " pts)");
             finalScreen.Add("");
 
             //finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
