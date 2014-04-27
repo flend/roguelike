@@ -618,6 +618,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                         LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
                     }
 
+                    if (!CheckItemRouteability())
+                    {
+                        throw new ApplicationException("Item is not connected to elevator, aborting.");
+                    }
+
                     if (retry)
                     {
                         throw new ApplicationException("It happened!");
@@ -625,6 +630,43 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
 
             return mapInfo;
+        }
+
+        private bool CheckItemRouteability()
+        {
+            var items = Game.Dungeon.Items;
+            var features = Game.Dungeon.Features;
+
+            foreach (var item in items)
+            {
+                if (item.InInventory)
+                    continue;
+
+                var destElevator = features.Where(f => f.GetType() == typeof(RogueBasin.Features.Elevator) && (f as RogueBasin.Features.Elevator).DestLevel == item.LocationLevel);
+                var destElevatorLocations = destElevator.Select(e => (e as RogueBasin.Features.Elevator).DestLocation);
+
+                var srcElevator = features.Where(f => f.GetType() == typeof(RogueBasin.Features.Elevator) && (f as RogueBasin.Features.Elevator).LocationLevel == item.LocationLevel);
+                var srcElevatorLocations = srcElevator.Select(e => (e as RogueBasin.Features.Elevator).LocationMap);
+
+                var elevatorLocations = destElevatorLocations.Union(srcElevatorLocations);
+
+                if (!elevatorLocations.Any())
+                {
+                    LogFile.Log.LogEntryDebug("Item " + item.SingleItemDescription + " has no elevator on the same level, map cannot be solved!", LogDebugLevel.High);
+                    //return false;
+                }
+
+                var elevatorToRouteTo = elevatorLocations.First();
+
+                //Check routing between elevator and item
+                if (!Game.Dungeon.Pathing.ArePointsConnected(item.LocationLevel, item.LocationMap, elevatorToRouteTo))
+                {
+                    LogFile.Log.LogEntryDebug("Item " + item.SingleItemDescription + " at " + item.LocationMap + "(" + item.LocationLevel +")" + "is not connected to elevator at " + elevatorToRouteTo + ", map cannot be solved!", LogDebugLevel.High);
+                    //return false;
+                }
+            }
+
+            return true;
         }
 
         private void SetupMapsInEngine()
