@@ -584,10 +584,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //Set maps in engine (needs to be done before placing items and monsters)
                     SetupMapsInEngine();
 
-                    var visualiser = new DoorClueGraphvizExport(mapInfo.Model);
-                    visualiser.OutputFullGraph("bsptree-full");
-                    GraphVizUtils.RunGraphVizPNG("bsptree-full");
-
                     //Add elevator features to link the maps
                     AddElevatorFeatures(mapInfo, levelInfo);
 
@@ -672,9 +668,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;
 
                     var numberOfFeatures = (int)Math.Abs(Gaussian.BoxMuller(thisRoomArea * avConcentration, thisRoomArea * stdConcentration));
-                    LogFile.Log.LogEntryDebug("bm " + numberOfFeatures, LogDebugLevel.Low);
+                    //LogFile.Log.LogEntryDebug("bm " + numberOfFeatures, LogDebugLevel.Low);
 
-                    AddStandardDecorativeFeaturesToRoomUsingGrid(thisLevel, thisRoom, numberOfFeatures, featuresAndWeights, true);
+                    AddStandardDecorativeFeaturesToRoomUsingGrid(thisLevel, thisRoom, numberOfFeatures, featuresAndWeights);
                 }
             }
         }
@@ -3067,7 +3063,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
 
             var floorPoints = new List<Point>();
-            if(useBoundary)
+            if(!useBoundary)
                 floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
             else
                 floorPoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(positionedRoom.Room);
@@ -3098,7 +3094,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private void AddStandardDecorativeFeaturesToRoomUsingGrid(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
+        private void AddStandardDecorativeFeaturesToRoomUsingGrid(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
         {
             var roomFiller = new RoomFilling(positionedRoom.Room);
 

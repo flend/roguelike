@@ -72,9 +72,9 @@ namespace TraumaRL
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
-            //VisualiseConnectivityGraph(mapInfo.Model);
+            VisualiseConnectivityGraph(mapInfo.Model);
 
-            //VisualiseLevelConnectivityGraph(new MapModel(templateGen.LevelLinks, 0), TraumaWorldGenerator.LevelNaming);
+            VisualiseLevelConnectivityGraph(new MapModel(templateGen.LevelLinks, 0), TraumaWorldGenerator.LevelNaming);
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel)
@@ -83,20 +83,27 @@ namespace TraumaRL
             visualiser.OutputFullGraph("bsptree-full");
             visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
-            GraphVizUtils.RunGraphVizPNG("bsptree-full");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
-            GraphVizUtils.RunGraphVizPNG("bsptree-door");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
-            GraphVizUtils.RunGraphVizPNG("bsptree-dep");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
+
+            if (Game.Config.DebugMode) {
+                GraphVizUtils.RunGraphVizPNG("bsptree-full");
+                GraphVizUtils.RunGraphVizPNG("bsptree-door");
+                GraphVizUtils.RunGraphVizPNG("bsptree-dep");
+
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
+            }   
         }
 
         private void VisualiseLevelConnectivityGraph(MapModel graphModel, Dictionary<int, string> levelNaming)
         {
             var visualiser = new DoorClueGraphvizExport(graphModel, levelNaming);
             visualiser.OutputFullGraph("levellinks-full");
-            GraphVizUtils.RunGraphVizPNG("levellinks-full");
-            GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
+            if (Game.Config.DebugMode)
+            {
+                GraphVizUtils.RunGraphVizPNG("levellinks-full");
+                GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
+            }
         }
 
         private void RandomSetup() {
