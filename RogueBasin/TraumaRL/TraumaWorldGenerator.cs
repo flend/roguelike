@@ -3037,6 +3037,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
 
+            if (floorPoints.Count() == 0)
+                return;
+
             for (int i = 0; i < featuresToPlace; i++)
             {
                 var randomPoint = floorPoints.RandomElement();
@@ -3067,6 +3070,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
             else
                 floorPoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(positionedRoom.Room);
+
+            if (floorPoints.Count() == 0)
+                return;
 
             for (int i = 0; i < featuresToPlace; i++)
             {
@@ -3102,6 +3108,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
 
             var floorPoints = RoomTemplateUtilities.GetGridFromRoom(positionedRoom.Room, 2, 1, 0.5);
+
+            if (floorPoints.Count() == 0)
+                return;
 
             for (int i = 0; i < featuresToPlace; i++)
             {
