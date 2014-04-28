@@ -1543,12 +1543,6 @@ namespace RogueBasin
                 int level = newLock.LocationLevel;
                 Point location = newLock.LocationMap;
 
-                //There must be a closed door here
-                //if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.ClosedDoor)
-                //{
-                //    OpenDoor(level, location);
-                //}
-
                 SetTerrainAtPoint(level, location, MapTerrain.ClosedLock);
 
                 //Otherwise OK
@@ -3493,6 +3487,8 @@ namespace RogueBasin
             PathingTerrain pathingTerrain;
             if (newTerrain == MapTerrain.ClosedDoor)
                 pathingTerrain = PathingTerrain.ClosedDoor;
+            else if (newTerrain == MapTerrain.ClosedLock)
+                pathingTerrain = PathingTerrain.ClosedLock;
             else
                 pathingTerrain = IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable;
             Pathing.PathFindingInternal.updateMap(level, location, pathingTerrain);

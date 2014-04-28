@@ -16,7 +16,7 @@ namespace RogueBasin
 
         public enum PathingPermission
         {
-            Normal, IgnoreDoors
+            Normal, IgnoreDoors, IgnoreDoorsAndLocks
         }
 
         Algorithms.IPathFinder pathFinding;

@@ -11,11 +11,13 @@ namespace RogueBasin.LibTCOD
 
         Dictionary<int, TCODFov> levelTCODMaps;
         Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoors;
+        Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoorsAndLocks;
 
         public TCODPathFindingWrapper()
         {
             levelTCODMaps = new Dictionary<int, TCODFov>();
             levelTCODMapsIgnoringClosedDoors = new Dictionary<int, TCODFov>();
+            levelTCODMapsIgnoringClosedDoorsAndLocks = new Dictionary<int, TCODFov>();
         }
 
         public bool arePointsConnected(int level, Point origin, Point dest, Pathing.PathingPermission permission)
@@ -50,6 +52,23 @@ namespace RogueBasin.LibTCOD
             }
 
             levelTCODMapsIgnoringClosedDoors[level] = tcodLevelNoClosedDoors;
+
+
+            //Ignoring closed doors and locks
+
+            TCODFov tcodLevelNoClosedDoorsAndLocks = new TCODFov(terrainMap.Width, terrainMap.Height);
+
+            for (int j = 0; j < terrainMap.Width; j++)
+            {
+                for (int k = 0; k < terrainMap.Height; k++)
+                {
+                    tcodLevelNoClosedDoors.SetCell(j, k, true, terrainMap.getCell(j, k) == PathingTerrain.Walkable ||
+                        terrainMap.getCell(j, k) == PathingTerrain.ClosedDoor ||
+                        terrainMap.getCell(j, k) == PathingTerrain.ClosedLock);
+                }
+            }
+
+            levelTCODMapsIgnoringClosedDoorsAndLocks[level] = tcodLevelNoClosedDoorsAndLocks;
         }
 
         public void updateMap(int level, Point point, PathingTerrain newTerrain)
@@ -62,17 +81,25 @@ namespace RogueBasin.LibTCOD
 
             switch (newTerrain)
             {
+                case PathingTerrain.ClosedLock:
+                    levelTCODMaps[level].SetCell(point.x, point.y, true, false);
+                    levelTCODMapsIgnoringClosedDoors[level].SetCell(point.x, point.y, true, false);
+                    levelTCODMapsIgnoringClosedDoorsAndLocks[level].SetCell(point.x, point.y, true, true);
+                    break;
                 case PathingTerrain.ClosedDoor:
                     levelTCODMaps[level].SetCell(point.x, point.y, true, false);
                     levelTCODMapsIgnoringClosedDoors[level].SetCell(point.x, point.y, true, true);
+                    levelTCODMapsIgnoringClosedDoorsAndLocks[level].SetCell(point.x, point.y, true, true);
                     break;
                 case PathingTerrain.Unwalkable:
                     levelTCODMaps[level].SetCell(point.x, point.y, true, false);
                     levelTCODMapsIgnoringClosedDoors[level].SetCell(point.x, point.y, true, false);
+                    levelTCODMapsIgnoringClosedDoorsAndLocks[level].SetCell(point.x, point.y, true, false);
                     break;
                 case PathingTerrain.Walkable:
                     levelTCODMaps[level].SetCell(point.x, point.y, true, true);
                     levelTCODMapsIgnoringClosedDoors[level].SetCell(point.x, point.y, true, true);
+                    levelTCODMapsIgnoringClosedDoorsAndLocks[level].SetCell(point.x, point.y, true, true);
                     break;
             }
         }
@@ -83,10 +110,21 @@ namespace RogueBasin.LibTCOD
 
             TCODFov mapToUse;
 
-            if (permission == Pathing.PathingPermission.IgnoreDoors)
-                mapToUse = levelTCODMapsIgnoringClosedDoors[level];
-            else
-                mapToUse = levelTCODMaps[level];
+            switch (permission)
+            {
+                case Pathing.PathingPermission.Normal:
+                    mapToUse = levelTCODMaps[level];
+                    break;
+                case Pathing.PathingPermission.IgnoreDoors:
+                    mapToUse = levelTCODMapsIgnoringClosedDoors[level];
+                    break;
+                case Pathing.PathingPermission.IgnoreDoorsAndLocks:
+                    mapToUse = levelTCODMapsIgnoringClosedDoorsAndLocks[level];
+                    break;
+                default:
+                    mapToUse = levelTCODMaps[level];
+                    break;
+            }   
 
             //Try to walk the path
             TCODPathFinding path = new TCODPathFinding(mapToUse, 1.0);
