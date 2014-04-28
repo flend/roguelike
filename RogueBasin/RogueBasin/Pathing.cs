@@ -61,7 +61,7 @@ namespace RogueBasin
         /// <param name="allDoorsAsOpen"></param>
         /// <param name="attackDestination"></param>
         /// <returns></returns>
-        internal PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingPermission permission)
+        private PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingPermission permission)
         {
             //Try to walk the path
             //If we fail, check if this square occupied by a creature
@@ -194,7 +194,7 @@ namespace RogueBasin
             }
         }
 
-        internal PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission)
+        private PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission)
         {
             //Check for pathing to own square
             if (origin == dest)
@@ -279,17 +279,7 @@ namespace RogueBasin
             return new PathingResult(origin, false, false);
         }
 
-        /// <summary>
-        /// Returns the direction to go in (+-xy) for the next step towards the target
-        /// If there's no route at all, return -1, -1. Right now we throw an exception for this, since it shouldn't happen in a connected dungeon
-        /// If there's a route but its blocked by a creature return the originCreature's coords
-        /// 
-        /// NB: This is rather inefficient as it recalculates the route each time. Probably the creature should continue on the same route unless something changes
-        /// </summary>
-        /// <param name="originCreature"></param>
-        /// <param name="destCreature"></param>
-        /// <returns></returns>
-        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature, PathingType type)
+        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature, PathingType type, PathingPermission permission)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != destCreature.LocationLevel)
@@ -299,71 +289,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, PathingPermission.Normal);
-        }
-
-        /// <summary>
-        /// Returns the direction to go in (+-xy) for the next step towards the target
-        /// If there's no route at all, return -1, -1
-        /// If there's a route but its blocked by a creature return the originCreature's coords
-        /// Use the map which assumes doors are all open
-        /// </summary>
-        /// <param name="originCreature"></param>
-        /// <param name="destCreature"></param>
-        /// <returns></returns>
-        internal PathingResult GetPathToPointIgnoreClosedDoors(int level, Monster originCreature, Point dest, PathingType type)
-        {
-            //If on different levels it's an error
-            if (originCreature.LocationLevel != level)
-            {
-                string msg = originCreature.Representation + " not on the same level as level " + level;
-                LogFile.Log.LogEntry(msg);
-                throw new ApplicationException(msg);
-            }
-
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, PathingPermission.IgnoreDoors);
-        }
-
-        /// <summary>
-        /// Returns the direction to go in (+-xy) for the next step towards the target
-        /// If there's no route at all, return -1, -1. Right now we throw an exception for this, since it shouldn't happen in a connected dungeon
-        /// If there's a route but its blocked by a creature return the originCreature's coords
-        /// </summary>
-        /// <param name="originCreature"></param>
-        /// <param name="destCreature"></param>
-        /// <returns></returns>
-        internal PathingResult GetPathToCreatureIgnoreClosedDoors(Creature originCreature, Creature destCreature, PathingType type)
-        {
-            //If on different levels it's an error
-            if (originCreature.LocationLevel != destCreature.LocationLevel)
-            {
-                string msg = originCreature.Representation + " not on the same level as " + destCreature.Representation;
-                LogFile.Log.LogEntry(msg);
-                throw new ApplicationException(msg);
-            }
-
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, PathingPermission.IgnoreDoors);
-        }
-
-        /// <summary>
-        /// Returns the direction to go in (+-xy) for the next step towards the target
-        /// If there's no route at all, return -1, -1
-        /// If there's a route but its blocked by a creature return the originCreature's coords
-        /// </summary>
-        /// <param name="originCreature"></param>
-        /// <param name="destCreature"></param>
-        /// <returns></returns>
-        internal PathingResult GetPathFromCreatureToPoint(int level, Monster originCreature, Point dest, PathingType type)
-        {
-            //If on different levels it's an error
-            if (originCreature.LocationLevel != level)
-            {
-                string msg = originCreature.Representation + " not on the same level as level " + level;
-                LogFile.Log.LogEntry(msg);
-                throw new ApplicationException(msg);
-            }
-
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, PathingPermission.Normal);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, permission);
         }
 
         public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, PathingPermission permission)

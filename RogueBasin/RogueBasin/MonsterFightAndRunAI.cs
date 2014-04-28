@@ -649,10 +649,12 @@ namespace RogueBasin
         {
             //Check the square is pathable to
             Pathing.PathingResult pathingResult;
-            if(!CanOpenDoors())
-                pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, currentSound.MapLocation, PathingType());
-            else
-                pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, currentSound.MapLocation, PathingType());
+            Pathing.PathingPermission permission = Pathing.PathingPermission.Normal;
+
+            if (CanOpenDoors())
+                permission = Pathing.PathingPermission.IgnoreDoors;
+
+            pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, currentSound.MapLocation, PathingType(), permission);
 
             if (pathingResult.TerminallyBlocked)
             {
@@ -806,10 +808,12 @@ namespace RogueBasin
                         //Head towards next waypoint
                         //Check the square is pathable to
                         Pathing.PathingResult pathingResult;
-                        if(!CanOpenDoors())
-                            pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, Waypoints[CurrentWaypoint], PathingType());
-                        else
-                            pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, Waypoints[CurrentWaypoint], PathingType());
+                        Pathing.PathingPermission permission = Pathing.PathingPermission.Normal;
+
+                        if(CanOpenDoors())
+                            permission = Pathing.PathingPermission.IgnoreDoors;
+
+                        pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, Waypoints[CurrentWaypoint], PathingType(), permission);
 
                         if (pathingResult.TerminallyBlocked)
                         {
@@ -995,10 +999,12 @@ namespace RogueBasin
                     }
 
                     //Check the square is pathable to
-                    if(!CanOpenDoors())
-                        pathingResult = Game.Dungeon.Pathing.GetPathFromCreatureToPoint(this.LocationLevel, this, new Point(fleeX, fleeY), PathingType());
-                    else
-                        pathingResult = Game.Dungeon.Pathing.GetPathToPointIgnoreClosedDoors(this.LocationLevel, this, new Point(fleeX, fleeY), PathingType());
+                    Pathing.PathingPermission permission = Pathing.PathingPermission.Normal;
+
+                    if(CanOpenDoors())
+                        permission = Pathing.PathingPermission.IgnoreDoors;
+
+                    pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, new Point(fleeX, fleeY), PathingType(), permission);
 
                     if (pathingResult.TerminallyBlocked)
                     {
@@ -1079,10 +1085,12 @@ namespace RogueBasin
             //Find location of next step on the path towards target
 
             Pathing.PathingResult pathingResult;
-            if(!CanOpenDoors())
-                pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType());
-            else
-                pathingResult = Game.Dungeon.Pathing.GetPathToCreatureIgnoreClosedDoors(this, newTarget, PathingType());
+            Pathing.PathingPermission permission = Pathing.PathingPermission.Normal;
+
+            if(CanOpenDoors())
+                permission = Pathing.PathingPermission.IgnoreDoors;
+
+            pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType(), permission);
 
             Point nextStep = pathingResult.MonsterFinalLocation;
 
@@ -1153,7 +1161,11 @@ namespace RogueBasin
                 return;
 
             //Find location of next step on the path towards them
-            var pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, player, PathingType());
+            Pathing.PathingPermission permission = Pathing.PathingPermission.Normal;
+            if (CanOpenDoors())
+                permission = Pathing.PathingPermission.IgnoreDoors;
+
+            var pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, player, PathingType(), permission);
 
             if (pathingResult.TerminallyBlocked)
             {
