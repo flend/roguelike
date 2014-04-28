@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RogueBasin.Algorithms
 {
-    interface IPathFinder
+    public interface IPathFinder
     {
         /// <summary>
         /// Return a list of nodes in the path, or null if no path is available.

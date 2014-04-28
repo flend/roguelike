@@ -19,16 +19,16 @@ namespace RogueBasin
             Normal, IgnoreDoors
         }
 
-        LibTCOD.TCODPathFindingWrapper pathFinding;
+        Algorithms.IPathFinder pathFinding;
         Dungeon dungeon;
 
-        public Pathing(Dungeon dungeon, LibTCOD.TCODPathFindingWrapper pathFinding)
+        public Pathing(Dungeon dungeon, Algorithms.IPathFinder pathFinding)
         {
             this.pathFinding = pathFinding;
             this.dungeon = dungeon;
         }
 
-        public LibTCOD.TCODPathFindingWrapper PathFindingInternal
+        public Algorithms.IPathFinder PathFindingInternal
         {
             get
             {
