@@ -659,7 +659,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var elevatorToRouteTo = elevatorLocations.First();
 
                 //Check routing between elevator and item
-                if (!Game.Dungeon.Pathing.ArePointsConnected(item.LocationLevel, item.LocationMap, elevatorToRouteTo))
+                if (!Game.Dungeon.Pathing.ArePointsConnected(item.LocationLevel, item.LocationMap, elevatorToRouteTo, Pathing.PathingPermission.IgnoreDoors))
                 {
                     LogFile.Log.LogEntryDebug("Item " + item.SingleItemDescription + " at " + item.LocationMap + "(" + item.LocationLevel +")" + "is not connected to elevator at " + elevatorToRouteTo + ", map cannot be solved!", LogDebugLevel.High);
                     //return false;

@@ -18,9 +18,9 @@ namespace RogueBasin.LibTCOD
             levelTCODMapsIgnoringClosedDoors = new Dictionary<int, TCODFov>();
         }
 
-        public bool arePointsConnected(int level, Point origin, Point dest, bool openAllDoors)
+        public bool arePointsConnected(int level, Point origin, Point dest, Pathing.PathingPermission permission)
         {
-            return pathNodes(level, origin, dest, openAllDoors).Count > 1;
+            return pathNodes(level, origin, dest, permission).Count > 1;
         }
 
         public void updateMap(int level, PathingMap terrainMap) {
@@ -77,13 +77,13 @@ namespace RogueBasin.LibTCOD
             }
         }
 
-        public List<Point> pathNodes(int level, Point origin, Point dest, bool openAllDoors) {
+        public List<Point> pathNodes(int level, Point origin, Point dest, Pathing.PathingPermission permission) {
 
             List<Point> returnNodes = new List<Point>();
 
             TCODFov mapToUse;
 
-            if (openAllDoors)
+            if (permission == Pathing.PathingPermission.IgnoreDoors)
                 mapToUse = levelTCODMapsIgnoringClosedDoors[level];
             else
                 mapToUse = levelTCODMaps[level];

@@ -1191,13 +1191,6 @@ namespace RogueBasin
                     return false;
                 }
 
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Position not connected to stairs", LogDebugLevel.Medium);
-                    return false;
-                }
-
                 //Otherwise OK
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
@@ -1344,13 +1337,6 @@ namespace RogueBasin
                     return false;
                 }
 
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Position not connected to stairs", LogDebugLevel.Medium);
-                    return false;
-                }
-
                 //Otherwise OK
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
@@ -1387,13 +1373,6 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
                 {
-                    return false;
-                }
-
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddItem failure: Position not connected to stairs", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1618,13 +1597,6 @@ namespace RogueBasin
                         LogFile.Log.LogEntry("AddFeature: other feature already there");
                         return false;
                     }
-                }
-
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddFeature failure: Position not connected to stairs", LogDebugLevel.Medium);
-                    return false;
                 }
 
                 //Otherwise OK

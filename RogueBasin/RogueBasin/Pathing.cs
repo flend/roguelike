@@ -14,6 +14,11 @@ namespace RogueBasin
             Normal, CreaturePass
         }
 
+        public enum PathingPermission
+        {
+            Normal, IgnoreDoors
+        }
+
         LibTCOD.TCODPathFindingWrapper pathFinding;
         Dungeon dungeon;
 
@@ -38,12 +43,12 @@ namespace RogueBasin
         /// <param name="firstPoint"></param>
         /// <param name="secondPoint"></param>
         /// <returns></returns>
-        public bool ArePointsConnected(int level, Point firstPoint, Point secondPoint)
+        public bool ArePointsConnected(int level, Point firstPoint, Point secondPoint, PathingPermission permission)
         {
             if (firstPoint == secondPoint)
                 return true;
 
-            return pathFinding.arePointsConnected(level, firstPoint, secondPoint, false);
+            return pathFinding.arePointsConnected(level, firstPoint, secondPoint, permission);
         }
 
         /// <summary>
@@ -56,7 +61,7 @@ namespace RogueBasin
         /// <param name="allDoorsAsOpen"></param>
         /// <param name="attackDestination"></param>
         /// <returns></returns>
-        internal PathingResult GetPathToPoint(int level, Point origin, Point dest, bool allDoorsAsOpen)
+        internal PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingPermission permission)
         {
             //Try to walk the path
             //If we fail, check if this square occupied by a creature
@@ -79,7 +84,7 @@ namespace RogueBasin
             {
                 //Generate path object
                 //We actually only need the next point here
-                List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, allDoorsAsOpen);
+                List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission);
 
                 //No path
                 if (pathNodes.Count == 1)
@@ -189,7 +194,7 @@ namespace RogueBasin
             }
         }
 
-        internal PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, bool allDoorsAsOpen)
+        internal PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission)
         {
             //Check for pathing to own square
             if (origin == dest)
@@ -199,7 +204,7 @@ namespace RogueBasin
             }
 
             //Generate path object
-            List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, allDoorsAsOpen);
+            List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission);
             //Remove last node if repeated (happens sometimes)
             if(pathNodes[pathNodes.Count - 1] == pathNodes[pathNodes.Count - 2])
                 pathNodes.RemoveAt(pathNodes.Count - 1);
@@ -275,61 +280,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Checks if location is in the connected part of the dungeon. Checked by routing a path from the up or entry stairs
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        public bool CheckInConnectedPartOfMap(int level, Point location)
-        {
-            //Level nature
-            //if (levels[level].GuaranteedConnected)
-            //    return true;
-
-            //na
-            return true;
-
-            //Find downstairs
-            Features.StaircaseUp upStairs = null;
-            Features.StaircaseExit entryStairs = null;
-            Point upStairlocation = new Point(0, 0);
-            Point entryStairlocation = new Point(0, 0);
-
-
-            foreach (Feature feature in dungeon.Features)
-            {
-                if (feature.LocationLevel == level &&
-                    feature is Features.StaircaseUp)
-                {
-                    upStairs = feature as Features.StaircaseUp;
-                    upStairlocation = feature.LocationMap;
-                }
-
-                if (feature.LocationLevel == level &&
-                    feature is Features.StaircaseExit)
-                {
-                    entryStairs = feature as Features.StaircaseExit;
-                    entryStairlocation = feature.LocationMap;
-                }
-            }
-
-            //We don't have downstairs, warn but return true
-            if (upStairs == null && entryStairs == null)
-            {
-                LogFile.Log.LogEntryDebug("CheckInConnectedPartOfMap called on level with no downstairs", LogDebugLevel.Medium);
-                return true;
-            }
-
-            bool toUp = ArePointsConnected(level, location, upStairlocation);
-            bool toEntry = ArePointsConnected(level, location, entryStairlocation);
-
-            if (toUp || toEntry)
-                return true;
-
-            return false;
-        }
-
-        /// <summary>
         /// Returns the direction to go in (+-xy) for the next step towards the target
         /// If there's no route at all, return -1, -1. Right now we throw an exception for this, since it shouldn't happen in a connected dungeon
         /// If there's a route but its blocked by a creature return the originCreature's coords
@@ -349,7 +299,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, PathingPermission.Normal);
         }
 
         /// <summary>
@@ -371,7 +321,7 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, true);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, PathingPermission.IgnoreDoors);
         }
 
         /// <summary>
@@ -392,14 +342,13 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, true);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, PathingPermission.IgnoreDoors);
         }
 
         /// <summary>
         /// Returns the direction to go in (+-xy) for the next step towards the target
         /// If there's no route at all, return -1, -1
         /// If there's a route but its blocked by a creature return the originCreature's coords
-        /// Use the map which assumes doors are all open
         /// </summary>
         /// <param name="originCreature"></param>
         /// <param name="destCreature"></param>
@@ -414,19 +363,19 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, false);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, dest, type, PathingPermission.Normal);
         }
 
-        public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, bool openClosedDoors)
+        public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, PathingPermission permission)
         {
             switch (pathingType)
             {
                 case PathingType.CreaturePass:
 
-                    return GetPathToPointPassThroughMonsters(level, origin, dest, openClosedDoors);
+                    return GetPathToPointPassThroughMonsters(level, origin, dest, permission);
 
                 default:
-                    return GetPathToPoint(level, origin, dest, openClosedDoors);
+                    return GetPathToPoint(level, origin, dest, permission);
             }
         }
 
