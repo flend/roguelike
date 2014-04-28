@@ -1561,54 +1561,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Add feature to the dungeon. Check it can be reached by the player. Not suitable for adding staircases.
-        /// </summary>
-        /// <param name="feature"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        public bool AddFeatureCheckConnectivity(Feature feature, int level, Point location)
-        {
-            //Try to add a feature at the requested location
-            //This may fail due to something else being there or being non-walkable
-            try
-            {
-                Map featureLevel = levels[level];
-
-                //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
-                {
-                    LogFile.Log.LogEntry("AddFeature: map square can't be entered");
-                    return false;
-                }
-
-                //Check another feature isn't there
-                foreach (Feature otherFeature in features)
-                {
-                    if (otherFeature.LocationLevel == level &&
-                        otherFeature.LocationMap == location)
-                    {
-                        LogFile.Log.LogEntry("AddFeature: other feature already there");
-                        return false;
-                    }
-                }
-
-                //Otherwise OK
-                feature.LocationLevel = level;
-                feature.LocationMap = location;
-
-                features.Add(feature);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntry(String.Format("AddFeature: ") + ex.Message);
-                return false;
-            }
-
-        }
-
-        /// <summary>
         /// Add decoration feature to the dungeon. Make sure we don't cover up useful non-decoration features
         /// </summary>
         /// <param name="feature"></param>
