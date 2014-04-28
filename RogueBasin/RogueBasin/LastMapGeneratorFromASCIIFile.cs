@@ -411,10 +411,10 @@ namespace RogueBasin
                               //  Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));
                                 //break;
                             case 'D':
-                                Game.Dungeon.AddMonsterNoConnectivityCheck(new Creatures.DragonUnique(), levelNo, new Point(i, row));
+                                Game.Dungeon.AddMonster(new Creatures.DragonUnique(), levelNo, new Point(i, row));
                                 break;
                             case 'F':
-                                Game.Dungeon.AddMonsterNoConnectivityCheck(new Creatures.Friend(), levelNo, new Point(i, row));
+                                Game.Dungeon.AddMonster(new Creatures.Friend(), levelNo, new Point(i, row));
                                 break;
                         }
 
