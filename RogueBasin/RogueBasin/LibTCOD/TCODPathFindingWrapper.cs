@@ -62,7 +62,7 @@ namespace RogueBasin.LibTCOD
             {
                 for (int k = 0; k < terrainMap.Height; k++)
                 {
-                    tcodLevelNoClosedDoors.SetCell(j, k, true, terrainMap.getCell(j, k) == PathingTerrain.Walkable ||
+                    tcodLevelNoClosedDoorsAndLocks.SetCell(j, k, true, terrainMap.getCell(j, k) == PathingTerrain.Walkable ||
                         terrainMap.getCell(j, k) == PathingTerrain.ClosedDoor ||
                         terrainMap.getCell(j, k) == PathingTerrain.ClosedLock);
                 }
