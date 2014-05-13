@@ -14,13 +14,13 @@ namespace RogueBasin
         /// Uses graphviz to make a png from a dot. No filename extension on parameter
         /// </summary>
         /// <param name="filename"></param>
-        public static void RunGraphVizPNG(string filename)
+        public static void RunGraphVizPNG(string graphVizLocation, string filename)
         {
             // Use ProcessStartInfo class
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = false;
             startInfo.UseShellExecute = false;
-            startInfo.FileName = "c:\\Program Files (x86)\\Graphviz2.36\\bin\\dot.exe";
+            startInfo.FileName = graphVizLocation;
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.Arguments = filename + ".dot -Tpng -o " + filename + ".png";
 

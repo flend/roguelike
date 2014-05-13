@@ -52,8 +52,7 @@ namespace GraphMap
             //Visualise the reduced graph, including door and clue locations
             var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(model.BaseGraph);
 
-            graphviz.FormatVertex += graphviz_FormatVertex;
-            graphviz.FormatEdge += graphviz_FormatEdge;
+            graphviz.FormatVertex += graphviz_FormatVertex_NoAnnotation;
 
             graphviz.Generate(new FileDotEngineUndirected(), filename);
 
@@ -164,6 +163,19 @@ namespace GraphMap
                 vertexLabel += "\\n";
                 vertexLabel += clue;
             }
+
+            vertexFormattor.Label = vertexLabel;
+        }
+
+        private void graphviz_FormatVertex_NoAnnotation(object sender, FormatVertexEventArgs<int> e)
+        {
+            //(If nothing is included here, having this here allows default behaviour for serializer (add labels))
+
+            //Use formattor explicitally
+            var vertexFormattor = e.VertexFormatter;
+            int vertexNo = e.Vertex;
+
+            string vertexLabel = vertexNo.ToString();
 
             vertexFormattor.Label = vertexLabel;
         }

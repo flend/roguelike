@@ -2198,16 +2198,23 @@ namespace RogueBasin
             }
 
             //Run graphviz to png the output then display
-            GraphVizUtils.RunGraphVizPNG("bsptree-base");
+            try {
+                var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
 
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-base");
+                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-base");
 
-            if (doLocks)
-            {
-                GraphVizUtils.RunGraphVizPNG("bsptree-door");
-                GraphVizUtils.RunGraphVizPNG("bsptree-dep");
-                GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
-                GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-base");
+
+                if (doLocks)
+                {
+                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-door");
+                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-dep");
+                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
+                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
+                }
+            }
+            catch(Exception) {
+                LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
             }
 
             //Add standard dock triggers (allows map abortion & completion)
@@ -2265,21 +2272,26 @@ namespace RogueBasin
 
 
             //Run graphviz to png the output then display
-            GraphVizUtils.RunGraphVizPNG("bsptree-base");
-            GraphVizUtils.RunGraphVizPNG("bsptree-nocycles");
+            try
+            {
+                var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
 
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-base");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-nocycles");
+                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-base");
+                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-nocycles");
 
-
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-base");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-nocycles");
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+            }
 
             //Add standard dock triggers (allows map abortion & completion)
             //AddStandardEntryExitTriggers(dungeon, hallsGen, levelNo);
 
             //Place dock bay feature at PC startloc
             Game.Dungeon.AddFeature(new Features.DockBay(), levelNo, Game.Dungeon.Levels[levelNo].PCStartLocation);
-
-
         }
 
         /// <summary>

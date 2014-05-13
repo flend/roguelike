@@ -107,12 +107,22 @@ namespace MapTester
             visualiser.OutputFullGraph("bsptree-full");
             visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
-            GraphVizUtils.RunGraphVizPNG("bsptree-full");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
-            GraphVizUtils.RunGraphVizPNG("bsptree-door");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
-            GraphVizUtils.RunGraphVizPNG("bsptree-dep");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
+
+            try
+            {
+                var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
+
+                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-full");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
+                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-door");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
+                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-dep");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+            }
         }
 
         private void StandardGameSetup()

@@ -33,8 +33,16 @@ namespace GraphMapStressTester
         {
             var visualiser = new DoorClueGraphvizExport(graphModel);
             visualiser.OutputFullGraph("bsptree-full");
-            GraphVizUtils.RunGraphVizPNG("bsptree-full");
-            GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
+            try
+            {
+                var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
+                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-full");
+                GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+            }
         }
     }
 }

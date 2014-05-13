@@ -11,6 +11,8 @@ namespace RogueBasin
     {
         public Dictionary<string, string> Entries { get; private set; }
 
+        public static string GraphVizLocation = "graphviz";
+
         public Config(string filename)
         {
             Entries = new Dictionary<string, string>();
