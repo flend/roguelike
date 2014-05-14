@@ -173,6 +173,7 @@ namespace RogueBasin
     {
         Walkable,
         ClosedDoor,
+        ClosedLock,
         Unwalkable
     }
 

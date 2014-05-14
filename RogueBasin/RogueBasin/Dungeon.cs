@@ -3517,7 +3517,13 @@ namespace RogueBasin
 
             //Update pathing and fov
             fov.updateFovMap(level, location, IsTerrainLightBlocking(newTerrain) ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
-            Pathing.PathFindingInternal.updateMap(level, location, IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable);
+
+            PathingTerrain pathingTerrain;
+            if (newTerrain == MapTerrain.ClosedDoor)
+                pathingTerrain = PathingTerrain.ClosedDoor;
+            else
+                pathingTerrain = IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable;
+            Pathing.PathFindingInternal.updateMap(level, location, pathingTerrain);
         }
 
         /// <summary>
