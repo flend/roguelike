@@ -74,7 +74,7 @@ namespace RogueBasin
                     if (i == j)
                         continue;
 
-                    if (!pathFinding.arePointsConnected(0, doors[i].Location, doors[j].Location, false))
+                    if (!pathFinding.arePointsConnected(0, doors[i].Location, doors[j].Location, Pathing.PathingPermission.Normal))
                     {
                         pathable = false;
                         break;

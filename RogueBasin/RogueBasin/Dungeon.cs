@@ -1191,13 +1191,6 @@ namespace RogueBasin
                     return false;
                 }
 
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Position not connected to stairs", LogDebugLevel.Medium);
-                    return false;
-                }
-
                 //Otherwise OK
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
@@ -1205,62 +1198,6 @@ namespace RogueBasin
                 creature.CalculateSightRadius();
 
                 AddMonsterToList(creature);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntry(String.Format("AddCreature: ") + ex.Message);
-                return false;
-            }
-
-        }
-
-        /// <summary>
-        /// Add monster. In addition to normal checks, check connectivity between monster and down stairs. This will ensure the monster is not placed in an unaccessible place
-        /// </summary>
-        /// <param name="creature"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-
-        public bool AddMonsterNoConnectivityCheck(Monster creature, int level, Point location)
-        {
-            //Try to add a creature at the requested location
-            //This may fail due to something else being there or being non-walkable
-            try
-            {
-                Map creatureLevel = levels[level];
-
-                //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
-                    return false;
-                }
-
-                //Check square has nothing else on it
-                SquareContents contents = MapSquareContents(level, location);
-
-                if (contents.monster != null)
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
-                    return false;
-                }
-
-                if (contents.player != null)
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
-                    return false;
-                }
-
-                //Otherwise OK
-                creature.LocationLevel = level;
-                creature.LocationMap = location;
-
-                creature.CalculateSightRadius();
-
-                AddMonsterToList(creature);
-
                 return true;
             }
             catch (Exception ex)
@@ -1344,13 +1281,6 @@ namespace RogueBasin
                     return false;
                 }
 
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Position not connected to stairs", LogDebugLevel.Medium);
-                    return false;
-                }
-
                 //Otherwise OK
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
@@ -1387,13 +1317,6 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
                 {
-                    return false;
-                }
-
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddItem failure: Position not connected to stairs", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1564,12 +1487,6 @@ namespace RogueBasin
                 int level = newLock.LocationLevel;
                 Point location = newLock.LocationMap;
 
-                //There must be a closed door here
-                //if (levels[level].mapSquares[location.x, location.y].Terrain == MapTerrain.ClosedDoor)
-                //{
-                //    OpenDoor(level, location);
-                //}
-
                 SetTerrainAtPoint(level, location, MapTerrain.ClosedLock);
 
                 //Otherwise OK
@@ -1585,61 +1502,6 @@ namespace RogueBasin
                 LogFile.Log.LogEntry(String.Format("AddLock: ") + ex.Message);
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Add feature to the dungeon. Check it can be reached by the player. Not suitable for adding staircases.
-        /// </summary>
-        /// <param name="feature"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        public bool AddFeatureCheckConnectivity(Feature feature, int level, Point location)
-        {
-            //Try to add a feature at the requested location
-            //This may fail due to something else being there or being non-walkable
-            try
-            {
-                Map featureLevel = levels[level];
-
-                //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
-                {
-                    LogFile.Log.LogEntry("AddFeature: map square can't be entered");
-                    return false;
-                }
-
-                //Check another feature isn't there
-                foreach (Feature otherFeature in features)
-                {
-                    if (otherFeature.LocationLevel == level &&
-                        otherFeature.LocationMap == location)
-                    {
-                        LogFile.Log.LogEntry("AddFeature: other feature already there");
-                        return false;
-                    }
-                }
-
-                //Check connectivity if required
-                if (!Pathing.CheckInConnectedPartOfMap(level, location))
-                {
-                    LogFile.Log.LogEntryDebug("AddFeature failure: Position not connected to stairs", LogDebugLevel.Medium);
-                    return false;
-                }
-
-                //Otherwise OK
-                feature.LocationLevel = level;
-                feature.LocationMap = location;
-
-                features.Add(feature);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntry(String.Format("AddFeature: ") + ex.Message);
-                return false;
-            }
-
         }
 
         /// <summary>
@@ -3521,6 +3383,8 @@ namespace RogueBasin
             PathingTerrain pathingTerrain;
             if (newTerrain == MapTerrain.ClosedDoor)
                 pathingTerrain = PathingTerrain.ClosedDoor;
+            else if (newTerrain == MapTerrain.ClosedLock)
+                pathingTerrain = PathingTerrain.ClosedLock;
             else
                 pathingTerrain = IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable;
             Pathing.PathFindingInternal.updateMap(level, location, pathingTerrain);

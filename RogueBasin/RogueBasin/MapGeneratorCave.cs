@@ -304,7 +304,7 @@ namespace RogueBasin
             //Try to walk a path between the 2 staircases
             LibTCOD.TCODPathFindingWrapper pathFinder = new LibTCOD.TCODPathFindingWrapper();
             pathFinder.updateMap(0, map);
-            return pathFinder.arePointsConnected(0, firstPoint, secondPoint, false);
+            return pathFinder.arePointsConnected(0, firstPoint, secondPoint, Pathing.PathingPermission.Normal);
         }
 
         private void ConnectPoints(Point upStairsPoint, Point downStairsPoint)

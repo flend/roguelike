@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RogueBasin.Algorithms
 {
-    interface IPathFinder
+    public interface IPathFinder
     {
         /// <summary>
         /// Return a list of nodes in the path, or null if no path is available.
@@ -15,7 +15,7 @@ namespace RogueBasin.Algorithms
         /// <param name="origin"></param>
         /// <param name="dest"></param>
         /// <returns></returns>
-        List<Point> pathNodes(int level, Point origin, Point dest, bool openAllDoors);
+        List<Point> pathNodes(int level, Point origin, Point dest, Pathing.PathingPermission permission);
 
         /// <summary>
         /// Update internal map representation, gets enum map for pathfinding
@@ -35,6 +35,6 @@ namespace RogueBasin.Algorithms
         /// <param name="origin"></param>
         /// <param name="dest"></param>
         /// <param name="openAllDoors"></param>
-        bool arePointsConnected(int level, Point origin, Point dest, bool openAllDoors);
+        bool arePointsConnected(int level, Point origin, Point dest, Pathing.PathingPermission permission);
     }
 }

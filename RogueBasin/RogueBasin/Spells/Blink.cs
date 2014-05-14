@@ -50,13 +50,6 @@ namespace RogueBasin.Spells
                 if(!dungeon.MapSquareIsWalkable(player.LocationLevel, new Point(x,y)))
                     continue;
 
-                //Connected?
-                if (!dungeon.Pathing.CheckInConnectedPartOfMap(player.LocationLevel, new Point(x, y)))
-                {
-                    LogFile.Log.LogEntryDebug("Blink square failure - not connected", LogDebugLevel.Medium);
-                    continue;
-                }
-
                 //Empty
 
                 SquareContents sq = dungeon.MapSquareContents(player.LocationLevel, new Point(x, y));
