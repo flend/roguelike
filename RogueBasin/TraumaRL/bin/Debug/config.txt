@@ -1,0 +1,3 @@
+tilesize=16
+debug=true
+graphviz=C:\Program Files (x86)\Graphviz2.36\bin\dot.exe

@@ -1,0 +1,9 @@
+TraumaRL has logs scattered around which
+give information on how to play.
+
+It's recommended that you leave these on.
+
+In game, press '?' for keys.
+
+After you answer a few questions, the station
+will be constructed. This may take a few seconds.

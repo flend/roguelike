@@ -1,0 +1,1 @@
+Grenades hit through doors (proved only with see all debugging on)
