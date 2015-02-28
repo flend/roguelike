@@ -28,48 +28,7 @@ namespace RogueBasin.Items
 
             LogFile.Log.LogEntryDebug("Firing laser", LogDebugLevel.Medium);
 
-            //The shotgun fires towards its target and does same damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
-            //Calculate a huge FOV
-
-            Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
-
-            WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
-            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
-
-            //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Chartreuse);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    int damage = 75;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
-
-            //Remove 1 ammo
-            Ammo--;
-
-            return true;
+            return Game.Dungeon.FireLaserLineWeapon(target, this, 75);
         }
 
         public List<EquipmentSlot> EquipmentSlots

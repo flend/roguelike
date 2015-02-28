@@ -628,6 +628,47 @@ namespace RogueBasin
             return true;
         }
 
+
+        public bool FireLaserLineWeapon(Point target, RangedWeapon item, int damage)
+        {
+            //Calculate a huge FOV
+
+            Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
+
+            WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
+            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Magenta);
+
+            //Make firing sound
+            Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in targetSquares)
+            {
+                SquareContents squareContents = MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    player.AttackMonsterRanged(squareContents.monster, damage);
+                }
+            }
+
+            //Remove 1 ammo
+            item.Ammo--;
+
+            return true;
+        }
+
         public bool FirePistolLineWeapon(Point target, RangedWeapon item, int damageBase)
         {
             Player player = Player;
