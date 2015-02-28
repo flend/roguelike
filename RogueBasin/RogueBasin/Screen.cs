@@ -29,6 +29,8 @@ namespace RogueBasin {
 
         static Screen instance = null;
 
+        IMapRenderer mapRenderer;
+
         //Console/screen size
         public int Width { get; set; }
         public int Height { get; set; }
@@ -192,7 +194,7 @@ namespace RogueBasin {
             get
             {
                 if (instance == null)
-                    instance = new Screen();
+                    instance = new Screen(new MapRendererLibTCod());
                 return instance;
             }
         }
@@ -218,8 +220,10 @@ namespace RogueBasin {
             get; set;
         }
 
-        Screen()
+        Screen(IMapRenderer renderer)
         {
+            mapRenderer = renderer;
+
             Width = 60;
             Height = 35;
 
@@ -277,44 +281,7 @@ namespace RogueBasin {
         //Setup the screen
         public void InitialSetup()
         {
-            int tileSize = 16;
-
-            try
-            {
-                tileSize = Convert.ToInt16(Game.Config.Entries["tilesize"]);
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Error getting tilesize from config file", LogDebugLevel.High);
-            }
-
-            string tileMapFilename = "FileSupport.dll";
-            if(tileSize == 32)
-                tileMapFilename = "StreamSupport.dll";
-
-            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
-            CustomFontRequest fontReq = new CustomFontRequest(tileMapFilename, tileSize, tileSize, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
-            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
-            //CustomFontRequest fontReq = new CustomFontRequest("shroom_moved_big.png", 32, 32, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("shroom_moved.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("Anikki_square_20x20.bmp", 20, 20, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("Markvii.png", 12, 12, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("Tahin_16x16_rounded.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("msgothic.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            RootConsole.Width = Width;
-            RootConsole.Height = Height;
-            RootConsole.WindowTitle = "TraumaRL";
-            RootConsole.Fullscreen = false;
-            RootConsole.Font = fontReq;
-            /*
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.PrintLine("Hello world!", 30, 30, LineAlignment.Left);
-            rootConsole.Flush();
-            */
-            Console.WriteLine("debug test message.");
-
+            mapRenderer.Setup(Width, Height);
         }
 
         public bool TargetSelected()
@@ -509,10 +476,7 @@ namespace RogueBasin {
         /// </summary>
         public void FlushConsole()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.Flush();
+            mapRenderer.Flush();
         }
 
         /// <summary>
@@ -715,7 +679,7 @@ namespace RogueBasin {
                 {
                     //Wait and then redraw without the highlight to make a flash effect
                     Screen.Instance.FlushConsole();
-                    TCODSystem.Sleep(movieMSBetweenFrames);
+                    mapRenderer.Sleep(movieMSBetweenFrames);
                     DrawMovieFrame(frame.scanLines, frameTL, width, false);
                 }
 
@@ -736,7 +700,7 @@ namespace RogueBasin {
                     //Wait for the specified time
 
                     Screen.Instance.FlushConsole();
-                    TCODSystem.Sleep(movieMSBetweenFrames);
+                    mapRenderer.Sleep(movieMSBetweenFrames);
                 }
 
                 frameNo++;
@@ -1051,7 +1015,7 @@ namespace RogueBasin {
             BuildTiledMap();
             
             //Render tiled map to screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
             //Draw Stats
             DrawStats(dungeon.Player);
@@ -1099,17 +1063,17 @@ namespace RogueBasin {
             }
 
             //Render the full layered map (with these animations) on screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
 
             //Wait
-            TCODSystem.Sleep(missileDelay);
+            mapRenderer.Sleep(missileDelay);
 
             //Wipe the animation layer
             tileMap.ClearLayer((int)TileLevel.Animations);
 
             //Draw again without animations
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
         }
 
@@ -1236,7 +1200,7 @@ namespace RogueBasin {
             ClearScreen();
 
             //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
+            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, ColorPresets.White);
 
             //Draw title
             PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
@@ -1269,32 +1233,32 @@ namespace RogueBasin {
             ClearScreen();
 
             //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
+            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, ColorPresets.White);
 
             //Draw title
-            PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, ColorPresets.White);
 
             //Draw preamble
             int count = 0;
             foreach (string s in DeathPreamble)
             {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left, ColorPresets.White);
                 count++;
             }
 
             //Draw kills
 
-            PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center, ColorPresets.White);
 
             foreach (string s in TotalKills)
             {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left, ColorPresets.White);
                 count++;
             }
 
             //Draw instructions
 
-            PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
+            PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center, ColorPresets.White);
         }
 
 
@@ -1308,22 +1272,7 @@ namespace RogueBasin {
 
         void ClearScreen()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.Clear();
-        }
-
-        /// <summary>
-        /// Draws a frame on the screen
-        /// </summary>
-        void DrawFrame(int x, int y, int width, int height, bool clear)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(x, y, width, height, clear);
+            mapRenderer.Clear(); 
         }
 
         /// <summary>
@@ -1331,15 +1280,7 @@ namespace RogueBasin {
         /// </summary>
         void DrawFrame(int x, int y, int width, int height, bool clear, Color color)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.ForegroundColor = color;
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(x, y, width, height, clear);
-
-            rootConsole.ForegroundColor = ColorPresets.White;
+            mapRenderer.DrawFrame(x, y, width, height, clear, color);
         }
 
         /// <summary>
@@ -1347,24 +1288,7 @@ namespace RogueBasin {
         /// </summary>
         void PutChar(int x, int y, char c, Color color)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-            rootConsole.ForegroundColor = color;
-
-            rootConsole.PutChar(x, y, c);
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-        }
-
-        /// <summary>
-        /// Print a string in a rectangle
-        /// </summary>
-        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
+            mapRenderer.PutChar(x, y, c, color);
         }
 
         /// <summary>
@@ -1372,23 +1296,7 @@ namespace RogueBasin {
         /// </summary>
         void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.ForegroundColor = color;
-            rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
-            rootConsole.ForegroundColor = ColorPresets.White;
-        }
-
-        /// <summary>
-        /// Print a string at a location
-        /// </summary>
-        void PrintLine(string msg, int x, int y, LineAlignment alignment)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.PrintLine(msg, x, y, alignment);
+            mapRenderer.PrintStringRect(msg, x, y, width, height, alignment, color);
         }
 
         /// <summary>
@@ -1396,23 +1304,15 @@ namespace RogueBasin {
         /// </summary>
         void PrintLine(string msg, int x, int y, LineAlignment alignment, Color color)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-            rootConsole.ForegroundColor = color;
-
-            rootConsole.PrintLine(msg, x, y, alignment);
-            rootConsole.ForegroundColor = ColorPresets.White;
+            mapRenderer.PrintString(msg, x, y, alignment, color);
         }
 
         /// <summary>
         /// Draw rectangle
         /// </summary>
-        void DrawRect(int x, int y, int width, int height, bool clear)
+        void ClearRect(int x, int y, int width, int height)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.DrawRect(x, y, width, height, clear);
+            mapRenderer.ClearRect(x, y, width, height);
         }
 
         /// <summary>
@@ -1624,7 +1524,7 @@ namespace RogueBasin {
                     }
 
                     //Clear the rectangle
-                    DrawRect(inventoryTL.x + 1, inventoryTL.y + 1, inventoryTR.x - inventoryTL.x - 1, inventoryBL.y - inventoryTL.y - 1, true);
+                    ClearRect(inventoryTL.x + 1, inventoryTL.y + 1, inventoryTR.x - inventoryTL.x - 1, inventoryBL.y - inventoryTL.y - 1);
 
                     //Display the message log
                     displayedMsg = topLineDisplayed;
@@ -1716,7 +1616,7 @@ namespace RogueBasin {
                 //Ammo
                 if (weaponE.HasFireAction())
                 {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
+                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left, weaponColor);
         
                     //TODO infinite ammo?
                     int ammoBarLength = 10;
@@ -2862,10 +2762,10 @@ namespace RogueBasin {
             lastMessage = message;
 
             //Clear message bar
-            DrawRect(topLeft.x, topLeft.y, width, 1, true);
+            ClearRect(topLeft.x, topLeft.y, width, 1);
 
             //Display new message
-            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left);
+            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, ColorPresets.White);
         }
 
         /// <summary>
@@ -2879,7 +2779,7 @@ namespace RogueBasin {
             lastMessage = message;
 
             //Clear message bar
-            DrawRect(topLeft.x, topLeft.y, width, 1, true);
+            ClearRect(topLeft.x, topLeft.y, width, 1);
 
             //Display new message
             PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, color);
@@ -2888,7 +2788,7 @@ namespace RogueBasin {
         void ClearMessageBar()
         {
 
-            DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1, true);
+            ClearRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1);
         }
 
 
@@ -3368,17 +3268,17 @@ namespace RogueBasin {
             }
 
             //Render the full layered map (with these animations) on screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
 
             //Wait
-            TCODSystem.Sleep(missileDelay);
+            mapRenderer.Sleep(missileDelay);
 
             //Wipe the animation layer
             tileMap.ClearLayer((int)TileLevel.Animations);
 
             //Draw the map normally
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();  
         }
 
@@ -3432,17 +3332,17 @@ namespace RogueBasin {
             }
 
             //Render the full layered map (with these animations) on screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
 
             //Wait
-            TCODSystem.Sleep(meleeDelay);
+            mapRenderer.Sleep(meleeDelay);
 
             //Wipe the animation layer
             tileMap.ClearLayer((int)TileLevel.Animations);
                         
             //Draw the map normally
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
             FlushConsole();
         }
 
