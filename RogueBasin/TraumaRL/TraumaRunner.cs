@@ -186,7 +186,7 @@ namespace TraumaRL
             Game.Dungeon.Player.LocationLevel = 0;
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
-            ShowIntroMovies();
+            //ShowIntroMovies();
 
             rb.MainLoop(false);
         }

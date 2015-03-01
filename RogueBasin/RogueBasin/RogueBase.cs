@@ -82,6 +82,7 @@ namespace RogueBasin
             var player = Game.Dungeon.Player;
 
             bool centreOnPC = true;
+            bool waitForPlayerAction = false;
 
             while (Game.Dungeon.RunMainLoop)
             {
@@ -89,148 +90,26 @@ namespace RogueBasin
                 {
                     //If we want to give the PC an extra go for any reason before the creatures
                     //(e.g. has just loaded, has just entered dungeon)
-                    //test here
 
                     bool pcFreeTurn = false;
-
                     if (!Game.Dungeon.PlayerHadBonusTurn && Game.Dungeon.PlayerBonusTurn)
                         pcFreeTurn = true;
 
-                    //Monsters turn
+                    //Advance time in the dungeon
+                    if(!pcFreeTurn)
+                        DungeonActions();
 
-                    if (!pcFreeTurn)
+                    //Advance time for the PC
+                    waitForPlayerAction = PlayerActions(centreOnPC);
+
+                    //Catch the player being killed
+                    if (!Game.Dungeon.RunMainLoop)
+                        break;
+
+                    if (waitForPlayerAction)
                     {
-                        //Increment world clock
-                        Game.Dungeon.IncrementWorldClock();
-
-                        //ProfileEntry("Pre event");
-
-                        //Increment time on all global (dungeon) events
-                        //Game.Dungeon.IncrementEventTime();
-
-                        //All creatures get IncrementTurnTime() called on them each worldClock tick
-                        //They internally keep track of when they should take another turn
-
-                        //IncrementTurnTime() also increments time for all events on that creature
-
-                        //ProfileEntry("Pre monster");
-
-                        foreach (Item item in Game.Dungeon.Items)
-                        {
-                            //Only process items on the same level as the player
-                            if (item.LocationLevel == Game.Dungeon.Player.LocationLevel)
-                            {
-                                item.IncrementTurnTime();
-                            }
-                        }
-
-                        foreach (Monster creature in Game.Dungeon.Monsters)
-                        {
-                            try
-                            {
-                                //Only process creatures on the same level as the player
-                                if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
-                                {
-                                    if (creature.IncrementTurnTime())
-                                    {
-                                        if(Screen.Instance.DebugMode)
-                                            dungeon.ShowCreatureFOVOnMap(creature);
-
-                                        //Creatures may be killed by other creatures so check they are alive before processing
-                                        if (creature.Alive)
-                                        {
-                                            creature.ProcessTurn();
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                LogFile.Log.LogEntry("Exception thrown" + e.Message);
-                            }
-                        }
-
-                        //ProfileEntry("Post monster");
-
                         try
                         {
-                            //Add summoned monsters
-                            Game.Dungeon.AddDynamicMonsters();
-                        }
-                        catch (Exception e)
-                        {
-                            LogFile.Log.LogEntry("Exception thrown" + e.Message);
-                        }
-
-                        //Remove dead monsters
-                        //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
-                        try
-                        {
-                            Game.Dungeon.RemoveDeadMonsters();
-                        }
-                        catch (Exception e)
-                        {
-                            LogFile.Log.LogEntry("Exception thrown" + e.Message);
-                        }
-
-                    }
-
-                    //PC turn
-                    try
-                    {
-
-
-                        //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
-                        if (Game.Dungeon.Player.IncrementTurnTime())
-                        {
-                            //Remove dead players! Restart mission. Do this here so we don't get healed then beaten up again in our old state
-                            if (Game.Dungeon.PlayerDeathOccured)
-                                Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
-
-                            ProfileEntry("Pre PC POV");
-
-                            //Calculate the player's FOV
-                            var playerFOV = Game.Dungeon.CalculatePlayerFOV();
-
-                            ProfileEntry("Pre Monster POV");
-
-                            //Debug: show the FOV of all monsters. Should flag or comment this for release.
-                            //This is extremely slow, so restricting to debug mode
-                            if (Screen.Instance.DebugMode)
-                            {
-                                foreach (Monster monster in Game.Dungeon.Monsters)
-                                {
-                                    Game.Dungeon.ShowCreatureFOVOnMap(monster);
-                                }
-
-                                Game.Dungeon.ShowSoundsOnMap();
-                            }
-
-                            ProfileEntry("Post Monster POV");
-
-                            //For effects that end to update the screen correctly etc.
-                            player.PreTurnActions();
-
-                            //Check the 'on' status of special moves - now unnecessary?
-                            //Game.Dungeon.CheckSpecialMoveValidity();
-
-                            //Do any targetting maintenance
-                            if (Screen.Instance.TargetSelected())
-                                CheckTargetInPlayerFOV(playerFOV);
-
-                            ProfileEntry("Pre Screen Update");
-
-                            //Update screen just before PC's turn
-                            if (centreOnPC)
-                                Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
-                            Screen.Instance.Update();
-
-                            ProfileEntry("Post Screen Update");
-
-                            //Catch the player being killed
-                            if (!Game.Dungeon.RunMainLoop)
-                                break;
-
                             //Deal with PCs turn as appropriate
                             bool timeAdvances = false;
                             do
@@ -250,25 +129,170 @@ namespace RogueBasin
 
                             //Game.MessageQueue.AddMessage("Finished PC move");
                             Game.Dungeon.PlayerHadBonusTurn = true;
+
+                            waitForPlayerAction = false;
                         }
 
-
-                    }
-                    catch (Exception ex)
-                    {
-                        LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+                        catch (Exception ex)
+                        {
+                            LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-
                     LogFile.Log.LogEntry("Exception thrown" + ex.Message);
-
                 }
             }
 
             //Do any final cleanup
             LogFile.Log.Close();
+        }
+
+        private bool PlayerActions(bool centreOnPC)
+        {
+            //PC turn
+            Player player = Game.Dungeon.Player;
+
+            try
+            {
+                //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
+                if (Game.Dungeon.Player.IncrementTurnTime())
+                {
+                    //Remove dead players! Restart mission. Do this here so we don't get healed then beaten up again in our old state
+                    if (Game.Dungeon.PlayerDeathOccured)
+                        Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
+
+                    ProfileEntry("Pre PC POV");
+
+                    //Calculate the player's FOV
+                    var playerFOV = Game.Dungeon.CalculatePlayerFOV();
+
+                    ProfileEntry("Pre Monster POV");
+
+                    //Debug: show the FOV of all monsters. Should flag or comment this for release.
+                    //This is extremely slow, so restricting to debug mode
+                    if (Screen.Instance.DebugMode)
+                    {
+                        foreach (Monster monster in Game.Dungeon.Monsters)
+                        {
+                            Game.Dungeon.ShowCreatureFOVOnMap(monster);
+                        }
+
+                        Game.Dungeon.ShowSoundsOnMap();
+                    }
+
+                    ProfileEntry("Post Monster POV");
+
+                    //For effects that end to update the screen correctly etc.
+                    Game.Dungeon.Player.PreTurnActions();
+
+                    //Check the 'on' status of special moves - now unnecessary?
+                    //Game.Dungeon.CheckSpecialMoveValidity();
+
+                    //Do any targetting maintenance
+                    if (Screen.Instance.TargetSelected())
+                        CheckTargetInPlayerFOV(playerFOV);
+
+                    ProfileEntry("Pre Screen Update");
+
+                    //Update screen just before PC's turn
+                    if (centreOnPC)
+                        Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
+
+                    Screen.Instance.Update();
+
+                    ProfileEntry("Post Screen Update");
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+                return true;
+            }
+        }
+        
+        private void DungeonActions()
+        {
+            //Monsters turn
+
+            //Increment world clock
+            Game.Dungeon.IncrementWorldClock();
+
+            //ProfileEntry("Pre event");
+
+            //Increment time on all global (dungeon) events
+            //Game.Dungeon.IncrementEventTime();
+
+            //All creatures get IncrementTurnTime() called on them each worldClock tick
+            //They internally keep track of when they should take another turn
+
+            //IncrementTurnTime() also increments time for all events on that creature
+
+            //ProfileEntry("Pre monster");
+
+            foreach (Item item in Game.Dungeon.Items)
+            {
+                //Only process items on the same level as the player
+                if (item.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                {
+                    item.IncrementTurnTime();
+                }
+            }
+
+            foreach (Monster creature in Game.Dungeon.Monsters)
+            {
+                try
+                {
+                    //Only process creatures on the same level as the player
+                    if (creature.LocationLevel == Game.Dungeon.Player.LocationLevel)
+                    {
+                        if (creature.IncrementTurnTime())
+                        {
+                            if (Screen.Instance.DebugMode)
+                                Game.Dungeon.ShowCreatureFOVOnMap(creature);
+
+                            //Creatures may be killed by other creatures so check they are alive before processing
+                            if (creature.Alive)
+                            {
+                                creature.ProcessTurn();
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogFile.Log.LogEntry("Exception thrown" + e.Message);
+                }
+            }
+
+            //ProfileEntry("Post monster");
+
+            try
+            {
+                //Add summoned monsters
+                Game.Dungeon.AddDynamicMonsters();
+            }
+            catch (Exception e)
+            {
+                LogFile.Log.LogEntry("Exception thrown" + e.Message);
+            }
+
+            //Remove dead monsters
+            //Isn't there a chance that monsters might attack dead monsters before they are removed? (CHECK?)
+            try
+            {
+                Game.Dungeon.RemoveDeadMonsters();
+            }
+            catch (Exception e)
+            {
+                LogFile.Log.LogEntry("Exception thrown" + e.Message);
+            }
+
         }
 
         private void CheckTargetInPlayerFOV(CreatureFOV playerFOV)
