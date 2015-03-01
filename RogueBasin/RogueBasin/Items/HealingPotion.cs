@@ -146,9 +146,9 @@ namespace RogueBasin.Items
             get { return "healing potion"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.SkyBlue;
+            return System.Drawing.Color.SkyBlue;
         }
 
 

@@ -225,7 +225,7 @@ namespace RogueBasin.Spells
             //Cast the ray from here
 
 
-            Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(lastX, lastY), ColorPresets.Yellow);
+            Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(lastX, lastY), System.Drawing.Color.Yellow);
             */
             return true;
             

@@ -55,9 +55,9 @@ namespace RogueBasin.Items
             get { return "puckered berries"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return libtcodWrapper.ColorPresets.Plum;
+            return System.Drawing.Color.Plum;
         }
 
         public bool UsedUp

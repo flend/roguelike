@@ -22,9 +22,9 @@ namespace RogueBasin
         /// Color of the projectile
         /// </summary>
         /// <returns></returns>
-        protected virtual Color GetWeaponColor()
+        protected virtual System.Drawing.Color GetWeaponColor()
         {
-            return ColorPresets.DarkGray;
+            return System.Drawing.Color.DarkGray;
         }
 
 

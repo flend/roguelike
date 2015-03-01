@@ -47,7 +47,7 @@ namespace RogueBasin.Spells
                     results = CombatResults.DefenderUnhurt;
                 }
 
-                Screen.Instance.DrawMissileAttack(player, squareContents.monster, results, ColorPresets.Crimson);
+                Screen.Instance.DrawMissileAttack(player, squareContents.monster, results, System.Drawing.Color.Crimson);
 
                 //If monster resisted no damage                
                 if (monsterResisted)

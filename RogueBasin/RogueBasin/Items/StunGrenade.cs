@@ -114,7 +114,7 @@ namespace RogueBasin.Items
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, size);
             
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, ColorPresets.DodgerBlue);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, System.Drawing.Color.DodgerBlue);
 
             //Attack all monsters in the area
 
@@ -179,9 +179,9 @@ namespace RogueBasin.Items
             return (char)298;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.DodgerBlue;
+            return System.Drawing.Color.DodgerBlue;
         }
 
         public int ArmourClassModifier()

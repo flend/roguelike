@@ -136,17 +136,19 @@ namespace TraumaRL
 
         private void IntroScreen()
         {
-            var gameInfo = new RogueBasin.GameIntro();
+            //live
+            //var gameInfo = new RogueBasin.GameIntro();
 
-            gameInfo.ShowIntroScreen();
+            //gameInfo.ShowIntroScreen();
 
-            difficulty = gameInfo.Difficulty;
-            playerName = gameInfo.PlayerName;
-            playItemMovies = gameInfo.ShowMovies;
+            //difficulty = gameInfo.Difficulty;
+            //playerName = gameInfo.PlayerName;
+            //playItemMovies = gameInfo.ShowMovies;
 
-          //  Game.Dungeon.Difficulty = GameDifficulty.Medium;
-           //  Game.Dungeon.Player.Name = "Dave";
-           //  Game.Dungeon.Player.PlayItemMovies = true;
+            //dev
+            difficulty = GameDifficulty.Medium;
+            playerName = "Dave";
+            playItemMovies = true;
         }
     
         private void StandardSystemSetup()

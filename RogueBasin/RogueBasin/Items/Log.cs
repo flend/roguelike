@@ -48,9 +48,9 @@ namespace RogueBasin.Items
             get { return "Logs"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.LimeGreen;
+            return System.Drawing.Color.LimeGreen;
         }
 
         protected override char GetRepresentation()

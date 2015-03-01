@@ -153,9 +153,9 @@ namespace RogueBasin.Creatures
             return new PerimeterBot();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Tomato;
+            return System.Drawing.Color.Tomato;
         }
 
         public override int GetCombatXP()

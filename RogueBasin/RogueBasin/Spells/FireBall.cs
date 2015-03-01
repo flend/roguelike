@@ -72,7 +72,7 @@ namespace RogueBasin.Spells
                 }
             }
 
-            //Screen.Instance.DrawFlashSquares(splashSquares, ColorPresets.Red);
+            //Screen.Instance.DrawFlashSquares(splashSquares, System.Drawing.Color.Red);
             
             return true;
         }

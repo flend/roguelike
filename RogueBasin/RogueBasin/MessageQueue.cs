@@ -24,7 +24,7 @@ namespace RogueBasin
         public int CachedMsgTurnCount{ get; set; }
         bool showCachedMsg = false;
         string cachedMsg = "";
-        Color cachedMsgColor = ColorPresets.Gray;
+        System.Drawing.Color cachedMsgColor = System.Drawing.Color.Gray;
         
         /// <summary>
         /// Require a keypress at the end of the message display

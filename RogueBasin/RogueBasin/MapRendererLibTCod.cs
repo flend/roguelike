@@ -11,6 +11,11 @@ namespace RogueBasin
     /// </summary>
     class MapRendererLibTCod : IMapRenderer
     {
+        private libtcodWrapper.Color colorFromSystemColor(System.Drawing.Color color)
+        {
+            return libtcodWrapper.Color.FromRGB(color.R, color.G, color.B);
+        }
+
         /// <summary>
         /// Render the map, with TL in map at mapOffset. Screenviewport is the screen viewport in tile dimensions (for now)
         /// </summary>
@@ -67,10 +72,10 @@ namespace RogueBasin
                             }
                             else
                             {
-                                rootConsole.BackgroundColor = colorFlags.BackgroundColor; 
+                                rootConsole.BackgroundColor = colorFromSystemColor(colorFlags.BackgroundColor); 
                             }
 
-                            rootConsole.ForegroundColor = colorFlags.ForegroundColor;
+                            rootConsole.ForegroundColor = colorFromSystemColor(colorFlags.ForegroundColor);
                         }
 
                         //Id is the char
@@ -86,8 +91,8 @@ namespace RogueBasin
             }
 
             //Reset colors - this matters for systems that don't use the tile renderer
-            rootConsole.ForegroundColor = ColorPresets.White;
-            rootConsole.BackgroundColor = ColorPresets.Black;
+            rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
+            rootConsole.BackgroundColor = libtcodWrapper.ColorPresets.Black;
         }
 
         public void Sleep(ulong milliseconds)
@@ -138,51 +143,51 @@ namespace RogueBasin
             rootConsole.Clear();
         }
 
-        public void DrawFrame(int x, int y, int width, int height, bool clear, libtcodWrapper.Color color)
+        public void DrawFrame(int x, int y, int width, int height, bool clear, System.Drawing.Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
             if (color != null)
             {
-                rootConsole.ForegroundColor = color;
+                rootConsole.ForegroundColor = colorFromSystemColor(color);
             }
 
             //Draw frame - same as inventory
             rootConsole.DrawFrame(x, y, width, height, clear);
 
-            rootConsole.ForegroundColor = ColorPresets.White;
+            rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
         }
 
-        public void PutChar(int x, int y, char c, libtcodWrapper.Color color)
+        public void PutChar(int x, int y, char c, System.Drawing.Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
-            rootConsole.ForegroundColor = color;
+            rootConsole.ForegroundColor = colorFromSystemColor(color);
 
             rootConsole.PutChar(x, y, c);
 
-            rootConsole.ForegroundColor = ColorPresets.White;
+            rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
         }
 
-        public void PrintStringRect(string msg, int x, int y, int width, int height, libtcodWrapper.LineAlignment alignment, libtcodWrapper.Color color)
+        public void PrintStringRect(string msg, int x, int y, int width, int height, libtcodWrapper.LineAlignment alignment, System.Drawing.Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
-            rootConsole.ForegroundColor = color;
+            rootConsole.ForegroundColor = colorFromSystemColor(color);
             rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
-            rootConsole.ForegroundColor = ColorPresets.White;
+            rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
         }
 
-        public void PrintString(string msg, int x, int y, libtcodWrapper.LineAlignment alignment, libtcodWrapper.Color color)
+        public void PrintString(string msg, int x, int y, libtcodWrapper.LineAlignment alignment, System.Drawing.Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
-            rootConsole.ForegroundColor = color;
+            rootConsole.ForegroundColor = colorFromSystemColor(color);
 
             rootConsole.PrintLine(msg, x, y, alignment);
-            rootConsole.ForegroundColor = ColorPresets.White;
+            rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
         }
 
         public void ClearRect(int x, int y, int width, int height)

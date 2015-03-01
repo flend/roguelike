@@ -128,9 +128,9 @@ namespace RogueBasin.Creatures
             return new Juggernaut();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Fuchsia;
+            return System.Drawing.Color.Fuchsia;
         }
 
         public override int GetCombatXP()

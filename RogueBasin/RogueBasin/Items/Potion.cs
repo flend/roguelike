@@ -60,9 +60,9 @@ namespace RogueBasin.Items
             get { return "green berries"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Green;
+            return System.Drawing.Color.Green;
         }
 
         public bool UsedUp

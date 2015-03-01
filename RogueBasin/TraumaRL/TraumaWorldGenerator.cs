@@ -2,6 +2,7 @@
 using libtcodWrapper;
 using RogueBasin;
 using System;
+using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,9 +35,9 @@ namespace TraumaRL
 
         LogGenerator logGen = new LogGenerator();
 
-        static List<Tuple<Color, string>> availableColors;
+        static List<Tuple<System.Drawing.Color, string>> availableColors;
         static Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>> featuresByLevel;
-        List<Tuple<Color, string>> usedColors = new List<Tuple<Color, string>>();
+        List<Tuple<System.Drawing.Color, string>> usedColors = new List<Tuple<System.Drawing.Color, string>>();
 
         public TraumaWorldGenerator()
         {
@@ -46,24 +47,24 @@ namespace TraumaRL
 
         private static void SetupColors()
         {
-            availableColors = new List<Tuple<Color, string>> {
-                new Tuple<Color, string>(ColorPresets.Red, "red"),
-                new Tuple<Color, string>(ColorPresets.Coral, "coral"),
-                new Tuple<Color, string>(ColorPresets.Blue, "blue"),
-                new Tuple<Color, string>(ColorPresets.Orange, "orange"),
-                new Tuple<Color, string>(ColorPresets.Yellow, "yellow"),
-                new Tuple<Color, string>(ColorPresets.Khaki, "khaki"),
-                new Tuple<Color, string>(ColorPresets.Chartreuse, "chartreuse"),
-                new Tuple<Color, string>(ColorPresets.HotPink, "hot pink"),
-                new Tuple<Color, string>(ColorPresets.Cyan, "cyan"),
-                new Tuple<Color, string>(ColorPresets.Lime, "lime"),
-                new Tuple<Color, string>(ColorPresets.Navy, "navy"),
-                new Tuple<Color, string>(ColorPresets.Tan, "tan"),
-                new Tuple<Color, string>(ColorPresets.Fuchsia, "fuchsia"),
-                new Tuple<Color, string>(ColorPresets.GhostWhite, "ghost"),
-                new Tuple<Color, string>(ColorPresets.Teal, "teal"),
-                new Tuple<Color, string>(ColorPresets.Plum, "plum"),
-                new Tuple<Color, string>(ColorPresets.Plum, "wheat")
+            availableColors = new List<Tuple<System.Drawing.Color, string>> {
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Red, "red"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Coral, "coral"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Blue, "blue"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Orange, "orange"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Yellow, "yellow"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Khaki, "khaki"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Chartreuse, "chartreuse"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.HotPink, "hot pink"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Cyan, "cyan"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Lime, "lime"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Navy, "navy"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Tan, "tan"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Fuchsia, "fuchsia"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.GhostWhite, "ghost"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Teal, "teal"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Plum, "plum"),
+                new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Plum, "wheat")
             };
         }
 
@@ -463,7 +464,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 placedClues = new HashSet<Clue>();
                 placedDoors = new HashSet<Door>();
                 placedObjectives = new HashSet<Objective>();
-                usedColors = new List<Tuple<Color, string>>();
+                usedColors = new List<Tuple<System.Drawing.Color, string>>();
 
                     //Generate the overall level structure
                     GenerateLevelLinks();
@@ -576,7 +577,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //Set player's start location (must be done before adding items)
 
                     var firstRoom = mapInfo.GetRoom(0);
-                    Game.Dungeon.Levels[0].PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+                    Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
                     
                     //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
                     allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
@@ -875,7 +876,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return true;
         }
 
-        private Tuple<Color, string> GetUnusedColor()
+        private Tuple<System.Drawing.Color, string> GetUnusedColor()
         {
             var unusedColor = availableColors.Except(usedColors);
             var colorToReturn = availableColors.RandomElement();
@@ -951,7 +952,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 
                 goodyRoomKeyNames[thisLevel] = clueName;
-                var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, unusedColor.Item1, clueName));
+                var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, unusedColor.Item1, clueName));
                 var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, true, false);
 
                 //Vault is used
@@ -1010,7 +1011,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
             var door = manager.GetDoorById(doorId);
 
-            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", doorId, ColorPresets.Red);
+            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", doorId, System.Drawing.Color.Red);
             var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;
@@ -1062,8 +1063,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             hasLogClue, logOnCriticalPath, logNotInCorridors);
         }*/
 
-        private void BlockPathBetweenRoomsWithSimpleDoor(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap, 
-            string doorId, string doorName, Color colorToUse, int cluesForDoor, int sourceRoom, int endRoom, 
+        private void BlockPathBetweenRoomsWithSimpleDoor(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap,
+            string doorId, string doorName, System.Drawing.Color colorToUse, int cluesForDoor, int sourceRoom, int endRoom, 
             double distanceFromSourceRatio, bool enforceClueOnDestLevel, CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
             bool hasLogClue, CluePath logOnCriticalPath, bool logNotInCorridors)
         {
@@ -1086,7 +1087,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var roomsForClues = GetRandomRoomsForClues(mapInfo, cluesForDoor, preferredRooms);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForClues);
 
-            var cluesAndColors = clues.Select(c => new Tuple<Clue, Color, string>(c, colorToUse, doorName));
+            var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, colorToUse, doorName));
 
             var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, clueNotInCorridors, false);
 
@@ -1121,7 +1122,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private Door PlaceDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, Color colorToUse, Connection criticalConnectionForDoor)
+        private Door PlaceDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, System.Drawing.Color colorToUse, Connection criticalConnectionForDoor)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1140,7 +1141,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return door;
         }
 
-        private Door PlaceMovieDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, Color colorToUse, string openMovie, string cantOpenMovie, Connection criticalConnectionForDoor)
+        private Door PlaceMovieDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, System.Drawing.Color colorToUse, string openMovie, string cantOpenMovie, Connection criticalConnectionForDoor)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1702,7 +1703,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             
         }
 
-        private int PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
+        private int PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, System.Drawing.Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1725,7 +1726,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             UseVault(levelInfo, captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
-            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
+            PlaceClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
@@ -1763,7 +1764,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return captainIdRoom;
         }
 
-        private int PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
+        private int PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, System.Drawing.Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1786,7 +1787,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             UseVault(levelInfo, captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(doorId, new List<int> { captainIdRoom }).First();
-            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(captainIdClue, clueColour, clueName), true, true);
+            PlaceClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
@@ -1827,7 +1828,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private static void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
-            var elevatorLocations = new Dictionary<Tuple<int, int>, Point>();
+            var elevatorLocations = new Dictionary<Tuple<int, int>, RogueBasin.Point>();
 
             foreach (var kv in levelInfo)
             {
@@ -1881,8 +1882,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     clueItem = new RogueBasin.Items.Clue(clue);
 
                 newMonster.PickUpItem(clueItem);
-                
-                foreach (Point p in allWalkablePoints)
+
+                foreach (RogueBasin.Point p in allWalkablePoints)
                 {
                     placedItem = Game.Dungeon.AddMonster(newMonster, levelForClue, p);
 
@@ -1907,7 +1908,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 if (placedClues.Contains(clue))
                     continue;
 
-                Tuple<int, IEnumerable<Point>> roomsForClue;
+                Tuple<int, IEnumerable<RogueBasin.Point>> roomsForClue;
                 if (boundariesPreferred)
                 {
                     roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors, false);
@@ -1925,7 +1926,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 var logItem = new RogueBasin.Items.Log(logEntry);
 
-                foreach (Point p in allWalkablePoints)
+                foreach (RogueBasin.Point p in allWalkablePoints)
                 {
                     placedItem = Game.Dungeon.AddItem(logItem, levelForClue, p);
 
@@ -1945,7 +1946,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             foreach (var item in items)
             {
 
-                Tuple<int, IEnumerable<Point>> roomsForClue;
+                Tuple<int, IEnumerable<RogueBasin.Point>> roomsForClue;
                 if (boundariesPreferred)
                 {
                     roomsForClue = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms, notInCorridors, includeVaults);
@@ -1961,7 +1962,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 bool placedItem = false;
 
-                foreach (Point p in allWalkablePoints)
+                foreach (RogueBasin.Point p in allWalkablePoints)
                 {
                     placedItem = Game.Dungeon.AddItem(item, levelForClue, p);
 
@@ -1975,7 +1976,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         }
 
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
 
@@ -1992,7 +1993,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
-            var allWalkablePoints = new List<Point>();
+            var allWalkablePoints = new List<RogueBasin.Point>();
 
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
@@ -2000,8 +2001,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
-            
-            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+
+            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
         private IEnumerable<int> GetAllRoomsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
@@ -2021,7 +2022,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return candidateRooms;
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRooms(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
+        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsInRooms(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = rooms;
 
@@ -2038,7 +2039,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
-            var allWalkablePoints = new List<Point>();
+            var allWalkablePoints = new List<RogueBasin.Point>();
 
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
@@ -2047,10 +2048,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
 
-            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
+        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = rooms;
             if(!includeVaults)
@@ -2064,7 +2065,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
-            var allWalkablePoints = new List<Point>();
+            var allWalkablePoints = new List<RogueBasin.Point>();
 
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
@@ -2073,11 +2074,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
 
-            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
             IEnumerable<int> initialRooms = possibleRooms;
@@ -2092,7 +2093,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
-            var allWalkablePoints = new List<Point>();
+            var allWalkablePoints = new List<RogueBasin.Point>();
 
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
@@ -2101,10 +2102,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
 
-            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
+            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
-        private Tuple<int, IEnumerable<Point>> GetAllWalkablePointsToPlaceObjective(MapInfo mapInfo, Objective clue, bool filterCorridors, bool includeVaults)
+        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceObjective(MapInfo mapInfo, Objective clue, bool filterCorridors, bool includeVaults)
         {
             IEnumerable<int> possibleRooms = clue.PossibleClueRoomsInFullMap;
 
@@ -2119,7 +2120,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
              var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
-            var allWalkablePoints = new List<Point>();
+             var allWalkablePoints = new List<RogueBasin.Point>();
 
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
@@ -2128,7 +2129,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
 
-            return new Tuple<int, IEnumerable<Point>>(levelForRandomRoom, allWalkablePoints);
+            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints);
         }
 
         /// <summary>
@@ -2148,7 +2149,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                         continue;
 
                     bool avoidCorridors = false;
-                    PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(clue, ColorPresets.Magenta, ""), avoidCorridors, false);
+                    PlaceClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(clue, System.Drawing.Color.Magenta, ""), avoidCorridors, false);
 
                     placedClues.Add(clue);
                 }
@@ -2192,7 +2193,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     var allWalkablePoints = Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints);
 
                     bool placedItem = false;
-                    foreach (Point p in allWalkablePoints)
+                    foreach (RogueBasin.Point p in allWalkablePoints)
                     {
                         var objectiveFeature = new RogueBasin.Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
                         placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
@@ -2213,14 +2214,14 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, Tuple<Clue, Color, string> clues, bool avoidCorridors, bool includeVaults)
+        private List<Tuple<int, RogueBasin.Point>> PlaceClueItem(MapInfo mapInfo, Tuple<Clue, System.Drawing.Color, string> clues, bool avoidCorridors, bool includeVaults)
         {
-            return PlaceClueItem(mapInfo, new List<Tuple<Clue, Color, string>> { clues }, avoidCorridors, includeVaults);
+            return PlaceClueItem(mapInfo, new List<Tuple<Clue, System.Drawing.Color, string>> { clues }, avoidCorridors, includeVaults);
         }
 
-        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, IEnumerable<Tuple<Clue, Color, string>> clues, bool avoidCorridors,  bool includeVaults)
+        private List<Tuple<int, RogueBasin.Point>> PlaceClueItem(MapInfo mapInfo, IEnumerable<Tuple<Clue, System.Drawing.Color, string>> clues, bool avoidCorridors, bool includeVaults)
         {
-            var toRet = new List<Tuple<int, Point>>();
+            var toRet = new List<Tuple<int, RogueBasin.Point>>();
 
             foreach (var tp in clues)
             {
@@ -2231,8 +2232,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var allWalkablePoints = roomsForClue.Item2;
 
                 bool placedItem = false;
-                Point pointToPlace = null;
-                foreach (Point p in allWalkablePoints)
+                RogueBasin.Point pointToPlace = null;
+                foreach (RogueBasin.Point p in allWalkablePoints)
                 {
                     placedItem = Game.Dungeon.AddItem(new RogueBasin.Items.Clue(clue, tp.Item2, tp.Item3), levelForRandomRoom, p);
                     pointToPlace = p;
@@ -2250,15 +2251,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     throw new ApplicationException(str);
                 }
 
-                toRet.Add(new Tuple<int, Point>(levelForRandomRoom, pointToPlace));
+                toRet.Add(new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace));
             }
 
             return toRet;
         }
 
-        private List<Tuple<int, Point>> PlaceClueItem(MapInfo mapInfo, List<Tuple<Clue, Item>> clueItem, bool avoidCorridors, bool includeVaults)
+        private List<Tuple<int, RogueBasin.Point>> PlaceClueItem(MapInfo mapInfo, List<Tuple<Clue, Item>> clueItem, bool avoidCorridors, bool includeVaults)
         {
-            var toRet = new List<Tuple<int, Point>>();
+            var toRet = new List<Tuple<int, RogueBasin.Point>>();
 
             foreach (var tp in clueItem)
             {
@@ -2270,8 +2271,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var allWalkablePoints = roomsForClue.Item2;
 
                 bool placedItem = false;
-                Point pointToPlace = null;
-                foreach (Point p in allWalkablePoints)
+                RogueBasin.Point pointToPlace = null;
+                foreach (RogueBasin.Point p in allWalkablePoints)
                 {
                     placedItem = Game.Dungeon.AddItem(item, levelForRandomRoom, p);
                     pointToPlace = p;
@@ -2289,23 +2290,23 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     throw new ApplicationException(str);
                 }
 
-                toRet.Add(new Tuple<int, Point>(levelForRandomRoom, pointToPlace));
+                toRet.Add(new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace));
             }
 
             return toRet;
         }
 
-        private Tuple<int, Point> PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults)
+        private Tuple<int, RogueBasin.Point> PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults)
         {
-            var toRet = new List<Tuple<int, Point>>();
+            var toRet = new List<Tuple<int, RogueBasin.Point>>();
 
             var roomsForClue = GetAllWalkablePointsToPlaceObjective(mapInfo, obj, avoidCorridors, includeVaults);
             var levelForRandomRoom = roomsForClue.Item1;
             var allWalkablePoints = roomsForClue.Item2;
 
             bool placedItem = false;
-            Point pointToPlace = null;
-            foreach (Point p in allWalkablePoints)
+            RogueBasin.Point pointToPlace = null;
+            foreach (RogueBasin.Point p in allWalkablePoints)
             {
                 if (objectiveFeature == null)
                     objectiveFeature = new RogueBasin.Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
@@ -2326,20 +2327,20 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 throw new ApplicationException(str);
             }
 
-            return new Tuple<int, Point>(levelForRandomRoom, pointToPlace);
+            return new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace);
         }
 
-        private Tuple<int, Point> PlaceFeatureInRoom(MapInfo mapInfo, Feature objectiveFeature, List<int> candidateRooms, bool avoidCorridors, bool includeVaults)
+        private Tuple<int, RogueBasin.Point> PlaceFeatureInRoom(MapInfo mapInfo, Feature objectiveFeature, List<int> candidateRooms, bool avoidCorridors, bool includeVaults)
         {
-            var toRet = new List<Tuple<int, Point>>();
+            var toRet = new List<Tuple<int, RogueBasin.Point>>();
 
             var roomsForClue = GetAllWalkablePointsInRooms(mapInfo, candidateRooms, avoidCorridors, includeVaults);
             var levelForRandomRoom = roomsForClue.Item1;
             var allWalkablePoints = roomsForClue.Item2;
 
             bool placedItem = false;
-            Point pointToPlace = null;
-            foreach (Point p in allWalkablePoints)
+            RogueBasin.Point pointToPlace = null;
+            foreach (RogueBasin.Point p in allWalkablePoints)
             {
                 placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
 
@@ -2356,7 +2357,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 throw new ApplicationException(str);
             }
 
-            return new Tuple<int, Point>(levelForRandomRoom, pointToPlace);
+            return new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace);
         }
 
         private LevelInfo GenerateMedicalLevel(int levelNo)
@@ -3145,7 +3146,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
 
-            var floorPoints = new List<Point>();
+            var floorPoints = new List<RogueBasin.Point>();
             if(!useBoundary)
                 floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
             else
@@ -3327,7 +3328,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private int PlaceOriginRoom(TemplatedMapGenerator templatedGenerator, RoomTemplate roomToPlace)
         {
-             return templatedGenerator.PlaceRoomTemplateAtPosition(roomToPlace, new Point(0, 0));
+            return templatedGenerator.PlaceRoomTemplateAtPosition(roomToPlace, new RogueBasin.Point(0, 0));
         }
 
         private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
@@ -3457,15 +3458,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Set PC start location
 
             var firstRoom = mapInfo.GetRoom(0);
-            masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+            masterMap.PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             //Add items
             var dungeon = Game.Dungeon;
 
-            dungeon.AddItem(new RogueBasin.Items.Pistol(), 0, new Point(1, 1));
-            dungeon.AddItem(new RogueBasin.Items.Shotgun(), 0, new Point(2, 1));
-            dungeon.AddItem(new RogueBasin.Items.Laser(), 0, new Point(3, 1));
-            dungeon.AddItem(new RogueBasin.Items.Vibroblade(), 0, new Point(4, 1));
+            dungeon.AddItem(new RogueBasin.Items.Pistol(), 0, new RogueBasin.Point(1, 1));
+            dungeon.AddItem(new RogueBasin.Items.Shotgun(), 0, new RogueBasin.Point(2, 1));
+            dungeon.AddItem(new RogueBasin.Items.Laser(), 0, new RogueBasin.Point(3, 1));
+            dungeon.AddItem(new RogueBasin.Items.Vibroblade(), 0, new RogueBasin.Point(4, 1));
 
             //Set map for visualisation
             return mapInfo;

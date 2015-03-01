@@ -100,18 +100,18 @@ namespace RogueBasin
         /// Colour for representation. Override in derived classes.
         /// </summary>
         /// <returns></returns>
-        virtual public Color RepresentationColor()
+        virtual public System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.White;
+            return System.Drawing.Color.White;
         }
 
         /// <summary>
         /// Colour for representation. Override in derived classes.
         /// </summary>
         /// <returns></returns>
-        virtual public Color RepresentationBackgroundColor()
+        virtual public System.Drawing.Color RepresentationBackgroundColor()
         {
-            return ColorPresets.Black;
+            return System.Drawing.Color.Black;
         }
 
         /// <summary>

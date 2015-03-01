@@ -11,9 +11,9 @@ namespace RogueBasin.Locks
     {
         protected GraphMap.Door mapDoor;
         private string idToReport;
-        private Color color;
+        private System.Drawing.Color color;
 
-        public SimpleLockedDoor(GraphMap.Door door, string idToReport, Color color)
+        public SimpleLockedDoor(GraphMap.Door door, string idToReport, System.Drawing.Color color)
         {
             this.mapDoor = door;
             this.idToReport = idToReport;
@@ -80,7 +80,7 @@ namespace RogueBasin.Locks
                 return (char)((shroomWallStartRow + 2) * rowLength + 2);
         }
 
-        public override libtcodWrapper.Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
             return color;
         }

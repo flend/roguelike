@@ -8,15 +8,15 @@ namespace RogueBasin.Features
     public class Corpse : DecorationFeature
     {
         char representation;
-        Color representationColor;
+        System.Drawing.Color representationColor;
 
         public Corpse()
         {
             representation = (char)479;
-            representationColor = ColorPresets.White;
+            representationColor = System.Drawing.Color.White;
         }
 
-        public Corpse(char representation, Color representationColor)
+        public Corpse(char representation, System.Drawing.Color representationColor)
         {
             this.representationColor = representationColor;
             this.representation = representation;
@@ -27,7 +27,7 @@ namespace RogueBasin.Features
             return representation;
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
             return representationColor;
         }

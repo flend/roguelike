@@ -90,9 +90,9 @@ namespace RogueBasin.Creatures
             return (char)500;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
         protected override int GetChanceToRecover()
@@ -125,9 +125,9 @@ namespace RogueBasin.Creatures
             return new HeavyBotRanged();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.SlateBlue;
+            return System.Drawing.Color.SlateBlue;
         }
 
         public override int GetCombatXP()

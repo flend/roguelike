@@ -83,9 +83,9 @@ namespace RogueBasin.Creatures
             return new Mushroom();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Peru;
+            return System.Drawing.Color.Peru;
         }
 
         public override int GetCombatXP()

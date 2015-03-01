@@ -111,9 +111,9 @@ namespace RogueBasin.Creatures
             return new BlackUnicorn();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.DarkGray;
+            return System.Drawing.Color.DarkGray;
         }
 
         public override int GetCombatXP()

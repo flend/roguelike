@@ -450,7 +450,7 @@ namespace RogueBasin
         List<SoundEffect> effects;
 
 
-        Color defaultPCColor = ColorPresets.White;
+        System.Drawing.Color defaultPCColor = System.Drawing.Color.White;
 
         public DungeonMaker DungeonMaker { get; set; }
 
@@ -587,7 +587,7 @@ namespace RogueBasin
             List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, PCMap, equipItem.RangeFire(), item.ShotgunSpreadAngle());
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Chocolate);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Chocolate);
 
             //Make firing sound
             Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
@@ -639,7 +639,7 @@ namespace RogueBasin
             List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Magenta);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Magenta);
 
             //Make firing sound
             Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
@@ -695,7 +695,7 @@ namespace RogueBasin
 
             //Draw attack
 
-            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, ColorPresets.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, System.Drawing.Color.Gray);
 
             //Apply damage
             player.AttackMonsterRanged(monster, damageBase);
@@ -2443,25 +2443,25 @@ namespace RogueBasin
             {
                 List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(m.LocationMap, Game.Dungeon.Player.LocationLevel, 4 + Game.Random.Next(3));
 
-                Color randColor = ColorPresets.Red;
+                System.Drawing.Color randColor = System.Drawing.Color.Red;
                 int randInt = Game.Random.Next(5);
 
                 switch (randInt)
                 {
                     case 0:
-                        randColor = ColorPresets.Red;
+                        randColor = System.Drawing.Color.Red;
                         break;
                     case 1:
-                        randColor = ColorPresets.Orange;
+                        randColor = System.Drawing.Color.Orange;
                         break;
                     case 2:
-                        randColor = ColorPresets.Yellow;
+                        randColor = System.Drawing.Color.Yellow;
                         break;
                     case 3:
-                        randColor = ColorPresets.OrangeRed;
+                        randColor = System.Drawing.Color.OrangeRed;
                         break;
                     case 4:
-                        randColor = ColorPresets.DarkRed;
+                        randColor = System.Drawing.Color.DarkRed;
                         break;
                 }
 
@@ -2540,7 +2540,7 @@ namespace RogueBasin
             var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, ColorPresets.Chocolate);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, System.Drawing.Color.Chocolate);
            
             foreach (Point sq in grenadeAffectsFiltered)
             {

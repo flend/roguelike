@@ -788,9 +788,9 @@ namespace RogueBasin
             return;
         }
 
-        internal virtual Color GetCorpseRepresentationColour()
+        internal virtual System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.Gainsboro;
+            return System.Drawing.Color.Gainsboro;
         }
 
         internal virtual char GetCorpseRepresentation()

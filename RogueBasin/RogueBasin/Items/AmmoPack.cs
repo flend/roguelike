@@ -62,9 +62,9 @@ namespace RogueBasin.Items
             get { return "Ammo packs"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Lime;
+            return System.Drawing.Color.Lime;
         }
 
         protected override char GetRepresentation()

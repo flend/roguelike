@@ -7,7 +7,7 @@ namespace RogueBasin.Items
 {
     public class Clue : Item
     {
-        Color color;
+        System.Drawing.Color color;
         string id = "";
         string parentId;
 
@@ -17,33 +17,33 @@ namespace RogueBasin.Items
         {
             Setup(mapClue);
 
-            color = ColorPresets.Magenta;
+            color = System.Drawing.Color.Magenta;
             /*
             //Map id to color
             switch (parentId)
             {
                 case "red":
-                    color = ColorPresets.Red;
+                    color = System.Drawing.Color.Red;
                     break;
                 case "green":
-                    color = ColorPresets.Green;
+                    color = System.Drawing.Color.Green;
                     break;
                 case "blue":
-                    color = ColorPresets.Blue;
+                    color = System.Drawing.Color.Blue;
                     break;
                 case "yellow":
-                    color = ColorPresets.Yellow;
+                    color = System.Drawing.Color.Yellow;
                     break;
                 case "escape":
-                    color = ColorPresets.Yellow;
+                    color = System.Drawing.Color.Yellow;
                     break;
                 case "self-destruct":
-                    color = ColorPresets.LimeGreen;
+                    color = System.Drawing.Color.LimeGreen;
                     break;
             }*/
         }
 
-        public Clue(GraphMap.Clue mapClue, Color lockColour, string id)
+        public Clue(GraphMap.Clue mapClue, System.Drawing.Color lockColour, string id)
         {
             Setup(mapClue);
 
@@ -91,7 +91,7 @@ namespace RogueBasin.Items
             get { return id; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
             return color;
         }

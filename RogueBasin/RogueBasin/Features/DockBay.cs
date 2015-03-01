@@ -16,9 +16,9 @@ namespace RogueBasin.Features
             return '\xe8';
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Cyan;
+            return System.Drawing.Color.Cyan;
         }
     }
 }

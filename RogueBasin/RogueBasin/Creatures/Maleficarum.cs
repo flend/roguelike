@@ -106,9 +106,9 @@ namespace RogueBasin.Creatures
             return new Creatures.Maleficarum();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Crimson;
+            return System.Drawing.Color.Crimson;
         }
 
         public override int GetCombatXP()

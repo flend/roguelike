@@ -123,9 +123,9 @@ namespace RogueBasin.Creatures
             return new PatrolBotArea();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.SlateBlue;
+            return System.Drawing.Color.SlateBlue;
         }
 
         public override int GetCombatXP()

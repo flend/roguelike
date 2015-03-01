@@ -69,50 +69,50 @@ namespace RogueBasin {
 
         Point hitpointsOffset;     
 
-        Color inFOVTerrainColor = ColorPresets.White;
-        Color seenNotInFOVTerrainColor = ColorPresets.Gray;
-        Color neverSeenFOVTerrainColor;
-        Color inMonsterFOVTerrainColor = ColorPresets.Blue;
+        System.Drawing.Color inFOVTerrainColor = System.Drawing.Color.White;
+        System.Drawing.Color seenNotInFOVTerrainColor = System.Drawing.Color.Gray;
+        System.Drawing.Color neverSeenFOVTerrainColor;
+        System.Drawing.Color inMonsterFOVTerrainColor = System.Drawing.Color.Blue;
 
-        Color statsColor = ColorPresets.Khaki;
-        Color nothingColor = ColorPresets.Gray;
+        System.Drawing.Color statsColor = System.Drawing.Color.Khaki;
+        System.Drawing.Color nothingColor = System.Drawing.Color.Gray;
 
-        Color creatureColor = ColorPresets.White;
-        Color itemColor = ColorPresets.Red;
-        Color featureColor = ColorPresets.White;
+        System.Drawing.Color creatureColor = System.Drawing.Color.White;
+        System.Drawing.Color itemColor = System.Drawing.Color.Red;
+        System.Drawing.Color featureColor = System.Drawing.Color.White;
 
-        Color hiddenColor = ColorPresets.Black;
+        System.Drawing.Color hiddenColor = System.Drawing.Color.Black;
 
-        Color charmBackground = ColorPresets.DarkKhaki;
-        Color passiveBackground = ColorPresets.DarkMagenta;
-        Color uniqueBackground = ColorPresets.DarkCyan;
-        Color inRangeBackground = ColorPresets.DeepSkyBlue;
-        Color inRangeAndAggressiveBackground = ColorPresets.Purple;
-        Color stunnedBackground = ColorPresets.DarkCyan;
-        Color investigateBackground = ColorPresets.DarkGreen;
-        Color pursuitBackground = ColorPresets.DarkRed;
-        Color normalBackground = ColorPresets.Black;
-        Color normalForeground = ColorPresets.White;
-        Color targettedBackground = ColorPresets.DarkSlateGray;
+        System.Drawing.Color charmBackground = System.Drawing.Color.DarkKhaki;
+        System.Drawing.Color passiveBackground = System.Drawing.Color.DarkMagenta;
+        System.Drawing.Color uniqueBackground = System.Drawing.Color.DarkCyan;
+        System.Drawing.Color inRangeBackground = System.Drawing.Color.DeepSkyBlue;
+        System.Drawing.Color inRangeAndAggressiveBackground = System.Drawing.Color.Purple;
+        System.Drawing.Color stunnedBackground = System.Drawing.Color.DarkCyan;
+        System.Drawing.Color investigateBackground = System.Drawing.Color.DarkGreen;
+        System.Drawing.Color pursuitBackground = System.Drawing.Color.DarkRed;
+        System.Drawing.Color normalBackground = System.Drawing.Color.Black;
+        System.Drawing.Color normalForeground = System.Drawing.Color.White;
+        System.Drawing.Color targettedBackground = System.Drawing.Color.DarkSlateGray;
 
-        Color statsFrameColor = ColorPresets.MediumSeaGreen;
-        Color mapFrameColor = ColorPresets.Khaki;
+        System.Drawing.Color statsFrameColor = System.Drawing.Color.MediumSeaGreen;
+        System.Drawing.Color mapFrameColor = System.Drawing.Color.Khaki;
 
-        Color targetBackground = ColorPresets.White;
-        Color targetForeground = ColorPresets.Black;
+        System.Drawing.Color targetBackground = System.Drawing.Color.White;
+        System.Drawing.Color targetForeground = System.Drawing.Color.Black;
 
-        Color literalColor = ColorPresets.BurlyWood;
-        Color literalTextColor = ColorPresets.White;
+        System.Drawing.Color literalColor = System.Drawing.Color.BurlyWood;
+        System.Drawing.Color literalTextColor = System.Drawing.Color.White;
 
-        Color headingColor = ColorPresets.Yellow;
+        System.Drawing.Color headingColor = System.Drawing.Color.Yellow;
 
-        Color messageColor = ColorPresets.CadetBlue;
-        Color titleColor = ColorPresets.CadetBlue;
+        System.Drawing.Color messageColor = System.Drawing.Color.CadetBlue;
+        System.Drawing.Color titleColor = System.Drawing.Color.CadetBlue;
 
-        Color soundColor = ColorPresets.Yellow;
+        System.Drawing.Color soundColor = System.Drawing.Color.Yellow;
 
-        Color normalMovieColor = ColorPresets.MediumSeaGreen;
-        Color flashMovieColor = ColorPresets.Red;
+        System.Drawing.Color normalMovieColor = System.Drawing.Color.MediumSeaGreen;
+        System.Drawing.Color flashMovieColor = System.Drawing.Color.Red;
 
         const char heartChar = (char)567;
         const char shieldChar = (char)561;
@@ -120,13 +120,13 @@ namespace RogueBasin {
         const char grenadeChar = (char)297;
         const char batteryChar = (char)308;
 
-        Color orangeActivatedColor = ColorPresets.DarkOrange;
-        Color batteryActivatedColor = ColorPresets.SlateBlue;
-        Color orangeHighlightedColor = ColorPresets.Gold;
-        Color orangeDisactivatedColor = ColorPresets.SaddleBrown;
-        Color disabledColor = ColorPresets.DimGray;
-        Color weaponColor = ColorPresets.LightSteelBlue;
-        Color heartColor = ColorPresets.Crimson;
+        System.Drawing.Color orangeActivatedColor = System.Drawing.Color.DarkOrange;
+        System.Drawing.Color batteryActivatedColor = System.Drawing.Color.SlateBlue;
+        System.Drawing.Color orangeHighlightedColor = System.Drawing.Color.Gold;
+        System.Drawing.Color orangeDisactivatedColor = System.Drawing.Color.SaddleBrown;
+        System.Drawing.Color disabledColor = System.Drawing.Color.DimGray;
+        System.Drawing.Color weaponColor = System.Drawing.Color.LightSteelBlue;
+        System.Drawing.Color heartColor = System.Drawing.Color.Crimson;
         
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
@@ -180,7 +180,7 @@ namespace RogueBasin {
         //Current movie
         List <MovieFrame> movieFrames;
 
-        public Color PCColor { get; set;}
+        public System.Drawing.Color PCColor { get; set;}
 
         public bool SeeAllMonsters { get; set; }
         public bool SeeAllMap { get; set; }
@@ -194,7 +194,9 @@ namespace RogueBasin {
             get
             {
                 if (instance == null)
+                {
                     instance = new Screen(new MapRendererLibTCod());
+                }
                 return instance;
             }
         }
@@ -264,7 +266,7 @@ namespace RogueBasin {
             MsgLogWrapWidth = inventoryTR.x - inventoryTL.x - 4;
 
             //Colors
-            neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
+            neverSeenFOVTerrainColor = System.Drawing.Color.Gray;// Color.FromRGB(90, 90, 90);
 
             TotalKills = null;
 
@@ -272,7 +274,7 @@ namespace RogueBasin {
             DeathWidth = 59;
             DeathHeight = 34;
 
-            PCColor = ColorPresets.White;
+            PCColor = System.Drawing.Color.White;
 
             SeeAllMonsters = false;
             SeeAllMap = false;
@@ -426,7 +428,7 @@ namespace RogueBasin {
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
             DrawPathLine(layerNo, start, end, foregroundColor, backgroundColor, (char)0);
         }
@@ -437,7 +439,7 @@ namespace RogueBasin {
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor, char drawChar)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor, char drawChar)
         {
             //Draw the line overlay
 
@@ -759,7 +761,7 @@ namespace RogueBasin {
                     //Print char by char
                     int coffset = 0;
                     bool nextCharFlash = false;
-                    Color flashColor = normalMovieColor;
+                    System.Drawing.Color flashColor = normalMovieColor;
 
                     foreach (char c in line)
                     {
@@ -916,13 +918,19 @@ namespace RogueBasin {
             return false;
         }
 
+        private System.Drawing.Color ColorInterpolate(System.Drawing.Color from, System.Drawing.Color to, double degree)
+        {
+            libtcodWrapper.Color interpolated = Color.Interpolate(Color.FromRGB(from.R, from.G, from.B), Color.FromRGB(to.R, to.G, to.B), degree);
+            return System.Drawing.Color.FromArgb(interpolated.Red, interpolated.Blue, interpolated.Green);
+        }
+
         private void DrawPC(int levelToDraw, Player player)
         {
             if (player.LocationLevel != levelToDraw)
                 return;
          
             Point PClocation = player.LocationMap;
-            Color PCDrawColor = PCColor;
+            System.Drawing.Color PCDrawColor = PCColor;
 
             if (DebugMode)
             {
@@ -930,7 +938,7 @@ namespace RogueBasin {
 
                 if (pcSquare.InMonsterFOV)
                 {
-                    PCDrawColor = Color.Interpolate(PCDrawColor, ColorPresets.Red, 0.4);
+                    PCDrawColor = ColorInterpolate(PCDrawColor, System.Drawing.Color.Red, 0.4);
                 }
             }
 
@@ -945,7 +953,7 @@ namespace RogueBasin {
 
             if (hasActiveWetware != null)
             {
-                colorToUse = ColorPresets.LightSkyBlue;
+                colorToUse = System.Drawing.Color.LightSkyBlue;
 
                 if (hasActiveWetware.GetType() == typeof(Items.StealthWare))
                     pcRepresentation = (char)256;
@@ -1037,7 +1045,7 @@ namespace RogueBasin {
         /// <param name="origin"></param>
         /// <param name="target"></param>
         /// <param name="size"></param>
-        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, Color color)
+        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, System.Drawing.Color color)
         {
             //Clone the list since we mangle it
             List<Point> mangledPoints = new List<Point>();
@@ -1059,7 +1067,7 @@ namespace RogueBasin {
                     continue;
 
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, ColorPresets.Black);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, System.Drawing.Color.Black);
             }
 
             //Render the full layered map (with these animations) on screen
@@ -1139,12 +1147,12 @@ namespace RogueBasin {
             if (!isViewVisible(Target))
                 return;
 
-            Color backgroundColor = targetBackground;
-            Color foregroundColor = targetForeground;
+            System.Drawing.Color backgroundColor = targetBackground;
+            System.Drawing.Color foregroundColor = targetForeground;
 
             if (SetTargetInRange)
             {
-                backgroundColor = ColorPresets.Red;
+                backgroundColor = System.Drawing.Color.Red;
             }
 
             char toDraw = '.';
@@ -1186,7 +1194,7 @@ namespace RogueBasin {
                     toDraw = (char)monsterIdInSquare;
 
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(toDraw);
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
             }
         }
 
@@ -1200,7 +1208,7 @@ namespace RogueBasin {
             ClearScreen();
 
             //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, ColorPresets.White);
+            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, System.Drawing.Color.White);
 
             //Draw title
             PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
@@ -1233,32 +1241,32 @@ namespace RogueBasin {
             ClearScreen();
 
             //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, ColorPresets.White);
+            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, System.Drawing.Color.White);
 
             //Draw title
-            PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, ColorPresets.White);
+            PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, System.Drawing.Color.White);
 
             //Draw preamble
             int count = 0;
             foreach (string s in DeathPreamble)
             {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left, ColorPresets.White);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left, System.Drawing.Color.White);
                 count++;
             }
 
             //Draw kills
 
-            PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center, ColorPresets.White);
+            PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center, System.Drawing.Color.White);
 
             foreach (string s in TotalKills)
             {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left, ColorPresets.White);
+                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left, System.Drawing.Color.White);
                 count++;
             }
 
             //Draw instructions
 
-            PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center, ColorPresets.White);
+            PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center, System.Drawing.Color.White);
         }
 
 
@@ -1278,7 +1286,7 @@ namespace RogueBasin {
         /// <summary>
         /// Draws a frame on the screen in a particular color
         /// </summary>
-        void DrawFrame(int x, int y, int width, int height, bool clear, Color color)
+        void DrawFrame(int x, int y, int width, int height, bool clear, System.Drawing.Color color)
         {
             mapRenderer.DrawFrame(x, y, width, height, clear, color);
         }
@@ -1286,7 +1294,7 @@ namespace RogueBasin {
         /// <summary>
         /// Character-based drawing. Kept only for stats etc. in transitional period. All map stuff now works in the tile layer
         /// </summary>
-        void PutChar(int x, int y, char c, Color color)
+        void PutChar(int x, int y, char c, System.Drawing.Color color)
         {
             mapRenderer.PutChar(x, y, c, color);
         }
@@ -1294,7 +1302,7 @@ namespace RogueBasin {
         /// <summary>
         /// Print a string in a rectangle
         /// </summary>
-        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color)
+        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment, System.Drawing.Color color)
         {
             mapRenderer.PrintStringRect(msg, x, y, width, height, alignment, color);
         }
@@ -1302,7 +1310,7 @@ namespace RogueBasin {
         /// <summary>
         /// Print a string at a location
         /// </summary>
-        void PrintLine(string msg, int x, int y, LineAlignment alignment, Color color)
+        void PrintLine(string msg, int x, int y, LineAlignment alignment, System.Drawing.Color color)
         {
             mapRenderer.PrintString(msg, x, y, alignment, color);
         }
@@ -1414,7 +1422,7 @@ namespace RogueBasin {
             DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(clueLines), normalMovieColor);
         }
 
-        private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory, Color textColor)
+        private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory, System.Drawing.Color textColor)
         {
             LinkedListNode<string> displayedMsg;
             LinkedListNode<string> topLineDisplayed = null;
@@ -1669,20 +1677,20 @@ namespace RogueBasin {
                 else if (weaponE.HasFireAction() && weaponE.HasThrowAction())
                 {
                     PrintLine("fire   throw", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), ColorPresets.White);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x + 7, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), ColorPresets.White);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), System.Drawing.Color.White);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x + 7, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), System.Drawing.Color.White);
                 }
 
                 else if (weaponE.HasFireAction())
                 {
                     PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), ColorPresets.White);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), System.Drawing.Color.White);
                 }
 
                 else if (weaponE.HasThrowAction())
                 {
                     PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), ColorPresets.White);
+                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), System.Drawing.Color.White);
                 }*/
 
                 //if (weaponE.HasOperateAction())
@@ -1811,11 +1819,11 @@ namespace RogueBasin {
                     {
                         if (i < ammoBarEntries)
                         {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, ColorPresets.Gold);
+                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, System.Drawing.Color.Gold);
                         }
                         else
                         {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, ColorPresets.Gray);
+                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, System.Drawing.Color.Gray);
                         }
                     }
                 }
@@ -1838,7 +1846,7 @@ namespace RogueBasin {
                 var cover = player.GetPlayerCover(CreatureToView);
                 if (cover.Item1 > 0)
                 {
-                    PrintLine("(hard cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, ColorPresets.Gold);
+                    PrintLine("(hard cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, System.Drawing.Color.Gold);
                 }
                 else if (cover.Item2 > 0)
                 {
@@ -1929,7 +1937,7 @@ namespace RogueBasin {
 
                 if (dodgeBonus < 0.71)
                 {
-                    PrintLine("(s. dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, ColorPresets.Gold);
+                    PrintLine("(s. dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, System.Drawing.Color.Gold);
                 }
 
                 else if (dodgeBonus < 0.81)
@@ -1956,7 +1964,7 @@ namespace RogueBasin {
 
             for (int i = 0; i < noAborts; i++)
             {
-                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X',ColorPresets.Red);
+                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X',System.Drawing.Color.Red);
             }*/
         }
 
@@ -1968,7 +1976,7 @@ namespace RogueBasin {
 
             if (availableWetware)
             {
-                Color colorToUse;
+                System.Drawing.Color colorToUse;
                 if (disabledWetware)
                 {
                     colorToUse = disabledColor;
@@ -1982,7 +1990,7 @@ namespace RogueBasin {
                     colorToUse = orangeActivatedColor;
                 }
 
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForLetter(wetwareChar), ColorPresets.White);
+                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForLetter(wetwareChar), System.Drawing.Color.White);
                 //+evil points
                 Item instance = (Item)Activator.CreateInstance(wetWareType);
                 PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
@@ -1998,7 +2006,7 @@ namespace RogueBasin {
 
             var thisWeaponEquipped = equippedWeapon != null && (equippedWeapon.GetType() == weaponType || equippedWeapon.GetType() == heavyWeaponType);
 
-            Color colorToUse;
+            System.Drawing.Color colorToUse;
             if (!availableWeapon)
             {
                 colorToUse = disabledColor;
@@ -2015,7 +2023,7 @@ namespace RogueBasin {
             if (weaponNo > 5)
                 utilityOffset = utilityOffset + new Point(-15, 2);
 
-            PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), ColorPresets.White);
+            PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), System.Drawing.Color.White);
            
             //+evil points
             Item instance = (Item)Activator.CreateInstance(heavyWeaponType);
@@ -2056,13 +2064,13 @@ namespace RogueBasin {
             {
                 if (i < shieldBarFirstBar)
                 {
-                    Color shieldColor = player.IsEffectActive(typeof(PlayerEffects.ShieldEnhance)) ? ColorPresets.Yellow : orangeActivatedColor;
+                    System.Drawing.Color shieldColor = player.IsEffectActive(typeof(PlayerEffects.ShieldEnhance)) ? System.Drawing.Color.Yellow : orangeActivatedColor;
 
                     PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
                 }
                 else
                 {
-                    Color shieldColor = player.ShieldIsDisabled ? orangeActivatedColor : orangeDisactivatedColor;
+                    System.Drawing.Color shieldColor = player.ShieldIsDisabled ? orangeActivatedColor : orangeDisactivatedColor;
 
                     PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
                 }
@@ -2103,14 +2111,14 @@ namespace RogueBasin {
                 MapSquare itemSquare = Game.Dungeon.Levels[item.LocationLevel].mapSquares[item.LocationMap.x, item.LocationMap.y];
 
                 //Use the item's colour if it has one
-                Color itemColorToUse = item.GetColour();
+                System.Drawing.Color itemColorToUse = item.GetColour();
 
                 IEquippableItem equipItem = item as IEquippableItem;
                 if (equipItem != null)
                 {
                     //Show no ammo items in a neutral colour
                     if (equipItem.HasFireAction() && equipItem.RemainingAmmo() == 0)
-                        itemColorToUse = ColorPresets.Gray;
+                        itemColorToUse = System.Drawing.Color.Gray;
                 }
 
                 //Color itemColorToUse = itemColor;
@@ -2125,7 +2133,7 @@ namespace RogueBasin {
                 {
                     //Not in FOV now but seen this adventure
                     //Don't draw items in squares seen in previous adventures (since the items have respawned)
-                    itemColorToUse = Color.Interpolate(item.GetColour(), ColorPresets.Black, 0.5);
+                    itemColorToUse = ColorInterpolate(item.GetColour(), System.Drawing.Color.Black, 0.5);
                 }
                 else
                 {
@@ -2165,7 +2173,7 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare featureSquare = Game.Dungeon.Levels[thisLock.LocationLevel].mapSquares[thisLock.LocationMap.x, thisLock.LocationMap.y];
 
-                Color featureColor = thisLock.RepresentationColor();
+                System.Drawing.Color featureColor = thisLock.RepresentationColor();
 
                 bool drawFeature = true;
 
@@ -2176,7 +2184,7 @@ namespace RogueBasin {
                 else if (featureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    featureColor = Color.Interpolate(featureColor, ColorPresets.Black, 0.3);
+                    featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
                 }
                 else
                 {
@@ -2214,7 +2222,7 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare featureSquare = Game.Dungeon.Levels[feature.LocationLevel].mapSquares[feature.LocationMap.x, feature.LocationMap.y];
 
-                Color featureColor = feature.RepresentationColor();
+                System.Drawing.Color featureColor = feature.RepresentationColor();
 
                 bool drawFeature = true;
 
@@ -2226,7 +2234,7 @@ namespace RogueBasin {
                 else if (featureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    featureColor = Color.Interpolate(featureColor, ColorPresets.Black, 0.3);
+                    featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
 
                     //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                 }
@@ -2267,7 +2275,7 @@ namespace RogueBasin {
                 if (!creature.Alive)
                     continue;
 
-                Color creatureColor = creature.RepresentationColor();
+                System.Drawing.Color creatureColor = creature.RepresentationColor();
 
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
                 bool drawCreature = true;
@@ -2378,10 +2386,10 @@ namespace RogueBasin {
 
                 //Colour depending on FOV (for development)
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
-                Color creatureColor = creature.RepresentationColor();
+                System.Drawing.Color creatureColor = creature.RepresentationColor();
 
-                Color foregroundColor;
-                Color backgroundColor;
+                System.Drawing.Color foregroundColor;
+                System.Drawing.Color backgroundColor;
 
                 //Shouldn't really do this here but see if we can get away with it
                 CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
@@ -2419,7 +2427,7 @@ namespace RogueBasin {
                 {
                     if (creatureSquare.InMonsterFOV)
                     {
-                        creatureColor = Color.Interpolate(creatureColor, ColorPresets.Red, 0.4);
+                        creatureColor = ColorInterpolate(creatureColor, System.Drawing.Color.Red, 0.4);
                     }
 
                     //Draw waypoints
@@ -2447,7 +2455,7 @@ namespace RogueBasin {
                 if (drawCreature)
                 {
                     foregroundColor = creatureColor;
-                    backgroundColor = ColorPresets.Black;
+                    backgroundColor = System.Drawing.Color.Black;
 
                     bool newBackground = false;
                     //Set background depending on status
@@ -2587,8 +2595,8 @@ namespace RogueBasin {
                     int screenY = mapTopLeft.y + j;
 
                     char screenChar;
-                    Color baseDrawColor;
-                    Color drawColor;
+                    System.Drawing.Color baseDrawColor;
+                    System.Drawing.Color drawColor;
 
                     //Defaults
                     screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
@@ -2614,7 +2622,7 @@ namespace RogueBasin {
                         {
                             //Draw the room id (in empty areas only for SRN==1)
 
-                            List<Color> colors = new List<Color>(new Color[] { ColorPresets.Yellow, ColorPresets.Gold, ColorPresets.RosyBrown, orangeDisactivatedColor, ColorPresets.LightGray, ColorPresets.Gray });
+                            List<System.Drawing.Color> colors = new List<System.Drawing.Color>(new System.Drawing.Color[] { System.Drawing.Color.Yellow, System.Drawing.Color.Gold, System.Drawing.Color.RosyBrown, orangeDisactivatedColor, System.Drawing.Color.LightGray, System.Drawing.Color.Gray });
 
                             int roomId = map.roomIdMap[i, j];
 
@@ -2624,7 +2632,7 @@ namespace RogueBasin {
                             if (numberToDraw == -1)
                             {
                                 screenChar = 'n';
-                                baseDrawColor = ColorPresets.DarkGray;
+                                baseDrawColor = System.Drawing.Color.DarkGray;
                             }
                             else {
                                 char r = Convert.ToChar(numberToDraw.ToString());
@@ -2655,7 +2663,7 @@ namespace RogueBasin {
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Black, 0.4);
+                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.4);
 
                         //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                     }
@@ -2663,7 +2671,7 @@ namespace RogueBasin {
                     {
                         //Never in FOV
                         if (DebugMode)
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Black, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.6);
                         else
                             drawColor = hiddenColor;
                     }
@@ -2674,26 +2682,26 @@ namespace RogueBasin {
                         //Draw player FOV explicitally
                         if (map.mapSquares[i, j].InPlayerFOV)
                         {
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Blue, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Blue, 0.6);
                         }
 
 
                         //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Red, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Red, 0.6);
                         }
 
                         //Draw sounds
                         if (map.mapSquares[i, j].SoundMag > 0.0001)
                         {
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Yellow, map.mapSquares[i, j].SoundMag);
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Yellow, map.mapSquares[i, j].SoundMag);
                         }
                     }
 
                     if (Game.Dungeon.Player.IsEffectActive(typeof(PlayerEffects.SeeFOV)) && map.mapSquares[i, j].InMonsterFOV)
                     {
-                        drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Green, 0.7);
+                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Green, 0.7);
                     }
 
                     Point mapTerrainLoc = new Point(i, j);
@@ -2743,7 +2751,7 @@ namespace RogueBasin {
         /// Print message in message bar
         /// </summary>
         /// <param name="message"></param>
-        internal void PrintMessage(string message, Color color)
+        internal void PrintMessage(string message, System.Drawing.Color color)
         {
             //Update state
             lastMessage = message;
@@ -2765,14 +2773,14 @@ namespace RogueBasin {
             ClearRect(topLeft.x, topLeft.y, width, 1);
 
             //Display new message
-            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, ColorPresets.White);
+            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, System.Drawing.Color.White);
         }
 
         /// <summary>
         /// Print message at any point on screen
         /// </summary>
         /// <param name="message"></param>
-        internal void PrintMessage(string message, Point topLeft, int width, Color color)
+        internal void PrintMessage(string message, Point topLeft, int width, System.Drawing.Color color)
         {
 
             //Update state
@@ -3051,7 +3059,7 @@ namespace RogueBasin {
             return null;
         }
 
-        public bool YesNoQuestionWithFrame(string introMessage, int extrayOffset, Color frameColor, Color textColor)
+        public bool YesNoQuestionWithFrame(string introMessage, int extrayOffset, System.Drawing.Color frameColor, System.Drawing.Color textColor)
         {
             var width = introMessage.Count() + 7;
             var height = 1;
@@ -3070,7 +3078,7 @@ namespace RogueBasin {
             return YesNoQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
         }
 
-        public GameDifficulty DifficultyQuestionWithFrame(string introMessage, int extrayOffset, Color frameColor, Color textColor)
+        public GameDifficulty DifficultyQuestionWithFrame(string introMessage, int extrayOffset, System.Drawing.Color frameColor, System.Drawing.Color textColor)
         {
             var width = introMessage.Count() + 7;
             var height = 1;
@@ -3089,7 +3097,7 @@ namespace RogueBasin {
             return DifficultyQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
         }
 
-        internal bool YesNoQuestion(string introMessage, Point topLeft, Color textColor)
+        internal bool YesNoQuestion(string introMessage, Point topLeft, System.Drawing.Color textColor)
         {
 
             PrintMessage(introMessage + " (y / n):", topLeft, introMessage.Length + 8, textColor);
@@ -3121,7 +3129,7 @@ namespace RogueBasin {
             } while(true);
         }
 
-        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft, Color textColor) {
+        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft, System.Drawing.Color textColor) {
             
             PrintMessage(introMessage, topLeft, introMessage.Length + 8, textColor);
             FlushConsole();
@@ -3214,7 +3222,7 @@ namespace RogueBasin {
         /// <param name="point"></param>
         /// <param name="point_3"></param>
         /// <param name="color"></param>
-        internal void DrawMissileAttack(Creature originCreature, Creature target, CombatResults result, Color color)
+        internal void DrawMissileAttack(Creature originCreature, Creature target, CombatResults result, System.Drawing.Color color)
         {
             if (!CombatAnimations)
                 return;
@@ -3235,21 +3243,21 @@ namespace RogueBasin {
             /*
             if (creatureSquare.InPlayerFOV)
             {
-                rootConsole.ForegroundColor = ColorPresets.White;
+                rootConsole.ForegroundColor = System.Drawing.Color.White;
                 rootConsole.PutChar(mapTopLeft.x + originCreature.LocationMap.x, mapTopLeft.y + originCreature.LocationMap.y, originCreature.Representation);
             }*/
 
             //Draw animation to animation layer
 
             //Calculate and draw the line overlay
-            DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, ColorPresets.Black);
+            DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, System.Drawing.Color.Black);
 
             //Flash the target if they were damaged
             //Draw them in either case so that we overwrite the missile animation on the target square with the creature
 
             if (targetSquare.InPlayerFOV)
             {
-                Color colorToDraw = ColorPresets.Red;
+                System.Drawing.Color colorToDraw = System.Drawing.Color.Red;
 
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
@@ -3311,7 +3319,7 @@ namespace RogueBasin {
 
             if (creatureSquare.InPlayerFOV)
             {
-                rootConsole.ForegroundColor = ColorPresets.White;
+                rootConsole.ForegroundColor = System.Drawing.Color.White;
                 rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
             }
             */
@@ -3326,7 +3334,7 @@ namespace RogueBasin {
                     if (isViewVisible(newTarget.LocationMap))
                     {
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.Representation);
-                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
                     }
                 }
             }

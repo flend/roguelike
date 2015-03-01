@@ -107,9 +107,9 @@ namespace RogueBasin.Creatures
             return new Ferret();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.WhiteSmoke;
+            return System.Drawing.Color.WhiteSmoke;
         }
 
         public override int GetCombatXP()

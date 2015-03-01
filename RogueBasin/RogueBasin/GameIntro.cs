@@ -88,12 +88,12 @@ namespace RogueBasin
             }
 
             //Ask settings questions
-            ShowMovies = Screen.Instance.YesNoQuestionWithFrame("Show logs on pickup (recommended)", 8, ColorPresets.Khaki, ColorPresets.MediumSeaGreen);
+            ShowMovies = Screen.Instance.YesNoQuestionWithFrame("Show logs on pickup (recommended)", 8, System.Drawing.Color.Khaki, System.Drawing.Color.MediumSeaGreen);
 
             rootConsole.Flush();
 
             //Ask settings questions
-            Difficulty = Screen.Instance.DifficultyQuestionWithFrame("Game difficulty: (E)asy / (M)edium / (H)ard?", 8, ColorPresets.Khaki, ColorPresets.MediumSeaGreen);
+            Difficulty = Screen.Instance.DifficultyQuestionWithFrame("Game difficulty: (E)asy / (M)edium / (H)ard?", 8, System.Drawing.Color.Khaki, System.Drawing.Color.MediumSeaGreen);
 
             rootConsole.PrintLineRect("Generating the station...", settingsTL.x, settingsTL.y + settingsText.Count + 5, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
         }

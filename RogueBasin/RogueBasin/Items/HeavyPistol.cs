@@ -108,9 +108,9 @@ namespace RogueBasin.Items
             return (char)272;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.DarkSlateGray;
+            return System.Drawing.Color.DarkSlateGray;
         }
 
         public int ArmourClassModifier()

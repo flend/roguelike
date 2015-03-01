@@ -64,9 +64,9 @@ namespace RogueBasin.PlayerEffects
             return "Tac. Overlay";
         }
 
-        internal override libtcodWrapper.Color GetColor()
+        internal override System.Drawing.Color GetColor()
         {
-            return ColorPresets.SeaGreen;
+            return System.Drawing.Color.SeaGreen;
         }
     }
 }

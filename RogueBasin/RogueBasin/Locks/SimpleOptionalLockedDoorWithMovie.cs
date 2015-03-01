@@ -13,7 +13,7 @@ namespace RogueBasin.Locks
         private string cantOpenMovie;
         private string confirmationString;
 
-        public SimpleOptionalLockedDoorWithMovie(GraphMap.Door door, string openMovie, string cantOpenMovie, string confirmationString, string idToReport, Color color) : base(door, idToReport, color)
+        public SimpleOptionalLockedDoorWithMovie(GraphMap.Door door, string openMovie, string cantOpenMovie, string confirmationString, string idToReport, System.Drawing.Color color) : base(door, idToReport, color)
         {
             this.openMovie = openMovie;
             this.cantOpenMovie = cantOpenMovie;
@@ -30,7 +30,7 @@ namespace RogueBasin.Locks
             if (!canDoorBeOpened)
             {
                 Screen.Instance.PlayMovie(cantOpenMovie, true);
-                var result = Screen.Instance.YesNoQuestionWithFrame(confirmationString, 0, ColorPresets.Khaki, ColorPresets.MediumSeaGreen);
+                var result = Screen.Instance.YesNoQuestionWithFrame(confirmationString, 0, System.Drawing.Color.Khaki, System.Drawing.Color.MediumSeaGreen);
                 if (result)
                     OpenDoor();
 

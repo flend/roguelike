@@ -137,9 +137,9 @@ namespace RogueBasin.Creatures
         }
 
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Gray;
+            return System.Drawing.Color.Gray;
         }
 
         public override int GetMagicXP()

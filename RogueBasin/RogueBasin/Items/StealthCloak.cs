@@ -88,9 +88,9 @@ namespace RogueBasin.Items
             return '[';
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.BlanchedAlmond;
+            return System.Drawing.Color.BlanchedAlmond;
         }
 
         public int ArmourClassModifier()

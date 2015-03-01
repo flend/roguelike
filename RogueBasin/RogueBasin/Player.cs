@@ -410,29 +410,29 @@ namespace RogueBasin
 
             //Armour
 
-            Screen.Instance.PCColor = ColorPresets.White;
+            Screen.Instance.PCColor = System.Drawing.Color.White;
             /*
             if (inv.ContainsItem(new Items.MetalArmour()) && AttackStat > 50)
             {
                 ArmourClassAccess += 6;
-                Screen.Instance.PCColor = ColorPresets.SteelBlue;
+                Screen.Instance.PCColor = System.Drawing.Color.SteelBlue;
             }
             else if (inv.ContainsItem(new Items.LeatherArmour()) && AttackStat > 25)
             {
                 ArmourClassAccess += 3;
-                Screen.Instance.PCColor = ColorPresets.BurlyWood;
+                Screen.Instance.PCColor = System.Drawing.Color.BurlyWood;
             }
             else if (inv.ContainsItem(new Items.KnockoutDress()))
             {
                 CharmPoints += 40;
                 ArmourClassAccess += 3;
-                Screen.Instance.PCColor = ColorPresets.Yellow;
+                Screen.Instance.PCColor = System.Drawing.Color.Yellow;
             }
             else if (inv.ContainsItem(new Items.PrettyDress()))
             {
                 CharmPoints += 20;
                 ArmourClassAccess += 1;
-                Screen.Instance.PCColor = ColorPresets.BlueViolet;
+                Screen.Instance.PCColor = System.Drawing.Color.BlueViolet;
             }*/
 
             //Consider equipped weapons (only 1 will work)
@@ -2594,7 +2594,7 @@ namespace RogueBasin
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), LocationLevel, destination);
 
             //Draw throw
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Gray);
 
             if (stunDamage)
             {

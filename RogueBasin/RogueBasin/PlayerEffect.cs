@@ -69,9 +69,9 @@ namespace RogueBasin
         public virtual string GetName() { return ""; }
 
 
-        internal virtual libtcodWrapper.Color GetColor()
+        internal virtual System.Drawing.Color GetColor()
         {
-            return ColorPresets.White;
+            return System.Drawing.Color.White;
         }
     }
 }

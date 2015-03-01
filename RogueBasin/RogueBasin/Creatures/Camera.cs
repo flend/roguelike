@@ -71,9 +71,9 @@ namespace RogueBasin.Creatures
             return new Camera();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.PaleVioletRed;
+            return System.Drawing.Color.PaleVioletRed;
         }
 
         public override int GetCombatXP()
@@ -137,9 +137,9 @@ namespace RogueBasin.Creatures
             return (char)270;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
         internal override void OnKilledSpecialEffects()

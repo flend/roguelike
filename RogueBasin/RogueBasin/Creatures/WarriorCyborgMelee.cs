@@ -72,9 +72,9 @@ namespace RogueBasin.Creatures
             return (char)499;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
         protected override int GetChanceToRecover()
@@ -107,9 +107,9 @@ namespace RogueBasin.Creatures
             return new WarriorCyborgMelee();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Red;
+            return System.Drawing.Color.Red;
         }
 
         public override int GetCombatXP()

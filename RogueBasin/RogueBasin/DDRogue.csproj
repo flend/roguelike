@@ -258,6 +258,10 @@
     <Compile Include="Items\ShotgunTypeWeapon.cs" />
     <Compile Include="Locks\SimpleOptionalLockedDoorWithMovie.cs" />
     <Compile Include="IMapRenderer.cs" />
+    <Compile Include="MapRendererLibTCod.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MapRendererSDLDotNet.cs" />
     <Compile Include="MonsterPlacement.cs" />
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
     <Compile Include="PlayerEffects\BioProtect.cs" />
@@ -324,7 +328,6 @@
     <Compile Include="MapGeneratorTemplated.cs" />
     <Compile Include="MapInfo.cs" />
     <Compile Include="MapObject.cs" />
-    <Compile Include="MapRendererLibTCod.cs" />
     <Compile Include="MapTerrainRandomizer.cs" />
     <Compile Include="MessageQueue.cs" />
     <Compile Include="Monster.cs" />
@@ -491,11 +494,19 @@
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
     </Reference>
+    <Reference Include="SdlDotNet, Version=6.1.0.0, Culture=neutral, PublicKeyToken=26ad4f7e10c61408, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files (x86)\SdlDotNet\bin\SdlDotNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tao.Sdl, Version=1.2.13.0, Culture=neutral, PublicKeyToken=9c7a200e36c0094e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files (x86)\SdlDotNet\bin\Tao.Sdl.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphMap\GraphMap.csproj">

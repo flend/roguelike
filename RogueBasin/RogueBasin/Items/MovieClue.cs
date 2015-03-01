@@ -13,7 +13,7 @@ namespace RogueBasin.Items
 
         GraphMap.Clue mapClue;
 
-        public MovieClue(GraphMap.Clue mapClue, char representation, string pickupMovie, string description) : base(mapClue, ColorPresets.LimeGreen, pickupMovie)
+        public MovieClue(GraphMap.Clue mapClue, char representation, string pickupMovie, string description) : base(mapClue, System.Drawing.Color.LimeGreen, pickupMovie)
         {
             Setup(mapClue);
             this.pickupMovie = pickupMovie;
@@ -53,9 +53,9 @@ namespace RogueBasin.Items
             return 10;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.LimeGreen;
+            return System.Drawing.Color.LimeGreen;
 ;
         }
 

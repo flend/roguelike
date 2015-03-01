@@ -61,9 +61,9 @@ namespace RogueBasin.Items
             get { return "gold berries"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Gold;
+            return System.Drawing.Color.Gold;
         }
 
         public bool UsedUp

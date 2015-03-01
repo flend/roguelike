@@ -64,9 +64,9 @@ namespace RogueBasin.Items
             get { return usedUp; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return libtcodWrapper.ColorPresets.Purple;
+            return System.Drawing.Color.Purple;
         }
 
         protected override char GetRepresentation()
