@@ -8,6 +8,9 @@ using System.IO;
 using System.Xml.Serialization;
 using System.IO.Compression;
 using System.Linq;
+using SdlDotNet.Core;
+using SdlDotNet.Graphics;
+using SdlDotNet.Input;
 
 namespace RogueBasin
 {
@@ -38,35 +41,82 @@ namespace RogueBasin
         {
         }
 
-        public int Run(string[] args)
+
+        /// <summary>
+        /// Setup internal systems
+        /// </summary>
+        /// <returns></returns>
+        public void SetupSystem()
         {
-            SetupSystem();
-            bool loadedGame = SetupGame();
+            //Initial setup
+            //See all debug messages
+            LogFile.Log.DebugLevel = 0;
 
-            MainLoop(loadedGame);
+            //Load config
+            Game.Config = new Config("config.txt");
 
-            //test code
-            /*
-            CustomFontRequest fontReq = new CustomFontRequest("terminal.png", 8, 8, CustomFontRequestFontTypes.Grayscale);
-            RootConsole.Width = 80;
-            RootConsole.Height = 50;
-            RootConsole.WindowTitle = "Hello World!";
-            RootConsole.Fullscreen = false;
-            //RootConsole.Font = fontReq;
+            //Setup screen
+            Screen.Instance.InitialSetup();
 
-            RootConsole rootConsole = RootConsole.GetInstance();
+            //Setup global random
+            Random rand = new Random();
 
-            rootConsole.PrintLine("Hello world!", 30, 30, LineAlignment.Left);
-            rootConsole.Flush();
+            //Setup logfile
+            try
+            {
+                LogFile.Log.LogEntry("Starting log file");
+            }
+            catch (Exception e)
+            {
+                Screen.Instance.ConsoleLine("Error creating log file: " + e.Message);
+            }
 
-            Console.WriteLine("debug test message.");
-            */
-            //Keyboard.WaitForKeyPress(true);
+            //Setup message queue
+            Game.MessageQueue = new MessageQueue();
 
-            return 1;
+            SetupSDLDotNet();
         }
 
-        public void MainLoop(bool loadedGame)
+        private void SetupSDLDotNet()
+        {
+            Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
+            Events.Tick += new EventHandler<TickEventArgs>(ApplicationTickEventHandler);
+            Events.KeyboardUp += new EventHandler<KeyboardEventArgs>(KeyboardEventHandler);
+        }
+
+        public void StartEventLoop()
+        {
+            Events.Run();
+        }
+
+        private void ApplicationQuitEventHandler(object sender, QuitEventArgs args)
+        {
+            //Do any final cleanup
+            LogFile.Log.Close();
+
+            Events.QuitApplication();
+        }
+
+        bool playerInputRequired = false;
+
+        private void ApplicationTickEventHandler(object sender, TickEventArgs args)
+        {
+            AdvanceDungeonToNextPlayerTick();
+
+            //no screen update necessary
+            //Screen.Instance.Update();
+        }
+
+        private void KeyboardEventHandler(object sender, KeyboardEventArgs args)
+        {
+            bool timeAdvances = ProcessKeypress(args);
+            if(timeAdvances)
+                playerInputRequired = false;
+
+        }
+
+
+        public void AdvanceDungeonToNextPlayerTick()
         {
             //Game time
             //Normal creatures have a speed of 100
@@ -82,9 +132,14 @@ namespace RogueBasin
             var player = Game.Dungeon.Player;
 
             bool centreOnPC = true;
-            bool waitForPlayerAction = false;
+            bool playerNotReady = true;
 
-            while (Game.Dungeon.RunMainLoop)
+            if (playerInputRequired)
+            {
+                return;
+            }
+
+            while (playerNotReady)
             {
                 try
                 {
@@ -96,48 +151,17 @@ namespace RogueBasin
                         pcFreeTurn = true;
 
                     //Advance time in the dungeon
-                    if(!pcFreeTurn)
+                    if (!pcFreeTurn)
                         DungeonActions();
 
                     //Advance time for the PC
-                    waitForPlayerAction = PlayerActions(centreOnPC);
+                    playerNotReady = !PlayerActions(centreOnPC);
 
                     //Catch the player being killed
-                    if (!Game.Dungeon.RunMainLoop)
-                        break;
+                    //if (!Game.Dungeon.RunMainLoop)
+                    //   break;
 
-                    if (waitForPlayerAction)
-                    {
-                        try
-                        {
-                            //Deal with PCs turn as appropriate
-                            bool timeAdvances = false;
-                            do
-                            {
-                                var inputResult = UserInput();
-                                timeAdvances = inputResult.Item1;
-                                centreOnPC = inputResult.Item2;
-
-                                //timeAdvances = true;
-                            } while (!timeAdvances);
-
-                            ProfileEntry("After user");
-
-                            //Reset the creature FOV display
-                            Game.Dungeon.ResetCreatureFOVOnMap();
-                            Game.Dungeon.ResetSoundOnMap();
-
-                            //Game.MessageQueue.AddMessage("Finished PC move");
-                            Game.Dungeon.PlayerHadBonusTurn = true;
-
-                            waitForPlayerAction = false;
-                        }
-
-                        catch (Exception ex)
-                        {
-                            LogFile.Log.LogEntry("Exception thrown" + ex.Message);
-                        }
-                    }
+                    
                 }
                 catch (Exception ex)
                 {
@@ -145,8 +169,48 @@ namespace RogueBasin
                 }
             }
 
-            //Do any final cleanup
-            LogFile.Log.Close();
+            playerInputRequired = true;
+        }
+
+        private bool ProcessKeypress(KeyboardEventArgs args)
+        {
+            try
+            {
+                //Deal with PCs turn as appropriate
+                bool timeAdvances = false;
+                //do
+               // {
+                    //var inputResult = UserInput();
+                    //timeAdvances = inputResult.Item1;
+                    //centreOnPC = inputResult.Item2;
+
+                //} while (!timeAdvances);
+
+                //Do the click processing here
+
+                Screen.Instance.NeedsUpdate = true;
+
+                if (timeAdvances)
+                {
+                    ProfileEntry("After user");
+
+                    //Reset the creature FOV display
+                    Game.Dungeon.ResetCreatureFOVOnMap();
+                    Game.Dungeon.ResetSoundOnMap();
+
+                    //Game.MessageQueue.AddMessage("Finished PC move");
+                    Game.Dungeon.PlayerHadBonusTurn = true;
+                }
+
+                return timeAdvances;
+            }
+
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+            }
+
+            return false;
         }
 
         private bool PlayerActions(bool centreOnPC)
@@ -360,7 +424,7 @@ namespace RogueBasin
 
             try
             {
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
 
                 //Each state has different keys
 
@@ -1343,7 +1407,7 @@ namespace RogueBasin
         private bool GetDirectionKeypress(out Point direction, out KeyModifier mod)
         {
             //Get direction
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
+            KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
 
             if (GetDirectionFromKeypress(userKey, out direction, out mod))
             {
@@ -2190,7 +2254,7 @@ namespace RogueBasin
 
             do
             {
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
 
                 if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                 {
@@ -2348,7 +2412,7 @@ namespace RogueBasin
             do
             {
                 //Get direction from the user or 'z' to fire
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
 
                 Point direction = new Point();
                 KeyModifier mod = KeyModifier.Arrow;
@@ -2574,7 +2638,7 @@ namespace RogueBasin
 
             do
             {
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
 
                 if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                 {
@@ -2620,7 +2684,7 @@ namespace RogueBasin
 
             do {
 
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
             
                 if (userKey.KeyCode == KeyCode.TCODK_CHAR) {
                     
@@ -2660,7 +2724,7 @@ namespace RogueBasin
 
             do {
 
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
             
                 if (userKey.KeyCode == KeyCode.TCODK_CHAR) {
                     
@@ -2685,38 +2749,6 @@ namespace RogueBasin
             } while (true);
         }
 
-        /// <summary>
-        /// Setup internal systems
-        /// </summary>
-        /// <returns></returns>
-        public void SetupSystem()
-        {
-            //Initial setup
-            //See all debug messages
-            LogFile.Log.DebugLevel = 0;
-
-            //Load config
-            Game.Config = new Config("config.txt");
-
-            //Setup screen
-            Screen.Instance.InitialSetup();
-
-            //Setup global random
-            Random rand = new Random();
-
-            //Setup logfile
-            try
-            {
-                LogFile.Log.LogEntry("Starting log file");
-            }
-            catch (Exception e)
-            {
-                Screen.Instance.ConsoleLine("Error creating log file: " + e.Message);
-            }
-
-            //Setup message queue
-            Game.MessageQueue = new MessageQueue();
-        }
 
         public bool SetupGame()
         {

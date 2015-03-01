@@ -142,7 +142,9 @@ namespace MapTester
         {
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
-            rb.MainLoop(false);
+            rb.StartEventLoop();
+
+            //rb.AdvanceDungeonToNextPlayerTick(false);
         }
     }
 }

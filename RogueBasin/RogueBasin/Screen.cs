@@ -30,6 +30,7 @@ namespace RogueBasin {
         static Screen instance = null;
 
         IMapRenderer mapRenderer;
+        public bool NeedsUpdate { get; set; }
 
         //Console/screen size
         public int Width { get; set; }
@@ -278,6 +279,8 @@ namespace RogueBasin {
 
             SeeAllMonsters = false;
             SeeAllMap = false;
+
+            NeedsUpdate = true;
         }
 
         //Setup the screen
@@ -3204,11 +3207,16 @@ namespace RogueBasin {
         /// </summary>
         public void Update()
         {
-            //Draw screen 
-            Draw();
+            if (NeedsUpdate)
+            {
+                //Draw screen 
+                Draw();
 
-            //Message queue - requires keyboard to advance messages - not sure about this yet
-            Game.MessageQueue.RunMessageQueue();
+                //Message queue - requires keyboard to advance messages - not sure about this yet
+                Game.MessageQueue.RunMessageQueue();
+
+                NeedsUpdate = false;
+            }
         }
 
 

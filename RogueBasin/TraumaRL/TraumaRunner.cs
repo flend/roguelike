@@ -188,7 +188,8 @@ namespace TraumaRL
 
             //ShowIntroMovies();
 
-            rb.MainLoop(false);
+            rb.StartEventLoop();
+            //rb.AdvanceDungeonToNextPlayerTick(false);
         }
     }
 }

@@ -376,7 +376,6 @@
     </Compile>
     <Compile Include="PlayerEffects\StealthField.cs" />
     <Compile Include="PlayerEffects\ToHitUp.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

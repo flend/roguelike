@@ -28,6 +28,16 @@ namespace RogueBasin
         public void RenderMap(TileEngine.TileMap mapToRender, Point mapOffset, Rectangle screenViewport)
         {
 
+            m_Background = (new Surface(@"DemoBackground.png")).Convert(m_VideoScreen, true, false);
+            m_Foreground = (new Surface(@"DemoForeground.png")).Convert(m_VideoScreen, true, false);
+            m_Foreground.Transparent = true;
+            m_Foreground.TransparentColor = System.Drawing.Color.FromArgb(255, 0, 255);
+            m_ForegroundPosition = new System.Drawing.Point(m_VideoScreen.Width / 2 - m_Foreground.Width / 2,
+                                              m_VideoScreen.Height / 2 - m_Foreground.Height / 2);
+
+            m_VideoScreen.Blit(m_Background);
+            m_VideoScreen.Blit(m_Foreground, m_ForegroundPosition);
+            m_VideoScreen.Update();
         }
 
         public void Sleep(ulong milliseconds)
@@ -36,32 +46,9 @@ namespace RogueBasin
 
         public void Setup(int width, int height)
         {
-
-            m_VideoScreen = Video.SetVideoMode(320, 240, 32, false, false, false, true);
-
-            m_Background = (new Surface(@"DemoBackground.png")).Convert(m_VideoScreen, true, false);
-            m_Foreground = (new Surface(@"DemoForeground.png")).Convert(m_VideoScreen, true, false);
-            m_Foreground.Transparent = true;
-            m_Foreground.TransparentColor = System.Drawing.Color.FromArgb(255, 0, 255);
-            m_ForegroundPosition = new System.Drawing.Point(m_VideoScreen.Width / 2 - m_Foreground.Width / 2,
-                                              m_VideoScreen.Height / 2 - m_Foreground.Height / 2);
-
-            Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
-            Events.Tick += new EventHandler<TickEventArgs>(ApplicationTickEventHandler);
-            Events.Run();
+            m_VideoScreen = Video.SetVideoMode(640, 480, 32, false, false, false, true);
         }
 
-        private void ApplicationTickEventHandler(object sender, TickEventArgs args)
-        {
-            m_VideoScreen.Blit(m_Background);
-            m_VideoScreen.Blit(m_Foreground, m_ForegroundPosition);
-            m_VideoScreen.Update();
-        }
-
-        private void ApplicationQuitEventHandler(object sender, QuitEventArgs args)
-        {
-            Events.QuitApplication();
-        }
 
         public void Flush()
         {
