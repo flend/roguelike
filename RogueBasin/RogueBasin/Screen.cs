@@ -196,7 +196,8 @@ namespace RogueBasin {
             {
                 if (instance == null)
                 {
-                    instance = new Screen(new MapRendererLibTCod());
+                    //instance = new Screen(new MapRendererLibTCod());
+                    instance = new Screen(new MapRendererSDLDotNet());
                 }
                 return instance;
             }

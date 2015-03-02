@@ -74,10 +74,10 @@ namespace RogueBasin
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
 
-            SetupSDLDotNet();
+            SetupSDLDotNetEvents();
         }
 
-        private void SetupSDLDotNet()
+        private void SetupSDLDotNetEvents()
         {
             Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
             Events.Tick += new EventHandler<TickEventArgs>(ApplicationTickEventHandler);
@@ -97,21 +97,28 @@ namespace RogueBasin
             Events.QuitApplication();
         }
 
-        bool playerInputRequired = false;
+        bool waitingForTurnTick = true;
 
         private void ApplicationTickEventHandler(object sender, TickEventArgs args)
         {
-            AdvanceDungeonToNextPlayerTick();
+            ProfileEntry("Tick Event");
 
-            //no screen update necessary
-            //Screen.Instance.Update();
+            if (Screen.Instance.NeedsUpdate)
+            {
+                ProfileEntry("Tick Update Film");
+
+                Screen.Instance.Update();
+            }
+
+            AdvanceDungeonToNextPlayerTick();
         }
 
         private void KeyboardEventHandler(object sender, KeyboardEventArgs args)
         {
+
             bool timeAdvances = ProcessKeypress(args);
             if(timeAdvances)
-                playerInputRequired = false;
+                waitingForTurnTick = true;
 
         }
 
@@ -134,10 +141,12 @@ namespace RogueBasin
             bool centreOnPC = true;
             bool playerNotReady = true;
 
-            if (playerInputRequired)
+            if (!waitingForTurnTick)
             {
                 return;
             }
+
+            ProfileEntry("Dungeon Turn");
 
             while (playerNotReady)
             {
@@ -169,7 +178,7 @@ namespace RogueBasin
                 }
             }
 
-            playerInputRequired = true;
+            waitingForTurnTick = false;
         }
 
         private bool ProcessKeypress(KeyboardEventArgs args)
@@ -178,6 +187,10 @@ namespace RogueBasin
             {
                 //Deal with PCs turn as appropriate
                 bool timeAdvances = false;
+
+                //If !playerInputRequired, don't allow any actions that time take
+                //(we need to wait for the next processing tick)
+
                 //do
                // {
                     //var inputResult = UserInput();
