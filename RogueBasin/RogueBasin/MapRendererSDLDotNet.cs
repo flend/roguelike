@@ -13,6 +13,7 @@ namespace RogueBasin
     /// </summary>
     class MapRendererSDLDotNet : IMapRenderer
     {
+        SdlDotNet.Graphics.Font font;
 
         private Surface videoSurface;
         private Surface spriteSheet;
@@ -136,6 +137,9 @@ namespace RogueBasin
             spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
             spriteSheet.Transparent = true;
             spriteSheet.TransparentColor = Color.FromArgb(255, 0, 255);
+
+            font = new SdlDotNet.Graphics.Font(@"Arial.ttf", 20);
+
         }
 
 
@@ -172,12 +176,22 @@ namespace RogueBasin
 
         public void PrintStringRect(string msg, int x, int y, int width, int height, libtcodWrapper.LineAlignment alignment, Color color)
         {
-
+            PrintString(msg, x, y, alignment, color);
         }
 
         public void PrintString(string msg, int x, int y, libtcodWrapper.LineAlignment alignment, Color color)
         {
+            // Create the Font Surfaces
+            Surface fontSurface = font.Render(msg, Color.White);
 
+            //Screen real coords
+            int screenX = x * spriteSheetWidth;
+            int screenY = y * spriteSheetHeight;
+
+            LogFile.Log.LogEntry("Drawing string " + msg + screenX + "/" + screenY);
+
+            videoSurface.Blit(fontSurface,
+                            new System.Drawing.Point(screenX, screenY));
         }
 
         public void ClearRect(int x, int y, int width, int height)

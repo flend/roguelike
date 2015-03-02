@@ -18,12 +18,10 @@ namespace TraumaRL
         /// </summary>
         Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping;
 
-        //List<RoomTemplate> roomTemplates = new List<RoomTemplate>();
-        //List<RoomTemplate> corridorTemplates = new List<RoomTemplate>();
-
         List<int> allReplaceableVaults;
 
-        ConnectivityMap connectivityMap;
+        //For development, skip making most of the levels
+        bool quickLevelGen = true;
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
@@ -367,14 +365,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return generator.PotentialDoors[Game.Random.Next(generator.PotentialDoors.Count())];
         }
 
-        public ConnectivityMap ConnectivityMap
-        {
-            get
-            {
-                return connectivityMap;
-            }
-        }
-
         public ConnectivityMap LevelLinks { get { return levelLinks; } }
 
         public static Dictionary<int, string> LevelNaming { get { return levelNaming; } }
@@ -391,33 +381,35 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Player starts in medical which links to the lower atrium
             levelLinks.AddRoomConnection(new Connection(medicalLevel, lowerAtriumLevel));
-            
-            var standardLowerLevels = new List<int> { scienceLevel, storageLevel, flightDeck, arcologyLevel, commercialLevel };
 
-            //3 of these branch from the lower atrium
-            var directLinksFromLowerAtrium = standardLowerLevels.RandomElements(3);
-
-            foreach (var level in directLinksFromLowerAtrium)
-                levelLinks.AddRoomConnection(lowerAtriumLevel, level);
-
-            //The remainder branch from other levels (except the arcology)
-            var leafLevels = directLinksFromLowerAtrium.Select(x => x);
-            leafLevels = leafLevels.Except(new List<int> { arcologyLevel });
-
-            var allLowerLevelsToPlace = standardLowerLevels.Except(directLinksFromLowerAtrium).Union(new List<int> { reactorLevel });
-            foreach (var level in allLowerLevelsToPlace)
+            if (!quickLevelGen)
             {
-                levelLinks.AddRoomConnection(leafLevels.RandomElement(), level);
-            }
+                var standardLowerLevels = new List<int> { scienceLevel, storageLevel, flightDeck, arcologyLevel, commercialLevel };
 
-            //Bridge and computer core are also leaves
-            var allLaterLevels = standardLowerLevels.Except(directLinksFromLowerAtrium);
-            var finalLevelsToPlace = new List<int> { computerCoreLevel, bridgeLevel };
-            foreach (var level in finalLevelsToPlace)
-            {
-                levelLinks.AddRoomConnection(allLaterLevels.RandomElement(), level);
-            }
+                //3 of these branch from the lower atrium
+                var directLinksFromLowerAtrium = standardLowerLevels.RandomElements(3);
 
+                foreach (var level in directLinksFromLowerAtrium)
+                    levelLinks.AddRoomConnection(lowerAtriumLevel, level);
+
+                //The remainder branch from other levels (except the arcology)
+                var leafLevels = directLinksFromLowerAtrium.Select(x => x);
+                leafLevels = leafLevels.Except(new List<int> { arcologyLevel });
+
+                var allLowerLevelsToPlace = standardLowerLevels.Except(directLinksFromLowerAtrium).Union(new List<int> { reactorLevel });
+                foreach (var level in allLowerLevelsToPlace)
+                {
+                    levelLinks.AddRoomConnection(leafLevels.RandomElement(), level);
+                }
+
+                //Bridge and computer core are also leaves
+                var allLaterLevels = standardLowerLevels.Except(directLinksFromLowerAtrium);
+                var finalLevelsToPlace = new List<int> { computerCoreLevel, bridgeLevel };
+                foreach (var level in finalLevelsToPlace)
+                {
+                    levelLinks.AddRoomConnection(allLaterLevels.RandomElement(), level);
+                }
+            }
             gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
 
             //Calculate some data about the levels
@@ -454,181 +446,185 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             public Dictionary<MapTerrain, List<MapTerrain>> TerrainMapping { get; set; }
         }
 
+
         /** Build a map using templated rooms */
         public MapInfo GenerateTraumaLevels(bool retry)
         {
             //We catch exceptions on generation and keep looping
             MapInfo mapInfo;
-            
-                //Reset shared state
-                placedClues = new HashSet<Clue>();
-                placedDoors = new HashSet<Door>();
-                placedObjectives = new HashSet<Objective>();
-                usedColors = new List<Tuple<System.Drawing.Color, string>>();
 
-                    //Generate the overall level structure
-                    GenerateLevelLinks();
+            //Reset shared state
+            placedClues = new HashSet<Clue>();
+            placedDoors = new HashSet<Door>();
+            placedObjectives = new HashSet<Objective>();
+            usedColors = new List<Tuple<System.Drawing.Color, string>>();
 
-                    //Build each level individually
+            //Generate the overall level structure
+            GenerateLevelLinks();
 
-                    Dictionary<int, LevelInfo> levelInfo = new Dictionary<int, LevelInfo>();
+            //Build each level individually
 
-                    var medicalInfo = GenerateMedicalLevel(medicalLevel);
-                    levelInfo[medicalLevel] = medicalInfo;
+            Dictionary<int, LevelInfo> levelInfo = new Dictionary<int, LevelInfo>();
 
-                    var scienceInfo = GenerateScienceLevel(scienceLevel, scienceLevel * 100);
-                    levelInfo[scienceLevel] = scienceInfo;
+            var medicalInfo = GenerateMedicalLevel(medicalLevel);
+            levelInfo[medicalLevel] = medicalInfo;
+            if (!quickLevelGen)
+            {
+                var scienceInfo = GenerateScienceLevel(scienceLevel, scienceLevel * 100);
+                levelInfo[scienceLevel] = scienceInfo;
 
-                    var bridgeInfo = GenerateBridgeLevel(bridgeLevel, bridgeLevel * 100);
-                    levelInfo[bridgeLevel] = bridgeInfo;
+                var bridgeInfo = GenerateBridgeLevel(bridgeLevel, bridgeLevel * 100);
+                levelInfo[bridgeLevel] = bridgeInfo;
 
-                    var storageInfo = GenerateStorageLevel(storageLevel, storageLevel * 100);
-                    levelInfo[storageLevel] = storageInfo;
+                var storageInfo = GenerateStorageLevel(storageLevel, storageLevel * 100);
+                levelInfo[storageLevel] = storageInfo;
 
-                    var flightInfo = GenerateFlightDeckLevel(flightDeck, flightDeck * 100);
-                    levelInfo[flightDeck] = flightInfo;
+                var flightInfo = GenerateFlightDeckLevel(flightDeck, flightDeck * 100);
+                levelInfo[flightDeck] = flightInfo;
 
-                    var reactorInfo = GenerateReactorLevel(reactorLevel, reactorLevel * 100);
-                    levelInfo[reactorLevel] = reactorInfo;
+                var reactorInfo = GenerateReactorLevel(reactorLevel, reactorLevel * 100);
+                levelInfo[reactorLevel] = reactorInfo;
 
-                    var computerInfo = GenerateComputerCoreLevel(computerCoreLevel, computerCoreLevel * 100);
-                    levelInfo[computerCoreLevel] = computerInfo;
+                var computerInfo = GenerateComputerCoreLevel(computerCoreLevel, computerCoreLevel * 100);
+                levelInfo[computerCoreLevel] = computerInfo;
 
-                    var archologyInfo = GenerateArcologyLevel(arcologyLevel, arcologyLevel * 100);
-                    levelInfo[arcologyLevel] = archologyInfo;
+                var archologyInfo = GenerateArcologyLevel(arcologyLevel, arcologyLevel * 100);
+                levelInfo[arcologyLevel] = archologyInfo;
 
-                    var commercialInfo = GenerateCommercialLevel(commercialLevel, commercialLevel * 100);
-                    levelInfo[commercialLevel] = commercialInfo;
+                var commercialInfo = GenerateCommercialLevel(commercialLevel, commercialLevel * 100);
+                levelInfo[commercialLevel] = commercialInfo;
+            }
+            //Make other levels generically
 
-                    //Make other levels generically
+            //var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel });
 
-                    var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel });
+            var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel });
 
-                    foreach (var level in standardGameLevels)
+            foreach (var level in standardGameLevels)
+            {
+                var thisLevelInfo = GenerateStandardLevel(level, level * 100);
+                levelInfo[level] = thisLevelInfo;
+            }
+
+            //Build the room graph containing all levels
+
+            //Build and add the start level
+
+            var mapInfoBuilder = new MapInfoBuilder();
+            var startRoom = 0;
+            var startLevelInfo = levelInfo[medicalLevel];
+            mapInfoBuilder.AddConstructedLevel(medicalLevel, startLevelInfo.LevelGenerator.ConnectivityMap, startLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
+                startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
+
+            //Build and add each connected level
+            //Needs to be done in DFS fashion so we don't add the same level twice
+
+            var levelsAdded = new HashSet<int> { medicalLevel };
+
+            MapModel levelModel = new MapModel(levelLinks, medicalLevel);
+            var vertexDFSOrder = levelModel.GraphNoCycles.mapMST.verticesInDFSOrder;
+
+            foreach (var level in vertexDFSOrder)
+            {
+                var thisLevel = level;
+                var thisLevelInfo = levelInfo[level];
+
+                //Since links to other levels are bidirectional, ensure we only add each level once
+                foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
+                {
+                    var otherLevel = connectionToOtherLevel.Key;
+                    var otherLevelInfo = levelInfo[otherLevel];
+
+                    var thisLevelElevator = connectionToOtherLevel.Value.Target;
+                    var otherLevelElevator = otherLevelInfo.ConnectionsToOtherLevels[thisLevel].Target;
+
+                    var levelConnection = new Connection(thisLevelElevator, otherLevelElevator);
+
+                    if (!levelsAdded.Contains(otherLevel))
                     {
-                        var thisLevelInfo = GenerateStandardLevel(level, level * 100);
-                        levelInfo[level] = thisLevelInfo;
+                        mapInfoBuilder.AddConstructedLevel(otherLevel, otherLevelInfo.LevelGenerator.ConnectivityMap, otherLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
+                        otherLevelInfo.LevelGenerator.GetDoorsInMapCoords(), levelConnection);
+
+                        LogFile.Log.LogEntryDebug("Adding level connection " + thisLevelInfo.LevelNo + ":" + connectionToOtherLevel.Key + " via nodes" +
+                            thisLevelElevator + "->" + otherLevelElevator, LogDebugLevel.Medium);
+
+                        levelsAdded.Add(otherLevel);
                     }
+                }
+            }
 
-                    //Build the room graph containing all levels
+            mapInfo = new MapInfo(mapInfoBuilder);
 
-                    //Build and add the start level
+            //Add maps to the dungeon (must be ordered)
+            foreach (var kv in levelInfo.OrderBy(kv => kv.Key))
+            {
+                var thisLevelInfo = kv.Value;
 
-                    var mapInfoBuilder = new MapInfoBuilder();
-                    var startRoom = 0;
-                    var startLevelInfo = levelInfo[medicalLevel];
-                    mapInfoBuilder.AddConstructedLevel(medicalLevel, startLevelInfo.LevelGenerator.ConnectivityMap, startLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                        startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
+                Map masterMap = thisLevelInfo.LevelBuilder.MergeTemplatesIntoMap(terrainMapping);
 
-                    //Build and add each connected level
-                    //Needs to be done in DFS fashion so we don't add the same level twice
+                Dictionary<MapTerrain, List<MapTerrain>> terrainSubstitution = brickTerrainMapping;
+                if (thisLevelInfo.TerrainMapping != null)
+                    terrainSubstitution = thisLevelInfo.TerrainMapping;
 
-                    var levelsAdded = new HashSet<int> { medicalLevel };
+                Map randomizedMapL1 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMap, terrainSubstitution);
+                Game.Dungeon.AddMap(randomizedMapL1);
+            }
 
-                    MapModel levelModel = new MapModel(levelLinks, medicalLevel);
-                    var vertexDFSOrder = levelModel.GraphNoCycles.mapMST.verticesInDFSOrder;
+            //Set player's start location (must be done before adding items)
 
-                    foreach (var level in vertexDFSOrder)
-                    {
-                        var thisLevel = level;
-                        var thisLevelInfo = levelInfo[level];
+            var firstRoom = mapInfo.GetRoom(0);
+            Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
-                        //Since links to other levels are bidirectional, ensure we only add each level once
-                        foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
-                        {
-                            var otherLevel = connectionToOtherLevel.Key;
-                            var otherLevelInfo = levelInfo[otherLevel];
+            //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
+            allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
 
-                            var thisLevelElevator = connectionToOtherLevel.Value.Target;
-                            var otherLevelElevator = otherLevelInfo.ConnectionsToOtherLevels[thisLevel].Target;
+            //Set maps in engine (needs to be done before placing items and monsters)
+            SetupMapsInEngine();
 
-                            var levelConnection = new Connection(thisLevelElevator, otherLevelElevator);
+            //Add elevator features to link the maps
+            if (!quickLevelGen)
+                AddElevatorFeatures(mapInfo, levelInfo);
 
-                            if (!levelsAdded.Contains(otherLevel))
-                            {
-                                mapInfoBuilder.AddConstructedLevel(otherLevel, otherLevelInfo.LevelGenerator.ConnectivityMap, otherLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                                otherLevelInfo.LevelGenerator.GetDoorsInMapCoords(), levelConnection);
+            //Generate quests at mapmodel level
+            if (!quickLevelGen)
+                GenerateQuests(mapInfo, levelInfo);
 
-                                LogFile.Log.LogEntryDebug("Adding level connection " + thisLevelInfo.LevelNo + ":" + connectionToOtherLevel.Key + " via nodes" +
-                                    thisLevelElevator + "->" + otherLevelElevator, LogDebugLevel.Medium);
+            //Place loot
+            CalculateLevelDifficulty();
 
-                                levelsAdded.Add(otherLevel);
-                            }
-                        }
-                    }
+            if (!quickLevelGen)
+                PlaceLootInArmory(mapInfo, levelInfo);
 
-                    mapInfo = new MapInfo(mapInfoBuilder);
+            if (!quickLevelGen)
+                AddGoodyQuestLogClues(mapInfo, levelInfo);
 
-                    //Add maps to the dungeon (must be ordered)
-                    foreach (var kv in levelInfo.OrderBy(kv => kv.Key))
-                    {
-                        var thisLevelInfo = kv.Value;
+            //Add non-interactable features
+            AddDecorationFeatures(mapInfo, levelInfo);
 
-                        Map masterMap = thisLevelInfo.LevelBuilder.MergeTemplatesIntoMap(terrainMapping);
+            //Add monsters
+            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
 
-                        Dictionary<MapTerrain, List<MapTerrain>> terrainSubstitution = brickTerrainMapping;
-                        if (thisLevelInfo.TerrainMapping != null)
-                            terrainSubstitution = thisLevelInfo.TerrainMapping;
+            //Check we are solvable
+            var graphSolver = new GraphSolver(mapInfo.Model);
+            if (!graphSolver.MapCanBeSolved())
+            {
+                LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
+                throw new ApplicationException("It's all over - map can't be solved.");
+            }
+            else
+            {
+                LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
+            }
 
-                        Map randomizedMapL1 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMap, terrainSubstitution);
-                        Game.Dungeon.AddMap(randomizedMapL1);
-                    }
+            if (!CheckItemRouteability())
+            {
+                throw new ApplicationException("Item is not connected to elevator, aborting.");
+            }
 
-                    //Set player's start location (must be done before adding items)
-
-                    var firstRoom = mapInfo.GetRoom(0);
-                    Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
-                    
-                    //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
-                    allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
-
-                    //Set maps in engine (needs to be done before placing items and monsters)
-                    SetupMapsInEngine();
-
-                    //Add elevator features to link the maps
-                    AddElevatorFeatures(mapInfo, levelInfo);
-
-                    //Generate quests at mapmodel level
-                    GenerateQuests(mapInfo, levelInfo);
-
-                    //Place loot
-                    CalculateLevelDifficulty();
-                    PlaceLootInArmory(mapInfo, levelInfo);
-
-                    AddGoodyQuestLogClues(mapInfo, levelInfo);
-                    //Add clues and locks at dungeon engine level
-                    //AddSimpleCluesAndLocks(mapInfo);
-
-                    //Add non-interactable features
-                    AddDecorationFeatures(mapInfo, levelInfo);
-                    //var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
-                    //AddStandardDecorativeFeaturesToRoom(escapePodsLevel, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
-
-                    //Add monsters
-                    Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
-
-                    //Check we are solvable
-                    var graphSolver = new GraphSolver(mapInfo.Model);
-                    if (!graphSolver.MapCanBeSolved())
-                    {
-                        LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
-                        throw new ApplicationException("It's all over - map can't be solved.");
-                    }
-                    else
-                    {
-                        LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
-                    }
-
-                    if (!CheckItemRouteability())
-                    {
-                        throw new ApplicationException("Item is not connected to elevator, aborting.");
-                    }
-
-                    if (retry)
-                    {
-                        throw new ApplicationException("It happened!");
-                    }
-
+            if (retry)
+            {
+                throw new ApplicationException("It happened!");
+            }
 
             return mapInfo;
         }
