@@ -193,8 +193,8 @@ namespace RogueBasin
 
                 //do
                // {
-                    //var inputResult = UserInput();
-                    //timeAdvances = inputResult.Item1;
+                    var inputResult = UserInput(args);
+                    timeAdvances = inputResult.Item1;
                     //centreOnPC = inputResult.Item2;
 
                 //} while (!timeAdvances);
@@ -430,15 +430,13 @@ namespace RogueBasin
 
         //Deal with user input
         //Return code is if the command was successful and time increments (i.e. the player has done a time-using command like moving)
-        private Tuple<bool, bool> UserInput()
+        private Tuple<bool, bool> UserInput(KeyboardEventArgs args)
         {
             bool timeAdvances = false;
             bool centreOnPC = true;
 
             try
             {
-                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
-
                 //Each state has different keys
 
                 switch (inputState)
@@ -449,19 +447,18 @@ namespace RogueBasin
 
                         bool functionPressed = false;
 
-                        if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                        {
-                            char keyCode = (char)userKey.Character;
-
-                            functionPressed = true;
-                            switch (keyCode)
-                            {
-                                default:
-                                    functionPressed = false;
-                                    //This allows us to collect keypresses
+                        if(args.Mod == ModifierKeys.ShiftKeys) {
+                            switch (args.Key) {
+                                
+                               case Key.F:
+                                    //Full screen switch
+                                    timeAdvances = false;
+                                    RootConsole rootConsole = RootConsole.GetInstance();
+                                    rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
+                                    rootConsole.Flush();
                                     break;
 
-                                case 'Q':
+                               case Key.Q:
                                     //Exit from game
                                     bool response = Screen.Instance.YesNoQuestion("Really quit?");
                                     if (response == true)
@@ -472,15 +469,38 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                     break;
 
-                                case 'F':
-                                    //Full screen switch
+
+                               case Key.M:
+                                    SetMsgHistoryScreen();
+                                    Screen.Instance.Update();
+                                    DisableMsgHistoryScreen();
+                                    Screen.Instance.Update();
                                     timeAdvances = false;
-                                    RootConsole rootConsole = RootConsole.GetInstance();
-                                    rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
-                                    rootConsole.Flush();
                                     break;
 
-                                case 'f':
+                               case Key.C:
+                                    SetClueScreen();
+                                    Screen.Instance.Update();
+                                    DisableClueScreen();
+                                    Screen.Instance.Update();
+                                    timeAdvances = false;
+                                    break;
+
+                               case Key.L:
+                                    SetLogScreen();
+                                    Screen.Instance.Update();
+                                    DisableLogScreen();
+                                    Screen.Instance.Update();
+                                    timeAdvances = false;
+                                    break;
+                            }
+                        }
+
+                        if(args.Mod == ModifierKeys.None) {
+
+                            switch (args.Key)
+                            {
+                                case Key.F:
                                     //Fire weapon
                                     if (Game.Dungeon.Player.GetEquippedWeapon() == null)
                                         break;
@@ -504,7 +524,7 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case 'x':
+                                case Key.X:
                                     //Examine
                                     timeAdvances = Examine(false);
                                     if (!timeAdvances)
@@ -513,45 +533,127 @@ namespace RogueBasin
                                         SpecialMoveNonMoveAction();
                                     break;
 
-                                case '.':
+                                case Key.Period:
                                     // Do nothing
                                     timeAdvances = DoNothing();
                                     // Don't recentre - useful for viewing
                                     centreOnPC = false;
                                     break;
 
-                                case 'M':
-                                    SetMsgHistoryScreen();
-                                    Screen.Instance.Update();
-                                    DisableMsgHistoryScreen();
-                                    Screen.Instance.Update();
-                                    timeAdvances = false;
-                                    break;
-
-                                case 'C':
-                                    SetClueScreen();
-                                    Screen.Instance.Update();
-                                    DisableClueScreen();
-                                    Screen.Instance.Update();
-                                    timeAdvances = false;
-                                    break;
-
-
-                                case 'L':
-                                    SetLogScreen();
-                                    Screen.Instance.Update();
-                                    DisableLogScreen();
-                                    Screen.Instance.Update();
-                                    timeAdvances = false;
-                                    break;
-
-                                case '?':
+                                case Key.QuestionMark:
                                     Screen.Instance.PlayMovie("helpkeys", true);
                                     timeAdvances = false;
                                     break;
+                            }
+                        }
+
+                        
+                                    if (Game.Config.DebugMode)
+                                    {
+                                        if(args.Mod == ModifierKeys.ShiftKeys) {
+                                        switch (args.Key)
+                                        {
+                                            //Debug events
 
 
+                                            case Key.X:
+                                                //Examine
+                                                timeAdvances = Examine(true);
+                                                if (!timeAdvances)
+                                                    Screen.Instance.Update();
+                                                if (timeAdvances)
+                                                    SpecialMoveNonMoveAction();
+                                                break;
 
+                                            case Key.R:
+                                                //Reload
+                                                Game.Dungeon.Player.RefillWeapons();
+                                                Screen.Instance.Update();
+                                                break;
+
+                                            case Key.K:
+                                                if (!Game.Dungeon.AllLocksOpen)
+                                                {
+                                                    Game.Dungeon.AllLocksOpen = true;
+                                                    Game.MessageQueue.AddMessage("All locks are now open.");
+                                                }
+                                                else
+                                                {
+                                                    Game.Dungeon.AllLocksOpen = false;
+                                                    Game.MessageQueue.AddMessage("All locks are now in their normal state.");
+                                                }
+                                                Screen.Instance.Update();
+                                                break;
+
+
+                                            case Key.N:
+                                                //screen numbering
+                                                Screen.Instance.CycleRoomNumbering();
+                                                Screen.Instance.Update();
+                                                break;
+
+                                            case Key.W:
+                                                //screen debug mode
+                                                Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
+                                                Screen.Instance.Update();
+                                                break;
+
+                                            case Key.V:
+                                                //screen debug mode
+                                                Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
+                                                Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
+                                                Screen.Instance.Update();
+                                                break;
+
+                                            case Key.Y:
+                                                //next mission
+                                                Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
+                                                timeAdvances = true;
+                                                break;
+
+                                            case Key.G:
+                                                //last mission
+                                                Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
+                                                timeAdvances = true;
+                                                break;
+
+                                            case Key.J:
+                                                //change debug level
+                                                LogFile.Log.DebugLevel += 1;
+                                                if (LogFile.Log.DebugLevel > 3)
+                                                    LogFile.Log.DebugLevel = 1;
+
+                                                LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
+
+                                                break;
+
+                                            case Key.C:
+                                                //Add a healing event on the player
+                                                Game.Dungeon.Player.HealCompletely();
+                                                Game.Dungeon.Player.FullAmmo();
+                                                Screen.Instance.Update();
+                                                break;
+
+                                            case Key.B:
+                                                Game.Dungeon.Player.GiveAllWeapons(1);
+                                                Game.Dungeon.Player.GiveAllWetware(1);
+                                                Screen.Instance.Update();
+                                                break;
+
+                                            case Key.H:
+                                                Game.Dungeon.Player.GiveAllWeapons(1);
+                                                Game.Dungeon.Player.GiveAllWetware(2);
+                                                Screen.Instance.Update();
+                                                break;
+
+                                            case Key.U:
+                                                Game.Dungeon.Player.GiveAllWeapons(2);
+                                                Game.Dungeon.Player.GiveAllWetware(3);
+                                                Screen.Instance.Update();
+                                                break;
+                                        }
+                                        }
+                                    }
 
 
                                 //OLD EVENTS
@@ -896,118 +998,10 @@ namespace RogueBasin
                                 UpdateScreen();
                                 break;
                                 */
-                            }
-
-                            if (Game.Config.DebugMode)
-                            {
-                                switch (keyCode)
-                                {
-                                    //Debug events
-
-
-                                    case 'X':
-                                        //Examine
-                                        timeAdvances = Examine(true);
-                                        if (!timeAdvances)
-                                            Screen.Instance.Update();
-                                        if (timeAdvances)
-                                            SpecialMoveNonMoveAction();
-                                        break;
-
-                                    case 'R':
-                                        //Reload
-                                        Game.Dungeon.Player.RefillWeapons();
-                                        Screen.Instance.Update();
-                                        break;
-
-                                    case 'K':
-                                        if (!Game.Dungeon.AllLocksOpen)
-                                        {
-                                            Game.Dungeon.AllLocksOpen = true;
-                                            Game.MessageQueue.AddMessage("All locks are now open.");
-                                        }
-                                        else
-                                        {
-                                            Game.Dungeon.AllLocksOpen = false;
-                                            Game.MessageQueue.AddMessage("All locks are now in their normal state.");
-                                        }
-                                        Screen.Instance.Update();
-                                        break;
-
-
-                                    case 'N':
-                                        //screen numbering
-                                        Screen.Instance.CycleRoomNumbering();
-                                        Screen.Instance.Update();
-                                        break;
-
-                                    case 'W':
-                                        //screen debug mode
-                                        Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
-                                        Screen.Instance.Update();
-                                        break;
-
-                                    case 'V':
-                                        //screen debug mode
-                                        Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
-                                        Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
-                                        Screen.Instance.Update();
-                                        break;
-
-                                    case 'Y':
-                                        //next mission
-                                        Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
-                                        timeAdvances = true;
-                                        break;
-
-                                    case 'G':
-                                        //last mission
-                                        Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
-                                        timeAdvances = true;
-                                        break;
-
-                                    case 'J':
-                                        //change debug level
-                                        LogFile.Log.DebugLevel += 1;
-                                        if (LogFile.Log.DebugLevel > 3)
-                                            LogFile.Log.DebugLevel = 1;
-
-                                        LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
-
-                                        break;
-
-                                    case 'v':
-                                        //Add a healing event on the player
-                                        Game.Dungeon.Player.HealCompletely();
-                                        Game.Dungeon.Player.FullAmmo();
-                                        Screen.Instance.Update();
-                                        break;
-
-                                    case 'B':
-                                        Game.Dungeon.Player.GiveAllWeapons(1);
-                                        Game.Dungeon.Player.GiveAllWetware(1);
-                                        Screen.Instance.Update();
-                                        break;
-
-                                    case 'H':
-                                        Game.Dungeon.Player.GiveAllWeapons(1);
-                                        Game.Dungeon.Player.GiveAllWetware(2);
-                                        Screen.Instance.Update();
-                                        break;
-
-                                    case 'U':
-                                        Game.Dungeon.Player.GiveAllWeapons(2);
-                                        Game.Dungeon.Player.GiveAllWetware(3);
-                                        Screen.Instance.Update();
-                                        break;
-                                }
-                            }
-                        }
 
                         //Handle wetware
-                        if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                        {
-                            char keyCode = (char)userKey.Character;
+
+                            char keyCode = args.KeyboardCharacter[0];
 
                             foreach (var kv in ItemMapping.WetwareMapping)
                             {
@@ -1031,10 +1025,10 @@ namespace RogueBasin
                                     break;
                                 }
                             }
-                        }
+                        
 
                         //Handle weapons
-                        int numberPressed = GetNumberFromNonKeypadKeyPress(userKey);
+                        int numberPressed = GetNumberFromNonKeypadKeyPress(args);
                         if (numberPressed != -1)
                         {
                             foreach (var kv in ItemMapping.WeaponMapping)
@@ -1042,9 +1036,9 @@ namespace RogueBasin
                                 if (numberPressed == kv.Key)
                                 {
                                     timeAdvances = Game.Dungeon.Player.EquipInventoryItemType(kv.Value);
-                                    functionPressed = true;
+                                    //functionPressed = true;
                                     //Just update the screen each time
-                                    Screen.Instance.Update();
+                                    //Screen.Instance.Update();
                                     break;
                                 }
                             }
@@ -1052,18 +1046,18 @@ namespace RogueBasin
 
                         //Handle direction keys (both arrows and vi keys)
 
-                        if (!functionPressed)
-                        {
+                        ////if (!functionPressed)
+                      //  {
                             Point direction = new Point(9, 9);
                             KeyModifier mod = KeyModifier.Arrow;
-                            bool wasDirection = GetDirectionFromKeypress(userKey, out direction, out mod);
+                            bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
 
                             if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi))
                             {
                                 timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
                             }
 
-                            if (wasDirection && mod == KeyModifier.Arrow && !userKey.Shift)
+                            if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod == ModifierKeys.ShiftKeys))
                             {
                                 Screen.Instance.ViewportScrollSpeed = 4;
                                 Screen.Instance.ScrollViewport(direction);
@@ -1072,7 +1066,7 @@ namespace RogueBasin
 
                             if (Game.Config.DebugMode)
                             {
-                                if (wasDirection && mod == KeyModifier.Arrow && userKey.Shift)
+                                if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod == ModifierKeys.ShiftKeys))
                                 {
                                     if (direction == new Point(0, -1))
                                         ScreenLevelUp();
@@ -1083,13 +1077,14 @@ namespace RogueBasin
                                     Screen.Instance.Update();
                                 }
                             }
-                        }
+                      //  }
 
                         break;
 
                     //Inventory is displayed
                     case InputState.InventoryShow:
-
+                        break;
+                /*
                         if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                         {
                             char keyCode = (char)userKey.Character;
@@ -1103,8 +1098,8 @@ namespace RogueBasin
                                 timeAdvances = false;
                             }
                         }
-
-                        break;
+                */
+                        
                 }
             }
             catch (Exception ex)
@@ -1420,9 +1415,9 @@ namespace RogueBasin
         private bool GetDirectionKeypress(out Point direction, out KeyModifier mod)
         {
             //Get direction
-            KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
+            //KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
 
-            if (GetDirectionFromKeypress(userKey, out direction, out mod))
+            if (GetDirectionFromKeypress(null, out direction, out mod))
             {
                 return true;
             }
@@ -1436,39 +1431,39 @@ namespace RogueBasin
             Arrow
         }
 
-        private int GetNumberFromNonKeypadKeyPress(KeyPress userKey)
+        private int GetNumberFromNonKeypadKeyPress(KeyboardEventArgs args)
         {
-            switch (userKey.KeyCode)
-                {
-                    case KeyCode.TCODK_0:
-                        return 0;
+            switch (args.Key)
+            {
+                case Key.Zero:
+                    return 0;
 
-                    case KeyCode.TCODK_1:
-                        return 1;
+                case Key.One:
+                    return 1;
 
-                    case KeyCode.TCODK_2:
-                        return 2;
+                case Key.Two:
+                    return 2;
 
-                    case KeyCode.TCODK_3:
-                        return 3;
+                case Key.Three:
+                    return 3;
 
-                    case KeyCode.TCODK_4:
-                        return 4;
+                case Key.Four:
+                    return 4;
 
-                    case KeyCode.TCODK_5:
-                        return 5;
+                case Key.Five:
+                    return 5;
 
-                    case KeyCode.TCODK_6:
-                        return 6;
+                case Key.Six:
+                    return 6;
 
-                    case KeyCode.TCODK_7:
-                        return 7;
+                case Key.Seven:
+                    return 7;
 
-                    case KeyCode.TCODK_8:
-                        return 8;
+                case Key.Eight:
+                    return 8;
 
-                    case KeyCode.TCODK_9:
-                        return 9;
+                case Key.Nine:
+                    return 9;
             }
 
             return -1;
@@ -1479,129 +1474,123 @@ namespace RogueBasin
         /// </summary>
         /// <param name="direction"></param>
         /// <returns></returns>
-        private bool GetDirectionFromKeypress(KeyPress userKey, out Point direction, out KeyModifier mod) {
+        private bool GetDirectionFromKeypress(KeyboardEventArgs args, out Point direction, out KeyModifier mod)
+        {
 
             direction = new Point(9, 9);
             mod = KeyModifier.Arrow;
-            
+
             //Vi keys for directions
-
-            if (userKey.KeyCode == KeyCode.TCODK_CHAR)
+            switch (args.Key)
             {
-                char keyCode = (char)userKey.Character;
-                switch (keyCode)
-                {
-                    case 'b':
-                        direction = new Point(-1, 1);
-                        mod = KeyModifier.Vi;
-                        break;
+                case Key.B:
+                    direction = new Point(-1, 1);
+                    mod = KeyModifier.Vi;
+                    break;
 
-                    case 'n':
-                        direction = new Point(1, 1);
-                        mod = KeyModifier.Vi;
-                        break;
+                case Key.N:
+                    direction = new Point(1, 1);
+                    mod = KeyModifier.Vi;
+                    break;
 
-                    case 'y':
-                        direction = new Point(-1, -1);
-                        mod = KeyModifier.Vi;
-                        break;
+                case Key.Y:
+                    direction = new Point(-1, -1);
+                    mod = KeyModifier.Vi;
+                    break;
 
-                    case 'u':
-                        direction = new Point(1, -1);
-                        mod = KeyModifier.Vi;
-                        break;
+                case Key.U:
+                    direction = new Point(1, -1);
+                    mod = KeyModifier.Vi;
+                    break;
 
-                    case 'h':
-                        direction = new Point(-1, 0);
-                        mod = KeyModifier.Vi;
-                        break;
+                case Key.H:
+                    direction = new Point(-1, 0);
+                    mod = KeyModifier.Vi;
+                    break;
 
-                    case 'l':
-                        direction = new Point(1, 0);
-                        mod = KeyModifier.Vi;
-                        break;
+                case Key.L:
+                    direction = new Point(1, 0);
+                    mod = KeyModifier.Vi;
+                    break;
 
-                    case 'k':
-                        direction = new Point(0, -1);
-                        mod = KeyModifier.Vi;
-                        break;
+                case Key.K:
+                    direction = new Point(0, -1);
+                    mod = KeyModifier.Vi;
+                    break;
 
-                    case 'j':
-                        direction = new Point(0, 1);
-                        mod = KeyModifier.Vi;
-                        break;
-                }
-            }
-            else
-            {
+                case Key.J:
+                    direction = new Point(0, 1);
+                    mod = KeyModifier.Vi;
+                    break;
+
+
                 //Arrow keys for directions
 
-                switch (userKey.KeyCode)
-                {
-                    case KeyCode.TCODK_KP1:
-                        direction = new Point(-1, 1);
-                        mod = KeyModifier.Numeric;
-                        break;
 
-                    case KeyCode.TCODK_KP3:
-                        direction = new Point(1, 1);
-                        mod = KeyModifier.Numeric;
-                        break;
+                case Key.Keypad1:
+                    direction = new Point(-1, 1);
+                    mod = KeyModifier.Numeric;
+                    break;
 
-                    case KeyCode.TCODK_KPDEC:
-                        direction = new Point(0, 0);
-                        mod = KeyModifier.Arrow;
-                        break;
+                case Key.Keypad3:
+                    direction = new Point(1, 1);
+                    mod = KeyModifier.Numeric;
+                    break;
 
-                    case KeyCode.TCODK_KP5:
-                        direction = new Point(0, 0);
-                        mod = KeyModifier.Numeric;
-                        break;
+                case Key.KeypadPeriod:
+                    direction = new Point(0, 0);
+                    mod = KeyModifier.Arrow;
+                    break;
 
-                    case KeyCode.TCODK_KP7:
-                        direction = new Point(-1, -1);
-                        mod = KeyModifier.Numeric;
-                        break;
-                    case KeyCode.TCODK_KP9:
-                        direction = new Point(1, -1);
-                        mod = KeyModifier.Numeric;
-                        break;
+                case Key.Keypad5:
+                    direction = new Point(0, 0);
+                    mod = KeyModifier.Numeric;
+                    break;
 
-                    case KeyCode.TCODK_LEFT:
-                        direction = new Point(-1, 0);
-                        mod = KeyModifier.Arrow;
-                        break;
+                case Key.Keypad7:
+                    direction = new Point(-1, -1);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.Keypad9:
+                    direction = new Point(1, -1);
+                    mod = KeyModifier.Numeric;
+                    break;
 
-                    case KeyCode.TCODK_KP4:
-                        direction = new Point(-1, 0);
-                        mod = KeyModifier.Numeric;
-                        break;
-                    case KeyCode.TCODK_RIGHT:
-                        direction = new Point(1, 0);
-                        mod = KeyModifier.Arrow;
-                        break;
-                    case KeyCode.TCODK_KP6:
-                        direction = new Point(1, 0);
-                        mod = KeyModifier.Numeric;
-                        break;
-                    case KeyCode.TCODK_UP:
-                        direction = new Point(0, -1);
-                        mod = KeyModifier.Arrow;
-                        break;
-                    case KeyCode.TCODK_KP8:
-                        direction = new Point(0, -1);
-                        mod = KeyModifier.Numeric;
-                        break;
-                    case KeyCode.TCODK_KP2:
-                        direction = new Point(0, 1);
-                        mod = KeyModifier.Numeric;
-                        break;
-                    case KeyCode.TCODK_DOWN:
-                        direction = new Point(0, 1);
-                        mod = KeyModifier.Arrow;
-                        break;
-                }
+                case Key.LeftArrow:
+                    direction = new Point(-1, 0);
+                    mod = KeyModifier.Arrow;
+                    break;
+
+                case Key.Keypad4:
+                    direction = new Point(-1, 0);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.RightArrow:
+                    direction = new Point(1, 0);
+                    mod = KeyModifier.Arrow;
+                    break;
+                case Key.Keypad6:
+                    direction = new Point(1, 0);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.UpArrow:
+                    direction = new Point(0, -1);
+                    mod = KeyModifier.Arrow;
+                    break;
+                case Key.Keypad8:
+                    direction = new Point(0, -1);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.Keypad2:
+                    direction = new Point(0, 1);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.DownArrow:
+                    direction = new Point(0, 1);
+                    mod = KeyModifier.Arrow;
+                    break;
             }
+
             //Not valid
             if (direction == new Point(9, 9))
                 return false;
@@ -2425,14 +2414,14 @@ namespace RogueBasin
             do
             {
                 //Get direction from the user or 'z' to fire
-                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
+                //KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
 
                 Point direction = new Point();
                 KeyModifier mod = KeyModifier.Arrow;
                 bool validDirection = false;
 
 
-                if (GetDirectionFromKeypress(userKey, out direction, out mod))
+                if (GetDirectionFromKeypress(null, out direction, out mod))
                 {
                     //Valid direction
                     validDirection = true;
@@ -2440,6 +2429,7 @@ namespace RogueBasin
                 else
                 {
                     //Look for firing
+                    libtcodWrapper.KeyPress userKey = new libtcodWrapper.KeyPress();
                     if (userKey.KeyCode == KeyCode.TCODK_CHAR)
                     {
                         char keyCode = (char)userKey.Character;

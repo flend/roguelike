@@ -33,6 +33,8 @@ namespace RogueBasin
         public void RenderMap(TileEngine.TileMap mapToRender, Point mapOffset, Rectangle screenViewport)
         {
 
+            videoSurface.Fill(Color.Black);
+
             //For libtcod
             //tileID = ascii char
             //flags = color
