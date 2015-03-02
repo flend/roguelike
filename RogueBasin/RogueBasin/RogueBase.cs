@@ -24,13 +24,35 @@ namespace RogueBasin
 
         enum InputState
         {
-            MapMovement, InventoryShow, InventorySelect
+            MapMovement, Targetting, InventoryShow, InventorySelect
+        }
+
+        enum TargettingAction
+        {
+            Weapon, Examine
         }
 
         /// <summary>
         /// State determining what functions keys have
         /// </summary>
         InputState inputState = InputState.MapMovement;
+
+        /// <summary>
+        /// What type of action are we targetting?
+        /// </summary>
+        TargettingAction targettingAction = TargettingAction.Weapon;
+
+        /// <summary>
+        /// Currently selected target square
+        /// </summary>
+        Point currentTarget = new Point(0, 0);
+
+        Creature lastSpellTarget = null;
+
+        /// <summary>
+        /// Used for range checks on currently targetted object
+        /// </summary>
+        int currentTargetRange = 0;
 
         public RogueBase()
         {
@@ -442,6 +464,10 @@ namespace RogueBasin
                 switch (inputState)
                 {
 
+                    case InputState.Targetting:
+                        TargettingKeyboardEvent(args);
+                        break;
+
                     //Normal movement on the map
                     case InputState.MapMovement:
 
@@ -507,7 +533,7 @@ namespace RogueBasin
 
                                     if (Game.Dungeon.Player.GetEquippedWeapon().HasFireAction())
                                     {
-                                        timeAdvances = FireWeapon();
+                                        TargetWeapon();
                                     }
                                     else if (Game.Dungeon.Player.GetEquippedWeapon().HasThrowAction())
                                     {
@@ -1110,6 +1136,82 @@ namespace RogueBasin
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
 
+        private void TargettingKeyboardEvent(KeyboardEventArgs args)
+        {
+
+            Point direction = new Point(9, 9);
+            KeyModifier mod = KeyModifier.Arrow;
+            bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
+            bool validFire = false;
+            bool escape = false;
+
+            if (!wasDirection)
+                { 
+                    //Look for firing
+                    if (args.Key == Key.F) { 
+                
+                            validFire = true;
+                    }
+
+                    if (args.Key == Key.Escape)
+                    {
+                        escape = true;
+                    }
+                }
+
+                //If direction, update the location and redraw
+
+            if (wasDirection)
+                {
+                    Point newPoint = new Point(currentTarget.x + direction.x, currentTarget.y + direction.y);
+
+                    int level = Game.Dungeon.Player.LocationLevel;
+
+                    if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
+                        return;
+
+                    //Otherwise OK
+                    currentTarget = newPoint;
+
+                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+                    if ((currentTargetRange == -1 && currentFOV.CheckTileFOV(newPoint.x, newPoint.y))
+                        || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, currentTargetRange, currentFOV))
+                    {
+                        Screen.Instance.SetTargetInRange = true;
+                        SquareContents sqC = SetViewPanelToTargetAtSquare(currentTarget);
+                    }
+                    else
+                        Screen.Instance.SetTargetInRange = false;
+
+                    //Update screen
+                    Screen.Instance.Target = newPoint;
+                    Game.MessageQueue.AddMessage("Find a target. " + 'f' + " to confirm. ESC to exit.");
+                    Screen.Instance.Update();
+
+                    return;
+                }
+
+            //Fire or Escape
+
+            //Turn targetting mode off
+            inputState = InputState.MapMovement;
+
+            Screen.Instance.TargettingModeOff();
+            Screen.Instance.Update();
+
+            //Complete actions
+            if (validFire)
+            {
+                switch (targettingAction)
+                {
+                    case TargettingAction.Weapon:
+
+                        waitingForTurnTick = FireTargettedWeapon(currentTarget);
+                        break;
+                }
+            }
+        }
 
         private void ScreenLevelDown()
         {
@@ -1741,87 +1843,6 @@ namespace RogueBasin
 
         
 
-        Spell lastSpell = null;
-        Creature lastSpellTarget = null;
-
-        /// <summary>
-        /// Cast a spell. Returns if time passes.
-        /// </summary>
-        /// <returns></returns>
-        private bool SelectAndCastSpell()
-        {
-            Dungeon dungeon = Game.Dungeon;
-            Player player = Game.Dungeon.Player;
-            
-            //No casting in town or wilderness
-            /*
-            if (player.LocationLevel < 2)
-            {
-                Game.MessageQueue.AddMessage("You want to save your spells for the dungeons.");
-                LogFile.Log.LogEntryDebug("Attempted to cast spell outside of dungeon", LogDebugLevel.Low);
-
-                return false;
-            }*/
-
-            //Get the user's selection
-            Spell toCast = SelectSpell();
-
-            //User exited
-            if (toCast == null)
-                return false;
-         
-            //Get a target if needed
-
-            Point target = new Point();
-            bool targettingSuccess = true;
-
-            if (toCast.NeedsTarget())
-            {
-                //Find spell range
-                int range = toCast.GetRange();
-                TargettingType targetType = toCast.TargetType();
-                //Calculate FOV
-                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-                targettingSuccess = TargetAttack(out target, range, targetType, 0, 'z', currentFOV);
-            }
-
-            //User exited
-            if (!targettingSuccess)
-                return false;
-
-            bool success = Game.Dungeon.Player.CastSpell(toCast, target);
-
-            //Store details for a recast
-           
-            //If we successfully cast, store the target
-            if (success)
-            {
-                //Only do this for certain spells
-                if (toCast.GetType() != typeof(Spells.MagicMissile) && toCast.GetType() != typeof(Spells.FireLance) && toCast.GetType() != typeof(Spells.FireBall) && toCast.GetType() != typeof(Spells.EnergyBlast))
-                    return success;
-
-                lastSpell = toCast;
-
-                //Spell target is the creature (monster or PC)
-
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
-
-                //Is there a creature here? If so, store
-                if (squareContents.monster != null)
-                    lastSpellTarget = squareContents.monster;
-
-                if (squareContents.player != null)
-                    lastSpellTarget = squareContents.player;
-            }
-            else
-            {
-                //Failure store the spell anyway
-                lastSpell = toCast;
-            }
-
-            //Time only goes past if successfully cast
-            return success;
-        }
 
         /// <summary>
         /// Throw weapon. Returns if time passes.
@@ -1933,7 +1954,8 @@ namespace RogueBasin
             //Calculate FOV
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
-            targettingSuccess = TargetAttack(out target, range, targetType, angle, confirmChar, currentFOV);
+            targettingSuccess = true;
+            TargetAttack(range, targetType, angle, confirmChar, currentFOV);
 
             //User exited
             if (!targettingSuccess)
@@ -2018,7 +2040,8 @@ namespace RogueBasin
             Item oldTargetItem = Screen.Instance.ItemToView;
             Feature oldFeature = Screen.Instance.FeatureToView;
 
-            targettingSuccess = TargetAttack(out target, TargettingType.Line, 0, 'x', currentFOV);
+            targettingSuccess = true;
+            TargetAttack(TargettingType.Line, 0, 'x', currentFOV);
 
             if (!targettingSuccess)
             {
@@ -2036,7 +2059,7 @@ namespace RogueBasin
         /// Fire weapon. Returns if time passes.
         /// </summary>
         /// <returns></returns>
-        private bool FireWeapon()
+        private void TargetWeapon()
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -2048,11 +2071,10 @@ namespace RogueBasin
             if (weapon == null || !weapon.HasFireAction())
             {
                 Game.MessageQueue.AddMessage("Need a weapon that can fire.");
-                return false;
+                return;
             }
 
             Point target = new Point();
-            bool targettingSuccess = true;
 
             //Find weapon range
             int range = weapon.RangeFire();
@@ -2062,11 +2084,18 @@ namespace RogueBasin
             //Calculate FOV
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
-            targettingSuccess = TargetAttack(out target, range, targetType, spreadAngle, 'f', currentFOV);
+            targettingAction = TargettingAction.Weapon;
+            TargetAttack(range, targetType, spreadAngle, 'f', currentFOV);
+        }
 
-            //User exited
-            if (!targettingSuccess)
-                return false;
+        private bool FireTargettedWeapon(Point target) {
+
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            //Check we have a fireable weapon
+            IEquippableItem weapon = player.GetEquippedWeapon();
+            Item weaponI = player.GetEquippedWeaponAsItem();
 
             if (target.x == player.LocationMap.x && target.y == player.LocationMap.y)
             {
@@ -2085,6 +2114,9 @@ namespace RogueBasin
             }
 
             //Check we are in range of target (not done above)
+            int range = weapon.RangeFire();
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
             if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
             {
                 Game.MessageQueue.AddMessage("Out of range!");
@@ -2103,7 +2135,7 @@ namespace RogueBasin
 
             //Store details for a recast
 
-            //If we successfully cast, store the target
+            //If we successful, store the target
             if (success)
             {
                 //Spell target is the creature (monster or PC)
@@ -2118,7 +2150,7 @@ namespace RogueBasin
                     lastSpellTarget = squareContents.player;
             }
 
-            //Time only goes past if successfully cast
+            //Time only goes past if successful
             return success;
         }
 
@@ -2129,6 +2161,8 @@ namespace RogueBasin
             player.CancelBoostDueToAttack();
             player.CancelStealthDueToAttack();
         }
+
+        Spell lastSpell;
 
         /// <summary>
         /// Recast the last spell at the same target
@@ -2295,16 +2329,16 @@ namespace RogueBasin
             return knownSpells[selectedSpell];
         }
 
-        private bool TargetAttack(out Point target, TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
+        private void TargetAttack(TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
-            return TargetAttack(out target, -1, targetType, spreadAngle, confirmChar, currentFOV);
+            TargetAttack(-1, targetType, spreadAngle, confirmChar, currentFOV);
         }
 
         /// <summary>
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private bool TargetAttack(out Point target, int range, TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
+        private void TargetAttack(int range, TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
             Player player = Game.Dungeon.Player;
 
@@ -2332,27 +2366,10 @@ namespace RogueBasin
             {
                 startPoint = new Point(player.LocationMap.x, player.LocationMap.y);
             }
-            /*
-            //Get the FOV from Dungeon (this also updates the map creature FOV state)
-            TCODFov currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
 
-            Point startPoint;
-
-            //Is that creature in FOV
-            if (currentFOV.CheckTileFOV(closeCreature.LocationMap.x, closeCreature.LocationMap.y))
-            {
-                //If so, target
-                startPoint = new Point(closeCreature.LocationMap.x, closeCreature.LocationMap.y);
-            }
-            else
-            {
-                //If not, target the PC
-                startPoint = new Point(player.LocationMap.x, player.LocationMap.y);
-            }
-            */
             //Get the desired target from the player
 
-            return GetTargetFromPlayer(startPoint, out target, targetType, range, spreadAngle, confirmChar, currentFOV);
+             GetTargetFromPlayer(startPoint, targetType, range, spreadAngle, confirmChar, currentFOV);
         }
 
         private void TargetItemsCloseToPlayer(double range, CreatureFOV currentFOV)
@@ -2383,7 +2400,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        private bool GetTargetFromPlayer(Point start, out Point target, TargettingType type, int range, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
+        private void GetTargetFromPlayer(Point start, TargettingType type, int range, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
@@ -2406,83 +2423,8 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
             Screen.Instance.Update();
 
-            bool keepLooping = true;
-            bool validFire = false;
-
-            target = start;
-
-            do
-            {
-                //Get direction from the user or 'z' to fire
-                //KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
-
-                Point direction = new Point();
-                KeyModifier mod = KeyModifier.Arrow;
-                bool validDirection = false;
-
-
-                if (GetDirectionFromKeypress(null, out direction, out mod))
-                {
-                    //Valid direction
-                    validDirection = true;
-                }
-                else
-                {
-                    //Look for firing
-                    libtcodWrapper.KeyPress userKey = new libtcodWrapper.KeyPress();
-                    if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                    {
-                        char keyCode = (char)userKey.Character;
-                        if(keyCode == confirmChar) {
-
-                                validFire = true;
-                                keepLooping = false;
-                        }
-                    }
-
-                    if (userKey.KeyCode == KeyCode.TCODK_ESCAPE)
-                    {
-                        keepLooping = false;
-                    }
-                }
-
-                //If direction, update the location and redraw
-
-                if (validDirection)
-                {
-                    Point newPoint = new Point(target.x + direction.x, target.y + direction.y);
-
-                    int level = Game.Dungeon.Player.LocationLevel;
-
-                    if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
-                        continue;
-
-                    //Otherwise OK
-                    target = newPoint;
-
-                    if ((range == -1 && currentFOV.CheckTileFOV(newPoint.x, newPoint.y))
-                        || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, range, currentFOV))
-                    {
-                        Screen.Instance.SetTargetInRange = true;
-                        SquareContents sqC = SetViewPanelToTargetAtSquare(target);
-                    }
-                    else
-                        Screen.Instance.SetTargetInRange = false;
-
-                    //Update screen
-                    Screen.Instance.Target = newPoint;
-                    Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
-                    Screen.Instance.Update();
-
-                }
-            } while (keepLooping);
-
-            //Turn targetting mode off
-            Screen.Instance.TargettingModeOff();
-            Screen.Instance.Update();
-
-            return validFire;
-
+            inputState = InputState.Targetting;
+            currentTarget = start;
         }
 
         private static SquareContents SetViewPanelToTargetAtSquare(Point start)
