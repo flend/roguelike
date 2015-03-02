@@ -85,68 +85,67 @@ namespace RogueBasin
 
                         LibtcodColorFlags colorFlags = thisCell.TileFlag as LibtcodColorFlags;
                         Color foregroundColor = Color.White;
-                        Color backgroundColor = Color.Black;
+                        Color backgroundColor = transparentColor;
                         
                         if(colorFlags != null)
                         {
-                            if (colorFlags.BackgroundColor == null)
-                            {
-                                backgroundColor = Color.Black;
-                            }
-                            else
+                            if (colorFlags.BackgroundColor != null)
                             {
                                 backgroundColor = colorFlags.BackgroundColor;
                             }
 
-                            if (colorFlags.ForegroundColor == null)
-                            {
-                                foregroundColor = Color.White;
-                            }
-                            else
+                            if (colorFlags.ForegroundColor != null)
                             {
                                 foregroundColor = colorFlags.ForegroundColor;
                             }
                         }
 
-                        var spriteLoc = tileIDToSpriteLocation(thisCell.TileID);
-
                         //Screen tile coords
                         int screenTileX = screenViewport.X + (x - mapOffset.x);
                         int screenTileY = screenViewport.Y + (y - mapOffset.y);
 
-                        //Screen real coords
-                        int screenX = screenTileX * spriteSheetWidth;
-                        int screenY = screenTileY * spriteSheetHeight;
-
-                        LogFile.Log.LogEntry("Drawing sprite " + thisCell.TileID + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
-                            + screenX + "/" + screenY);
-
-                        SurfaceCacheEntry entry = new SurfaceCacheEntry();
-                        entry.Id = thisCell.TileID;
-                        entry.ForegroundColor = foregroundColor;
-                        entry.BackgroundColor = backgroundColor;
-
-                        Surface spriteSurface;
-                        surfaceCache.TryGetValue(entry, out spriteSurface);
-                        if (spriteSurface == null)
-                        {
-                            spriteSurface = new Surface(spriteVideoWidth, spriteVideoHeight);
-                            spriteSurface.Blit(spriteSheet,
-                                new System.Drawing.Point(0, 0),
-                                new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
-                            spriteSurface.ReplaceColor(Color.White, foregroundColor);
-                            spriteSurface.ReplaceColor(transparentColor, backgroundColor);
-
-                            surfaceCache.Add(entry, spriteSurface);
-                        }
-
-                        videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY),
-                            new Rectangle(new System.Drawing.Point(0, 0), new Size(spriteSheetWidth, spriteSheetHeight)));
+                        DrawSprite(thisCell.TileID, screenTileX, screenTileY, foregroundColor, backgroundColor);
                     }
                 }
             }
+        }
 
-            
+        private void DrawSprite(int id, int x, int y, Color foregroundColor, Color backgroundColor)
+        {
+            var spriteLoc = tileIDToSpriteLocation(id);
+
+            //Screen real coords
+            int screenX = x * spriteVideoWidth;
+            int screenY = y * spriteVideoHeight;
+
+            SurfaceCacheEntry entry = new SurfaceCacheEntry();
+            entry.Id = id;
+            entry.ForegroundColor = foregroundColor;
+            entry.BackgroundColor = backgroundColor;
+
+            Surface spriteSurface;
+            surfaceCache.TryGetValue(entry, out spriteSurface);
+            if (spriteSurface == null)
+            {
+                spriteSurface = new Surface(spriteVideoWidth, spriteVideoHeight);
+                spriteSurface.Blit(spriteSheet,
+                    new System.Drawing.Point(0, 0),
+                    new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
+                if(foregroundColor != Color.White)
+                    spriteSurface.ReplaceColor(Color.White, foregroundColor);
+                if(backgroundColor != transparentColor)
+                    spriteSurface.ReplaceColor(transparentColor, backgroundColor);
+
+                surfaceCache.Add(entry, spriteSurface);
+
+                LogFile.Log.LogEntryDebug("Rendering sprite" + id, LogDebugLevel.Profiling);
+            }
+
+            LogFile.Log.LogEntryDebug("Drawing sprite " + id + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
+                + screenX + "/" + screenY, LogDebugLevel.Profiling);
+
+            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY),
+                new Rectangle(new System.Drawing.Point(0, 0), new Size(spriteSheetWidth, spriteSheetHeight)));
         }
 
         private System.Drawing.Point tileIDToSpriteLocation(int tileID)
@@ -196,16 +195,7 @@ namespace RogueBasin
         {
             var spriteLoc = tileIDToSpriteLocation(Convert.ToInt32(c));
 
-            //Screen real coords
-            int screenX = x * spriteSheetWidth;
-            int screenY = y * spriteSheetHeight;
-
-            LogFile.Log.LogEntry("Drawing char sprite " + c + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
-                     + screenX + "/" + screenY);
-
-            videoSurface.Blit(spriteSheet,
-                            new System.Drawing.Point(screenX, screenY),
-                            new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
+            DrawSprite(Convert.ToInt32(c), x, y, color, transparentColor);
         }
 
         public void PrintStringRect(string msg, int x, int y, int width, int height, libtcodWrapper.LineAlignment alignment, Color color)
@@ -216,13 +206,13 @@ namespace RogueBasin
         public void PrintString(string msg, int x, int y, libtcodWrapper.LineAlignment alignment, Color color)
         {
             // Create the Font Surfaces
-            Surface fontSurface = font.Render(msg, Color.White);
+            Surface fontSurface = font.Render(msg, color);
 
             //Screen real coords
             int screenX = x * spriteSheetWidth;
             int screenY = y * spriteSheetHeight;
 
-            LogFile.Log.LogEntry("Drawing string " + msg + screenX + "/" + screenY);
+            LogFile.Log.LogEntryDebug("Drawing string " + msg + screenX + "/" + screenY, LogDebugLevel.Profiling);
 
             videoSurface.Blit(fontSurface,
                             new System.Drawing.Point(screenX, screenY));
