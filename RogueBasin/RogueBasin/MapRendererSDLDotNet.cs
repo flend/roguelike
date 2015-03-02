@@ -8,12 +8,35 @@ using SdlDotNet.Core;
 
 namespace RogueBasin
 {
+    class SurfaceCacheEntry
+    {
+        public int Id { get; set; }
+        public Color ForegroundColor { get; set; }
+        public Color BackgroundColor { get; set; }
+
+        public override bool Equals(object other)
+        {
+            var otherFoo = other as SurfaceCacheEntry;
+            if (otherFoo == null)
+                return false;
+            return Id == otherFoo.Id && ForegroundColor == otherFoo.ForegroundColor && BackgroundColor == otherFoo.BackgroundColor;
+        }
+
+        public override int GetHashCode()
+        {
+            return 17 * Id.GetHashCode() + 17 * ForegroundColor.GetHashCode() + BackgroundColor.GetHashCode();
+        }
+    }
+
     /// <summary>
     /// Renders a multi-layer tile map onto the screen
     /// </summary>
     class MapRendererSDLDotNet : IMapRenderer
     {
         SdlDotNet.Graphics.Font font;
+        Dictionary<SurfaceCacheEntry, Surface> surfaceCache = new Dictionary<SurfaceCacheEntry,Surface>();
+
+        private Color transparentColor = Color.FromArgb(255, 0, 255);
 
         private Surface videoSurface;
         private Surface spriteSheet;
@@ -33,12 +56,6 @@ namespace RogueBasin
         /// <param name="screenViewport"></param>
         public void RenderMap(TileEngine.TileMap mapToRender, Point mapOffset, Rectangle screenViewport)
         {
-
-            //For libtcod
-            //tileID = ascii char
-            //flags = color
-
-            //Get screen handle
 
             if (mapOffset.x >= mapToRender.Columns || mapOffset.y >= mapToRender.Rows)
             {
@@ -66,30 +83,30 @@ namespace RogueBasin
                         if (thisCell.TileID == -1)
                             continue;
 
-                        //Flags is a color for libtcod
-                        /*
                         LibtcodColorFlags colorFlags = thisCell.TileFlag as LibtcodColorFlags;
-                        if (colorFlags == null)
-                        {
-                            rootConsole.ForegroundColor = ColorPresets.White;
-                            rootConsole.BackgroundColor = ColorPresets.Black;
-                        }
-                        else
+                        Color foregroundColor = Color.White;
+                        Color backgroundColor = Color.Black;
+                        
+                        if(colorFlags != null)
                         {
                             if (colorFlags.BackgroundColor == null)
                             {
-                                rootConsole.BackgroundColor = ColorPresets.Black;
+                                backgroundColor = Color.Black;
                             }
                             else
                             {
-                                rootConsole.BackgroundColor = colorFromSystemColor(colorFlags.BackgroundColor);
+                                backgroundColor = colorFlags.BackgroundColor;
                             }
 
-                            rootConsole.ForegroundColor = colorFromSystemColor(colorFlags.ForegroundColor);
+                            if (colorFlags.ForegroundColor == null)
+                            {
+                                foregroundColor = Color.White;
+                            }
+                            else
+                            {
+                                foregroundColor = colorFlags.ForegroundColor;
+                            }
                         }
-
-                        //Id is the char
-                        char screenChar = Convert.ToChar(thisCell.TileID);*/
 
                         var spriteLoc = tileIDToSpriteLocation(thisCell.TileID);
 
@@ -104,9 +121,27 @@ namespace RogueBasin
                         LogFile.Log.LogEntry("Drawing sprite " + thisCell.TileID + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
                             + screenX + "/" + screenY);
 
-                        videoSurface.Blit(spriteSheet,
-                            new System.Drawing.Point(screenX, screenY),
-                            new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
+                        SurfaceCacheEntry entry = new SurfaceCacheEntry();
+                        entry.Id = thisCell.TileID;
+                        entry.ForegroundColor = foregroundColor;
+                        entry.BackgroundColor = backgroundColor;
+
+                        Surface spriteSurface;
+                        surfaceCache.TryGetValue(entry, out spriteSurface);
+                        if (spriteSurface == null)
+                        {
+                            spriteSurface = new Surface(spriteVideoWidth, spriteVideoHeight);
+                            spriteSurface.Blit(spriteSheet,
+                                new System.Drawing.Point(0, 0),
+                                new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
+                            spriteSurface.ReplaceColor(Color.White, foregroundColor);
+                            spriteSurface.ReplaceColor(transparentColor, backgroundColor);
+
+                            surfaceCache.Add(entry, spriteSurface);
+                        }
+
+                        videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY),
+                            new Rectangle(new System.Drawing.Point(0, 0), new Size(spriteSheetWidth, spriteSheetHeight)));
                     }
                 }
             }
@@ -136,10 +171,9 @@ namespace RogueBasin
 
             spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
             spriteSheet.Transparent = true;
-            spriteSheet.TransparentColor = Color.FromArgb(255, 0, 255);
+            spriteSheet.TransparentColor = transparentColor;
 
-            font = new SdlDotNet.Graphics.Font(@"Arial.ttf", 20);
-
+            font = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 18);
         }
 
 
