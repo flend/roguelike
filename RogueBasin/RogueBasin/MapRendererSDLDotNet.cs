@@ -16,8 +16,8 @@ namespace RogueBasin
 
         private Surface videoSurface;
         private Surface spriteSheet;
-        private int videoWidth = 640;
-        private int videoHeight = 480;
+        private int videoWidth = 960;
+        private int videoHeight = 720;
         private int spritesPerRow = 16;
         private int spriteSheetWidth = 16;
         private int spriteSheetHeight = 16;
@@ -32,8 +32,6 @@ namespace RogueBasin
         /// <param name="screenViewport"></param>
         public void RenderMap(TileEngine.TileMap mapToRender, Point mapOffset, Rectangle screenViewport)
         {
-
-            videoSurface.Fill(Color.Black);
 
             //For libtcod
             //tileID = ascii char
@@ -92,12 +90,7 @@ namespace RogueBasin
                         //Id is the char
                         char screenChar = Convert.ToChar(thisCell.TileID);*/
 
-                        //Location on sprite sheet
-                        int spriteTileX = thisCell.TileID % spritesPerRow;
-                        int spriteTileY = thisCell.TileID / spritesPerRow;
-
-                        int spriteX = spriteTileX * spriteSheetWidth;
-                        int spriteY = spriteTileY * spriteSheetHeight;
+                        var spriteLoc = tileIDToSpriteLocation(thisCell.TileID);
 
                         //Screen tile coords
                         int screenTileX = screenViewport.X + (x - mapOffset.x);
@@ -107,17 +100,29 @@ namespace RogueBasin
                         int screenX = screenTileX * spriteSheetWidth;
                         int screenY = screenTileY * spriteSheetHeight;
 
-                        LogFile.Log.LogEntry("Drawing sprite " + thisCell.TileID + " from " + spriteX + "/" + spriteY + "at: "
+                        LogFile.Log.LogEntry("Drawing sprite " + thisCell.TileID + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
                             + screenX + "/" + screenY);
 
                         videoSurface.Blit(spriteSheet,
                             new System.Drawing.Point(screenX, screenY),
-                            new Rectangle(new System.Drawing.Point(spriteX, spriteY), new Size(spriteSheetWidth, spriteSheetHeight)));
+                            new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
                     }
                 }
             }
 
-            videoSurface.Update();
+            
+        }
+
+        private System.Drawing.Point tileIDToSpriteLocation(int tileID)
+        {
+            //Location on sprite sheet
+            int spriteTileX = tileID % spritesPerRow;
+            int spriteTileY = tileID / spritesPerRow;
+
+            int spriteX = spriteTileX * spriteSheetWidth;
+            int spriteY = spriteTileY * spriteSheetHeight;
+
+            return new System.Drawing.Point(spriteX, spriteY);
         }
 
         public void Sleep(ulong milliseconds)
@@ -126,7 +131,7 @@ namespace RogueBasin
 
         public void Setup(int width, int height)
         {
-            videoSurface = Video.SetVideoMode(640, 480, 32, false, false, false, true);
+            videoSurface = Video.SetVideoMode(videoWidth, videoHeight, 32, false, false, false, true);
 
             spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
             spriteSheet.Transparent = true;
@@ -136,12 +141,12 @@ namespace RogueBasin
 
         public void Flush()
         {
-
+            videoSurface.Update();
         }
 
         public void Clear()
         {
-
+            videoSurface.Fill(Color.Black);
         }
 
         public void DrawFrame(int x, int y, int width, int height, bool clear, Color color)
@@ -151,7 +156,18 @@ namespace RogueBasin
 
         public void PutChar(int x, int y, char c, Color color)
         {
+            var spriteLoc = tileIDToSpriteLocation(Convert.ToInt32(c));
 
+            //Screen real coords
+            int screenX = x * spriteSheetWidth;
+            int screenY = y * spriteSheetHeight;
+
+            LogFile.Log.LogEntry("Drawing char sprite " + c + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
+                     + screenX + "/" + screenY);
+
+            videoSurface.Blit(spriteSheet,
+                            new System.Drawing.Point(screenX, screenY),
+                            new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
         }
 
         public void PrintStringRect(string msg, int x, int y, int width, int height, libtcodWrapper.LineAlignment alignment, Color color)
