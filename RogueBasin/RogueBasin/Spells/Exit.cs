@@ -20,6 +20,7 @@ namespace RogueBasin.Spells
             }
 
             //Check if we actually want to do this
+            /*
             bool actuallyLeave = Screen.Instance.YesNoQuestion("Do you want to leave the dungeon and return to school?");
 
             //Exit from current dungeon
@@ -32,7 +33,7 @@ namespace RogueBasin.Spells
             else
             {
                 Game.MessageQueue.AddMessage("You cancel the spell and the energies dissipate.");
-            }
+            }*/
 
             return true;
         }

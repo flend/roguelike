@@ -4338,7 +4338,7 @@ namespace RogueBasin
         public void EndOfGame(bool playerWon, bool playerQuit)
         {
             //Work out which ending the player gets
-
+            /*
             if (playerWon)
                 Screen.Instance.PlayMovie("traumawin", true);
             else
@@ -4348,7 +4348,7 @@ namespace RogueBasin
                 else
                     Screen.Instance.PlayMovie("traumaquit", true);
             }
-
+            */
             //RunMainLoop = false;
             EndOfGameMechanics(playerWon, playerQuit);
         }

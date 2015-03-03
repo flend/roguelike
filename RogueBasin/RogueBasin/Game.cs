@@ -74,5 +74,7 @@ namespace RogueBasin
                 config = value;
             }
         }
+
+        public static RogueBase Base { get; set; }
     }
 }

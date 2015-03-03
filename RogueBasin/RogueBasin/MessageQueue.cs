@@ -133,8 +133,6 @@ namespace RogueBasin
         {
             List<string> messages = Game.MessageQueue.GetMessages();
 
-            Screen.Instance.ClearMessageLine();
-
             //Increment no of turns we have shown cached msg. Turn it off if too many
             IncrementCachedMsgCounter();
             if (CachedMsgTurnCount > displayCachedMsgTurns)
@@ -144,9 +142,13 @@ namespace RogueBasin
             {
                 //If we have a cached msg, show it
                 if (showCachedMsg)
+                {
+                    Screen.Instance.ClearMessageLine();
                     Screen.Instance.PrintMessage(cachedMsg, cachedMsgColor);
+                }
 
-                Screen.Instance.FlushConsole();
+                //Don't clear if we don't have anything to display (for prompts etc.)
+
                 return;
             }
 
@@ -163,7 +165,6 @@ namespace RogueBasin
 
                 Game.MessageQueue.ClearList();
 
-                Screen.Instance.FlushConsole();
                 return;
             }
 
@@ -219,11 +220,11 @@ namespace RogueBasin
                     //Show on screen
 
                     Screen.Instance.PrintMessage(outputMsg + " <more>");
-                    Screen.Instance.FlushConsole();
 
                     //Block for this keypress - may want to listen for exit too
-                    KeyPress userKey;
-                    userKey = Keyboard.WaitForKeyPress(true);
+                    //KeyPress userKey;
+                    //userKey = Keyboard.WaitForKeyPress(true);
+                    //This doesn't work right now
                 }
                 else
                 {
@@ -255,15 +256,17 @@ namespace RogueBasin
                     //Show on screen
 
                     Screen.Instance.PrintMessage(outputMsg);
-                    Screen.Instance.FlushConsole();
+                   
                 }
             } while (i < wrappedMsgs.Count);
 
+
+            /*
             //Require a keypress if requested
             if (Game.MessageQueue.RequireKeypress)
             {
                 Keyboard.WaitForKeyPress(true);
-            }
+            }*/
 
             Game.MessageQueue.ClearList();
 

@@ -157,6 +157,7 @@ namespace TraumaRL
         private void StandardSystemSetup()
         {
             rb = new RogueBase();
+            Game.Base = rb;
             rb.SetupSystem();
 
             //Minimum debug

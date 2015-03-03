@@ -32,6 +32,9 @@ namespace RogueBasin {
         IMapRenderer mapRenderer;
         public bool NeedsUpdate { get; set; }
 
+        //A prompt for the user to respond to
+        string Prompt { get; set; }
+
         //Console/screen size
         public int Width { get; set; }
         public int Height { get; set; }
@@ -114,6 +117,8 @@ namespace RogueBasin {
 
         System.Drawing.Color normalMovieColor = System.Drawing.Color.MediumSeaGreen;
         System.Drawing.Color flashMovieColor = System.Drawing.Color.Red;
+
+        System.Drawing.Color promptColor = System.Drawing.Color.Orange;
 
         const char heartChar = (char)567;
         const char shieldChar = (char)561;
@@ -3169,40 +3174,6 @@ namespace RogueBasin {
             return GameDifficulty.Easy;
         }
 
-        internal bool YesNoQuestion(string introMessage)
-        {
-
-            ClearMessageLine();
-
-            PrintMessage(introMessage + " (y / n):");
-            FlushConsole();
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                    char keyCode = (char)userKey.Character;
-                    switch (keyCode)
-                    {
-                        case 'y':
-                            ClearMessageLine();
-                            return true;
-
-                        case 'n':
-                            ClearMessageLine();
-                            return false;
-
-                    }
-                }
-            } while (true);
-        }
-
         /// <summary>
         /// Draw the screen and run the message queue
         /// </summary>
@@ -3213,14 +3184,33 @@ namespace RogueBasin {
                 //Draw screen 
                 Draw();
 
-                //Message queue - requires keyboard to advance messages - not sure about this yet
-                Game.MessageQueue.RunMessageQueue();
+                //Prompt for user
+                if (Prompt != null)
+                {
+                    DrawPrompt();
+                }
+                else
+                {
+                    //Message queue - requires keyboard to advance messages - not sure about this yet
+                    //(in same area as prompt)
+                    Game.MessageQueue.RunMessageQueue();
+                }
+                FlushConsole();
 
                 NeedsUpdate = false;
             }
         }
 
+        private void DrawPrompt()
+        {
+            ClearMessageLine();
+            PrintMessage(Prompt, promptColor);
+        }
 
+        public void ClearPrompt()
+        {
+            Prompt = null;
+        }
 
         /// <summary>
         /// Do a missile attack animation. creature firing from start to finish in color.
@@ -3372,6 +3362,11 @@ namespace RogueBasin {
                 Screen.Instance.ItemToView = null;
                 Screen.Instance.FeatureToView = null;
             }
+        }
+
+        internal void SetPrompt(string p)
+        {
+            Prompt = p;
         }
     }
 }

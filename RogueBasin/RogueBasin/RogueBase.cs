@@ -24,7 +24,8 @@ namespace RogueBasin
 
         enum InputState
         {
-            MapMovement, Targetting, InventoryShow, InventorySelect
+            MapMovement, Targetting, InventoryShow, InventorySelect,
+            YesNoPrompt
         }
 
         enum TargettingAction
@@ -36,6 +37,8 @@ namespace RogueBasin
         /// State determining what functions keys have
         /// </summary>
         InputState inputState = InputState.MapMovement;
+
+        Action<bool> promptAction = null;
 
         /// <summary>
         /// What type of action are we targetting?
@@ -125,6 +128,11 @@ namespace RogueBasin
         {
             ProfileEntry("Tick Event");
 
+            if (!Game.Dungeon.RunMainLoop)
+            {
+                Events.QuitApplication();
+            }
+
             AdvanceDungeonToNextPlayerTick();
 
             if (Screen.Instance.NeedsUpdate)
@@ -133,6 +141,7 @@ namespace RogueBasin
 
                 Screen.Instance.Update();
             }
+
         }
 
         private void KeyboardEventHandler(object sender, KeyboardEventArgs args)
@@ -448,6 +457,10 @@ namespace RogueBasin
             bool timeAdvances = false;
             bool centreOnPC = true;
 
+            //Only on key up
+            if (args.Down)
+                return new Tuple<bool, bool>(false, false);
+
             try
             {
                 //Each state has different keys
@@ -457,6 +470,10 @@ namespace RogueBasin
 
                     case InputState.Targetting:
                         TargettingKeyboardEvent(args);
+                        break;
+
+                    case InputState.YesNoPrompt:
+                        YesNoPromptKeyboardEvent(args);
                         break;
 
                     //Normal movement on the map
@@ -476,12 +493,15 @@ namespace RogueBasin
 
                                 case Key.Q:
                                     //Exit from game
-                                    bool response = Screen.Instance.YesNoQuestion("Really quit?");
-                                    if (response == true)
-                                    {
-                                        Game.Dungeon.PlayerDeath("quit");
-                                        timeAdvances = true;
-                                    }
+                                    timeAdvances = false;
+                                    YesNoQuestion("Really quit?", (result) => {
+                                        if (result)
+                                        {
+                                            Game.Dungeon.PlayerDeath("quit");
+                                            timeAdvances = true;
+                                        }
+                                    });
+                                    
                                     break;
 
 
@@ -1022,8 +1042,6 @@ namespace RogueBasin
                                 //If we don't set time advances, changing wetware still resets bonuses but the enemies don't get a move
                                 //timeAdvances = changeWorks;
 
-                                //Just update the screen each time
-                                Screen.Instance.Update();
                                 break;
                             }
                         }
@@ -1063,7 +1081,6 @@ namespace RogueBasin
                         {
                             Screen.Instance.ViewportScrollSpeed = 4;
                             Screen.Instance.ScrollViewport(direction);
-                            Screen.Instance.Update();
                         }
 
                         if (Game.Config.DebugMode)
@@ -1076,7 +1093,6 @@ namespace RogueBasin
                                 if (direction == new Point(0, 1))
                                     ScreenLevelDown();
 
-                                Screen.Instance.Update();
                             }
                         }
                         //  }
@@ -1110,6 +1126,30 @@ namespace RogueBasin
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
             }
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+        }
+
+        private void YesNoPromptKeyboardEvent(KeyboardEventArgs args)
+        {
+
+            if (args.Key == Key.Y)
+            {
+                if (promptAction != null)
+                {
+                    promptAction(true);
+                    inputState = InputState.MapMovement;
+                    Screen.Instance.ClearPrompt();
+                }
+            }
+
+            if (args.Key == Key.N)
+            {
+                if (promptAction != null)
+                {
+                    promptAction(false);
+                    inputState = InputState.MapMovement;
+                    Screen.Instance.ClearPrompt();
+                }
+            }
         }
 
         private void TargettingKeyboardEvent(KeyboardEventArgs args)
@@ -2724,6 +2764,13 @@ namespace RogueBasin
             return false;
         }
 
+        public void YesNoQuestion(string introMessage, Action<bool> action)
+        {
+            Screen.Instance.SetPrompt(introMessage + " (y / n):");
+            Screen.Instance.NeedsUpdate = true;
 
+            inputState = InputState.YesNoPrompt;
+            promptAction = action;
+        }
     }
 }
