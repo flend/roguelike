@@ -100,8 +100,8 @@ namespace RogueBasin
         ~LogFile()
         {
             //Close logfile
-            if(logFile != null)
-                logFile.Close();
+            //if(logFile != null)
+            //    logFile.Close();
         }
 
         public static LogFile Log

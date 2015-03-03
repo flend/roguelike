@@ -131,10 +131,15 @@ namespace RogueBasin
                 spriteSurface.Blit(spriteSheet,
                     new System.Drawing.Point(0, 0),
                     new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
-                if(foregroundColor != Color.White)
+
+                if (foregroundColor != Color.White)
                     spriteSurface.ReplaceColor(Color.White, foregroundColor);
-                if(backgroundColor != transparentColor)
+                if (backgroundColor != transparentColor)
                     spriteSurface.ReplaceColor(transparentColor, backgroundColor);
+
+                //Set this after doing background replacement
+                spriteSurface.Transparent = true;
+                spriteSurface.TransparentColor = transparentColor;
 
                 surfaceCache.Add(entry, spriteSurface);
 
@@ -169,8 +174,6 @@ namespace RogueBasin
             videoSurface = Video.SetVideoMode(videoWidth, videoHeight, 32, false, false, false, true);
 
             spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
-            spriteSheet.Transparent = true;
-            spriteSheet.TransparentColor = transparentColor;
 
             font = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 18);
         }

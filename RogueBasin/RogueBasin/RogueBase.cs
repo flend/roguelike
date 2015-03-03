@@ -145,8 +145,14 @@ namespace RogueBasin
             }
 
             bool timeAdvances = ProcessKeypress(args);
-            if(timeAdvances)
+            if (timeAdvances)
+            {
+                ProfileEntry("After user");
+
+                Game.Dungeon.PlayerHadBonusTurn = true;
+
                 waitingForTurnTick = true;
+            }
         }
 
 
@@ -193,6 +199,10 @@ namespace RogueBasin
                     //Advance time for the PC
                     playerNotReady = !PlayerActions(centreOnPC);
 
+                    //Reset the creature FOV display
+                    Game.Dungeon.ResetCreatureFOVOnMap();
+                    Game.Dungeon.ResetSoundOnMap();
+
                     //Catch the player being killed
                     //if (!Game.Dungeon.RunMainLoop)
                     //   break;
@@ -215,32 +225,12 @@ namespace RogueBasin
                 //Deal with PCs turn as appropriate
                 bool timeAdvances = false;
 
-                //If !playerInputRequired, don't allow any actions that time take
-                //(we need to wait for the next processing tick)
+                var inputResult = UserInput(args);
+                timeAdvances = inputResult.Item1;
+                //centreOnPC = inputResult.Item2;
 
-                //do
-               // {
-                    var inputResult = UserInput(args);
-                    timeAdvances = inputResult.Item1;
-                    //centreOnPC = inputResult.Item2;
-
-                //} while (!timeAdvances);
-
-                //Do the click processing here
-
+                //Currently update on all keypresses
                 Screen.Instance.NeedsUpdate = true;
-
-                if (timeAdvances)
-                {
-                    ProfileEntry("After user");
-
-                    //Reset the creature FOV display
-                    Game.Dungeon.ResetCreatureFOVOnMap();
-                    Game.Dungeon.ResetSoundOnMap();
-
-                    //Game.MessageQueue.AddMessage("Finished PC move");
-                    Game.Dungeon.PlayerHadBonusTurn = true;
-                }
 
                 return timeAdvances;
             }
@@ -298,15 +288,11 @@ namespace RogueBasin
                     if (Screen.Instance.TargetSelected())
                         CheckTargetInPlayerFOV(playerFOV);
 
-                    ProfileEntry("Pre Screen Update");
-
-                    //Update screen just before PC's turn
                     if (centreOnPC)
                         Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
 
+                    //Player has taken turn so update screen
                     Screen.Instance.NeedsUpdate = true;
-
-                    ProfileEntry("Post Screen Update");
 
                     return true;
                 }
@@ -1128,7 +1114,6 @@ namespace RogueBasin
 
         private void TargettingKeyboardEvent(KeyboardEventArgs args)
         {
-
             Point direction = new Point(9, 9);
             KeyModifier mod = KeyModifier.Arrow;
             bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
@@ -1136,69 +1121,71 @@ namespace RogueBasin
             bool escape = false;
 
             if (!wasDirection)
-                { 
-                    //Look for firing
-                    if (args.Key == Key.F) { 
-                
-                            validFire = true;
-                    }
-
-                    if (args.Key == Key.Escape)
-                    {
-                        escape = true;
-                    }
+            {
+                //Look for firing
+                if (args.Key == Key.F)
+                {
+                    validFire = true;
                 }
 
-                //If direction, update the location and redraw
+                if (args.Key == Key.Escape)
+                {
+                    escape = true;
+                }
+            }
+
+            //If direction, update the location and redraw
 
             if (wasDirection)
-                {
-                    Point newPoint = new Point(currentTarget.x + direction.x, currentTarget.y + direction.y);
+            {
+                Point newPoint = new Point(currentTarget.x + direction.x, currentTarget.y + direction.y);
 
-                    int level = Game.Dungeon.Player.LocationLevel;
+                int level = Game.Dungeon.Player.LocationLevel;
 
-                    if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
-                        return;
-
-                    //Otherwise OK
-                    currentTarget = newPoint;
-
-                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-
-                    if ((currentTargetRange == -1 && currentFOV.CheckTileFOV(newPoint.x, newPoint.y))
-                        || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, currentTargetRange, currentFOV))
-                    {
-                        Screen.Instance.SetTargetInRange = true;
-                        SquareContents sqC = SetViewPanelToTargetAtSquare(currentTarget);
-                    }
-                    else
-                        Screen.Instance.SetTargetInRange = false;
-
-                    //Update screen
-                    Screen.Instance.Target = newPoint;
-                    Game.MessageQueue.AddMessage("Find a target. " + 'f' + " to confirm. ESC to exit.");
-                    Screen.Instance.Update();
-
+                if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
                     return;
+
+                //Otherwise OK
+                currentTarget = newPoint;
+
+                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+                if ((currentTargetRange == -1 && currentFOV.CheckTileFOV(newPoint.x, newPoint.y))
+                    || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, newPoint, currentTargetRange, currentFOV))
+                {
+                    Screen.Instance.SetTargetInRange = true;
+                    SquareContents sqC = SetViewPanelToTargetAtSquare(currentTarget);
                 }
+                else
+                    Screen.Instance.SetTargetInRange = false;
+
+                //Update screen
+                Screen.Instance.Target = newPoint;
+                Game.MessageQueue.AddMessage("Find a target. " + 'f' + " to confirm. ESC to exit.");
+
+                return;
+            }
 
             //Fire or Escape
 
-            //Turn targetting mode off
-            inputState = InputState.MapMovement;
-
-            Screen.Instance.TargettingModeOff();
-            Screen.Instance.Update();
-
-            //Complete actions
-            if (validFire)
+            if (validFire == true || escape == true)
             {
-                switch (targettingAction)
-                {
-                    case TargettingAction.Weapon:
+                //Turn targetting mode off
+                inputState = InputState.MapMovement;
 
-                        waitingForTurnTick = FireTargettedWeapon(currentTarget);
-                        break;
+                Screen.Instance.TargettingModeOff();
+
+                //Complete actions
+                if (validFire)
+                {
+                    switch (targettingAction)
+                    {
+                        case TargettingAction.Weapon:
+
+                            //Time advances only on success
+                            waitingForTurnTick = FireTargettedWeapon(currentTarget);
+                            break;
+                    }
                 }
             }
         }

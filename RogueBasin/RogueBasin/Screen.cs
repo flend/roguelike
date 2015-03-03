@@ -1178,7 +1178,7 @@ namespace RogueBasin {
 
             tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(toDraw);
             if(monsterColorInSquare != null)
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(monsterColorInSquare.BackgroundColor, monsterColorInSquare.ForegroundColor);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
             
         }
 
