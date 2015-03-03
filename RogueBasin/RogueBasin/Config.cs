@@ -44,5 +44,13 @@ namespace RogueBasin
                 return Game.Config.Entries.ContainsKey("debug") && Game.Config.Entries["debug"] == "true";
             }
         }
+
+        public bool DisplayGraphs
+        {
+            get
+            {
+                return Game.Config.Entries.ContainsKey("displayGraphs") && Game.Config.Entries["displayGraphs"] == "true";
+            }
+        }
     }
 }

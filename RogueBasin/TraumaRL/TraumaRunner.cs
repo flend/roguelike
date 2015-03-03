@@ -84,7 +84,7 @@ namespace TraumaRL
             visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
 
-            if (Game.Config.DebugMode) {
+            if (Game.Config.DisplayGraphs) {
                 try
                 {
                     var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
@@ -110,16 +110,19 @@ namespace TraumaRL
             visualiser.OutputClueDoorGraph("levellinks-full");
             if (Game.Config.DebugMode)
             {
-                try
+                if (Game.Config.DisplayGraphs)
                 {
-                    var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
+                    try
+                    {
+                        var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
 
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "levellinks-full");
-                    GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
-                }
-                catch (Exception)
-                {
-                    LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+                        GraphVizUtils.RunGraphVizPNG(graphVizLocation, "levellinks-full");
+                        GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
+                    }
+                    catch (Exception)
+                    {
+                        LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+                    }
                 }
             }
         }
