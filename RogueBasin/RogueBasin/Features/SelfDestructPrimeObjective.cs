@@ -32,12 +32,12 @@ namespace RogueBasin.Features
 
             if (!canDoorBeOpened)
             {
-                Screen.Instance.PlayMovie("reactorlocked", true);
+                Game.Base.PlayMovie("reactorlocked", true);
                 return false;
             }
             else
             {
-                Screen.Instance.PlayMovie("reactorunlocked", true);
+                Game.Base.PlayMovie("reactorunlocked", true);
 
                 //Add clues directly into player's inventory
                 GivePlayerObjectiveClues(player);

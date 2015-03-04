@@ -26,7 +26,7 @@ namespace RogueBasin.Triggers
 
             if (!Triggered && !Game.Dungeon.DungeonInfo.DragonDead)
             {
-                Screen.Instance.PlayMovie("dragonapproach", true);
+                Game.Base.PlayMovie("dragonapproach", true);
             }
 
             return true;

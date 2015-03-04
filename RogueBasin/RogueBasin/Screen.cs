@@ -567,26 +567,6 @@ namespace RogueBasin {
 
         }
 
-        /// <summary>
-        /// Play the movie indicated by the filename root.
-        /// </summary>
-        /// <param name="root"></param>
-        /// 
-
-        public void PlayMovie(List<MovieFrame> frames, bool keypressBetweenFrames)
-        {
-            try
-            {
-                movieFrames = frames;
-
-                PlayMovieFrames(keypressBetweenFrames);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to play movie from frames " + ex.Message);
-            }
-        }
-
         private Tuple<int, int> CalculateWidthHeightFromLines(List<string> lines)
         {
             int width = 0;
@@ -626,6 +606,26 @@ namespace RogueBasin {
             }
         }
 
+        List<string> moviesToPlay = new List<string>();
+
+        private void EnqueueMovie(string filenameRoot)
+        {
+            moviesToPlay.Add(filenameRoot);
+        }
+
+        public void DequeueFirstMovie()
+        {
+            if (moviesToPlay.Count == 0)
+                return;
+
+            moviesToPlay.RemoveAt(0);
+        }
+
+        public bool MoviesToPlay()
+        {
+            return moviesToPlay.Count > 0;
+        }
+
         public void PlayMovie(string filenameRoot, bool keypressBetweenFrames)
         {
             if (filenameRoot == "" || filenameRoot.Length == 0)
@@ -634,12 +634,21 @@ namespace RogueBasin {
                 return;
             }
 
+            EnqueueMovie(filenameRoot);
+        }
+
+        private void PlayFirstMovieInQueue() {
+
+            if (moviesToPlay.Count == 0)
+            {
+                LogFile.Log.LogEntryDebug("No movies in queue", LogDebugLevel.High);
+                return;
+            }
+
+            string filenameRoot = moviesToPlay[0];
+
             try
             {
-
-                //Draw the basis of the screen
-                Draw();
-
                 //Load whole movie
                 bool loadSuccess = LoadMovie(filenameRoot);
 
@@ -649,11 +658,11 @@ namespace RogueBasin {
                     return;
                 }
 
-                PlayMovieFrames(keypressBetweenFrames);
+                PlayMovieFrames(false);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to play movie: " + filenameRoot + " : " + ex.Message);
+                LogFile.Log.LogEntryDebug("Failed to play movie: " + filenameRoot + " : " + ex.Message, LogDebugLevel.High);
             }
         }
 
@@ -686,15 +695,17 @@ namespace RogueBasin {
 
                 bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL, width, true);
 
+                //Unsupported at the moment
+                /*
                 if (hasFlashingChars)
                 {
                     //Wait and then redraw without the highlight to make a flash effect
                     Screen.Instance.FlushConsole();
                     mapRenderer.Sleep(movieMSBetweenFrames);
                     DrawMovieFrame(frame.scanLines, frameTL, width, false);
-                }
+                }*/
 
-
+                /*
                 if (keypressBetweenFrames == true)
                 {
                     //Don't ask for a key press if it's the last frame, one will happen below automatically
@@ -710,22 +721,17 @@ namespace RogueBasin {
                 {
                     //Wait for the specified time
 
-                    Screen.Instance.FlushConsole();
+                    
                     mapRenderer.Sleep(movieMSBetweenFrames);
-                }
+                }*/
 
+                Screen.Instance.FlushConsole();
                 frameNo++;
             }
 
             //Print press any key
             PrintLineRect("Press ENTER to continue", frameTL.x + width / 2, frameTL.y + height + 1, width, 1, LineAlignment.Center, titleColor);
 
-            Screen.Instance.FlushConsole();
-
-            //Await keypress then redraw normal screen
-            WaitForEnterKey();
-
-            UpdateNoMsgQueue();
         }
 
         /// <summary>
@@ -1046,6 +1052,8 @@ namespace RogueBasin {
             if (ShowLogList)
                 DrawLogList();
 
+            if(MoviesToPlay())
+                PlayFirstMovieInQueue();
         }
 
         /// <summary>

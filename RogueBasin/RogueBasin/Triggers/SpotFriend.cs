@@ -26,7 +26,7 @@ namespace RogueBasin.Triggers
 
             if (!Triggered)
             {
-                Screen.Instance.PlayMovie("spotFriend", true);
+                Game.Base.PlayMovie("spotFriend", true);
                 Triggered = true;
             }
 

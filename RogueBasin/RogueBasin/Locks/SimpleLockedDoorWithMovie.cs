@@ -27,12 +27,12 @@ namespace RogueBasin.Locks
 
             if (!canDoorBeOpened)
             {
-                Screen.Instance.PlayMovie(cantOpenMovie, true);
+                Game.Base.PlayMovie(cantOpenMovie, true);
                 return false;
             }
             else
             {
-                Screen.Instance.PlayMovie(openMovie, true);
+                Game.Base.PlayMovie(openMovie, true);
                 isOpen = true;
                 return true;
             }

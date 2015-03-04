@@ -30,7 +30,7 @@ namespace RogueBasin.Triggers
 
                 if (Game.Dungeon.Player.PlayItemMovies)
                 {
-                    //Screen.Instance.PlayMovie("helpdungeons", true);
+                    //Game.Base.PlayMovie("helpdungeons", true);
                 }
                 Triggered = true;
             }

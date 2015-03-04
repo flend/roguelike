@@ -53,11 +53,12 @@ namespace TraumaRL
 
         private void ShowIntroMovies()
         {
-            Screen.Instance.PlayMovie("qe_start", true);
+            Game.Base.PlayMovie("qe_start", true);
+            Game.Base.PlayMovie("helpkeys", true);
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                Screen.Instance.PlayMovie("helpkeys", true);
+                Game.Base.PlayMovie("helpkeys", true);
             }
         }
    
@@ -190,9 +191,11 @@ namespace TraumaRL
             Game.Dungeon.Player.LocationLevel = 0;
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
-            //ShowIntroMovies();
-
             rb.StartEventLoop();
+
+            //Movies can only be shown after event loop started
+            ShowIntroMovies();
+                        
             //rb.AdvanceDungeonToNextPlayerTick(false);
         }
     }

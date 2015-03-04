@@ -26,7 +26,7 @@ namespace RogueBasin.Triggers
 
             if (!Triggered)
             {
-                Screen.Instance.PlayMovie("treasureRoom", true);
+                Game.Base.PlayMovie("treasureRoom", true);
                 Triggered = true;
 
                 //Teleport the player to the start location on the final level

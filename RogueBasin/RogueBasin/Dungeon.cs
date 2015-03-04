@@ -1153,7 +1153,7 @@ namespace RogueBasin
             //Play movie
             foreach (SpecialMove m1 in specialMoves)
             {
-                Screen.Instance.PlayMovie(m1.MovieRoot(), false);
+                Game.Base.PlayMovie(m1.MovieRoot(), false);
             }
         }
 
@@ -2631,7 +2631,7 @@ namespace RogueBasin
 
                         if (player.LocationLevel == 0)
                         {
-                            Screen.Instance.PlayMovie("mission0done", true);
+                            Game.Base.PlayMovie("mission0done", true);
                         }
 
                         if (player.LocationLevel == 14)
@@ -2689,7 +2689,7 @@ namespace RogueBasin
                         }
                     }
 
-                    Screen.Instance.PlayMovie("dragondead", true);
+                    Game.Base.PlayMovie("dragondead", true);
 
                     dungeonInfo.DragonDead = true;
                 }*/
@@ -3571,7 +3571,7 @@ namespace RogueBasin
                     if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete)
                     {
                         if(Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeathButCompleted) {
-                            //Screen.Instance.PlayMovie("deadbutnextmission", true);
+                            //Game.Base.PlayMovie("deadbutnextmission", true);
                             PlayedMissionFailedDeathButCompleted = true;
                         }
                         MoveToNextMission();
@@ -3581,7 +3581,7 @@ namespace RogueBasin
                     //If not, reset mission with different seed
                     if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeath)
                     {
-                        //Screen.Instance.PlayMovie("deadretrymission", true);
+                        //Game.Base.PlayMovie("deadretrymission", true);
                         PlayedMissionFailedDeath = true;
                     }
                     ResetCurrentMission(true);
@@ -4340,13 +4340,13 @@ namespace RogueBasin
             //Work out which ending the player gets
             /*
             if (playerWon)
-                Screen.Instance.PlayMovie("traumawin", true);
+                Game.Base.PlayMovie("traumawin", true);
             else
             {
                 if (!playerQuit)
-                    Screen.Instance.PlayMovie("traumalose", true);
+                    Game.Base.PlayMovie("traumalose", true);
                 else
-                    Screen.Instance.PlayMovie("traumaquit", true);
+                    Game.Base.PlayMovie("traumaquit", true);
             }
             */
             //RunMainLoop = false;
@@ -4476,7 +4476,7 @@ namespace RogueBasin
                 //With secondary
                 if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionCompleteWithSecondary)
                 {
-                    //Screen.Instance.PlayMovie("missioncompletewithsecondary", true);
+                    //Game.Base.PlayMovie("missioncompletewithsecondary", true);
                     PlayedMissionCompleteWithSecondary = true;
                 }
                 Game.MessageQueue.AddMessage("Mission COMPLETE (primary + secondary objectives)!");
@@ -4486,7 +4486,7 @@ namespace RogueBasin
                 //Primary only
                 if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionComplete)
                 {
-                    //Screen.Instance.PlayMovie("missioncomplete", true);
+                    //Game.Base.PlayMovie("missioncomplete", true);
                     PlayedMissionComplete = true;
                 }
                 Game.MessageQueue.AddMessage("Mission COMPLETE (primary objectives)!");
@@ -4510,7 +4510,7 @@ namespace RogueBasin
                 //No more aborts allowed
                 if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionNoMoreAborts)
                 {
-                    //Screen.Instance.PlayMovie("nomoreaborts", true);
+                    //Game.Base.PlayMovie("nomoreaborts", true);
                     PlayedMissionNoMoreAborts = true;
                 }
                 Game.MessageQueue.AddMessage("No more aborts permitted.");
@@ -4525,7 +4525,7 @@ namespace RogueBasin
 
             if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionAborted)
             {
-                // Screen.Instance.PlayMovie("missionaborted", true);
+                // Game.Base.PlayMovie("missionaborted", true);
                 PlayedMissionAborted = true;
             }
             Game.MessageQueue.AddMessage("Mission ABORTED.");

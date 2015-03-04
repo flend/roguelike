@@ -25,7 +25,8 @@ namespace RogueBasin
         enum InputState
         {
             MapMovement, Targetting, InventoryShow, InventorySelect,
-            YesNoPrompt
+            YesNoPrompt,
+            MovieDisplay
         }
 
         enum TargettingAction
@@ -476,6 +477,10 @@ namespace RogueBasin
                         YesNoPromptKeyboardEvent(args);
                         break;
 
+                    case InputState.MovieDisplay:
+                        MovieDisplayKeyboardEvent(args);
+                        break;
+
                     //Normal movement on the map
                     case InputState.MapMovement:
 
@@ -520,6 +525,13 @@ namespace RogueBasin
                                 case Key.L:
                                     SetLogScreen();
                                     DisableLogScreen();
+                                    timeAdvances = false;
+                                    break;
+
+                                case Key.Slash:
+                                    Game.Base.PlayMovie("helpkeys", true);
+                                    Game.Base.PlayMovie("endintrgreatheroine", true);
+
                                     timeAdvances = false;
                                     break;
                             }
@@ -571,10 +583,7 @@ namespace RogueBasin
                                     centreOnPC = false;
                                     break;
 
-                                case Key.QuestionMark:
-                                    Screen.Instance.PlayMovie("helpkeys", true);
-                                    timeAdvances = false;
-                                    break;
+
                             }
                         }
 
@@ -1126,6 +1135,18 @@ namespace RogueBasin
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
             }
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+        }
+
+        private void MovieDisplayKeyboardEvent(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.Return)
+            {
+                //Finish movie
+                Screen.Instance.DequeueFirstMovie();
+                //Out of movie mode if no more to display
+                if (!Screen.Instance.MoviesToPlay())
+                    inputState = InputState.MapMovement;
+            }
         }
 
         private void YesNoPromptKeyboardEvent(KeyboardEventArgs args)
@@ -2624,12 +2645,12 @@ namespace RogueBasin
                         {
                             if (charIndex < knownMoves.Count)
                             {
-                                Screen.Instance.PlayMovie(knownMoves[charIndex].MovieRoot(), false);
+                                Game.Base.PlayMovie(knownMoves[charIndex].MovieRoot(), false);
                             }
                             else
                             {
                                 charIndex = charIndex - knownMoves.Count;
-                                Screen.Instance.PlayMovie(knownSpells[charIndex].MovieRoot(), false);
+                                Game.Base.PlayMovie(knownSpells[charIndex].MovieRoot(), false);
                             }
                         }
                     }
@@ -2771,6 +2792,13 @@ namespace RogueBasin
 
             inputState = InputState.YesNoPrompt;
             promptAction = action;
+        }
+
+        public void PlayMovie(string filename, bool keypressBetweenFrames)
+        {
+            inputState = InputState.MovieDisplay;
+            Screen.Instance.PlayMovie(filename, keypressBetweenFrames);
+            Screen.Instance.NeedsUpdate = true;
         }
     }
 }
