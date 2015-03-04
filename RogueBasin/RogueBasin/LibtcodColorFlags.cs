@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
-using libtcodWrapper;
 
 namespace RogueBasin
 {
     class LibtcodColorFlags : TileEngine.TileFlags
     {
-        System.Drawing.Color foregroundColor;
-        System.Drawing.Color backgroundColor;
+        Color foregroundColor;
+        Color backgroundColor;
+        Color transparentColor = Color.FromArgb(255, 0, 255);
 
         /// <summary>
         /// Foreground color only
@@ -17,6 +18,7 @@ namespace RogueBasin
         public LibtcodColorFlags(System.Drawing.Color foregroundColor)
         {
             this.foregroundColor = foregroundColor;
+            this.backgroundColor = transparentColor;
         }
 
         /// <summary>
