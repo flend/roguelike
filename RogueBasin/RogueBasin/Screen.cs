@@ -727,10 +727,13 @@ namespace RogueBasin {
 
                 Screen.Instance.FlushConsole();
                 frameNo++;
+                
+                //Multi-frame unsupported for now, enqueue 3 movies instead
+                break;
             }
 
             //Print press any key
-            PrintLineRect("Press ENTER to continue", frameTL.x + width / 2, frameTL.y + height + 1, width, 1, LineAlignment.Center, titleColor);
+            PrintLineRect("Press ENTER to continue", frameTL.x, frameTL.y + height, width, 1, LineAlignment.Center, titleColor);
 
         }
 
@@ -1329,7 +1332,7 @@ namespace RogueBasin {
         /// </summary>
         void PrintLine(string msg, int x, int y, LineAlignment alignment, System.Drawing.Color color)
         {
-            mapRenderer.PrintString(msg, x, y, alignment, color);
+            mapRenderer.PrintString(msg, x, y, color);
         }
 
         /// <summary>

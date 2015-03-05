@@ -530,7 +530,7 @@ namespace RogueBasin
 
                                 case Key.Slash:
                                     Game.Base.PlayMovie("helpkeys", true);
-                                    Game.Base.PlayMovie("endintrgreatheroine", true);
+                                    Game.Base.PlayMovie("qe_start", true);
 
                                     timeAdvances = false;
                                     break;

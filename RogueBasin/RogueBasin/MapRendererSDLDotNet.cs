@@ -189,9 +189,33 @@ namespace RogueBasin
             videoSurface.Fill(Color.Black);
         }
 
-        public void DrawFrame(int x, int y, int width, int height, bool clear, Color color)
+        public void DrawFrame(int tlx, int tly, int width, int height, bool clear, Color color)
         {
+            if (clear)
+            {
+                videoSurface.Fill(new Rectangle(tlx * spriteSheetWidth, tly * spriteSheetHeight, width * spriteSheetWidth, height * spriteSheetHeight), Color.Black);
+            }
 
+            for (int x = tlx + 1; x < tlx + width - 1; x++)
+            {
+                PutChar(x, tly, '-', color);
+            }
+            for (int x = tlx + 1; x < tlx + width - 1; x++)
+            {
+                PutChar(x, tly + height - 1, '-', color);
+            }
+            for (int y = tly + 1; y < tly + height - 1; y++)
+            {
+                PutChar(tlx, y, '|', color);
+            }
+            for (int y = tly + 1; y < tly + height - 1; y++)
+            {
+                PutChar(tlx + width - 1, y, '|', color);
+            }
+            PutChar(tlx, tly, '+', color);
+            PutChar(tlx + width - 1, tly, '+', color);
+            PutChar(tlx, tly + height - 1, '+', color);
+            PutChar(tlx + width - 1, tly + height - 1, '+', color);
         }
 
         public void PutChar(int x, int y, char c, Color color)
@@ -201,12 +225,21 @@ namespace RogueBasin
             DrawSprite(Convert.ToInt32(c), x, y, color, transparentColor);
         }
 
-        public void PrintStringRect(string msg, int x, int y, int width, int height, libtcodWrapper.LineAlignment alignment, Color color)
+        public void PrintStringRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color)
         {
-            PrintString(msg, x, y, alignment, color);
+            int xCoord = x;
+            int yCoord = y;
+
+            if (alignment == LineAlignment.Center)
+            {
+                xCoord = x + Math.Max(width - msg.Length, 0) / 2;
+                yCoord = y + Math.Max(height - 1, 0) / 2;
+            }
+
+            PrintString(msg, xCoord, yCoord, color);
         }
 
-        public void PrintString(string msg, int x, int y, libtcodWrapper.LineAlignment alignment, Color color)
+        public void PrintString(string msg, int x, int y, Color color)
         {
             // Create the Font Surfaces
             Surface fontSurface = font.Render(msg, color);

@@ -59,7 +59,7 @@ namespace RogueBasin
 
             for (int i = 0; i < preamble.Count; i++)
             {
-                rootConsole.PrintLineRect(preamble[i], preambleTL.x, preambleTL.y + i, Screen.Instance.Width - 2 * preambleTL.x, 1, LineAlignment.Left);
+                rootConsole.PrintLineRect(preamble[i], preambleTL.x, preambleTL.y + i, Screen.Instance.Width - 2 * preambleTL.x, 1, libtcodWrapper.LineAlignment.Left);
             }
 
             int nameYCoord = 5 + preamble.Count + 2;
@@ -84,7 +84,7 @@ namespace RogueBasin
 
             for (int i = 0; i < settingsText.Count; i++)
             {
-                rootConsole.PrintLineRect(settingsText[i], settingsTL.x, settingsTL.y + i, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
+                rootConsole.PrintLineRect(settingsText[i], settingsTL.x, settingsTL.y + i, Screen.Instance.Width - 2 * settingsTL.x, 1, libtcodWrapper.LineAlignment.Left);
             }
 
             //Ask settings questions
@@ -95,7 +95,7 @@ namespace RogueBasin
             //Ask settings questions
             Difficulty = Screen.Instance.DifficultyQuestionWithFrame("Game difficulty: (E)asy / (M)edium / (H)ard?", 8, System.Drawing.Color.Khaki, System.Drawing.Color.MediumSeaGreen);
 
-            rootConsole.PrintLineRect("Generating the station...", settingsTL.x, settingsTL.y + settingsText.Count + 5, Screen.Instance.Width - 2 * settingsTL.x, 1, LineAlignment.Left);
+            rootConsole.PrintLineRect("Generating the station...", settingsTL.x, settingsTL.y + settingsText.Count + 5, Screen.Instance.Width - 2 * settingsTL.x, 1, libtcodWrapper.LineAlignment.Left);
         }
 
         /// <summary>
@@ -116,15 +116,15 @@ namespace RogueBasin
             //Draw title
 
             titleCentre = new Point(screen.Width / 2, screen.Height / 2);
-            rootConsole.PrintLineRect("Welcome to FlatlineRL!", titleCentre.x, titleCentre.y, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("Welcome to FlatlineRL!", titleCentre.x, titleCentre.y, screen.Width, 1, libtcodWrapper.LineAlignment.Center);
 
-            rootConsole.PrintLineRect("7DRL Challenge 2013", titleCentre.x, titleCentre.y + 2, screen.Width, 1, LineAlignment.Center);
-            rootConsole.PrintLineRect("by: flend", titleCentre.x, titleCentre.y + 4, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("7DRL Challenge 2013", titleCentre.x, titleCentre.y + 2, screen.Width, 1, libtcodWrapper.LineAlignment.Center);
+            rootConsole.PrintLineRect("by: flend", titleCentre.x, titleCentre.y + 4, screen.Width, 1, libtcodWrapper.LineAlignment.Center);
 
             //Any key to continue
 
             anyKeyLocation = new Point(screen.Width / 2, screen.Height - 5);
-            rootConsole.PrintLineRect("Press any key to continue", anyKeyLocation.x, anyKeyLocation.y, screen.Width, 1, LineAlignment.Center);
+            rootConsole.PrintLineRect("Press any key to continue", anyKeyLocation.x, anyKeyLocation.y, screen.Width, 1, libtcodWrapper.LineAlignment.Center);
             
             //Update screen
             Screen.Instance.FlushConsole();

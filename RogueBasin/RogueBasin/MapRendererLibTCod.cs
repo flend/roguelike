@@ -170,23 +170,23 @@ namespace RogueBasin
             rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
         }
 
-        public void PrintStringRect(string msg, int x, int y, int width, int height, libtcodWrapper.LineAlignment alignment, System.Drawing.Color color)
+        public void PrintStringRect(string msg, int x, int y, int width, int height, LineAlignment alignment, System.Drawing.Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
 
             rootConsole.ForegroundColor = colorFromSystemColor(color);
-            rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
+            rootConsole.PrintLineRect(msg, x, y, width, height, LineAlignmentToTCOD(alignment));
             rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
         }
 
-        public void PrintString(string msg, int x, int y, libtcodWrapper.LineAlignment alignment, System.Drawing.Color color)
+        public void PrintString(string msg, int x, int y, System.Drawing.Color color)
         {
             //Get screen handle
             RootConsole rootConsole = RootConsole.GetInstance();
             rootConsole.ForegroundColor = colorFromSystemColor(color);
 
-            rootConsole.PrintLine(msg, x, y, alignment);
+            rootConsole.PrintLine(msg, x, y, libtcodWrapper.LineAlignment.Left);
             rootConsole.ForegroundColor = libtcodWrapper.ColorPresets.White;
         }
 
@@ -196,6 +196,21 @@ namespace RogueBasin
             RootConsole rootConsole = RootConsole.GetInstance();
 
             rootConsole.DrawRect(x, y, width, height, true);
+        }
+
+        private libtcodWrapper.LineAlignment LineAlignmentToTCOD(LineAlignment align) {
+
+            if (align == LineAlignment.Center)
+            {
+                return libtcodWrapper.LineAlignment.Center;
+            }
+
+            if (align == LineAlignment.Right)
+            {
+                return libtcodWrapper.LineAlignment.Right;
+            }
+
+            return libtcodWrapper.LineAlignment.Left;
         }
     }
 }
