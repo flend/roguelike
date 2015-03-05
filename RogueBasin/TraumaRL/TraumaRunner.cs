@@ -195,8 +195,7 @@ namespace TraumaRL
 
             //Movies can only be shown after event loop started
             ShowIntroMovies();
-                        
-            //rb.AdvanceDungeonToNextPlayerTick(false);
+            
         }
     }
 }

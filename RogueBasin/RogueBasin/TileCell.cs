@@ -12,6 +12,16 @@ namespace TileEngine
         }
     }
 
+    class Animation
+    {
+        public Animation(int durationMS) {
+            DurationMS = durationMS;
+        }
+
+        public int DurationMS { get; set; }
+        public int CurrentFrame { get; set; }
+    }
+
     class TileCell
     {
         /// <summary>
@@ -36,6 +46,12 @@ namespace TileEngine
             {
                 flags = value;
             }
+        }
+
+        public Animation Animation
+        {
+            get;
+            set;
         }
 
         public TileCell()

@@ -115,6 +115,14 @@ namespace RogueBasin
             Events.Run();
         }
 
+        bool firstRun = true;
+
+        public void InitializeScreen()
+        {
+            Screen.Instance.NeedsUpdate = true;
+            Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+        }
+
         private void ApplicationQuitEventHandler(object sender, QuitEventArgs args)
         {
             //Do any final cleanup
@@ -129,6 +137,9 @@ namespace RogueBasin
         {
             ProfileEntry("Tick Event");
 
+            //LogFile.Log.LogEntryDebug("FPS: " + args.Fps, LogDebugLevel.Medium);
+            //LogFile.Log.LogEntryDebug("FPS tick: " + args.Tick, LogDebugLevel.Medium);
+
             if (!Game.Dungeon.RunMainLoop)
             {
                 Events.QuitApplication();
@@ -136,13 +147,16 @@ namespace RogueBasin
 
             AdvanceDungeonToNextPlayerTick();
 
-            if (Screen.Instance.NeedsUpdate)
-            {
-                ProfileEntry("Tick Update Film");
+            ProfileEntry("Tick Update Film");
 
-                Screen.Instance.Update();
+            if (firstRun)
+            {
+                //Should be called as a one-off earlier
+                InitializeScreen();
+                firstRun = false;
             }
 
+            Screen.Instance.Update(args.TicksElapsed);
         }
 
         private void KeyboardEventHandler(object sender, KeyboardEventArgs args)
@@ -181,7 +195,6 @@ namespace RogueBasin
             var dungeon = Game.Dungeon;
             var player = Game.Dungeon.Player;
 
-            bool centreOnPC = true;
             bool playerNotReady = true;
 
             if (!waitingForTurnTick)
@@ -207,7 +220,7 @@ namespace RogueBasin
                         DungeonActions();
 
                     //Advance time for the PC
-                    playerNotReady = !PlayerActions(centreOnPC);
+                    playerNotReady = !PlayerActions();
 
                     //Reset the creature FOV display
                     Game.Dungeon.ResetCreatureFOVOnMap();
@@ -230,14 +243,21 @@ namespace RogueBasin
 
         private bool ProcessKeypress(KeyboardEventArgs args)
         {
+            var player = Game.Dungeon.Player;
+
             try
             {
                 //Deal with PCs turn as appropriate
-                bool timeAdvances = false;
 
                 var inputResult = UserInput(args);
-                timeAdvances = inputResult.Item1;
-                //centreOnPC = inputResult.Item2;
+                bool timeAdvances = inputResult.Item1;
+                bool centreOnPC = inputResult.Item2;
+
+                //Update the view point before any drawing occurs (some drawing is done ad-hoc during the monster's turn directly onto the viewport)
+                if (centreOnPC)
+                {
+                    Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
+                }
 
                 //Currently update on all keypresses
                 Screen.Instance.NeedsUpdate = true;
@@ -253,7 +273,7 @@ namespace RogueBasin
             return false;
         }
 
-        private bool PlayerActions(bool centreOnPC)
+        private bool PlayerActions()
         {
             //PC turn
             Player player = Game.Dungeon.Player;
@@ -297,9 +317,6 @@ namespace RogueBasin
                     //Do any targetting maintenance
                     if (Screen.Instance.TargetSelected())
                         CheckTargetInPlayerFOV(playerFOV);
-
-                    if (centreOnPC)
-                        Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
 
                     //Player has taken turn so update screen
                     Screen.Instance.NeedsUpdate = true;
@@ -1090,6 +1107,7 @@ namespace RogueBasin
                         {
                             Screen.Instance.ViewportScrollSpeed = 4;
                             Screen.Instance.ScrollViewport(direction);
+                            centreOnPC = false;
                         }
 
                         if (Game.Config.DebugMode)
@@ -1097,11 +1115,16 @@ namespace RogueBasin
                             if (wasDirection && mod == KeyModifier.Arrow && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
                             {
                                 if (direction == new Point(0, -1))
+                                {
                                     ScreenLevelUp();
+                                    centreOnPC = false;
+                                }
 
                                 if (direction == new Point(0, 1))
+                                {
                                     ScreenLevelDown();
-
+                                    centreOnPC = false;
+                                }
                             }
                         }
                         //  }
@@ -1742,7 +1765,7 @@ namespace RogueBasin
         {
             //Ask user for a direction
             Game.MessageQueue.AddMessage("Select a direction:");
-            Screen.Instance.Update();
+            Screen.Instance.Update(0);
 
             //Get direction
             Point direction = new Point(0, 0);
@@ -1773,7 +1796,7 @@ namespace RogueBasin
         {
             //Ask user for a direction
             Game.MessageQueue.AddMessage("Select a direction:");
-            Screen.Instance.Update();
+            Screen.Instance.Update(0);
 
             //Get direction
             Point direction = new Point(0, 0);
@@ -1804,7 +1827,7 @@ namespace RogueBasin
         {
             //Ask user for a direction
             Game.MessageQueue.AddMessage("Select a direction:");
-            Screen.Instance.Update();
+            Screen.Instance.Update(0);
 
             //Get direction
             Point direction = new Point(0, 0);
@@ -1828,7 +1851,7 @@ namespace RogueBasin
         {
             //Ask user for a direction
             Game.MessageQueue.AddMessage("Select a direction:");
-            Screen.Instance.Update();
+            Screen.Instance.Update(0);
 
             //Get direction
             Point direction = new Point(0, 0);
@@ -2317,7 +2340,7 @@ namespace RogueBasin
         {
             //Select a spell to cast
 
-            Screen.Instance.Update();
+            Screen.Instance.Update(0);
 
             //Player presses a key from a-w to select a spell
 
@@ -2359,7 +2382,7 @@ namespace RogueBasin
 
             //Select a spell to cast
 
-            Screen.Instance.Update();
+            Screen.Instance.Update(0);
 
             if (selectedSpell == -1)
                 return null;
@@ -2459,7 +2482,6 @@ namespace RogueBasin
             }
 
             Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
-            Screen.Instance.Update();
 
             inputState = InputState.Targetting;
             currentTarget = start;

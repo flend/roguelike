@@ -23,8 +23,8 @@ namespace RogueBasin {
             Items = 2,
             CreatureDecoration = 3,
             Creatures = 4,
-            Animations = 5,
-            TargettingUI = 6
+            TargettingUI = 5,
+            Animations = 6
         }
 
         static Screen instance = null;
@@ -167,6 +167,8 @@ namespace RogueBasin {
 
         Point movieTL = new Point(0, 0);
         uint movieMSBetweenFrames = 500;
+
+        int combationAnimationFrameDuration = 200; //ms
 
         /// <summary>
         /// Targetting mode
@@ -477,6 +479,10 @@ namespace RogueBasin {
 
                 tileMapLayer(layerNo)[ViewRelative(p)] = new TileEngine.TileCell(c);
                 tileMapLayer(layerNo)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+                if (layerNo == TileLevel.Animations)
+                {
+                    tileMapLayer(layerNo)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
+                }
             }           
         }
 
@@ -990,7 +996,17 @@ namespace RogueBasin {
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
-            tileMap = new TileEngine.TileMap(7, ViewableHeight, ViewableWidth);
+            if(tileMap == null)
+                tileMap = new TileEngine.TileMap(7, ViewableHeight, ViewableWidth);
+
+            tileMap.ClearLayer(TileLevel.Terrain);
+            tileMap.ClearLayer(TileLevel.Features);
+            tileMap.ClearLayer(TileLevel.Creatures);
+            tileMap.ClearLayer(TileLevel.CreatureDecoration);
+            tileMap.ClearLayer(TileLevel.Items);
+            tileMap.ClearLayer(TileLevel.TargettingUI);
+
+            //Don't clear the animations layer
 
             int levelToDisplay = LevelToDisplay;
 
@@ -1024,7 +1040,6 @@ namespace RogueBasin {
         //Draw the current dungeon map and objects
         private void Draw()
         {
-
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
@@ -1060,7 +1075,7 @@ namespace RogueBasin {
         }
 
         /// <summary>
-        /// Draws an animated attack. This a top level function which is used instead of Draw() as an entry to screen
+        /// Draws an animated attack.
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="target"></param>
@@ -1074,11 +1089,6 @@ namespace RogueBasin {
                 mangledPoints.Add(new Point(p));
             }
 
-            //Don't rebuild the static map (items, creatures etc.) since it hasn't changed
-            
-            //Clear targetting
-            tileMap.ClearLayer((int)TileLevel.TargettingUI);
-
             //Add animation points into the animation layer
 
             foreach (Point p in mangledPoints)
@@ -1088,21 +1098,9 @@ namespace RogueBasin {
 
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, System.Drawing.Color.Black);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
+
             }
-
-            //Render the full layered map (with these animations) on screen
-            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
-
-            //Wait
-            mapRenderer.Sleep(missileDelay);
-
-            //Wipe the animation layer
-            tileMap.ClearLayer((int)TileLevel.Animations);
-
-            //Draw again without animations
-            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
         }
 
 
@@ -3188,9 +3186,15 @@ namespace RogueBasin {
         /// <summary>
         /// Draw the screen and run the message queue
         /// </summary>
-        public void Update()
+        public void Update(int tickIncrement)
         {
-            if (NeedsUpdate)
+            Boolean animationUpdate = false;
+
+            //Expire any temporary animations
+            animationUpdate = UpdateAnimations(tickIncrement);
+
+            //Rerender tiles if user events has occurred or an animation has expired
+            if (NeedsUpdate || animationUpdate)
             {
                 //Draw screen 
                 Draw();
@@ -3206,10 +3210,50 @@ namespace RogueBasin {
                     //(in same area as prompt)
                     Game.MessageQueue.RunMessageQueue();
                 }
-                FlushConsole();
-
                 NeedsUpdate = false;
+
+                FlushConsole();
             }
+        }
+
+        public bool UpdateAnimations(int tickIncrement)
+        {
+            //May be called before map made
+            if (tileMap == null)
+                return false;
+
+            var animationChangeOccurred = false;
+            var animationLayer = tileMapLayer(TileLevel.Animations);
+
+            for (int i = 0; i < tileMap.Rows; i++)
+            {
+                for (int j = 0; j < tileMap.Columns; j++)
+                {
+                    TileEngine.TileCell thisCell = animationLayer.Rows[i].Columns[j];
+
+                    if (thisCell.TileID == -1)
+                        continue;
+
+                    TileEngine.Animation cellAnimation = thisCell.Animation;
+
+                    if (cellAnimation == null)
+                    {
+                        LogFile.Log.LogEntryDebug("Cell animation at row: " + i + " column " + j + "is null", LogDebugLevel.High);
+                        continue;
+                    }
+
+                    cellAnimation.CurrentFrame += tickIncrement;
+                    if (cellAnimation.CurrentFrame > cellAnimation.DurationMS)
+                    {
+                        thisCell.TileID = -1;
+                        thisCell.Animation = null;
+                        animationChangeOccurred = true;
+                    }
+                }
+            }
+
+            return animationChangeOccurred;
+
         }
 
         private void DrawPrompt()
@@ -3245,18 +3289,6 @@ namespace RogueBasin {
             if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
                 return;
             
-            //Draw the screen as normal
-            Draw();
-            FlushConsole();
-
-            //Flash the attacker
-            /*
-            if (creatureSquare.InPlayerFOV)
-            {
-                rootConsole.ForegroundColor = System.Drawing.Color.White;
-                rootConsole.PutChar(mapTopLeft.x + originCreature.LocationMap.x, mapTopLeft.y + originCreature.LocationMap.y, originCreature.Representation);
-            }*/
-
             //Draw animation to animation layer
 
             //Calculate and draw the line overlay
@@ -3282,22 +3314,10 @@ namespace RogueBasin {
                 {
                     tileMapLayer(TileLevel.Animations)[ViewRelative(target.LocationMap)] = new TileEngine.TileCell(target.Representation);
                     tileMapLayer(TileLevel.Animations)[ViewRelative(target.LocationMap)].TileFlag = new LibtcodColorFlags(colorToDraw);
+                    tileMapLayer(TileLevel.Animations)[ViewRelative(target.LocationMap)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
+
                 }
             }
-
-            //Render the full layered map (with these animations) on screen
-            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
-
-            //Wait
-            mapRenderer.Sleep(missileDelay);
-
-            //Wipe the animation layer
-            tileMap.ClearLayer((int)TileLevel.Animations);
-
-            //Draw the map normally
-            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();  
         }
 
         /// <summary>
@@ -3318,22 +3338,6 @@ namespace RogueBasin {
             if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
                 return;
 
-            //Draw screen normally
-            //Necessary since on a player move, his old position will show unless we do this
-            Draw();
-            FlushConsole();
-
-            //Flash the attacker
-            /*
-            Color creatureColor = creature.RepresentationColor();
-
-            if (creatureSquare.InPlayerFOV)
-            {
-                rootConsole.ForegroundColor = System.Drawing.Color.White;
-                rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
-            }
-            */
-
             //Flash the attacked creature
             //Add flash to animation layer
 
@@ -3345,23 +3349,10 @@ namespace RogueBasin {
                     {
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.Representation);
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
                     }
                 }
             }
-
-            //Render the full layered map (with these animations) on screen
-            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
-
-            //Wait
-            mapRenderer.Sleep(meleeDelay);
-
-            //Wipe the animation layer
-            tileMap.ClearLayer((int)TileLevel.Animations);
-                        
-            //Draw the map normally
-            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
         }
 
 
@@ -3378,6 +3369,11 @@ namespace RogueBasin {
         internal void SetPrompt(string p)
         {
             Prompt = p;
+        }
+
+        internal void UpdateAnimations()
+        {
+            throw new NotImplementedException();
         }
     }
 }

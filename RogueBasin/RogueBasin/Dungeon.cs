@@ -2468,7 +2468,6 @@ namespace RogueBasin
                 KillMonster(m, false);
 
                 Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, randColor);
-                Screen.Instance.Update();
             }
         }
         /// <summary>
