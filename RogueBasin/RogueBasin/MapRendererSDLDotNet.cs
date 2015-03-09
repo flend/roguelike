@@ -28,6 +28,24 @@ namespace RogueBasin
         }
     }
 
+    class SpriteCacheEntry
+    {
+        public string StrId { get; set; }
+
+        public override bool Equals(object other)
+        {
+            var otherFoo = other as SpriteCacheEntry;
+            if (otherFoo == null)
+                return false;
+            return StrId == otherFoo.StrId;
+        }
+
+        public override int GetHashCode()
+        {
+            return 17 * StrId.GetHashCode();
+        }
+    }
+
     /// <summary>
     /// Renders a multi-layer tile map onto the screen
     /// </summary>
@@ -35,18 +53,24 @@ namespace RogueBasin
     {
         SdlDotNet.Graphics.Font font;
         Dictionary<SurfaceCacheEntry, Surface> surfaceCache = new Dictionary<SurfaceCacheEntry,Surface>();
+        Dictionary<SpriteCacheEntry, Surface> spriteCache = new Dictionary<SpriteCacheEntry, Surface>();
 
         private Color transparentColor = Color.FromArgb(255, 0, 255);
 
         private Surface videoSurface;
         private Surface spriteSheet;
-        private int videoWidth = 960;
-        private int videoHeight = 720;
+        private int videoWidth = 1024;
+        private int videoHeight = 768;
         private int spritesPerRow = 16;
         private int spriteSheetWidth = 16;
         private int spriteSheetHeight = 16;
-        private int spriteVideoWidth = 16;
-        private int spriteVideoHeight = 16;
+        private int spriteVideoWidth = 32;
+        private int spriteVideoHeight = 32;
+
+        private double xScale = 1.0;
+        private double yScale = 1.0;
+
+        private int traumaSpriteScaling = 2;
 
         /// <summary>
         /// Render the map, with TL in map at mapOffset. Screenviewport is the screen viewport in tile dimensions (for now)
@@ -56,7 +80,6 @@ namespace RogueBasin
         /// <param name="screenViewport"></param>
         public void RenderMap(TileEngine.TileMap mapToRender, Point mapOffset, Rectangle screenViewport)
         {
-
             if (mapOffset.x >= mapToRender.Columns || mapOffset.y >= mapToRender.Rows)
             {
                 throw new Exception("Point outside map " + mapOffset);
@@ -127,16 +150,31 @@ namespace RogueBasin
             surfaceCache.TryGetValue(entry, out spriteSurface);
             if (spriteSurface == null)
             {
-                spriteSurface = new Surface(spriteVideoWidth, spriteVideoHeight);
-                spriteSurface.Blit(spriteSheet,
+                Surface tempSpriteSurface = new Surface(spriteSheetWidth, spriteSheetHeight);
+
+                tempSpriteSurface.Blit(spriteSheet,
                     new System.Drawing.Point(0, 0),
                     new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
 
                 if (foregroundColor != Color.White)
-                    spriteSurface.ReplaceColor(Color.White, foregroundColor);
+                    tempSpriteSurface.ReplaceColor(Color.White, foregroundColor);
                 if (backgroundColor != transparentColor)
-                    spriteSurface.ReplaceColor(transparentColor, backgroundColor);
+                    tempSpriteSurface.ReplaceColor(transparentColor, backgroundColor);
 
+                spriteSurface = tempSpriteSurface;
+
+                if (traumaSpriteScaling > 1)
+                {
+                    if (traumaSpriteScaling == 2)
+                    {
+                        spriteSurface = tempSpriteSurface.CreateScaleDoubleSurface(false);
+                    }
+                    else
+                    {
+                        spriteSurface = tempSpriteSurface.CreateScaledSurface(traumaSpriteScaling, false);
+                    }
+                }
+                
                 //Set this after doing background replacement
                 spriteSurface.Transparent = true;
                 spriteSurface.TransparentColor = transparentColor;
@@ -149,8 +187,50 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("Drawing sprite " + id + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
                 + screenX + "/" + screenY, LogDebugLevel.Profiling);
 
-            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY),
-                new Rectangle(new System.Drawing.Point(0, 0), new Size(spriteSheetWidth, spriteSheetHeight)));
+            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY));
+        }
+
+        private string GameSpritePath(string id)
+        {
+            return "graphics/game/" + id + ".png";
+        }
+
+        private string UISpritePath(string id)
+        {
+            return "graphics/ui" + id + ".png";
+        }
+
+        public void DrawUISprite(string id, int x, int y)
+        {
+            DrawSprite(UISpritePath(id), x, y);
+        }
+
+        /// <summary>
+        /// Draw sprite in absolute screen coordinates
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void DrawSprite(string filePath, int x, int y)
+        {
+            SpriteCacheEntry entry = new SpriteCacheEntry();
+            entry.StrId = filePath;
+
+            Surface spriteSurface;
+            spriteCache.TryGetValue(entry, out spriteSurface);
+            
+            if (spriteSurface == null)
+            {
+                Surface sprite = new Surface(filePath).Convert(videoSurface, true, true);
+
+                sprite.Transparent = true;
+
+                spriteCache.Add(entry, sprite);
+
+                LogFile.Log.LogEntryDebug("Storing ui sprite" + filePath, LogDebugLevel.Profiling);
+            }
+
+            videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
         }
 
         private System.Drawing.Point tileIDToSpriteLocation(int tileID)

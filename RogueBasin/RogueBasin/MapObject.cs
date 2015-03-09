@@ -124,6 +124,24 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Name of the UI sprite, without path or .png
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetUISprite()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Name of the game sprite, without path or .png
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetGameSprite()
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Return true if this object and other are in the same place (level and square)
         /// </summary>
         /// <param name="other"></param>

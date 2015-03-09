@@ -258,9 +258,6 @@
     <Compile Include="Items\ShotgunTypeWeapon.cs" />
     <Compile Include="Locks\SimpleOptionalLockedDoorWithMovie.cs" />
     <Compile Include="IMapRenderer.cs" />
-    <Compile Include="MapRendererLibTCod.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="MapRendererSDLDotNet.cs" />
     <Compile Include="MonsterPlacement.cs" />
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
@@ -306,6 +303,7 @@
     <Compile Include="Locks\SimpleLockedDoorWithMovie.cs" />
     <Compile Include="LogGenerator.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
+    <Compile Include="SpriteMapping.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />

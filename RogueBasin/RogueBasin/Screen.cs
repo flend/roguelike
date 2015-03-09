@@ -35,7 +35,7 @@ namespace RogueBasin {
         //A prompt for the user to respond to
         string Prompt { get; set; }
 
-        //Console/screen size
+        //Console size
         public int Width { get; set; }
         public int Height { get; set; }
 
@@ -235,11 +235,11 @@ namespace RogueBasin {
         {
             mapRenderer = renderer;
 
-            Width = 60;
-            Height = 35;
+            Width = 32;
+            Height = 24;
 
-            ViewableWidth = 37;
-            ViewableHeight = 27;
+            ViewableWidth = 32;
+            ViewableHeight = 24;
 
             ViewportScrollSpeed = 1;
 
@@ -258,8 +258,8 @@ namespace RogueBasin {
 
             msgDisplayNumLines = 3;
 
-            mapTopLeftBase = new Point(2, 6);
-            mapBotRightBase = new Point(38, 32);
+            mapTopLeftBase = new Point(0, 0);
+            mapBotRightBase = new Point(31, 23);
 
             statsDisplayTopLeft = new Point(40, 6);
             statsDisplayBotRight = new Point(57, 32);
@@ -2595,10 +2595,10 @@ namespace RogueBasin {
             int heightAvail = mapBotRightBase.y - mapTopLeftBase.y;
 
             //Draw frame
-            DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, mapFrameColor);
+            //DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, mapFrameColor);
 
             //Draw frame for msg here too
-            DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false, statsFrameColor);
+            //DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false, statsFrameColor);
 
             //Put the map in the centre
             //mapTopLeft = new Point(mapTopLeftBase.x + (widthAvail - width) / 2, mapTopLeftBase.y + (heightAvail - height) / 2);
