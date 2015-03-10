@@ -85,6 +85,30 @@ namespace RogueBasin
             }
         }
 
+        public String UISprite
+        {
+            get
+            {
+                if (GetUISprite() == null)
+                {
+                    return null; //better to return a default
+                }
+                return GetUISprite();
+            }
+        }
+
+        public String GameSprite
+        {
+            get
+            {
+                if (GetGameSprite() == null)
+                {
+                    return null; //better to return a default
+                }
+                return GetGameSprite();
+            }
+        }
+
         /// <summary>
         /// Character for the monster's heading. Can be overriden in derived classes.
         /// </summary>

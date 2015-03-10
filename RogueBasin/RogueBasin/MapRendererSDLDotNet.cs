@@ -146,6 +146,18 @@ namespace RogueBasin
             entry.ForegroundColor = foregroundColor;
             entry.BackgroundColor = backgroundColor;
 
+            Surface spriteSurface = GetTraumaSprite(entry);
+
+            //LogFile.Log.LogEntryDebug("Drawing sprite " + id + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
+            //    + screenX + "/" + screenY, LogDebugLevel.Profiling);
+
+            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY));
+        }
+
+        private Surface GetTraumaSprite(SurfaceCacheEntry entry)
+        {
+            var spriteLoc = tileIDToSpriteLocation(entry.Id);
+
             Surface spriteSurface;
             surfaceCache.TryGetValue(entry, out spriteSurface);
             if (spriteSurface == null)
@@ -156,10 +168,10 @@ namespace RogueBasin
                     new System.Drawing.Point(0, 0),
                     new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
 
-                if (foregroundColor != Color.White)
-                    tempSpriteSurface.ReplaceColor(Color.White, foregroundColor);
-                if (backgroundColor != transparentColor)
-                    tempSpriteSurface.ReplaceColor(transparentColor, backgroundColor);
+                if (entry.ForegroundColor != Color.White)
+                    tempSpriteSurface.ReplaceColor(Color.White, entry.ForegroundColor);
+                if (entry.BackgroundColor != transparentColor)
+                    tempSpriteSurface.ReplaceColor(transparentColor, entry.BackgroundColor);
 
                 spriteSurface = tempSpriteSurface;
 
@@ -174,20 +186,16 @@ namespace RogueBasin
                         spriteSurface = tempSpriteSurface.CreateScaledSurface(traumaSpriteScaling, false);
                     }
                 }
-                
+
                 //Set this after doing background replacement
                 spriteSurface.Transparent = true;
                 spriteSurface.TransparentColor = transparentColor;
 
                 surfaceCache.Add(entry, spriteSurface);
 
-                LogFile.Log.LogEntryDebug("Rendering sprite" + id, LogDebugLevel.Profiling);
+                LogFile.Log.LogEntryDebug("Rendering sprite" + entry.Id, LogDebugLevel.Profiling);
             }
-
-            LogFile.Log.LogEntryDebug("Drawing sprite " + id + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
-                + screenX + "/" + screenY, LogDebugLevel.Profiling);
-
-            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY));
+            return spriteSurface;
         }
 
         private string GameSpritePath(string id)
@@ -197,12 +205,37 @@ namespace RogueBasin
 
         private string UISpritePath(string id)
         {
-            return "graphics/ui" + id + ".png";
+            return "graphics/ui/" + id + ".png";
         }
 
         public void DrawUISprite(string id, int x, int y)
         {
             DrawSprite(UISpritePath(id), x, y);
+        }
+
+        public void DrawTraumaSprite(int id, int x, int y)
+        {
+            SurfaceCacheEntry entry = new SurfaceCacheEntry();
+            entry.Id = id;
+            entry.ForegroundColor = Color.Wheat;
+            entry.BackgroundColor = Color.Black;
+
+            Surface traumaSprite = GetTraumaSprite(entry);
+
+            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));
+        }
+
+        public Size GetUISpriteDimensions(string id)
+        {
+            SpriteCacheEntry entry = new SpriteCacheEntry();
+            entry.StrId = UISpritePath(id);
+
+            return GetSpriteFromCache(entry).Size;
+        }
+
+        public Size GetTraumaSpriteDimensions(int id)
+        {
+            return new Size(spriteVideoWidth, spriteVideoHeight);
         }
 
         /// <summary>
@@ -216,21 +249,26 @@ namespace RogueBasin
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = filePath;
 
-            Surface spriteSurface;
-            spriteCache.TryGetValue(entry, out spriteSurface);
-            
-            if (spriteSurface == null)
-            {
-                Surface sprite = new Surface(filePath).Convert(videoSurface, true, true);
-
-                sprite.Transparent = true;
-
-                spriteCache.Add(entry, sprite);
-
-                LogFile.Log.LogEntryDebug("Storing ui sprite" + filePath, LogDebugLevel.Profiling);
-            }
+            Surface spriteSurface = GetSpriteFromCache(entry);
 
             videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
+        }
+
+        private Surface GetSpriteFromCache(SpriteCacheEntry entry)
+        {
+            Surface spriteSurface;
+            spriteCache.TryGetValue(entry, out spriteSurface);
+
+            if (spriteSurface == null)
+            {
+                //Convert knocks out alpha for some goddamn reason
+                spriteSurface = new Surface(entry.StrId);//.Convert(videoSurface, true, false);
+
+                spriteCache.Add(entry, spriteSurface);
+
+                LogFile.Log.LogEntryDebug("Storing ui sprite" + entry.StrId, LogDebugLevel.Profiling);
+            }
+            return spriteSurface;
         }
 
         private System.Drawing.Point tileIDToSpriteLocation(int tileID)
@@ -252,6 +290,7 @@ namespace RogueBasin
         public void Setup(int width, int height)
         {
             videoSurface = Video.SetVideoMode(videoWidth, videoHeight, 32, false, false, false, true);
+            videoSurface.AlphaBlending = true;
 
             spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
 

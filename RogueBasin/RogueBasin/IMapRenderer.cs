@@ -31,5 +31,11 @@ namespace RogueBasin
         void ClearRect(int x, int y, int width, int height);
 
         void DrawUISprite(string id, int x, int y);
+
+        void DrawTraumaSprite(int id, int x, int y);
+
+        Size GetUISpriteDimensions(string id);
+
+        Size GetTraumaSpriteDimensions(int id);
     }
 }

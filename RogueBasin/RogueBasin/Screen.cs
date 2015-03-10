@@ -7,6 +7,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Reflection;
 using System.Linq;
+using System.Drawing;
 
 namespace RogueBasin {
 
@@ -38,6 +39,9 @@ namespace RogueBasin {
         //Console size
         public int Width { get; set; }
         public int Height { get; set; }
+
+        public int ScreenWidth { get; set; }
+        public int ScreenHeight { get; set; }
 
         public bool DebugMode { get; set; }
 
@@ -234,6 +238,9 @@ namespace RogueBasin {
         Screen(IMapRenderer renderer)
         {
             mapRenderer = renderer;
+
+            ScreenWidth = 1024;
+            ScreenHeight = 768;
 
             Width = 32;
             Height = 24;
@@ -944,7 +951,7 @@ namespace RogueBasin {
 
         private System.Drawing.Color ColorInterpolate(System.Drawing.Color from, System.Drawing.Color to, double degree)
         {
-            libtcodWrapper.Color interpolated = Color.Interpolate(Color.FromRGB(from.R, from.G, from.B), Color.FromRGB(to.R, to.G, to.B), degree);
+            libtcodWrapper.Color interpolated = libtcodWrapper.Color.Interpolate(libtcodWrapper.Color.FromRGB(from.R, from.G, from.B), libtcodWrapper.Color.FromRGB(to.R, to.G, to.B), degree);
             return System.Drawing.Color.FromArgb(interpolated.Red, interpolated.Blue, interpolated.Green);
         }
 
@@ -1059,7 +1066,8 @@ namespace RogueBasin {
             mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
             //Draw Stats
-            DrawStats(dungeon.Player);
+            //DrawStats(dungeon.Player);
+            DrawUI();
 
             if (ShowMsgHistory)
                 DrawMsgHistory();
@@ -1565,6 +1573,141 @@ namespace RogueBasin {
                 Screen.Instance.FlushConsole();
 
             } while (keepLooping);
+        }
+
+        private void DrawUISpriteByCentre(string id, int xCenter, int yCentre) {
+            Size spriteDim = UISpriteSize(id);
+            DrawUISprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
+        }
+
+        private void DrawTraumaSpriteByCentre(int id, int xCenter, int yCentre) {
+            Size spriteDim = TraumaSpriteSize(id);
+            DrawTraumaSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
+        }
+
+        private void DrawUISpriteByCentre(string id, System.Drawing.Point point) {
+            DrawUISpriteByCentre(id, point.X, point.Y);
+        }
+
+        System.Drawing.Point rangedWeaponUICenter = new System.Drawing.Point(160, 152);
+
+        private void DrawGraduatedBar(string id, double fullness, Rectangle barArea, double spacing)
+        {
+            //This isn't quite right since it ends with a gap
+            Size barSize = UISpriteSize(id);
+            double barSpacing = (barSize.Width * (1.0 + spacing));
+            double oneBarProportion = barSpacing / barArea.Width;
+            int barsToDraw = (int)Math.Floor(fullness / oneBarProportion);
+
+            for (int i = 0; i < barsToDraw; i++)
+            {
+                int x = barArea.X + (int)Math.Floor(i * barSpacing);
+                DrawUISprite(id, x, barArea.Y);
+            }
+        }
+
+        System.Drawing.Point leftUI_TL;
+        System.Drawing.Point rightUI_TL;
+
+        private void DrawUI()
+        {
+
+            //Draw the UI background
+            Size uiLeftDim = UISpriteSize("ui_left");
+            leftUI_TL = new System.Drawing.Point(0, ScreenHeight - uiLeftDim.Height);
+
+            DrawUISprite("ui_left", leftUI_TL.X, leftUI_TL.Y);
+
+            Size uiRightDim = UISpriteSize("ui_right");
+            rightUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
+
+            DrawUISprite("ui_right", rightUI_TL.X, rightUI_TL.Y);
+
+            //Draw equipped weapon
+            Player player = Game.Dungeon.Player;
+
+            Item weapon = player.GetEquippedWeaponAsItem();
+
+            if (weapon != null)
+            {
+                IEquippableItem weaponE = weapon as IEquippableItem;
+
+                String weaponSpriteId = weapon.UISprite;
+
+                if (weaponSpriteId != null)
+                {
+                    DrawUISpriteByCentre(weaponSpriteId, leftUI_TL.X + rangedWeaponUICenter.X, leftUI_TL.Y + rangedWeaponUICenter.Y);
+                }
+                else
+                {
+                    DrawTraumaSpriteByCentre(weapon.Representation, leftUI_TL.X + rangedWeaponUICenter.X, leftUI_TL.Y + rangedWeaponUICenter.Y);
+                }
+            }
+
+            //Draw Shield
+            double playerShieldRatio = player.Shield / (double)player.MaxShield;
+            DrawGraduatedBar("shieldbar", playerShieldRatio, new Rectangle(leftUI_TL.X + 49, leftUI_TL.Y + 70, 266, 12), 0.2);
+
+            //Draw HP
+            double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
+            DrawGraduatedBar("healthbar", playerHPRatio, new Rectangle(leftUI_TL.X + 49, leftUI_TL.Y + 92, 266, 12), 0.2);
+
+            DrawFocusWindow();
+        }
+
+        private void DrawFocusWindow()
+        {
+            Player player = Game.Dungeon.Player;
+
+            System.Drawing.Point rightUIIconCentre = new System.Drawing.Point(90, 152);
+
+            if (CreatureToView != null && CreatureToView.Alive == true)
+            {
+                /*
+                //Combat vs player
+
+                var cover = player.GetPlayerCover(CreatureToView);
+                if (cover.Item1 > 0)
+                {
+                    PrintLine("(hard cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, System.Drawing.Color.Gold);
+                }
+                else if (cover.Item2 > 0)
+                {
+                    PrintLine("(soft cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
+                }
+                */
+                //PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, statsColor);
+                //var cover = player.GetPlayerCover(CreatureToView);
+                //PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
+
+                //Monster hp
+                double enemyHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
+                DrawGraduatedBar("healthbar", enemyHPRatio, new Rectangle(rightUI_TL.X + 10, rightUI_TL.Y + 90, 70, 10), 0.2);
+
+                //Creature picture.Representatio
+                DrawTraumaSpriteByCentre(CreatureToView.Representation, rightUI_TL.X + rightUIIconCentre.X, rightUI_TL.Y + rightUIIconCentre.Y);
+
+            }
+        }
+
+        private Size UISpriteSize(string name)
+        {
+            return mapRenderer.GetUISpriteDimensions(name);
+        }
+
+        private Size TraumaSpriteSize(int id)
+        {
+            return mapRenderer.GetTraumaSpriteDimensions(id);
+        }
+
+        private void DrawTraumaSprite(int id, int x, int y)
+        {
+            mapRenderer.DrawTraumaSprite(id, x, y);
+        }
+
+        private void DrawUISprite(string name, int x, int y)
+        {
+            mapRenderer.DrawUISprite(name, x, y);
         }
 
         private void DrawStats(Player player)

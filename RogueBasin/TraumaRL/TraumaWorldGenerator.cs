@@ -706,6 +706,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void SetupMapsInEngine()
         {
+            //Comment for faster UI check
             Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
             foreach (var level in gameLevels)

@@ -110,7 +110,7 @@ namespace RogueBasin.Items
 
         protected override string GetUISprite()
         {
-            return "ui-items_0000_he";
+            return "ui-items_0001_he";
         }
 
         public override System.Drawing.Color GetColour()
