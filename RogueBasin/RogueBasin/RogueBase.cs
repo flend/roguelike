@@ -473,7 +473,7 @@ namespace RogueBasin
         private Tuple<bool, bool> UserInput(KeyboardEventArgs args)
         {
             bool timeAdvances = false;
-            bool centreOnPC = true;
+            bool centreOnPC = false;
 
             //Only on key up
             if (args.Down)
@@ -578,19 +578,20 @@ namespace RogueBasin
                                         timeAdvances = UseWeapon();
                                     }
 
-                                    //if (!timeAdvances)
-                                    //    Screen.Instance.Update();
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
+
+                                    centreOnPC = true;
                                     break;
 
                                 case Key.X:
                                     //Examine
                                     timeAdvances = Examine(false);
-                                    //if (!timeAdvances)
-                                    //    Screen.Instance.Update();
+
                                     if (timeAdvances)
                                         SpecialMoveNonMoveAction();
+
+                                    centreOnPC = true;
                                     break;
 
                                 case Key.Period:
@@ -612,13 +613,9 @@ namespace RogueBasin
                                 switch (args.Key)
                                 {
                                     //Debug events
-
-
                                     case Key.X:
                                         //Examine
                                         timeAdvances = Examine(true);
-                                        //if (!timeAdvances)
-                                        //    Screen.Instance.Update();
                                         if (timeAdvances)
                                             SpecialMoveNonMoveAction();
                                         break;
@@ -1063,6 +1060,7 @@ namespace RogueBasin
                                     //We changed wetware, counts as an action
                                     Game.Dungeon.ResetPCTurnCountersOnActionStatonary();
                                     Game.Dungeon.Player.DisableEnergyRecharge();
+                                    centreOnPC = true;
                                 }
 
                                 //If we don't set time advances, changing wetware still resets bonuses but the enemies don't get a move
@@ -1082,9 +1080,7 @@ namespace RogueBasin
                                 if (numberPressed == kv.Key)
                                 {
                                     timeAdvances = Game.Dungeon.Player.EquipInventoryItemType(kv.Value);
-                                    //functionPressed = true;
-                                    //Just update the screen each time
-                                    //Screen.Instance.Update();
+                                    centreOnPC = true;
                                     break;
                                 }
                             }
@@ -1092,8 +1088,6 @@ namespace RogueBasin
 
                         //Handle direction keys (both arrows and vi keys)
 
-                        ////if (!functionPressed)
-                        //  {
                         Point direction = new Point(9, 9);
                         KeyModifier mod = KeyModifier.Arrow;
                         bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
@@ -1101,6 +1095,7 @@ namespace RogueBasin
                         if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
                         {
                             timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
+                            centreOnPC = true;
                         }
 
                         if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
@@ -1127,7 +1122,7 @@ namespace RogueBasin
                                 }
                             }
                         }
-                        //  }
+
 
                         break;
 
@@ -2821,6 +2816,11 @@ namespace RogueBasin
             inputState = InputState.MovieDisplay;
             Screen.Instance.PlayMovie(filename, keypressBetweenFrames);
             Screen.Instance.NeedsUpdate = true;
+        }
+
+        public void SetupRoyaleEntryLevels()
+        {
+            Game.Dungeon.SetupRoyaleEntryLevels();
         }
     }
 }

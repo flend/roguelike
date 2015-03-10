@@ -303,6 +303,7 @@
     <Compile Include="Locks\SimpleLockedDoorWithMovie.cs" />
     <Compile Include="LogGenerator.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
+    <Compile Include="RoyaleDungeonLevelMaker.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />

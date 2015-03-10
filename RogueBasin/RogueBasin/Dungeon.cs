@@ -2768,33 +2768,34 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Refresh the TCOD maps used for FOV and pathfinding
-        /// Unoptimised at present
+        /// Refresh the all TCOD maps used for FOV and pathfinding
         /// </summary>
         public void RefreshAllLevelPathingAndFOV()
         {
-            //Set the walkable flag based on the terrain
             for (int i = 0; i < levels.Count; i++)
             {
-                levels[i].RecalculateWalkable();
+                RefreshLevelPathingAndFOV(i);
             }
+        }
+
+        /// <summary>
+        /// Refresh the TCOD maps used for FOV and pathfinding
+        /// Unoptimised at present
+        /// </summary>
+        public void RefreshLevelPathingAndFOV(int levelNo)
+        {
+            //Set the walkable flag based on the terrain
+            levels[levelNo].RecalculateWalkable();
 
             //Set the light blocking flag based on the terrain
-            for (int i = 0; i < levels.Count; i++)
-            {
-                levels[i].RecalculateLightBlocking();
-            }
+            levels[levelNo].RecalculateLightBlocking();
 
             //Set the properties on the TCODMaps from our Maps
-            for (int i = 0; i < levels.Count; i++)
-            {
+            //New fov representation
+            fov.updateFovMap(levelNo, levels[levelNo].FovRepresentaton);
 
-                //New fov representation
-                fov.updateFovMap(i, levels[i].FovRepresentaton);
-
-                //Notify abstract path finding lib
-                pathFinding.PathFindingInternal.updateMap(i, levels[i].PathRepresentation);
-            }
+            //Notify abstract path finding lib
+            pathFinding.PathFindingInternal.updateMap(levelNo, levels[levelNo].PathRepresentation);
         }
 
 
@@ -4890,5 +4891,16 @@ namespace RogueBasin
         public MapInfo MapInfo { get; set; }
 
         public MonsterPlacement MonsterPlacement { get; private set; }
+
+        private RoyaleDungeonLevelMaker royaleDungeonMaker; 
+
+        public void SetupRoyaleEntryLevels()
+        {
+            royaleDungeonMaker = new RoyaleDungeonLevelMaker();
+
+            royaleDungeonMaker.CreateNextDungeonChoices();
+            royaleDungeonMaker.SetPlayerStartLocation();
+
+        }
     }
 }
