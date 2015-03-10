@@ -26,7 +26,7 @@ namespace RogueBasin
         {
             MapMovement, Targetting, InventoryShow, InventorySelect,
             YesNoPrompt,
-            MovieDisplay
+            MovieDisplay, PreMapMovement
         }
 
         enum TargettingAction
@@ -2821,6 +2821,46 @@ namespace RogueBasin
         public void SetupRoyaleEntryLevels()
         {
             Game.Dungeon.SetupRoyaleEntryLevels();
+        }
+
+        /// <summary>
+        /// Player starts a new level and can choose an arena
+        /// </summary>
+        /// <param name="level"></param>
+        internal void PlayerStartsLevel(int level)
+        {
+            //Input state where the user can switch levels
+            inputState = InputState.PreMapMovement;
+
+            LogFile.Log.LogEntryDebug("Player starts level " + level, LogDebugLevel.Medium);
+        }
+
+        /// <summary>
+        /// Player actually enters the arena
+        /// </summary>
+        /// <param name="level"></param>
+        internal void PlayerEntersLevel(int level)
+        {
+            //Normal input state
+            inputState = InputState.MapMovement;
+
+            LogFile.Log.LogEntryDebug("Player enters level " + level, LogDebugLevel.Medium);
+        }
+
+        /// <summary>
+        /// Player exists the arena successfully
+        /// </summary>
+        /// <param name="level"></param>
+        internal void PlayerExitsLevel(int level)
+        {
+            //Switching level state
+            inputState = InputState.PreMapMovement;
+
+            LogFile.Log.LogEntryDebug("Player exists level " + level, LogDebugLevel.Medium);
+
+            //Generate new levels
+
+            //Control back to the user
         }
     }
 }

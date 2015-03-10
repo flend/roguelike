@@ -30,6 +30,9 @@ namespace RogueBasin
             public List<Connection> ReplaceableVaultConnections { get; set; }
             public List<Connection> ReplaceableVaultConnectionsUsed { get; set; }
 
+            public Connection EntryBoothConnection { get; set; }
+            public Connection ExitBoothConnection { get; set; }
+
             public Dictionary<MapTerrain, List<MapTerrain>> TerrainMapping { get; set; }
         }
 
@@ -49,6 +52,8 @@ namespace RogueBasin
         private MapInfo mapInfo;
 
         Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
+
+        Dictionary<int, LevelInfo> levels = new Dictionary<int, LevelInfo>();
 
         private static int vertexOffsetPerLevel = 100;
 
@@ -76,19 +81,25 @@ namespace RogueBasin
             SetupNewMapsInEngine();
 
             //Setup monsters and items
+            for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
+            {
+                PlaceEntryAndExitDoors(levels[i]);
+            }
         }
 
         public void SetPlayerStartLocation()
         {
             //Set player's start location (must be done before adding items)
-            var firstRoom = mapInfo.GetRoom(0);
+            var firstRoom = mapInfo.GetRoom(levels[0].EntryBoothConnection.Target);
             Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
         }
 
         private void AddLevel(LevelInfo newLevel)
         {
+            levels[newLevel.LevelNo] = newLevel;
+
             //Adding as unconnected maps, all starting at room 0
-            mapInfoBuilder.AddConstructedLevel(0, newLevel.LevelGenerator.ConnectivityMap, newLevel.LevelGenerator.GetRoomTemplatesInWorldCoords(),
+            mapInfoBuilder.AddConstructedLevel(newLevel.LevelNo, newLevel.LevelGenerator.ConnectivityMap, newLevel.LevelGenerator.GetRoomTemplatesInWorldCoords(),
                 newLevel.LevelGenerator.GetDoorsInMapCoords(), newLevel.LevelNo * vertexOffsetPerLevel);
 
             Map masterMap = newLevel.LevelBuilder.MergeTemplatesIntoMap(terrainMapping);
@@ -122,27 +133,33 @@ namespace RogueBasin
 
         private LevelInfo GenerateStandardLevel(int levelNo, int startVertexIndex)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var levelInfo = new LevelInfo(levelNo);
 
             //Load standard room types
 
             RoomTemplate deadEnd = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber3x3_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate medicalBay = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.medical_bay1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping);
 
+            //Entry/exit booth
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            //RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
-            medicalInfo.LevelBuilder = mapBuilder;
+            levelInfo.LevelBuilder = mapBuilder;
             var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
-            medicalInfo.LevelGenerator = templateGenerator;
+            levelInfo.LevelGenerator = templateGenerator;
 
-            PlaceOriginRoom(templateGenerator, medicalBay);
+            PlaceOriginRoom(templateGenerator, xshape);
 
             int numberOfRandomRooms = 10;
 
             BuildTXShapedRoomsBig(templateGenerator, numberOfRandomRooms);
+
+            //Add exit and entry booths
+            //Connections are from the level TO the booth
+            levelInfo.EntryBoothConnection = AddVaults(templateGenerator, corridor1, replacementVault, 1).First();
+            levelInfo.ExitBoothConnection = AddVaults(templateGenerator, corridor1, replacementVault, 1).First();
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
@@ -150,7 +167,78 @@ namespace RogueBasin
             //Tidy terrain
             templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
-            return medicalInfo;
+            return levelInfo;
+        }
+
+        private List<Connection> AddVaults(TemplatedMapGenerator templateGenerator, RoomTemplate corridor1, RoomTemplate placeHolderVault, int maxPlaceHolders)
+        {
+            return AddVaults(templateGenerator, corridor1, new List<RoomTemplate> { placeHolderVault }, maxPlaceHolders);
+        }
+
+        private List<Connection> AddVaults(TemplatedMapGenerator templateGenerator, RoomTemplate corridor1, List<RoomTemplate> placeHolderVault, int maxPlaceHolders)
+        {
+            var vaultsToReturn = new List<Connection>();
+            int cargoTotalPlaceHolders = 0;
+            do
+            {
+                var placeHolderRoom = AddRoomToRandomOpenDoor(templateGenerator, placeHolderVault.RandomElement(), corridor1, 3);
+                if (placeHolderRoom != null)
+                {
+                    vaultsToReturn.Add(placeHolderRoom);
+                    cargoTotalPlaceHolders++;
+                }
+                else
+                    break;
+            } while (cargoTotalPlaceHolders < maxPlaceHolders);
+            return vaultsToReturn;
+        }
+
+        Connection AddRoomToRandomOpenDoor(TemplatedMapGenerator gen, RoomTemplate templateToPlace, RoomTemplate corridorTemplate, int distanceFromDoor)
+        {
+            var doorsToTry = gen.PotentialDoors.Shuffle();
+
+            foreach (var door in doorsToTry)
+            {
+                try
+                {
+                    return gen.PlaceRoomTemplateAlignedWithExistingDoor(templateToPlace, corridorTemplate, RandomDoor(gen), 0, distanceFromDoor);
+                }
+                catch (ApplicationException)
+                {
+                    //No good, continue
+                }
+            }
+
+            throw new ApplicationException("No applicable doors left");
+        }
+
+        private void PlaceEntryAndExitDoors(LevelInfo levelInfo)
+        {
+            var entryConnection = levelInfo.EntryBoothConnection;
+            var exitConnection = levelInfo.ExitBoothConnection;
+            
+            //Place entry door
+            var doorInfo = mapInfo.GetDoorForConnection(entryConnection);
+
+            var entryDoor = new RogueBasin.Locks.EntryLock(levelInfo.LevelNo);
+            entryDoor.LocationLevel = doorInfo.LevelNo;
+            entryDoor.LocationMap = doorInfo.MapLocation;
+
+            Game.Dungeon.AddLock(entryDoor);
+
+            LogFile.Log.LogEntryDebug("Placing entry booth door for: level: " + levelInfo.LevelNo + " at: " + entryConnection, LogDebugLevel.Medium);
+
+            //Place entry door
+            doorInfo = mapInfo.GetDoorForConnection(exitConnection);
+
+            var exitDoor = new RogueBasin.Locks.ExitLock(levelInfo.LevelNo);
+            exitDoor.LocationLevel = doorInfo.LevelNo;
+            exitDoor.LocationMap = doorInfo.MapLocation;
+
+            Game.Dungeon.AddLock(exitDoor);
+
+            LogFile.Log.LogEntryDebug("Placing exit booth door for: level: " + levelInfo.LevelNo + " at: " + entryConnection, LogDebugLevel.Medium);
+
         }
 
         private int PlaceOriginRoom(TemplatedMapGenerator templatedGenerator, RoomTemplate roomToPlace)

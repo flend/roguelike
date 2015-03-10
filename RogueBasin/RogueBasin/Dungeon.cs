@@ -4902,5 +4902,6 @@ namespace RogueBasin
             royaleDungeonMaker.SetPlayerStartLocation();
 
         }
+
     }
 }
