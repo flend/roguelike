@@ -184,6 +184,8 @@ namespace TraumaRL
             Game.Dungeon.Player.LocationLevel = 0;
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
+            rb.PrepareGameEntry();
+
             rb.StartEventLoop();
 
             //Movies can only be shown after event loop started

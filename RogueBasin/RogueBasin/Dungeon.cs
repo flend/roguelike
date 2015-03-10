@@ -2095,7 +2095,7 @@ namespace RogueBasin
             bool okToMoveIntoSquare = true;
 
             //Apply environmental effects
-            if (Game.Dungeon.DungeonInfo.LevelNaming[player.LocationLevel] == "Arcology")
+            if (player.LocationLevel < dungeonInfo.LevelNaming.Count && dungeonInfo.LevelNaming[player.LocationLevel] == "Arcology")
             {
                 if (!player.IsEffectActive(typeof(PlayerEffects.BioProtect)))
                 {
@@ -4903,5 +4903,44 @@ namespace RogueBasin
 
         }
 
+        public void GenerateNextRoyaleLevels()
+        {
+            royaleDungeonMaker.CreateNextDungeonChoices();
+        }
+
+        /// <summary>
+        /// The player moves to view a new arena
+        /// </summary>
+        /// <param name="p"></param>
+        internal bool TeleportToAdjacentArena(bool arenaHigher)
+        {
+            int newLevel = player.LocationLevel + (arenaHigher ? 1 : -1);
+
+            if (newLevel < royaleDungeonMaker.NextDungeonLevelChoice)
+                return false;
+
+            if (newLevel >= royaleDungeonMaker.NextDungeonLevelChoice + royaleDungeonMaker.NumberDungeonLevelChoices)
+                return false;
+
+            LogFile.Log.LogEntryDebug("Moving to arena level " + newLevel, LogDebugLevel.Medium);
+
+            TeleportToArena(newLevel);
+            return true;
+        }
+
+        private void TeleportToArena(int newLevel)
+        {
+            var entryPoint = royaleDungeonMaker.GetEntryLocationOnLevel(newLevel);
+            MovePCAbsolute(newLevel, entryPoint);
+        }
+
+        internal void ExitLevel()
+        {
+            //Generate a new set of levels
+            Game.Dungeon.GenerateNextRoyaleLevels();
+
+            //Teleport to the first new level
+            TeleportToArena(royaleDungeonMaker.NextDungeonLevelChoice);
+        }
     }
 }

@@ -34,6 +34,8 @@ namespace RogueBasin
             public Connection ExitBoothConnection { get; set; }
 
             public Dictionary<MapTerrain, List<MapTerrain>> TerrainMapping { get; set; }
+
+            public Point EntryLocation { get; set; }
         }
 
         /// <summary>
@@ -83,15 +85,26 @@ namespace RogueBasin
             //Setup monsters and items
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
             {
+                SetEntryLocation(levels[i]);
                 PlaceEntryAndExitDoors(levels[i]);
             }
+        }
+
+        private void SetEntryLocation(LevelInfo levelInfo)
+        {
+            var entryRoom = mapInfo.GetRoom(levelInfo.EntryBoothConnection.Target);
+            levelInfo.EntryLocation = new RogueBasin.Point(entryRoom.X + entryRoom.Room.Width / 2, entryRoom.Y + entryRoom.Room.Height / 2); 
+        }
+
+        public Point GetEntryLocationOnLevel(int levelNo)
+        {
+            return levels[levelNo].EntryLocation;
         }
 
         public void SetPlayerStartLocation()
         {
             //Set player's start location (must be done before adding items)
-            var firstRoom = mapInfo.GetRoom(levels[0].EntryBoothConnection.Target);
-            Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+            Game.Dungeon.Levels[0].PCStartLocation = GetEntryLocationOnLevel(0);
         }
 
         private void AddLevel(LevelInfo newLevel)
@@ -152,7 +165,7 @@ namespace RogueBasin
 
             PlaceOriginRoom(templateGenerator, xshape);
 
-            int numberOfRandomRooms = 10;
+            int numberOfRandomRooms = 3;
 
             BuildTXShapedRoomsBig(templateGenerator, numberOfRandomRooms);
 
@@ -260,7 +273,7 @@ namespace RogueBasin
                 new Tuple<int, RoomTemplate>(100, tshape),
                 new Tuple<int, RoomTemplate>(100, xshape) };
 
-            PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 4, 6);
+            PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 0, 1);
         }
 
 

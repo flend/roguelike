@@ -486,6 +486,34 @@ namespace RogueBasin
                 switch (inputState)
                 {
 
+                    //Before entering an arena you can view the arenas to come
+                    case InputState.PreMapMovement:
+
+                        if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
+                        {
+                            switch (args.Key)
+                            {
+                                case Key.Comma:
+
+                                    Game.Dungeon.TeleportToAdjacentArena(true);
+                                    centreOnPC = true;
+                                    break;
+
+                                case Key.Period:
+
+                                    Game.Dungeon.TeleportToAdjacentArena(false);
+                                    centreOnPC = true;
+                                    break;
+                            }
+
+                        }
+                        break;
+
+                }
+
+                switch (inputState)
+                {
+
                     case InputState.Targetting:
                         TargettingKeyboardEvent(args);
                         break;
@@ -498,8 +526,11 @@ namespace RogueBasin
                         MovieDisplayKeyboardEvent(args);
                         break;
 
+
+
                     //Normal movement on the map
                     case InputState.MapMovement:
+                    case InputState.PreMapMovement:
 
                         if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
                         {
@@ -508,9 +539,7 @@ namespace RogueBasin
                                 case Key.F:
                                     //Full screen switch
                                     timeAdvances = false;
-                                    RootConsole rootConsole = RootConsole.GetInstance();
-                                    rootConsole.SetFullscreen(!rootConsole.IsFullscreen());
-                                    rootConsole.Flush();
+                                    
                                     break;
 
                                 case Key.Q:
@@ -1151,6 +1180,7 @@ namespace RogueBasin
             {
                 //This should catch most exceptions that happen as a result of user commands
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
+                LogFile.Log.LogEntryDebug("Exception occurred: " + ex.Message + "\n" + ex.StackTrace, LogDebugLevel.High);
             }
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
@@ -2823,6 +2853,19 @@ namespace RogueBasin
             Game.Dungeon.SetupRoyaleEntryLevels();
         }
 
+        private void PreArenaEntryState() {
+            inputState = InputState.PreMapMovement;
+            Screen.Instance.SeeAllMap = true;
+            Screen.Instance.SeeAllMonsters = true;
+        }
+
+        private void PostArenaEntryState()
+        {
+            inputState = InputState.MapMovement;
+            Screen.Instance.SeeAllMap = false;
+            Screen.Instance.SeeAllMonsters = false;
+        }
+
         /// <summary>
         /// Player starts a new level and can choose an arena
         /// </summary>
@@ -2830,7 +2873,7 @@ namespace RogueBasin
         internal void PlayerStartsLevel(int level)
         {
             //Input state where the user can switch levels
-            inputState = InputState.PreMapMovement;
+            PreArenaEntryState();
 
             LogFile.Log.LogEntryDebug("Player starts level " + level, LogDebugLevel.Medium);
         }
@@ -2842,7 +2885,7 @@ namespace RogueBasin
         internal void PlayerEntersLevel(int level)
         {
             //Normal input state
-            inputState = InputState.MapMovement;
+            PostArenaEntryState();
 
             LogFile.Log.LogEntryDebug("Player enters level " + level, LogDebugLevel.Medium);
         }
@@ -2854,13 +2897,16 @@ namespace RogueBasin
         internal void PlayerExitsLevel(int level)
         {
             //Switching level state
-            inputState = InputState.PreMapMovement;
+            PreArenaEntryState();
 
             LogFile.Log.LogEntryDebug("Player exists level " + level, LogDebugLevel.Medium);
 
-            //Generate new levels
+            Game.Dungeon.ExitLevel();
+        }
 
-            //Control back to the user
+        public void PrepareGameEntry()
+        {
+            PlayerStartsLevel(0);
         }
     }
 }

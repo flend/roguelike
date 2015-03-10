@@ -28,7 +28,8 @@ namespace RogueBasin.Locks
             Game.Base.PlayerExitsLevel(level);
             Game.MessageQueue.AddMessage("You escape arena " + level + " !");
 
-            return true;
+            //Don't return true here or we will place an open door in a random place on the new level
+            return false;
         }
 
         public override bool CloseLock(Player player)
