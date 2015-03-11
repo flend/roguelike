@@ -239,14 +239,14 @@ namespace RogueBasin {
         {
             mapRenderer = renderer;
 
-            ScreenWidth = 1024;
-            ScreenHeight = 768;
+            ScreenWidth = 1280;
+            ScreenHeight = 960;
 
-            Width = 32;
-            Height = 24;
+            Width = 20;
+            Height = 15;
 
-            ViewableWidth = 32;
-            ViewableHeight = 24;
+            ViewableWidth = 20;
+            ViewableHeight = 15;
 
             ViewportScrollSpeed = 1;
 
@@ -301,7 +301,7 @@ namespace RogueBasin {
         //Setup the screen
         public void InitialSetup()
         {
-            mapRenderer.Setup(Width, Height);
+            mapRenderer.Setup(ScreenWidth, ScreenHeight);
         }
 
         public bool TargetSelected()
@@ -1580,9 +1580,9 @@ namespace RogueBasin {
             DrawUISprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
         }
 
-        private void DrawTraumaSpriteByCentre(int id, int xCenter, int yCentre) {
+        private void DrawUITraumaSpriteByCentre(int id, int xCenter, int yCentre) {
             Size spriteDim = TraumaSpriteSize(id);
-            DrawTraumaSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
+            DrawUITraumaSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
         }
 
         private void DrawUISpriteByCentre(string id, System.Drawing.Point point) {
@@ -1640,7 +1640,7 @@ namespace RogueBasin {
                 }
                 else
                 {
-                    DrawTraumaSpriteByCentre(weapon.Representation, leftUI_TL.X + rangedWeaponUICenter.X, leftUI_TL.Y + rangedWeaponUICenter.Y);
+                    DrawUITraumaSpriteByCentre(weapon.Representation, leftUI_TL.X + rangedWeaponUICenter.X, leftUI_TL.Y + rangedWeaponUICenter.Y);
                 }
             }
 
@@ -1685,7 +1685,7 @@ namespace RogueBasin {
                 DrawGraduatedBar("healthbar", enemyHPRatio, new Rectangle(rightUI_TL.X + 10, rightUI_TL.Y + 90, 70, 10), 0.2);
 
                 //Creature picture.Representatio
-                DrawTraumaSpriteByCentre(CreatureToView.Representation, rightUI_TL.X + rightUIIconCentre.X, rightUI_TL.Y + rightUIIconCentre.Y);
+                DrawUITraumaSpriteByCentre(CreatureToView.Representation, rightUI_TL.X + rightUIIconCentre.X, rightUI_TL.Y + rightUIIconCentre.Y);
 
             }
         }
@@ -1700,9 +1700,9 @@ namespace RogueBasin {
             return mapRenderer.GetTraumaSpriteDimensions(id);
         }
 
-        private void DrawTraumaSprite(int id, int x, int y)
+        private void DrawUITraumaSprite(int id, int x, int y)
         {
-            mapRenderer.DrawTraumaSprite(id, x, y);
+            mapRenderer.DrawTraumaUISprite(id, x, y);
         }
 
         private void DrawUISprite(string name, int x, int y)
@@ -2697,6 +2697,7 @@ namespace RogueBasin {
                     if (isViewVisible(creature.LocationMap))
                     {
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(creature.Representation);
+                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameSprite;
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
                     }
 

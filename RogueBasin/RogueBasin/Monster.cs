@@ -730,13 +730,13 @@ namespace RogueBasin
         /// The monster's combat challenge rating
         /// </summary>
         /// <returns></returns>
-        abstract public int GetCombatXP();
+        public virtual int GetCombatXP() { return 0; }
 
         /// <summary>
         /// The monster's magic challenge rating
         /// </summary>
         /// <returns></returns>
-        abstract public int GetMagicXP();
+        public virtual int GetMagicXP() { return 0; }
 
         /// <summary>
         /// The monster's magic resistance

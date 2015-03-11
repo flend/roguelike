@@ -61,6 +61,7 @@
     <Compile Include="Creatures\Camera.cs" />
     <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
+    <Compile Include="Creatures\Punk.cs" />
     <Compile Include="Creatures\Ferret.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -941,6 +942,8 @@
     <EmbeddedResource Include="bin\Debug\movies\qe_start2.amf" />
     <EmbeddedResource Include="bin\Debug\movies\qe_start3.amf" />
     <EmbeddedResource Include="bin\Debug\movies\traumaquit0.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\oval_vault1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\oval_vault_small1.room" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />

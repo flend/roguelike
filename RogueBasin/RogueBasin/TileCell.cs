@@ -29,6 +29,13 @@ namespace TileEngine
         /// </summary>
         int tileID = -1;
         TileFlags flags;
+        string tileSprite = null;
+
+        public string TileSprite
+        {
+            get { return tileSprite; }
+            set { tileSprite = value; }
+        }
 
         public int TileID
         {
@@ -62,6 +69,11 @@ namespace TileEngine
         public TileCell(int tileID)
         {
             this.tileID = tileID;
+        }
+
+        public TileCell(string tileSprite)
+        {
+            TileSprite = tileSprite;
         }
     }
 }

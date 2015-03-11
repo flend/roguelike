@@ -335,12 +335,12 @@ namespace RogueBasin
         /// <summary>
         /// Creature AC. Set by type of creature.
         /// </summary>
-        public abstract int ArmourClass();
+        public virtual int ArmourClass() { return 0; }
 
         /// <summary>
         /// Creature 1dn damage.  Set by type of creature.
         /// </summary>
-        public abstract int HitModifier();
+        public virtual int HitModifier() { return 0; }
 
         /// <summary>
         /// Creature 1dn damage.  Set by type of creature.
@@ -350,7 +350,7 @@ namespace RogueBasin
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public abstract int DamageModifier();
+        public virtual int DamageModifier() { return 0; }
 
         /// <summary>
         /// What FOV we have in addition to the tcod

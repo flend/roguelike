@@ -53,24 +53,23 @@ namespace RogueBasin
     {
         SdlDotNet.Graphics.Font font;
         Dictionary<SurfaceCacheEntry, Surface> surfaceCache = new Dictionary<SurfaceCacheEntry,Surface>();
+        Dictionary<SurfaceCacheEntry, Surface> surfaceUICache = new Dictionary<SurfaceCacheEntry, Surface>();
+
         Dictionary<SpriteCacheEntry, Surface> spriteCache = new Dictionary<SpriteCacheEntry, Surface>();
 
         private Color transparentColor = Color.FromArgb(255, 0, 255);
 
         private Surface videoSurface;
         private Surface spriteSheet;
-        private int videoWidth = 1024;
-        private int videoHeight = 768;
         private int spritesPerRow = 16;
         private int spriteSheetWidth = 16;
         private int spriteSheetHeight = 16;
-        private int spriteVideoWidth = 32;
-        private int spriteVideoHeight = 32;
+        private int spriteVideoWidth = 64;
+        private int spriteVideoHeight = 64;
 
-        private double xScale = 1.0;
-        private double yScale = 1.0;
+        private int traumaSpriteScaling = 4;
+        private int traumaUISpriteScaling = 4;
 
-        private int traumaSpriteScaling = 2;
 
         /// <summary>
         /// Render the map, with TL in map at mapOffset. Screenviewport is the screen viewport in tile dimensions (for now)
@@ -102,6 +101,16 @@ namespace RogueBasin
                     for (int x = mapOffset.x; x <= maxColumn; x++)
                     {
                         TileEngine.TileCell thisCell = layer.Rows[y].Columns[x];
+                        
+                        //Screen tile coords
+                        int screenTileX = screenViewport.X + (x - mapOffset.x);
+                        int screenTileY = screenViewport.Y + (y - mapOffset.y);
+
+                        if (thisCell.TileSprite != null)
+                        {
+                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY);
+                            continue;
+                        }
 
                         if (thisCell.TileID == -1)
                             continue;
@@ -122,10 +131,6 @@ namespace RogueBasin
                                 foregroundColor = colorFlags.ForegroundColor;
                             }
                         }
-
-                        //Screen tile coords
-                        int screenTileX = screenViewport.X + (x - mapOffset.x);
-                        int screenTileY = screenViewport.Y + (y - mapOffset.y);
 
                         DrawSprite(thisCell.TileID, screenTileX, screenTileY, foregroundColor, backgroundColor);
                     }
@@ -198,9 +203,53 @@ namespace RogueBasin
             return spriteSurface;
         }
 
-        private string GameSpritePath(string id)
+        private Surface GetTraumaUISprite(SurfaceCacheEntry entry)
         {
-            return "graphics/game/" + id + ".png";
+            var spriteLoc = tileIDToSpriteLocation(entry.Id);
+
+            Surface spriteSurface;
+            surfaceUICache.TryGetValue(entry, out spriteSurface);
+            if (spriteSurface == null)
+            {
+                Surface tempSpriteSurface = new Surface(spriteSheetWidth, spriteSheetHeight);
+
+                tempSpriteSurface.Blit(spriteSheet,
+                    new System.Drawing.Point(0, 0),
+                    new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
+
+                if (entry.ForegroundColor != Color.White)
+                    tempSpriteSurface.ReplaceColor(Color.White, entry.ForegroundColor);
+                if (entry.BackgroundColor != transparentColor)
+                    tempSpriteSurface.ReplaceColor(transparentColor, entry.BackgroundColor);
+
+                spriteSurface = tempSpriteSurface;
+
+                if (traumaUISpriteScaling > 1)
+                {
+                    if (traumaUISpriteScaling == 2)
+                    {
+                        spriteSurface = tempSpriteSurface.CreateScaleDoubleSurface(false);
+                    }
+                    else
+                    {
+                        spriteSurface = tempSpriteSurface.CreateScaledSurface(traumaUISpriteScaling, false);
+                    }
+                }
+
+                //Set this after doing background replacement
+                spriteSurface.Transparent = true;
+                spriteSurface.TransparentColor = transparentColor;
+
+                surfaceUICache.Add(entry, spriteSurface);
+
+                LogFile.Log.LogEntryDebug("Rendering ui sprite" + entry.Id, LogDebugLevel.Profiling);
+            }
+            return spriteSurface;
+        }
+
+        private string TileSpritePath(string id)
+        {
+            return "graphics/tiles/" + id + ".png";
         }
 
         private string UISpritePath(string id)
@@ -211,6 +260,19 @@ namespace RogueBasin
         public void DrawUISprite(string id, int x, int y)
         {
             DrawSprite(UISpritePath(id), x, y);
+        }
+
+        private void DrawTileSprite(string id, int x, int y)
+        {
+            //Tile x, y are the top left of a 64x64 tile
+            //Our tile sprites may not be 64x64, but are aligned to the BOTTOM-LEFT of a 64x64 tile (I hope)
+            Size tileDimensions = GetTileSpriteDimensions(id);
+
+            //Screen real coords
+            int screenX = x * spriteVideoWidth;
+            int screenY = (y * spriteVideoHeight) - (tileDimensions.Height - 64);
+
+            DrawSprite(TileSpritePath(id), screenX, screenY);
         }
 
         public void DrawTraumaSprite(int id, int x, int y)
@@ -225,10 +287,30 @@ namespace RogueBasin
             videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));
         }
 
+        public void DrawTraumaUISprite(int id, int x, int y)
+        {
+            SurfaceCacheEntry entry = new SurfaceCacheEntry();
+            entry.Id = id;
+            entry.ForegroundColor = Color.Wheat;
+            entry.BackgroundColor = Color.Black;
+
+            Surface traumaSprite = GetTraumaUISprite(entry);
+
+            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));
+        }
+
         public Size GetUISpriteDimensions(string id)
         {
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = UISpritePath(id);
+
+            return GetSpriteFromCache(entry).Size;
+        }
+
+        public Size GetTileSpriteDimensions(string id)
+        {
+            SpriteCacheEntry entry = new SpriteCacheEntry();
+            entry.StrId = TileSpritePath(id);
 
             return GetSpriteFromCache(entry).Size;
         }
@@ -289,12 +371,12 @@ namespace RogueBasin
 
         public void Setup(int width, int height)
         {
-            videoSurface = Video.SetVideoMode(videoWidth, videoHeight, 32, false, false, false, true);
+            videoSurface = Video.SetVideoMode(width, height, 32, false, false, false, true);
             videoSurface.AlphaBlending = true;
 
             spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
 
-            font = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 18);
+            font = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 22);
         }
 
 
