@@ -275,6 +275,7 @@ namespace RogueBasin
             return false;
         }
 
+        //Includes start and end points
         public static IEnumerable<Point> GetPointsOnLine(Point start, Point end)
         {
             var startV = new Vector3(start.x, start.y, 0);
@@ -317,6 +318,18 @@ namespace RogueBasin
             n |= n >> 8;
             n |= n >> 16;
             return ++n;        
+        }
+
+        /// <summary>
+        /// Get the distance in terms of how many steps required
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        /// <returns></returns>
+        public static int GetPathDistanceBetween(MapObject obj1, MapObject obj2)
+        {
+            List<Point> pts = Utility.GetPointsOnLine(obj1.LocationMap, obj2.LocationMap).ToList();
+            return pts.Count;
         }
 
         /// <summary>

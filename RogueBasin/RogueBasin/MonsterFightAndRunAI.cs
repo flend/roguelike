@@ -176,6 +176,9 @@ namespace RogueBasin
                 return;
             }
 
+            //Calculate current FOV
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
             //TEST SLEEPING CREATURES
             //Sleeping is a Creature state that is used like an AI state
             //This is OK since we exit immediately
@@ -184,12 +187,10 @@ namespace RogueBasin
             if (Sleeping && WakesOnBeingSeen())
             {
                 //Check to see if we should wake by looking for woken creatures in POV
-                //(when we drop through currentFOV may be unnecessarily recalculated)
-
-                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+                CreatureFOV playerFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
                 //Player sees monster, wake up
-                if (currentFOV.CheckTileFOV(LocationMap.x, LocationMap.y))
+                if (playerFOV.CheckTileFOV(LocationMap.x, LocationMap.y))
                 {
                     Sleeping = false;
                     AIState = SimpleAIStates.Patrol;
@@ -201,10 +202,6 @@ namespace RogueBasin
             if (Sleeping && WakesOnSight())
             {
                 //Check to see if we should wake by looking for woken creatures in POV
-                //(when we drop through currentFOV may be unnecessarily recalculated)
-
-                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
-
                 foreach (Monster monster in Game.Dungeon.Monsters)
                 {
                     //Same monster
@@ -231,13 +228,25 @@ namespace RogueBasin
                 }
 
                 //Check if we can see the player
-                if (Game.Dungeon.Player.LocationLevel == this.LocationLevel &&
-                    currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y) && !Game.Dungeon.Player.isStealthed())
+                if (PlayerCanBeSeen(currentFOV))
                 {
                     //In FOV wake
                     Sleeping = false;
                     AIState = SimpleAIStates.Patrol;
                     LogFile.Log.LogEntryDebug(this.Representation + " spots player and wakes", LogDebugLevel.Low);
+                }
+            }
+
+            //Sleeping creatures who are activated by player proximity (within FOV)
+            if (Sleeping && StealthRadius() > 0)
+            {
+                int range = Utility.GetPathDistanceBetween(this, Game.Dungeon.Player);
+
+                if (range <= StealthRadius() && PlayerCanBeSeen(currentFOV))
+                {
+                    Sleeping = false;
+                    AIState = SimpleAIStates.Patrol;
+                    LogFile.Log.LogEntryDebug(this.Representation + " spots player within stealth radius", LogDebugLevel.Low);
                 }
             }
 
@@ -351,9 +360,6 @@ namespace RogueBasin
                     //Charmed - will fight for the PC
                     //Won't attack passive creatures (otherwise will de-passify them and it would be annoying)
 
-                    //Look for creatures in FOV
-                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
-
                     //List will contain monsters & player
                     List<Monster> monstersInFOV = new List<Monster>();
 
@@ -441,8 +447,6 @@ namespace RogueBasin
                     }*/
 
                     //Find creatures & PC in FOV
-                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
-
                     List<Creature> monstersInFOV = new List<Creature>();
 
                     foreach (Creature monster in Game.Dungeon.Monsters)
@@ -714,6 +718,11 @@ namespace RogueBasin
             }
 
             return true;
+        }
+
+        private bool PlayerCanBeSeen(CreatureFOV currentFOV) {
+            return Game.Dungeon.Player.LocationLevel == this.LocationLevel &&
+                    currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y) && !Game.Dungeon.Player.isStealthed();
         }
 
         protected void DoPatrol()

@@ -101,7 +101,7 @@ namespace RogueBasin
             Passive = false;
             
             //In FlatlineRL monsters default to awake
-            Sleeping = false;
+            Sleeping = true;
 
             Unique = false;
         }
@@ -207,7 +207,7 @@ namespace RogueBasin
         /// <returns></returns>
         virtual protected bool WakesOnSight()
         {
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -218,7 +218,18 @@ namespace RogueBasin
         /// <returns></returns>
         virtual protected bool WakesOnBeingSeen()
         {
-            return true;
+            return false;
+        }
+
+        /// <summary>
+        /// For a sleeping creature, if the player is within this radius
+        /// and they are visible, the creature will wake
+        /// This range is for points on a line that can go diagonally, including the origin and dest
+        /// </summary>
+        /// <returns></returns>
+        virtual protected int StealthRadius()
+        {
+            return 3;
         }
 
         /// <summary>
