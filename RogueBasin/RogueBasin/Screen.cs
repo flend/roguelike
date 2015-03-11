@@ -1607,7 +1607,9 @@ namespace RogueBasin {
         }
 
         System.Drawing.Point leftUI_TL;
+        System.Drawing.Point midUI_TL;
         System.Drawing.Point rightUI_TL;
+
 
         private void DrawUI()
         {
@@ -1618,6 +1620,11 @@ namespace RogueBasin {
 
             DrawUISprite("ui_left", leftUI_TL.X, leftUI_TL.Y);
 
+            Size uiMidDim = UISpriteSize("ui_mid");
+            midUI_TL = leftUI_TL.Add(new System.Drawing.Point(uiLeftDim.Width, 0)).Add(new System.Drawing.Point(100, 0));
+            DrawUISprite("ui_mid", midUI_TL);
+            DrawUISprite("ui_mid", midUI_TL.Add(new System.Drawing.Point(uiMidDim.Width, 0)));
+            
             Size uiRightDim = UISpriteSize("ui_right");
             rightUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
 
@@ -1700,6 +1707,11 @@ namespace RogueBasin {
             return mapRenderer.GetTraumaSpriteDimensions(id);
         }
 
+        private void DrawUITraumaSprite(int id, System.Drawing.Point p)
+        {
+            DrawUITraumaSprite(id, p.X, p.Y);
+        }
+
         private void DrawUITraumaSprite(int id, int x, int y)
         {
             mapRenderer.DrawTraumaUISprite(id, x, y);
@@ -1708,6 +1720,11 @@ namespace RogueBasin {
         private void DrawUISprite(string name, int x, int y)
         {
             mapRenderer.DrawUISprite(name, x, y);
+        }
+
+        private void DrawUISprite(string name, System.Drawing.Point p)
+        {
+            DrawUISprite(name, p.X, p.Y);
         }
 
         private void DrawStats(Player player)
@@ -3518,6 +3535,14 @@ namespace RogueBasin {
         internal void UpdateAnimations()
         {
             throw new NotImplementedException();
+        }
+    }
+
+    static class ScreenExtensionMethods
+    {
+        public static System.Drawing.Point Add(this System.Drawing.Point p1, System.Drawing.Point p2)
+        {
+            return new System.Drawing.Point(p1.X + p2.X, p1.Y + p2.Y);
         }
     }
 }

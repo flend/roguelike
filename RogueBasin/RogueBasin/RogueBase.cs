@@ -204,6 +204,10 @@ namespace RogueBasin
 
             ProfileEntry("Dungeon Turn");
 
+            //Reset the creature FOV display
+            Game.Dungeon.ResetCreatureFOVOnMap();
+            Game.Dungeon.ResetSoundOnMap();
+
             while (playerNotReady)
             {
                 try
@@ -222,15 +226,9 @@ namespace RogueBasin
                     //Advance time for the PC
                     playerNotReady = !PlayerActions();
 
-                    //Reset the creature FOV display
-                    Game.Dungeon.ResetCreatureFOVOnMap();
-                    Game.Dungeon.ResetSoundOnMap();
-
                     //Catch the player being killed
                     //if (!Game.Dungeon.RunMainLoop)
                     //   break;
-
-                    
                 }
                 catch (Exception ex)
                 {
