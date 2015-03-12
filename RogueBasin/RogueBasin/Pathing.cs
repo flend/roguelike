@@ -72,6 +72,7 @@ namespace RogueBasin
             bool pathBlockedByCreatureOrLock = false;
             Point nextStep = new Point(-1, -1);
             bool interaction = false;
+            bool tryBackupRoute = false;
 
             //Check for pathing to own square - return blocked but not terminally
             if (origin == dest)
@@ -98,7 +99,12 @@ namespace RogueBasin
                     }
                     else
                     {
-                        //All paths are blocked by creatures, we will return the origin creature's location
+                        //All paths are blocked by creatures or dangerous terrain
+                        //If there is dangerous terrain, we just have to suck it up (this fails with small islands etc.)
+                        if (!ignoreDangerousTerrain)
+                            tryBackupRoute = true;
+
+                        //If there's no dangerous terrain, we will return the origin creature's location
                         nextStep = origin;
                         //Exits loop and allows cleanup
                         break;
@@ -188,7 +194,7 @@ namespace RogueBasin
                 pathFinding.updateMap(level, sq, PathingTerrain.Walkable);
             }
 
-            return new PathingResult(nextStep, interaction, false);
+            return new PathingResult(nextStep, interaction, false, tryBackupRoute);
         }
 
         public class PathingResult {
@@ -340,13 +346,28 @@ namespace RogueBasin
                     PathingResult result = GetPathToPointPassThroughMonsters(level, origin, dest, permission, ignoreDangerousTerrain);
                     if (result.TryBackupRoute)
                     {
-                        return GetPathToPoint(level, origin, dest, permission, ignoreDangerousTerrain);
+                        LogFile.Log.LogEntryDebug("GetPathToPoint: CreaturePass falling back to normal routing", LogDebugLevel.Medium);
+                        return GetPathToPointDefault(level, origin, dest, permission, ignoreDangerousTerrain);
                     }
                     return result;
 
                 default:
-                    return GetPathToPoint(level, origin, dest, permission, ignoreDangerousTerrain);
+                    return GetPathToPointDefault(level, origin, dest, permission, ignoreDangerousTerrain);
             }
+        }
+
+        private PathingResult GetPathToPointDefault(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
+        {
+            var result = GetPathToPoint(level, origin, dest, permission, ignoreDangerousTerrain);
+
+            if (result.TryBackupRoute)
+            {
+                LogFile.Log.LogEntryDebug("GetPathToPoint: DangerousTerrain falling back to normal routing", LogDebugLevel.Medium);
+                //Just ignore dangerous terrain if it didn't work out being careful
+                return GetPathToPoint(level, origin, dest, permission, true);
+            }
+
+            return result;
         }
 
     }

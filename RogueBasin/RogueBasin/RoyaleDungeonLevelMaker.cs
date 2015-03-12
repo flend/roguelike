@@ -642,7 +642,7 @@ namespace RogueBasin
                     {
 
                         //Acid Pond
-                        AddAcidPondToLevel(levelInfo.LevelNo, thisRoom.Location + centre, 5, 5);
+                        AddAcidPondToLevel(levelInfo.LevelNo, thisRoom.Location + centre, 8, 8);
                     }
                 }
 
