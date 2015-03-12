@@ -262,7 +262,7 @@ namespace RogueBasin
                 Game.Dungeon.Monsters.Clear();
                 Game.Dungeon.Items.Clear();
                 Game.Dungeon.Triggers.Clear();
-                Game.Dungeon.Features.Clear();
+                //Game.Dungeon.Features.Clear(); //find another way!
                 SetupMapsFlatline();
 
                 //Otherwise respawn

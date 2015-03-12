@@ -1512,7 +1512,7 @@ namespace RogueBasin
                 //Build a new dungeon object from the stored data
                 Dungeon newDungeon = new Dungeon();
 
-                newDungeon.Features = readData.features;
+                //newDungeon.Features = readData.features;
                 newDungeon.Items = readData.items;
                 newDungeon.Effects = readData.effects;
                 newDungeon.Monsters = readData.monsters;

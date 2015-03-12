@@ -366,7 +366,7 @@ namespace RogueBasin
 
         List<Monster> monsters;
         List<Item> items;
-        List<Feature> features;
+        Dictionary<Location, List<Feature>> features;
         Dictionary<Location, List<Lock>> locks;
         public List<HiddenNameInfo> HiddenNameInfo { get; set; } //for serialization
         public List<DungeonSquareTrigger> Triggers { get; set; }
@@ -464,7 +464,7 @@ namespace RogueBasin
             levels = new List<Map>();
             monsters = new List<Monster>();
             items = new List<Item>();
-            features = new List<Feature>();
+            features = new Dictionary<Location, List<Feature>>();
             locks = new Dictionary<Location, List<Lock>>();
 
             pathFinding = new Pathing(this, new LibTCOD.TCODPathFindingWrapper());
@@ -1043,7 +1043,6 @@ namespace RogueBasin
                 SaveGameInfo saveGameInfo = new SaveGameInfo();
 
                 saveGameInfo.effects = this.effects;
-                saveGameInfo.features = this.features;
                 saveGameInfo.items = this.items;
                 saveGameInfo.monsters = this.monsters;
                 saveGameInfo.player = this.player;
@@ -1466,6 +1465,7 @@ namespace RogueBasin
             try
             {
                 Map featureLevel = levels[level];
+                var thisLocation = new Location(level, location);
 
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
@@ -1475,14 +1475,11 @@ namespace RogueBasin
                 }
 
                 //Check another feature isn't there
-                foreach (Feature otherFeature in features)
+                var featuresAtLocation = GetFeaturesAtLocation(thisLocation);
+                if (featuresAtLocation.Count() > 0)
                 {
-                    if (otherFeature.LocationLevel == level &&
-                        otherFeature.LocationMap == location)
-                    {
-                        LogFile.Log.LogEntry("AddFeature: other feature already there");
-                        return false;
-                    }
+                    LogFile.Log.LogEntry("AddFeature: other feature already there");
+                    return false;
                 }
 
                 //DON'T PLACE UNDER MONSTERS OR ITEMS - may make the square unroutable
@@ -1506,7 +1503,7 @@ namespace RogueBasin
                 feature.LocationLevel = level;
                 feature.LocationMap = location;
 
-                features.Add(feature);
+                AddFeatureAtLocation(thisLocation, feature);
                 return true;
             }
             catch (Exception ex)
@@ -1515,6 +1512,43 @@ namespace RogueBasin
                 return false;
             }
 
+        }
+
+        private void AddFeatureAtLocation(Location loc, Feature feature)
+        {
+            feature.LocationLevel = loc.Level;
+            feature.LocationMap = loc.MapCoord;
+
+            List<Feature> featureListAtLocation;
+            features.TryGetValue(loc, out featureListAtLocation);
+
+            if (featureListAtLocation == null)
+            {
+                features[loc] = new List<Feature>();
+                features[loc].Add(feature);
+            }
+            else
+            {
+                featureListAtLocation.Add(feature);
+            }
+        }
+
+        /// <summary>
+        /// Returns features at location, or empty list if none
+        /// </summary>
+        /// <param name="loc"></param>
+        /// <returns></returns>
+        private IEnumerable<Feature> GetFeaturesAtLocation(Location loc)
+        {
+            List<Feature> featureListAtLocation;
+            features.TryGetValue(loc, out featureListAtLocation);
+
+            if (featureListAtLocation == null)
+            {
+                return new List<Feature>();
+            }
+
+            return featureListAtLocation;
         }
 
         /// <summary>
@@ -1560,25 +1594,22 @@ namespace RogueBasin
             try
             {
                 Map featureLevel = levels[level];
+                Location thisLocation = new Location(level, location);
 
                 //Check another non-decoration feature isn't there
-                foreach (Feature otherFeature in features)
-                {
-                    if (otherFeature.LocationLevel == level &&
-                        otherFeature.LocationMap == location)
-                    {
-                        if (otherFeature as UseableFeature != null || otherFeature as ActiveFeature != null)
-                        {
-                            LogFile.Log.LogEntry("AddDecorationFeature: non-decoration feature already there");
-                            return false;
-                        }
-                    }
-                }
 
+                var featuresAtLocation = GetFeaturesAtLocation(thisLocation);
+
+                if (featuresAtLocation.Select(f => f as UseableFeature != null || f as ActiveFeature != null).Any())
+                {
+                    LogFile.Log.LogEntry("AddDecorationFeature: non-decoration feature already there");
+                    return false;
+                }
+                
                 feature.LocationLevel = level;
                 feature.LocationMap = location;
 
-                features.Add(feature);
+                AddFeatureAtLocation(thisLocation, feature);
                 return true;
             }
             catch (Exception ex)
@@ -1629,16 +1660,9 @@ namespace RogueBasin
             }
 
             //Check features
-            foreach (Feature feature in features)
-            {
-                if (feature.LocationLevel == level &&
-                    feature.LocationMap.x == location.x && feature.LocationMap.y == location.y)
-                {
-                    contents.feature = feature;
-                    break;
-                }
-            }
-
+            var features = GetFeaturesAtLocation(new Location(level, location));
+            contents.feature = features.Count() > 0 ? features.First() : null;
+                
             //Check for PC blocking
             //Allow this to work before having the player placed (at beginning of game)
             if (player != null && player.LocationMap != null)
@@ -1847,18 +1871,13 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// List of all the features in the game
+        /// List of all the features in the game - doesn't use index, so avoid use where possible
         /// </summary>
         public List<Feature> Features
         {
             get
             {
-                return features;
-            }
-            //For serialization
-            set
-            {
-                features = value;
+                return GetAllFeatures().ToList();
             }
         }
 
@@ -2043,17 +2062,15 @@ namespace RogueBasin
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
-            Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
+            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(player.LocationLevel, player.LocationMap));
 
-            UseableFeature useableFeature = featureAtSpace as UseableFeature;
-            if (useableFeature == null)
-            {
-                //Game.MessageQueue.AddMessage("Nothing to interact with here");
-                return false;
-            }
-
+            var useableFeatures = featuresAtSpace.Where(f => f as UseableFeature != null);
+            
             //Interact with feature - these will normally put success / failure messages in queue
-            return useableFeature.PlayerInteraction(player);
+            var successes = useableFeatures.Select(f => (f as UseableFeature).PlayerInteraction(player)).ToList();
+
+            //Watch out for the short circuit
+            return successes.Any();
         }
 
         /// <summary>
@@ -2065,15 +2082,15 @@ namespace RogueBasin
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
-            Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
+            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(player.LocationLevel, player.LocationMap));
 
-            var activeFeature = featureAtSpace as ActiveFeature;
-            if (activeFeature == null)
-            {
-                return false;
-            }
+            var useableFeatures = featuresAtSpace.Where(f => f as ActiveFeature != null);
 
-            return activeFeature.PlayerInteraction(player);
+            //Interact with feature - these will normally put success / failure messages in queue
+            var successes = useableFeatures.Select(f => (f as ActiveFeature).PlayerInteraction(player)).ToList();
+
+            //Watch out for the short circuit
+            return successes.Any();
         }
 
         /// <summary>
@@ -2261,13 +2278,6 @@ namespace RogueBasin
             if (MultipleItemAtSpace(player.LocationLevel, player.LocationMap))
             {
                 Game.MessageQueue.AddMessage("There are multiple items here.");
-            }
-
-            //If there is a feature and an item (feature will be hidden)
-            if (FeatureAtSpace(player.LocationLevel, player.LocationMap) != null &&
-                ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
-            {
-                Game.MessageQueue.AddMessage("There is something behind it.");
             }
 
             return true;
@@ -3188,26 +3198,7 @@ namespace RogueBasin
             return newSounds;
         }
 
-
-        /// <summary>
-        /// Return a (the first) feature at this location or null
-        /// </summary>
-        /// <param name="locationLevel"></param>
-        /// <param name="locationMap"></param>
-        /// <returns></returns>
-        internal Feature FeatureAtSpace(int locationLevel, Point locationMap)
-        {
-            foreach (Feature feature in features)
-            {
-                if (feature.IsLocatedAt(locationLevel, locationMap))
-                {
-                    return feature;
-                }
-            }
-
-            return null;
-        }
-
+        
         /// <summary>
         /// Return an item if there is one at the requested square, or return null if not
         /// </summary>
@@ -4606,6 +4597,11 @@ namespace RogueBasin
             Game.Dungeon.PCMove(0, 0, true);
         }
 
+        public IEnumerable<Feature> GetAllFeatures()
+        {
+            return features.SelectMany(f => f.Value);
+        }
+
         /// <summary>
         /// Move player to next mission
         /// </summary>
@@ -4615,7 +4611,7 @@ namespace RogueBasin
                 return;
 
             //Find any elevator that goes here
-            var elevator = features.Where(f => f.GetType() == typeof(Features.Elevator) && (f as Features.Elevator).DestLevel == levelNo);
+            var elevator = GetAllFeatures().Where(f => f.GetType() == typeof(Features.Elevator) && (f as Features.Elevator).DestLevel == levelNo);
             if (elevator.Count() == 0)
             {
                 LogFile.Log.LogEntryDebug("Failed to find elevator to get to on level " + levelNo, LogDebugLevel.Medium);
@@ -4899,21 +4895,11 @@ namespace RogueBasin
                     hardCover++;
             }
 
-            //Check for any blocking features
-            //Is checked by terrain above
+            //Blocking features affect the terrain flags and are counted above
+
+            //Each non-blocking feature counts as soft cover
+            softCover += pointsOnLine.Select(p => GetFeaturesAtLocation(new Location(sourceLevel, p)).Where(f => !f.IsBlocking).Count()).Sum();
             
-            foreach (var f in features)
-            {
-                if (f.LocationLevel != sourceLevel)
-                    continue;
-
-                if (pointsOnLine.Contains(f.LocationMap))
-                {
-                    if (!f.IsBlocking)
-                        softCover += 1;                        
-                }
-            }
-
             return new Tuple<int, int>(hardCover, softCover);
         }
 
