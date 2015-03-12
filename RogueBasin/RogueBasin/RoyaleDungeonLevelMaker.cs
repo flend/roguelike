@@ -99,6 +99,9 @@ namespace RogueBasin
             {
                 List<Monster> punks = new List<Monster> { new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1) };
                 AddMonstersToRoom(mapInfo, i, 0, punks);
+
+                List<Item> items = new List<Item> { new Items.Pistol(), new Items.Shotgun(), new Items.Laser(), new Items.Axe() };
+                AddItemsToRoom(mapInfo, i, 0, items);
             }
 
         }
@@ -454,7 +457,7 @@ namespace RogueBasin
                     break;
             }
         }
-
+        
         public int AddMonstersToRoom(MapInfo mapInfo, int level, int roomId, IEnumerable<Monster> monsters)
         {
             var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(roomId, RoomTemplateTerrain.Floor).Shuffle();
@@ -478,6 +481,31 @@ namespace RogueBasin
                 }
             }
             return monstersPlaced;
+        }
+
+        public int AddItemsToRoom(MapInfo mapInfo, int level, int roomId, IEnumerable<Item> items)
+        {
+            var candidatePointsInRoom = mapInfo.GetAllPointsInRoomOfTerrain(roomId, RoomTemplateTerrain.Floor).Shuffle();
+
+            int ItemsPlaced = 0;
+
+            Item mon = items.ElementAt(ItemsPlaced);
+
+            foreach (Point p in candidatePointsInRoom)
+            {
+                bool placedSuccessfully = Game.Dungeon.AddItem(mon, level, p);
+
+                if (placedSuccessfully)
+                {
+                    ItemsPlaced++;
+
+                    if (ItemsPlaced == items.Count())
+                        break;
+
+                    mon = items.ElementAt(ItemsPlaced);
+                }
+            }
+            return ItemsPlaced;
         }
 
 

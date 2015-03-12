@@ -278,5 +278,15 @@ namespace RogueBasin.Items
         {
             return 0;
         }
+
+        protected override string GetGameSprite()
+        {
+            return "rifle";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-pistol";
+        }
     }
 }

@@ -65,12 +65,12 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "monsters_punk";
+            return "punk";
         }
 
         protected override string GetUISprite()
         {
-            return "monsters_punk";
+            return "punk";
         }
 
         protected override int GetChanceToRecover()

@@ -94,6 +94,8 @@ namespace RogueBasin
             if (maxRow >= mapToRender.Rows)
                 maxRow = mapToRender.Rows - 1;
 
+            int layerNumber = 0;
+
             //Render layers in order
             foreach (TileEngine.TileLayer layer in mapToRender.Layer)
             {
@@ -107,9 +109,17 @@ namespace RogueBasin
                         int screenTileX = screenViewport.X + (x - mapOffset.x);
                         int screenTileY = screenViewport.Y + (y - mapOffset.y);
 
+                        int offsetX = 0;
+                        int offsetY = 0;
+                        
                         if (thisCell.TileSprite != null)
                         {
-                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, thisCell.Transparency);
+                            if (layerNumber == (int)RogueBasin.Screen.TileLevel.CreatureDecoration)
+                            {
+                                offsetY = 15;
+                            }
+
+                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency);
                             continue;
                         }
 
@@ -136,6 +146,7 @@ namespace RogueBasin
                         DrawSprite(thisCell.TileID, screenTileX, screenTileY, foregroundColor, backgroundColor);
                     }
                 }
+                layerNumber++;
             }
         }
 
@@ -263,15 +274,15 @@ namespace RogueBasin
             DrawSprite(UISpritePath(id), x, y, 1.0);
         }
 
-        private void DrawTileSprite(string id, int x, int y, double alpha = 1.0)
+        private void DrawTileSprite(string id, int x, int y, Point offset, double alpha)
         {
             //Tile x, y are the top left of a 64x64 tile
             //Our tile sprites may not be 64x64, but are aligned to the BOTTOM-LEFT of a 64x64 tile (I hope)
             Size tileDimensions = GetTileSpriteDimensions(id);
 
             //Screen real coords
-            int screenX = x * spriteVideoWidth;
-            int screenY = (y * spriteVideoHeight) - (tileDimensions.Height - 64);
+            int screenX = x * spriteVideoWidth + offset.x;
+            int screenY = (y * spriteVideoHeight) - (tileDimensions.Height - 64) + offset.y;
 
             DrawSprite(TileSpritePath(id), screenX, screenY, alpha);
         }
@@ -305,7 +316,14 @@ namespace RogueBasin
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = UISpritePath(id);
 
-            return GetSpriteFromCache(entry).Size;
+            try
+            {
+                return GetSpriteFromCache(entry).Size;
+            }
+            catch (Exception)
+            {
+                return new Size(0, 0);
+            }
         }
 
         public Size GetTileSpriteDimensions(string id)
@@ -313,7 +331,14 @@ namespace RogueBasin
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = TileSpritePath(id);
 
-            return GetSpriteFromCache(entry).Size;
+            try
+            {
+                return GetSpriteFromCache(entry).Size;
+            }
+            catch (Exception)
+            {
+                return new Size(0, 0);
+            }
         }
 
         public Size GetTraumaSpriteDimensions(int id)
@@ -333,9 +358,16 @@ namespace RogueBasin
             entry.StrId = filePath;
             entry.AlphaOverride = alpha;
 
-            Surface spriteSurface = GetSpriteFromCache(entry);
-            
-            videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
+            try
+            {
+                Surface spriteSurface = GetSpriteFromCache(entry);
+
+                videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Can't find sprite " + filePath, LogDebugLevel.High);
+            }
         }
 
         private Surface GetSpriteFromCache(SpriteCacheEntry entry)

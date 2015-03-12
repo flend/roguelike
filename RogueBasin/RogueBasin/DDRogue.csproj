@@ -260,6 +260,7 @@
     <Compile Include="Items\AmmoPack.cs" />
     <Compile Include="Items\BioWare.cs" />
     <Compile Include="Items\ShotgunTypeWeapon.cs" />
+    <Compile Include="Items\Axe.cs" />
     <Compile Include="Locks\EntryLock.cs" />
     <Compile Include="Locks\ExitLock.cs" />
     <Compile Include="Locks\SimpleOptionalLockedDoorWithMovie.cs" />

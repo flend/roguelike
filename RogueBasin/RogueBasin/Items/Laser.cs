@@ -282,5 +282,15 @@ namespace RogueBasin.Items
         {
             return 0;
         }
+
+        protected override string GetGameSprite()
+        {
+            return "laser";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-laser";
+        }
     }
 }

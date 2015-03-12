@@ -1360,6 +1360,7 @@ namespace RogueBasin
                     return false;
                 }
 
+                /*
                 //DON'T PLACE UNDER MONSTER FOR FLATLINE
 
                 //Check square has nothing else on it
@@ -1369,7 +1370,7 @@ namespace RogueBasin
                 {
                     LogFile.Log.LogEntryDebug("AddItem failure: Monster at this square", LogDebugLevel.Low);
                     return false;
-                }
+                }*/
 
                 //Otherwise OK
                 item.LocationLevel = level;

@@ -2883,5 +2883,10 @@ namespace RogueBasin
                 }
             }
         }
+
+        protected override string GetGameSprite()
+        {
+            return "lance";
+        }
     }
 }

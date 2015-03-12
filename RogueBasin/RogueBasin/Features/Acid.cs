@@ -28,7 +28,7 @@ namespace RogueBasin.Features
 
         protected override string GetGameSprite()
         {
-            return "features_acid";
+            return "acid";
         }
     }
 }

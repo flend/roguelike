@@ -105,6 +105,16 @@ namespace RogueBasin.Items
             return (char)274;
         }
 
+        protected override string GetGameSprite()
+        {
+            return "shotgun";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-shotgun";
+        }
+
         public override System.Drawing.Color GetColour()
         {
             return System.Drawing.Color.Cyan;

@@ -22,8 +22,8 @@ namespace RogueBasin {
             Terrain = 0,
             Features = 1,
             Items = 2,
-            CreatureDecoration = 3,
-            Creatures = 4,
+            Creatures = 3,
+            CreatureDecoration = 4,
             TargettingUI = 5,
             Animations = 6
         }
@@ -992,6 +992,23 @@ namespace RogueBasin {
 
             tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)] = new TileEngine.TileCell(pcRepresentation);
             tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileFlag = new LibtcodColorFlags(colorToUse);
+            tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileSprite = player.GameSprite;
+
+            //Draw equipped weapons
+
+            //Draw equipped ranged weapon
+            Item weapon = player.GetEquippedRangedWeaponAsItem();
+            
+            //Draw equipped melee weapon
+            Item meleeWeapon = player.GetEquippedMeleeWeaponAsItem();
+
+            if(weapon != null && !(weapon is Items.Pistol)) {
+                tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(PClocation)].TileSprite = weapon.GameSprite;
+            }
+            else if (meleeWeapon != null)
+            {
+                tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(PClocation)].TileSprite = weapon.GameSprite;
+            }
         }
 
 
