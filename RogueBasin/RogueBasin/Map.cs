@@ -329,6 +329,12 @@ namespace RogueBasin
             }
         }
 
+        public bool InMonsterStealthRadius
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Sound magnitude at this square (debug only)
         /// </summary>

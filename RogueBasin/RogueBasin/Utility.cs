@@ -328,8 +328,18 @@ namespace RogueBasin
         /// <returns></returns>
         public static int GetPathDistanceBetween(MapObject obj1, MapObject obj2)
         {
-            List<Point> pts = Utility.GetPointsOnLine(obj1.LocationMap, obj2.LocationMap).ToList();
+            return GetPathDistanceBetween(obj1.LocationMap, obj2.LocationMap);
+        }
+
+        public static int GetPathDistanceBetween(Point p1, Point p2)
+        {
+            List<Point> pts = Utility.GetPointsOnLine(p1, p2).ToList();
             return pts.Count;
+        }
+
+        public static int GetPathDistanceBetween(MapObject obj1, Point p2)
+        {
+            return GetPathDistanceBetween(obj1.LocationMap, p2);
         }
 
         /// <summary>

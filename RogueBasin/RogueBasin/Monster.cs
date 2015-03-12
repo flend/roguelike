@@ -229,7 +229,7 @@ namespace RogueBasin
         /// <returns></returns>
         virtual protected int StealthRadius()
         {
-            return 3;
+            return 5;
         }
 
         /// <summary>
@@ -284,6 +284,16 @@ namespace RogueBasin
         {
             LogFile.Log.LogEntryDebug(this.SingleDescription + "unpassified", LogDebugLevel.Medium);
             Passive = false;
+        }
+
+        public bool InStealthRadius(Point sq)
+        {
+            int range = Utility.GetPathDistanceBetween(this, sq);
+
+            if (range <= StealthRadius())
+                return true;
+
+            return false;
         }
 
         public void CalculateCombatStats()

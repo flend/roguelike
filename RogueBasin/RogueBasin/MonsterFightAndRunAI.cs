@@ -240,9 +240,7 @@ namespace RogueBasin
             //Sleeping creatures who are activated by player proximity (within FOV)
             if (Sleeping && StealthRadius() > 0)
             {
-                int range = Utility.GetPathDistanceBetween(this, Game.Dungeon.Player);
-
-                if (range <= StealthRadius() && PlayerCanBeSeen(currentFOV))
+                if (InStealthRadius(Game.Dungeon.Player.LocationMap) && PlayerCanBeSeen(currentFOV))
                 {
                     Sleeping = false;
                     AIState = SimpleAIStates.Patrol;

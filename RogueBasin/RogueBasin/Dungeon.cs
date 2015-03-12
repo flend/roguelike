@@ -3031,6 +3031,12 @@ namespace RogueBasin
                     bool inFOV = creatureFov.CheckTileFOV(i, j);
                     if (inFOV)
                         thisSquare.InMonsterFOV = true;
+
+                    //Show stealth radii too
+                    if (creature is Monster)
+                    {
+                        thisSquare.InMonsterStealthRadius = (creature as Monster).InStealthRadius(new Point(i, j));
+                    }
                 }
             }
         }

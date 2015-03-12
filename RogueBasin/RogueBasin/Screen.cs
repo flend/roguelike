@@ -2864,11 +2864,16 @@ namespace RogueBasin {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Blue, 0.6);
                         }
 
-
                         //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Red, 0.6);
+                        }
+
+                        //Draw monster stealth radius
+                        if (map.mapSquares[i, j].InMonsterStealthRadius)
+                        {
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.OrangeRed, 0.6);
                         }
 
                         //Draw sounds
