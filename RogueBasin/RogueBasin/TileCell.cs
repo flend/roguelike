@@ -55,6 +55,8 @@ namespace TileEngine
             }
         }
 
+        public double Transparency { get; set; }
+
         public Animation Animation
         {
             get;
@@ -72,21 +74,25 @@ namespace TileEngine
             tileSprite = null;
             Animation = null;
             TileFlag = null;
+            Transparency = 0.0;
         }
 
         public TileCell()
         {
             //-1 default id
+            Transparency = 0.0;
         }
 
         public TileCell(int tileID)
         {
             this.tileID = tileID;
+            Transparency = 0.0;
         }
 
         public TileCell(string tileSprite)
         {
             TileSprite = tileSprite;
+            Transparency = 0.0;
         }
     }
 }

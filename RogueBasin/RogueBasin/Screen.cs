@@ -2368,6 +2368,7 @@ namespace RogueBasin {
                 //Color itemColorToUse = itemColor;
 
                 bool drawItem = true;
+                double spriteAlpha = 0.0;
 
                 if (itemSquare.InPlayerFOV || SeeAllMap)
                 {
@@ -2378,6 +2379,7 @@ namespace RogueBasin {
                     //Not in FOV now but seen this adventure
                     //Don't draw items in squares seen in previous adventures (since the items have respawned)
                     itemColorToUse = ColorInterpolate(item.GetColour(), System.Drawing.Color.Black, 0.5);
+                    spriteAlpha = 0.3;
                 }
                 else
                 {
@@ -2401,6 +2403,9 @@ namespace RogueBasin {
 
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)] = new TileEngine.TileCell(item.Representation);
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileFlag = new LibtcodColorFlags(itemColorToUse);
+                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileSprite = item.GameSprite;
+                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].Transparency = spriteAlpha;
+
                 }
                 //rootConsole.Flush();
                 //KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -2418,6 +2423,7 @@ namespace RogueBasin {
                 MapSquare featureSquare = Game.Dungeon.Levels[thisLock.LocationLevel].mapSquares[thisLock.LocationMap.x, thisLock.LocationMap.y];
 
                 System.Drawing.Color featureColor = thisLock.RepresentationColor();
+                double spriteAlpha = 0.0;
 
                 bool drawFeature = true;
 
@@ -2429,6 +2435,7 @@ namespace RogueBasin {
                 {
                     //Not in FOV but seen
                     featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
+                    spriteAlpha = 0.3;
                 }
                 else
                 {
@@ -2450,6 +2457,7 @@ namespace RogueBasin {
 
                     tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)] = new TileEngine.TileCell(thisLock.Representation);
                     tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor);
+                    tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)].Transparency = spriteAlpha;
                 }
             }
 
@@ -2467,7 +2475,7 @@ namespace RogueBasin {
                 MapSquare featureSquare = Game.Dungeon.Levels[feature.LocationLevel].mapSquares[feature.LocationMap.x, feature.LocationMap.y];
 
                 System.Drawing.Color featureColor = feature.RepresentationColor();
-
+                double spriteAlpha = 0.0;
                 bool drawFeature = true;
 
                 if (featureSquare.InPlayerFOV || SeeAllMap)
@@ -2479,6 +2487,7 @@ namespace RogueBasin {
                 {
                     //Not in FOV but seen
                     featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
+                    spriteAlpha = 0.3;
 
                     //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                 }
@@ -2503,6 +2512,8 @@ namespace RogueBasin {
 
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.Representation);
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor, feature.RepresentationBackgroundColor());
+                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileSprite = feature.GameSprite;
+                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].Transparency = spriteAlpha;
                 }
             }
 
@@ -2842,9 +2853,12 @@ namespace RogueBasin {
                     char screenChar;
                     System.Drawing.Color baseDrawColor;
                     System.Drawing.Color drawColor;
+                    double spriteTransparency = 1.0;
 
                     //Defaults
                     screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
+                    string terrainSprite = null;
+                    StringEquivalent.TerrainSprites.TryGetValue(map.mapSquares[i, j].Terrain, out terrainSprite);
                     baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
 
                     //Exception for literals
@@ -2960,6 +2974,7 @@ namespace RogueBasin {
                     {
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(screenChar);
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileFlag = new LibtcodColorFlags(drawColor);
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].Transparency = spriteTransparency;
                     }
                 }
             }

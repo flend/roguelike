@@ -20,6 +20,8 @@ namespace RogueBasin
         /// </summary>
         public static Dictionary<MapTerrain, char> TerrainChars { get; private set; }
 
+        public static Dictionary<MapTerrain, string> TerrainSprites { get; private set; }
+
         public static Dictionary<MapTerrain, System.Drawing.Color> TerrainColors { get; private set; }
 
         public static Dictionary<GameDifficulty, string> GameDifficultyString { get; private set; }
@@ -34,6 +36,9 @@ namespace RogueBasin
             TerrainChars = new Dictionary<MapTerrain, char>();
             SetupTerrainChars();
 
+            TerrainSprites = new Dictionary<MapTerrain, string>();
+            SetupTerrainSprites();
+
             TerrainColors = new Dictionary<MapTerrain, System.Drawing.Color>();
             SetupTerrainColors();
 
@@ -41,6 +46,11 @@ namespace RogueBasin
             GameDifficultyString.Add(GameDifficulty.Easy, "Easy");
             GameDifficultyString.Add(GameDifficulty.Medium, "Medium");
             GameDifficultyString.Add(GameDifficulty.Hard, "Hard");
+        }
+
+        private static void SetupTerrainSprites()
+        {
+            TerrainSprites.Add(MapTerrain.Empty, "terrain_floor");
         }
 
         public static void OverrideTerrainChar(MapTerrain terrain, char c)

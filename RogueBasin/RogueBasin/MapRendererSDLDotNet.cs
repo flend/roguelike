@@ -31,18 +31,19 @@ namespace RogueBasin
     class SpriteCacheEntry
     {
         public string StrId { get; set; }
+        public double AlphaOverride { get; set; }
 
         public override bool Equals(object other)
         {
             var otherFoo = other as SpriteCacheEntry;
             if (otherFoo == null)
                 return false;
-            return StrId == otherFoo.StrId;
+            return StrId == otherFoo.StrId && AlphaOverride - otherFoo.AlphaOverride < 0.001;
         }
 
         public override int GetHashCode()
         {
-            return 17 * StrId.GetHashCode();
+            return 17 * StrId.GetHashCode() + 17 * AlphaOverride.GetHashCode();
         }
     }
 
@@ -108,7 +109,7 @@ namespace RogueBasin
 
                         if (thisCell.TileSprite != null)
                         {
-                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY);
+                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, thisCell.Transparency);
                             continue;
                         }
 
@@ -259,10 +260,10 @@ namespace RogueBasin
 
         public void DrawUISprite(string id, int x, int y)
         {
-            DrawSprite(UISpritePath(id), x, y);
+            DrawSprite(UISpritePath(id), x, y, 1.0);
         }
 
-        private void DrawTileSprite(string id, int x, int y)
+        private void DrawTileSprite(string id, int x, int y, double alpha = 1.0)
         {
             //Tile x, y are the top left of a 64x64 tile
             //Our tile sprites may not be 64x64, but are aligned to the BOTTOM-LEFT of a 64x64 tile (I hope)
@@ -272,7 +273,7 @@ namespace RogueBasin
             int screenX = x * spriteVideoWidth;
             int screenY = (y * spriteVideoHeight) - (tileDimensions.Height - 64);
 
-            DrawSprite(TileSpritePath(id), screenX, screenY);
+            DrawSprite(TileSpritePath(id), screenX, screenY, alpha);
         }
 
         public void DrawTraumaSprite(int id, int x, int y)
@@ -326,13 +327,14 @@ namespace RogueBasin
         /// <param name="id"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void DrawSprite(string filePath, int x, int y)
+        private void DrawSprite(string filePath, int x, int y, double alpha = 1.0)
         {
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = filePath;
+            entry.AlphaOverride = alpha;
 
             Surface spriteSurface = GetSpriteFromCache(entry);
-
+            
             videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
         }
 
@@ -345,12 +347,34 @@ namespace RogueBasin
             {
                 //Convert knocks out alpha for some goddamn reason
                 spriteSurface = new Surface(entry.StrId);//.Convert(videoSurface, true, false);
+                if (entry.AlphaOverride > 0.01)
+                {
+                    ModifyAlpha(spriteSurface, entry.AlphaOverride);
+                }
 
                 spriteCache.Add(entry, spriteSurface);
 
                 LogFile.Log.LogEntryDebug("Storing ui sprite" + entry.StrId, LogDebugLevel.Profiling);
             }
             return spriteSurface;
+        }
+
+        private void ModifyAlpha(Surface spriteSurface, double alpha)
+        {
+            for (int i = 0; i < spriteSurface.Width; i++)
+            {
+                for (int j = 0; j < spriteSurface.Height; j++)
+                {
+                    var pixelColor = spriteSurface.GetPixel(new System.Drawing.Point(i, j));
+                    var originalAlpha = pixelColor.A;
+                    var newAlpha = (byte)Math.Floor(pixelColor.A * alpha);
+                    //LogFile.Log.LogEntryDebug("Setting transparency (override) " + alpha + " from " + originalAlpha + " to " + newAlpha, LogDebugLevel.Medium);
+                    var transparentColor = Color.FromArgb(newAlpha, pixelColor.R, pixelColor.G, pixelColor.B);
+                    Color[,] newPixel = new Color[1, 1];
+                    newPixel[0, 0] = transparentColor;
+                    spriteSurface.SetPixels(new System.Drawing.Point(i, j), newPixel);
+                }
+            }
         }
 
         private System.Drawing.Point tileIDToSpriteLocation(int tileID)
