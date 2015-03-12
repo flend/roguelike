@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RogueBasin.Features
 {
-    class Acid : ActiveFeature
+    class Acid : DangerousActiveFeature
     {
         public override bool PlayerInteraction(Player player)
         {

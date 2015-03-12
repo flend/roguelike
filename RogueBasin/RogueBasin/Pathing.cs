@@ -61,7 +61,7 @@ namespace RogueBasin
         /// <param name="allDoorsAsOpen"></param>
         /// <param name="attackDestination"></param>
         /// <returns></returns>
-        private PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingPermission permission)
+        private PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             //Try to walk the path
             //If we fail, check if this square occupied by a creature
@@ -110,6 +110,7 @@ namespace RogueBasin
 
                 //Check if that square is occupied
                 Creature blockingCreature = null;
+                Feature blockingFeature = null;
 
                 foreach (Monster creature in dungeon.Monsters)
                 {
@@ -151,9 +152,18 @@ namespace RogueBasin
 
                     blockingCreature = dungeon.Player;
                 }
-                
+
+                //Check for dangerous features
+
+                var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(level, theNextStep)).Where(f => f is DangerousActiveFeature);
+
+                if (dangeousTerrainAtPoint.Count() > 0 && !ignoreDangerousTerrain)
+                {
+                    blockingFeature = dangeousTerrainAtPoint.First();
+                }
+
                 //If no blocking creature, the path is good
-                if (blockingCreature == null)
+                if (blockingCreature == null && blockingFeature == null)
                 {
                     goodPath = true;
                     nextStep = theNextStep;
@@ -186,15 +196,24 @@ namespace RogueBasin
             public Point MonsterFinalLocation { get; private set; }
             public bool MoveIsInteractionWithTarget { get; private set; }
             public bool TerminallyBlocked { get; private set; }
+            public bool TryBackupRoute { get; private set; }
 
             public PathingResult(Point monsterFinalLocation, bool moveIsInteractionWithMonsterAtDest, bool terminallyBlocked) {
                 MonsterFinalLocation = monsterFinalLocation;
                 MoveIsInteractionWithTarget = moveIsInteractionWithMonsterAtDest;
                 TerminallyBlocked = terminallyBlocked;
             }
+
+            public PathingResult(Point monsterFinalLocation, bool moveIsInteractionWithMonsterAtDest, bool terminallyBlocked, bool tryBackupRoute)
+            {
+                MonsterFinalLocation = monsterFinalLocation;
+                MoveIsInteractionWithTarget = moveIsInteractionWithMonsterAtDest;
+                TerminallyBlocked = terminallyBlocked;
+                TryBackupRoute = tryBackupRoute;
+            }
         }
 
-        private PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission)
+        private PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             //Check for pathing to own square
             if (origin == dest)
@@ -234,10 +253,26 @@ namespace RogueBasin
                 //Check if that square is occupied
                 Creature blockingCreature = Game.Dungeon.CreatureAtSpaceIncludingPlayer(level, theNextStep);
 
-                if (blockingCreature == null)
+                //Check for dangerous features
+
+                Feature blockingFeature = null;
+                var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(level, theNextStep)).Where(f => f is DangerousActiveFeature);
+
+                if (dangeousTerrainAtPoint.Count() > 0 && !ignoreDangerousTerrain)
+                {
+                    blockingFeature = dangeousTerrainAtPoint.First();
+                }
+
+                if (blockingCreature == null && blockingFeature == null)
                 {
                     //Free space on the path, stop here
                     return new PathingResult(theNextStep, false, false);
+                }
+
+                if (blockingCreature == null && blockingFeature != null)
+                {
+                    //Way is blocked but not by a creature - reroute normally
+                    return new PathingResult(theNextStep, false, false, true);
                 }
 
                 pathPoint++;
@@ -264,7 +299,11 @@ namespace RogueBasin
             {
                 Point thisPathPoint = pathNodes[pathPoint];
 
-                var possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint);
+                List<Point> possibleRestSquares;
+                if(ignoreDangerousTerrain)
+                    possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint);
+                else
+                    possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreaturesAndDangerousTerrain(level, thisPathPoint);
 
                 if (possibleRestSquares.Any())
                 {
@@ -279,7 +318,7 @@ namespace RogueBasin
             return new PathingResult(origin, false, false);
         }
 
-        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature, PathingType type, PathingPermission permission)
+        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature, PathingType type, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != destCreature.LocationLevel)
@@ -289,19 +328,24 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, permission);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, permission, ignoreDangerousTerrain);
         }
 
-        public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, PathingPermission permission)
+        public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             switch (pathingType)
             {
                 case PathingType.CreaturePass:
 
-                    return GetPathToPointPassThroughMonsters(level, origin, dest, permission);
+                    PathingResult result = GetPathToPointPassThroughMonsters(level, origin, dest, permission, ignoreDangerousTerrain);
+                    if (result.TryBackupRoute)
+                    {
+                        return GetPathToPoint(level, origin, dest, permission, ignoreDangerousTerrain);
+                    }
+                    return result;
 
                 default:
-                    return GetPathToPoint(level, origin, dest, permission);
+                    return GetPathToPoint(level, origin, dest, permission, ignoreDangerousTerrain);
             }
         }
 

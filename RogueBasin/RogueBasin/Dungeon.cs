@@ -1538,7 +1538,7 @@ namespace RogueBasin
         /// </summary>
         /// <param name="loc"></param>
         /// <returns></returns>
-        private IEnumerable<Feature> GetFeaturesAtLocation(Location loc)
+        public IEnumerable<Feature> GetFeaturesAtLocation(Location loc)
         {
             List<Feature> featureListAtLocation;
             features.TryGetValue(loc, out featureListAtLocation);
@@ -4799,6 +4799,48 @@ namespace RogueBasin
                     }
 
                     if (contents.player != null)
+                        continue;
+
+                    //Empty and walkable
+                    adjacentSqFree.Add(p);
+                }
+            }
+
+            return adjacentSqFree;
+        }
+
+        public List<Point> GetWalkableAdjacentSquaresFreeOfCreaturesAndDangerousTerrain(int locationLevel, Point locationMap)
+        {
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSqFree = new List<Point>();
+            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+
+            foreach (Point p in adjacentSq)
+            {
+                if (p.x >= 0 && p.x < levelMap.width
+                    && p.y >= 0 && p.y < levelMap.height)
+                {
+                    if (!MapSquareIsWalkable(locationLevel, p))
+                    {
+                        continue;
+                    }
+
+                    //Check square has nothing else on it
+                    SquareContents contents = MapSquareContents(locationLevel, p);
+
+                    if (contents.monster != null)
+                    {
+                        continue;
+                    }
+
+                    if (contents.player != null)
+                        continue;
+
+                    //Check for dangerous features
+
+                    var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(locationLevel, locationMap)).Where(f => f is DangerousActiveFeature);
+                    if (dangeousTerrainAtPoint.Count() > 0)
                         continue;
 
                     //Empty and walkable

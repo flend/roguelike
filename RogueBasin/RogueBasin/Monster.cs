@@ -114,10 +114,12 @@ namespace RogueBasin
             Charmed = false;
             Passive = false;
 
-            //In FlatlineRL monsters default to awake
             Sleeping = true;
 
             Unique = false;
+
+            //Most monsters are sensible
+            IgnoreDangerousTerrain = false;
         }
 
         /// <summary>
@@ -189,6 +191,10 @@ namespace RogueBasin
         /// </summary>
         public bool Sleeping { get; set; }
 
+        /// <summary>
+        /// The monster will ignore dangerous terrain and just take the hit
+        /// </summary>
+        public bool IgnoreDangerousTerrain { get; set; }
 
         /// <summary>
         /// Player armour class. Auto-calculated so not serialized

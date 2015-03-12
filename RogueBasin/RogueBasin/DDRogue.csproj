@@ -99,6 +99,7 @@
     <Compile Include="Creatures\Swarmer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DangerousActiveFeature.cs" />
     <Compile Include="DecorationFeatureDetails.cs" />
     <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />
