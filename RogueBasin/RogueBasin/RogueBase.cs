@@ -2217,6 +2217,14 @@ namespace RogueBasin
                 RemoveEffectsDueToFiringWeapon(player);
             }
 
+            //Ditch empty weapons
+            if (weapon.RemainingAmmo() < 1)
+            {
+                Game.MessageQueue.AddMessage("This " + (weapon as Item).SingleItemDescription + " is all out of ammo! Ditching it!");
+                LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+                player.UnequipAndDestroyItem(weapon as Item);
+            }
+
             //Store details for a recast
 
             //If we successful, store the target

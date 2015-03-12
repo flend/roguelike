@@ -1809,7 +1809,8 @@ namespace RogueBasin
             if (itemToPickUp is Items.HeavyLaser)
                 return true;
 
-            return false;
+            //Just equip everything
+            return true;
         }
 
         /// <summary>
@@ -1888,7 +1889,7 @@ namespace RogueBasin
                     UnequipAndDestroyItem(oldItem);
                 }
                 else
-                    UnequipItem(oldItem);
+                    UnequipAndDropItem(oldItem);
 
                 //This slot is now free
                 freeSlot = matchingEquipSlots[0];

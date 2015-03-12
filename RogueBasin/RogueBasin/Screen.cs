@@ -1007,7 +1007,7 @@ namespace RogueBasin {
             }
             else if (meleeWeapon != null)
             {
-                tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(PClocation)].TileSprite = weapon.GameSprite;
+                tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(PClocation)].TileSprite = meleeWeapon.GameSprite;
             }
         }
 
