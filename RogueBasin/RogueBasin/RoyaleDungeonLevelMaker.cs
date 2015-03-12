@@ -507,7 +507,24 @@ namespace RogueBasin
             return items.ElementAt(Game.Random.Next(totalItems));
         }
 
-        private void AddStandardDecorativeFeaturesToRoomUsingGrid(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
+        private void AddNonBlockingFeaturesToLevel(int level, IEnumerable<Point> mapPoints, Func<Feature> featureGenerator)
+        {
+            foreach (Point mapPoint in mapPoints)
+            {
+                var featureToPlace = featureGenerator();
+                if (featureToPlace.IsBlocking)
+                {
+                    throw new ApplicationException("Can't use this function for blocking features");
+                }
+
+                bool result = Game.Dungeon.AddFeature(featureToPlace, level, mapPoint);
+
+                if (result)
+                    LogFile.Log.LogEntryDebug("Placing feature " + featureToPlace.Description + " at location " + mapPoint, LogDebugLevel.Medium);
+            }
+        }
+
+        private void AddFeaturesToRoom(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, Func<Feature> featureGenerator)
         {
             var roomFiller = new RoomFilling(positionedRoom.Room);
 
@@ -516,7 +533,44 @@ namespace RogueBasin
 
             foreach (Point roomPoint in pointsToPlaceTerrain)
             {
+                try
+                {
+                    var featureLocationInMapCoords = positionedRoom.Location + roomPoint;
+                    var featureToPlace = featureGenerator();
 
+                    if (!featureToPlace.IsBlocking)
+                    {
+                        bool result = Game.Dungeon.AddFeature(featureToPlace, level, featureLocationInMapCoords);
+
+                        if (result)
+                            LogFile.Log.LogEntryDebug("Placing feature " + featureToPlace.Description + " in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                    }
+                    else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint))
+                    {
+                        bool result = Game.Dungeon.AddFeatureBlocking(featureToPlace, level, featureLocationInMapCoords, false);
+
+                        if (result)
+                        {
+                            LogFile.Log.LogEntryDebug("Placing blocking feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords + " room wise " + roomPoint, LogDebugLevel.Medium);
+                        }
+                    }
+                }
+                catch (ApplicationException ex)
+                {
+                    LogFile.Log.LogEntryDebug("Unable to add feature in room " + ex.Message, LogDebugLevel.Medium);
+                }
+            }
+        }
+
+        private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
+        {
+            var roomFiller = new RoomFilling(positionedRoom.Room);
+
+            //Need to account for all current blocking features in room
+            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
+
+            foreach (Point roomPoint in pointsToPlaceTerrain)
+            {
                 try
                 {
                     var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
@@ -582,23 +636,30 @@ namespace RogueBasin
 
                         var crossPiece = new CrossPiece(centre, 9, 3, Math.PI / 2);
                         var crossPoints = crossPiece.Generate();
-                        AddStandardDecorativeFeaturesToRoomUsingGrid(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights);
+                        AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights);
                     }
                     else
                     {
 
-                        //Pond
-
-                        var pond = new Pond(centre, 5, 5);
-                        var pondPoints = pond.Generate();
-
-                        AddStandardDecorativeFeaturesToRoomUsingGrid(levelInfo.LevelNo, thisRoom, pondPoints, decorationWeights);
+                        //Acid Pond
+                        AddAcidPondToLevel(levelInfo.LevelNo, thisRoom.Location + centre, 5, 5);
                     }
                 }
 
 
             }
         }
+
+        public void AddAcidPondToLevel(int level, Point origin, int width, int height)
+        {
+            var pond = new Pond(origin, width, height);
+            var pondPoints = pond.Generate();
+
+            AddNonBlockingFeaturesToLevel(level, pondPoints, () => new Features.Acid());
+        }
+
+
+
 
         /// <summary>
         /// Return a list of the centres of grid squares for room subdivision

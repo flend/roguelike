@@ -1437,8 +1437,9 @@ namespace RogueBasin
                 return false;
 
             feature.IsBlocking = true;
+            var willBlockLight = feature.BlocksLight || blocksLight;
 
-            SetTerrainAtPoint(level, location, blocksLight ? MapTerrain.NonWalkableFeatureLightBlocking : MapTerrain.NonWalkableFeature);
+            SetTerrainAtPoint(level, location, willBlockLight ? MapTerrain.NonWalkableFeatureLightBlocking : MapTerrain.NonWalkableFeature);
 
             return true;
         }
@@ -1566,7 +1567,7 @@ namespace RogueBasin
                     if (otherFeature.LocationLevel == level &&
                         otherFeature.LocationMap == location)
                     {
-                        if (otherFeature as UseableFeature != null)
+                        if (otherFeature as UseableFeature != null || otherFeature as ActiveFeature != null)
                         {
                             LogFile.Log.LogEntry("AddDecorationFeature: non-decoration feature already there");
                             return false;
@@ -2037,7 +2038,7 @@ namespace RogueBasin
             return specialMoves.Find(x => x.GetType() == specialMove);
         }
 
-        private bool InteractWithFeature()
+        private bool InteractWithUseableFeature()
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
@@ -2053,6 +2054,26 @@ namespace RogueBasin
 
             //Interact with feature - these will normally put success / failure messages in queue
             return useableFeature.PlayerInteraction(player);
+        }
+
+        /// <summary>
+        /// Active features are typically triggered automatically
+        /// </summary>
+        /// <returns></returns>
+        private bool InteractWithActiveFeature()
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
+            Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
+
+            var activeFeature = featureAtSpace as ActiveFeature;
+            if (activeFeature == null)
+            {
+                return false;
+            }
+
+            return activeFeature.PlayerInteraction(player);
         }
 
         /// <summary>
@@ -2217,8 +2238,11 @@ namespace RogueBasin
                     PickUpItemInSpace();
                 }
 
-                //If there is a feature, auto interact
-                InteractWithFeature();
+                //If there is an active feature, auto interact
+                InteractWithActiveFeature();
+                
+                //If there is a useable feature, auto interact
+                InteractWithUseableFeature();
             }
 
             //Run any entering square messages
@@ -3166,7 +3190,7 @@ namespace RogueBasin
 
 
         /// <summary>
-        /// Return a (the first) feature at this location or null. Ignores decorativefeatures
+        /// Return a (the first) feature at this location or null
         /// </summary>
         /// <param name="locationLevel"></param>
         /// <param name="locationMap"></param>
@@ -3175,7 +3199,7 @@ namespace RogueBasin
         {
             foreach (Feature feature in features)
             {
-                if (feature.IsLocatedAt(locationLevel, locationMap) && feature is UseableFeature)
+                if (feature.IsLocatedAt(locationLevel, locationMap))
                 {
                     return feature;
                 }

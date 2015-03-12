@@ -51,6 +51,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="ActiveFeature.cs" />
     <Compile Include="Algorithms\IFieldOfView.cs" />
     <Compile Include="Algorithms\IPathFinder.cs" />
     <Compile Include="ArrayCache.cs" />
@@ -199,6 +200,7 @@
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
+    <Compile Include="Features\Acid.cs" />
     <Compile Include="Features\SelfDestructPrimeObjective.cs" />
     <Compile Include="Features\SelfDestructObjective.cs" />
     <Compile Include="Features\AntennaeObjective.cs" />
