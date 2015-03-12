@@ -258,15 +258,9 @@ namespace RogueBasin
                 }
             }
 
-            //If we're still sleeping then skip this go
-            if (Sleeping)
-            {
-                ResetTurnsMoving();
-                return;
-            }
             //RETURNING - used when a charmed creature gets a long way from the PC
 
-            if (AIState == SimpleAIStates.Returning)
+            if (AIState == SimpleAIStates.Returning && !Sleeping)
             {
                 //Don't stop on an attack otherwise charmed creatures will be frozen in front of missile troops
 
@@ -295,7 +289,7 @@ namespace RogueBasin
 
             //PURSUIT MODES - Pursuit [active] and Fleeing [temporarily fleeing, will return to target]
 
-            if (AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit)
+            if ((AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit) && !Sleeping)
             {
                 Monster targetMonster = currentTarget as Monster;
 
@@ -357,7 +351,8 @@ namespace RogueBasin
 
             //Check states which override patrol or investigate (e.g being attacked, charmed, seeing the PC)
 
-            if(AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) {
+            if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && !Sleeping)
+            {
      
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
                 
@@ -546,6 +541,8 @@ namespace RogueBasin
 
             //Monster that don't pursue still have a chance to direct their FOVs at sounds
 
+            //Sleeping monsters will still investigate large sounds - but they will sleep again if they get to the source and nothing else happens
+
             bool moveFollowingSound = false;
 
             if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && WillInvestigateSounds() )
@@ -621,7 +618,7 @@ namespace RogueBasin
 
             //If nothing else happened, do the Patrol action
             //Don't if we moved in response to a sound
-            if ((AIState == SimpleAIStates.Patrol && !moveFollowingSound) || (WillAlwaysPatrol() && !headingSetToSound))
+            if (((AIState == SimpleAIStates.Patrol && !moveFollowingSound) || (WillAlwaysPatrol() && !headingSetToSound)) && !Sleeping)
             {
                 //We haven't got anything to do and we can't see the PC
                 //Do normal movement
