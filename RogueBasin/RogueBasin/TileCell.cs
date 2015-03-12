@@ -61,6 +61,19 @@ namespace TileEngine
             set;
         }
 
+        public bool IsPresent()
+        {
+            return tileID != -1 || tileSprite != null;
+        }
+
+        public void Reset()
+        {
+            tileID = -1;
+            tileSprite = null;
+            Animation = null;
+            TileFlag = null;
+        }
+
         public TileCell()
         {
             //-1 default id

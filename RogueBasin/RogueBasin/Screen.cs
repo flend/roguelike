@@ -3397,7 +3397,7 @@ namespace RogueBasin {
                 {
                     TileEngine.TileCell thisCell = animationLayer.Rows[i].Columns[j];
 
-                    if (thisCell.TileID == -1)
+                    if (!thisCell.IsPresent())
                         continue;
 
                     TileEngine.Animation cellAnimation = thisCell.Animation;
@@ -3411,8 +3411,7 @@ namespace RogueBasin {
                     cellAnimation.CurrentFrame += tickIncrement;
                     if (cellAnimation.CurrentFrame > cellAnimation.DurationMS)
                     {
-                        thisCell.TileID = -1;
-                        thisCell.Animation = null;
+                        thisCell.Reset();
                         animationChangeOccurred = true;
                     }
                 }
@@ -3514,6 +3513,7 @@ namespace RogueBasin {
                     if (isViewVisible(newTarget.LocationMap))
                     {
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.Representation);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.GameSprite);
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
                     }

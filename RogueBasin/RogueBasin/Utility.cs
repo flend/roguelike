@@ -342,6 +342,21 @@ namespace RogueBasin
             return GetPathDistanceBetween(obj1.LocationMap, p2);
         }
 
+        public static int GetManhattenPathDistanceBetween(Point p1, Point p2)
+        {
+            return Math.Abs(p1.x - p2.x) + Math.Abs(p1.y - p2.y);
+        }
+
+        public static int GetManhattenPathDistanceBetween(MapObject obj1, MapObject obj2)
+        {
+            return GetManhattenPathDistanceBetween(obj1.LocationMap, obj2.LocationMap);
+        }
+
+        public static int GetManhattenPathDistanceBetween(MapObject obj1, Point p2)
+        {
+            return GetManhattenPathDistanceBetween(obj1.LocationMap, p2);
+        }
+
         /// <summary>
         /// Return the distance between 2 objects on the map
         /// -1 means they are on different levels

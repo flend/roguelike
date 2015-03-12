@@ -2809,6 +2809,7 @@ namespace RogueBasin
             foreach (MapSquare sq in level.mapSquares)
             {
                 sq.InMonsterFOV = false;
+                sq.InMonsterStealthRadius = false;
             }
         }
 

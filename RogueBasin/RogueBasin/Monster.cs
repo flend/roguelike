@@ -229,7 +229,7 @@ namespace RogueBasin
         /// <returns></returns>
         virtual protected int StealthRadius()
         {
-            return 5;
+            return 4;
         }
 
         /// <summary>
