@@ -1,4 +1,5 @@
 ﻿using GraphMap;
+using RogueBasin.TerrainSets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +63,7 @@ namespace RogueBasin
 
         public RoyaleDungeonLevelMaker()
         {
-            NumberDungeonLevelChoices = 3;
+            NumberDungeonLevelChoices = 1;
             mapInfoBuilder = new MapInfoBuilder();
             BuildTerrainMapping();
         }
@@ -564,12 +565,38 @@ namespace RogueBasin
                 };
 
                 //only big rooms
-                //if (thisRoomArea > 50)
-                //    continue;
+                if(thisRoomArea < 40)
+                  continue;
 
                 //var regularGridOfCentres = RoomTemplateUtilities.GetPointsInRoomWithTerrain(thisRoom.Room, RoomTemplateTerrain.Floor)
-                var regularGridOfCentres = DivideRoomIntoCentres(thisRoom.Room, 5, 5, 0.2);
-                AddStandardDecorativeFeaturesToRoomUsingGrid(levelInfo.LevelNo, thisRoom, regularGridOfCentres, decorationWeights);
+                var regularGridOfCentres = DivideRoomIntoCentres(thisRoom.Room, 4, 2, 0);
+                
+                foreach (Point centre in regularGridOfCentres)
+                {
+
+                    int random = Game.Random.Next(2);
+                    random = 1;
+                    if (random == 0)
+                    {
+                        //Cross piece
+
+                        var crossPiece = new CrossPiece(centre, 9, 3, Math.PI / 2);
+                        var crossPoints = crossPiece.Generate();
+                        AddStandardDecorativeFeaturesToRoomUsingGrid(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights);
+                    }
+                    else
+                    {
+
+                        //Pond
+
+                        var pond = new Pond(centre, 5, 5);
+                        var pondPoints = pond.Generate();
+
+                        AddStandardDecorativeFeaturesToRoomUsingGrid(levelInfo.LevelNo, thisRoom, pondPoints, decorationWeights);
+                    }
+                }
+
+
             }
         }
 
@@ -602,11 +629,12 @@ namespace RogueBasin
                 }
             }
 
+            /*
             LogFile.Log.LogEntryDebug("Room centres: " + room.Width + "/" + room.Height, LogDebugLevel.Medium);
             foreach (Point p in pointsToReturn)
             {
                 LogFile.Log.LogEntryDebug("Centre: " + p, LogDebugLevel.Medium);
-            }
+            }*/
             return pointsToReturn;
         }
 

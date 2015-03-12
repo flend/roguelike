@@ -177,7 +177,6 @@ namespace RogueBasin
         Unwalkable
     }
 
-
     public enum FOVTerrain
     {
         NonBlocking,
@@ -390,6 +389,20 @@ namespace RogueBasin
         public void setCell(Point p, T terrain)
         {
             pathingMap[p.x, p.y] = terrain;
+        }
+
+        public IEnumerable<Point> getAllCells(T terrain, Func<T, T, bool> equality)
+        {
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    if (equality(pathingMap[i, j], terrain))
+                    {
+                        yield return new Point(i, j); 
+                    }
+                }
+            }
         }
 
     }

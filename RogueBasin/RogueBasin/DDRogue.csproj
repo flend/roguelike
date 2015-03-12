@@ -307,6 +307,8 @@
     <Compile Include="LogGenerator.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="RoyaleDungeonLevelMaker.cs" />
+    <Compile Include="TerrainSets\CrossPiece.cs" />
+    <Compile Include="TerrainSets\Pond.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />

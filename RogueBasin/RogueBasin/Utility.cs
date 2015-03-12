@@ -474,5 +474,13 @@ namespace RogueBasin
 
         }
 
+        internal static Point RotatePoint(Point toRotate, Point origin, double radians)
+        {
+            int px = (int)Math.Round(Math.Cos(radians) * (toRotate.x-origin.x) - Math.Sin(radians) * (toRotate.y-origin.y) + origin.x);
+            int py = (int)Math.Round(Math.Sin(radians) * (toRotate.x - origin.x) + Math.Cos(radians) * (toRotate.y - origin.y) + origin.y);
+
+            return new Point(px, py);
+        }
+
     }
 }
