@@ -85,26 +85,20 @@ namespace RogueBasin
             {
                 //Generate path object
                 //We actually only need the next point here
-                List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission);
+                List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission, ignoreDangerousTerrain);
 
                 //No path
                 if (pathNodes.Count == 1)
                 {
-                    //If there was no blocking creature then there is no possible route (hopefully impossible in a fully connected dungeon)
+                    //If there was no blocking creature then there is no possible route, this may be due to dangerous terrain
                     if (!pathBlockedByCreatureOrLock)
                     {
-                        //This gets thrown a lot mainly when you cheat
-                        LogFile.Log.LogEntryDebug("Path blocked by terrain!", LogDebugLevel.High);
-                        return new PathingResult(origin, false, false);
+                        LogFile.Log.LogEntryDebug("Path blocked by dangerous terrain!", LogDebugLevel.High);
+                        return new PathingResult(origin, false, false, true);
                     }
                     else
                     {
-                        //All paths are blocked by creatures or dangerous terrain
-                        //If there is dangerous terrain, we just have to suck it up (this fails with small islands etc.)
-                        if (!ignoreDangerousTerrain)
-                            tryBackupRoute = true;
-
-                        //If there's no dangerous terrain, we will return the origin creature's location
+                        //Wait for blocking creatures
                         nextStep = origin;
                         //Exits loop and allows cleanup
                         break;
@@ -116,7 +110,6 @@ namespace RogueBasin
 
                 //Check if that square is occupied
                 Creature blockingCreature = null;
-                Feature blockingFeature = null;
 
                 foreach (Monster creature in dungeon.Monsters)
                 {
@@ -159,17 +152,8 @@ namespace RogueBasin
                     blockingCreature = dungeon.Player;
                 }
 
-                //Check for dangerous features
-
-                var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(level, theNextStep)).Where(f => f is DangerousActiveFeature);
-
-                if (dangeousTerrainAtPoint.Count() > 0 && !ignoreDangerousTerrain)
-                {
-                    blockingFeature = dangeousTerrainAtPoint.First();
-                }
-
                 //If no blocking creature, the path is good
-                if (blockingCreature == null && blockingFeature == null)
+                if (blockingCreature == null)
                 {
                     goodPath = true;
                     nextStep = theNextStep;
@@ -229,16 +213,19 @@ namespace RogueBasin
             }
 
             //Generate path object
-            List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission);
+            List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission, ignoreDangerousTerrain);
             //Remove last node if repeated (happens sometimes)
-            if(pathNodes[pathNodes.Count - 1] == pathNodes[pathNodes.Count - 2])
-                pathNodes.RemoveAt(pathNodes.Count - 1);
+            if (pathNodes.Count > 1)
+            {
+                if (pathNodes[pathNodes.Count - 1] == pathNodes[pathNodes.Count - 2])
+                    pathNodes.RemoveAt(pathNodes.Count - 1);
+            }
 
             //No possible path
             if (pathNodes.Count == 1)
             {
                 LogFile.Log.LogEntryDebug("Monster Path Passing blocked by terrain!", LogDebugLevel.High);
-                return new PathingResult(origin, false, true);
+                return new PathingResult(origin, false, true, true);
             }
 
             //Run through the path.
@@ -258,27 +245,11 @@ namespace RogueBasin
 
                 //Check if that square is occupied
                 Creature blockingCreature = Game.Dungeon.CreatureAtSpaceIncludingPlayer(level, theNextStep);
-
-                //Check for dangerous features
-
-                Feature blockingFeature = null;
-                var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(level, theNextStep)).Where(f => f is DangerousActiveFeature);
-
-                if (dangeousTerrainAtPoint.Count() > 0 && !ignoreDangerousTerrain)
-                {
-                    blockingFeature = dangeousTerrainAtPoint.First();
-                }
-
-                if (blockingCreature == null && blockingFeature == null)
+                
+                if (blockingCreature == null)
                 {
                     //Free space on the path, stop here
                     return new PathingResult(theNextStep, false, false);
-                }
-
-                if (blockingCreature == null && blockingFeature != null)
-                {
-                    //Way is blocked but not by a creature - reroute normally
-                    return new PathingResult(theNextStep, false, false, true);
                 }
 
                 pathPoint++;

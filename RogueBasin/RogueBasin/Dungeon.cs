@@ -1504,6 +1504,13 @@ namespace RogueBasin
                 feature.LocationMap = location;
 
                 AddFeatureAtLocation(thisLocation, feature);
+
+                //Update routing
+                if (feature is DangerousActiveFeature)
+                {
+                    Pathing.PathFindingInternal.updateMapWithDangerousTerrain(level, location, true);
+                }
+
                 return true;
             }
             catch (Exception ex)
