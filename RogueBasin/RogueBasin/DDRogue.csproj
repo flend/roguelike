@@ -340,7 +340,6 @@
     <Compile Include="MonsterSimpleAI.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MonsterSimpleThrowingAI.cs" />
     <Compile Include="MonsterSpecialAI.cs">
       <SubType>Code</SubType>
     </Compile>

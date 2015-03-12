@@ -66,6 +66,8 @@ namespace RogueBasin
 
         public bool DoesShieldRecharge { get; private set; }
 
+        public bool DoHitpointsRecharge { get; private set; }
+
         private int TurnsSinceShieldDisabled { get; set; }
 
         private int TurnsSinceEnergyRechargeDisabled { get; set; }
@@ -200,6 +202,7 @@ namespace RogueBasin
 
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Utility));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Melee));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Wetware));
 
@@ -214,16 +217,17 @@ namespace RogueBasin
         private void SetupInitialStats()
         {
             //CalculateCombatStats();
-            maxHitpoints = 50;
+            maxHitpoints = 100;
             hitpoints = maxHitpoints;
 
-            MaxShield = 100;
+            MaxShield = 0;
             Shield = MaxShield;
 
             MaxEnergy = 200;
             Energy = MaxEnergy;
 
             DoesShieldRecharge = false;
+            DoHitpointsRecharge = false;
         }
 
         internal bool IsWeaponTypeAvailable(Type weaponType)
@@ -649,7 +653,7 @@ namespace RogueBasin
         private int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
         {
             //Flatline has a rather simple combat system
-            IEquippableItem item = GetEquippedWeapon();
+            IEquippableItem item = GetEquippedRangedWeapon();
 
             int baseDamage = 2;
 
@@ -898,7 +902,7 @@ namespace RogueBasin
         {
 
             //Flatline has a rather simple combat system
-            IEquippableItem item = GetBestMeleeWeapon();
+            IEquippableItem item = GetEquippedMeleeWeapon();
 
             int baseDamage = 2;
 
@@ -1435,7 +1439,7 @@ namespace RogueBasin
 
         protected override char GetRepresentation()
         {
-            var weapon = GetEquippedWeapon();
+            var weapon = GetEquippedRangedWeapon();
 
             if (weapon != null)
             {
@@ -1759,7 +1763,7 @@ namespace RogueBasin
             if (equipSuccess == false && reequip == false)
             {
                 //Try to reequip melee
-                EquipBestMeleeWeapon();
+                //EquipBestMeleeWeapon();
             }
             return false;
         }
@@ -1838,9 +1842,6 @@ namespace RogueBasin
             //Find all matching slots available on the player
 
             List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
-            //Is always only 1 slot in FlatlineRL
-
-            EquipmentSlot itemSlot = itemPossibleSlots[0];
             
             //We always have 2 equipment slots, 1 of each type on a player in FlatlineRL
             //So we should match exactly on 1 free slot
@@ -2032,11 +2033,7 @@ namespace RogueBasin
             return false;
         }
 
-        /// <summary>
-        /// FlatlineRL - return equipped weapon or null
-        /// </summary>
-        /// <returns></returns>
-        public IEquippableItem GetEquippedWeapon() 
+        public IEquippableItem GetEquippedRangedWeapon() 
         {
             EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Weapon);
 
@@ -2048,9 +2045,22 @@ namespace RogueBasin
             return weaponSlot.equippedItem as IEquippableItem;
         }
 
+        public IEquippableItem GetEquippedMeleeWeapon()
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Melee);
+
+            if (weaponSlot == null)
+            {
+                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem as IEquippableItem;
+        }
+
         public bool HasMeleeWeaponEquipped()
         {
-            var currentWeapon = GetEquippedWeapon();
+            var currentWeapon = GetEquippedRangedWeapon();
 
             if (currentWeapon == null)
                 return false;
@@ -2063,7 +2073,7 @@ namespace RogueBasin
 
         public bool HasThrownWeaponEquipped()
         {
-            var currentWeapon = GetEquippedWeapon();
+            var currentWeapon = GetEquippedRangedWeapon();
 
             if (currentWeapon == null)
                 return false;
@@ -2075,16 +2085,24 @@ namespace RogueBasin
         }
 
 
-
-        /// <summary>
-        /// FlatlineRL - return equipped weapon as item reference (always works)
-        /// </summary>
-        /// <returns></returns>
-        public Item GetEquippedWeaponAsItem()
+        public Item GetEquippedRangedWeaponAsItem()
         {
             EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Weapon);
 
             if(weaponSlot == null) {
+                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem;
+        }
+
+        public Item GetEquippedMeleeWeaponAsItem()
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Melee);
+
+            if (weaponSlot == null)
+            {
                 LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
                 return null;
             }
@@ -2194,10 +2212,14 @@ namespace RogueBasin
             
         }
         public void EquipStartupWeapons() {
-            //Non debug from here
-            //Start with fists equipped
+
+            //Melee - Start with fists equipped
             Inventory.AddItemNotFromDungeon(new Items.Fists());
             Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[1]);
+
+            //Ranged - Start with pistol equipped
+            Inventory.AddItemNotFromDungeon(new Items.Pistol());
+            Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[2]);
         }
 
         /// <summary>
@@ -2755,7 +2777,7 @@ namespace RogueBasin
                     Shield = MaxShield;
             }
 
-            if (!HitpointsWasDamagedThisTurn)
+            if (!HitpointsWasDamagedThisTurn && DoHitpointsRecharge)
             {
                 double hpRegenRate = MaxHitpoints / (double)TurnsToRegenerateHP;
                 Hitpoints += (int)Math.Ceiling(hpRegenRate);
@@ -2812,7 +2834,7 @@ namespace RogueBasin
 
         internal void AddAmmoToCurrentWeapon()
         {
-            var equippedWeapon = GetEquippedWeaponAsItem() as RangedWeapon;
+            var equippedWeapon = GetEquippedRangedWeaponAsItem() as RangedWeapon;
 
             if (equippedWeapon != null && equippedWeapon.RemainingAmmo() < equippedWeapon.MaxAmmo())
             {

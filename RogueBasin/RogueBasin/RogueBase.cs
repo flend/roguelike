@@ -588,19 +588,19 @@ namespace RogueBasin
                             {
                                 case Key.F:
                                     //Fire weapon
-                                    if (Game.Dungeon.Player.GetEquippedWeapon() == null)
+                                    if (Game.Dungeon.Player.GetEquippedRangedWeapon() == null)
                                         break;
 
-                                    if (Game.Dungeon.Player.GetEquippedWeapon().HasFireAction())
+                                    if (Game.Dungeon.Player.GetEquippedRangedWeapon().HasFireAction())
                                     {
                                         TargetWeapon();
                                         timeAdvances = false;
                                     }
-                                    else if (Game.Dungeon.Player.GetEquippedWeapon().HasThrowAction())
+                                    else if (Game.Dungeon.Player.GetEquippedRangedWeapon().HasThrowAction())
                                     {
                                         timeAdvances = ThrowWeapon();
                                     }
-                                    else if (Game.Dungeon.Player.GetEquippedWeapon().HasOperateAction())
+                                    else if (Game.Dungeon.Player.GetEquippedRangedWeapon().HasOperateAction())
                                     {
                                         timeAdvances = UseWeapon();
                                     }
@@ -1966,8 +1966,8 @@ namespace RogueBasin
             }
             else
             {
-                toUse = player.GetEquippedWeapon();
-                toUseItem = player.GetEquippedWeaponAsItem();
+                toUse = player.GetEquippedRangedWeapon();
+                toUseItem = player.GetEquippedRangedWeaponAsItem();
             }
 
             if (toUse == null || !toUse.HasOperateAction())
@@ -2011,8 +2011,8 @@ namespace RogueBasin
             char confirmChar = 'f';
             if (isWeapon)
             {
-                toThrow = player.GetEquippedWeapon();
-                toThrowItem = player.GetEquippedWeaponAsItem();
+                toThrow = player.GetEquippedRangedWeapon();
+                toThrowItem = player.GetEquippedRangedWeaponAsItem();
             }
             else
             {
@@ -2149,8 +2149,8 @@ namespace RogueBasin
             Player player = Game.Dungeon.Player;
 
             //Check we have a fireable weapon
-            IEquippableItem weapon = player.GetEquippedWeapon();
-            Item weaponI = player.GetEquippedWeaponAsItem();
+            IEquippableItem weapon = player.GetEquippedRangedWeapon();
+            Item weaponI = player.GetEquippedRangedWeaponAsItem();
 
             if (weapon == null || !weapon.HasFireAction())
             {
@@ -2178,8 +2178,8 @@ namespace RogueBasin
             Player player = Game.Dungeon.Player;
 
             //Check we have a fireable weapon
-            IEquippableItem weapon = player.GetEquippedWeapon();
-            Item weaponI = player.GetEquippedWeaponAsItem();
+            IEquippableItem weapon = player.GetEquippedRangedWeapon();
+            Item weaponI = player.GetEquippedRangedWeaponAsItem();
 
             if (target.x == player.LocationMap.x && target.y == player.LocationMap.y)
             {

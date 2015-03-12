@@ -93,7 +93,17 @@ namespace RogueBasin
         /// </summary>
         protected bool headingSetToSound = false;
 
+        public MonsterFightAndRunAI(int level) : base (level)
+        {
+            Initialise();
+        }
+
         public MonsterFightAndRunAI()
+        {
+            Initialise();
+        }
+
+        private void Initialise()
         {
             AIState = SimpleAIStates.Patrol;
             currentTarget = null;

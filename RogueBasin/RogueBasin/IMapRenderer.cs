@@ -28,6 +28,8 @@ namespace RogueBasin
 
         void PrintString(string msg, int x, int y, Color color);
 
+        void DrawText(string msg, int x, int y, Color color);
+
         void ClearRect(int x, int y, int width, int height);
 
         void DrawUISprite(string id, int x, int y);

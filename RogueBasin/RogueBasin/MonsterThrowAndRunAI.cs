@@ -5,8 +5,20 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public abstract class MonsterThrowAndRunAI : MonsterSimpleThrowingAI
+    public abstract class MonsterThrowAndRunAI : MonsterFightAndRunAI
     {
+        /// <summary>
+        /// Color of the projectile
+        /// </summary>
+        /// <returns></returns>
+        protected virtual System.Drawing.Color GetWeaponColor()
+        {
+            return System.Drawing.Color.DarkGray;
+        }
+
+        protected abstract double GetMissileRange();
+
+        protected abstract string GetWeaponName();
 
         /// <summary>
         /// Override the following code from the simple throwing AI to include backing away

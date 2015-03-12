@@ -440,19 +440,26 @@ namespace RogueBasin
             PrintString(msg, xCoord, yCoord, color);
         }
 
-        public void PrintString(string msg, int x, int y, Color color)
-        {
+        public void DrawText(string msg, int x, int y, Color color) {
+            
             // Create the Font Surfaces
             Surface fontSurface = font.Render(msg, color);
 
+            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
+
+            videoSurface.Blit(fontSurface,
+                            new System.Drawing.Point(x, y));
+        }
+
+        public void PrintString(string msg, int x, int y, Color color)
+        {
             //Screen real coords
             int screenX = x * spriteSheetWidth;
             int screenY = y * spriteSheetHeight;
 
             LogFile.Log.LogEntryDebug("Drawing string " + msg + screenX + "/" + screenY, LogDebugLevel.Profiling);
 
-            videoSurface.Blit(fontSurface,
-                            new System.Drawing.Point(screenX, screenY));
+            DrawText(msg, screenX, screenY, color);
         }
 
         public void ClearRect(int x, int y, int width, int height)

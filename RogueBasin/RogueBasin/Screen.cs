@@ -1590,6 +1590,8 @@ namespace RogueBasin {
         }
 
         System.Drawing.Point rangedWeaponUICenter = new System.Drawing.Point(160, 152);
+        System.Drawing.Point meleeWeaponUICenter = new System.Drawing.Point(38, 152);
+
 
         private void DrawGraduatedBar(string id, double fullness, Rectangle barArea, double spacing)
         {
@@ -1606,34 +1608,39 @@ namespace RogueBasin {
             }
         }
 
-        System.Drawing.Point leftUI_TL;
-        System.Drawing.Point midUI_TL;
-        System.Drawing.Point rightUI_TL;
+        System.Drawing.Point playerUI_TL;
+        System.Drawing.Point playerTextUI_TL;
+        System.Drawing.Point monsterUI_TL;
+        System.Drawing.Point monsterTextUI_TL;
 
 
         private void DrawUI()
         {
+            //Calculate some point offsets
+            var playerTextUI_UsefulTL = playerTextUI_TL.Add(new System.Drawing.Point(0, 90));
 
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left");
-            leftUI_TL = new System.Drawing.Point(0, ScreenHeight - uiLeftDim.Height);
+            playerUI_TL = new System.Drawing.Point(0, ScreenHeight - uiLeftDim.Height);
 
-            DrawUISprite("ui_left", leftUI_TL.X, leftUI_TL.Y);
+            DrawUISprite("ui_left", playerUI_TL.X, playerUI_TL.Y);
 
             Size uiMidDim = UISpriteSize("ui_mid");
-            midUI_TL = leftUI_TL.Add(new System.Drawing.Point(uiLeftDim.Width, 0)).Add(new System.Drawing.Point(100, 0));
-            DrawUISprite("ui_mid", midUI_TL);
-            DrawUISprite("ui_mid", midUI_TL.Add(new System.Drawing.Point(uiMidDim.Width, 0)));
+            playerTextUI_TL = playerUI_TL.Add(new System.Drawing.Point(uiLeftDim.Width, 0));
+            DrawUISprite("ui_mid", playerTextUI_TL);
             
             Size uiRightDim = UISpriteSize("ui_right");
-            rightUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
+            monsterUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
 
-            DrawUISprite("ui_right", rightUI_TL.X, rightUI_TL.Y);
+            DrawUISprite("ui_right", monsterUI_TL.X, monsterUI_TL.Y);
 
-            //Draw equipped weapon
+            monsterTextUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width - uiMidDim.Width, ScreenHeight - uiMidDim.Height);
+            DrawUISprite("ui_mid", monsterTextUI_TL);
+
             Player player = Game.Dungeon.Player;
 
-            Item weapon = player.GetEquippedWeaponAsItem();
+            //Draw equipped ranged weapon
+            Item weapon = player.GetEquippedRangedWeaponAsItem();
 
             if (weapon != null)
             {
@@ -1643,23 +1650,69 @@ namespace RogueBasin {
 
                 if (weaponSpriteId != null)
                 {
-                    DrawUISpriteByCentre(weaponSpriteId, leftUI_TL.X + rangedWeaponUICenter.X, leftUI_TL.Y + rangedWeaponUICenter.Y);
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.X + rangedWeaponUICenter.X, playerUI_TL.Y + rangedWeaponUICenter.Y);
                 }
                 else
                 {
-                    DrawUITraumaSpriteByCentre(weapon.Representation, leftUI_TL.X + rangedWeaponUICenter.X, leftUI_TL.Y + rangedWeaponUICenter.Y);
+                    DrawUITraumaSpriteByCentre(weapon.Representation, playerUI_TL.X + rangedWeaponUICenter.X, playerUI_TL.Y + rangedWeaponUICenter.Y);
                 }
+
+                RangedWeapon weaponR = weapon as RangedWeapon;
+
+                var rangedDamage = weaponE.DamageBase();
+
+                //Ranged Damage base
+                var playerRangedTextOffset = new System.Drawing.Point(10, 30);
+                var rangedStr = "Ranged: " + rangedDamage;
+                DrawText(rangedStr, playerTextUI_UsefulTL.Add(playerRangedTextOffset));
             }
 
+            //Draw equipped melee weapon
+            Item meleeWeapon = player.GetEquippedMeleeWeaponAsItem();
+
+            if (meleeWeapon != null)
+            {
+                IEquippableItem weaponE = meleeWeapon as IEquippableItem;
+
+                String weaponSpriteId = meleeWeapon.UISprite;
+
+                if (weaponSpriteId != null)
+                {
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.X + meleeWeaponUICenter.X, playerUI_TL.Y + meleeWeaponUICenter.Y);
+                }
+                else
+                {
+                    DrawUITraumaSpriteByCentre(meleeWeapon.Representation, playerUI_TL.X + meleeWeaponUICenter.X, playerUI_TL.Y + meleeWeaponUICenter.Y);
+                }
+
+                var rangedDamage = weaponE.MeleeDamage();
+
+                //Ranged Damage base
+                var playerRangedTextOffset = new System.Drawing.Point(10, 45);
+                var rangedStr = "Melee: " + rangedDamage;
+                DrawText(rangedStr, playerTextUI_UsefulTL.Add(playerRangedTextOffset));
+            }
+            
             //Draw Shield
-            double playerShieldRatio = player.Shield / (double)player.MaxShield;
-            DrawGraduatedBar("shieldbar", playerShieldRatio, new Rectangle(leftUI_TL.X + 49, leftUI_TL.Y + 70, 266, 12), 0.2);
+            //double playerShieldRatio = player.Shield / (double)player.MaxShield;
+            //DrawGraduatedBar("shieldbar", playerShieldRatio, new Rectangle(leftUI_TL.X + 49, leftUI_TL.Y + 70, 266, 12), 0.2);
 
             //Draw HP
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            DrawGraduatedBar("healthbar", playerHPRatio, new Rectangle(leftUI_TL.X + 49, leftUI_TL.Y + 92, 266, 12), 0.2);
+            DrawGraduatedBar("healthbar", playerHPRatio, new Rectangle(playerUI_TL.X + 49, playerUI_TL.Y + 92, 266, 12), 0.2);
 
+
+            var playerHPTextOffset = new System.Drawing.Point(10, 0);
+            var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
+            DrawText(hpStr, playerTextUI_UsefulTL.Add(playerHPTextOffset));
+
+            //Monster stats
             DrawFocusWindow();
+        }
+
+        private void DrawText(string msg, System.Drawing.Point p)
+        {
+            mapRenderer.DrawText(msg, p.X, p.Y, statsColor);
         }
 
         private void DrawFocusWindow()
@@ -1667,6 +1720,10 @@ namespace RogueBasin {
             Player player = Game.Dungeon.Player;
 
             System.Drawing.Point rightUIIconCentre = new System.Drawing.Point(90, 152);
+
+            //Calculate some point offsets
+            var monsterTextUI_UsefulTL = monsterTextUI_TL.Add(new System.Drawing.Point(0, 90));
+
 
             if (CreatureToView != null && CreatureToView.Alive == true)
             {
@@ -1689,10 +1746,19 @@ namespace RogueBasin {
 
                 //Monster hp
                 double enemyHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
-                DrawGraduatedBar("healthbar", enemyHPRatio, new Rectangle(rightUI_TL.X + 10, rightUI_TL.Y + 90, 70, 10), 0.2);
+                DrawGraduatedBar("healthbar", enemyHPRatio, new Rectangle(monsterUI_TL.X + 10, monsterUI_TL.Y + 90, 70, 10), 0.2);
 
-                //Creature picture.Representatio
-                DrawUITraumaSpriteByCentre(CreatureToView.Representation, rightUI_TL.X + rightUIIconCentre.X, rightUI_TL.Y + rightUIIconCentre.Y);
+                var monsterHPTextOffset = new System.Drawing.Point(10, 0);
+                var hpStr = "HP: " + CreatureToView.Hitpoints + "/" + CreatureToView.MaxHitpoints;
+                DrawText(hpStr, monsterTextUI_UsefulTL.Add(monsterHPTextOffset));
+
+                //Damage
+                var monsterDamageTextOffset = new System.Drawing.Point(10, 15);
+                var dmStr = "DMG: " + CreatureToView.DamageBase();
+                DrawText(dmStr, monsterTextUI_UsefulTL.Add(monsterDamageTextOffset));
+
+                //Creature picture.Representation
+                DrawUITraumaSpriteByCentre(CreatureToView.Representation, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
 
             }
         }
@@ -1784,7 +1850,7 @@ namespace RogueBasin {
 
             //Draw equipped weapon
 
-            Item weapon = Game.Dungeon.Player.GetEquippedWeaponAsItem();
+            Item weapon = Game.Dungeon.Player.GetEquippedRangedWeaponAsItem();
 
             //string weaponStr = "Weapon: ";
 
@@ -2180,7 +2246,7 @@ namespace RogueBasin {
             var heavyWeaponType = Game.Dungeon.Player.HeavyWeaponTranslation(weaponType);
 
             var availableWeapon = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType) || Game.Dungeon.Player.IsWeaponTypeAvailable(heavyWeaponType);
-            var equippedWeapon = Game.Dungeon.Player.GetEquippedWeapon();
+            var equippedWeapon = Game.Dungeon.Player.GetEquippedRangedWeapon();
 
             var thisWeaponEquipped = equippedWeapon != null && (equippedWeapon.GetType() == weaponType || equippedWeapon.GetType() == heavyWeaponType);
 
@@ -2662,7 +2728,7 @@ namespace RogueBasin {
                     if (newBackground == false)
                     {
 
-                        IEquippableItem weapon = Game.Dungeon.Player.GetEquippedWeapon();
+                        IEquippableItem weapon = Game.Dungeon.Player.GetEquippedRangedWeapon();
 
                         if (weapon != null)
                         {

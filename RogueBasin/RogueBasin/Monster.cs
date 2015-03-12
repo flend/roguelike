@@ -82,14 +82,28 @@ namespace RogueBasin
         /// </summary>
         public List<MonsterEffect> effects { get; private set; }
 
+
+
+        public Monster(int level)
+        {
+            Level = level;
+            Initalise();
+        }
+
         public Monster()
         {
+            Initalise();
+        }
+
+        private void Initalise()
+        {
             effects = new List<MonsterEffect>();
-            
+
             //Set up attributes from class start values
             maxHitpoints = ClassMaxHitpoints();
 
             hitpoints = maxHitpoints;
+            LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints + " on construction", LogDebugLevel.Medium);
 
             SightRadius = NormalSightRadius;
 
@@ -99,7 +113,7 @@ namespace RogueBasin
 
             Charmed = false;
             Passive = false;
-            
+
             //In FlatlineRL monsters default to awake
             Sleeping = true;
 
@@ -141,6 +155,7 @@ namespace RogueBasin
             }
             set
             {
+                LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints, LogDebugLevel.Medium);
                 hitpoints = value;
             }
         }
@@ -156,6 +171,8 @@ namespace RogueBasin
                 maxHitpoints = value;
             }
         }
+
+        public int Level { get; private set; }
 
         /// <summary>
         /// Special effect that means the monster fights for the player. Could be a real effect in future, and use this as an accessor
@@ -724,10 +741,10 @@ namespace RogueBasin
         abstract public int CreatureCost();
 
         /// <summary>
-        /// Creature level for level gen
+        /// Creature level
         /// </summary>
         /// <returns></returns>
-        abstract public int CreatureLevel();
+        public virtual int CreatureLevel() { return Level; }
 
         /// <summary>
         /// We have be attacked (but not necessarily damaged by) creature

@@ -121,7 +121,7 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 0;
+            return 20;
         }
 
         public int DamageModifier()
@@ -164,7 +164,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            return Game.Dungeon.FirePistolLineWeapon(target, this, 20);
+            return Game.Dungeon.FirePistolLineWeapon(target, this, DamageBase());
         }
 
         /// <summary>

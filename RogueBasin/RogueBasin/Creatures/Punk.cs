@@ -11,25 +11,21 @@ namespace RogueBasin.Creatures
         const int classDeltaHitpoints = 4;
         const int classMinHitpoints = 1;
 
-        int level;
-
-        public Punk(int level)
+        public Punk(int level) : base (level)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 4;
-
-            this.level = level;
         }
 
         protected override int ClassMaxHitpoints()
         {
-            return 30 + 30 * (level - 1);
+            return 30 + 30 * (Level - 1);
         }
 
         public override int DamageBase()
         {
-            return 15 + 10 * (level - 1);
+            return 15 + 10 * (Level - 1);
         }
 
 
@@ -105,11 +101,6 @@ namespace RogueBasin.Creatures
         public override int CreatureCost()
         {
             return 10;
-        }
-
-        public override int CreatureLevel()
-        {
-            return level;
         }
 
         public override Monster NewCreatureOfThisType()

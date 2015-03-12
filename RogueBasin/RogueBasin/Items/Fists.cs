@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Fists : Item, IEquippableItem
+    public class Fists : MeleeWeapon, IEquippableItem
     {
  
         /// <summary>
@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Melee);
 
                 return retList;
             }
