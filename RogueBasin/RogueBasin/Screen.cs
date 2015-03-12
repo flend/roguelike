@@ -2908,7 +2908,7 @@ namespace RogueBasin {
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.4);
+                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.6);
 
                         //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                     }
@@ -2916,7 +2916,7 @@ namespace RogueBasin {
                     {
                         //Never in FOV
                         if (DebugMode)
-                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.7);
                         else
                             drawColor = hiddenColor;
                     }

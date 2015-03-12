@@ -943,6 +943,7 @@
     <EmbeddedResource Include="bin\Debug\movies\traumaquit0.amf" />
     <EmbeddedResource Include="bin\Debug\vaults\oval_vault1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\oval_vault_small1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\basic_large_arena.room" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />

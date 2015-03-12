@@ -46,6 +46,11 @@ namespace RogueBasin
             if (p.x < 0 || p.y < 0 || p.x >= thisMap.Width || p.y >= thisMap.Height)
                 throw new ApplicationException("Point off template.");
 
+            //It's not safe to set the squares at the edge of the template as unwalkable since they may link to other rooms
+            //(and the fill algorithm won't work on them)
+            if (p.x == 0 || p.y == 0 || p.x == thisMap.Width - 1 || p.y == thisMap.Height - 1)
+                return false;
+
             var oldTerrain = thisMap.getCell(p);
             thisMap.setCell(p, PathingTerrain.Unwalkable);
 

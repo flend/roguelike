@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace RogueBasin
 {
@@ -82,11 +83,14 @@ namespace RogueBasin
             //Set maps in engine (needs to be done before placing items and monsters)
             SetupNewMapsInEngine();
 
-            //Setup entry and exit
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
             {
+                //Setup entry and exit
                 SetEntryLocation(levels[i]);
                 PlaceEntryAndExitDoors(levels[i]);
+
+                //Add intra-room terrain
+                AddDecorationFeatures(mapInfo, levels[i]);
             }
 
             //Add monsters
@@ -95,13 +99,13 @@ namespace RogueBasin
                 List<Monster> punks = new List<Monster> { new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1) };
                 AddMonstersToRoom(mapInfo, i, 0, punks);
             }
-            
+
         }
 
         private void SetEntryLocation(LevelInfo levelInfo)
         {
             var entryRoom = mapInfo.GetRoom(levelInfo.EntryBoothConnection.Target);
-            levelInfo.EntryLocation = new RogueBasin.Point(entryRoom.X + entryRoom.Room.Width / 2, entryRoom.Y + entryRoom.Room.Height / 2); 
+            levelInfo.EntryLocation = new RogueBasin.Point(entryRoom.X + entryRoom.Room.Width / 2, entryRoom.Y + entryRoom.Room.Height / 2);
         }
 
         public Point GetEntryLocationOnLevel(int levelNo)
@@ -161,6 +165,7 @@ namespace RogueBasin
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate largeOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.oval_vault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate verylargeOvalArena = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.basic_large_arena.room", StandardTemplateMapping.terrainMapping);
 
             //Entry/exit booth
             RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
@@ -170,18 +175,18 @@ namespace RogueBasin
             var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
             levelInfo.LevelGenerator = templateGenerator;
 
-            PlaceOriginRoom(templateGenerator, largeOval);
+            PlaceOriginRoom(templateGenerator, verylargeOvalArena);
 
             //Connections are from the level TO the booth
             int distanceToConnectingDoor = 1;
             levelInfo.EntryBoothConnection = AddVaults(templateGenerator, corridor1, distanceToConnectingDoor, replacementVault, 0).First();
-            
+
             int numberOfRandomRooms = 3;
 
             BuildCircularRooms(templateGenerator, numberOfRandomRooms);
 
             //Add exit booth
-            
+
             levelInfo.ExitBoothConnection = AddVaults(templateGenerator, corridor1, distanceToConnectingDoor, replacementVault, 0).First();
 
             //Add extra corridors
@@ -239,7 +244,7 @@ namespace RogueBasin
         {
             var entryConnection = levelInfo.EntryBoothConnection;
             var exitConnection = levelInfo.ExitBoothConnection;
-            
+
             //Place entry door
             var doorInfo = mapInfo.GetDoorForConnection(entryConnection);
 
@@ -271,13 +276,14 @@ namespace RogueBasin
 
         private void BuildCircularRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
-            RoomTemplate mediumOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping);
+            // RoomTemplate mediumOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate smallOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.oval_vault_small1.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
-                new Tuple<int, RoomTemplate>(200, smallOval),
-                new Tuple<int, RoomTemplate>(100, mediumOval) };
+                new Tuple<int, RoomTemplate>(200, smallOval) };
+            //,
+            //new Tuple<int, RoomTemplate>(100, mediumOval) };
 
             PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 0, 1);
         }
@@ -472,6 +478,139 @@ namespace RogueBasin
             }
             return monstersPlaced;
         }
+
+
+        private static void AddExistingBlockingFeaturesToRoomFiller(int level, TemplatePositioned positionedRoom, RoomFilling bridgeRouter)
+        {
+            var floorPointsInRoom = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor).Select(p => p + positionedRoom.Location);
+            foreach (var roomPoint in floorPointsInRoom)
+            {
+                if (Game.Dungeon.BlockingFeatureAtLocation(level, roomPoint))
+                {
+                    var stillWalkable = bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint - positionedRoom.Location);
+
+                    if (!stillWalkable)
+                    {
+                        LogFile.Log.LogEntryDebug("Room " + positionedRoom.RoomIndex + " appears unconnected.", LogDebugLevel.High);
+                    }
+                }
+            }
+        }
+
+        T RandomItem<T>(IEnumerable<T> items)
+        {
+            var totalItems = items.Count();
+            if (totalItems == 0)
+                throw new ApplicationException("Empty list for randomization");
+
+            return items.ElementAt(Game.Random.Next(totalItems));
+        }
+
+        private void AddStandardDecorativeFeaturesToRoomUsingGrid(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
+        {
+            var roomFiller = new RoomFilling(positionedRoom.Room);
+
+            //Need to account for all current blocking features in room
+            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
+
+            foreach (Point roomPoint in pointsToPlaceTerrain)
+            {
+
+                try
+                {
+                    var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
+                    var featureLocationInMapCoords = positionedRoom.Location + roomPoint;
+
+                    if (!featureToPlace.isBlocking)
+                    {
+                        bool result = Game.Dungeon.AddFeature(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
+
+                        if (result)
+                            LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                    }
+                    else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint))
+                    {
+                        bool result = Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
+
+                        if (result)
+                        {
+                            LogFile.Log.LogEntryDebug("Placing blocking feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords + " room wise " + roomPoint, LogDebugLevel.Medium);
+                        }
+                    }
+                }
+                catch (ApplicationException ex)
+                {
+                    LogFile.Log.LogEntryDebug("Unable to add feature in room " + ex.Message, LogDebugLevel.Medium);
+                }
+            }
+        }
+
+        private void AddDecorationFeatures(MapInfo mapInfo, LevelInfo levelInfo)
+        {
+            var roomsInThisLevel = mapInfo.GetRoomIndicesForLevel(levelInfo.LevelNo);
+            roomsInThisLevel = mapInfo.FilterOutCorridors(roomsInThisLevel);
+
+            double avConcentration = 0.1;
+            double stdConcentration = 0.02;
+
+            foreach (var room in roomsInThisLevel)
+            {
+                var thisRoom = mapInfo.GetRoom(room);
+                var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;
+
+                var numberOfFeatures = (int)Math.Abs(Gaussian.BoxMuller(thisRoomArea * avConcentration, thisRoomArea * stdConcentration));
+                var decorationWeights = new List<Tuple<int, DecorationFeatureDetails.Decoration>> {
+                    new Tuple<int, DecorationFeatureDetails.Decoration>(100, new DecorationFeatureDetails.Decoration((char)557, System.Drawing.Color.Yellow, true))
+                };
+
+                //only big rooms
+                //if (thisRoomArea > 50)
+                //    continue;
+
+                //var regularGridOfCentres = RoomTemplateUtilities.GetPointsInRoomWithTerrain(thisRoom.Room, RoomTemplateTerrain.Floor)
+                var regularGridOfCentres = DivideRoomIntoCentres(thisRoom.Room, 5, 5, 0.2);
+                AddStandardDecorativeFeaturesToRoomUsingGrid(levelInfo.LevelNo, thisRoom, regularGridOfCentres, decorationWeights);
+            }
+        }
+
+        /// <summary>
+        /// Return a list of the centres of grid squares for room subdivision
+        /// </summary>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        private List<Point> DivideRoomIntoCentres(RoomTemplate room, int xSubdivisons, int ySubdivisions, double gaussianJitter)
+        {
+            List<Point> pointsToReturn = new List<Point>();
+
+            double xStep = room.Width / (double)xSubdivisons;
+            double yStep = room.Height / (double)ySubdivisions;
+
+            List<Point> xCentres = new List<Point>();
+
+
+            for (int i = 0; i < xSubdivisons; i++)
+            {
+                for (int j = 0; j < ySubdivisions; j++)
+                {
+                    double xCentre = Math.Round((i + 0.5) * xStep);
+                    double yCentre = Math.Round((j + 0.5) * yStep);
+                    
+                    double xJitter = Gaussian.BoxMuller(0, gaussianJitter * xStep);
+                    double yJitter = Gaussian.BoxMuller(0, gaussianJitter * yStep);
+
+                    pointsToReturn.Add(new Point((int)Math.Round(xCentre + xJitter), (int)Math.Round(yCentre + yJitter)));
+                }
+            }
+
+            LogFile.Log.LogEntryDebug("Room centres: " + room.Width + "/" + room.Height, LogDebugLevel.Medium);
+            foreach (Point p in pointsToReturn)
+            {
+                LogFile.Log.LogEntryDebug("Centre: " + p, LogDebugLevel.Medium);
+            }
+            return pointsToReturn;
+        }
+
     }
+
 
 }

@@ -127,6 +127,26 @@ namespace DDRogueTest
             Assert.IsFalse(filler.Connected);
         }
 
+        [TestMethod]
+        public void BlockingOffADoorByReplacementFailsHorizontal()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(3, 4)));
+        }
+
+        [TestMethod]
+        public void BlockingOffADoorByReplacementFailsVertical()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(0, 2)));
+        }
+
 
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {
