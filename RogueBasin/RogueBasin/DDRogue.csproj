@@ -63,6 +63,7 @@
     <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
     <Compile Include="Creatures\Psycho.cs" />
+    <Compile Include="Creatures\Grenade.cs" />
     <Compile Include="Creatures\Thug.cs" />
     <Compile Include="Creatures\Punk.cs" />
     <Compile Include="Creatures\Ferret.cs">

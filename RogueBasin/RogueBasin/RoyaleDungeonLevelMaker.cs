@@ -97,7 +97,8 @@ namespace RogueBasin
             //Add monsters
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
             {
-                List<Monster> punks = new List<Monster> { new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1) };
+                List<Monster> punks = new List<Monster> { new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1), 
+                    new Creatures.Grenade(100, 20), new Creatures.Grenade(100, 20) };
                 AddMonstersToRoom(mapInfo, i, 0, punks);
 
                 List<Item> items = new List<Item> { new Items.Pistol(), new Items.Shotgun(), new Items.Laser(), new Items.Axe() };
