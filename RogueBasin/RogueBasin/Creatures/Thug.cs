@@ -25,7 +25,7 @@ namespace RogueBasin.Creatures
 
         public override int DamageBase()
         {
-            return 20 + 10 * (Level - 1);
+            return 50 + 10 * (Level - 1);
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
@@ -149,11 +149,6 @@ namespace RogueBasin.Creatures
             return System.Drawing.Color.Chartreuse;
         }
 
-        public override int GetCombatXP()
-        {
-            return 10;
-        }
-
         public override int GetMagicXP()
         {
             return 10;
@@ -208,6 +203,11 @@ namespace RogueBasin.Creatures
         public override int DropChance()
         {
             return 30;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 20;
         }
     }
 }

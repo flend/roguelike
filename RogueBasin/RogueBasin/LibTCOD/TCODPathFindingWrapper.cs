@@ -109,6 +109,48 @@ namespace RogueBasin.LibTCOD
             levelTCODMapsIgnoringClosedDoorsAndLocks[level].SetCell(point.x, point.y, true, !terrainPresent);
         }
 
+        public bool getCellPathable(int level, Point point)
+        {
+            bool pathable;
+            bool sightable;
+            levelTCODMapsIgnoringClosedDoors[level].GetCell(point.x, point.y, out sightable, out pathable);
+
+            return pathable;
+        }
+
+        public bool getPathable(int level, Point point, Pathing.PathingPermission permission, bool ignoreDangerousTerrain)
+        {
+            TCODFov mapToUse;
+
+            switch (permission)
+            {
+                case Pathing.PathingPermission.Normal:
+                    if (ignoreDangerousTerrain)
+                        mapToUse = levelTCODMapsIgnoringTerrain[level];
+                    else
+                        mapToUse = levelTCODMaps[level];
+                    break;
+                case Pathing.PathingPermission.IgnoreDoors:
+                    if (ignoreDangerousTerrain)
+                        mapToUse = levelTCODMapsIgnoringClosedDoorsAndTerrain[level];
+                    else
+                        mapToUse = levelTCODMapsIgnoringClosedDoors[level];
+                    break;
+                case Pathing.PathingPermission.IgnoreDoorsAndLocks:
+                    mapToUse = levelTCODMapsIgnoringClosedDoorsAndLocks[level];
+                    break;
+                default:
+                    mapToUse = levelTCODMaps[level];
+                    break;
+            }
+
+            bool transparent;
+            bool walkable;
+            mapToUse.GetCell(point.x, point.y, out transparent, out walkable);
+
+            return walkable;
+        }
+
         public void updateMap(int level, Point point, PathingTerrain newTerrain)
         {
             if (levelTCODMaps.Count() == 0)
@@ -146,6 +188,58 @@ namespace RogueBasin.LibTCOD
                     levelTCODMapsIgnoringClosedDoors[level].SetCell(point.x, point.y, true, true);
                     levelTCODMapsIgnoringClosedDoorsAndTerrain[level].SetCell(point.x, point.y, true, true);
                     levelTCODMapsIgnoringClosedDoorsAndLocks[level].SetCell(point.x, point.y, true, true);
+                    break;
+            }
+        }
+
+        public void updateMap(int level, Point point, PathingTerrain newTerrain, Pathing.PathingPermission permission, bool ignoreDangerousTerrain) {
+        
+            if (levelTCODMaps.Count() == 0)
+            {
+                LogFile.Log.LogEntryDebug("updateMap called before pathfinding initially done.", LogDebugLevel.Medium);
+                return;
+            }
+
+            TCODFov mapToUse;
+
+            switch (permission)
+            {
+                case Pathing.PathingPermission.Normal:
+                    if(ignoreDangerousTerrain)
+                        mapToUse = levelTCODMapsIgnoringTerrain[level];
+                    else 
+                        mapToUse = levelTCODMaps[level];
+                    break;
+                case Pathing.PathingPermission.IgnoreDoors:
+                    if (ignoreDangerousTerrain)
+                        mapToUse = levelTCODMapsIgnoringClosedDoorsAndTerrain[level];
+                    else
+                        mapToUse = levelTCODMapsIgnoringClosedDoors[level];
+                    break;
+                case Pathing.PathingPermission.IgnoreDoorsAndLocks:
+                    mapToUse = levelTCODMapsIgnoringClosedDoorsAndLocks[level];
+                    break;
+                default:
+                    mapToUse = levelTCODMaps[level];
+                    break;
+            }   
+
+            switch (newTerrain)
+            {
+                case PathingTerrain.ClosedLock:
+                    if(mapToUse != levelTCODMapsIgnoringClosedDoorsAndLocks[level])
+                        mapToUse.SetCell(point.x, point.y, true, true);
+                    break;
+                case PathingTerrain.ClosedDoor:
+                    if(mapToUse == levelTCODMaps[level] || mapToUse == levelTCODMapsIgnoringTerrain[level]) {
+                        mapToUse.SetCell(point.x, point.y, true, false);
+                    }
+                    break;
+                case PathingTerrain.Unwalkable:
+                    mapToUse.SetCell(point.x, point.y, true, false);
+                    break;
+                case PathingTerrain.Walkable:
+                    mapToUse.SetCell(point.x, point.y, true, true);
                     break;
             }
         }

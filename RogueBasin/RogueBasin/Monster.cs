@@ -254,6 +254,15 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Wakes on seeing an awake creature within this radius
+        /// </summary>
+        /// <returns></returns>
+        virtual protected bool WakesOnMonsterStealth()
+        {
+            return true;
+        }
+
+        /// <summary>
         /// For a sleeping creature, if the player is within this radius
         /// and they are visible, the creature will wake
         /// This range is for points on a line that can go diagonally, including the origin and dest
@@ -262,6 +271,15 @@ namespace RogueBasin
         virtual protected int StealthRadius()
         {
             return 4;
+        }
+
+        /// <summary>
+        /// If we see an awake monster within this range, stop sleeping
+        /// </summary>
+        /// <returns></returns>
+        virtual protected int MonsterStealthRadius()
+        {
+            return 3;
         }
 
         /// <summary>
@@ -323,6 +341,16 @@ namespace RogueBasin
             int range = Utility.GetPathDistanceBetween(this, sq);
 
             if (range <= StealthRadius())
+                return true;
+
+            return false;
+        }
+
+        public bool InMonsterStealthRadius(Point sq)
+        {
+            int range = Utility.GetPathDistanceBetween(this, sq);
+
+            if (range <= MonsterStealthRadius())
                 return true;
 
             return false;
@@ -595,7 +623,7 @@ namespace RogueBasin
             //Do attack
             if (this.AttackType == CreatureAttackType.Shotgun)
             {
-                Game.Dungeon.FireShotgunWeapon(this, Game.Dungeon.Player.LocationMap, this.DamageBase(), 0.0, Math.PI / 4, this.DamageBase() / 5, this.DamageBase() / 5);
+                StandardShotGunAttack(player);
             }
             else
             {
@@ -620,7 +648,7 @@ namespace RogueBasin
             if (this.AttackType == CreatureAttackType.Shotgun)
             {
                 //Will call ApplyDamageToMonster on all monsters hit
-                Game.Dungeon.FireShotgunWeapon(this, monster.LocationMap, this.DamageBase(), 0.0, Math.PI / 4, this.DamageBase() / 5, this.DamageBase() / 5);
+                StandardShotGunAttack(monster);
                 return CombatResults.NeitherDied; //can't tell in this case
             }
             else
@@ -629,6 +657,11 @@ namespace RogueBasin
 
                 return ApplyDamageToMonster(this, monster, damage);
             }
+        }
+
+        private void StandardShotGunAttack(Creature target)
+        {
+            Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, this.DamageBase(), 0.0, Math.PI / 4, this.DamageBase() / 10, this.DamageBase() / 10);
         }
 
         private void StandardPreCombat()
@@ -827,8 +860,15 @@ namespace RogueBasin
         public void CalculateSightRadius()
         {
             //Set vision
-            double sightRatio = NormalSightRadius / 5.0;
-            SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[LocationLevel].LightLevel * sightRatio);
+            //double sightRatio = NormalSightRadius / 5.0;
+            //SightRadius = (int)Math.Ceiling(Game.Dungeon.Levels[LocationLevel].LightLevel * sightRatio);
+
+            //For royaleRL we support the player having infinite site radius but not the monsters
+            //if (SightRadius == 0)
+            //{
+            //This scaling is confusing!
+            SightRadius = NormalSightRadius;
+            //}
         }
 
         /// <summary>

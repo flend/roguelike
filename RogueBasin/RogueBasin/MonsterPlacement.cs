@@ -109,7 +109,7 @@ namespace RogueBasin
 
             var zeroDifficultySet = new MonsterSet(0, 0.6);
 
-            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.Swarmer());
+            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.Swarmer(1));
             zeroDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.MaintBot());
             zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.RotatingTurret());
 
@@ -117,7 +117,7 @@ namespace RogueBasin
 
             var oneDifficultySet = new MonsterSet(1);
 
-            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer(1));
             oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
             oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
 
@@ -141,7 +141,7 @@ namespace RogueBasin
 
             var twoDifficultySet3 = new MonsterSet(2, 2.0);
 
-            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer(1));
             twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
             twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
 
@@ -196,7 +196,7 @@ namespace RogueBasin
             /*
             var monsterTypesToPlace = new List<Tuple<int, Monster>> {
                //new Tuple<int, Monster>(1, new RogueBasin.Creatures.AlertBot()),
-               new Tuple<int, Monster>(1, new RogueBasin.Creatures.Swarmer()),
+               new Tuple<int, Monster>(1, new RogueBasin.Creatures.Swarmer(1)),
                new Tuple<int, Monster>(1, new RogueBasin.Creatures.MaintBot()),
                new Tuple<int, Monster>(1, new RogueBasin.Creatures.RotatingTurret()),
                new Tuple<int, Monster>(50, new RogueBasin.Creatures.WarriorCyborgRanged()),

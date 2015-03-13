@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.Linq;
 using System.Drawing;
+using RogueBasin.LibTCOD;
 
 namespace RogueBasin {
 
@@ -24,8 +25,9 @@ namespace RogueBasin {
             Items = 2,
             Creatures = 3,
             CreatureDecoration = 4,
-            TargettingUI = 5,
-            Animations = 6
+            CreatureStatus = 5,
+            TargettingUI = 6,
+            Animations = 7
         }
 
         static Screen instance = null;
@@ -1021,12 +1023,13 @@ namespace RogueBasin {
             Player player = dungeon.Player;
 
             if(tileMap == null)
-                tileMap = new TileEngine.TileMap(7, ViewableHeight, ViewableWidth);
+                tileMap = new TileEngine.TileMap((int)TileLevel.Animations + 1, ViewableHeight, ViewableWidth);
 
             tileMap.ClearLayer(TileLevel.Terrain);
             tileMap.ClearLayer(TileLevel.Features);
             tileMap.ClearLayer(TileLevel.Creatures);
             tileMap.ClearLayer(TileLevel.CreatureDecoration);
+            tileMap.ClearLayer(TileLevel.CreatureStatus);
             tileMap.ClearLayer(TileLevel.Items);
             tileMap.ClearLayer(TileLevel.TargettingUI);
 
@@ -1102,9 +1105,6 @@ namespace RogueBasin {
         /// <summary>
         /// Draws an animated attack.
         /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="target"></param>
-        /// <param name="size"></param>
         public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, System.Drawing.Color color)
         {
             //Clone the list since we mangle it
@@ -1128,6 +1128,31 @@ namespace RogueBasin {
             }
         }
 
+        /// <summary>
+        /// Draws an animated attack.
+        /// </summary>
+        public void DrawAreaAttackAnimation(IEnumerable<Point> targetSquares, string spriteName)
+        {
+            //Clone the list since we mangle it
+            List<Point> mangledPoints = new List<Point>();
+            foreach (Point p in targetSquares)
+            {
+                mangledPoints.Add(new Point(p));
+            }
+
+            //Add animation points into the animation layer
+
+            foreach (Point p in mangledPoints)
+            {
+                if (!isViewVisible(p))
+                    continue;
+
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileSprite = spriteName;
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
+
+            }
+        }
 
         private void DrawTargettingCursor()
         {
@@ -2728,6 +2753,7 @@ namespace RogueBasin {
                 {
                     foregroundColor = creatureColor;
                     backgroundColor = System.Drawing.Color.Black;
+                    string overlapSprite = null;
 
                     bool newBackground = false;
                     //Set background depending on status
@@ -2751,6 +2777,10 @@ namespace RogueBasin {
                     {
                         //backgroundColor = stunnedBackground;
                         newBackground = true;
+                    }
+                    else if (creature.Sleeping)
+                    {
+                        overlapSprite = "zzoverlay";
                     }
 
                     if (newBackground == false)
@@ -2812,6 +2842,8 @@ namespace RogueBasin {
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
 
                         tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameOverlaySprite;
+
+                        tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(overlapSprite);
                     }
 
                 }
@@ -2988,12 +3020,19 @@ namespace RogueBasin {
                     }
 
                     Point mapTerrainLoc = new Point(i, j);
+                    string sprite = null;
+                    if ((Game.Dungeon.Pathing.PathFindingInternal as TCODPathFindingWrapper).getCellPathable(0, mapTerrainLoc))
+                    {
+                        sprite = "ground";
+                    }
 
                     if (isViewVisible(mapTerrainLoc))
                     {
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(screenChar);
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileFlag = new LibtcodColorFlags(drawColor);
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].Transparency = spriteTransparency;
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileSprite = sprite;
+
                     }
                 }
             }

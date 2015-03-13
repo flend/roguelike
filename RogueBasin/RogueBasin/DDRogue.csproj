@@ -62,6 +62,7 @@
     <Compile Include="Creatures\Camera.cs" />
     <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
+    <Compile Include="Creatures\Grenadier.cs" />
     <Compile Include="Creatures\Mine.cs" />
     <Compile Include="Creatures\Psycho.cs" />
     <Compile Include="Creatures\Grenade.cs" />
@@ -315,6 +316,7 @@
     <Compile Include="LogGenerator.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="RoyaleDungeonLevelMaker.cs" />
+    <Compile Include="RoyaleMonsterPlacement.cs" />
     <Compile Include="TerrainSets\CrossPiece.cs" />
     <Compile Include="TerrainSets\Pond.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />

@@ -229,6 +229,9 @@ namespace RogueBasin
 
                 bool usingSpecial = UseSpecialAbility();
 
+                if (usingSpecial)
+                    CheckReload();
+
                 if (!usingSpecial)
                 {
                     //In FOV - fire at the player
@@ -257,6 +260,15 @@ namespace RogueBasin
             else
             {
                 ContinueChasing(newTarget);
+            }
+        }
+
+        private void CheckReload() {
+
+            //We only use this for special abilities for now - otherwise handled in attackplayer / attackmonster
+            if (this.ReloadTurnsRequired() > 0)
+            {
+                ReloadingTurns = ReloadTurnsRequired();
             }
         }
 

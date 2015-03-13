@@ -1,23 +1,58 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System;using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Swarmer. Light melee with wide FOV. Responds to sounds.
-    /// </summary>
-    public class Swarmer : MonsterFightAndRunAI
+    public class Grenadier : MonsterThrowAndRunAI
     {
 
-        public Swarmer(int level) : base(level)
+        public Grenadier(int level): base(level)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
-            //More fun to move these guys around with a lower radius
             NormalSightRadius = 5;
+
+       }
+
+        protected override bool UseSpecialAbility()
+        {
+            //Throw a timed grenade at the player
+
+            //Find an adjacent square to the target
+            var adjacentSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(currentTarget.LocationLevel, currentTarget.LocationMap);
+
+            if(adjacentSquares.Count > 0) {
+                LogFile.Log.LogEntryDebug("Grenadier throwing grenade at " + currentTarget.Representation, LogDebugLevel.Medium);
+
+                var grenadeCreature = new Creatures.Grenade(DamageBase(), 2);
+                Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, adjacentSquares.RandomElement());
+
+                var targetSquares = Game.Dungeon.CalculateTrajectory(this, currentTarget.LocationMap);
+                Screen.Instance.DrawAreaAttackAnimation(targetSquares, grenadeCreature.GameSprite);
+            }
+            else {
+                LogFile.Log.LogEntryDebug("Grenadier failed to throw grenade at " + currentTarget.Representation, LogDebugLevel.Medium);
+            }
+
+            //Always use this rather than shoot
+            return true;
+        }
+
+        public override double GetMissileRange()
+        {
+            return 5.0;
+        }
+
+        internal override int ReloadTurnsRequired()
+        {
+            return 2;
+        }
+
+        protected override string GetWeaponName()
+        {
+            return "throws a grenade!";
         }
 
         public override void InventoryDrop()
@@ -29,27 +64,22 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Swarmer(Level);
+            return new Grenadier(Level);
         }
 
         protected override int ClassMaxHitpoints()
         {
-            return 10 + (Level - 1) * 10; 
+            return 45 + (Level - 1) * 30;
         }
 
         public override int DamageBase()
         {
-            return 5 + (Level - 1) * 10;
+            return 50 + (Level - 1) * 10;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
             return CreatureFOV.CreatureFOVType.Base;
-        }
-
-        public override Pathing.PathingType PathingType()
-        {
-            return Pathing.PathingType.CreaturePass;
         }
 
         public override PatrolType GetPatrolType()
@@ -67,7 +97,6 @@ namespace RogueBasin.Creatures
         {
             return 2;
         }
-
 
         protected override bool WillInvestigateSounds()
         {
@@ -90,21 +119,21 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Swarmer"; } }
+        public override string SingleDescription { get { return "Grenadier"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Swarmers"; } }
+        public override string GroupDescription { get { return "Grenadier"; } }
 
         protected override char GetRepresentation()
         {
-            return (char)261;
+            return 'G';
         }
 
         internal override char GetCorpseRepresentation()
         {
-            return (char)498;
+            return (char)503;
         }
 
         internal override System.Drawing.Color GetCorpseRepresentationColour()
@@ -133,7 +162,7 @@ namespace RogueBasin.Creatures
         }
         public override int CreatureCost()
         {
-            return 20;
+            return 30;
         }
 
         public override int CreatureLevel()
@@ -144,7 +173,7 @@ namespace RogueBasin.Creatures
 
         public override System.Drawing.Color RepresentationColor()
         {
-            return System.Drawing.Color.Cyan;
+            return System.Drawing.Color.Gold;
         }
 
         public override int GetMagicXP()
@@ -191,12 +220,22 @@ namespace RogueBasin.Creatures
 
         public override int DropChance()
         {
-            return 5;
+            return 0;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "dwarf";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "dwarf";
         }
 
         public override int GetCombatXP()
         {
-            return 10;
+            return 20;
         }
 
     }

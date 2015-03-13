@@ -29,6 +29,22 @@ namespace RogueBasin.Algorithms
         void updateMap(int level, Point point, PathingTerrain newTerrain);
 
         /// <summary>
+        /// Update internal map representation, point by point
+        /// </summary>
+        void updateMap(int level, Point point, PathingTerrain newTerrain, Pathing.PathingPermission permission, bool ignoreDangerousTerrain);
+
+        
+        /// <summary>
+        /// Is this square pathable?
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="point"></param>
+        /// <param name="permission"></param>
+        /// <param name="ignoreDangerousTerrain"></param>
+        /// <returns></returns>
+        bool getPathable(int level, Point point, Pathing.PathingPermission permission, bool ignoreDangerousTerrain);
+
+        /// <summary>
         /// Update internal map representation, with the addition or removal of dangerous terrain
         /// </summary>
         /// <param name="level"></param>

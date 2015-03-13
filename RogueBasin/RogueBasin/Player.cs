@@ -359,7 +359,7 @@ namespace RogueBasin
             */
             //Sight
 
-            NormalSightRadius = 0;
+            //NormalSightRadius = 0;
 
             /*
             if(inv.ContainsItem(new Items.Lantern()))

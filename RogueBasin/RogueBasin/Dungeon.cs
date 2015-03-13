@@ -2595,7 +2595,7 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Do a grenade explosion. If this originated on a monster pass that in
+        /// Do a grenade explosion. If this originated on a monster then the monster will be the origin of the attack
         /// </summary>
         /// <param name="level"></param>
         /// <param name="p"></param>
@@ -2646,6 +2646,8 @@ namespace RogueBasin
 
             if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
             {
+                string combatResultsMsg = "MvP (" + originMonster.Representation + ") Grenade: Dam: " + damage;
+
                 //Apply damage (uses damage base)
                 if (originMonster != null)
                     player.ApplyCombatDamageToPlayer(originMonster, damage);
@@ -4906,7 +4908,7 @@ namespace RogueBasin
 
                     //Check for dangerous features
 
-                    var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(locationLevel, locationMap)).Where(f => f is DangerousActiveFeature);
+                    var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(locationLevel, p)).Where(f => f is DangerousActiveFeature);
                     if (dangeousTerrainAtPoint.Count() > 0)
                         continue;
 

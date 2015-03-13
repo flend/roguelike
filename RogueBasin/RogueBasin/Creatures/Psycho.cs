@@ -120,5 +120,10 @@ namespace RogueBasin.Creatures
             return System.Drawing.Color.WhiteSmoke;
         }
 
+        public override int GetCombatXP()
+        {
+            return 10;
+        }
+
     }
 }

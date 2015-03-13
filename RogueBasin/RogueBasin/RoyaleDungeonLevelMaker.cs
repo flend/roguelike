@@ -81,6 +81,8 @@ namespace RogueBasin
                 AddLevel(standardLevel);
             }
 
+
+            MessageBox.Show("stop");
             //Set maps in engine (needs to be done before placing items and monsters)
             SetupNewMapsInEngine();
 
@@ -94,13 +96,18 @@ namespace RogueBasin
                 AddDecorationFeatures(mapInfo, levels[i]);
             }
 
+            RoyaleMonsterPlacement monPlacement = new RoyaleMonsterPlacement();
+
             //Add monsters
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
             {
+                
                 List<Monster> punks = new List<Monster> { new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1), 
                     new Creatures.Grenade(100, 20), new Creatures.Grenade(100, 20),
-                new Creatures.Mine(100), new Creatures.Mine(100) };
-                AddMonstersToRoom(mapInfo, i, 0, punks);
+                new Creatures.Mine(50), new Creatures.Mine(50),
+                new Creatures.Grenadier(1), new Creatures.Grenadier(1) };
+                //AddMonstersToRoom(mapInfo, i, 0, punks);
+                monPlacement.CreateMonstersForLevels(mapInfo, new List<Tuple<int, int>> { new Tuple<int, int>(i, 1) });
 
                 List<Item> items = new List<Item> { new Items.Pistol(), new Items.Shotgun(), new Items.Laser(), new Items.Axe() };
                 AddItemsToRoom(mapInfo, i, 0, items);
@@ -149,8 +156,9 @@ namespace RogueBasin
                 Game.Dungeon.RefreshLevelPathingAndFOV(i);
 
                 //Set light level
-                Game.Dungeon.Levels[i].LightLevel = 0;
+                Game.Dungeon.Levels[i].LightLevel = 8;
             }
+            Game.Dungeon.Player.CalculateSightRadius();
         }
 
         private void BuildTerrainMapping()
@@ -653,26 +661,23 @@ namespace RogueBasin
                   continue;
 
                 //var regularGridOfCentres = RoomTemplateUtilities.GetPointsInRoomWithTerrain(thisRoom.Room, RoomTemplateTerrain.Floor)
-                var regularGridOfCentres = DivideRoomIntoCentres(thisRoom.Room, 4, 2, 0);
+                var regularGridOfCentres = DivideRoomIntoCentres(thisRoom.Room, 3, 3, 0.3);
                 
                 foreach (Point centre in regularGridOfCentres)
                 {
-
-                    int random = Game.Random.Next(2);
-                    random = 1;
-                    if (random == 0)
+                    int random = Game.Random.Next(3);
+                    if (random < 2)
                     {
                         //Cross piece
 
-                        var crossPiece = new CrossPiece(centre, 9, 3, Math.PI / 2);
+                        var crossPiece = new CrossPiece(centre, 4 + Game.Random.Next(3), 4 + Game.Random.Next(3), Math.PI / Game.Random.NextDouble());
                         var crossPoints = crossPiece.Generate();
                         AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights);
                     }
                     else
                     {
-
                         //Acid Pond
-                        AddAcidPondToLevel(levelInfo.LevelNo, thisRoom.Location + centre, 8, 8);
+                        AddAcidPondToLevel(levelInfo.LevelNo, thisRoom.Location + centre, 6, 6);
                     }
                 }
 
@@ -687,8 +692,6 @@ namespace RogueBasin
 
             AddNonBlockingFeaturesToLevel(level, pondPoints, () => new Features.Acid());
         }
-
-
 
 
         /// <summary>

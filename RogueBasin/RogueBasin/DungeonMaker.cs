@@ -2806,7 +2806,7 @@ namespace RogueBasin
 
             for (int i = 0; i < 15; i++)
             {
-                Creatures.Swarmer patrolBot = new Creatures.Swarmer();
+                Creatures.Swarmer patrolBot = new Creatures.Swarmer(1);
                 monstersToPlace.Add(patrolBot);
             }
 
@@ -2848,7 +2848,7 @@ namespace RogueBasin
 
             for (int i = 0; i < 15; i++)
             {
-                Creatures.Swarmer patrolBot = new Creatures.Swarmer();
+                Creatures.Swarmer patrolBot = new Creatures.Swarmer(1);
                 monstersToPlace.Add(patrolBot);
             }
 
@@ -2866,7 +2866,7 @@ namespace RogueBasin
 
             for (int i = 0; i < 5; i++)
             {
-                Creatures.Swarmer patrolBot = new Creatures.Swarmer();
+                Creatures.Swarmer patrolBot = new Creatures.Swarmer(1);
                 monstersToPlace.Add(patrolBot);
             }
 
@@ -2975,7 +2975,7 @@ namespace RogueBasin
             //Melee monsters
 
             List<KeyValuePair<Monster, int>> meleeMonsters = new List<KeyValuePair<Monster, int>>();
-            meleeMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.Swarmer(), 6));
+            meleeMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.Swarmer(1), 6));
             meleeMonsters.Add(new KeyValuePair<Monster, int>(new Creatures.Juggernaut(), 1));
 
             //Patrolling catalogue

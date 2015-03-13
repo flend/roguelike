@@ -54,7 +54,7 @@ namespace RogueBasin.Creatures
 
                 Game.Dungeon.AddSoundEffect(1.0, LocationLevel, LocationMap);
 
-                Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 3.0, damage, this);
+                Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 2.0, damage, this);
             }
         }
         /// <summary>

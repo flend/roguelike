@@ -21,7 +21,7 @@ namespace RogueBasin.Items
         {
             //Should be guaranteed in range by caller
 
-            Game.Dungeon.FireShotgunWeapon(target, this, DamageBase(), 10, 10);
+            Game.Dungeon.FireShotgunWeapon(target, this, DamageBase(), DamageBase() / 10, DamageBase() / 10);
 
             //Remove 1 ammo
             Ammo--;
@@ -128,7 +128,7 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 100;
+            return 30;
         }
 
         public int DamageModifier()

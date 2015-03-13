@@ -73,6 +73,7 @@ namespace RogueBasin
             Point nextStep = new Point(-1, -1);
             bool interaction = false;
             bool tryBackupRoute = false;
+            bool terminalFailure = false;
 
             //Check for pathing to own square - return blocked but not terminally
             if (origin == dest)
@@ -94,7 +95,11 @@ namespace RogueBasin
                     if (!pathBlockedByCreatureOrLock)
                     {
                         LogFile.Log.LogEntryDebug("Path blocked by dangerous terrain!", LogDebugLevel.High);
-                        return new PathingResult(origin, false, false, true);
+                        terminalFailure = true;
+                        nextStep = origin;
+                        interaction = false;
+                        tryBackupRoute = true;
+                        break;
                     }
                     else
                     {
@@ -163,10 +168,15 @@ namespace RogueBasin
                     //Otherwise, there's a blocking creature. Make his square unwalkable temporarily and try to reroute
                     pathBlockedByCreatureOrLock = true;
 
-                    pathFinding.updateMap(level, theNextStep, PathingTerrain.Unwalkable);
+                    bool isSquarePathable = pathFinding.getPathable(level, theNextStep, permission, ignoreDangerousTerrain);
+                    //Only block out squares which were not pathable already (so we don't make them pathable accidentally)
+                    if (isSquarePathable)
+                    {
+                        pathFinding.updateMap(level, theNextStep, PathingTerrain.Unwalkable, permission, ignoreDangerousTerrain);
 
-                    //Add this square to a list of squares to put back
-                    blockedSquares.Add(theNextStep);
+                        //Add this square to a list of squares to put back
+                        blockedSquares.Add(theNextStep);
+                    }
 
                     //We will try again
                 }
@@ -175,7 +185,7 @@ namespace RogueBasin
             //Put back any squares we made unwalkable
             foreach (Point sq in blockedSquares)
             {
-                pathFinding.updateMap(level, sq, PathingTerrain.Walkable);
+                pathFinding.updateMap(level, sq, PathingTerrain.Walkable, permission, ignoreDangerousTerrain);
             }
 
             return new PathingResult(nextStep, interaction, false, tryBackupRoute);
@@ -277,10 +287,17 @@ namespace RogueBasin
                 Point thisPathPoint = pathNodes[pathPoint];
 
                 List<Point> possibleRestSquares;
-                if(ignoreDangerousTerrain)
+                
+                LogFile.Log.LogEntryDebug("No of non-terrain squares: " +  Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint).Count(), LogDebugLevel.High);
+                LogFile.Log.LogEntryDebug("No of terrain squares: " + Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreaturesAndDangerousTerrain(level, thisPathPoint).Count(), LogDebugLevel.High);
+                if (ignoreDangerousTerrain)
+                {
                     possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint);
+                }
                 else
+                {
                     possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreaturesAndDangerousTerrain(level, thisPathPoint);
+                }
 
                 if (possibleRestSquares.Any())
                 {

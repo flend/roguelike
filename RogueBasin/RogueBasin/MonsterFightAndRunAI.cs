@@ -238,6 +238,7 @@ namespace RogueBasin
 
                     //Otherwise in FOV
                     //Check if it's awake. If so, wake up and stop
+                    //For RRL, they need to be seen within the stealth radius when sleeping
                     if (!monster.Sleeping)
                     {
                         Sleeping = false;
@@ -254,6 +255,37 @@ namespace RogueBasin
                     Sleeping = false;
                     AIState = SimpleAIStates.Patrol;
                     LogFile.Log.LogEntryDebug(this.Representation + " spots player and wakes", LogDebugLevel.Low);
+                }
+            }
+
+            //Sleeping creatures wake if a monster wakes within their monster stealth radius
+            if (Sleeping && WakesOnMonsterStealth())
+            {
+                //Check to see if we should wake by looking for woken creatures in POV
+                foreach (Monster monster in Game.Dungeon.Monsters)
+                {
+                    //Same monster
+                    if (monster == this)
+                        continue;
+
+                    //Not on the same level
+                    if (monster.LocationLevel != this.LocationLevel)
+                        continue;
+
+                    //Not in FOV
+                    if (!currentFOV.CheckTileFOV(monster.LocationMap.x, monster.LocationMap.y))
+                        continue;
+
+                    //Otherwise in FOV
+                    //Check if it's awake. If so, wake up and stop
+                    //For RRL, they need to be seen within the stealth radius when sleeping
+                    if (!monster.Sleeping && InMonsterStealthRadius(monster.LocationMap))
+                    {
+                        Sleeping = false;
+                        AIState = SimpleAIStates.Patrol;
+                        LogFile.Log.LogEntryDebug(this.Representation + " spots awake " + monster.Representation + " within stealth radius and wakes", LogDebugLevel.Low);
+                        break;
+                    }
                 }
             }
 
@@ -597,6 +629,7 @@ namespace RogueBasin
                 if (newSoundToFollowID != -1)
                 {
                     LogFile.Log.LogEntryDebug(this.Representation + " new sound target: " + newSoundToFollow + "[ int: " + newSoundInterest + "] (old: " + currentSound + " [ int: " + currentSoundInterest + "])", LogDebugLevel.Medium);
+                    Sleeping = false;
 
                     //Change sound
                     
@@ -1334,7 +1367,7 @@ namespace RogueBasin
         /// </summary>
         public override void NotifyAttackByCreature(Creature creature)
         {
-            if (creature != currentTarget)
+            if (currentTarget != null && creature != currentTarget)
             {
                 LogFile.Log.LogEntryDebug(this.Representation + " changes target from " + currentTarget.Representation + " to " + creature.Representation, LogDebugLevel.Low);
             }
