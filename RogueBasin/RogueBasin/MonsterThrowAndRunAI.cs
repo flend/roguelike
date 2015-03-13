@@ -20,6 +20,13 @@ namespace RogueBasin
 
         protected abstract string GetWeaponName();
 
+        public MonsterThrowAndRunAI() { }
+        public MonsterThrowAndRunAI(int level)
+            : base(level)
+        {
+
+        }
+
         /// <summary>
         /// Override the following code from the simple throwing AI to include backing away
         /// </summary>

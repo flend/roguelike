@@ -872,7 +872,7 @@ namespace RogueBasin
 
             int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
 
-            return ApplyDamageToMonster(monster, damage, false, specialMoveUsed);
+            return ApplyDamageToMonsterFromPlayer(monster, damage, false, specialMoveUsed);
         }
 
         public CombatResults AttackMonsterRanged(Monster monster, int damage)
@@ -884,7 +884,7 @@ namespace RogueBasin
             CancelStealthDueToAttack();
             CancelBoostDueToAttack();
 
-            return ApplyDamageToMonster(monster, modifiedDamage, false, false);
+            return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
         }
 
         public CombatResults AttackMonsterThrown(Monster monster, int damage)
@@ -895,7 +895,7 @@ namespace RogueBasin
             CancelStealthDueToAttack();
             CancelBoostDueToAttack();
 
-            return ApplyDamageToMonster(monster, damage, false, false);
+            return ApplyDamageToMonsterFromPlayer(monster, damage, false, false);
         }
 
         public CombatResults AttackMonsterMelee(Monster monster)
@@ -919,7 +919,7 @@ namespace RogueBasin
             CancelStealthDueToAttack();
             ResetTurnsMoving();
 
-            return ApplyDamageToMonster(monster, modifiedDamage, false, false);
+            return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
         }
 
         public void CancelStealthDueToAttack()
@@ -970,7 +970,7 @@ namespace RogueBasin
         public CombatResults ApplyStunDamageToMonster(Monster monster, int stunTurns)
         {
             //Wake monster up etc.
-            AIForMonsterIsAttacked(monster);
+            AIForMonsterIsAttacked(monster, this);
 
             int monsterOrigStunTurns = monster.StunnedTurns;
 
@@ -1010,16 +1010,20 @@ namespace RogueBasin
 
         }
 
+        public CombatResults ApplyDamageToMonsterFromPlayer(Monster monster, int damage, bool magicUse, bool specialMove)
+        {
+            return ApplyDamageToMonster(this, monster, damage, magicUse, specialMove);
+        }
         /// <summary>
         /// Apply damage to monster and deal with death. All player attacks are routed through here.
         /// </summary>
         /// <param name="monster"></param>
         /// <param name="damage"></param>
         /// <returns></returns>
-        public CombatResults ApplyDamageToMonster(Monster monster, int damage, bool magicUse, bool specialMove)
+        public CombatResults ApplyDamageToMonster(Creature attackingCreature, Monster monster, int damage, bool magicUse, bool specialMove)
         {
             //Wake monster up etc.
-            AIForMonsterIsAttacked(monster);
+            AIForMonsterIsAttacked(monster, attackingCreature);
 
             //Do we hit the monster?
             if (damage > 0)
@@ -1031,11 +1035,12 @@ namespace RogueBasin
                 bool monsterDead = monster.Hitpoints <= 0;
 
                 //Add HP from the glove if wielded
-                SpecialCombatEffectsOnMonster(monster, damage, monsterDead, specialMove);
+                if(attackingCreature == this)
+                    SpecialCombatEffectsOnMonster(monster, damage, monsterDead, specialMove);
 
                 //Notify the creature that it has taken damage
                 //It may activate a special ability or stop running away etc.
-                monster.NotifyHitByCreature(this, damage);
+                monster.NotifyHitByCreature(attackingCreature, damage);
 
                 //Is the monster dead, if so kill it?
                 if (monsterDead)
@@ -1086,11 +1091,11 @@ namespace RogueBasin
         /// Monster has been attacked. Wake it up etc.
         /// </summary>
         /// <param name="monster"></param>
-        private void AIForMonsterIsAttacked(Monster monster)
+        private void AIForMonsterIsAttacked(Monster monster, Creature attackingMonster)
         {
             //Set the attacked by marker
-            monster.LastAttackedBy = this;
-            monster.LastAttackedByID = this.UniqueID;
+            monster.LastAttackedBy = attackingMonster;
+            monster.LastAttackedByID = attackingMonster.UniqueID;
 
             //Was this a passive creature? It loses that flag
             if (monster.Passive)
@@ -1103,11 +1108,11 @@ namespace RogueBasin
 
                 //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
                 Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
-                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by player", LogDebugLevel.Low);
+                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack", LogDebugLevel.Low);
             }
 
             //Notify the creature that it has been hit
-            monster.NotifyAttackByCreature(this);
+            monster.NotifyAttackByCreature(attackingMonster);
         }
 
         /// <summary>

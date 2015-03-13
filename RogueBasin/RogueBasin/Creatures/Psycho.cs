@@ -112,7 +112,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Punk(CreatureLevel());
+            return new Psycho(CreatureLevel());
         }
 
         public override System.Drawing.Color RepresentationColor()

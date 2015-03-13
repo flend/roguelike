@@ -628,6 +628,80 @@ namespace RogueBasin
             return true;
         }
 
+        public bool MonsterFireShotgunWeapon(Monster gunner, Point target, int range, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
+        {
+            //The shotgun fires towards its target and does less damage with range
+
+            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
+
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(gunner);
+            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(gunner.LocationMap, target, PCMap, 10, Math.PI / 4);
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Chocolate);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in targetSquares)
+            {
+                SquareContents squareContents = MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    //Calculate range
+                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(gunner.LocationMap, m.LocationMap));
+
+                    //How many monsters between monster and gunner
+                    var pointsFromPlayerToMonster = Utility.GetPointsOnLine(gunner.LocationMap, m.LocationMap);
+                    //(exclude player and monster itself)
+                    var numInterveningMonsters = pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(gunner.LocationLevel, p).monster != null).Count() - 1;
+
+                    LogFile.Log.LogEntryDebug("Shotgun. Monster at " + m.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
+
+                    int damage = damageBase - rangeToMonster * damageDropWithRange;
+                    damage = damage - numInterveningMonsters * damageDropWithInterveningMonster;
+
+                    string combatResultsMsg = "MvM (" + m.Representation + ") Shotgun: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage to monsters
+                    if (damage > 0)
+                        player.ApplyDamageToMonster(gunner, squareContents.monster, damage, false, false);
+                }
+
+                if (squareContents.player != null)
+                {
+                    //Calculate range
+                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(gunner.LocationMap, Game.Dungeon.Player.LocationMap));
+
+                    //How many monsters between monster and gunner
+                    var pointsFromPlayerToMonster = Utility.GetPointsOnLine(gunner.LocationMap, Game.Dungeon.Player.LocationMap);
+                    //(exclude player and monster itself)
+                    var numInterveningMonsters = pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(gunner.LocationLevel, p).monster != null).Count() - 1;
+
+                    LogFile.Log.LogEntryDebug("Shotgun. Monster at " + Game.Dungeon.Player.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
+
+                    int damage = damageBase - rangeToMonster * damageDropWithRange;
+                    damage = damage - numInterveningMonsters * damageDropWithInterveningMonster;
+
+                    string combatResultsMsg = "MvP (" + gunner.Representation + ") Shotgun: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage to player
+                    if (damage > 0)
+                    {
+                        var modifiedDamaged = (int)Math.Floor(player.CalculateDamageModifierForAttacksOnPlayer(gunner) * damage);
+                        player.ApplyDamageToPlayer(modifiedDamaged); 
+                    }
+                }
+            }
+
+            return true;
+        }
+
 
         public bool FireLaserLineWeapon(Point target, RangedWeapon item, int damage)
         {

@@ -6,6 +6,11 @@ using System.Linq;
 
 namespace RogueBasin
 {
+    public enum CreatureAttackType
+    {
+        Normal, Shotgun
+    }
+
     /// <summary>
     /// Base class for Creatures.
     /// </summary>
@@ -378,6 +383,19 @@ namespace RogueBasin
         {
             return inventory.Items;
         }
+
+        public CreatureAttackType AttackType
+        {
+            get {
+                return GetCreatureAttackType();
+            }
+        }
+
+        protected virtual CreatureAttackType GetCreatureAttackType()
+        {
+            return CreatureAttackType.Normal;
+        }
+
 
         /// <summary>
         /// Inventory - possibly make this protected at some point?
