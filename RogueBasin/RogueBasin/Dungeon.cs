@@ -669,7 +669,7 @@ namespace RogueBasin
 
                     //Apply damage to monsters
                     if (damage > 0)
-                        player.ApplyDamageToMonster(gunner, squareContents.monster, damage, false, false);
+                        gunner.ApplyDamageToMonster(gunner, squareContents.monster, damage);
                 }
 
                 if (squareContents.player != null)
@@ -693,8 +693,7 @@ namespace RogueBasin
                     //Apply damage to player
                     if (damage > 0)
                     {
-                        var modifiedDamaged = (int)Math.Floor(player.CalculateDamageModifierForAttacksOnPlayer(gunner) * damage);
-                        player.ApplyDamageToPlayer(modifiedDamaged); 
+                        player.ApplyCombatDamageToPlayer(gunner, damage); 
                     }
                 }
             }
@@ -2688,9 +2687,9 @@ namespace RogueBasin
             {
                 //Apply damage (uses damage base)
                 if (originMonster != null)
-                    originMonster.AttackPlayer(Game.Dungeon.Player, damage);
+                    player.ApplyCombatDamageToPlayer(originMonster, damage);
                 else
-                    player.AttackPlayer(damage);
+                    player.ApplyCombatDamageToPlayer(damage);
             }
         }
 

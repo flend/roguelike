@@ -103,7 +103,7 @@ namespace RogueBasin
             maxHitpoints = ClassMaxHitpoints();
 
             hitpoints = maxHitpoints;
-            LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints + " on construction", LogDebugLevel.Medium);
+            //LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints + " on construction", LogDebugLevel.Medium);
 
             SightRadius = NormalSightRadius;
 
@@ -157,7 +157,7 @@ namespace RogueBasin
             }
             set
             {
-                LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints, LogDebugLevel.Medium);
+                //LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints, LogDebugLevel.Medium);
                 hitpoints = value;
             }
         }
@@ -576,11 +576,6 @@ namespace RogueBasin
             return false;
         }
 
-        /// <summary>
-        /// Important to keep this the only place where the player gets injured
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
         public virtual CombatResults AttackPlayer(Player player)
         {
             //Recalculate combat stats if required
@@ -590,21 +585,6 @@ namespace RogueBasin
             if (player.RecalculateCombatStatsRequired)
                 player.CalculateCombatStats();
 
-            //Calculate damage from a normal attack
-            int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
-
-            return AttackPlayer(player, damage);
-        }
-
-        /// <summary>
-        /// Important to keep this the only place where the player gets injured
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        public virtual CombatResults AttackPlayer(Player player, int damage)
-        {
-            player.NotifyAttack(this);
-
             //Do attack
             if (this.AttackType == CreatureAttackType.Shotgun)
             {
@@ -612,51 +592,13 @@ namespace RogueBasin
             }
             else
             {
-                var modifiedDamaged = (int)Math.Floor(player.CalculateDamageModifierForAttacksOnPlayer(this) * damage);
-                player.ApplyDamageToPlayer(modifiedDamaged);
+                int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
+                string combatResultsMsg = "MvP (" + this.Representation + ") Normal. Dam: " + damage;
+                LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                return Game.Dungeon.Player.ApplyCombatDamageToPlayer(this, damage);
             }
 
-            //Do we hit the player?
-            if (damage > 0)
-            {
-                int monsterOrigHP = player.Hitpoints;
-
-                //Is the player dead, if so kill it?
-                if (player.Hitpoints <= 0)
-                {
-                    
-                    //Message queue string
-                    //string combatResultsMsg = "MvP " + this.Representation + " Dam: base: " + damage + " mod: " + modifiedDamaged + " HP: " + monsterOrigHP + "->" + player.Hitpoints + " killed";
-                    
-                    //string playerMsg = "The " + this.SingleDescription + " hits you. You die.";
-                    //string playerMsg = HitsPlayerCombatString() + " R. E. E. D. DESTROYED!";
-                    //Game.MessageQueue.AddMessage(playerMsg);
-                    //LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Game.Dungeon.SetPlayerDeath("was knocked out by a " + this.SingleDescription);
-
-                    return CombatResults.DefenderDied;
-                }
-
-                //Debug string
-
-                //string combatResultsMsg3 = "MvP " + this.Representation + " Dam: base: " + damage + " mod: " + modifiedDamaged + " HP: " + monsterOrigHP + "->" + player.Hitpoints + " injured";
-                //string playerMsg3 = "The " + this.SingleDescription + " hits you.";
-                string playerMsg3 = HitsPlayerCombatString();
-                Game.MessageQueue.AddMessage(playerMsg3);
-               // LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
-
-                return CombatResults.DefenderDamaged;
-            }
-
-            //Miss
-            string combatResultsMsg2 = "MvP "  + this.Representation + " Dam: base: " + damage + " mod: " + damageModifier + " HP: " + player.Hitpoints + " miss";
-            //string playerMsg2 = "The " + this.SingleDescription + " misses you.";
-            string playerMsg2 = MissesPlayerCombatString();
-            Game.MessageQueue.AddMessage(playerMsg2);
-            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
-
-            return CombatResults.DefenderUnhurt;
+            return CombatResults.NeitherDied;
         }
 
         public virtual CombatResults AttackMonster(Monster monster)
@@ -667,78 +609,181 @@ namespace RogueBasin
 
             if (monster.RecalculateCombatStatsRequired)
                 monster.CalculateCombatStats();
+            
+            //Do attack
+            int damage = 0;
+            if (this.AttackType == CreatureAttackType.Shotgun)
+            {
+                //Will call ApplyDamageToMonster on all monsters hit
+                Game.Dungeon.MonsterFireShotgunWeapon(this, monster.LocationMap, 10, DamageBase(), 10, 10);
+                return CombatResults.NeitherDied; //can't tell in this case
+            }
+            else
+            {
+                damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
+                return ApplyDamageToMonster(this, monster, damage);
+            }
+        }
 
+        /// <summary>
+        /// Apply stun damage (miss n-turns) to monster. All stun attacks are routed through here
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="stunTurns"></param>
+        /// <returns></returns>
+        public CombatResults ApplyStunDamageToMonster(Creature attackingCreature, int stunTurns)
+        {
+            //Wake monster up etc.
+            AIForMonsterIsAttacked(this, this);
+
+            int monsterOrigStunTurns = this.StunnedTurns;
+
+            //Do we hit the monster?
+            if (stunTurns > 0)
+            {
+                this.StunnedTurns += stunTurns;
+
+                //Notify the creature that it has taken damage
+                //It may activate a special ability or stop running away etc.
+                this.NotifyHitByCreature(this, 0);
+
+                //Message string
+                string playerMsg2 = "";
+                if (!this.Unique)
+                    playerMsg2 += "The ";
+                playerMsg2 += this.SingleDescription + " is stunned!";
+                Game.MessageQueue.AddMessage(playerMsg2);
+
+                string debugMsg2 = "MStun: " + monsterOrigStunTurns + "->" + this.StunnedTurns;
+                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+
+            string playerMsg3 = "";
+            if (!this.Unique)
+                playerMsg3 += "The ";
+            playerMsg3 += this.SingleDescription + " shrugs off the attack.";
+            Game.MessageQueue.AddMessage(playerMsg3);
+            string debugMsg3 = "MStun: " + monsterOrigStunTurns + "->" + this.StunnedTurns;
+            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+
+        }
+
+        /// <summary>
+        /// Apply damage to monster and deal with death. All damaging attacks are routed through here.
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="damage"></param>
+        /// <returns></returns>
+        public CombatResults ApplyDamageToMonster(Creature attackingCreature, Monster monster, int damage)
+        {
+            //Wake monster up etc.
+            AIForMonsterIsAttacked(monster, attackingCreature);
+
+            //Do we hit the monster?
+            if (damage > 0)
+            {
+                int monsterOrigHP = monster.Hitpoints;
+
+                monster.Hitpoints -= damage;
+
+                bool monsterDead = monster.Hitpoints <= 0;
+
+                //Add HP from the glove if wielded
+                if (attackingCreature == Game.Dungeon.Player)
+                    Game.Dungeon.Player.SpecialCombatEffectsOnMonster(monster, damage, monsterDead, false);
+
+                //Notify the creature that it has taken damage
+                //It may activate a special ability or stop running away etc.
+                monster.NotifyHitByCreature(attackingCreature, damage);
+
+                //Is the monster dead, if so kill it?
+                if (monsterDead)
+                {
+                    //Add it to our list of kills (simply adding the whole object here)
+                    Game.Dungeon.Player.AddKill(monster);
+
+                    //Message string
+                    string attackerStr = AttackerString(attackingCreature);
+                    string playerMsg = attackingCreature + "destroyed the";
+                    playerMsg += monster.SingleDescription + ".";
+                    Game.MessageQueue.AddMessage(playerMsg);
+
+                    string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
+                    LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
+
+                    Game.Dungeon.KillMonster(monster, false);
+
+                    return CombatResults.DefenderDied;
+                }
+
+                //Message string
+                string playerMsg2 = AttackerString(attackingCreature);
+                playerMsg2 += " hit the ";
+                playerMsg2 += monster.SingleDescription + ".";
+                Game.MessageQueue.AddMessage(playerMsg2);
+
+                string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
+                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
+
+                return CombatResults.DefenderDamaged;
+            }
+
+            //Miss
+
+            string playerMsg3 = AttackerString(attackingCreature) + " missed the " + monster.SingleDescription + ".";
+            Game.MessageQueue.AddMessage(playerMsg3);
+            string debugMsg3 = "MHP: " + monster.Hitpoints + "->" + monster.Hitpoints + " missed";
+            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+        }
+
+        private string AttackerString(Creature attackingCreature)
+        {
+            String attackerStr = "";
+            if (attackingCreature is Monster)
+            {
+                attackerStr = (attackingCreature as Monster).SingleDescription;
+            }
+            if (attackingCreature is Player)
+            {
+                attackerStr = "You";
+            }
+            return attackerStr;
+        }
+
+        /// <summary>
+        /// Monster has been attacked. Wake it up etc.
+        /// </summary>
+        /// <param name="monster"></param>
+        private void AIForMonsterIsAttacked(Monster monster, Creature attackingMonster)
+        {
             //Set the attacked by marker
-            monster.LastAttackedBy = this;
-            monster.LastAttackedByID = this.UniqueID;
+            monster.LastAttackedBy = attackingMonster;
+            monster.LastAttackedByID = attackingMonster.UniqueID;
 
-            //Notify the creature that it has been attacked
-            monster.NotifyAttackByCreature(this);
+            //Was this a passive creature? It loses that flag
+            if (monster.Passive)
+                monster.UnpassifyCreature();
 
-            //Wake a sleeping creature
+            //Was this a sleeping creature? It loses that flag
             if (monster.Sleeping)
             {
                 monster.WakeCreature();
 
                 //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
                 Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
-                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by monster " + this.Representation, LogDebugLevel.Low);
+                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack", LogDebugLevel.Low);
             }
 
-            //Do attack
-            int damage = 0;
-            if (this.AttackType == CreatureAttackType.Shotgun)
-            {
-                Game.Dungeon.MonsterFireShotgunWeapon(this, monster.LocationMap, 10, DamageBase(), 10, 10);
-            }
-            else
-            {
-                damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
-                Game.Dungeon.Player.ApplyDamageToMonster(this, monster, damage, false, false);
-            }
-            
-            //Only do logging here, actual damage is handled above
-
-            string messageStr;
-            
-            //Do we hit the monster?
-            if (damage > 0)
-            {
-                
-                //Is the player dead, if so kill it?
-                if (monster.Hitpoints <= 0)
-                {
-                    
-                    //Debug string
-                    //string combatResultsMsg = "MvM " + this.Representation + " vs " + monster.Representation + " ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    messageStr = HitsMonsterCombatString(monster) + " It's knocked out.";
-                    Game.MessageQueue.AddMessage(messageStr);
-                    //Game.MessageQueue.AddMessage(combatResultsMsg);
-                    //LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Add charm XP if appropriate
-                    Game.Dungeon.Player.AddXPMonsterAttack(this, monster);
-
-                    return CombatResults.DefenderDied;
-                }
-
-                //Debug string
-                //string combatResultsMsg3 = "MvM " + this.Representation + " vs " + monster.Representation + " ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
-                messageStr = HitsMonsterCombatString(monster);
-                Game.MessageQueue.AddMessage(messageStr);
-                //LogFile.Log.LogEntryDebug(combatResultsMsg3, LogDebugLevel.Medium);
-
-                return CombatResults.DefenderDamaged;
-            }
-
-            //Miss
-            string combatResultsMsg2 = "MvM " + this.Representation + " vs " + monster.Representation + " ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
-            //Game.MessageQueue.AddMessage(combatResultsMsg2);
-            messageStr = MissesMonsterCombatString(monster);
-            Game.MessageQueue.AddMessage(messageStr);
-            LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
-
-            return CombatResults.DefenderUnhurt;
+            //Notify the creature that it has been hit
+            monster.NotifyAttackByCreature(attackingMonster);
         }
 
         /// <summary>

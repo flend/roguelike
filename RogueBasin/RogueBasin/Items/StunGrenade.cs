@@ -131,7 +131,7 @@ namespace RogueBasin.Items
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    player.ApplyStunDamageToMonster(m, damage);
+                    m.ApplyStunDamageToMonster(Game.Dungeon.Player, damage);
                 }
             }
 
