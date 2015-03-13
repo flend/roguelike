@@ -50,7 +50,7 @@ namespace RogueBasin
 
         private static void SetupTerrainSprites()
         {
-            TerrainSprites.Add(MapTerrain.Empty, "terrain_floor");
+            TerrainSprites.Add(MapTerrain.Empty, "ground");
         }
 
         public static void OverrideTerrainChar(MapTerrain terrain, char c)

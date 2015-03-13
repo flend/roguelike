@@ -26,8 +26,9 @@ namespace RogueBasin {
             Creatures = 3,
             CreatureDecoration = 4,
             CreatureStatus = 5,
-            TargettingUI = 6,
-            Animations = 7
+            CreatureLevel = 6,
+            TargettingUI = 7,
+            Animations = 8
         }
 
         static Screen instance = null;
@@ -1030,6 +1031,7 @@ namespace RogueBasin {
             tileMap.ClearLayer(TileLevel.Creatures);
             tileMap.ClearLayer(TileLevel.CreatureDecoration);
             tileMap.ClearLayer(TileLevel.CreatureStatus);
+            tileMap.ClearLayer(TileLevel.CreatureLevel);
             tileMap.ClearLayer(TileLevel.Items);
             tileMap.ClearLayer(TileLevel.TargettingUI);
 
@@ -2851,6 +2853,8 @@ namespace RogueBasin {
                         tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameOverlaySprite;
 
                         tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(overlapSprite);
+
+                        tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
                     }
 
                 }
@@ -2912,6 +2916,7 @@ namespace RogueBasin {
                     System.Drawing.Color baseDrawColor;
                     System.Drawing.Color drawColor;
                     double spriteTransparency = 1.0;
+                    bool drawSquare = true;
 
                     //Defaults
                     screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
@@ -2981,7 +2986,7 @@ namespace RogueBasin {
                     {
                         //Not in FOV but seen
                         drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.6);
-
+                        spriteTransparency = 0.5;
                         //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                     }
                     else
@@ -2990,7 +2995,10 @@ namespace RogueBasin {
                         if (DebugMode)
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.7);
                         else
+                        {
                             drawColor = hiddenColor;
+                            drawSquare = false;
+                        }
                     }
 
                     //Monster FOV in debug mode
@@ -3028,17 +3036,20 @@ namespace RogueBasin {
 
                     Point mapTerrainLoc = new Point(i, j);
                     string sprite = null;
+                    
+                    //map debug
+                    /*
                     if ((Game.Dungeon.Pathing.PathFindingInternal as TCODPathFindingWrapper).getCellPathable(0, mapTerrainLoc))
                     {
                         sprite = "ground";
-                    }
+                    }*/
 
-                    if (isViewVisible(mapTerrainLoc))
+                    if (isViewVisible(mapTerrainLoc) && drawSquare)
                     {
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(screenChar);
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileFlag = new LibtcodColorFlags(drawColor);
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].Transparency = spriteTransparency;
-                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileSprite = sprite;
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileSprite = terrainSprite;
 
                     }
                 }
