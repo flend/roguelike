@@ -26,7 +26,7 @@ namespace RogueBasin.Creatures
             if(adjacentSquares.Count > 0) {
                 LogFile.Log.LogEntryDebug("Grenadier throwing grenade at " + currentTarget.Representation, LogDebugLevel.Medium);
 
-                var grenadeCreature = new Creatures.Grenade(DamageBase(), 2);
+                var grenadeCreature = new Creatures.Grenade(this.ScaleRangedDamage(DamageBase()), 2 + (int)Math.Floor(Level / 3.0));
                 Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, adjacentSquares.RandomElement());
 
                 var targetSquares = Game.Dungeon.CalculateTrajectory(this, currentTarget.LocationMap);
@@ -208,7 +208,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 1;
         }

@@ -355,7 +355,7 @@ namespace RogueBasin
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public virtual int DamageModifier() { return 0; }
+        public virtual double DamageModifier() { return 0; }
 
         /// <summary>
         /// What FOV we have in addition to the tcod

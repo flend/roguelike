@@ -48,10 +48,10 @@ namespace RogueBasin.PlayerEffects
             return duration;
         }
 
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             //We multiply the player's current
-            int playerDamMod = Game.Dungeon.Player.DamageModifier();
+            var playerDamMod = Game.Dungeon.Player.DamageModifier();
 
             return playerDamMod * (multiplier - 1);
         }

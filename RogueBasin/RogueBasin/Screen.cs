@@ -1701,7 +1701,7 @@ namespace RogueBasin {
 
                 RangedWeapon weaponR = weapon as RangedWeapon;
 
-                var rangedDamage = weaponE.DamageBase();
+                var rangedDamage = Game.Dungeon.Player.ScaleRangedDamage(weapon, weaponE.DamageBase());
 
                 //Ranged Damage base
                 var playerRangedTextOffset = new System.Drawing.Point(10, 30);
@@ -1743,10 +1743,17 @@ namespace RogueBasin {
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
             DrawGraduatedBar("healthbar", playerHPRatio, new Rectangle(playerUI_TL.X + 49, playerUI_TL.Y + 92, 266, 12), 0.2);
 
-
             var playerHPTextOffset = new System.Drawing.Point(10, 0);
             var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
             DrawText(hpStr, playerTextUI_UsefulTL.Add(playerHPTextOffset));
+
+            //Draw Fame
+            var playerFameTextOffset = new System.Drawing.Point(10, 60);
+            var fameStr = "Fame: " + player.CombatXP;
+            DrawText(fameStr, playerTextUI_UsefulTL.Add(playerFameTextOffset));
+            var playerExpFameTextOffset = new System.Drawing.Point(10, 75);
+            var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
+            DrawText(fameExpStr, playerTextUI_UsefulTL.Add(playerExpFameTextOffset));
 
             //Monster stats
             DrawFocusWindow();

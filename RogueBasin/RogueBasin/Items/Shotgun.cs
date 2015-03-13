@@ -21,7 +21,8 @@ namespace RogueBasin.Items
         {
             //Should be guaranteed in range by caller
 
-            Game.Dungeon.FireShotgunWeapon(target, this, DamageBase(), DamageBase() / 10, DamageBase() / 10);
+            var scaledDamage = Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase());
+            Game.Dungeon.FireShotgunWeapon(target, this, scaledDamage, scaledDamage / 10, scaledDamage / 10);
 
             //Remove 1 ammo
             Ammo--;
@@ -131,7 +132,7 @@ namespace RogueBasin.Items
             return 30;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

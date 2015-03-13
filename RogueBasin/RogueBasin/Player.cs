@@ -523,10 +523,10 @@ namespace RogueBasin
                     minSpeed = effect.SpeedModifier();
 
                 if(effect.DamageModifier() > maxDamage)
-                    maxDamage = effect.DamageModifier();
+                    maxDamage = (int)effect.DamageModifier();
 
                 if(effect.DamageModifier() < minDamage)
-                    minDamage = effect.DamageModifier();
+                    minDamage = (int)effect.DamageModifier();
 
                 if (effect.SightModifier() < minSight)
                     minSight = effect.SightModifier();
@@ -614,7 +614,7 @@ namespace RogueBasin
         /// <summary>
         /// Used as accessors only for Player
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return damageModifier;
         }
@@ -2229,15 +2229,15 @@ namespace RogueBasin
             //Level up!
             Level++;
 
-            int lastMaxHP = maxHitpoints;
+            //int lastMaxHP = maxHitpoints;
 
             //Recalculate combat stats
             CalculateCombatStats();
 
-            hitpoints += maxHitpoints - lastMaxHP;
+            //hitpoints += maxHitpoints - lastMaxHP;
 
             //Calculate HP etc
-            //HPOnLevelUP();
+            HPOnLevelUP();
 
             LogFile.Log.LogEntry("Player levels up to: " + Level);
         }
@@ -2247,8 +2247,7 @@ namespace RogueBasin
         /// </summary>
         private void HPOnLevelUP()
         {
-            hitpoints += 10;
-            maxHitpoints += 10;
+            MaxHitpoints = (int)Math.Ceiling(100 * (1 + (Level - 1) * 0.2));
         }
 
         /// <summary>
@@ -2787,6 +2786,46 @@ namespace RogueBasin
         {
             KillCount++;
             Kills.Add(monster);
+        }
+
+        internal int GetHealXPCost()
+        {
+            return 75;
+        }
+
+        internal int GetLevelXPCost()
+        {
+            return 150;
+        }
+
+        internal void LevelUpWithXP()
+        {
+            if (CombatXP >= GetLevelXPCost())
+            {
+                LevelUp();
+                CombatXP -= GetLevelXPCost();
+                LogFile.Log.LogEntryDebug("Levelled up at cost of  " + GetLevelXPCost() + " XP", LogDebugLevel.Medium);
+            }
+        }
+
+        internal void HealWithXP()
+        {
+            if (CombatXP >= GetHealXPCost())
+            {
+                HealCompletely();
+                CombatXP -= GetHealXPCost();
+                LogFile.Log.LogEntryDebug("Healed completely at cost of " + GetHealXPCost() + " XP", LogDebugLevel.Medium);
+            }
+        }
+
+        internal int ScaleRangedDamage(Item item, int damageBase)
+        {
+            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
+        }
+
+        internal int ScaleMeleeDamage(Item item, int damageBase)
+        {
+            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
         }
     }
 }

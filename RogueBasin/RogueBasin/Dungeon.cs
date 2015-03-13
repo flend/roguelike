@@ -2685,14 +2685,15 @@ namespace RogueBasin
             if (monster.Charmed)
                 Game.Dungeon.Player.RemoveCharmedCreature();
 
-            //Leave a corpse
-            if (!autoKill)
+            if (!autoKill) { 
+                //Leave a corpse
                 AddDecorationFeature(new Features.Corpse(monster.GetCorpseRepresentation(), monster.GetCorpseRepresentationColour()), monster.LocationLevel, monster.LocationMap);
 
-            //Deal with special death effects, but not on an autokill
-            if (!autoKill)
-            {
+                //Add experience
+                AddXPForMonster(monster);
+
                 monster.OnKilledSpecialEffects();
+            }
                 /*
                 if (monster.Unique)
                 {
@@ -2770,7 +2771,24 @@ namespace RogueBasin
 
                     dungeonInfo.DragonDead = true;
                 }*/
+        }
+
+
+        private void AddXPForMonster(Monster monster)
+        {
+            var baseXP = monster.GetCombatXP();
+            int modifiedXP = baseXP;
+            if (player.Level < monster.Level)
+            {
+                modifiedXP = (monster.Level - player.Level) * baseXP;
             }
+            else if (player.Level > monster.Level)
+            {
+                modifiedXP = (int) Math.Ceiling(Math.Pow(2.0, (monster.Level - player.Level)) * baseXP);
+            }
+
+            player.CombatXP += modifiedXP;
+            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (from base: " + baseXP + ")", LogDebugLevel.Medium);
         }
 
         /// <summary>

@@ -218,7 +218,7 @@ namespace RogueBasin
         /// <summary>
         /// Player damage modifier. Auto-calculated so not serialized
         /// </summary>
-        protected int damageModifier;
+        protected double damageModifier;
 
         /// <summary>
         /// Player damage modifier. Auto-calculated so not serialized
@@ -437,10 +437,10 @@ namespace RogueBasin
                     minSpeed = effect.SpeedModifier();
 
                 if (effect.DamageModifier() > maxDamage)
-                    maxDamage = effect.DamageModifier();
+                    maxDamage = (int)effect.DamageModifier();
 
                 if (effect.DamageModifier() < minDamage)
-                    minDamage = effect.DamageModifier();
+                    minDamage = (int)effect.DamageModifier();
             }
 
             damageModifier += maxDamage;
@@ -557,10 +557,21 @@ namespace RogueBasin
 
         protected int toHitRoll;
 
+        internal int ScaleRangedDamage(int damageBase)
+        {
+            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
+        }
+
+        internal int ScaleMeleeDamage(int damageBase)
+        {
+            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
+        }
+
         protected virtual int AttackCreatureWithModifiers(Creature creature, int hitMod, int damBase, int damMod, int ACmod)
         {
-            //Just do damage base
-            return damageBase;
+
+            //Scale based on level
+            return ScaleRangedDamage(damageBase);
 
             /*
             int attackToHit = hitModifier + hitMod;
@@ -661,7 +672,8 @@ namespace RogueBasin
 
         private void StandardShotGunAttack(Creature target)
         {
-            Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, this.DamageBase(), 0.0, Math.PI / 4, this.DamageBase() / 10, this.DamageBase() / 10);
+            var scaledDamage = ScaleRangedDamage(this.DamageBase());
+            Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, scaledDamage, 0.0, Math.PI / 4, scaledDamage / 10, scaledDamage / 10);
         }
 
         private void StandardPreCombat()

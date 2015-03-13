@@ -55,7 +55,7 @@ namespace RogueBasin
         /// Damage modifier +1 -1 etc. 0 if none.
         /// </summary>
         /// <returns></returns>
-        int DamageModifier();
+        double DamageModifier();
 
         /// <summary>
         /// Hit modifier +1 -1 etc. 0 if none.

@@ -122,7 +122,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

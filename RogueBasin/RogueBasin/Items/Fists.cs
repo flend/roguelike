@@ -117,7 +117,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -260,7 +260,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 10;
+            return Game.Dungeon.Player.ScaleMeleeDamage(this, 10);
         }
 
         /// <summary>

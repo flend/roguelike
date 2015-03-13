@@ -567,8 +567,14 @@ namespace RogueBasin
                                     break;
 
                                 case Key.L:
-                                    SetLogScreen();
-                                    DisableLogScreen();
+
+                                    Game.Dungeon.Player.LevelUpWithXP();
+                                    timeAdvances = false;
+                                    break;
+
+                                case Key.H:
+
+                                    Game.Dungeon.Player.HealWithXP();
                                     timeAdvances = false;
                                     break;
 
@@ -663,6 +669,11 @@ namespace RogueBasin
                                             Game.Dungeon.AllLocksOpen = false;
                                             Game.MessageQueue.AddMessage("All locks are now in their normal state.");
                                         }
+                                        break;
+
+                                    case Key.I:
+                                        Game.MessageQueue.AddMessage("Player levelled up.");
+                                        Game.Dungeon.Player.LevelUp();
                                         break;
 
 

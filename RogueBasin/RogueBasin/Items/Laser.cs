@@ -28,7 +28,7 @@ namespace RogueBasin.Items
 
             LogFile.Log.LogEntryDebug("Firing laser", LogDebugLevel.Medium);
 
-            return Game.Dungeon.FireLaserLineWeapon(target, this, 75);
+            return Game.Dungeon.FireLaserLineWeapon(target, this, Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase()));
         }
 
         public List<EquipmentSlot> EquipmentSlots
@@ -158,11 +158,10 @@ namespace RogueBasin.Items
 
         public int DamageBase()
         {
-            //1d6
-            return 0;
+            return 75;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

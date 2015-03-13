@@ -44,6 +44,6 @@ namespace RogueBasin.PlayerEffects
             return duration;
         }
 
-        public override int DamageModifier() { return damageUpAmount; }
+        public override double DamageModifier() { return damageUpAmount; }
     }
 }

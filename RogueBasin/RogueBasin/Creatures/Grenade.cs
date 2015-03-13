@@ -12,6 +12,8 @@ namespace RogueBasin.Creatures
         int damage;
         int timer;
         bool exploded = false;
+        private int p1;
+        private double p2;
 
         public Grenade(int damage, int timer)
         {
@@ -234,7 +236,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 1;
         }

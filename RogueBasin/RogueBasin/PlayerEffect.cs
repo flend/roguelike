@@ -54,7 +54,7 @@ namespace RogueBasin
 
         public virtual int DamageBase() { return 0; }
 
-        public virtual int DamageModifier() { return 0; }
+        public virtual double DamageModifier() { return 0; }
 
         public virtual int HitModifier() { return 0; }
 
