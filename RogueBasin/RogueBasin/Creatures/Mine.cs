@@ -4,16 +4,12 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Swarmer. Light melee with wide FOV. Responds to sounds.
-    /// </summary>
-    public class Grenade : MonsterThrowAndRunAI
+    public class Mine : MonsterThrowAndRunAI
     {
         int damage;
-        int timer;
         bool exploded = false;
 
-        public Grenade(int damage, int timer)
+        public Mine(int damage)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -23,18 +19,30 @@ namespace RogueBasin.Creatures
             Sleeping = false;
 
             this.damage = damage;
-            this.timer = timer;
         }
 
         protected override bool UseSpecialAbility()
         {
-            timer--;
-
-            LogFile.Log.LogEntryDebug("Grenade on timer: " + this.timer, LogDebugLevel.Medium);
             //Avoid exploding if we have already been killed
-            if (timer == 0 && Alive)
+            if (Alive)
             {
-                Explode();
+                var adjacentSquares = Game.Dungeon.GetWalkableAdjacentSquares(this.LocationLevel, this.LocationMap);
+
+                bool willExplode = false;
+                foreach (Point sq in adjacentSquares)
+                {
+                    //Check square has nothing else on it
+                    SquareContents contents = Game.Dungeon.MapSquareContents(this.LocationLevel, sq);
+
+                    if (contents.monster != null)
+                    {
+                        willExplode = true;
+                        break;
+                    }
+                }
+
+                if(willExplode)
+                    Explode();
             }
 
             //Always use this rather than shoot
@@ -50,7 +58,7 @@ namespace RogueBasin.Creatures
                 exploded = true;
                 Hitpoints = 0;
 
-                LogFile.Log.LogEntryDebug("Grenade explosion at: " + this.LocationMap, LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Mine explosion at: " + this.LocationMap, LogDebugLevel.Medium);
 
                 Game.Dungeon.AddSoundEffect(1.0, LocationLevel, LocationMap);
 
@@ -81,7 +89,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Grenade(damage, timer);
+            return new Mine(damage);
         }
 
         protected override int ClassMaxHitpoints()
@@ -140,16 +148,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Grenade"; } }
+        public override string SingleDescription { get { return "Mine"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Grenades"; } }
+        public override string GroupDescription { get { return "Mines"; } }
 
         protected override char GetRepresentation()
         {
-            return 'g';
+            return 'm';
         }
 
         internal override char GetCorpseRepresentation()
@@ -251,12 +259,12 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "grenade";
+            return "mine";
         }
 
         protected override string GetUISprite()
         {
-            return "grenade";
+            return "mine";
         }
 
         internal override void OnKilledSpecialEffects()

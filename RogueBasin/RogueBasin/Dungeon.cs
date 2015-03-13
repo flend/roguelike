@@ -2621,10 +2621,6 @@ namespace RogueBasin
 
                 Monster m = squareContents.monster;
 
-                //Don't attack ourself -will loop
-                if (m == originMonster)
-                    continue;
-
                 if (m != null && !m.Alive)
                     continue;
 
@@ -2635,8 +2631,14 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    //make this a player attack to avoid AI being confused by monster attack that disappears
-                    Game.Dungeon.Player.AttackMonsterRanged(squareContents.monster, damage);
+                    if (originMonster != null)
+                    {
+                        originMonster.ApplyDamageToMonster(originMonster, m, damage);
+                    }
+                    else
+                    {
+                        Game.Dungeon.Player.AttackMonsterRanged(squareContents.monster, damage);
+                    }
                 }
             }
 
@@ -4841,6 +4843,31 @@ namespace RogueBasin
                     if (contents.player != null)
                         continue;
 
+                    //Empty and walkable
+                    adjacentSqFree.Add(p);
+                }
+            }
+
+            return adjacentSqFree;
+        }
+
+        public List<Point> GetWalkableAdjacentSquares(int locationLevel, Point locationMap)
+        {
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSqFree = new List<Point>();
+            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+
+            foreach (Point p in adjacentSq)
+            {
+                if (p.x >= 0 && p.x < levelMap.width
+                    && p.y >= 0 && p.y < levelMap.height)
+                {
+                    if (!MapSquareIsWalkable(locationLevel, p))
+                    {
+                        continue;
+                    }
+                    
                     //Empty and walkable
                     adjacentSqFree.Add(p);
                 }
