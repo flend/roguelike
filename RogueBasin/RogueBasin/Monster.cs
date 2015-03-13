@@ -149,6 +149,15 @@ namespace RogueBasin
             set;
         }
 
+        /// <summary>
+        /// The monster is reloading for this many turns, and will miss this many AI turns
+        /// </summary>
+        public int ReloadingTurns
+        {
+            get;
+            set;
+        }
+
         public int Hitpoints
         {
             get
@@ -578,9 +587,7 @@ namespace RogueBasin
 
         public virtual CombatResults AttackPlayer(Player player)
         {
-            //Recalculate combat stats if required
-            if (this.RecalculateCombatStatsRequired)
-                this.CalculateCombatStats();
+            StandardPreCombat();
 
             if (player.RecalculateCombatStatsRequired)
                 player.CalculateCombatStats();
@@ -588,7 +595,7 @@ namespace RogueBasin
             //Do attack
             if (this.AttackType == CreatureAttackType.Shotgun)
             {
-                Game.Dungeon.MonsterFireShotgunWeapon(this, Game.Dungeon.Player.LocationMap, 10, 50, 10, 10);
+                Game.Dungeon.FireShotgunWeapon(this, Game.Dungeon.Player.LocationMap, this.DamageBase(), 0.0, Math.PI / 4, this.DamageBase() / 5, this.DamageBase() / 5);
             }
             else
             {
@@ -603,9 +610,7 @@ namespace RogueBasin
 
         public virtual CombatResults AttackMonster(Monster monster)
         {
-            //Recalculate combat stats if required
-            if (this.RecalculateCombatStatsRequired)
-                this.CalculateCombatStats();
+            StandardPreCombat();
 
             if (monster.RecalculateCombatStatsRequired)
                 monster.CalculateCombatStats();
@@ -615,13 +620,25 @@ namespace RogueBasin
             if (this.AttackType == CreatureAttackType.Shotgun)
             {
                 //Will call ApplyDamageToMonster on all monsters hit
-                Game.Dungeon.MonsterFireShotgunWeapon(this, monster.LocationMap, 10, DamageBase(), 10, 10);
+                Game.Dungeon.FireShotgunWeapon(this, monster.LocationMap, this.DamageBase(), 0.0, Math.PI / 4, this.DamageBase() / 5, this.DamageBase() / 5);
                 return CombatResults.NeitherDied; //can't tell in this case
             }
             else
             {
                 damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
+
                 return ApplyDamageToMonster(this, monster, damage);
+            }
+        }
+
+        private void StandardPreCombat()
+        {
+            if (this.RecalculateCombatStatsRequired)
+                this.CalculateCombatStats();
+
+            if (this.ReloadTurnsRequired() > 0)
+            {
+                ReloadingTurns = ReloadTurnsRequired();
             }
         }
 
@@ -714,6 +731,10 @@ namespace RogueBasin
                     playerMsg += monster.SingleDescription + ".";
                     Game.MessageQueue.AddMessage(playerMsg);
 
+                    string mvm = AttackerMvMString(attackingCreature);
+                    string debugMsg4 = mvm + " " + attackingCreature.Representation + " attacks " + this.Representation;
+                    LogFile.Log.LogEntryDebug(debugMsg4, LogDebugLevel.Medium);
+
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
 
@@ -727,6 +748,10 @@ namespace RogueBasin
                 playerMsg2 += " hit the ";
                 playerMsg2 += monster.SingleDescription + ".";
                 Game.MessageQueue.AddMessage(playerMsg2);
+
+                string mvm2 = AttackerMvMString(attackingCreature);
+                string debugMsg6 = mvm2 + " " + attackingCreature.Representation + " attacks " + this.Representation;
+                LogFile.Log.LogEntryDebug(debugMsg6, LogDebugLevel.Medium);
 
                 string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
                 LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
@@ -754,6 +779,16 @@ namespace RogueBasin
             if (attackingCreature is Player)
             {
                 attackerStr = "You";
+            }
+            return attackerStr;
+        }
+
+        private string AttackerMvMString(Creature attackingCreature)
+        {
+            String attackerStr = "MvM";
+            if (attackingCreature is Player)
+            {
+                attackerStr = "MvP";
             }
             return attackerStr;
         }
@@ -886,6 +921,11 @@ namespace RogueBasin
         internal virtual void OnKilledSpecialEffects()
         {
             return;
+        }
+
+        internal virtual int ReloadTurnsRequired()
+        {
+            return 0;
         }
 
         internal virtual System.Drawing.Color GetCorpseRepresentationColour()

@@ -62,7 +62,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return 'f';
+            return 'k';
         }
 
         protected override string GetGameSprite()

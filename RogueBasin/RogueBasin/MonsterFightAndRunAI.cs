@@ -186,6 +186,16 @@ namespace RogueBasin
                 return;
             }
 
+            //Reloading creatures miss turns
+            if (ReloadingTurns > 0)
+            {
+                ReloadingTurns--;
+                LogFile.Log.LogEntryDebug(this.Representation + " is reloading for " + ReloadingTurns + " more turns", LogDebugLevel.Low);
+
+                ResetTurnsMoving();
+                return;
+            }
+
             //Calculate current FOV
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
@@ -1324,6 +1334,10 @@ namespace RogueBasin
         /// </summary>
         public override void NotifyAttackByCreature(Creature creature)
         {
+            if (creature != currentTarget)
+            {
+                LogFile.Log.LogEntryDebug(this.Representation + " changes target from " + currentTarget.Representation + " to " + creature.Representation, LogDebugLevel.Low);
+            }
             AIState = SimpleAIStates.Pursuit;
             currentTarget = creature;
             currentTargetID = creature.UniqueID;

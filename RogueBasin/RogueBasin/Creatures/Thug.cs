@@ -43,14 +43,19 @@ namespace RogueBasin.Creatures
             return true;
         }
 
+        internal override int ReloadTurnsRequired()
+        {
+            return 2;
+        }
+
         protected override bool WillPursue()
         {
             return true;
         }
 
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
-            return 7.0;
+            return 5.0;
         }
 
         protected override int GetChanceToBackAway()
@@ -81,7 +86,7 @@ namespace RogueBasin.Creatures
 
         protected override char GetRepresentation()
         {
-            return (char)629;
+            return 'f';
         }
 
         internal override char GetCorpseRepresentation()

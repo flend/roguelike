@@ -1298,6 +1298,7 @@ namespace RogueBasin
 
         protected override char GetRepresentation()
         {
+            /*
             var weapon = GetEquippedRangedWeapon();
 
             if (weapon != null)
@@ -1338,7 +1339,9 @@ namespace RogueBasin
                 if (weapon.GetType() == typeof(Items.SoundGrenade))
                     return (char)520;
             }
-            return (char)257;
+            return (char)257;*/
+
+            return '@';
         }
 
         /// <summary>

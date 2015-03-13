@@ -46,7 +46,7 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             return 7.0;
         }

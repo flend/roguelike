@@ -16,7 +16,7 @@ namespace RogueBasin
             return System.Drawing.Color.DarkGray;
         }
 
-        protected abstract double GetMissileRange();
+        public abstract double GetMissileRange();
 
         protected abstract string GetWeaponName();
 

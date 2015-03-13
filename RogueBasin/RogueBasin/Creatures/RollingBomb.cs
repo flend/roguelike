@@ -42,7 +42,7 @@ namespace RogueBasin.Creatures
         /// Only explodes when next to you
         /// </summary>
         /// <returns></returns>
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             //Can explode diagonally!
             return 1.9;

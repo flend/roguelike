@@ -178,7 +178,7 @@ namespace RogueBasin.Creatures
         /// Alert bot has a long range to use its alerting ability
         /// </summary>
         /// <returns></returns>
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             return 10.0;
         }

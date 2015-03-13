@@ -571,66 +571,15 @@ namespace RogueBasin
 
         public bool FireShotgunWeapon(Point target, Items.ShotgunTypeWeapon item, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
         {
-            //The shotgun fires towards its target and does less damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
             IEquippableItem equipItem = item as IEquippableItem;
-
-            if (equipItem == null)
-            {
-                LogFile.Log.LogEntryDebug("Shotgun is not equippable", LogDebugLevel.High);
-                return false;
-            }
-
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, PCMap, equipItem.RangeFire(), item.ShotgunSpreadAngle());
-
-            //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Chocolate);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(player.LocationMap, m.LocationMap));
-
-                    //How many monsters between monster and player
-                    var pointsFromPlayerToMonster = Utility.GetPointsOnLine(player.LocationMap, m.LocationMap);
-                    //(exclude player and monster itself)
-                    var numInterveningMonsters = pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(player.LocationLevel, p).monster != null).Count() - 1;
-
-                    LogFile.Log.LogEntryDebug("Shotgun. Monster at " + m.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
-
-                    int damage = damageBase - rangeToMonster * damageDropWithRange;
-                    damage = damage - numInterveningMonsters * damageDropWithInterveningMonster;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    if(damage > 0)
-                        player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
-
-            return true;
+            return FireShotgunWeapon(Game.Dungeon.player, target, damageBase, item.FireSoundMagnitude(), item.ShotgunSpreadAngle(), damageDropWithRange, damageDropWithInterveningMonster);
         }
 
-        public bool MonsterFireShotgunWeapon(Monster gunner, Point target, int range, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
+        public bool FireShotgunWeapon(Creature gunner, Point target, int damageBase, double fireSoundMagnitude, double spreadAngle, int damageDropWithRange, int damageDropWithInterveningMonster)
         {
             //The shotgun fires towards its target and does less damage with range
+
+            LogFile.Log.LogEntryDebug("---SHOTGUN FIRE---", LogDebugLevel.Medium);
 
             //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
 
@@ -640,6 +589,10 @@ namespace RogueBasin
             //Draw attack
             Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Chocolate);
 
+            //Make firing sound
+            if(gunner is Player)
+                Game.Dungeon.AddSoundEffect(fireSoundMagnitude, player.LocationLevel, player.LocationMap);
+
             //Attack all monsters in the area
 
             foreach (Point sq in targetSquares)
@@ -651,41 +604,30 @@ namespace RogueBasin
                 //Hit the monster if it's there
                 if (m != null)
                 {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(gunner.LocationMap, m.LocationMap));
+                    int damage = ShotgunDamage(gunner, m, damageBase, damageDropWithRange, damageDropWithInterveningMonster);
 
-                    //How many monsters between monster and gunner
-                    var pointsFromPlayerToMonster = Utility.GetPointsOnLine(gunner.LocationMap, m.LocationMap);
-                    //(exclude player and monster itself)
-                    var numInterveningMonsters = pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(gunner.LocationLevel, p).monster != null).Count() - 1;
-
-                    LogFile.Log.LogEntryDebug("Shotgun. Monster at " + m.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
-
-                    int damage = damageBase - rangeToMonster * damageDropWithRange;
-                    damage = damage - numInterveningMonsters * damageDropWithInterveningMonster;
-
-                    string combatResultsMsg = "MvM (" + m.Representation + ") Shotgun: Dam: " + damage;
+                    string combatMessage = "MvM";
+                    if (gunner is Player)
+                        combatMessage = "PvM";
+                    
+                    string combatResultsMsg = combatMessage + " (" + m.Representation + ") Shotgun: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage to monsters
                     if (damage > 0)
-                        gunner.ApplyDamageToMonster(gunner, squareContents.monster, damage);
+                    {
+                        if(gunner is Player)
+                            //Cancels some player statuses
+                            player.AttackMonsterRanged(squareContents.monster, damage);
+                        else
+                            m.ApplyDamageToMonster(gunner, m, damage);
+                    }
                 }
 
-                if (squareContents.player != null)
+                if (squareContents.player != null && !(gunner is Player))
                 {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(gunner.LocationMap, Game.Dungeon.Player.LocationMap));
 
-                    //How many monsters between monster and gunner
-                    var pointsFromPlayerToMonster = Utility.GetPointsOnLine(gunner.LocationMap, Game.Dungeon.Player.LocationMap);
-                    //(exclude player and monster itself)
-                    var numInterveningMonsters = pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(gunner.LocationLevel, p).monster != null).Count() - 1;
-
-                    LogFile.Log.LogEntryDebug("Shotgun. Monster at " + Game.Dungeon.Player.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
-
-                    int damage = damageBase - rangeToMonster * damageDropWithRange;
-                    damage = damage - numInterveningMonsters * damageDropWithInterveningMonster;
+                    int damage = ShotgunDamage(gunner, player, damageBase, damageDropWithRange, damageDropWithInterveningMonster);
 
                     string combatResultsMsg = "MvP (" + gunner.Representation + ") Shotgun: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
@@ -693,12 +635,29 @@ namespace RogueBasin
                     //Apply damage to player
                     if (damage > 0)
                     {
-                        player.ApplyCombatDamageToPlayer(gunner, damage); 
+                        player.ApplyCombatDamageToPlayer(gunner as Monster, damage); 
                     }
                 }
             }
 
             return true;
+        }
+
+        private int ShotgunDamage(Creature gunner, Creature target, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
+        {
+            //Calculate range
+            int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(gunner.LocationMap, target.LocationMap));
+
+            //How many monsters between monster and gunner
+            var pointsFromPlayerToMonster = Utility.GetPointsOnLine(gunner.LocationMap, target.LocationMap);
+            //(exclude player and monster itself)
+            var numInterveningMonsters = Math.Max(pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(gunner.LocationLevel, p).monster != null).Count() - 1, 0);
+
+            LogFile.Log.LogEntryDebug("Shotgun. Gunner: " + gunner.Representation + " Target at " + target.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
+
+            int damage = damageBase - rangeToMonster * damageDropWithRange;
+            damage = Math.Max(damage - numInterveningMonsters * damageDropWithInterveningMonster, 0);
+            return damage;
         }
 
 
