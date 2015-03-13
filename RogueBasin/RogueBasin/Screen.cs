@@ -2810,6 +2810,8 @@ namespace RogueBasin {
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(creature.Representation);
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameSprite;
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+
+                        tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameOverlaySprite;
                     }
 
                 }

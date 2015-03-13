@@ -116,7 +116,15 @@ namespace RogueBasin
                         {
                             if (layerNumber == (int)RogueBasin.Screen.TileLevel.CreatureDecoration)
                             {
-                                offsetY = 15;
+                                if (thisCell.TileSprite == "knife")
+                                {
+                                    offsetY = 5;
+                                    offsetX = -5;
+                                }
+                                else
+                                {
+                                    offsetY = 15;
+                                }
                             }
 
                             DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency);

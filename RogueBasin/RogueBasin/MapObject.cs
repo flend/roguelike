@@ -109,6 +109,18 @@ namespace RogueBasin
             }
         }
 
+        public String GameOverlaySprite
+        {
+            get
+            {
+                if (GetGameOverlaySprite() == null)
+                {
+                    return null; //better to return a default
+                }
+                return GetGameOverlaySprite();
+            }
+        }
+
         /// <summary>
         /// Character for the monster's heading. Can be overriden in derived classes.
         /// </summary>
@@ -161,6 +173,15 @@ namespace RogueBasin
         /// </summary>
         /// <returns></returns>
         protected virtual string GetGameSprite()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Name of the game sprite, without path or .png
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetGameOverlaySprite()
         {
             return null;
         }

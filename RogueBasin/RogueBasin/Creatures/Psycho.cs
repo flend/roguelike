@@ -6,26 +6,28 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
 
-    public class Punk : MonsterFightAndRunAI
+    public class Psycho : MonsterFightAndRunAI
     {
         const int classDeltaHitpoints = 4;
         const int classMinHitpoints = 1;
 
-        public Punk(int level) : base (level)
+        public Psycho(int level)
+            : base(level)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 4;
+            IgnoreDangerousTerrain = true;
         }
 
         protected override int ClassMaxHitpoints()
         {
-            return 30 + 30 * (Level - 1);
+            return 60 + 40 * (Level - 1);
         }
 
         public override int DamageBase()
         {
-            return 15 + 10 * (Level - 1);
+            return 40 + 10 * (Level - 1);
         }
 
 
@@ -65,17 +67,17 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "punk";
+            return "psycho";
         }
 
         protected override string GetUISprite()
         {
-            return "punk";
+            return "psycho";
         }
 
         protected override string GetGameOverlaySprite()
         {
-            return "knife";
+            return "chainsaw";
         }
 
         protected override int GetChanceToRecover()
