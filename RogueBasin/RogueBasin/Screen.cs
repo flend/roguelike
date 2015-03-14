@@ -21,14 +21,15 @@ namespace RogueBasin {
     {
         public enum TileLevel {
             Terrain = 0,
-            Features = 1,
-            Items = 2,
-            Creatures = 3,
-            CreatureDecoration = 4,
-            CreatureStatus = 5,
-            CreatureLevel = 6,
-            TargettingUI = 7,
-            Animations = 8
+            TerrainEffects = 1,
+            Features = 2,
+            Items = 3,
+            Creatures = 4,
+            CreatureDecoration = 5,
+            CreatureStatus = 6,
+            CreatureLevel = 7,
+            TargettingUI = 8,
+            Animations = 9
         }
 
         static Screen instance = null;
@@ -1037,6 +1038,7 @@ namespace RogueBasin {
                 tileMap = new TileEngine.TileMap((int)TileLevel.Animations + 1, ViewableHeight, ViewableWidth);
 
             tileMap.ClearLayer(TileLevel.Terrain);
+            tileMap.ClearLayer(TileLevel.TerrainEffects);
             tileMap.ClearLayer(TileLevel.Features);
             tileMap.ClearLayer(TileLevel.Creatures);
             tileMap.ClearLayer(TileLevel.CreatureDecoration);
@@ -3002,6 +3004,9 @@ namespace RogueBasin {
                     double spriteTransparency = 1.0;
                     bool drawSquare = true;
 
+                    string effectSprite = null;
+                    double effectTransparency = 1.0;
+
                     //Defaults
                     screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
                     string terrainSprite = null;
@@ -3109,6 +3114,8 @@ namespace RogueBasin {
                         //Draw sounds
                         if (map.mapSquares[i, j].SoundMag > 0.0001)
                         {
+                            effectSprite = "sound";
+                            effectTransparency = map.mapSquares[i, j].SoundMag;
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Yellow, map.mapSquares[i, j].SoundMag);
                         }
                     }
@@ -3135,6 +3142,8 @@ namespace RogueBasin {
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].Transparency = spriteTransparency;
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileSprite = terrainSprite;
 
+                        tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(effectSprite);
+                        tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)].Transparency = effectTransparency;
                     }
                 }
             }
