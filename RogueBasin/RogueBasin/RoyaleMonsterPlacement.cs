@@ -167,17 +167,16 @@ namespace RogueBasin
         }
 
 
-        public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<Tuple<int, int>> levelsToProcess, List<Point> entryPoints)
+        public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<Tuple<int, int>> levelsToProcess, IEnumerable<Point> entryPoints)
         {
-            int levelIterator = 0;
+            var allLevelData = levelsToProcess.Zip(entryPoints, Tuple.Create);
 
-            foreach (var level in levelsToProcess)
+            foreach (var level in allLevelData)
             {
-                var levelNo = level.Item1;
-                var baseXPLevel = level.Item2;
+                var levelNo = level.Item1.Item1;
+                var baseXPLevel = level.Item1.Item2;
 
-                var entryPoint = entryPoints.ElementAt(levelNo); //please use zip
-                levelIterator++;
+                var entryPoint = level.Item2;
 
                 var levelVariance = 0.2;
 

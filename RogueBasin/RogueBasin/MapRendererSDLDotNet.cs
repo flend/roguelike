@@ -282,6 +282,11 @@ namespace RogueBasin
             DrawSprite(UISpritePath(id), x, y, 1.0);
         }
 
+        public void DrawTileSprite(string id, int x, int y)
+        {
+            DrawSprite(TileSpritePath(id), x, y, 1.0);
+        }
+
         private void DrawTileSprite(string id, int x, int y, Point offset, double alpha)
         {
             //Tile x, y are the top left of a 64x64 tile

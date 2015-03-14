@@ -63,15 +63,18 @@ namespace RogueBasin
 
         public RoyaleDungeonLevelMaker()
         {
-            NumberDungeonLevelChoices = 1;
+            NumberDungeonLevelChoices = 3;
             mapInfoBuilder = new MapInfoBuilder();
             BuildTerrainMapping();
         }
 
-        public void CreateNextDungeonChoices()
+        public void CreateNextDungeonChoices(int basePlayerLevel)
         {
             NextDungeonLevelChoice = Game.Dungeon.NoLevels;
             NumberDungeonLevelChoices = NumberDungeonLevelChoices;
+
+            var playerLevelsForDungeons = Enumerable.Range(basePlayerLevel, NumberDungeonLevelChoices);
+            var levelNumbers = Enumerable.Range(NextDungeonLevelChoice, NumberDungeonLevelChoices);
 
             //Construct new levels
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
@@ -97,15 +100,18 @@ namespace RogueBasin
             RoyaleMonsterPlacement monPlacement = new RoyaleMonsterPlacement();
 
             //Add monsters
+            var playerEntryLocations = levelNumbers.Select(n => levels[n].EntryLocation);
+            monPlacement.CreateMonstersForLevels(mapInfo, levelNumbers.Zip(playerLevelsForDungeons, Tuple.Create), playerEntryLocations);
+
+            //hacks
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
             {
-                
                 List<Monster> punks = new List<Monster> { new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1), 
                     new Creatures.Grenade(100, 20), new Creatures.Grenade(100, 20),
                 new Creatures.Mine(50), new Creatures.Mine(50),
                 new Creatures.Grenadier(1), new Creatures.Grenadier(1) };
                 //AddMonstersToRoom(mapInfo, i, 0, punks);
-                monPlacement.CreateMonstersForLevels(mapInfo, new List<Tuple<int, int>> { new Tuple<int, int>(i, 1) }, new List<Point> {levels[i].EntryLocation} );
+               
 
                 List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(),
                 new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(),

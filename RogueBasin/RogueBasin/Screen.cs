@@ -1153,6 +1153,84 @@ namespace RogueBasin {
             DrawUISpriteByCentre("nerd", nerdCentre);
         }
 
+        public int ArenaSelected { get; set; }
+        public IEnumerable<Monster> ArenaMonsters { get; set; }
+        public IEnumerable<Item> ArenaItems { get; set; }
+        
+        public void ArenaSelectionScreen()
+        {
+            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
+
+            var titleColor = System.Drawing.Color.Khaki;
+
+            var centreX = ScreenWidth / 2;
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 8;
+
+            DrawText("Select your fate...", new Point(centreX, centreYOffset + 20), LineAlignment.Center, titleColor);
+
+            string difficultyText = null;
+            if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 3)
+            {
+                difficultyText = "Easy (?)";
+            }
+            else if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 2)
+            {
+                difficultyText = "Hard (!)";
+            }
+            else
+            {
+                difficultyText = "You must be joking (!!!)";
+            }
+
+            DrawText(difficultyText, new Point(centreX, centreYOffset + 40), LineAlignment.Center, titleColor);
+
+            var monsterTL = new Point(ScreenWidth / 4, centreYOffset + 80);
+            var maxWidth = ScreenWidth / 2;
+            var maxIcons = maxWidth / 64;
+
+            for (int i = 0; i < ArenaMonsters.Count(); i++)
+            {
+                var monster = ArenaMonsters.ElementAt(i);
+                var columnNo = i % maxIcons;
+                var rowNo = (int)Math.Floor(i / (double)maxIcons);
+                var thisPoint = new Point(columnNo * 64, rowNo * 96);
+                DrawTileSpriteByCentre(monster.GameSprite, monsterTL + thisPoint);
+                DrawTileSpriteByCentre("monster_level_" + monster.Level, monsterTL + thisPoint + new Point(0, 32));
+            }
+
+            var itemTL = new Point(ScreenWidth / 4, centreYOffset + 400);
+
+            for (int i = 0; i < ArenaItems.Count(); i++)
+            {
+                var item = ArenaItems.ElementAt(i);
+                var columnNo = i % maxIcons;
+                var rowNo = (int)Math.Floor(i / (double)maxIcons);
+                var thisPoint = new Point(columnNo * 64, rowNo * 96);
+                DrawTileSpriteByCentre(item.GameSprite, itemTL + thisPoint);
+            }
+
+        }
+
+        internal void EndOfGameScreen()
+        {
+            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
+
+            var centreX = ScreenWidth / 2;
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 8;
+
+            string difficultyText = "Final fame: " + Game.Dungeon.Player.CombatXP;
+            
+            DrawText(difficultyText, new Point(centreX, centreYOffset + 40), LineAlignment.Center, titleColor);
+
+            string resultText = "Result: Slightly famous!";
+
+            DrawText(resultText, new Point(centreX, centreYOffset + 80), LineAlignment.Center, titleColor);
+        }
+
         public enum AttackType
         {
             Explosion, Bullet, Laser,
@@ -1720,6 +1798,12 @@ namespace RogueBasin {
             DrawUISprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
         }
 
+        private void DrawTileSpriteByCentre(string id, int xCenter, int yCentre)
+        {
+            Size spriteDim = UISpriteSize(id);
+            DrawTileSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
+        }
+
         private void DrawUITraumaSpriteByCentre(int id, int xCenter, int yCentre) {
             Size spriteDim = TraumaSpriteSize(id);
             DrawUITraumaSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
@@ -1732,6 +1816,11 @@ namespace RogueBasin {
         private void DrawUISpriteByCentre(string id, Point point)
         {
             DrawUISpriteByCentre(id, point.x, point.y);
+        }
+
+        private void DrawTileSpriteByCentre(string id, Point point)
+        {
+            DrawTileSpriteByCentre(id, point.x, point.y);
         }
 
 
@@ -1996,6 +2085,11 @@ namespace RogueBasin {
         private void DrawUISprite(string name, int x, int y)
         {
             mapRenderer.DrawUISprite(name, x, y);
+        }
+
+        private void DrawTileSprite(string name, int x, int y)
+        {
+            mapRenderer.DrawTileSprite(name, x, y);
         }
 
         private void DrawUISprite(string name, System.Drawing.Point p)
@@ -3884,6 +3978,8 @@ namespace RogueBasin {
         {
             throw new NotImplementedException();
         }
+
+        
     }
 
     static class ScreenExtensionMethods

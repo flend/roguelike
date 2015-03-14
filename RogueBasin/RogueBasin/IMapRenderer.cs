@@ -38,6 +38,9 @@ namespace RogueBasin
 
         void DrawUISprite(string id, int x, int y);
 
+        void DrawTileSprite(string id, int x, int y);
+
+
         void DrawTraumaSprite(int id, int x, int y);
 
         void DrawTraumaUISprite(int id, int x, int y);

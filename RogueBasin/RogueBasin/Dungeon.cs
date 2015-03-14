@@ -5246,14 +5246,13 @@ namespace RogueBasin
         {
             royaleDungeonMaker = new RoyaleDungeonLevelMaker();
 
-            royaleDungeonMaker.CreateNextDungeonChoices();
+            royaleDungeonMaker.CreateNextDungeonChoices(1);
             royaleDungeonMaker.SetPlayerStartLocation();
-
         }
 
         public void GenerateNextRoyaleLevels()
         {
-            royaleDungeonMaker.CreateNextDungeonChoices();
+            royaleDungeonMaker.CreateNextDungeonChoices(player.Level);
         }
 
         /// <summary>
@@ -5284,11 +5283,23 @@ namespace RogueBasin
 
         internal void ExitLevel()
         {
-            //Generate a new set of levels
-            Game.Dungeon.GenerateNextRoyaleLevels();
+            if (player.LocationLevel / 3 == 5)
+            {
+                //Game over folks
+                Game.Base.DoEndOfGame();
+            }
+            else
+            {
 
-            //Teleport to the first new level
-            TeleportToArena(royaleDungeonMaker.NextDungeonLevelChoice);
+                //Generate a new set of levels
+                Game.Dungeon.GenerateNextRoyaleLevels();
+
+                //Teleport to the first new level
+                TeleportToArena(royaleDungeonMaker.NextDungeonLevelChoice);
+
+                //Offer the user the choice of arenas
+                Game.Base.DoArenaSelection();
+            }
         }
     }
 }

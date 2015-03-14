@@ -685,7 +685,8 @@ namespace RogueBasin
                                         break;
 
                                     case Key.E:
-                                        this.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
+                                        //this.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
+                                        DoArenaSelection();
                                         break;
 
                                     case Key.R:
@@ -1229,6 +1230,18 @@ namespace RogueBasin
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
 
+        public void DoArenaSelection()
+        {
+            this.SetSpecialScreenAndHandler(Screen.Instance.ArenaSelectionScreen, ArenaSelectionKeyHandler);
+            SetupArenaSelection();
+        }
+
+        private void SetupArenaSelection()
+        {
+            Screen.Instance.ArenaItems = Game.Dungeon.Items.Where(i => i.LocationLevel == Game.Dungeon.Player.LocationLevel);
+            Screen.Instance.ArenaMonsters = Game.Dungeon.Monsters.Where(m => m.LocationLevel == Game.Dungeon.Player.LocationLevel);
+        }
+
         private void MovieDisplayKeyboardEvent(KeyboardEventArgs args)
         {
             if (args.Key == Key.Return)
@@ -1246,20 +1259,54 @@ namespace RogueBasin
             if (args.Key == Key.One)
             {
                 Game.Dungeon.Player.SetPlayerClass(PlayerClass.Athlete);
-                ClearSpecialScreenAndHandler();
+                PostCharacterSelection();
             }
             if (args.Key == Key.Two)
             {
                 Game.Dungeon.Player.SetPlayerClass(PlayerClass.Gunner);
-                ClearSpecialScreenAndHandler();
+                PostCharacterSelection();
             }
             if (args.Key == Key.Three)
             {
                 Game.Dungeon.Player.SetPlayerClass(PlayerClass.Sneaker);
-                ClearSpecialScreenAndHandler();
+                PostCharacterSelection();
             }
         }
 
+        public void PostCharacterSelection()
+        {
+            ClearSpecialScreenAndHandler();
+            //Follow on to initial arena selection
+            DoArenaSelection();
+        }
+
+        public void ArenaSelectionKeyHandler(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.LeftArrow)
+            {
+                Game.Dungeon.TeleportToAdjacentArena(false);
+                SetupArenaSelection();
+            }
+            if (args.Key == Key.RightArrow)
+            {
+                Game.Dungeon.TeleportToAdjacentArena(true);
+                SetupArenaSelection();
+            }
+            if (args.Key == Key.F)
+            {
+                ClearSpecialScreenAndHandler();
+                Screen.Instance.NeedsUpdate = true;
+            }
+        }
+
+        public void EndOfGameSelectionKeyHandler(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.Return)
+            {
+                Events.QuitApplication();
+            }
+        }
+        
         private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
 
         private void SpecialScreenKeyboardEvent(KeyboardEventArgs args)
@@ -3158,5 +3205,10 @@ namespace RogueBasin
         }
 
         public char TargettingConfirmChar { get; set; }
+
+        internal void DoEndOfGame()
+        {
+            this.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, EndOfGameSelectionKeyHandler);
+        }
     }
 }
