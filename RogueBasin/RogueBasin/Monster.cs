@@ -762,7 +762,10 @@ namespace RogueBasin
 
                 //Notify the creature that it has taken damage
                 //It may activate a special ability or stop running away etc.
-                monster.NotifyHitByCreature(attackingCreature, damage);
+                if (attackingCreature != null)
+                {
+                    monster.NotifyHitByCreature(attackingCreature, damage);
+                }
 
                 //Is the monster dead, if so kill it?
                 if (monsterDead)
@@ -771,15 +774,25 @@ namespace RogueBasin
                     Game.Dungeon.Player.AddKill(monster);
 
                     //Message string
-                    string attackerStr = AttackerString(attackingCreature);
-                    string playerMsg = attackingCreature + "destroyed the";
-                    playerMsg += monster.SingleDescription + ".";
-                    Game.MessageQueue.AddMessage(playerMsg);
+                    if (attackingCreature != null)
+                    {
+                        string attackerStr = AttackerString(attackingCreature);
+                        string playerMsg = attackingCreature + "destroyed the";
+                        playerMsg += monster.SingleDescription + ".";
+                        Game.MessageQueue.AddMessage(playerMsg);
+                         
+                    }
+                    else
+                    {
+                        Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " dies.");
+                    }
 
-                    string mvm = AttackerMvMString(attackingCreature);
-                    string debugMsg4 = mvm + " " + attackingCreature.Representation + " attacks " + this.Representation;
-                    LogFile.Log.LogEntryDebug(debugMsg4, LogDebugLevel.Medium);
-
+                    if (attackingCreature != null)
+                    {
+                        string mvm = AttackerMvMString(attackingCreature);
+                        string debugMsg4 = mvm + " " + attackingCreature == null ? "" : attackingCreature.Representation + " attacks " + this.Representation;
+                        LogFile.Log.LogEntryDebug(debugMsg4, LogDebugLevel.Medium);
+                    }
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
 
@@ -793,11 +806,12 @@ namespace RogueBasin
                 playerMsg2 += " hit the ";
                 playerMsg2 += monster.SingleDescription + ".";
                 Game.MessageQueue.AddMessage(playerMsg2);
-
-                string mvm2 = AttackerMvMString(attackingCreature);
-                string debugMsg6 = mvm2 + " " + attackingCreature.Representation + " attacks " + this.Representation;
-                LogFile.Log.LogEntryDebug(debugMsg6, LogDebugLevel.Medium);
-
+                if (attackingCreature != null)
+                {
+                    string mvm2 = AttackerMvMString(attackingCreature);
+                    string debugMsg6 = mvm2 + " " + attackingCreature == null ? "" : attackingCreature.Representation + " attacks " + this.Representation;
+                    LogFile.Log.LogEntryDebug(debugMsg6, LogDebugLevel.Medium);
+                }
                 string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
                 LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
 
@@ -831,10 +845,15 @@ namespace RogueBasin
         private string AttackerMvMString(Creature attackingCreature)
         {
             String attackerStr = "MvM";
+            if (attackingCreature == null)
+            {
+                return "TvM";
+            }
             if (attackingCreature is Player)
             {
                 attackerStr = "MvP";
             }
+            
             return attackerStr;
         }
 
@@ -845,8 +864,11 @@ namespace RogueBasin
         private void AIForMonsterIsAttacked(Monster monster, Creature attackingMonster)
         {
             //Set the attacked by marker
-            monster.LastAttackedBy = attackingMonster;
-            monster.LastAttackedByID = attackingMonster.UniqueID;
+            if (attackingMonster != null)
+            {
+                monster.LastAttackedBy = attackingMonster;
+                monster.LastAttackedByID = attackingMonster.UniqueID;
+            }
 
             //Was this a passive creature? It loses that flag
             if (monster.Passive)
@@ -863,7 +885,10 @@ namespace RogueBasin
             }
 
             //Notify the creature that it has been hit
-            monster.NotifyAttackByCreature(attackingMonster);
+            if (attackingMonster != null)
+            {
+                monster.NotifyAttackByCreature(attackingMonster);
+            }
         }
 
         /// <summary>

@@ -110,7 +110,7 @@ namespace RogueBasin
                 List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(),
                 new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(),
                 new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade()};
-                AddItemsToRoom(mapInfo, i, 0, items);
+                //AddItemsToRoom(mapInfo, i, 0, items);
             }
 
         }

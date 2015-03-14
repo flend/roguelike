@@ -2130,6 +2130,21 @@ namespace RogueBasin
             return successes.Any();
         }
 
+        public bool MonsterInteractWithActiveFeature(Monster monster, int level, Point mapLocation)
+        {
+            Dungeon dungeon = Game.Dungeon;
+
+            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(level, mapLocation));
+
+            var useableFeatures = featuresAtSpace.Where(f => f as ActiveFeature != null);
+
+            //Interact with feature - these will normally put success / failure messages in queue
+            var successes = useableFeatures.Select(f => (f as ActiveFeature).MonsterInteraction(monster)).ToList();
+
+            //Watch out for the short circuit
+            return successes.Any();
+        }
+
         /// <summary>
         /// Process a relative PC move, from a keypress
         /// </summary>

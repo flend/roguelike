@@ -18,6 +18,17 @@ namespace RogueBasin.Features
             return true;
         }
 
+        public override bool MonsterInteraction(Monster monster)
+        {
+            var damage = (int)Math.Round(monster.MaxHitpoints / 5.0);
+            monster.ApplyDamageToMonster(null, monster, damage);
+
+            LogFile.Log.LogEntryDebug(Description + " does " + damage + " damage to monster on interaction", LogDebugLevel.Medium);
+
+
+            return true;
+        }
+
         public override string Description
         {
             get

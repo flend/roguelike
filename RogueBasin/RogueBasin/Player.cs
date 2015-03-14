@@ -901,7 +901,7 @@ namespace RogueBasin
                 if (hardCover > 0)
                     damageModifier -= 0.5;
                 if (softCover > 0)
-                    damageModifier -= 0.1;
+                    damageModifier -= 0.25;
             }
 
             return Math.Max(0.1, damageModifier);

@@ -137,7 +137,7 @@ namespace RogueBasin
                 var candidateSquares = Game.Dungeon.GetWalkableSquaresFreeOfCreaturesWithinRange(levelNo, origin, 3, 7);
                 var squaresToPlace = candidateSquares.Shuffle();
 
-                int numberOfItems = 1;
+                int numberOfItems = 2;
                 for (int i = 0; i < numberOfItems; i++)
                 {
                     var generatorToUse = itemGenerators.RandomElement();

@@ -1249,6 +1249,9 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug(this.Representation + " opened door", LogDebugLevel.Medium);
             }
 
+            //Apply any dangerous terrain effects
+            Game.Dungeon.MonsterInteractWithActiveFeature(this, this.LocationLevel, nextStep);
+
             LocationMap = nextStep;
         }
 

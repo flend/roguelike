@@ -27,9 +27,10 @@ namespace RogueBasin {
             Creatures = 4,
             CreatureDecoration = 5,
             CreatureStatus = 6,
-            CreatureLevel = 7,
-            TargettingUI = 8,
-            Animations = 9
+            CreatureCover = 7,
+            CreatureLevel = 8,
+            TargettingUI = 9,
+            Animations = 10
         }
 
         static Screen instance = null;
@@ -1043,6 +1044,7 @@ namespace RogueBasin {
             tileMap.ClearLayer(TileLevel.Creatures);
             tileMap.ClearLayer(TileLevel.CreatureDecoration);
             tileMap.ClearLayer(TileLevel.CreatureStatus);
+            tileMap.ClearLayer(TileLevel.CreatureCover);
             tileMap.ClearLayer(TileLevel.CreatureLevel);
             tileMap.ClearLayer(TileLevel.Items);
             tileMap.ClearLayer(TileLevel.TargettingUI);
@@ -1908,7 +1910,16 @@ namespace RogueBasin {
                 DrawText(dmStr, monsterTextUI_UsefulTL.Add(monsterDamageTextOffset));
 
                 //Creature picture.Representation
-                DrawUITraumaSpriteByCentre(CreatureToView.Representation, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+                DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+            }
+
+            else if (ItemToView != null)
+            {
+                DrawUISpriteByCentre(ItemToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+            }
+            else if (FeatureToView != null)
+            {
+                DrawUISpriteByCentre(FeatureToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
 
             }
         }
@@ -2947,6 +2958,21 @@ namespace RogueBasin {
                            // backgroundColor = normalBackground;
                     }
 
+                    //Cover
+                    var cover = Game.Dungeon.Player.GetPlayerCover(creature);
+                    string coverSprite = null;
+                    double coverTransparency = 1.0;
+                    if (cover.Item1 > 0)
+                    {
+                        coverSprite = "cover";
+                        coverTransparency = 1.0;
+                    }
+                    else if (cover.Item2 > 0)
+                    {
+                        coverSprite = "cover";
+                        coverTransparency = 0.5;
+                    }
+
                     //Creature
 
                     if (isViewVisible(creature.LocationMap))
@@ -2958,6 +2984,9 @@ namespace RogueBasin {
                         tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameOverlaySprite;
 
                         tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(overlapSprite);
+
+                        tileMapLayer(TileLevel.CreatureCover)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(coverSprite);
+                        tileMapLayer(TileLevel.CreatureCover)[ViewRelative(creature.LocationMap)].Transparency = coverTransparency;
 
                         tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
                     }

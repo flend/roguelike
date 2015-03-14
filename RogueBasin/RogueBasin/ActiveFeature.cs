@@ -16,5 +16,8 @@ namespace RogueBasin
         /// <param name="player"></param>
         /// <returns></returns>
         public abstract bool PlayerInteraction(Player player);
+
+        public abstract bool MonsterInteraction(Monster monster);
+
     }
 }

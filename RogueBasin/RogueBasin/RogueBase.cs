@@ -1318,10 +1318,15 @@ namespace RogueBasin
             bool validFire = false;
             bool escape = false;
 
+            bool restoreExamine = true;
+            Monster examineCreature = Screen.Instance.CreatureToView;
+            Item examineItem = Screen.Instance.ItemToView;
+            Feature examineFeature = Screen.Instance.FeatureToView;
+
             if (!wasDirection)
             {
                 //Look for firing
-                if (args.Key == Key.F || args.Key == Key.T)
+                if (args.Key == Key.F || args.Key == Key.T || args.Key == Key.X)
                 {
                     validFire = true;
                 }
@@ -1361,6 +1366,8 @@ namespace RogueBasin
                 Screen.Instance.Target = newPoint;
                 Game.MessageQueue.AddMessage("Find a target. " + TargettingConfirmChar + " to confirm. ESC to exit.");
 
+                ExamineTarget(newPoint);
+
                 return;
             }
 
@@ -1393,8 +1400,49 @@ namespace RogueBasin
                             Game.Dungeon.Player.ResetTurnsMoving();
                             Game.Dungeon.Player.ResetTurnsSinceAction();
                             break;
+
+                        case TargettingAction.Examine:
+
+                            restoreExamine = false;
+                            break;
                     }
                 }
+            }
+
+            if (restoreExamine)
+            {
+                Screen.Instance.CreatureToView = examineCreature;
+                Screen.Instance.ItemToView = examineItem;
+                Screen.Instance.FeatureToView = examineFeature;
+            }
+
+        }
+
+        private void ExamineTarget(Point currentTarget)
+        {
+            var dungeon = Game.Dungeon;
+            var player = Game.Dungeon.Player;
+
+            SquareContents squareContents = Game.Dungeon.MapSquareContents(player.LocationLevel, currentTarget);
+
+            //Is there a creature here? If so, store
+            if (squareContents.monster != null)
+            {
+                Screen.Instance.ItemToView = null;
+                Screen.Instance.FeatureToView = null;
+                Screen.Instance.CreatureToView = squareContents.monster;
+            }
+            else if (squareContents.items.Count > 0)
+            {
+                Screen.Instance.ItemToView = squareContents.items.First();
+                Screen.Instance.FeatureToView = null;
+                Screen.Instance.CreatureToView = null;
+            }
+            else if (squareContents.feature != null)
+            {
+                Screen.Instance.FeatureToView = squareContents.feature;
+                Screen.Instance.CreatureToView = null;
+                Screen.Instance.ItemToView = null;
             }
         }
 
@@ -2226,6 +2274,7 @@ namespace RogueBasin
             Feature oldFeature = Screen.Instance.FeatureToView;
 
             targettingSuccess = true;
+            targettingAction = TargettingAction.Examine;
             TargetAttack(TargettingType.Line, 0, 'x', currentFOV);
 
             if (!targettingSuccess)
