@@ -2854,7 +2854,7 @@ namespace RogueBasin {
 
                         tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(overlapSprite);
 
-                        tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
+                        tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
                     }
 
                 }

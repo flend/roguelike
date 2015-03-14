@@ -81,8 +81,6 @@ namespace RogueBasin
                 AddLevel(standardLevel);
             }
 
-
-            MessageBox.Show("stop");
             //Set maps in engine (needs to be done before placing items and monsters)
             SetupNewMapsInEngine();
 

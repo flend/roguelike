@@ -18,6 +18,8 @@ namespace RogueBasin
         private void SetupMonsterGenerators()
         {
             monsterGenerators.Add(SwarmerSet);
+            monsterGenerators.Add(GrenadierSet);
+            monsterGenerators.Add(ThugSet);
         }
 
         public int LevelWithVariance(int level, double levelVariance)
@@ -25,12 +27,34 @@ namespace RogueBasin
             return (int)Math.Round(level + (level * Gaussian.BoxMuller(0, levelVariance)));
         }
 
+        public IEnumerable<Monster> MonsterType(int constant, int variable, double variance, int level, double levelVariance, Monster monster)
+        {
+            var swarmerNo = (int)Math.Round(constant + (variable * Gaussian.BoxMuller(0, variance)));
+            var levels = Enumerable.Range(0, swarmerNo).Select(i => LevelWithVariance(level, levelVariance));
+            return levels.Select(l => monster.NewCreatureOfThisType());
+        }
+
         public IEnumerable<Monster> SwarmerSet(int level, double levelVariance)
         {
-            var swarmerNo = (int)Math.Round(5 + (3 * Gaussian.BoxMuller(0, 0.2)));
-            var levels = Enumerable.Range(0, swarmerNo).Select(i => LevelWithVariance(level, levelVariance));
-            return levels.Select(l => new RogueBasin.Creatures.Swarmer(l));
+            return MonsterType(5, 3, 0.2, level, levelVariance, new RogueBasin.Creatures.Swarmer(1));
         }
+
+        public IEnumerable<Monster> GrenadierSet(int level, double levelVariance)
+        {
+            var punks = MonsterType(3, 3, 0.2, level, levelVariance, new RogueBasin.Creatures.Punk(1));
+            var grenadiers = MonsterType(1, 1, 0.2, level, levelVariance, new RogueBasin.Creatures.Grenadier(1));
+
+            return punks.Concat(grenadiers);
+        }
+
+        public IEnumerable<Monster> ThugSet(int level, double levelVariance)
+        {
+            var thugs = MonsterType(1, 1, 0.2, level, levelVariance, new RogueBasin.Creatures.Thug(1));
+            var psychos = MonsterType(1, 1, 0.2, level, levelVariance, new RogueBasin.Creatures.Psycho(1));
+
+            return thugs.Concat(psychos);
+        }
+
 
         public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<Tuple<int, int>> levelsToProcess)
         {
@@ -68,7 +92,6 @@ namespace RogueBasin
             var roomsAndPointsInRooms = rooms.Zip(candidatePointsInRooms, Tuple.Create);
 
             //Distribution of sets amongst rooms, mostly evenly, scaled by room size
-            MessageBox.Show("stop");
             //(variance disabled for now)
             var roomMonsterRatio = roomsAndPointsInRooms.Select(rp => Math.Max(0, Gaussian.BoxMuller(1, 0)) * rp.Item2.Count());
             double totalMonsterRatio = roomMonsterRatio.Sum();
@@ -119,6 +142,8 @@ namespace RogueBasin
                     Point origin = candidatePointsInRoom.First();
                     var candidatePointsFromFirstPoint = candidatePointsInRoom.OrderBy(pt => Utility.GetDistanceBetween(origin, pt));
 
+                    List<Point> candidatePointsSpaced = new List<Point>();
+                    
                     var monsterSet = monsterSetsGenerated.ElementAt(totalSetNo);
                     totalSetNo++;
                     var monsterNo = 0;
