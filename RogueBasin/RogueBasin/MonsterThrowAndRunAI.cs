@@ -190,7 +190,7 @@ namespace RogueBasin
 
                     if (newTarget == Game.Dungeon.Player)
                     {
-                        result = AttackPlayer(newTarget as Player);
+                        result = AttackPlayer(newTarget as Player, true);
                     }
                     else
                     {
@@ -243,7 +243,7 @@ namespace RogueBasin
 
                     if (newTarget == Game.Dungeon.Player)
                     {
-                        result = AttackPlayer(newTarget as Player);
+                        result = AttackPlayer(newTarget as Player, true);
                     }
                     else
                     {
@@ -330,7 +330,7 @@ namespace RogueBasin
 
                     if (newTarget == Game.Dungeon.Player)
                     {
-                        result = AttackPlayer(newTarget as Player);
+                        result = AttackPlayer(newTarget as Player, true);
                     }
                     else
                     {

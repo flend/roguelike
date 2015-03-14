@@ -1359,6 +1359,8 @@ namespace RogueBasin
 
                             //Time advances only on success
                             waitingForTurnTick = FireTargettedWeapon(currentTarget);
+                            Game.Dungeon.Player.ResetTurnsMoving();
+                            Game.Dungeon.Player.ResetTurnsSinceAction();
                             break;
                     }
                 }

@@ -624,7 +624,7 @@ namespace RogueBasin
             return false;
         }
 
-        public virtual CombatResults AttackPlayer(Player player)
+        public virtual CombatResults AttackPlayer(Player player, bool ranged)
         {
             StandardPreCombat();
 
@@ -641,7 +641,7 @@ namespace RogueBasin
                 int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
                 string combatResultsMsg = "MvP (" + this.Representation + ") Normal. Dam: " + damage;
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-                return Game.Dungeon.Player.ApplyCombatDamageToPlayer(this, damage);
+                return Game.Dungeon.Player.ApplyCombatDamageToPlayer(this, damage, ranged);
             }
 
             return CombatResults.NeitherDied;

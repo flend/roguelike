@@ -635,7 +635,7 @@ namespace RogueBasin
                     //Apply damage to player
                     if (damage > 0)
                     {
-                        player.ApplyCombatDamageToPlayer(gunner as Monster, damage); 
+                        player.ApplyCombatDamageToPlayer(gunner as Monster, damage, true); 
                     }
                 }
             }
@@ -2182,6 +2182,7 @@ namespace RogueBasin
             }
 
             bool stationaryAction = false;
+            bool attackAction = false;
 
             //If there's no special move, do a conventional move
             if (moveDone == null)
@@ -2258,16 +2259,31 @@ namespace RogueBasin
                         okToMoveIntoSquare = false;
 
                         stationaryAction = true;
+                        attackAction = true;
                     }
                 }
 
                 //Apply movement effects to counters
                 if (stationaryAction)
                 {
-                    ResetPCTurnCountersOnActionStatonary();
+                    if (attackAction && !player.LastMoveWasMeleeAttack)
+                    {
+                        
+                    }
+                    else
+                    {
+                        player.ResetTurnsMoving();
+                    }
+
+                    player.ResetTurnsSinceAction();
+                    player.AddTurnsInactive();
+
+                    if (attackAction)
+                        player.LastMoveWasMeleeAttack = true;
                 }
                 else
                 {
+                    player.LastMoveWasMeleeAttack = false;
                     player.AddTurnsSinceAction();
                     if (deltaMove == new Point(0, 0))
                     {
@@ -2321,6 +2337,11 @@ namespace RogueBasin
             }
 
             return true;
+        }
+
+        private void ResetPCTurnCountersOnActionStatonary(bool attackAction)
+        {
+            throw new NotImplementedException();
         }
 
         private SpecialMove DoSpecialMove(Point newPCLocation)
@@ -2650,7 +2671,7 @@ namespace RogueBasin
 
                 //Apply damage (uses damage base)
                 if (originMonster != null)
-                    player.ApplyCombatDamageToPlayer(originMonster, damage);
+                    player.ApplyCombatDamageToPlayer(originMonster, damage, true);
                 else
                     player.ApplyCombatDamageToPlayer(damage);
             }
@@ -3622,6 +3643,7 @@ namespace RogueBasin
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
         }
+
 
         public String PlayerDeathString { get; set; }
         public bool PlayerDeathOccured { get; set; }

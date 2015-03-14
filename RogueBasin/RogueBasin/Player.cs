@@ -244,6 +244,8 @@ namespace RogueBasin
             {
                 case RogueBasin.PlayerClass.Athlete:
                     GameSprite = "lance";
+                    //Perma dodge
+                    AddEffect(new PlayerEffects.Dodge());
                     break;
                 case RogueBasin.PlayerClass.Gunner:
                     GameSprite = "crack";
@@ -813,10 +815,10 @@ namespace RogueBasin
             return meleeMultiplier;
         }
 
-        public double CalculateDamageModifierForAttacksOnPlayer(Monster target)
+        public double CalculateDamageModifierForAttacksOnPlayer(Monster target, bool ranged)
         {
             var damageModifier = 1.0;
-
+            /*
             var speedEffect = GetActiveEffects(typeof(PlayerEffects.SpeedBoost));
 
             var speedModifier = 1.0;
@@ -824,14 +826,15 @@ namespace RogueBasin
             if (speedEffect.Count() > 0)
             {
                 speedModifier += ((PlayerEffects.SpeedBoost)speedEffect.First()).Level;
-            }
+            }*/
 
-            if(TurnsMoving > 0)
+            if (TurnsMoving > 0 && ranged && IsEffectActive(typeof(PlayerEffects.Dodge)))
             {
-                damageModifier -= 0.2 * speedModifier;
+                //Straight 50% damage reduction for moving
+                damageModifier -= 0.5;
             }
 
-            if (target != null)
+            if (target != null && ranged)
             {
                 //Test cover
                 var coverItems = GetPlayerCover(target);
@@ -844,7 +847,7 @@ namespace RogueBasin
                     damageModifier -= 0.1;
             }
 
-            return Math.Max(0.0, damageModifier);
+            return Math.Max(0.1, damageModifier);
         }
 
         public Tuple<int, int> GetPlayerCover()
@@ -941,7 +944,7 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             CancelStealthDueToAttack();
-            ResetTurnsMoving();
+            //ResetTurnsMoving();
 
             return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
         }
@@ -2527,11 +2530,11 @@ namespace RogueBasin
         /// All combat attacks go through here, since we apply modifiers
         /// </summary>
         /// <param name="damage"></param>
-        public CombatResults ApplyCombatDamageToPlayer(Monster attacker, int damage)
+        public CombatResults ApplyCombatDamageToPlayer(Monster attacker, int damage, bool ranged)
         {
             NotifyAttack(attacker);
 
-            var modifiedDamaged = (int)Math.Floor(CalculateDamageModifierForAttacksOnPlayer(attacker) * damage);
+            var modifiedDamaged = (int)Math.Floor(CalculateDamageModifierForAttacksOnPlayer(attacker, ranged) * damage);
             return ApplyDamageToPlayer(modifiedDamaged);
         }
 
@@ -2855,5 +2858,7 @@ namespace RogueBasin
         {
             return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
         }
+
+        public bool LastMoveWasMeleeAttack { get; set; }
     }
 }

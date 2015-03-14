@@ -42,7 +42,7 @@ namespace RogueBasin
             return CombatResults.NeitherDied;
         }
 
-        public override CombatResults AttackPlayer(Player player)
+        public override CombatResults AttackPlayer(Player player, bool ranged)
         {
             return CombatResults.NeitherDied;
         }

@@ -1796,12 +1796,25 @@ namespace RogueBasin {
             var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
             DrawText(fameExpStr, playerTextUI_UsefulTL.Add(playerExpFameTextOffset));
 
-            //Draw class
-            /*
-            var playerClassTextOffset = new System.Drawing.Point(80, 0);
-            var classStr = player.PlayerClass.ToString();
-            DrawText(classStr, playerTextUI_UsefulTL.Add(playerClassTextOffset));
-            */
+            //Draw timers
+            
+            var playerMoveOffset = new System.Drawing.Point(170, 0);
+            var moveStr = "Move: " + player.TurnsMoving;
+            DrawText(moveStr, playerTextUI_UsefulTL.Add(playerMoveOffset));
+
+            var playerStationaryOffset = new System.Drawing.Point(170, 15);
+            var actionStr = "No A: " + player.TurnsSinceAction;
+            DrawText(actionStr, playerTextUI_UsefulTL.Add(playerStationaryOffset));
+
+            var playerRestOffset = new System.Drawing.Point(170, 30);
+            var restStr = "Rest: " + player.TurnsInactive;
+            DrawText(restStr, playerTextUI_UsefulTL.Add(playerRestOffset));
+
+            var dodgeBonusOffset = new System.Drawing.Point(170, 45);
+            var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
+            DrawText(dodgeStr, playerTextUI_UsefulTL.Add(dodgeBonusOffset));
+
+
             //Monster stats
             DrawFocusWindow();
         }
@@ -2283,7 +2296,7 @@ namespace RogueBasin {
                 PrintLine("Attk: " + bonusStr, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 1, LineAlignment.Left, statsColor);
                 
                 //Defence
-                var dodgeBonus = player.CalculateDamageModifierForAttacksOnPlayer(null);
+                var dodgeBonus = player.CalculateDamageModifierForAttacksOnPlayer(null, true);
 
                 if (dodgeBonus < 0.71)
                 {
