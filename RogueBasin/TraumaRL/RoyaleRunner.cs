@@ -156,7 +156,7 @@ namespace TraumaRL
 
             //Minimum debug
             if(Game.Config.DebugMode)
-                LogFile.Log.DebugLevel = 3;
+                LogFile.Log.DebugLevel = 2;
             else
                 LogFile.Log.DebugLevel = 1;
         }

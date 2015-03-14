@@ -2569,7 +2569,7 @@ namespace RogueBasin
         /// <param name="item"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, double size, int damage)
+        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, double size, int damage, bool stunning = false)
         {
             Item itemAsItem = item as Item;
 
@@ -2602,14 +2602,20 @@ namespace RogueBasin
             //Make throwing sound AT target location
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), Game.Dungeon.Player.LocationLevel, destination);
 
-            if (Player.LocationLevel >= 6)
-                damage *= 2;
+            //if (Player.LocationLevel >= 6)
+            //    damage *= 2;
 
             //Work out grenade splash and damage
-            DoGrenadeExplosion(level, target, size, damage, Game.Dungeon.Player);
+            if (stunning)
+            {
+                DoGrenadeExplosionStun(level, target, size, damage, Game.Dungeon.Player);
+            }
+            else
+            {
+                DoGrenadeExplosion(level, target, size, damage, Game.Dungeon.Player);
+            }
 
-            return (destination);
-
+            return destination;
         }
 
         /// <summary>
@@ -2674,6 +2680,58 @@ namespace RogueBasin
                     player.ApplyCombatDamageToPlayer((originMonster as Monster), damage, true);
                 else
                     player.ApplyCombatDamageToPlayer(damage);
+            }
+        }
+
+        public void DoGrenadeExplosionStun(int level, Point locationMap, double size, int stunDamage, Creature originMonster)
+        {
+            //Work out grenade splash and damage
+            List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
+
+            //Use FOV from point of explosion (this means grenades don't go round corners or through walls)
+            WrappedFOV grenadeFOV = Game.Dungeon.CalculateAbstractFOV(level, locationMap, 0);
+
+            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, System.Drawing.Color.Blue);
+
+            foreach (Point sq in grenadeAffectsFiltered)
+            {
+                SquareContents squareContents = Game.Dungeon.MapSquareContents(level, sq);
+
+                Monster m = squareContents.monster;
+
+                if (m != null && !m.Alive)
+                    continue;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Stun Grenade: Dam: " + stunDamage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    if (originMonster != null)
+                    {
+                        m.ApplyStunDamageToMonster(originMonster, stunDamage);
+                    }
+                }
+            }
+
+            //And the player
+
+            if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
+            {
+                if (originMonster != null)
+                {
+                    string combatResultsMsg = "MvP (" + originMonster.Representation + ") Stun Grenade: Dam: " + stunDamage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                }
+
+                //Apply damage (uses damage base)
+                //player.a.ApplyCombatDamageToPlayer(damage);
+                //No stun damage for players right now
             }
         }
 
@@ -3283,7 +3341,8 @@ namespace RogueBasin
 
             foreach (SoundEffect soundPair in effects)
             {
-                if (soundPair.SoundTime > soundAfterThisTime)
+                // >= in case the monster and player go on the same tick
+                if (soundPair.SoundTime >= soundAfterThisTime)
                     newSounds.Add(soundPair);
             }
 

@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -62,8 +62,8 @@ namespace RogueBasin.Items
         {
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The stun grenade explodes!");
-           
-            Point dest = StunGrenade.ThrowItemGrenadeLikeStun(this, target, 4, 6);
+
+            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4, 6, true);
             
             return dest;
         }
@@ -163,7 +163,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "EMP grenade"; }
+            get { return "Stun grenade"; }
         }
 
         /// <summary>
@@ -171,7 +171,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "EMP grenades"; }
+            get { return "Stun grenades"; }
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "stun_grenade";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-stun_grenade";
         }
 
         protected override char GetRepresentation()

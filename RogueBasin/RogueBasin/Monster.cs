@@ -696,7 +696,7 @@ namespace RogueBasin
         public CombatResults ApplyStunDamageToMonster(Creature attackingCreature, int stunTurns)
         {
             //Wake monster up etc.
-            AIForMonsterIsAttacked(this, this);
+            AIForMonsterIsAttacked(this, attackingCreature);
 
             int monsterOrigStunTurns = this.StunnedTurns;
 

@@ -2876,7 +2876,7 @@ namespace RogueBasin {
                     }
                     else if (creature.StunnedTurns > 0)
                     {
-
+                        overlapSprite = "stun";
                     }
                     else if (creature.Sleeping)
                     {

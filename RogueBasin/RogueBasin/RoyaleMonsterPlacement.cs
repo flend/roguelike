@@ -53,6 +53,16 @@ namespace RogueBasin
             return new List<Item> { new Items.FragGrenade() };
         }
 
+        public IEnumerable<Item> StunGrenade()
+        {
+            return new List<Item> { new Items.StunGrenade() };
+        }
+
+        public IEnumerable<Item> SoundGrenade()
+        {
+            return new List<Item> { new Items.SoundGrenade() };
+        }
+
         public int LevelWithVariance(int level, double levelVariance)
         {
             return (int)Math.Round(level + (level * Gaussian.BoxMuller(0, levelVariance)));

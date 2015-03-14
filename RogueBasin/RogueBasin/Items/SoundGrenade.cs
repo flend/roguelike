@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -92,7 +92,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Siren grenade"; }
+            get { return "Screamer"; }
         }
 
         /// <summary>
@@ -100,7 +100,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Siren grenades"; }
+            get { return "Screamers"; }
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "screamer";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-screamer";
         }
 
         protected override char GetRepresentation()

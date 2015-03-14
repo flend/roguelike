@@ -107,7 +107,9 @@ namespace RogueBasin
                 //AddMonstersToRoom(mapInfo, i, 0, punks);
                 monPlacement.CreateMonstersForLevels(mapInfo, new List<Tuple<int, int>> { new Tuple<int, int>(i, 1) });
 
-                List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade() };
+                List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(),
+                new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(),
+                new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade()};
                 AddItemsToRoom(mapInfo, i, 0, items);
             }
 
