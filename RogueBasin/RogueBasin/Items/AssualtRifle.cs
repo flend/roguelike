@@ -119,7 +119,7 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 0;
+            return 40;
         }
 
         public double DamageModifier()
@@ -139,7 +139,7 @@ namespace RogueBasin.Items
 
         public override int MaxAmmo()
         {
-            return 5;
+            return 3;
         }
 
         public bool HasMeleeAction()
@@ -161,7 +161,7 @@ namespace RogueBasin.Items
         public bool FireItem(Point target)
         {
             Ammo--;
-            return Game.Dungeon.FirePistolLineWeapon(target, this, 60);
+            return Game.Dungeon.FirePistolLineWeapon(target, this, DamageBase());
         }
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 7;
+            return 5;
         }
 
         public override double FireSoundMagnitude()
@@ -260,6 +260,16 @@ namespace RogueBasin.Items
         public virtual double ShotgunSpreadAngle()
         {
             return 0.0;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "rifle";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-rifle";
         }
 
         /// <summary>

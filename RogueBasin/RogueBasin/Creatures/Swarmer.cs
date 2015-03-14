@@ -199,5 +199,15 @@ namespace RogueBasin.Creatures
             return 10;
         }
 
+        protected override string GetGameSprite()
+        {
+            return "rat";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "rat";
+        }
+
     }
 }

@@ -1152,11 +1152,17 @@ namespace RogueBasin {
             DrawText("[3] Nerd", nerdCentre - new Point(0, 50), LineAlignment.Center, titleColor);
             DrawUISpriteByCentre("nerd", nerdCentre);
         }
-        
+
+        public enum AttackType
+        {
+            Explosion, Bullet, Laser,
+            Stun
+        }
+
         /// <summary>
         /// Draws an animated attack.
         /// </summary>
-        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, System.Drawing.Color color)
+        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, AttackType attackType)
         {
             //Clone the list since we mangle it
             List<Point> mangledPoints = new List<Point>();
@@ -1167,15 +1173,29 @@ namespace RogueBasin {
 
             //Add animation points into the animation layer
 
+            string explosionSprite = "explosion";
+
+            switch (attackType)
+            {
+                case AttackType.Bullet:
+                    explosionSprite = "bullet";
+                    break;
+
+                case AttackType.Laser:
+                    explosionSprite = "bullet";
+                    break;
+
+                case AttackType.Stun:
+                    explosionSprite = "paralexp";
+                    break;
+            }
+
             foreach (Point p in mangledPoints)
             {
                 if (!isViewVisible(p))
                     continue;
 
-                string explosionSprite = "explosion";
-
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionSprite);
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, System.Drawing.Color.Black);
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
 
             }
@@ -1307,7 +1327,7 @@ namespace RogueBasin {
              */
             
         }
-
+        /*
         private void DrawExplosionOverSquaresAndCreatures(List<Point> splashSquares)
         {
             //Draw each point as targetted
@@ -1326,7 +1346,7 @@ namespace RogueBasin {
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(toDraw);
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
             }
-        }
+        }*/
 
         private void DrawTargettingOverSquaresAndCreatures(List<Point> splashSquares)
         {
@@ -3780,7 +3800,7 @@ namespace RogueBasin {
 
             //Calculate and draw the line overlay
             List<Point> thisLineSquares = Game.Dungeon.GetPathLinePoints(originCreature.LocationMap, target.LocationMap);
-            DrawTargettingOverSquaresAndCreatures(thisLineSquares);    
+            DrawAreaAttackAnimation(thisLineSquares, AttackType.Bullet);    
             //DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, System.Drawing.Color.Black);
 
             //Flash the target if they were damaged

@@ -6,10 +6,10 @@ using libtcodWrapper;
 namespace RogueBasin.Creatures
 {
 
-    public class Thug : MonsterThrowAndRunAI
+    public class Hunter : MonsterThrowAndRunAI
     {
 
-        public Thug(int level)
+        public Hunter(int level)
             : base(level)
         {
             //Add a default right hand slot
@@ -20,12 +20,12 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 45;
+            return 30;
         }
 
         public override int DamageBase()
         {
-            return 30;
+            return 10;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
@@ -43,11 +43,6 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        internal override int ReloadTurnsRequired()
-        {
-            return 2;
-        }
-
         protected override bool WillPursue()
         {
             return true;
@@ -55,17 +50,17 @@ namespace RogueBasin.Creatures
 
         public override double GetMissileRange()
         {
-            return 5.0;
+            return 3.0;
         }
 
         protected override int GetChanceToBackAway()
         {
-            return 0;
+            return 100;
         }
 
         protected override string GetWeaponName()
         {
-            return "fires his shotgun";
+            return "fires his rifle";
         }
 
         public override bool CanOpenDoors()
@@ -77,16 +72,16 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Thug"; } }
+        public override string SingleDescription { get { return "Hunter"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Thugs"; } }
+        public override string GroupDescription { get { return "Hunters"; } }
 
         protected override char GetRepresentation()
         {
-            return 'f';
+            return 'h';
         }
 
         internal override char GetCorpseRepresentation()
@@ -101,12 +96,12 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "thug";
+            return "hunter";
         }
 
         protected override string GetUISprite()
         {
-            return "thug";
+            return "hunter";
         }
 
         protected override int GetChanceToRecover()
@@ -136,12 +131,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Thug(Level);
-        }
-
-        protected override CreatureAttackType GetCreatureAttackType()
-        {
-            return CreatureAttackType.Shotgun;
+            return new Hunter(Level);
         }
 
         public override System.Drawing.Color RepresentationColor()
@@ -207,12 +197,12 @@ namespace RogueBasin.Creatures
 
         public override int GetCombatXP()
         {
-            return 20;
+            return 15;
         }
 
         protected override string GetGameOverlaySprite()
         {
-            return "shotgun";
+            return "rifle";
         }
     }
 }

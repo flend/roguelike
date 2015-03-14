@@ -45,16 +45,18 @@ namespace RogueBasin
 
         private void SetupMonsterGenerators()
         {
-            monsterGenerators.Add(SwarmerSet);
-            monsterGenerators.Add(GrenadierSet);
-            monsterGenerators.Add(ThugSet);
+            //monsterGenerators.Add(SwarmerSet);
+            //monsterGenerators.Add(GrenadierSet);
+            //monsterGenerators.Add(ThugSet);
+            monsterGenerators.Add(HunterSet);
         }
 
         private void SetupItemGenerators()
         {
             itemGenerators[ItemType.Ranged] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, ShotgunItem ),
-                new Tuple<int, Func<IEnumerable<Item>>> ( 100, LaserItem )
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, LaserItem ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, AssaultRifle ),
             };
 
             itemGenerators[ItemType.Melee] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
@@ -109,6 +111,11 @@ namespace RogueBasin
             return new List<Item> { new Items.FragGrenade() };
         }
 
+        public IEnumerable<Item> AssaultRifle()
+        {
+            return new List<Item> { new Items.AssaultRifle() };
+        }
+
         public IEnumerable<Item> StunGrenade()
         {
             return new List<Item> { new Items.StunGrenade() };
@@ -126,14 +133,14 @@ namespace RogueBasin
 
         public IEnumerable<Monster> MonsterType(int constant, int variable, double variance, int level, double levelVariance, Monster monster)
         {
-            var swarmerNo = (int)Math.Round(constant + (variable * Gaussian.BoxMuller(0, variance)));
+            var swarmerNo = (int)Math.Max(1, Math.Round(constant + (variable * Gaussian.BoxMuller(0, variance))));
             var levels = Enumerable.Range(0, swarmerNo).Select(i => LevelWithVariance(level, levelVariance));
             return levels.Select(l => monster.NewCreatureOfThisType());
         }
 
         public IEnumerable<Monster> SwarmerSet(int level, double levelVariance)
         {
-            return MonsterType(5, 3, 0.2, level, levelVariance, new RogueBasin.Creatures.Swarmer(1));
+            return MonsterType(6, 3, 0.2, level, levelVariance, new RogueBasin.Creatures.Swarmer(1));
         }
 
         public IEnumerable<Monster> GrenadierSet(int level, double levelVariance)
@@ -150,6 +157,13 @@ namespace RogueBasin
             var psychos = MonsterType(1, 1, 0.2, level, levelVariance, new RogueBasin.Creatures.Psycho(1));
 
             return thugs.Concat(psychos);
+        }
+
+        public IEnumerable<Monster> HunterSet(int level, double levelVariance)
+        {
+            var hunters = MonsterType(1, 2, 0.2, level, levelVariance, new RogueBasin.Creatures.Hunter(1));
+
+            return hunters;
         }
 
 

@@ -32,6 +32,11 @@ namespace RogueBasin.Features
             return representationColor;
         }
 
+        protected override string GetGameSprite()
+        {
+            return "corpse";
+        }
+
         public override string Description
         {
             get

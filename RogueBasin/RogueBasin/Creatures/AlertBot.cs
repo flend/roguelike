@@ -216,7 +216,7 @@ namespace RogueBasin.Creatures
             LogFile.Log.LogEntryDebug("Alert bot makes sound: " + effect + " at time: " + Game.Dungeon.WorldClock, LogDebugLevel.Medium);
 
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(Game.Dungeon.Player.LocationMap, Game.Dungeon.Player.LocationLevel, 4);
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, System.Drawing.Color.Yellow);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Bullet);
 
             return true;
         }

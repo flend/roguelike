@@ -15,7 +15,7 @@ namespace RogueBasin.Creatures
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
-            NormalSightRadius = 4;
+            NormalSightRadius = 5;
         }
 
         protected override int ClassMaxHitpoints()

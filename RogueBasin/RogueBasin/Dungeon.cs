@@ -587,7 +587,7 @@ namespace RogueBasin
             List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(gunner.LocationMap, target, PCMap, 10, spreadAngle);
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Chocolate);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, Screen.AttackType.Bullet);
 
             //Make firing sound
             if(gunner is Player)
@@ -671,7 +671,7 @@ namespace RogueBasin
             List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Magenta);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, Screen.AttackType.Laser);
 
             //Make firing sound
             Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
@@ -724,7 +724,7 @@ namespace RogueBasin
 
             //Draw attack
 
-            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, System.Drawing.Color.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Bullet);
 
             //Apply damage
             player.AttackMonsterRanged(monster, damageBase);
@@ -2574,7 +2574,7 @@ namespace RogueBasin
 
                 KillMonster(m, false);
 
-                Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, randColor);
+                Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Explosion);
             }
         }
         /// <summary>
@@ -2652,7 +2652,7 @@ namespace RogueBasin
             var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, System.Drawing.Color.Chocolate);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion);
            
             foreach (Point sq in grenadeAffectsFiltered)
             {
@@ -2709,7 +2709,7 @@ namespace RogueBasin
             var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, System.Drawing.Color.Blue);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion);
 
             foreach (Point sq in grenadeAffectsFiltered)
             {

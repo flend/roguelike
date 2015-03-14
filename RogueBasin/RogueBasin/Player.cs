@@ -2577,7 +2577,7 @@ namespace RogueBasin
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), LocationLevel, destination);
 
             //Draw throw
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, Screen.AttackType.Bullet);
 
             if (stunDamage)
             {

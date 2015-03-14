@@ -66,7 +66,7 @@ namespace RogueBasin.Items
 
             //Draw attack
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(target, Game.Dungeon.Player.LocationLevel, 4);
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, System.Drawing.Color.Yellow);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Bullet);
 
             return dest;
         }
