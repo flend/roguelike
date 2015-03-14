@@ -79,6 +79,8 @@ namespace RogueBasin
                     monsterSets.Add(monsterSetGenerated);
                 }
 
+                LogFile.Log.LogEntryDebug("Placing total monster XP (base)" + levelMonsterXP, LogDebugLevel.Medium);
+
                 PlaceMonsterSets(mapInfo, levelNo, monsterSets);
             }
         }

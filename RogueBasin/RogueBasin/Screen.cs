@@ -2765,32 +2765,38 @@ namespace RogueBasin {
                     string overlapSprite = null;
 
                     bool newBackground = false;
-                    //Set background depending on status
-                    if (creature == CreatureToView)
+                    //Overlay depends on status
+                    
+                    if (creature.Charmed)
                     {
-                        //targetted
-                        backgroundColor = targettedBackground;
-                        newBackground = true;
-                    }
-                    else if (creature.Charmed)
-                    {
-                        //backgroundColor = charmBackground;
-                        newBackground = true;
+
                     }
                     else if (creature.Passive)
                     {
-                        //backgroundColor = passiveBackground;
-                        newBackground = true;
+
                     }
                     else if (creature.StunnedTurns > 0)
                     {
-                        //backgroundColor = stunnedBackground;
-                        newBackground = true;
+
                     }
                     else if (creature.Sleeping)
                     {
                         overlapSprite = "zzoverlay";
                     }
+                    else if (creature.ReloadingTurns > 0)
+                    {
+                        overlapSprite = "reloading";
+                    }
+                    else
+                    {
+                        MonsterFightAndRunAI monsterWithAI = creature as MonsterFightAndRunAI;
+
+                        if (monsterWithAI != null && monsterWithAI.AIState == SimpleAIStates.InvestigateSound)
+                        {
+                            overlapSprite = "investigating";
+                        }
+                    }
+
 
                     if (newBackground == false)
                     {

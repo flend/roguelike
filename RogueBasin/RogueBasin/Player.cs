@@ -2790,12 +2790,12 @@ namespace RogueBasin
 
         internal int GetHealXPCost()
         {
-            return 75;
+            return (int)Math.Floor(75 * (1 + 0.5 * (Level - 1)));
         }
 
         internal int GetLevelXPCost()
         {
-            return 150;
+            return (int)Math.Floor(150 * (1 + 0.5 * (Level - 1)));
         }
 
         internal void LevelUpWithXP()

@@ -54,7 +54,7 @@ namespace RogueBasin.Creatures
 
                 LogFile.Log.LogEntryDebug("Grenade explosion at: " + this.LocationMap, LogDebugLevel.Medium);
 
-                Game.Dungeon.AddSoundEffect(1.0, LocationLevel, LocationMap);
+                Game.Dungeon.AddSoundEffect(0.5, LocationLevel, LocationMap);
 
                 Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 2.0, damage, this);
             }
@@ -201,7 +201,7 @@ namespace RogueBasin.Creatures
 
         public override int GetCombatXP()
         {
-            return 40;
+            return 0;
         }
 
         public override int GetMagicXP()

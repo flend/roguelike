@@ -189,8 +189,8 @@ namespace RogueBasin
             //Reloading creatures miss turns
             if (ReloadingTurns > 0)
             {
-                ReloadingTurns--;
                 LogFile.Log.LogEntryDebug(this.Representation + " is reloading for " + ReloadingTurns + " more turns", LogDebugLevel.Low);
+                ReloadingTurns--;
 
                 ResetTurnsMoving();
                 return;

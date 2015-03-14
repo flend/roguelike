@@ -20,12 +20,12 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 45 + 30 * (Level - 1);
+            return 45;
         }
 
         public override int DamageBase()
         {
-            return 50 + 10 * (Level - 1);
+            return 30;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()

@@ -583,7 +583,7 @@ namespace RogueBasin
 
             //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
 
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(gunner);
+            CreatureFOV currentFOV = Game.Dungeon.CalculateNoRangeCreatureFOV(gunner);
             List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(gunner.LocationMap, target, PCMap, 10, Math.PI / 4);
 
             //Draw attack
@@ -2776,6 +2776,7 @@ namespace RogueBasin
 
         private void AddXPForMonster(Monster monster)
         {
+            /*
             var baseXP = monster.GetCombatXP();
             int modifiedXP = baseXP;
             if (player.Level < monster.Level)
@@ -2788,7 +2789,16 @@ namespace RogueBasin
             }
 
             player.CombatXP += modifiedXP;
-            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (from base: " + baseXP + ")", LogDebugLevel.Medium);
+            
+            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (from base: " + baseXP + ")", LogDebugLevel.Medium); */
+
+            //Simpler system
+
+            var baseXP = monster.GetCombatXP();
+            var modifiedXP = (int)Math.Floor(baseXP * (1 + 0.5 * (monster.Level - 1)));
+            player.CombatXP += modifiedXP;
+
+            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (mon level: " + monster.Level + ")", LogDebugLevel.Medium);
         }
 
         /// <summary>
@@ -2936,6 +2946,22 @@ namespace RogueBasin
             return wrappedFOV;
         }
 
+        /// <summary>
+        /// Calculates the FOV for a creature
+        /// </summary>
+        /// <param name="creature"></param>
+        public CreatureFOV CalculateNoRangeCreatureFOV(Creature creature)
+        {
+            Map currentMap = levels[creature.LocationLevel];
+
+            //Update FOV
+            fov.CalculateFOV(creature.LocationLevel, creature.LocationMap, 0);
+
+            //Wrapper with game-specific FOV layer
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(fov), creature.FOVType());
+
+            return wrappedFOV;
+        }
 
         public Point GetEndOfLine(Point start, Point midPoint, int level)
         {

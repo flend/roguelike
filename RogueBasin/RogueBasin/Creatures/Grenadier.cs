@@ -26,7 +26,7 @@ namespace RogueBasin.Creatures
             if(adjacentSquares.Count > 0) {
                 LogFile.Log.LogEntryDebug("Grenadier throwing grenade at " + currentTarget.Representation, LogDebugLevel.Medium);
 
-                var grenadeCreature = new Creatures.Grenade(this.ScaleRangedDamage(DamageBase()), 2 + (int)Math.Floor(Level / 3.0));
+                var grenadeCreature = new Creatures.Grenade(this.ScaleRangedDamage(DamageBase()), 2);
                 Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, adjacentSquares.RandomElement());
 
                 var targetSquares = Game.Dungeon.CalculateTrajectory(this, currentTarget.LocationMap);
@@ -69,12 +69,12 @@ namespace RogueBasin.Creatures
 
         protected override int ClassMaxHitpoints()
         {
-            return 45 + (Level - 1) * 30;
+            return 45;
         }
 
         public override int DamageBase()
         {
-            return 50 + (Level - 1) * 10;
+            return 30;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
