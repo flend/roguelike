@@ -126,42 +126,73 @@ namespace RogueBasin
             return new List<Item> { new Items.SoundGrenade() };
         }
 
+        public Monster MonsterSwarmer(int level) 
+        {
+            return new Creatures.Swarmer(level);
+        }
+
+        public Monster MonsterPunk(int level)
+        {
+            return new Creatures.Punk(level);
+        }
+
+        public Monster MonsterGrenadier(int level)
+        {
+            return new Creatures.Grenadier(level);
+        }
+
+        public Monster MonsterThug(int level)
+        {
+            return new Creatures.Grenadier(level);
+        }
+
+        public Monster MonsterPsycho(int level)
+        {
+            return new Creatures.Psycho(level);
+        }
+
+        public Monster MonsterHunter(int level)
+        {
+            return new Creatures.Psycho(level);
+        }
+
+
         public int LevelWithVariance(int level, double levelVariance)
         {
             return (int)Math.Round(level + (level * Gaussian.BoxMuller(0, levelVariance)));
         }
 
-        public IEnumerable<Monster> MonsterType(int constant, int variable, double variance, int level, double levelVariance, Monster monster)
+        public IEnumerable<Monster> MonsterType(int constant, int variable, double variance, int level, double levelVariance, Func<int, Monster> monsterGenerator)
         {
             var swarmerNo = (int)Math.Max(1, Math.Round(constant + (variable * Gaussian.BoxMuller(0, variance))));
             var levels = Enumerable.Range(0, swarmerNo).Select(i => LevelWithVariance(level, levelVariance));
-            return levels.Select(l => monster.NewCreatureOfThisType());
+            return levels.Select(l => monsterGenerator(l));
         }
 
         public IEnumerable<Monster> SwarmerSet(int level, double levelVariance)
         {
-            return MonsterType(6, 3, 0.2, level, levelVariance, new RogueBasin.Creatures.Swarmer(1));
+            return MonsterType(6, 3, 0.2, level, levelVariance, MonsterSwarmer);
         }
 
         public IEnumerable<Monster> GrenadierSet(int level, double levelVariance)
         {
-            var punks = MonsterType(3, 3, 0.2, level, levelVariance, new RogueBasin.Creatures.Punk(1));
-            var grenadiers = MonsterType(1, 1, 0.2, level, levelVariance, new RogueBasin.Creatures.Grenadier(1));
+            var punks = MonsterType(3, 3, 0.2, level, levelVariance, MonsterPunk);
+            var grenadiers = MonsterType(1, 1, 0.2, level, levelVariance, MonsterGrenadier);
 
             return punks.Concat(grenadiers);
         }
 
         public IEnumerable<Monster> ThugSet(int level, double levelVariance)
         {
-            var thugs = MonsterType(1, 1, 0.2, level, levelVariance, new RogueBasin.Creatures.Thug(1));
-            var psychos = MonsterType(1, 1, 0.2, level, levelVariance, new RogueBasin.Creatures.Psycho(1));
+            var thugs = MonsterType(1, 1, 0.2, level, levelVariance, MonsterThug);
+            var psychos = MonsterType(1, 1, 0.2, level, levelVariance, MonsterPsycho);
 
             return thugs.Concat(psychos);
         }
 
         public IEnumerable<Monster> HunterSet(int level, double levelVariance)
         {
-            var hunters = MonsterType(1, 2, 0.2, level, levelVariance, new RogueBasin.Creatures.Hunter(1));
+            var hunters = MonsterType(1, 2, 0.2, level, levelVariance, MonsterHunter);
 
             return hunters;
         }

@@ -201,9 +201,9 @@ namespace RogueBasin
             int distanceToConnectingDoor = 1;
             levelInfo.EntryBoothConnection = AddVaults(templateGenerator, corridor1, distanceToConnectingDoor, replacementVault, 0).First();
 
-            int numberOfRandomRooms = 3;
+            //int numberOfRandomRooms = 3;
 
-            BuildCircularRooms(templateGenerator, numberOfRandomRooms);
+            //BuildCircularRooms(templateGenerator, numberOfRandomRooms);
 
             //Add exit booth
 

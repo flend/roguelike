@@ -183,7 +183,7 @@ namespace RogueBasin
             }
         }
 
-        public int Level { get; private set; }
+        public int Level { get; set; }
 
         /// <summary>
         /// Special effect that means the monster fights for the player. Could be a real effect in future, and use this as an accessor
