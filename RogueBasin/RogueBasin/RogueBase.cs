@@ -281,6 +281,9 @@ namespace RogueBasin
                 //Increment time on the PC's events and turn time (all done in IncrementTurnTime)
                 if (Game.Dungeon.Player.IncrementTurnTime())
                 {
+                    LogFile.Log.LogEntryDebug("Player taking turn at tick " + player.TurnClock + " (world " + Game.Dungeon.WorldClock + ")", LogDebugLevel.Low);
+
+
                     //Remove dead players! Restart mission. Do this here so we don't get healed then beaten up again in our old state
                     if (Game.Dungeon.PlayerDeathOccured)
                         Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
@@ -374,6 +377,7 @@ namespace RogueBasin
                             //Creatures may be killed by other creatures so check they are alive before processing
                             if (creature.Alive)
                             {
+                                LogFile.Log.LogEntryDebug("Creature " + creature.Representation + " taking turn at tick " + creature.TurnClock + " (world " + Game.Dungeon.WorldClock + ")", LogDebugLevel.Low);
                                 creature.ProcessTurn();
                             }
                         }

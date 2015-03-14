@@ -202,7 +202,8 @@ namespace RogueBasin
             //Used as a test for re-adding monsters
             UniqueID = 0;
 
-            RandomStartTurnClock();
+            //Don't randomized the turn clock - otherwise sometimes summonded enemies get an attack in before the player
+            //RandomStartTurnClock();
 
             //By default set a random heading. Override from outside
             SetRandomHeading();
