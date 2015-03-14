@@ -249,6 +249,8 @@ namespace RogueBasin
                     break;
                 case RogueBasin.PlayerClass.Gunner:
                     GameSprite = "crack";
+                    //Perma aim
+                    AddEffect(new PlayerEffects.Aim());
                     break;
                 case RogueBasin.PlayerClass.Sneaker:
                     GameSprite = "nerd";
@@ -769,6 +771,7 @@ namespace RogueBasin
 
         public double CalculateAimBonus()
         {
+            /*
             var aimBonus = 0.1;
 
             var aimEffect = GetActiveEffects(typeof(PlayerEffects.AimEnhance));
@@ -783,6 +786,14 @@ namespace RogueBasin
             var nonFireBonus = Math.Min(TurnsSinceAction, 3) * aimBonus / 2;
 
             return stationaryBonus + nonFireBonus;
+             * */
+
+            if (IsAimActive())
+            {
+                return 0.5;
+            }
+
+            return 0.0;
         }
 
         public double CalculateRangedAttackModifiersOnMonster(Monster target)
@@ -828,9 +839,15 @@ namespace RogueBasin
                 speedModifier += ((PlayerEffects.SpeedBoost)speedEffect.First()).Level;
             }*/
 
-            if (TurnsMoving > 0 && ranged && IsEffectActive(typeof(PlayerEffects.Dodge)))
+            if (IsDodgeActive() && ranged)
             {
                 //Straight 50% damage reduction for moving
+                damageModifier -= 0.5;
+            }
+
+            if (IsAimActive() && ranged)
+            {
+                //Straight 50% damage reduction for not moving
                 damageModifier -= 0.5;
             }
 
@@ -2860,5 +2877,15 @@ namespace RogueBasin
         }
 
         public bool LastMoveWasMeleeAttack { get; set; }
+
+        internal bool IsDodgeActive()
+        {
+            return TurnsMoving > 0 && IsEffectActive(typeof(PlayerEffects.Dodge));
+        }
+
+        internal bool IsAimActive()
+        {
+            return TurnsMoving == 0 && TurnsSinceAction > 1 && TurnsInactive > 1 && IsEffectActive(typeof(PlayerEffects.Aim));
+        }
     }
 }

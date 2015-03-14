@@ -199,6 +199,7 @@
     <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
+    <Compile Include="PlayerEffects\Aim.cs" />
     <Compile Include="Dodge.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="DungeonEffect.cs" />

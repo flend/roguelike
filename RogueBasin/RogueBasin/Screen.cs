@@ -1012,6 +1012,16 @@ namespace RogueBasin {
             {
                 tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(PClocation)].TileSprite = meleeWeapon.GameSprite;
             }
+
+            if (player.IsDodgeActive())
+            {
+                tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(PClocation)].TileSprite = "running";
+            }
+
+            if (player.IsAimActive())
+            {
+                tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(PClocation)].TileSprite = "aiming";
+            }
         }
 
 
