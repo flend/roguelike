@@ -186,11 +186,18 @@ namespace TraumaRL
 
             rb.PrepareGameEntry();
 
+            DoCharacterSelection();
+
             rb.StartEventLoop();
 
             //Movies can only be shown after event loop started
-            ShowIntroMovies();
-            
+            //ShowIntroMovies();
+        }
+
+        private void DoCharacterSelection()
+        {
+            rb.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, rb.CharacterSelectionKeyHandler);
+            LogFile.Log.LogEntryDebug("Requesting character gen screen", LogDebugLevel.High);
         }
     }
 }

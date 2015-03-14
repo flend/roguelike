@@ -1102,8 +1102,41 @@ namespace RogueBasin {
 
             if(MoviesToPlay())
                 PlayFirstMovieInQueue();
+
+            if (SpecialScreen != null)
+            {
+                SpecialScreen();
+            }
         }
 
+
+        public Action SpecialScreen {
+            get; set;
+        }
+
+        public void CharacterSelectionScreen()
+        {
+            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
+
+            var titleColor = System.Drawing.Color.Khaki;
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 4;
+            
+            var lanceCentre = new Point(centreXOffset, centreYOffset);
+            var crackCentre = new Point(centreXOffset * 2, centreYOffset);
+            var nerdCentre = new Point(centreXOffset * 3, centreYOffset);
+
+            DrawText("[1] Lance", lanceCentre - new Point(0, 50), LineAlignment.Center, titleColor);
+            DrawUISpriteByCentre("lance", lanceCentre);
+
+            DrawText("[2] Crack", crackCentre - new Point(0, 50), LineAlignment.Center, titleColor);
+            DrawUISpriteByCentre("crack", crackCentre);
+
+            DrawText("[3] Nerd", nerdCentre - new Point(0, 50), LineAlignment.Center, titleColor);
+            DrawUISpriteByCentre("nerd", nerdCentre);
+        }
+        
         /// <summary>
         /// Draws an animated attack.
         /// </summary>
@@ -1633,6 +1666,12 @@ namespace RogueBasin {
             DrawUISpriteByCentre(id, point.X, point.Y);
         }
 
+        private void DrawUISpriteByCentre(string id, Point point)
+        {
+            DrawUISpriteByCentre(id, point.x, point.y);
+        }
+
+
         System.Drawing.Point rangedWeaponUICenter = new System.Drawing.Point(160, 152);
         System.Drawing.Point meleeWeaponUICenter = new System.Drawing.Point(38, 152);
 
@@ -1757,6 +1796,12 @@ namespace RogueBasin {
             var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
             DrawText(fameExpStr, playerTextUI_UsefulTL.Add(playerExpFameTextOffset));
 
+            //Draw class
+            /*
+            var playerClassTextOffset = new System.Drawing.Point(80, 0);
+            var classStr = player.PlayerClass.ToString();
+            DrawText(classStr, playerTextUI_UsefulTL.Add(playerClassTextOffset));
+            */
             //Monster stats
             DrawFocusWindow();
         }
@@ -1764,6 +1809,16 @@ namespace RogueBasin {
         private void DrawText(string msg, System.Drawing.Point p)
         {
             mapRenderer.DrawText(msg, p.X, p.Y, statsColor);
+        }
+
+        private void DrawText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.X, p.Y, lineAlignment, color);
+        }
+
+        private void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            DrawText(msg, new System.Drawing.Point(p.x, p.y), lineAlignment, color);
         }
 
         private void DrawFocusWindow()

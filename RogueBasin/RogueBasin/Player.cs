@@ -6,6 +6,11 @@ using System.Linq;
 
 namespace RogueBasin
 {
+    public enum PlayerClass
+    {
+        Athlete, Gunner, Sneaker
+    }
+
     public class Player : Creature
     {
         /// <summary>
@@ -131,6 +136,7 @@ namespace RogueBasin
         /// </summary>
         int maxMagicPoints;
 
+        public PlayerClass PlayerClass { get; private set; }
 
         /// <summary>
         /// Number of times we get knocked out
@@ -228,6 +234,24 @@ namespace RogueBasin
 
             DoesShieldRecharge = false;
             DoHitpointsRecharge = false;
+        }
+
+        public void SetPlayerClass(PlayerClass thisClass)
+        {
+            PlayerClass = thisClass;
+
+            switch (PlayerClass)
+            {
+                case RogueBasin.PlayerClass.Athlete:
+                    GameSprite = "lance";
+                    break;
+                case RogueBasin.PlayerClass.Gunner:
+                    GameSprite = "crack";
+                    break;
+                case RogueBasin.PlayerClass.Sneaker:
+                    GameSprite = "nerd";
+                    break;
+            }
         }
 
         internal bool IsWeaponTypeAvailable(Type weaponType)
@@ -2800,20 +2824,24 @@ namespace RogueBasin
 
         internal void LevelUpWithXP()
         {
-            if (CombatXP >= GetLevelXPCost())
+
+            var levelUpCost = GetLevelXPCost();
+            if (CombatXP >= levelUpCost)
             {
+               
                 LevelUp();
-                CombatXP -= GetLevelXPCost();
+                CombatXP -= levelUpCost;
                 LogFile.Log.LogEntryDebug("Levelled up at cost of  " + GetLevelXPCost() + " XP", LogDebugLevel.Medium);
             }
         }
 
         internal void HealWithXP()
         {
-            if (CombatXP >= GetHealXPCost())
+            var healCost = GetHealXPCost();
+            if (CombatXP >= healCost)
             {
                 HealCompletely();
-                CombatXP -= GetHealXPCost();
+                CombatXP -= healCost;
                 LogFile.Log.LogEntryDebug("Healed completely at cost of " + GetHealXPCost() + " XP", LogDebugLevel.Medium);
             }
         }

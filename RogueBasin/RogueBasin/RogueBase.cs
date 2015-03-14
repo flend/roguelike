@@ -26,7 +26,7 @@ namespace RogueBasin
         {
             MapMovement, Targetting, InventoryShow, InventorySelect,
             YesNoPrompt,
-            MovieDisplay, PreMapMovement
+            MovieDisplay, PreMapMovement, SpecialScreen
         }
 
         enum TargettingAction
@@ -524,6 +524,10 @@ namespace RogueBasin
                         MovieDisplayKeyboardEvent(args);
                         break;
 
+                    case InputState.SpecialScreen:
+                        SpecialScreenKeyboardEvent(args);
+                        break;
+
 
 
                     //Normal movement on the map
@@ -651,6 +655,10 @@ namespace RogueBasin
                                         timeAdvances = Examine(true);
                                         if (timeAdvances)
                                             SpecialMoveNonMoveAction();
+                                        break;
+
+                                    case Key.E:
+                                        this.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
                                         break;
 
                                     case Key.R:
@@ -1206,9 +1214,54 @@ namespace RogueBasin
             }
         }
 
+        public void CharacterSelectionKeyHandler(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.One)
+            {
+                Game.Dungeon.Player.SetPlayerClass(PlayerClass.Athlete);
+                ClearSpecialScreenAndHandler();
+            }
+            if (args.Key == Key.Two)
+            {
+                Game.Dungeon.Player.SetPlayerClass(PlayerClass.Gunner);
+                ClearSpecialScreenAndHandler();
+            }
+            if (args.Key == Key.Three)
+            {
+                Game.Dungeon.Player.SetPlayerClass(PlayerClass.Sneaker);
+                ClearSpecialScreenAndHandler();
+            }
+        }
+
+        private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
+
+        private void SpecialScreenKeyboardEvent(KeyboardEventArgs args)
+        {
+            if (SpecialScreenKeyboardHandler != null)
+            {
+                SpecialScreenKeyboardHandler(args);
+            }
+            else
+            {
+                ClearSpecialScreenAndHandler();
+            }
+        }
+
+        public void SetSpecialScreenAndHandler(Action specialScreen, Action<KeyboardEventArgs> specialScreenHandler) {
+            Screen.Instance.SpecialScreen = specialScreen;
+            SpecialScreenKeyboardHandler = specialScreenHandler;
+            inputState = InputState.SpecialScreen;
+        }
+
+        public void ClearSpecialScreenAndHandler()
+        {
+            Screen.Instance.SpecialScreen = null;
+            SpecialScreenKeyboardHandler = null;
+            inputState = InputState.MapMovement;
+        }
+
         private void YesNoPromptKeyboardEvent(KeyboardEventArgs args)
         {
-
             if (args.Key == Key.Y)
             {
                 if (promptAction != null)

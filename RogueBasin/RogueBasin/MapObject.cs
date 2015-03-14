@@ -97,16 +97,17 @@ namespace RogueBasin
             }
         }
 
+        private String gameSprite = null;
+
         public String GameSprite
         {
             get
             {
-                if (GetGameSprite() == null)
-                {
-                    return null; //better to return a default
-                }
-                return GetGameSprite();
+                if (gameSprite != null)
+                    return gameSprite;
+                else return GetGameSprite();
             }
+            protected set { gameSprite = value;  }
         }
 
         public String GameOverlaySprite

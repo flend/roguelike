@@ -454,6 +454,14 @@ namespace RogueBasin
             videoSurface.Fill(Color.Black);
         }
 
+        public void DrawFramePixel(int x, int y, int width, int height, bool clear, Color color)
+        {
+            if (clear)
+            {
+                videoSurface.Fill(new Rectangle(x, y, width, height), Color.Black);
+            }
+        }
+
         public void DrawFrame(int tlx, int tly, int width, int height, bool clear, Color color)
         {
             if (clear)
@@ -505,14 +513,26 @@ namespace RogueBasin
         }
 
         public void DrawText(string msg, int x, int y, Color color) {
-            
+
+            DrawText(msg, x, y, LineAlignment.Left, color);
+        }
+
+        public void DrawText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
+        {
             // Create the Font Surfaces
             Surface fontSurface = font.Render(msg, color);
 
             LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
 
-            videoSurface.Blit(fontSurface,
-                            new System.Drawing.Point(x, y));
+            var pointToDraw =  new System.Drawing.Point(x, y);
+
+            if (lineAlignment == LineAlignment.Center)
+            {
+                var size = font.SizeText(msg);
+                pointToDraw = new System.Drawing.Point(x - size.Width / 2, y - size.Height / 2);
+            }
+
+            videoSurface.Blit(fontSurface, pointToDraw);
         }
 
         public void PrintString(string msg, int x, int y, Color color)
