@@ -673,7 +673,7 @@ namespace RogueBasin
         private void StandardShotGunAttack(Creature target)
         {
             var scaledDamage = ScaleRangedDamage(this.DamageBase());
-            Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, scaledDamage, 0.0, Math.PI / 4, scaledDamage / 10, scaledDamage / 10);
+            Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, scaledDamage, 0.0, Math.PI / 8, scaledDamage / 10, scaledDamage / 10);
         }
 
         private void StandardPreCombat()

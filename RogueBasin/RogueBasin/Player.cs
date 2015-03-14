@@ -390,7 +390,7 @@ namespace RogueBasin
             }
             if (InventoryPosition < 0)
             {
-                InventoryPosition = 0;
+                InventoryPosition = orderedUtilityItems.Count() - 1;
             }
 
             EquipAndReplaceItem(orderedUtilityItems.ElementAt(InventoryPosition));

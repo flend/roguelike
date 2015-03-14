@@ -600,7 +600,7 @@ namespace RogueBasin
             }
         }
 
-        private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
+        private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool blocksLight)
         {
             var roomFiller = new RoomFilling(positionedRoom.Room);
 
@@ -623,7 +623,7 @@ namespace RogueBasin
                     }
                     else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint))
                     {
-                        bool result = Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
+                        bool result = Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, blocksLight);
 
                         if (result)
                         {
@@ -672,7 +672,7 @@ namespace RogueBasin
 
                         var crossPiece = new CrossPiece(centre, 4 + Game.Random.Next(3), 4 + Game.Random.Next(3), Math.PI / Game.Random.NextDouble());
                         var crossPoints = crossPiece.Generate();
-                        AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights);
+                        AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights, Game.Random.Next(2) > 0 ? true : false);
                     }
                     else
                     {

@@ -232,7 +232,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 15;
+            return 6;
         }
 
         /// <summary>

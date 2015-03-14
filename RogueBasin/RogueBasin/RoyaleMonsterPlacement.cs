@@ -6,15 +6,41 @@ using System.Windows.Forms;
 
 namespace RogueBasin
 {
+
+    enum ItemType
+    {
+        Ranged, Melee, Utility
+    }
+
     class RoyaleMonsterPlacement
     {
         List<Func<int, double, IEnumerable<Monster>>> monsterGenerators = new List<Func<int, double, IEnumerable<Monster>>>();
-        List<Func<IEnumerable<Item>>> itemGenerators = new List<Func<IEnumerable<Item>>>();
+        Dictionary<ItemType, IEnumerable<Tuple<int, Func<IEnumerable<Item>>>>> itemGenerators = new Dictionary<ItemType, IEnumerable<Tuple<int, Func<IEnumerable<Item>>>>>();
+        Dictionary<PlayerClass, IEnumerable<Tuple<int, ItemType>>> classItemCategories = new Dictionary<PlayerClass, IEnumerable<Tuple<int, ItemType>>>();
 
         public RoyaleMonsterPlacement()
         {
             SetupMonsterGenerators();
             SetupItemGenerators();
+            SetupItemCategories();
+        }
+
+        private void SetupItemCategories()
+        {
+            classItemCategories[PlayerClass.Athlete] = new List<Tuple<int, ItemType>> {
+                new Tuple<int, ItemType>(100, ItemType.Ranged),
+                new Tuple<int, ItemType>(100, ItemType.Utility)
+            };
+
+            classItemCategories[PlayerClass.Gunner] = new List<Tuple<int, ItemType>> {
+                new Tuple<int, ItemType>(100, ItemType.Ranged),
+                new Tuple<int, ItemType>(100, ItemType.Utility)
+            };
+
+            classItemCategories[PlayerClass.Sneaker] = new List<Tuple<int, ItemType>> {
+                new Tuple<int, ItemType>(100, ItemType.Ranged),
+                new Tuple<int, ItemType>(200, ItemType.Utility)
+            };
         }
 
         private void SetupMonsterGenerators()
@@ -26,12 +52,42 @@ namespace RogueBasin
 
         private void SetupItemGenerators()
         {
-            itemGenerators.Add(ShotgunItem);
-            itemGenerators.Add(AxeItem);
-            itemGenerators.Add(LaserItem);
-            itemGenerators.Add(FragGrenade);
+            itemGenerators[ItemType.Ranged] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, ShotgunItem ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, LaserItem )
+            };
 
+            itemGenerators[ItemType.Melee] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, AxeItem )
+            };
+
+            itemGenerators[ItemType.Utility] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, FragGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, StunGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, SoundGrenade )
+            };
         }
+
+        private T ChooseItemFromWeights<T>(IEnumerable<Tuple<int, T>> itemsWithWeights)
+        {
+            var totalWeight = itemsWithWeights.Select(t => t.Item1).Sum();
+            var randomNumber = Game.Random.Next(totalWeight);
+
+            int weightSoFar = 0;
+            T roomToPlace = itemsWithWeights.First().Item2;
+            foreach (var t in itemsWithWeights)
+            {
+                weightSoFar += t.Item1;
+                if (weightSoFar > randomNumber)
+                {
+                    roomToPlace = t.Item2;
+                    break;
+                }
+            }
+
+            return roomToPlace;
+        }
+
 
         public IEnumerable<Item> ShotgunItem()
         {
@@ -123,43 +179,53 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Placing total monster XP (base)" + levelMonsterXP, LogDebugLevel.Medium);
 
                 var monsterSetPositions = PlaceMonsterSets(mapInfo, levelNo, monsterSets);
-
-                PlaceItemSets(mapInfo, levelNo, monsterSetPositions);
+                var items = GetRandomsItemForPlayer(monsterSetPositions.Count());
+                PlaceItemSets(mapInfo, levelNo, monsterSetPositions, items);
             }
         }
 
-
-        private void PlaceItemSets(MapInfo mapInfo, int levelNo, List<Point> monsterSetPositions)
+        private IEnumerable<IEnumerable<Item>> GetRandomsItemForPlayer(int numberOfItems)
         {
+            var player = Game.Dungeon.Player;
+
+            var itemTypesToGenerate = Enumerable.Repeat(0, numberOfItems).Select(x => ChooseItemFromWeights(classItemCategories[player.PlayerClass]));
+            var weightedGenerators = itemTypesToGenerate.Select(itemType => itemGenerators[itemType]);
+            var generatorsToUse = weightedGenerators.Select(weightedGen => ChooseItemFromWeights(weightedGen));
+            var items = generatorsToUse.Select(gen => gen());
+
+            return items;
+        }
+
+        private void PlaceItemSets(MapInfo mapInfo, int levelNo, List<Point> monsterSetPositions, IEnumerable<IEnumerable<Item>> itemSetsToPlace)
+        {
+            var itemsAndPlaces = monsterSetPositions.Zip(itemSetsToPlace, (f, s) => new Tuple<Point, IEnumerable<Item>>(f, s));
+
             //Place a couple of random items near each group
-            MessageBox.Show("Stop");
-            foreach(Point origin in monsterSetPositions) {
+            foreach (var pointAndItem in itemsAndPlaces)
+            {
+                var origin = pointAndItem.Item1;
+                var itemsToPlace = pointAndItem.Item2;
+
                 var candidateSquares = Game.Dungeon.GetWalkableSquaresFreeOfCreaturesWithinRange(levelNo, origin, 3, 7);
                 var squaresToPlace = candidateSquares.Shuffle();
 
-                int numberOfItems = 2;
-                for (int i = 0; i < numberOfItems; i++)
+                int itemsPlaced = 0;
+
+                foreach (Point p in squaresToPlace)
                 {
-                    var generatorToUse = itemGenerators.RandomElement();
-                    var itemToPlace = generatorToUse();
+                    bool placedSuccessfully = Game.Dungeon.AddItem(itemsToPlace.ElementAt(itemsPlaced), levelNo, p);
 
-                    int itemsPlaced = 0;
-
-                    foreach (Point p in squaresToPlace)
+                    if (placedSuccessfully)
                     {
-                        bool placedSuccessfully = Game.Dungeon.AddItem(itemToPlace.ElementAt(itemsPlaced), levelNo, p);
+                        LogFile.Log.LogEntryDebug("Placing item " + itemsToPlace.ElementAt(itemsPlaced) + " at " + p + " close to set at " + origin, LogDebugLevel.Medium);
 
-                        if (placedSuccessfully)
-                        {
-                            LogFile.Log.LogEntryDebug("Placing item " + itemToPlace.ElementAt(itemsPlaced) + " at " + p + " close to set at " + origin, LogDebugLevel.Medium);
+                        itemsPlaced++;
 
-                            itemsPlaced++;
-
-                            if (itemsPlaced == itemToPlace.Count())
-                                break;
-                        }
+                        if (itemsPlaced == itemsToPlace.Count())
+                            break;
                     }
                 }
+
             }
         }
 

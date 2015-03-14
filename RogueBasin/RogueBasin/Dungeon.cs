@@ -584,7 +584,7 @@ namespace RogueBasin
             //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
 
             CreatureFOV currentFOV = Game.Dungeon.CalculateNoRangeCreatureFOV(gunner);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(gunner.LocationMap, target, PCMap, 10, Math.PI / 4);
+            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(gunner.LocationMap, target, PCMap, 10, spreadAngle);
 
             //Draw attack
             Screen.Instance.DrawAreaAttackAnimation(targetSquares, System.Drawing.Color.Chocolate);
@@ -3104,6 +3104,18 @@ namespace RogueBasin
                 {
                     pointsToRet.Add(p);
                 }
+            }
+
+            return pointsToRet;
+        }
+
+        public List<Point> GetPathLinePoints(Point start, Point end)
+        {
+            List<Point> pointsToRet = new List<Point>();
+
+            foreach (Point p in Utility.GetPointsOnLine(start, end))
+            {
+                    pointsToRet.Add(p);
             }
 
             return pointsToRet;

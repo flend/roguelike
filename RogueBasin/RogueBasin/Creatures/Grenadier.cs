@@ -27,9 +27,10 @@ namespace RogueBasin.Creatures
                 LogFile.Log.LogEntryDebug("Grenadier throwing grenade at " + currentTarget.Representation, LogDebugLevel.Medium);
 
                 var grenadeCreature = new Creatures.Grenade(this.ScaleRangedDamage(DamageBase()), 2);
-                Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, adjacentSquares.RandomElement());
+                var grenadeSquare = adjacentSquares.RandomElement();
+                Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, grenadeSquare);
 
-                var targetSquares = Game.Dungeon.CalculateTrajectory(this, currentTarget.LocationMap);
+                var targetSquares = Game.Dungeon.CalculateTrajectory(this, grenadeSquare);
                 Screen.Instance.DrawAreaAttackAnimation(targetSquares, grenadeCreature.GameSprite);
             }
             else {

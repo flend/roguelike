@@ -9,7 +9,7 @@ namespace RogueBasin.Items
     {
         public virtual double ShotgunSpreadAngle()
         {
-            return Math.PI / 4;
+            return Math.PI / 8;
         }
     }
 }
