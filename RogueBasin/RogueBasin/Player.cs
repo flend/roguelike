@@ -361,6 +361,46 @@ namespace RogueBasin
             }
         }
 
+        private int InventoryPosition
+        {
+            get;
+            set;
+        }
+
+        public void EquipNextUtilityInventoryItem(bool forward)
+        {
+            var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Utility));
+            var orderedUtilityItems = allUtilityItems.OrderBy(i => i.SingleItemDescription);
+
+            if (orderedUtilityItems.Count() == 0)
+            {
+                InventoryPosition = 0;
+                LogFile.Log.LogEntryDebug("No next utility item to equip", LogDebugLevel.Medium);
+                return;
+            }
+
+            if (forward)
+                InventoryPosition++;
+            else
+                InventoryPosition--;
+
+            if (InventoryPosition >= orderedUtilityItems.Count())
+            {
+                InventoryPosition = 0;
+            }
+            if (InventoryPosition < 0)
+            {
+                InventoryPosition = 0;
+            }
+
+            EquipAndReplaceItem(orderedUtilityItems.ElementAt(InventoryPosition));
+        }
+
+        public void EquipNextUtility()
+        {
+            EquipNextUtilityInventoryItem(true);
+        }
+
         /// <summary>
         /// Function called after an effect is applied or a new item is equipped.
         /// Calculates all derived statistics from bases with modifications from equipment and effects.

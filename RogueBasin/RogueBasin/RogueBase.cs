@@ -638,6 +638,16 @@ namespace RogueBasin
                                     centreOnPC = true;
                                     break;
 
+                                case Key.E:
+                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(false);
+                                    centreOnPC = true;
+                                    break;
+
+                                case Key.R:
+                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(true);
+                                    centreOnPC = true;
+                                    break;
+
                                 case Key.X:
                                     //Examine
                                     timeAdvances = Examine(false);
@@ -2290,8 +2300,9 @@ namespace RogueBasin
             {
                 player.UnequipAndDestroyItem(toThrowItem);
 
-                //Try to reequip if we have more
-                player.EquipInventoryItemType(toThrow.GetType());
+                //Try to reequip another item 
+                //player.EquipInventoryItemType(toThrow.GetType());
+                player.EquipNextUtility();
 
                 return true;
             }

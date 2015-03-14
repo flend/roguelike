@@ -1686,7 +1686,7 @@ namespace RogueBasin {
 
         System.Drawing.Point rangedWeaponUICenter = new System.Drawing.Point(160, 152);
         System.Drawing.Point meleeWeaponUICenter = new System.Drawing.Point(38, 152);
-        System.Drawing.Point utilityUICenter = new System.Drawing.Point(287, 152);
+        System.Drawing.Point utilityUICenter = new System.Drawing.Point(282, 152);
 
         private void DrawGraduatedBar(string id, double fullness, Rectangle barArea, double spacing)
         {
