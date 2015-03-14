@@ -45,9 +45,9 @@ namespace RogueBasin
 
         private void SetupMonsterGenerators()
         {
-            //monsterGenerators.Add(SwarmerSet);
-            //monsterGenerators.Add(GrenadierSet);
-            //monsterGenerators.Add(ThugSet);
+            monsterGenerators.Add(SwarmerSet);
+            monsterGenerators.Add(GrenadierSet);
+            monsterGenerators.Add(ThugSet);
             monsterGenerators.Add(HunterSet);
         }
 
@@ -167,12 +167,18 @@ namespace RogueBasin
         }
 
 
-        public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<Tuple<int, int>> levelsToProcess)
+        public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<Tuple<int, int>> levelsToProcess, List<Point> entryPoints)
         {
+            int levelIterator = 0;
+
             foreach (var level in levelsToProcess)
             {
                 var levelNo = level.Item1;
                 var baseXPLevel = level.Item2;
+
+                var entryPoint = entryPoints.ElementAt(levelNo); //please use zip
+                levelIterator++;
+
                 var levelVariance = 0.2;
 
                 var levelMonsterXP = 0;
@@ -192,7 +198,7 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntryDebug("Placing total monster XP (base)" + levelMonsterXP, LogDebugLevel.Medium);
 
-                var monsterSetPositions = PlaceMonsterSets(mapInfo, levelNo, monsterSets);
+                var monsterSetPositions = PlaceMonsterSets(mapInfo, levelNo, monsterSets, entryPoint);
                 var items = GetRandomsItemForPlayer(monsterSetPositions.Count());
                 PlaceItemSets(mapInfo, levelNo, monsterSetPositions, items);
             }
@@ -243,14 +249,17 @@ namespace RogueBasin
             }
         }
 
-        private List<Point> PlaceMonsterSets(MapInfo mapInfo, int levelNo, IEnumerable<IEnumerable<Monster>> monsterSetsGenerated)
+        private List<Point> PlaceMonsterSets(MapInfo mapInfo, int levelNo, IEnumerable<IEnumerable<Monster>> monsterSetsGenerated, Point playerStart)
         {
             var monsterSetPositions = new List<Point>();
 
             //Get points in rooms
             var allRoomsAndCorridors = mapInfo.GetRoomIndicesForLevel(levelNo);//.Except(new List<int> { mapInfo.StartRoom });
+            
             var rooms = mapInfo.FilterOutCorridors(allRoomsAndCorridors).ToList();
+            
             var candidatePointsInRooms = rooms.Select(room => mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor));
+            
             var roomsAndPointsInRooms = rooms.Zip(candidatePointsInRooms, Tuple.Create);
 
             //Distribution of sets amongst rooms, mostly evenly, scaled by room size
@@ -302,7 +311,10 @@ namespace RogueBasin
                 {
 
                     var candidatePointsInRoom = roomsAndPointsInRooms.ElementAt(r).Item2.Shuffle();
-                    Point origin = candidatePointsInRoom.First();
+                    var pointsCloseToPlayer = Game.Dungeon.GetValidMapSquaresWithinRange(levelNo, playerStart, 3);
+                    var safeCandidatePointsInRoom = candidatePointsInRoom.Except(pointsCloseToPlayer);
+
+                    Point origin = safeCandidatePointsInRoom.First();
                     var candidatePointsFromFirstPoint = candidatePointsInRoom.OrderBy(pt => Utility.GetDistanceBetween(origin, pt));
 
                     List<Point> candidatePointsSpaced = new List<Point>();

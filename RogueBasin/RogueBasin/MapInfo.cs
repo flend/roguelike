@@ -155,7 +155,7 @@ namespace RogueBasin
             startRoom = builder.StartRoom;
             doors = builder.Doors;
 
-            model = new MapModel(map, startRoom);
+            //model = new MapModel(map, startRoom);
 
             BuildRoomIndices();
         }

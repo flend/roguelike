@@ -1182,7 +1182,7 @@ namespace RogueBasin {
                     break;
 
                 case AttackType.Laser:
-                    explosionSprite = "bullet";
+                    explosionSprite = "laz";
                     break;
 
                 case AttackType.Stun:

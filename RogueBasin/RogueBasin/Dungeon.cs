@@ -2709,7 +2709,7 @@ namespace RogueBasin
             var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Stun);
 
             foreach (Point sq in grenadeAffectsFiltered)
             {
