@@ -9,10 +9,12 @@ namespace RogueBasin
     class RoyaleMonsterPlacement
     {
         List<Func<int, double, IEnumerable<Monster>>> monsterGenerators = new List<Func<int, double, IEnumerable<Monster>>>();
+        List<Func<IEnumerable<Item>>> itemGenerators = new List<Func<IEnumerable<Item>>>();
 
         public RoyaleMonsterPlacement()
         {
             SetupMonsterGenerators();
+            SetupItemGenerators();
         }
 
         private void SetupMonsterGenerators()
@@ -20,6 +22,35 @@ namespace RogueBasin
             monsterGenerators.Add(SwarmerSet);
             monsterGenerators.Add(GrenadierSet);
             monsterGenerators.Add(ThugSet);
+        }
+
+        private void SetupItemGenerators()
+        {
+            itemGenerators.Add(ShotgunItem);
+            itemGenerators.Add(AxeItem);
+            itemGenerators.Add(LaserItem);
+            itemGenerators.Add(FragGrenade);
+
+        }
+
+        public IEnumerable<Item> ShotgunItem()
+        {
+            return new List<Item> { new Items.Shotgun() };
+        }
+
+        public IEnumerable<Item> AxeItem()
+        {
+            return new List<Item> { new Items.Axe() };
+        }
+
+        public IEnumerable<Item> LaserItem()
+        {
+            return new List<Item> { new Items.Laser() };
+        }
+
+        public IEnumerable<Item> FragGrenade()
+        {
+            return new List<Item> { new Items.FragGrenade() };
         }
 
         public int LevelWithVariance(int level, double levelVariance)
@@ -81,12 +112,51 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntryDebug("Placing total monster XP (base)" + levelMonsterXP, LogDebugLevel.Medium);
 
-                PlaceMonsterSets(mapInfo, levelNo, monsterSets);
+                var monsterSetPositions = PlaceMonsterSets(mapInfo, levelNo, monsterSets);
+
+                PlaceItemSets(mapInfo, levelNo, monsterSetPositions);
             }
         }
 
-        private void PlaceMonsterSets(MapInfo mapInfo, int levelNo, IEnumerable<IEnumerable<Monster>> monsterSetsGenerated)
+
+        private void PlaceItemSets(MapInfo mapInfo, int levelNo, List<Point> monsterSetPositions)
         {
+            //Place a couple of random items near each group
+            MessageBox.Show("Stop");
+            foreach(Point origin in monsterSetPositions) {
+                var candidateSquares = Game.Dungeon.GetWalkableSquaresFreeOfCreaturesWithinRange(levelNo, origin, 3, 7);
+                var squaresToPlace = candidateSquares.Shuffle();
+
+                int numberOfItems = 1;
+                for (int i = 0; i < numberOfItems; i++)
+                {
+                    var generatorToUse = itemGenerators.RandomElement();
+                    var itemToPlace = generatorToUse();
+
+                    int itemsPlaced = 0;
+
+                    foreach (Point p in squaresToPlace)
+                    {
+                        bool placedSuccessfully = Game.Dungeon.AddItem(itemToPlace.ElementAt(itemsPlaced), levelNo, p);
+
+                        if (placedSuccessfully)
+                        {
+                            LogFile.Log.LogEntryDebug("Placing item " + itemToPlace.ElementAt(itemsPlaced) + " at " + p + " close to set at " + origin, LogDebugLevel.Medium);
+
+                            itemsPlaced++;
+
+                            if (itemsPlaced == itemToPlace.Count())
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private List<Point> PlaceMonsterSets(MapInfo mapInfo, int levelNo, IEnumerable<IEnumerable<Monster>> monsterSetsGenerated)
+        {
+            var monsterSetPositions = new List<Point>();
+
             //Get points in rooms
             var allRoomsAndCorridors = mapInfo.GetRoomIndicesForLevel(levelNo);//.Except(new List<int> { mapInfo.StartRoom });
             var rooms = mapInfo.FilterOutCorridors(allRoomsAndCorridors).ToList();
@@ -138,14 +208,15 @@ namespace RogueBasin
             {
                 int monsterSetsToPlaceInRoom = monstersPerRoom[r];
 
-                for (int setNo = 0; setNo < monstersPerRoom[r]; setNo++) {
+                for (int setNo = 0; setNo < monstersPerRoom[r]; setNo++)
+                {
 
                     var candidatePointsInRoom = roomsAndPointsInRooms.ElementAt(r).Item2.Shuffle();
                     Point origin = candidatePointsInRoom.First();
                     var candidatePointsFromFirstPoint = candidatePointsInRoom.OrderBy(pt => Utility.GetDistanceBetween(origin, pt));
 
                     List<Point> candidatePointsSpaced = new List<Point>();
-                    
+
                     var monsterSet = monsterSetsGenerated.ElementAt(totalSetNo);
                     totalSetNo++;
                     var monsterNo = 0;
@@ -164,7 +235,13 @@ namespace RogueBasin
                         bool placedSuccessfully = Game.Dungeon.AddMonster(thisMonster, levelNo, p);
                         if (placedSuccessfully)
                         {
+                            if (monsterNo == 0)
+                            {
+                                //Make a note of the location of the first monster in each set
+                                monsterSetPositions.Add(p);
+                            }
                             monsterNo++;
+
                         }
                     }
 
@@ -180,6 +257,8 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntryDebug("Unable to place " + (monsterSetsGenerated.Count() - totalSetNo) + " sets on level " + levelNo, LogDebugLevel.High);
             }
+
+            return monsterSetPositions;
         }
     }
 }

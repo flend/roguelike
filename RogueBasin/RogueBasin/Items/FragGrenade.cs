@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -105,12 +105,12 @@ namespace RogueBasin.Items
 
         protected override string GetGameSprite()
         {
-            return null;
+            return "grenade";
         }
 
         protected override string GetUISprite()
         {
-            return "ui-items_0001_he";
+            return "ui-grenade";
         }
 
         public override System.Drawing.Color GetColour()

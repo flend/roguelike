@@ -1676,9 +1676,9 @@ namespace RogueBasin
         
         public virtual bool PickUpItem(Item itemToPickUp)
         {
-            base.PickUpItem(itemToPickUp);
+            bool pickedUp = base.PickUpItem(itemToPickUp);
 
-            if (AutoequipItem(itemToPickUp))
+            if (pickedUp && AutoequipItem(itemToPickUp))
             {
                 EquipAndReplaceItem(itemToPickUp);
             }
@@ -1795,8 +1795,18 @@ namespace RogueBasin
                     UnequipAndDestroyItem(oldItem);
                 }
                 else
-                    UnequipAndDropItem(oldItem);
-
+                {
+                    if (oldItemEquippable.EquipmentSlots.Where(x => x == EquipmentSlot.Utility).Any())
+                    {
+                        //Don't drop utilities
+                        UnequipItem(oldItem);
+                    }
+                    else
+                    {
+                        UnequipAndDropItem(oldItem);
+                    }
+                }
+                    
                 //This slot is now free
                 freeSlot = matchingEquipSlots[0];
             }
@@ -1819,6 +1829,10 @@ namespace RogueBasin
 
         private bool IsObselete(Item oldItem)
         {
+            //Pistol is never dropped
+            if (oldItem is Items.Pistol)
+                return true;
+                     /*   
             if (oldItem is Items.Pistol && IsWeaponTypeAvailable(typeof(Items.HeavyPistol)))
                 return true;
 
@@ -1826,7 +1840,7 @@ namespace RogueBasin
                 return true;
 
             if (oldItem is Items.Laser && IsWeaponTypeAvailable(typeof(Items.HeavyLaser)))
-                return true;
+                return true;*/
             return false;
         }
 
@@ -2886,6 +2900,14 @@ namespace RogueBasin
         internal bool IsAimActive()
         {
             return TurnsMoving == 0 && TurnsSinceAction > 1 && TurnsInactive > 1 && IsEffectActive(typeof(PlayerEffects.Aim));
+        }
+
+        internal void GivePistol()
+        {
+            LogFile.Log.LogEntryDebug("Giving player default pistol", LogDebugLevel.Medium);
+            var pistol = new Items.Pistol();
+            Inventory.AddItemNotFromDungeon(pistol);
+            EquipAndReplaceItem(pistol);
         }
     }
 }

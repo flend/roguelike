@@ -705,9 +705,6 @@ namespace RogueBasin
         {
             Player player = Player;
 
-            //Remove 1 ammo
-            item.Ammo--;
-
             //Make firing sound
             AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
 
@@ -2609,7 +2606,7 @@ namespace RogueBasin
                 damage *= 2;
 
             //Work out grenade splash and damage
-            DoGrenadeExplosion(level, target, size, damage, null);
+            DoGrenadeExplosion(level, target, size, damage, Game.Dungeon.Player);
 
             return (destination);
 
@@ -2623,7 +2620,7 @@ namespace RogueBasin
         /// <param name="size"></param>
         /// <param name="damage"></param>
         /// <param name="originMonster"></param>
-        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Monster originMonster)
+        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Creature originMonster)
         {
             //Work out grenade splash and damage
             List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
@@ -2652,9 +2649,9 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    if (originMonster != null)
+                    if (originMonster != null && originMonster != Game.Dungeon.Player)
                     {
-                        originMonster.ApplyDamageToMonster(originMonster, m, damage);
+                        (originMonster as Monster).ApplyDamageToMonster(originMonster, m, damage);
                     }
                     else
                     {
@@ -2667,11 +2664,14 @@ namespace RogueBasin
 
             if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
             {
-                string combatResultsMsg = "MvP (" + originMonster.Representation + ") Grenade: Dam: " + damage;
-
-                //Apply damage (uses damage base)
                 if (originMonster != null)
-                    player.ApplyCombatDamageToPlayer(originMonster, damage, true);
+                {
+                    string combatResultsMsg = "MvP (" + originMonster.Representation + ") Grenade: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                }
+                //Apply damage (uses damage base)
+                if (originMonster != null && originMonster != Game.Dungeon.Player)
+                    player.ApplyCombatDamageToPlayer((originMonster as Monster), damage, true);
                 else
                     player.ApplyCombatDamageToPlayer(damage);
             }
@@ -4914,6 +4914,74 @@ namespace RogueBasin
                     //Empty and walkable
                     adjacentSqFree.Add(p);
                 }
+            }
+
+            return adjacentSqFree;
+        }
+
+        public List<Point> GetValidMapSquaresWithinRange(int locationLevel, Point locationMap, int range)
+        {
+            List<Point> pointsToReturn = new List<Point>();
+            Map currentMap = levels[locationLevel];
+
+            int xl = locationMap.x - range;
+            int xr = locationMap.x + range;
+
+            int yt = locationMap.y - range;
+            int yb = locationMap.y + range;
+
+            if (xl < 0)
+                xl = 0;
+            if (xr >= currentMap.width)
+                xr = currentMap.width - 1;
+            if (yt < 0)
+                yt = 0;
+            if (yb >= currentMap.height)
+                yb = currentMap.height - 1;
+
+            for (int i = xl; i <= xr; i++)
+            {
+                for (int j = yt; j <= yb; j++)
+                {
+                    pointsToReturn.Add(new Point(i, j));
+                }
+            }
+
+            return pointsToReturn;
+        }
+
+        public List<Point> GetWalkableSquaresFreeOfCreaturesWithinRange(int locationLevel, Point locationMap, int minRange, int maxRange)
+        {
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSqFree = new List<Point>();
+            List<Point> maxRangeSq = GetValidMapSquaresWithinRange(locationLevel, locationMap, maxRange);
+            List<Point> minRangeSq = GetValidMapSquaresWithinRange(locationLevel, locationMap, minRange);
+
+            var adjacentSq = maxRangeSq.Except(minRangeSq);
+            
+            foreach (Point p in adjacentSq)
+            {
+
+                if (!MapSquareIsWalkable(locationLevel, p))
+                {
+                    continue;
+                }
+
+                //Check square has nothing else on it
+                SquareContents contents = MapSquareContents(locationLevel, p);
+
+                if (contents.monster != null)
+                {
+                    continue;
+                }
+
+                if (contents.player != null)
+                    continue;
+
+                //Empty and walkable
+                adjacentSqFree.Add(p);
+
             }
 
             return adjacentSqFree;

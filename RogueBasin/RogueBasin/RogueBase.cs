@@ -31,7 +31,7 @@ namespace RogueBasin
 
         enum TargettingAction
         {
-            Weapon, Examine
+            Weapon, Examine, Utility
         }
 
         /// <summary>
@@ -610,13 +610,26 @@ namespace RogueBasin
                                         TargetWeapon();
                                         timeAdvances = false;
                                     }
-                                    else if (Game.Dungeon.Player.GetEquippedRangedWeapon().HasThrowAction())
+
+                                    if (timeAdvances)
+                                        SpecialMoveNonMoveAction();
+
+                                    centreOnPC = true;
+                                    break;
+
+                                case Key.T:
+                                    //Use utility (throw or operate)
+                                    if (Game.Dungeon.Player.GetEquippedUtility() == null)
+                                        break;
+
+                                    if (Game.Dungeon.Player.GetEquippedUtility().HasThrowAction())
                                     {
-                                        timeAdvances = ThrowWeapon();
+                                        TargetThrowUtility();
+                                        timeAdvances = false;
                                     }
-                                    else if (Game.Dungeon.Player.GetEquippedRangedWeapon().HasOperateAction())
+                                    else if (Game.Dungeon.Player.GetEquippedUtility().HasOperateAction())
                                     {
-                                        timeAdvances = UseWeapon();
+                                        timeAdvances = UseUtility();
                                     }
 
                                     if (timeAdvances)
@@ -1298,7 +1311,7 @@ namespace RogueBasin
             if (!wasDirection)
             {
                 //Look for firing
-                if (args.Key == Key.F)
+                if (args.Key == Key.F || args.Key == Key.T)
                 {
                     validFire = true;
                 }
@@ -1336,7 +1349,7 @@ namespace RogueBasin
 
                 //Update screen
                 Screen.Instance.Target = newPoint;
-                Game.MessageQueue.AddMessage("Find a target. " + 'f' + " to confirm. ESC to exit.");
+                Game.MessageQueue.AddMessage("Find a target. " + TargettingConfirmChar + " to confirm. ESC to exit.");
 
                 return;
             }
@@ -1359,6 +1372,14 @@ namespace RogueBasin
 
                             //Time advances only on success
                             waitingForTurnTick = FireTargettedWeapon(currentTarget);
+                            Game.Dungeon.Player.ResetTurnsMoving();
+                            Game.Dungeon.Player.ResetTurnsSinceAction();
+                            break;
+
+                        case TargettingAction.Utility:
+
+                            //Time advances only on success
+                            waitingForTurnTick = ThrowTargettedUtility(currentTarget);
                             Game.Dungeon.Player.ResetTurnsMoving();
                             Game.Dungeon.Player.ResetTurnsSinceAction();
                             break;
@@ -2207,12 +2228,102 @@ namespace RogueBasin
             return false;
         }
 
-
-
         /// <summary>
         /// Fire weapon. Returns if time passes.
         /// </summary>
         /// <returns></returns>
+        private void TargetThrowUtility()
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            //Check we have a throwable weapon
+            IEquippableItem weapon = player.GetEquippedUtility();
+            Item weaponI = player.GetEquippedUtilityAsItem();
+
+            if (weapon == null || !weapon.HasThrowAction())
+            {
+                Game.MessageQueue.AddMessage("Need a utility that can be thrown.");
+                return;
+            }
+
+            Point target = new Point();
+
+            int range = weapon.RangeThrow();
+            TargettingType targetType = weapon.TargetTypeThrow();
+
+            //Calculate FOV
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+            targettingAction = TargettingAction.Utility;
+            TargetAttack(range, targetType, 0.0, 't', currentFOV);
+        }
+
+        private bool ThrowTargettedUtility(Point target)
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            IEquippableItem toThrow = player.GetEquippedUtility();
+            Item toThrowItem = player.GetEquippedUtilityAsItem();
+
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            int range = toThrow.RangeThrow();
+
+            //Check we are in range of target (not done above)
+            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
+            {
+                Game.MessageQueue.AddMessage("Out of range!");
+                LogFile.Log.LogEntryDebug("Out of range for " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
+
+                return false;
+            }
+
+            //Actually do throwing action
+            Point destinationSq = toThrow.ThrowItem(target);
+
+            //Remove stealth
+            RemoveEffectsDueToThrowing(player);
+
+            //Destroy it if required
+            if (toThrow.DestroyedOnThrow())
+            {
+                player.UnequipAndDestroyItem(toThrowItem);
+
+                //Try to reequip if we have more
+                player.EquipInventoryItemType(toThrow.GetType());
+
+                return true;
+            }
+
+            if (destinationSq != null)
+            {
+                //Drop the item at the end point
+
+                Point dropTarget = destinationSq;
+
+                //If there is a creature at the end point, try to find a free area
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, destinationSq);
+
+                //Is there a creature here? If so, try to find another location
+                if (squareContents.monster != null)
+                {
+                    //Get surrounding squares
+                    List<Point> freeSqs = dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(player.LocationLevel, destinationSq);
+
+                    if (freeSqs.Count > 0)
+                    {
+                        dropTarget = freeSqs[Game.Random.Next(freeSqs.Count)];
+                    }
+                }
+
+                player.UnequipAndDropItem(toThrowItem, player.LocationLevel, dropTarget);
+            }
+
+            //Time only goes past if successfully thrown
+            return true;
+        }
+
         private void TargetWeapon()
         {
             Dungeon dungeon = Game.Dungeon;
@@ -2247,7 +2358,6 @@ namespace RogueBasin
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
 
-            //Check we have a fireable weapon
             IEquippableItem weapon = player.GetEquippedRangedWeapon();
             Item weaponI = player.GetEquippedRangedWeaponAsItem();
 
@@ -2293,6 +2403,7 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage("This " + (weapon as Item).SingleItemDescription + " is all out of ammo! Ditching it!");
                 LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
                 player.UnequipAndDestroyItem(weapon as Item);
+                player.GivePistol();
             }
 
             //Store details for a recast
@@ -2585,6 +2696,7 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
 
             inputState = InputState.Targetting;
+            TargettingConfirmChar = confirmChar;
             currentTarget = start;
         }
 
@@ -2984,5 +3096,7 @@ namespace RogueBasin
         {
             PlayerStartsLevel(0);
         }
+
+        public char TargettingConfirmChar { get; set; }
     }
 }

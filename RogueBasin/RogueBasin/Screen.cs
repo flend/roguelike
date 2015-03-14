@@ -1686,7 +1686,7 @@ namespace RogueBasin {
 
         System.Drawing.Point rangedWeaponUICenter = new System.Drawing.Point(160, 152);
         System.Drawing.Point meleeWeaponUICenter = new System.Drawing.Point(38, 152);
-
+        System.Drawing.Point utilityUICenter = new System.Drawing.Point(287, 152);
 
         private void DrawGraduatedBar(string id, double fullness, Rectangle barArea, double spacing)
         {
@@ -1786,6 +1786,25 @@ namespace RogueBasin {
                 var playerRangedTextOffset = new System.Drawing.Point(10, 45);
                 var rangedStr = "Melee: " + rangedDamage;
                 DrawText(rangedStr, playerTextUI_UsefulTL.Add(playerRangedTextOffset));
+            }
+
+            //Draw equipped utility weapon
+            Item utility = player.GetEquippedUtilityAsItem();
+
+            if (utility != null)
+            {
+                IEquippableItem weaponE = utility as IEquippableItem;
+
+                String weaponSpriteId = utility.UISprite;
+
+                if (weaponSpriteId != null)
+                {
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.X + utilityUICenter.X, playerUI_TL.Y + utilityUICenter.Y);
+                }
+                else
+                {
+                    DrawUITraumaSpriteByCentre(utility.Representation, playerUI_TL.X + utilityUICenter.X, playerUI_TL.Y + utilityUICenter.Y);
+                }
             }
             
             //Draw Shield
