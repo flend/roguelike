@@ -232,6 +232,8 @@ namespace RogueBasin
                 if (usingSpecial)
                     CheckReload();
 
+                //Disable this so no reloads
+                /*
                 if (!usingSpecial)
                 {
                     //In FOV - fire at the player
@@ -253,7 +255,7 @@ namespace RogueBasin
 
                     //Missile animation
                     Screen.Instance.DrawMissileAttack(this, newTarget, result, GetWeaponColor());
-                }
+                }*/
             }
 
             //Not in range, chase the target

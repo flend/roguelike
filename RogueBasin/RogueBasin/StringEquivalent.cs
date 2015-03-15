@@ -53,6 +53,11 @@ namespace RogueBasin
             TerrainSprites.Add(MapTerrain.Empty, "ground");
             TerrainSprites.Add(MapTerrain.NonWalkableFeature, "ground");
             TerrainSprites.Add(MapTerrain.NonWalkableFeatureLightBlocking, "ground");
+            TerrainSprites.Add(MapTerrain.OpenDoor, "opendoor");
+            TerrainSprites.Add(MapTerrain.ClosedDoor, "closeddoor");
+            TerrainSprites.Add(MapTerrain.OpenLock, "opendoor");
+            TerrainSprites.Add(MapTerrain.ClosedLock, "closeddoor");
+            TerrainSprites.Add(MapTerrain.Wall, "wall");
         }
 
         public static void OverrideTerrainChar(MapTerrain terrain, char c)

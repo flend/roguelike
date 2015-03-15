@@ -5418,9 +5418,11 @@ namespace RogueBasin
             return player.LocationLevel / 3;
         }
 
+        public static int TotalArenas = 6;
+
         internal void ExitLevel()
         {
-            if (player.LocationLevel / 3 == 5)
+            if (player.LocationLevel / 3 == TotalArenas)
             {
                 //Game over folks
                 Game.Base.DoEndOfGame(true, true, false);

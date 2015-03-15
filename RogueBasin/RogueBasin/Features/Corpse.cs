@@ -9,6 +9,7 @@ namespace RogueBasin.Features
     {
         char representation;
         System.Drawing.Color representationColor;
+        Type monsterType;
 
         public Corpse()
         {

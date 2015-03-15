@@ -106,11 +106,11 @@ namespace RogueBasin
             //hacks
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
             {
-                List<Monster> punks = new List<Monster> { new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1), 
+                List<Monster> punks = new List<Monster> { //new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1), 
                     new Creatures.Grenade(100, 20), new Creatures.Grenade(100, 20),
                 new Creatures.Mine(50), new Creatures.Mine(50),
-                new Creatures.Grenadier(1), new Creatures.Grenadier(1) };
-                //AddMonstersToRoom(mapInfo, i, 0, punks);
+                new Creatures.Zomborg(1), new Creatures.Zomborg(1) };
+                AddMonstersToRoom(mapInfo, i, 0, punks);
                
 
                 List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(),

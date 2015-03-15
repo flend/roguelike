@@ -992,7 +992,7 @@ namespace RogueBasin {
             DrawMap(levelToDisplay, dungeon.Levels);
 
             //Draw locks
-            DrawLocks(levelToDisplay, dungeon.Locks);
+            //DrawLocks(levelToDisplay, dungeon.Locks);
 
             //Draw fixed features
             DrawFeatures(levelToDisplay, dungeon.Features);
@@ -1189,7 +1189,7 @@ namespace RogueBasin {
 
             DrawNextLine(fameText, centrePoint, titleColor);
 
-            var viewingFigures = (int)Math.Round(totalFame / (double)5000 * 100);
+            var viewingFigures = (int)Math.Round(totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 ));
 
             string fameStr = "A slime mold";
 
@@ -3371,10 +3371,11 @@ namespace RogueBasin {
 
                     if (isViewVisible(mapTerrainLoc) && drawSquare)
                     {
-                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(screenChar);
+                        //tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(screenChar);
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(terrainSprite); 
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileFlag = new LibtcodColorFlags(drawColor);
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].Transparency = spriteTransparency;
-                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileSprite = terrainSprite;
+                        
 
                         tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(effectSprite);
                         tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)].Transparency = effectTransparency;

@@ -63,7 +63,7 @@ namespace RogueBasin
 
             monsterGenerators[2] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
-                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, ThugSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 200, ThugSet ),
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet ),
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, PunkSet )
             };
@@ -71,14 +71,29 @@ namespace RogueBasin
             monsterGenerators[3] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet ),
-                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, GrenadierSet )
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 200, GrenadierSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, ThugSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, PsychoSet )
             };
 
             monsterGenerators[4] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet ),
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, GrenadierSet ),
                 new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, ThugSet ),
-                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet )
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 200, JunkborgSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, PsychoSet )
+
+            };
+
+            monsterGenerators[5] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, GrenadierSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, ThugSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, JunkborgSet ),
+               new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, PsychoSet )
+
             };
 
         }
@@ -225,6 +240,12 @@ namespace RogueBasin
             return new Creatures.Hunter(level);
         }
 
+        public Monster MonsterJunkborg(int level)
+        {
+            return new Creatures.Junkborg(level);
+        }
+
+
 
         public int LevelWithVariance(int level, double levelVariance)
         {
@@ -248,6 +269,13 @@ namespace RogueBasin
             return MonsterType(3, 1, 0.2, level, levelVariance, MonsterPunk);
         }
 
+        public IEnumerable<Monster> JunkborgSet(int level, double levelVariance)
+        {
+            var punks = MonsterType(3, 2, 0.2, level, levelVariance, MonsterPunk);
+            var junkborg = MonsterType(1, 0, 0, level, levelVariance, MonsterJunkborg);
+            return punks.Concat(junkborg);
+        }
+
         public IEnumerable<Monster> GrenadierSet(int level, double levelVariance)
         {
             var punks = MonsterType(3, 3, 0.2, level, levelVariance, MonsterPunk);
@@ -262,6 +290,13 @@ namespace RogueBasin
             var psychos = MonsterType(1, 1, 0.2, level, levelVariance, MonsterPsycho);
 
             return thugs.Concat(psychos);
+        }
+
+        public IEnumerable<Monster> PsychoSet(int level, double levelVariance)
+        {
+            var psychos = MonsterType(2, 2, 0.2, level, levelVariance, MonsterPsycho);
+
+            return psychos;
         }
 
         public IEnumerable<Monster> HunterSet(int level, double levelVariance)
@@ -305,7 +340,7 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Placing total monster XP (base)" + levelMonsterXP, LogDebugLevel.Medium);
 
                 var monsterSetPositions = PlaceMonsterSets(mapInfo, levelNo, monsterSets, entryPoint);
-                var items = GetRandomsItemForPlayer(monsterSetPositions.Count());
+                var items = GetRandomsItemForPlayer(8);
                 PlaceItemSets(mapInfo, levelNo, monsterSetPositions, items);
             }
         }
@@ -315,10 +350,13 @@ namespace RogueBasin
             var player = Game.Dungeon.Player;
             IEnumerable<IEnumerable<Item>> items = new List<List<Item>>();
 
+            
             var itemTypesToGenerate = Enumerable.Repeat(0, numberOfItems).Select(x => ChooseItemFromWeights(classItemCategories[player.PlayerClass]));
             var weightedGenerators = itemTypesToGenerate.Select(itemType => itemGenerators[itemType]);
             var generatorsToUse = weightedGenerators.Select(weightedGen => ChooseItemFromWeights(weightedGen));
             items = generatorsToUse.Select(gen => gen());
+            
+            //items = AddExtraItemsToSets(numberOfItems, items, ChooseItemFromWeights(classItemCategories[player.PlayerClass]));
 
             //Add extra utilities for the nerd
             if (player.PlayerClass == PlayerClass.Sneaker)
@@ -364,26 +402,25 @@ namespace RogueBasin
             var extraItemsAdded = originalItems.Zip(extraItems, (a, b) => a.Concat(b));
             var allItems = extraItemsAdded.Concat(originalItems.Skip(extraItems.Count()));
             return allItems;
-
         }
 
 
         private void PlaceItemSets(MapInfo mapInfo, int levelNo, List<Point> monsterSetPositions, IEnumerable<IEnumerable<Item>> itemSetsToPlace)
         {
 
-            //remove in production code
-            if (monsterSetPositions.Count() != itemSetsToPlace.Count())
-            {
-                throw new ApplicationException("items and monster sets different lengths");
-            }
-
-            var itemsAndPlaces = monsterSetPositions.Zip(itemSetsToPlace, (f, s) => new Tuple<Point, IEnumerable<Item>>(f, s));
+            //var itemsAndPlaces = monsterSetPositions.Zip(itemSetsToPlace, (f, s) => new Tuple<Point, IEnumerable<Item>>(f, s));
 
             //Place a couple of random items near each group
-            foreach (var pointAndItem in itemsAndPlaces)
+            int counter = 0;
+            foreach (var itemsToPlace in itemSetsToPlace)
             {
-                var origin = pointAndItem.Item1;
-                var itemsToPlace = pointAndItem.Item2;
+                //var origin = pointAndItem.Item1;
+                //var itemsToPlace = pointAndItem.Item2;
+
+                if (counter >= monsterSetPositions.Count())
+                    counter = 0;
+
+                Point origin = monsterSetPositions.ElementAt(counter);
 
                 var candidateSquares = Game.Dungeon.GetWalkableSquaresFreeOfCreaturesWithinRange(levelNo, origin, 3, 7);
                 var squaresToPlace = candidateSquares.Shuffle();
@@ -404,7 +441,7 @@ namespace RogueBasin
                             break;
                     }
                 }
-
+                counter++;
             }
         }
 
