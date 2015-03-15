@@ -31,7 +31,7 @@ namespace RogueBasin
         void PrintString(string msg, int x, int y, Color color);
 
         void DrawText(string msg, int x, int y, Color color);
-
+        void DrawTextWidth(string msg, int x, int y, int width, Color color);
         void DrawText(string msg, int x, int y, LineAlignment alignment, Color color);
         void DrawSmallText(string msg, int x, int y, LineAlignment alignment, Color color);
         void DrawLargeText(string msg, int x, int y, LineAlignment alignment, Color color);

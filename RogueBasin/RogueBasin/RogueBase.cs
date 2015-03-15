@@ -26,7 +26,7 @@ namespace RogueBasin
         enum InputState
         {
             MapMovement, Targetting, InventoryShow, InventorySelect,
-            YesNoPrompt,
+            YesNoPrompt, FPrompt,
             MovieDisplay, PreMapMovement, SpecialScreen
         }
 
@@ -161,15 +161,18 @@ namespace RogueBasin
 
         private void ApplicationTickEventHandler(object sender, TickEventArgs args)
         {
+            if (!Game.Dungeon.RunMainLoop)
+            {
+                Events.QuitApplication();
+                return;
+            }
+
             ProfileEntry("Tick Event");
 
             //LogFile.Log.LogEntryDebug("FPS: " + args.Fps, LogDebugLevel.Medium);
             //LogFile.Log.LogEntryDebug("FPS tick: " + args.Tick, LogDebugLevel.Medium);
 
-            if (!Game.Dungeon.RunMainLoop)
-            {
-                Events.QuitApplication();
-            }
+            
 
             if(GameStarted)
                 AdvanceDungeonToNextPlayerTick();
@@ -534,7 +537,7 @@ namespace RogueBasin
 
                     //Before entering an arena you can view the arenas to come
                     case InputState.PreMapMovement:
-
+                        /*
                         if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
                         {
                             switch (args.Key)
@@ -552,7 +555,7 @@ namespace RogueBasin
                                     break;
                             }
 
-                        }
+                        }*/
                         break;
 
                 }
@@ -566,6 +569,10 @@ namespace RogueBasin
 
                     case InputState.YesNoPrompt:
                         YesNoPromptKeyboardEvent(args);
+                        break;
+
+                    case InputState.FPrompt:
+                        FPromptKeyboardEvent(args);
                         break;
 
                     case InputState.MovieDisplay:
@@ -1311,6 +1318,11 @@ namespace RogueBasin
             SetupArenaSelection();
         }
 
+        public void DoFunModeDeath()
+        {
+            this.SetSpecialScreenAndHandler(Screen.Instance.FunModeDeathScreen, FunModeDeathKeyHandler);
+        }
+
         private void SetupArenaSelection()
         {
             Screen.Instance.ArenaItems = Game.Dungeon.Items.Where(i => i.LocationLevel == Game.Dungeon.Player.LocationLevel);
@@ -1346,6 +1358,14 @@ namespace RogueBasin
                 Game.Dungeon.Player.SetPlayerClass(PlayerClass.Sneaker);
                 PostCharacterSelection();
             }
+            if (args.Key == Key.R)
+            {
+                Game.Dungeon.FunMode = false;
+            }
+            if (args.Key == Key.F)
+            {
+                Game.Dungeon.FunMode = true;
+            }
         }
 
         public void PostCharacterSelection()
@@ -1379,15 +1399,31 @@ namespace RogueBasin
             if (args.Key == Key.F)
             {
                 ClearSpecialScreenAndHandler();
+
                 Screen.Instance.NeedsUpdate = true;
+                Screen.Instance.Update(0);
+                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+            }
+        }
+
+        public void FunModeDeathKeyHandler(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.F)
+            {
+                ClearSpecialScreenAndHandler();
+
+                Screen.Instance.NeedsUpdate = true;
+                Screen.Instance.Update(0);
+                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
             }
         }
 
         public void EndOfGameSelectionKeyHandler(KeyboardEventArgs args)
         {
+            Game.Dungeon.RunMainLoop = false;
+
             if (args.Key == Key.Return)
             {
-                Events.QuitApplication();
             }
         }
         
@@ -1438,6 +1474,22 @@ namespace RogueBasin
                     inputState = InputState.MapMovement;
                     Screen.Instance.ClearPrompt();
                 }
+            }
+        }
+
+        private void FPromptKeyboardEvent(KeyboardEventArgs args)
+        {
+            inputState = InputState.MapMovement;
+            Screen.Instance.ClearPrompt();
+
+            if (args.Key == Key.F)
+            {
+                if (promptAction != null)
+                {
+                    promptAction(true);
+
+                }
+                
             }
         }
 
@@ -3235,6 +3287,16 @@ namespace RogueBasin
             promptAction = action;
         }
 
+        public void FPrompt(string introMessage, Action<bool> action)
+        {
+            Screen.Instance.SetPrompt(introMessage);
+            Screen.Instance.NeedsUpdate = true;
+
+            inputState = InputState.FPrompt;
+            promptAction = action;
+        }
+
+
         public void PlayMovie(string filename, bool keypressBetweenFrames)
         {
             inputState = InputState.MovieDisplay;
@@ -3318,6 +3380,11 @@ namespace RogueBasin
             Screen.Instance.EndOfGameQuit = quit;
 
             this.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, EndOfGameSelectionKeyHandler);
+        }
+
+        internal void SetupFunModeDeath()
+        {
+            this.SetSpecialScreenAndHandler(Screen.Instance.FunModeDeathScreen, FunModeDeathKeyHandler);
         }
     }
 }

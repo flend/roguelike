@@ -996,7 +996,8 @@ namespace RogueBasin
                 baseDamage = item.MeleeDamage();
             }
 
-            var modifiedDamage = (int)Math.Ceiling(CalculateMeleeAttackModifiersOnMonster(monster) * baseDamage);
+            var modifiedDamage = ScaleMeleeDamage(GetEquippedMeleeWeapon() as Item, baseDamage);
+                //(int)Math.Ceiling(CalculateMeleeAttackModifiersOnMonster(monster) * baseDamage);
 
             string combatResultsMsg = "PvM (melee) " + monster.Representation + " base " + baseDamage + " mod " + modifiedDamage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);

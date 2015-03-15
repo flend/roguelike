@@ -2493,11 +2493,11 @@ namespace RogueBasin
             }
             if (delta == new Point(-1, 0))
             {
-                return new List<Point> { new Point(-1, 1), new Point(-1, 1) };
+                return new List<Point> { new Point(-1, 1), new Point(1, 1) };
             }
             else// (delta == new Point(-1, -1))
             {
-                return new List<Point> { new Point(-1, 0), new Point(-1, 0) };
+                return new List<Point> { new Point(-1, 0), new Point(0, 1) };
             }
 
         }
@@ -4033,12 +4033,12 @@ namespace RogueBasin
 
         private void RestartLevelOnFailure()
         {
-            Game.Base.PlayMovie("fun_mode_failure", true);
             TeleportToArena(player.LocationLevel);
             player.CombatXP = 0;
             Game.Dungeon.Player.HealCompletely();
             Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
             Screen.Instance.NeedsUpdate = true;
+            Game.Base.SetupFunModeDeath();
         }
 
         public struct KillRecord
@@ -5435,7 +5435,7 @@ namespace RogueBasin
 
         internal void ExitLevel()
         {
-            if (ArenaLevelNumber() == TotalArenas)
+            if (ArenaLevelNumber() == TotalArenas - 1)
             {
                 //Game over folks
                 Game.Base.DoEndOfGame(true, true, false);

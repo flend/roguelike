@@ -25,9 +25,18 @@ namespace RogueBasin.Locks
 
             //Test to see if all the monsters are dead
 
-            Game.Base.PlayerExitsLevel(level);
-            Game.MessageQueue.AddMessage("You escape arena " + level + " !");
+            var allMonsters = Game.Dungeon.Monsters.Where(m => m.LocationLevel == Game.Dungeon.Player.LocationLevel && m.Alive && !(m is Creatures.Mine) && !(m is Creatures.ExplosiveBarrel)).Count();
 
+            if (allMonsters == 0)
+            {
+
+                Game.Base.PlayerExitsLevel(level);
+                Game.MessageQueue.AddMessage("You escape arena " + level + " !");
+            }
+            else
+            {
+                Game.Base.FPrompt("The door won't open until they are all dead!", x => { });
+            }
             //Don't return true here or we will place an open door in a random place on the new level
             return false;
         }

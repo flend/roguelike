@@ -108,7 +108,7 @@ namespace RogueBasin
             {
                 List<Monster> punks = new List<Monster> { //new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1), 
                 new Creatures.ArenaMaster(21) };
-                AddMonstersToRoom(mapInfo, i, 0, punks);
+                //AddMonstersToRoom(mapInfo, i, 0, punks);
                
 
                 List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(),

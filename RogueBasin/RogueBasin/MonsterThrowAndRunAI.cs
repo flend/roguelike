@@ -228,7 +228,12 @@ namespace RogueBasin
                 //Special abilities are defined in derived classes
 
                 bool usingSpecial = UseSpecialAbility();
-                               
+
+                if (usingSpecial)
+                {
+                    CheckReload();
+                }
+
                 //Stop guy we don't want to fire from having to
                 if (!usingSpecial && DamageBase() > 0)
                 {

@@ -264,12 +264,12 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "pyro";
+            return "junkborg";
         }
 
         protected override string GetUISprite()
         {
-            return "pyro";
+            return "junkborg";
         }
 
         protected override int GetChanceToBackAway()

@@ -1064,6 +1064,8 @@ namespace RogueBasin {
             get; set;
         }
 
+        private System.Drawing.Color textColor = System.Drawing.Color.Khaki;
+
         public void CharacterSelectionScreen()
         {
             mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
@@ -1073,19 +1075,109 @@ namespace RogueBasin {
 
             var centreXOffset = ScreenWidth / 4;
             var centreYOffset = ScreenHeight / 4;
-            
-            var lanceCentre = new Point(centreXOffset, centreYOffset);
-            var crackCentre = new Point(centreXOffset * 2, centreYOffset);
-            var nerdCentre = new Point(centreXOffset * 3, centreYOffset);
 
-            DrawText("[1] Lance", lanceCentre - new Point(0, 50), LineAlignment.Center, titleColor);
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
+
+            var centreX = ScreenWidth / 2;
+
+            var lanceCentre = new Point(centreXOffset, graphicsY);
+            var crackCentre = new Point(centreXOffset * 2, graphicsY);
+            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
+
+            var titleLineOffset = 30;
+
+            DrawLargeText("Congratulations!", new System.Drawing.Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("You VOLUNTEERed for the RoyaLe!", new System.Drawing.Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("VERY LITTLE (6 arenas)", new System.Drawing.Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("now stands between you and victory!", new System.Drawing.Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+
+            DrawLargeText("State your name and history:", new System.Drawing.Point(centreX, topY + titleLineOffset * 5), LineAlignment.Center, textColor);
+            
+            var characterOffset = 50;
+
+            DrawText("[1] Lance", lanceCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
             DrawUISpriteByCentre("lance", lanceCentre);
 
-            DrawText("[2] Crack", crackCentre - new Point(0, 50), LineAlignment.Center, titleColor);
+            DrawText("[2] Crack", crackCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
             DrawUISpriteByCentre("crack", crackCentre);
 
-            DrawText("[3] Nerd", nerdCentre - new Point(0, 50), LineAlignment.Center, titleColor);
+            DrawText("[3] N3rd", nerdCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
             DrawUISpriteByCentre("nerd", nerdCentre);
+
+            var textY = 90;
+
+            var lanceText = "A disgraced athlete who was dismissed for his violent conduct in track and field. Ideal for the Arena.";
+            DrawTextWidth(lanceText, lanceCentre + new Point(-100, textY), 244, statsColor);
+
+            var crackText = "In 2072 a commando was sent to prison by a military court for a crime he absolutely did commit. Now fighting for the pleasure of TV viewers everywhere!";
+            DrawTextWidth(crackText, crackCentre + new Point(-100, textY), 244, statsColor);
+
+            var nerdText = "Having finally won GrandMaster league in popular video game 'Running Hunger Royale' the nerd was completely unprepared for his 'prize'!";
+            DrawTextWidth(nerdText, nerdCentre + new Point(-100, textY), 244, statsColor);
+
+            var specialY = 300;
+
+            var lanceSpecial = "Special: Keep moving for a melee and defence bonus!";
+            DrawTextWidth(lanceSpecial, lanceCentre + new Point(-100, specialY), 244, textColor);
+
+            var crackSpecial = "Special: Halt in place for a ranged and defence bonus!";
+            DrawTextWidth(crackSpecial, crackCentre + new Point(-100, specialY), 244, textColor);
+
+            var nerdSpecial = "Special: Sneak around and cause mayhem!";
+            DrawTextWidth(nerdSpecial, nerdCentre + new Point(-100, specialY), 244, textColor);
+
+            var styleY = 450;
+
+            if (Game.Dungeon.FunMode)
+            {
+                var funText1 = "FUN MODE!: Life's a laugh and death's a joke, it's true.";
+                var funText2 = "[R]: For roguelike mode!";
+
+                DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
+                DrawText(funText2, new Point(centreX, graphicsY + styleY + 30), LineAlignment.Center, textColor);
+            }
+            else
+            {
+                var funText1 = "ROGUELIKE MODE!: I learnt to Crawl before I could walk.";
+                var funText2 = "[F]: For FUN mode!";
+
+                DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
+                DrawText(funText2, new Point(centreX, graphicsY + styleY + 30), LineAlignment.Center, textColor);
+            }
+        }
+
+        public void FunModeDeathScreen()
+        {
+            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
+            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
+
+            var titleColor = System.Drawing.Color.Khaki;
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 4;
+
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
+
+            var centreX = ScreenWidth / 2;
+
+            var lanceCentre = new Point(centreXOffset, graphicsY);
+            var crackCentre = new Point(centreXOffset * 2, graphicsY);
+            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
+
+            var titleLineOffset = 30;
+
+            DrawLargeText("Congratulations!", new System.Drawing.Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("You DIED in the service of PRIME TIME TV!", new System.Drawing.Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("But...", new System.Drawing.Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("But...", new System.Drawing.Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, textColor);
+
+            DrawLargeText("You think the TV execs let you off that easy?", new System.Drawing.Point(centreX, topY + titleLineOffset * 6), LineAlignment.Center, textColor);
+
+            DrawLargeText("Press [F] to restart the area", new System.Drawing.Point(centreX, topY + titleLineOffset * 8), LineAlignment.Center, statsColor);
+
+            DrawLargeText("Oh yeah, you lose any fame you had...", new System.Drawing.Point(centreX, topY + titleLineOffset * 9), LineAlignment.Center, textColor);
         }
 
         public int ArenaSelected { get; set; }
@@ -1094,17 +1186,29 @@ namespace RogueBasin {
         
         public void ArenaSelectionScreen()
         {
+            var titleColor = System.Drawing.Color.Khaki;
+
             mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
             mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
 
-            var titleColor = System.Drawing.Color.Khaki;
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 4;
+
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
 
             var centreX = ScreenWidth / 2;
 
-            var centreXOffset = ScreenWidth / 4;
-            var centreYOffset = ScreenHeight / 8;
+            var lanceCentre = new Point(centreXOffset, graphicsY);
+            var crackCentre = new Point(centreXOffset * 2, graphicsY);
+            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
 
-            DrawText("Select your fate...", new Point(centreX, centreYOffset + 20), LineAlignment.Center, titleColor);
+            var titleLineOffset = 30;
+
+            DrawLargeText("Entering arena: " + (Game.Dungeon.ArenaLevelNumber() + 1), new System.Drawing.Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("Pick your poison!", new System.Drawing.Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("[Left] and [Right] to choose difficulty", new System.Drawing.Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("[F] to begin", new System.Drawing.Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
 
             string difficultyText = null;
             if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 3)
@@ -1120,10 +1224,13 @@ namespace RogueBasin {
                 difficultyText = "You must be joking (!!!)";
             }
 
-            DrawText(difficultyText, new Point(centreX, centreYOffset + 40), LineAlignment.Center, titleColor);
+            DrawLargeText("Difficulty: " + difficultyText, new System.Drawing.Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, statsColor);
 
-            var monsterTL = new Point(ScreenWidth / 4, centreYOffset + 80);
-            var maxWidth = ScreenWidth / 2;
+            var monsterStr = "Arena denizens:";
+            DrawLargeText(monsterStr, new System.Drawing.Point(centreX, topY + 6 * titleLineOffset), LineAlignment.Center, titleColor);
+
+            var monsterTL = new Point(ScreenWidth / 8, topY + 7 * titleLineOffset + 30);
+            var maxWidth = 3 * ScreenWidth / 4;
             var maxIcons = maxWidth / 64;
 
             for (int i = 0; i < ArenaMonsters.Count(); i++)
@@ -1132,11 +1239,24 @@ namespace RogueBasin {
                 var columnNo = i % maxIcons;
                 var rowNo = (int)Math.Floor(i / (double)maxIcons);
                 var thisPoint = new Point(columnNo * 64, rowNo * 96);
-                DrawTileSpriteByCentre(monster.GameSprite, monsterTL + thisPoint);
-                DrawTileSpriteByCentre("monster_level_" + monster.Level, monsterTL + thisPoint + new Point(0, 32));
+                Point offset = new Point(0, 0);
+                if (monster.GameSprite == "boss")
+                {
+                    offset = new Point(-32, 32);
+                    DrawTileSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
+
+                }
+                else
+                {
+                    DrawTileSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
+                    DrawTileSpriteByCentre("monster_level_" + monster.Level, monsterTL + thisPoint + new Point(0, 32) + offset);
+                }
             }
 
-            var itemTL = new Point(ScreenWidth / 4, centreYOffset + 400);
+            var itemTL = new Point(ScreenWidth / 8, centreYOffset + 500);
+
+            var equipStr = "Equipment:";
+            DrawLargeText(equipStr, new System.Drawing.Point(centreX, itemTL.y - titleLineOffset), LineAlignment.Center, titleColor);
 
             for (int i = 0; i < ArenaItems.Count(); i++)
             {
@@ -1153,16 +1273,20 @@ namespace RogueBasin {
 
         internal void EndOfGameScreen()
         {
-            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
+            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
+            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
 
-            var centreX = ScreenWidth / 2;
+            var titleColor = System.Drawing.Color.Khaki;
 
             var centreXOffset = ScreenWidth / 4;
             var centreYOffset = ScreenHeight / 8;
 
-            textLineNumber = 0;
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
 
-            Point centrePoint = new Point(centreX, centreYOffset + 40);
+            var centreX = ScreenWidth / 2;
+
+            Point centrePoint = new Point(centreX, centreYOffset);
             string headingText = "It's all over!";
             string statusText = "";
 
@@ -1189,7 +1313,7 @@ namespace RogueBasin {
 
             DrawNextLine(fameText, centrePoint, titleColor);
 
-            var viewingFigures = (int)Math.Round(totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 ));
+            var viewingFigures = (int)Math.Round(100 * totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 ));
 
             string fameStr = "A slime mold";
 
@@ -1217,27 +1341,56 @@ namespace RogueBasin {
             {
                 fameStr = "Mr. Riddick";
             }
+            if (viewingFigures > 70)
+            {
+                fameStr = "Max Max";
+            }
+            if (viewingFigures > 80)
+            {
+                fameStr = "Jason Bourne";
+            }
+            if (viewingFigures > 90)
+            {
+                fameStr = "The King";
+            }
             
             DrawNextLine("Your viewing figures: " + viewingFigures + "%!", centrePoint, titleColor);
+            DrawNextLine(viewingFigures.ToString() + "%!", centrePoint, statsColor);
 
-            DrawNextLine("Your exploits grant you an honourable place in history with:", centrePoint, titleColor);
-            DrawNextLine(fameStr, centrePoint, soundColor);
+            DrawNextLine("Your exploits grant you an honourable place in history as the new:", centrePoint, titleColor);
+            DrawNextLine(fameStr, centrePoint, statsColor);
 
-            DrawNextLine("STATS", centrePoint, titleColor);
+            DrawNextLine("Stats", centrePoint, titleColor);
 
             //Deaths
 
             if(Game.Dungeon.FunMode) {
-                var deathStr = "You died: " + Game.Dungeon.NumberOfFunModeDeaths + "times (it's just for fun, right?)";
-                DrawNextLine(deathStr, centrePoint, soundColor);
+                if (Game.Dungeon.NumberOfFunModeDeaths > 0)
+                {
+                    var deathStr = "You died: " + Game.Dungeon.NumberOfFunModeDeaths + "times (it's just for fun, right?)";
+                    DrawNextLine(deathStr, centrePoint, statsColor);
+                }
+
+                if (EndOfGameWon)
+                {
+                    var deathStr = "Well, you won. Congrats and all that. Wanna play properly now?";
+                    DrawNextLine(deathStr, centrePoint, statsColor);
+
+                    if (Game.Dungeon.NumberOfFunModeDeaths == 0)
+                    {
+                        var deathStr2 = "And you didn't die? Bet you wish you'd pressed [R] now!";
+                        DrawNextLine(deathStr2, centrePoint, statsColor);
+                    }
+                }
             }
 
             //Total kills
             var killRecord = Game.Dungeon.GetKillRecord();
 
-            var killCount = "Opponents killed: " + killRecord.killCount;
-            DrawNextLine(killCount, centrePoint, soundColor);
+            var killCount = "Opponents massacred: " + killRecord.killCount;
+            DrawNextLine(killCount, centrePoint, statsColor);
 
+            textLineNumber++;
             var thanks = "Thanks for playing another of our 7DRLs! -flend and ShroomArts";
             DrawNextLine(thanks, centrePoint, titleColor);
 
@@ -1251,7 +1404,8 @@ namespace RogueBasin {
         }
 
         private void DrawNextLine(string msg, Point centreOrigin, System.Drawing.Color color) {
-            DrawText(msg, centreOrigin + new Point(0, textLineNumber * 30), LineAlignment.Center, color);
+            var pt = centreOrigin + new Point(0, textLineNumber * 40);
+            DrawLargeText(msg, new System.Drawing.Point(pt.x, pt.y), LineAlignment.Center, color);
             textLineNumber++;
         }
 
@@ -2023,7 +2177,8 @@ namespace RogueBasin {
             var utilityHelpOffset = new System.Drawing.Point(298, 134);
             var utilityHelp = "(T)";
             DrawText(utilityHelp, playerUI_TL.Add(utilityHelpOffset), LineAlignment.Center, statsColor);
-
+            DrawSmallText("(E)", playerUI_TL.Add(new System.Drawing.Point(262, 177)), LineAlignment.Center, statsColor);
+            DrawSmallText("(R)", playerUI_TL.Add(new System.Drawing.Point(298, 177)), LineAlignment.Center, statsColor);
 
             //Draw Shield
             //double playerShieldRatio = player.Shield / (double)player.MaxShield;
@@ -2034,16 +2189,16 @@ namespace RogueBasin {
             DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(playerUI_TL.X + 57, playerUI_TL.Y + 73, 180, 12), 0.2);
 
             //Draw fame
-            double playerFameRatio = player.CombatXP / 150.0;
+            double playerFameRatio = Math.Min(150.0, player.CombatXP) / 150.0;
             DrawGraduatedBar("ui_bar", playerFameRatio, new Rectangle(playerUI_TL.X + 57, playerUI_TL.Y + 94, 180, 12), 0.2);
 
             //Draw fame sprites
             DrawUISprite("ui_triangle", playerUI_TL.X + 146, playerUI_TL.Y + 97);
-            DrawUISprite("ui_triangle", playerUI_TL.X + 237, playerUI_TL.Y + 97);
+            DrawUISprite("ui_triangle", playerUI_TL.X + 227, playerUI_TL.Y + 97);
 
 
             DrawSmallText("Heal (C)", new System.Drawing.Point(playerUI_TL.X + 156, playerUI_TL.Y + 110), LineAlignment.Center, statsColor);
-            DrawSmallText("LVL (V)", new System.Drawing.Point(playerUI_TL.X + 247, playerUI_TL.Y + 110), LineAlignment.Center, statsColor);
+            DrawSmallText("LVL (V)", new System.Drawing.Point(playerUI_TL.X + 237, playerUI_TL.Y + 110), LineAlignment.Center, statsColor);
 
             //maybe grey them out
             var playerFMNuOffset = new System.Drawing.Point(269, 93);
@@ -2051,9 +2206,6 @@ namespace RogueBasin {
 
             //HP
 
-            var playerHPTextOffset = new System.Drawing.Point(10, 0);
-            var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
-            DrawText(hpStr, playerTextUI_UsefulTL.Add(playerHPTextOffset));
 
             var playerHPNuOffset = new System.Drawing.Point(25, 93);
             DrawLargeText(player.Hitpoints.ToString(), playerUI_TL.Add(playerHPNuOffset), LineAlignment.Center, statsColor);
@@ -2064,6 +2216,9 @@ namespace RogueBasin {
 
             if (debug)
             {
+                var playerHPTextOffset = new System.Drawing.Point(10, 0);
+                var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
+                DrawText(hpStr, playerTextUI_UsefulTL.Add(playerHPTextOffset));
 
                 //Draw Fame
                 var playerFameTextOffset = new System.Drawing.Point(10, 60);
@@ -2111,6 +2266,16 @@ namespace RogueBasin {
         private void DrawLargeText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
             mapRenderer.DrawLargeText(msg, p.X, p.Y, lineAlignment, color);
+        }
+
+        void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
+        {
+            mapRenderer.DrawTextWidth(msg, p.x, p.y, width, color);
+        }
+
+        void DrawTextWidth(string msg, System.Drawing.Point p, int width, System.Drawing.Color color)
+        {
+            mapRenderer.DrawTextWidth(msg, p.X, p.Y, width, color);
         }
 
         private void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
@@ -3957,7 +4122,7 @@ namespace RogueBasin {
                 {
                     //Message queue - requires keyboard to advance messages - not sure about this yet
                     //(in same area as prompt)
-                    Game.MessageQueue.RunMessageQueue();
+                    //Game.MessageQueue.RunMessageQueue();
                 }
                 NeedsUpdate = false;
 

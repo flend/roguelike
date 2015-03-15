@@ -353,7 +353,7 @@ namespace RogueBasin
             if (id == "boss")
             {
                 screenX = x * spriteVideoWidth + offset.x - 32;
-                screenY = (y * spriteVideoHeight) - 64;
+                screenY = (y * spriteVideoHeight) - 128;
             }
 
             DrawSprite(TileSpritePath(id), screenX, screenY, alpha, frameNo, isAnimated);
@@ -608,6 +608,18 @@ namespace RogueBasin
             }
 
             videoSurface.Blit(fontSurface, pointToDraw);
+        }
+
+        public void DrawTextWidth(string msg, int x, int y, int width, Color color)
+        {
+            // Create the Font Surfaces
+            Surface fontSurface = largeFont.Render(msg, color, true, width, 100);
+
+            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
+
+            var pointToDraw = new System.Drawing.Point(x, y);
+
+           videoSurface.Blit(fontSurface, pointToDraw);
         }
 
         public void DrawSmallText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
