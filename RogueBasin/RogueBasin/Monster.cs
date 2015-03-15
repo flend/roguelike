@@ -641,9 +641,18 @@ namespace RogueBasin
                 int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
                 string combatResultsMsg = "MvP (" + this.Representation + ") Normal. Dam: " + damage;
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-                
-                if(!ranged)
-                    SoundPlayer.Instance().EnqueueSound("punch");
+
+                if (!ranged)
+                {
+                    if (this is Creatures.Psycho)
+                    {
+                        SoundPlayer.Instance().EnqueueSound("chainsaw");
+                    }
+                    else
+                    {
+                        SoundPlayer.Instance().EnqueueSound("punch");
+                    }
+                }
                 SoundPlayer.Instance().EnqueueSound("gunshot");
 
                 return Game.Dungeon.Player.ApplyCombatDamageToPlayer(this, damage, ranged);

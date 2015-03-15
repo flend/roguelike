@@ -265,7 +265,7 @@ namespace RogueBasin.Items
 
         public void FireAudio()
         {
-            SoundPlayer.Instance().EnqueueSound("gunshot");
+            SoundPlayer.Instance().EnqueueSound("shotgun");
         }
 
         public void ThrowAudio()

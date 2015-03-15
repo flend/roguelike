@@ -242,6 +242,8 @@ namespace RogueBasin
             waitingForTurnTick = false;
 
             //Play any enqueued sounds - pre player
+            if (!MusicPlayer.Instance().Initialised)
+                MusicPlayer.Instance().ToggleMusic();
             SoundPlayer.Instance().PlaySounds();
         }
 
@@ -585,6 +587,10 @@ namespace RogueBasin
                                     break;
 
                                 case Key.M:
+                                    MusicPlayer.Instance().ToggleMusic();
+                                    break;
+                                    /*
+                                case Key.M:
                                     SetMsgHistoryScreen();
                                     DisableMsgHistoryScreen();
                                     timeAdvances = false;
@@ -595,7 +601,7 @@ namespace RogueBasin
                                     DisableClueScreen();
                                     timeAdvances = false;
                                     break;
-
+                                    */
                                 case Key.L:
 
                                     Game.Dungeon.Player.LevelUpWithXP();
