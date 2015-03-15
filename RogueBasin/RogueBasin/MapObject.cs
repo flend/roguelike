@@ -25,6 +25,11 @@ namespace RogueBasin
         /// </summary>
         Point locationMap;
 
+        public MapObject()
+        {
+            SetupAnimationForObject();
+        }
+
         /// <summary>
         /// Level the object is on
         /// </summary>
@@ -220,5 +225,40 @@ namespace RogueBasin
                 return false;
             }
         }
+
+        public bool HasAnimation { get; protected set; }
+        public int AnimationDelayMS { get; protected set; }
+        public int NumberOfFrames { get; protected set; }
+        public int CurrentFrame { get; protected set; }
+        public int CurrentTick { get; protected set; }
+
+        protected virtual void SetupAnimationForObject() { HasAnimation = false; }
+        
+        public bool IncrementAnimation(int inc)
+        {
+            if (!HasAnimation)
+                return false;
+
+            CurrentTick += inc;
+            if (CurrentTick > AnimationDelayMS)
+            {
+                CurrentTick -= AnimationDelayMS;
+                CurrentFrame++;
+                if (CurrentFrame >= NumberOfFrames)
+                    CurrentFrame = 0;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public RecurringAnimation GetAnimation()
+        {
+            var anim = new RecurringAnimation();
+            anim.FrameNo = CurrentFrame;
+            return anim;
+        }
+
     }
 }

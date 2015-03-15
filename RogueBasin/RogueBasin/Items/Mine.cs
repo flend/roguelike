@@ -224,9 +224,7 @@ namespace RogueBasin.Items
 
                 var success = Game.Dungeon.AddMonsterDynamic(grenadeCreature, player.LocationLevel, player.LocationMap, true);
                 return success;
-          //  }
 
-            return false;
         }
 
         /// <summary>

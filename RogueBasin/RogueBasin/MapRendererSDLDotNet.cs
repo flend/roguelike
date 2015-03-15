@@ -137,7 +137,15 @@ namespace RogueBasin
                                     continue;
                             }
 
-                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency);
+                            int frameNo = 0;
+                            bool isAnimated = false;
+                            if (thisCell.RecurringAnimation != null)
+                            {
+                                frameNo = thisCell.RecurringAnimation.FrameNo;
+                                isAnimated = true;
+                            }
+
+                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, frameNo, isAnimated);
                             continue;
                         }
 
@@ -297,7 +305,7 @@ namespace RogueBasin
             DrawSprite(TileSpritePath(id), x, y, 1.0);
         }
 
-        private void DrawTileSprite(string id, int x, int y, Point offset, double alpha)
+        private void DrawTileSprite(string id, int x, int y, Point offset, double alpha,  int frameNo = 0, bool isAnimated=false)
         {
             //Tile x, y are the top left of a 64x64 tile
             //Our tile sprites may not be 64x64, but are aligned to the BOTTOM-LEFT of a 64x64 tile (I hope)
@@ -307,7 +315,7 @@ namespace RogueBasin
             int screenX = x * spriteVideoWidth + offset.x;
             int screenY = (y * spriteVideoHeight) - (tileDimensions.Height - 64) + offset.y;
 
-            DrawSprite(TileSpritePath(id), screenX, screenY, alpha);
+            DrawSprite(TileSpritePath(id), screenX, screenY, alpha, frameNo, isAnimated);
         }
 
         public void DrawTraumaSprite(int id, int x, int y)
@@ -375,7 +383,7 @@ namespace RogueBasin
         /// <param name="id"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void DrawSprite(string filePath, int x, int y, double alpha = 1.0)
+        private void DrawSprite(string filePath, int x, int y, double alpha = 1.0, int frameNo = 0, bool isAnimated=false)
         {
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = filePath;
@@ -385,7 +393,16 @@ namespace RogueBasin
             {
                 Surface spriteSurface = GetSpriteFromCache(entry);
 
-                videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
+                if (!isAnimated)
+                {
+                    videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
+                }
+                else
+                {
+                    videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y), new Rectangle(frameNo * 64, 0, 64, 64));
+                }
+
+               
             }
             catch (Exception)
             {

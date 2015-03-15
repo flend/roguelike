@@ -179,6 +179,7 @@ namespace RogueBasin {
         uint movieMSBetweenFrames = 500;
 
         public static int combationAnimationFrameDuration = 300; //ms
+        public static int combatFastAnimationFrameDuration = 150;
 
         /// <summary>
         /// Targetting mode
@@ -689,60 +690,22 @@ namespace RogueBasin {
         {
             int frameNo = 0;
 
-            int width = Width - movieTL.x;
+            int width = 6 * ScreenWidth / 8;
             int height = Height - movieTL.y - 5;
-            Point frameTL = new Point(5, 5);
+            Point frameTL = new Point(ScreenWidth / 8, ScreenHeight / 8);
+
 
             //Draw each frame of the movie
             foreach (MovieFrame frame in movieFrames)
             {
-                //Flatline - centre on each frame
-                 width = frame.width;
-                 height = frame.height;
-
-                int xOffset = (Width - movieTL.x * 2 - width) / 2;
-                int yOffset = (Height - movieTL.y * 2 - height) / 2;
-
-                frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
-                int frameOffset = 2;
 
                 //Draw frame
-                DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, mapFrameColor);
+                mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
 
                 //Draw content
                 List<string> scanLines = frame.scanLines;
 
-                bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL, width, true);
-
-                //Unsupported at the moment
-                /*
-                if (hasFlashingChars)
-                {
-                    //Wait and then redraw without the highlight to make a flash effect
-                    Screen.Instance.FlushConsole();
-                    mapRenderer.Sleep(movieMSBetweenFrames);
-                    DrawMovieFrame(frame.scanLines, frameTL, width, false);
-                }*/
-
-                /*
-                if (keypressBetweenFrames == true)
-                {
-                    //Don't ask for a key press if it's the last frame, one will happen below automatically
-                    if (frameNo != movieFrames.Count - 1)
-                    {
-                        PrintLineRect("Press any key to continue", frameTL.x + width / 2, frameTL.y + height + 2, width, 1, LineAlignment.Center, titleColor);
-                        Screen.Instance.FlushConsole();
-                        KeyPress userKey = Keyboard.WaitForKeyPress(true);
-                        Screen.Instance.Update();
-                    }
-                }
-                else
-                {
-                    //Wait for the specified time
-
-                    
-                    mapRenderer.Sleep(movieMSBetweenFrames);
-                }*/
+                bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL + new Point(0, 100), width, true);
 
                 Screen.Instance.FlushConsole();
                 frameNo++;
@@ -752,7 +715,7 @@ namespace RogueBasin {
             }
 
             //Print press any key
-            PrintLineRect("Press ENTER to continue", frameTL.x, frameTL.y + height, width, 1, LineAlignment.Center, titleColor);
+            //PrintLineRect("Press ENTER to continue", frameTL.x, frameTL.y + height, width, 1, LineAlignment.Center, titleColor);
 
         }
 
@@ -789,50 +752,10 @@ namespace RogueBasin {
 
             foreach (string line in scanLines)
             {
-                //Check for special characters
-                if (line.Contains(flashChar.ToString()))
-                {
-                    //We will return this, so that the caller knows to call us again with flashOn = false
-                    flashingChars = true;
-
-                    //Print char by char
-                    int coffset = 0;
-                    bool nextCharFlash = false;
-                    System.Drawing.Color flashColor = normalMovieColor;
-
-                    foreach (char c in line)
-                    {
-                        if (c == flashChar)
-                        {
-                            if (flashOn)
-                            {
-                                nextCharFlash = true;
-                            }
-                            //Skip this char
-                            continue;
-                        }
-
-                        if (nextCharFlash)
-                        {
-                            flashColor = flashMovieColor;
-                            nextCharFlash = false;
-                        }
-                        else
-                        {
-                            flashColor = normalMovieColor;
-                        }
-
-                        PutChar(frameTL.x + coffset, frameTL.y + offset, c, flashColor);
-                        coffset++;
-                    }
-
-                }
-                else
-                {
                     //Print whole line
-                    PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left, normalMovieColor);
-                }
+                DrawText(line, new Point(frameTL.x + width / 2, frameTL.y + offset * 20), LineAlignment.Center, normalMovieColor);
                 offset++;
+
             }
 
             return flashingChars;
@@ -1143,7 +1066,8 @@ namespace RogueBasin {
 
         public void CharacterSelectionScreen()
         {
-            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
+            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
+            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
 
             var titleColor = System.Drawing.Color.Khaki;
 
@@ -1170,7 +1094,8 @@ namespace RogueBasin {
         
         public void ArenaSelectionScreen()
         {
-            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
+            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
+            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
 
             var titleColor = System.Drawing.Color.Khaki;
 
@@ -1224,6 +1149,8 @@ namespace RogueBasin {
 
         }
 
+        int textLineNumber;
+
         internal void EndOfGameScreen()
         {
             mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
@@ -1233,13 +1160,99 @@ namespace RogueBasin {
             var centreXOffset = ScreenWidth / 4;
             var centreYOffset = ScreenHeight / 8;
 
-            string difficultyText = "Final fame: " + Game.Dungeon.Player.CombatXP;
+            textLineNumber = 0;
+
+            Point centrePoint = new Point(centreX, centreYOffset + 40);
+            string headingText = "It's all over!";
+            string statusText = "";
+
+            if (EndOfGameQuit)
+            {
+                statusText = "You fell on your own pole and ended it all!";
+            }
+            else if (EndOfGameWon)
+            {
+                statusText = "You lived to your next TV contract!";
+            }
+            else
+            {
+                statusText = "Easy come, easy go.";
+            }
+
+            DrawNextLine(headingText, centrePoint, titleColor);
+
+            DrawNextLine(statusText, centrePoint, titleColor);
+
+            var totalFame = Game.Dungeon.Player.CombatXP + 150 * Game.Dungeon.Player.Level;
+
+            string fameText = "Final fame: " + totalFame;
+
+            DrawNextLine(fameText, centrePoint, titleColor);
+
+            var viewingFigures = (int)Math.Round(totalFame / (double)5000 * 100);
+
+            string fameStr = "A slime mold";
+
+            if (viewingFigures > 10)
+            {
+                fameStr = "Chance Boudreaux";
+            }
+            if (viewingFigures > 20)
+            {
+                fameStr = "Korben Dallas";
+            }
+            if (viewingFigures > 30)
+            {
+                fameStr = "Patrick Mason";
+            }
+            if (viewingFigures > 40)
+            {
+                fameStr = "John Spartan";
+            }
+            if (viewingFigures > 50)
+            {
+                fameStr = "Snake Plisken";
+            }
+            if (viewingFigures > 60)
+            {
+                fameStr = "Mr. Riddick";
+            }
             
-            DrawText(difficultyText, new Point(centreX, centreYOffset + 40), LineAlignment.Center, titleColor);
+            DrawNextLine("Your viewing figures: " + viewingFigures + "%!", centrePoint, titleColor);
 
-            string resultText = "Result: Slightly famous!";
+            DrawNextLine("Your exploits grant you an honourable place in history with:", centrePoint, titleColor);
+            DrawNextLine(fameStr, centrePoint, soundColor);
 
-            DrawText(resultText, new Point(centreX, centreYOffset + 80), LineAlignment.Center, titleColor);
+            DrawNextLine("STATS", centrePoint, titleColor);
+
+            //Deaths
+
+            if(Game.Dungeon.FunMode) {
+                var deathStr = "You died: " + Game.Dungeon.NumberOfFunModeDeaths + "times (it's just for fun, right?)";
+                DrawNextLine(deathStr, centrePoint, soundColor);
+            }
+
+            //Total kills
+            var killRecord = Game.Dungeon.GetKillRecord();
+
+            var killCount = "Opponents killed: " + killRecord.killCount;
+            DrawNextLine(killCount, centrePoint, soundColor);
+
+            var thanks = "Thanks for playing another of our 7DRLs! -flend and ShroomArts";
+            DrawNextLine(thanks, centrePoint, titleColor);
+
+            //Compose the obituary
+
+            List<string> obString = new List<string>();
+
+            obString.Add(fameStr);
+
+            Game.Dungeon.SaveObituary(obString, killRecord.killStrings);
+        }
+
+        private void DrawNextLine(string msg, Point centreOrigin, System.Drawing.Color color) {
+            DrawText(msg, centreOrigin + new Point(0, textLineNumber * 30), LineAlignment.Center, color);
+            textLineNumber++;
         }
 
         public enum AttackType
@@ -1297,7 +1310,7 @@ namespace RogueBasin {
 
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileSprite = spriteName;
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration, animationDelay);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combatFastAnimationFrameDuration, animationDelay);
 
             }
         }
@@ -1316,7 +1329,7 @@ namespace RogueBasin {
 
             //Add animation points into the animation layer
 
-            var frameTime = (int)Math.Round(combationAnimationFrameDuration / (double)mangledPoints.Count());
+            var frameTime = (int)Math.Round(combatFastAnimationFrameDuration / (double)mangledPoints.Count());
 
             int counter = 0;
             foreach (Point p in mangledPoints)
@@ -3159,6 +3172,9 @@ namespace RogueBasin {
 
 
                         tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
+
+                        if (creature.HasAnimation)
+                            tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].RecurringAnimation = creature.GetAnimation();
                     }
 
                 }
@@ -3894,6 +3910,13 @@ namespace RogueBasin {
                 }
             }
 
+            foreach (Monster m in Game.Dungeon.Monsters)
+            {
+                var animationChanged = m.IncrementAnimation(tickIncrement);
+                if (animationChanged)
+                    animationChangeOccurred = true;
+            }
+
             return animationChangeOccurred;
 
         }
@@ -3985,8 +4008,11 @@ namespace RogueBasin {
             //Flash the attacked creature
             //Add flash to animation layer
 
+            //need to add a melee splash
+
             if (targetSquare.InPlayerFOV)
             {
+                /*
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
                     if (isViewVisible(newTarget.LocationMap))
@@ -3995,7 +4021,7 @@ namespace RogueBasin {
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
                     }
-                }
+                }*/
             }
         }
 
@@ -4020,7 +4046,11 @@ namespace RogueBasin {
             throw new NotImplementedException();
         }
 
-        
+
+
+        public bool EndOfGameQuit { get; set; }
+
+        public bool EndOfGameWon { get; set; }
     }
 
     static class ScreenExtensionMethods

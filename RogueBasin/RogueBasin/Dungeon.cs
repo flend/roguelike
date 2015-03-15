@@ -1298,7 +1298,7 @@ namespace RogueBasin
         }
 
 
-        public static double LevelScalingFactor = 0.6;
+        public static double LevelScalingFactor = 0.5;
         /// <summary>
         /// Scale anything for monster level
         /// </summary>
@@ -3887,6 +3887,8 @@ namespace RogueBasin
             PlayerDeathString = deathString;
         }
 
+        public bool FunMode { get; set; }
+
         /// <summary>
         /// It's all gone wrong!
         /// </summary>
@@ -3899,11 +3901,17 @@ namespace RogueBasin
                 return;
             }
 
-            //In FlatlineRL death is not permanent, but quitting is!
+            if (FunMode)
+            {
+                //Restart the level with 0 fame
+                RestartLevelOnFailure();
+                NumberOfFunModeDeaths++;
+                PlayerDeathOccured = false;
+                return;
+            }
 
             if (!verb.Contains("quit"))
             {
-
                 //Reset vars
                 PlayerDeathString = "";
                 PlayerDeathOccured = false;
@@ -3911,49 +3919,12 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Player killed", LogDebugLevel.Medium);
 
                 DungeonInfo.NoDeaths++;
-                EndOfGame(false, false);
-
-                //For now, we just healup the player
-                //Game.Dungeon.Player.HealCompletely();
-                //return;
-                /*
-                if (DungeonInfo.NoDeaths == DungeonInfo.MaxDeaths)
-                {
-                    //This is true death
-                    EndOfGame(false);
-                    return;
-                }
-                else
-                {
-
-                    //We get another try
-                    
-                    //Is level complete? Move onto next
-                    if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete)
-                    {
-                        if(Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeathButCompleted) {
-                            //Game.Base.PlayMovie("deadbutnextmission", true);
-                            PlayedMissionFailedDeathButCompleted = true;
-                        }
-                        MoveToNextMission();
-                        return;
-                    }
-
-                    //If not, reset mission with different seed
-                    if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeath)
-                    {
-                        //Game.Base.PlayMovie("deadretrymission", true);
-                        PlayedMissionFailedDeath = true;
-                    }
-                    ResetCurrentMission(true);
-
-                    return;
-                }*/
-
+                Game.Base.DoEndOfGame(false, false, false);
+                //EndOfGame(false, false);
             }
             else
             {
-                EndOfGame(false, true);
+                Game.Base.DoEndOfGame(false, false, true);
             }
 
 
@@ -4042,6 +4013,19 @@ namespace RogueBasin
             RunMainLoop = false;
             */
 
+        }
+
+
+        public int NumberOfFunModeDeaths { get; private set; }
+
+        private void RestartLevelOnFailure()
+        {
+            Game.Base.PlayMovie("fun_mode_failure", true);
+            TeleportToArena(player.LocationLevel);
+            player.CombatXP = 0;
+            Game.Dungeon.Player.HealCompletely();
+            Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
+            Screen.Instance.NeedsUpdate = true;
         }
 
         public struct KillRecord
@@ -4236,7 +4220,7 @@ namespace RogueBasin
             }
         }
 
-        private void SaveObituary(List<string> deathPreamble, List<string> killRecord)
+        public void SaveObituary(List<string> deathPreamble, List<string> killRecord)
         {
             try
             {
@@ -5439,7 +5423,7 @@ namespace RogueBasin
             if (player.LocationLevel / 3 == 5)
             {
                 //Game over folks
-                Game.Base.DoEndOfGame();
+                Game.Base.DoEndOfGame(true, true, false);
             }
             else
             {
@@ -5461,6 +5445,21 @@ namespace RogueBasin
             if (dangeousTerrainAtPoint.Count() > 0)
                 return true;
             return false;
+        }
+
+        Dictionary<int, bool> DoorStatus = new Dictionary<int, bool>();
+
+        internal void ShutDoor(int level)
+        {
+            DoorStatus[level] = true;
+        }
+
+        internal bool CheckDoor(int level)
+        {
+            bool status = false;
+            DoorStatus.TryGetValue(level, out status);
+
+            return status;
         }
     }
 }

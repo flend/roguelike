@@ -3,4 +3,4 @@ debug=true
 displayGraphs=false
 graphviz=C:\Program Files (x86)\Graphviz2.36\bin\dot.exe
 sound=true
-music=true
+music=false

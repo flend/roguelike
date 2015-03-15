@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using RogueBasin;
 
 namespace TileEngine
 {
@@ -68,6 +69,12 @@ namespace TileEngine
         public double Transparency { get; set; }
 
         public Animation Animation
+        {
+            get;
+            set;
+        }
+
+        public RecurringAnimation RecurringAnimation
         {
             get;
             set;

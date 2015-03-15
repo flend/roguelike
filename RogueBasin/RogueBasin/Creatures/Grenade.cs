@@ -26,6 +26,15 @@ namespace RogueBasin.Creatures
 
             this.damage = damage;
             this.timer = timer;
+
+            Passive = true;
+        }
+
+        protected override void SetupAnimationForObject()
+        {
+            AnimationDelayMS = 250;
+            HasAnimation = true;
+            NumberOfFrames = 2;
         }
 
         protected override bool UseSpecialAbility()
@@ -255,12 +264,12 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "grenade";
+            return "livegrenade";
         }
 
         protected override string GetUISprite()
         {
-            return "grenade";
+            return "livegrenade";
         }
 
         internal override void OnKilledSpecialEffects()

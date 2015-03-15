@@ -321,12 +321,14 @@
     <Compile Include="Locks\SimpleLockedDoorWithMovie.cs" />
     <Compile Include="LogGenerator.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
+    <Compile Include="RecurringAnimation.cs" />
     <Compile Include="RoyaleDungeonLevelMaker.cs" />
     <Compile Include="RoyaleMonsterPlacement.cs" />
     <Compile Include="MusicPlayer.cs" />
     <Compile Include="SoundPlayer.cs" />
     <Compile Include="TerrainSets\CrossPiece.cs" />
     <Compile Include="TerrainSets\Pond.cs" />
+    <Compile Include="Triggers\ArenaEntry.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />
@@ -964,6 +966,7 @@
     <EmbeddedResource Include="bin\Debug\vaults\oval_vault1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\oval_vault_small1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\basic_large_arena.room" />
+    <EmbeddedResource Include="bin\Debug\movies\fun_mode_failure0.amf" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />

@@ -326,10 +326,11 @@ namespace RogueBasin
                 {
                     LogFile.Log.LogEntryDebug("Player taking turn at tick " + player.TurnClock + " (world " + Game.Dungeon.WorldClock + ")", LogDebugLevel.Low);
 
-
                     //Remove dead players! Restart mission. Do this here so we don't get healed then beaten up again in our old state
                     if (Game.Dungeon.PlayerDeathOccured)
+                    {
                         Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
+                    }
 
                     ProfileEntry("Pre PC POV");
 
@@ -579,7 +580,6 @@ namespace RogueBasin
 
                     //Normal movement on the map
                     case InputState.MapMovement:
-                    case InputState.PreMapMovement:
 
                         if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
                         {
@@ -3246,15 +3246,15 @@ namespace RogueBasin
 
         private void PreArenaEntryState() {
             inputState = InputState.PreMapMovement;
-            Screen.Instance.SeeAllMap = true;
-            Screen.Instance.SeeAllMonsters = true;
+            //Screen.Instance.SeeAllMap = true;
+            //Screen.Instance.SeeAllMonsters = true;
         }
 
         private void PostArenaEntryState()
         {
             inputState = InputState.MapMovement;
-            Screen.Instance.SeeAllMap = false;
-            Screen.Instance.SeeAllMonsters = false;
+            //Screen.Instance.SeeAllMap = false;
+            //Screen.Instance.SeeAllMonsters = false;
         }
 
         /// <summary>
@@ -3309,8 +3309,11 @@ namespace RogueBasin
 
         public char TargettingConfirmChar { get; set; }
 
-        internal void DoEndOfGame()
+        internal void DoEndOfGame(bool lived, bool won, bool quit)
         {
+            Screen.Instance.EndOfGameWon = won;
+            Screen.Instance.EndOfGameQuit = quit;
+
             this.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, EndOfGameSelectionKeyHandler);
         }
     }

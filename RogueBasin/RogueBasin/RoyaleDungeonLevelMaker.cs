@@ -198,7 +198,7 @@ namespace RogueBasin
             PlaceOriginRoom(templateGenerator, verylargeOvalArena);
 
             //Connections are from the level TO the booth
-            int distanceToConnectingDoor = 1;
+            int distanceToConnectingDoor = 0;
             levelInfo.EntryBoothConnection = AddVaults(templateGenerator, corridor1, distanceToConnectingDoor, replacementVault, 0).First();
 
             //int numberOfRandomRooms = 3;
@@ -274,9 +274,12 @@ namespace RogueBasin
 
             Game.Dungeon.AddLock(entryDoor);
 
+            //Place trigger to close door - to do
+
+            
             LogFile.Log.LogEntryDebug("Placing entry booth door for: level: " + levelInfo.LevelNo + " at: " + entryConnection, LogDebugLevel.Medium);
 
-            //Place entry door
+            //Place exit door
             doorInfo = mapInfo.GetDoorForConnection(exitConnection);
 
             var exitDoor = new RogueBasin.Locks.ExitLock(levelInfo.LevelNo);
