@@ -83,6 +83,16 @@ namespace RogueBasin.Items
             get { return "Nano-repair kits"; }
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         protected override char GetRepresentation()
         {
             return (char)309;

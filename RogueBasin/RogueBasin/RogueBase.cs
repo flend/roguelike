@@ -68,6 +68,8 @@ namespace RogueBasin
         }
 
 
+        public bool PlaySounds { get; set; }
+
         /// <summary>
         /// Setup internal systems
         /// </summary>
@@ -157,6 +159,7 @@ namespace RogueBasin
             }
 
             Screen.Instance.Update(args.TicksElapsed);
+
         }
 
         private void KeyboardEventHandler(object sender, KeyboardEventArgs args)
@@ -237,6 +240,9 @@ namespace RogueBasin
             }
 
             waitingForTurnTick = false;
+
+            //Play any enqueued sounds - pre player
+            SoundPlayer.Instance().PlaySounds();
         }
 
         private bool ProcessKeypress(KeyboardEventArgs args)
@@ -259,6 +265,9 @@ namespace RogueBasin
 
                 //Currently update on all keypresses
                 Screen.Instance.NeedsUpdate = true;
+
+                //Play any enqueued sounds
+                SoundPlayer.Instance().PlaySounds();
 
                 return timeAdvances;
             }
@@ -561,6 +570,19 @@ namespace RogueBasin
                                     
                                     break;
 
+                                case Key.S:
+                                    //Toggle sounds
+                                    if (PlaySounds)
+                                    {
+                                        Game.MessageQueue.AddMessage("Sounds off");
+                                        PlaySounds = false;
+                                    }
+                                    else
+                                    {
+                                        Game.MessageQueue.AddMessage("Sounds on");
+                                        PlaySounds = true;
+                                    }
+                                    break;
 
                                 case Key.M:
                                     SetMsgHistoryScreen();
@@ -758,8 +780,7 @@ namespace RogueBasin
                                         break;
 
                                     case Key.B:
-                                        Game.Dungeon.Player.GiveAllWeapons(1);
-                                        Game.Dungeon.Player.GiveAllWetware(1);
+                                        Game.Dungeon.Player.LevelUp();
                                         break;
 
                                     case Key.H:
@@ -2391,6 +2412,9 @@ namespace RogueBasin
             //Remove stealth
             RemoveEffectsDueToThrowing(player);
 
+            //Play any audio
+            toThrow.ThrowAudio();
+
             //Destroy it if required
             if (toThrow.DestroyedOnThrow())
             {
@@ -2528,6 +2552,11 @@ namespace RogueBasin
 
                 if (squareContents.player != null)
                     lastSpellTarget = squareContents.player;
+            }
+
+            if (success)
+            {
+                weapon.FireAudio();
             }
 
             //Time only goes past if successful

@@ -55,6 +55,16 @@ namespace RogueBasin.Items
             return 50;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         public override string SingleItemDescription
         {
             get { return "BioWare v1"; }

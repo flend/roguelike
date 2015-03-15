@@ -195,7 +195,7 @@ namespace RogueBasin
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, true);
                     }
 
                     //Missile animation
@@ -248,7 +248,7 @@ namespace RogueBasin
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, true);
                     }
 
                     //Missile animation
@@ -335,7 +335,7 @@ namespace RogueBasin
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, true);
                     }
 
                     //Missile animation

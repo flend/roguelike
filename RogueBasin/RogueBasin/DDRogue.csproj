@@ -320,6 +320,7 @@
     <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="RoyaleDungeonLevelMaker.cs" />
     <Compile Include="RoyaleMonsterPlacement.cs" />
+    <Compile Include="SoundPlayer.cs" />
     <Compile Include="TerrainSets\CrossPiece.cs" />
     <Compile Include="TerrainSets\Pond.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />

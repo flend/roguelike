@@ -79,6 +79,15 @@ namespace RogueBasin.Items
             return false;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
         /// <summary>
         /// Can be operated
         /// </summary>

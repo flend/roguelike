@@ -37,7 +37,7 @@ namespace RogueBasin
             return "";
         }
 
-        public override CombatResults AttackMonster(Monster monster)
+        public override CombatResults AttackMonster(Monster monster, bool ranged)
         {
             return CombatResults.NeitherDied;
         }

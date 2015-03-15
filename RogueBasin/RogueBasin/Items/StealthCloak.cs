@@ -104,6 +104,16 @@ namespace RogueBasin.Items
             return 0;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         public double DamageModifier()
         {
             return 0;

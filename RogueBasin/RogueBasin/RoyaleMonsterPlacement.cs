@@ -143,7 +143,7 @@ namespace RogueBasin
 
         public Monster MonsterThug(int level)
         {
-            return new Creatures.Grenadier(level);
+            return new Creatures.Thug(level);
         }
 
         public Monster MonsterPsycho(int level)
@@ -153,7 +153,7 @@ namespace RogueBasin
 
         public Monster MonsterHunter(int level)
         {
-            return new Creatures.Psycho(level);
+            return new Creatures.Hunter(level);
         }
 
 

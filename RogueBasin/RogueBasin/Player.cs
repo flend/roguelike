@@ -1003,6 +1003,9 @@ namespace RogueBasin
             CancelStealthDueToAttack();
             //ResetTurnsMoving();
 
+            //Play sound
+            SoundPlayer.Instance().EnqueueSound("punch");
+
             return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
         }
 
@@ -1871,6 +1874,9 @@ namespace RogueBasin
         {
             //Pistol is never dropped
             if (oldItem is Items.Pistol)
+                return true;
+
+            if (oldItem is Items.Fists)
                 return true;
                      /*   
             if (oldItem is Items.Pistol && IsWeaponTypeAvailable(typeof(Items.HeavyPistol)))
@@ -2888,12 +2894,12 @@ namespace RogueBasin
 
         internal int GetHealXPCost()
         {
-            return (int)Math.Floor(75 * (1 + 0.5 * (Level - 1)));
+            return 75;//(int)Math.Floor(75 * (1 + 0.5 * (Level - 1)));
         }
 
         internal int GetLevelXPCost()
         {
-            return (int)Math.Floor(150 * (1 + 0.5 * (Level - 1)));
+            return 150;//(int)Math.Floor(150 * (1 + 0.5 * (Level - 1)));
         }
 
         internal void LevelUpWithXP()

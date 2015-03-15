@@ -177,5 +177,9 @@ namespace RogueBasin
         double ShotgunSpreadAngle();
 
         int GetEnergyDrain();
+
+        void FireAudio();
+
+        void ThrowAudio();
     }
 }

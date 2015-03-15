@@ -71,6 +71,15 @@ namespace RogueBasin.Items
             return dest;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("explosion");
+        }
 
         /// <summary>
         /// not used in this game

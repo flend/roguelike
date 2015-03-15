@@ -289,5 +289,15 @@ namespace RogueBasin.Items
         {
             return "ui-pistol";
         }
+
+        public void FireAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("gunshot");
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
     }
 }

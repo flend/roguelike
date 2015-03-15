@@ -1000,6 +1000,8 @@ namespace RogueBasin {
             tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileFlag = new LibtcodColorFlags(colorToUse);
             tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileSprite = player.GameSprite;
 
+            tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(player.LocationMap)] = new TileEngine.TileCell("monster_level_" + player.Level);
+
             //Draw equipped weapons
 
             //Draw equipped ranged weapon

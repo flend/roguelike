@@ -154,6 +154,7 @@ namespace RogueBasin.Items
             return TargettingType.Line;
         }
 
+
         /// <summary>
         /// What type of targetting reticle is needed? [for firing]
         /// </summary>
@@ -253,6 +254,16 @@ namespace RogueBasin.Items
         public int GetEnergyDrain()
         {
             return 0;
+        }
+
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
         }
     }
 }

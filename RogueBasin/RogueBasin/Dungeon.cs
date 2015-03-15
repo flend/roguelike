@@ -2787,6 +2787,8 @@ namespace RogueBasin
                 AddXPForMonster(monster);
 
                 monster.OnKilledSpecialEffects();
+
+                SoundPlayer.Instance().EnqueueSound("death");
             }
                 /*
                 if (monster.Unique)
@@ -2870,7 +2872,7 @@ namespace RogueBasin
 
         private void AddXPForMonster(Monster monster)
         {
-            /*
+            
             var baseXP = monster.GetCombatXP();
             int modifiedXP = baseXP;
             if (player.Level < monster.Level)
@@ -2884,8 +2886,8 @@ namespace RogueBasin
 
             player.CombatXP += modifiedXP;
             
-            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (from base: " + baseXP + ")", LogDebugLevel.Medium); */
-
+            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (from base: " + baseXP + ")", LogDebugLevel.Medium);
+            /*
             //Simpler system
 
             var baseXP = monster.GetCombatXP();
@@ -2893,6 +2895,7 @@ namespace RogueBasin
             player.CombatXP += modifiedXP;
 
             LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (mon level: " + monster.Level + ")", LogDebugLevel.Medium);
+             */
         }
 
         /// <summary>

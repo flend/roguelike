@@ -73,6 +73,16 @@ namespace RogueBasin.Items
             return 50;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         /// Can be thrown
         /// </summary>
         /// <returns></returns>
@@ -177,8 +187,9 @@ namespace RogueBasin.Items
         public Point ThrowItem(Point target)
         {
             return Game.Dungeon.Player.ThrowItemGeneric(this, target, 3, true);
-        }       
-       
+        }
+
+
         /// <summary>
         /// Operates the item - definitely a method
         /// </summary>

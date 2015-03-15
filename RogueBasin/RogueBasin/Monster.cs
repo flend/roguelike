@@ -641,13 +641,18 @@ namespace RogueBasin
                 int damage = AttackCreatureWithModifiers(player, 0, 0, 0, 0);
                 string combatResultsMsg = "MvP (" + this.Representation + ") Normal. Dam: " + damage;
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                
+                if(!ranged)
+                    SoundPlayer.Instance().EnqueueSound("punch");
+                SoundPlayer.Instance().EnqueueSound("gunshot");
+
                 return Game.Dungeon.Player.ApplyCombatDamageToPlayer(this, damage, ranged);
             }
 
             return CombatResults.NeitherDied;
         }
 
-        public virtual CombatResults AttackMonster(Monster monster)
+        public virtual CombatResults AttackMonster(Monster monster, bool ranged)
         {
             StandardPreCombat();
 
@@ -665,6 +670,9 @@ namespace RogueBasin
             else
             {
                 damage = AttackCreatureWithModifiers(monster, 0, 0, 0, 0);
+                if (!ranged)
+                    SoundPlayer.Instance().EnqueueSound("punch");
+                SoundPlayer.Instance().EnqueueSound("gunshot");
 
                 return ApplyDamageToMonster(this, monster, damage);
             }
@@ -674,6 +682,7 @@ namespace RogueBasin
         {
             var scaledDamage = ScaleRangedDamage(this.DamageBase());
             Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, scaledDamage, 0.0, Math.PI / 8, scaledDamage / 10, scaledDamage / 10);
+            SoundPlayer.Instance().EnqueueSound("shotgun");
         }
 
         private void StandardPreCombat()

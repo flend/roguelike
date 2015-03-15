@@ -265,5 +265,15 @@ namespace RogueBasin.Items
         {
             return 10;
         }
+
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
     }
 }

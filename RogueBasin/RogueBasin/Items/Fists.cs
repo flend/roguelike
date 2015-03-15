@@ -52,6 +52,16 @@ namespace RogueBasin.Items
             return true;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         /// <summary>
         /// Throws the item. Can use generic, it's just 
         /// </summary>

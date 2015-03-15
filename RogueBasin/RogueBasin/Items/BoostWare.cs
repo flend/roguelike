@@ -34,6 +34,16 @@ namespace RogueBasin.Items
             }
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         public bool Equip(Creature user)
         {
             LogFile.Log.LogEntryDebug("BoostWare equipped", LogDebugLevel.Medium);

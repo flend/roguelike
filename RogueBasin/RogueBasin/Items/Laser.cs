@@ -291,5 +291,15 @@ namespace RogueBasin.Items
         {
             return "ui-laser";
         }
+
+        public void FireAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("laser");
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
     }
 }

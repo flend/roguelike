@@ -80,6 +80,15 @@ namespace RogueBasin.Items
             return (char)577;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
         public override System.Drawing.Color GetColour()
         {
             return System.Drawing.Color.Gold;

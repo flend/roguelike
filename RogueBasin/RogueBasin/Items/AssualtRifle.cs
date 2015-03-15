@@ -42,6 +42,16 @@ namespace RogueBasin.Items
             return true;
         }
 
+        public void FireAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("gunshot");
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         public List<EquipmentSlot> EquipmentSlots
         {
             get

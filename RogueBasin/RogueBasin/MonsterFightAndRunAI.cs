@@ -1166,7 +1166,7 @@ namespace RogueBasin
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, false);
                     }
 
                     Screen.Instance.DrawMeleeAttack(this, newTarget, result);

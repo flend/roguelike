@@ -52,6 +52,16 @@ namespace RogueBasin.Items
             return true;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("explosion");
+        }
+
         /// <summary>
         /// Throws the item. Can use generic, it's just 
         /// </summary>

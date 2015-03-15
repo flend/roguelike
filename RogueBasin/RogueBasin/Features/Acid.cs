@@ -14,6 +14,7 @@ namespace RogueBasin.Features
 
             LogFile.Log.LogEntryDebug(Description + " does " + damage + " damage to player on interaction", LogDebugLevel.Medium);
             Game.MessageQueue.AddMessage("Bloody hell - acid!");
+            SoundPlayer.Instance().EnqueueSound("acid");
 
             return true;
         }
@@ -24,7 +25,6 @@ namespace RogueBasin.Features
             monster.ApplyDamageToMonster(null, monster, damage);
 
             LogFile.Log.LogEntryDebug(Description + " does " + damage + " damage to monster on interaction", LogDebugLevel.Medium);
-
 
             return true;
         }
