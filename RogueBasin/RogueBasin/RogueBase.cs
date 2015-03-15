@@ -135,6 +135,8 @@ namespace RogueBasin
 
         bool waitingForTurnTick = true;
 
+        public bool GameStarted { get; set; }
+
         private void ApplicationTickEventHandler(object sender, TickEventArgs args)
         {
             ProfileEntry("Tick Event");
@@ -147,11 +149,12 @@ namespace RogueBasin
                 Events.QuitApplication();
             }
 
-            AdvanceDungeonToNextPlayerTick();
+            if(GameStarted)
+                AdvanceDungeonToNextPlayerTick();
 
             ProfileEntry("Tick Update Film");
 
-            if (firstRun)
+            if (GameStarted && firstRun)
             {
                 //Should be called as a one-off earlier
                 InitializeScreen();
@@ -166,7 +169,7 @@ namespace RogueBasin
         {
 
             //Dungeon click must complete before we take more input
-            if (waitingForTurnTick)
+            if (waitingForTurnTick && GameStarted)
             {
                 return;
             }
@@ -1306,6 +1309,15 @@ namespace RogueBasin
         public void PostCharacterSelection()
         {
             ClearSpecialScreenAndHandler();
+
+            //Setup initial levels
+            SetupRoyaleEntryLevels();
+
+            Game.Dungeon.Player.LocationLevel = 0;
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
+
+            PrepareGameEntry();
+
             //Follow on to initial arena selection
             DoArenaSelection();
         }
@@ -3249,6 +3261,8 @@ namespace RogueBasin
         public void PrepareGameEntry()
         {
             PlayerStartsLevel(0);
+
+            GameStarted = true;
         }
 
         public char TargettingConfirmChar { get; set; }

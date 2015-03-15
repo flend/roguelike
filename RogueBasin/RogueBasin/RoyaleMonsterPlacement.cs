@@ -9,12 +9,14 @@ namespace RogueBasin
 
     enum ItemType
     {
-        Ranged, Melee, Utility
+        Ranged, Melee, Utility, NerdExtras, MeleeExtras
     }
 
     class RoyaleMonsterPlacement
     {
-        List<Func<int, double, IEnumerable<Monster>>> monsterGenerators = new List<Func<int, double, IEnumerable<Monster>>>();
+        //level => list of monster set generators with weights
+        Dictionary<int, IEnumerable<Tuple<int, Func<int, double, IEnumerable<Monster>>>>> monsterGenerators = new Dictionary<int, IEnumerable<Tuple<int, Func<int, double, IEnumerable<Monster>>>>>();
+        //item => list of item set generators with weights
         Dictionary<ItemType, IEnumerable<Tuple<int, Func<IEnumerable<Item>>>>> itemGenerators = new Dictionary<ItemType, IEnumerable<Tuple<int, Func<IEnumerable<Item>>>>>();
         Dictionary<PlayerClass, IEnumerable<Tuple<int, ItemType>>> classItemCategories = new Dictionary<PlayerClass, IEnumerable<Tuple<int, ItemType>>>();
 
@@ -45,10 +47,37 @@ namespace RogueBasin
 
         private void SetupMonsterGenerators()
         {
-            monsterGenerators.Add(SwarmerSet);
-            monsterGenerators.Add(GrenadierSet);
-            monsterGenerators.Add(ThugSet);
-            monsterGenerators.Add(HunterSet);
+            monsterGenerators[0] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet )
+            };
+
+            monsterGenerators[1] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet )
+            };
+
+            monsterGenerators[2] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, GrenadierSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, ThugSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet )
+            };
+
+            monsterGenerators[3] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, GrenadierSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, ThugSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet )
+            };
+
+            monsterGenerators[4] = new List<Tuple<int, Func<int, double, IEnumerable<Monster>>>> {
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, SwarmerSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, GrenadierSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, ThugSet ),
+                new Tuple<int, Func<int, double, IEnumerable<Monster>>> ( 100, HunterSet )
+            };
+
         }
 
         private void SetupItemGenerators()
@@ -63,10 +92,22 @@ namespace RogueBasin
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, AxeItem )
             };
 
+            itemGenerators[ItemType.MeleeExtras] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, AxeItem )
+            };
+
             itemGenerators[ItemType.Utility] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, FragGrenade ),
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, StunGrenade ),
-                new Tuple<int, Func<IEnumerable<Item>>> ( 100, SoundGrenade )
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, SoundGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, Mine )
+            };
+
+            itemGenerators[ItemType.NerdExtras] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
+                new Tuple<int, Func<IEnumerable<Item>>> ( 40, FragGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 40, StunGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, SoundGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, Mine )
             };
         }
 
@@ -124,6 +165,11 @@ namespace RogueBasin
         public IEnumerable<Item> SoundGrenade()
         {
             return new List<Item> { new Items.SoundGrenade() };
+        }
+
+        public IEnumerable<Item> Mine()
+        {
+            return new List<Item> { new Items.Mine() };
         }
 
         public Monster MonsterSwarmer(int level) 
@@ -207,6 +253,8 @@ namespace RogueBasin
                 var levelNo = level.Item1.Item1;
                 var baseXPLevel = level.Item1.Item2;
 
+                var arenaNo = (int)Math.Floor(levelNo / 3.0);
+
                 var entryPoint = level.Item2;
 
                 var levelVariance = 0.2;
@@ -217,8 +265,8 @@ namespace RogueBasin
                 List<IEnumerable<Monster>> monsterSets = new List<IEnumerable<Monster>>();
 
                 while(levelMonsterXP < totalMonsterXP) {
-                    var generatorToUse = monsterGenerators.RandomElement();
 
+                    var generatorToUse = ChooseItemFromWeights(monsterGenerators[arenaNo]);
                     var monsterSetGenerated = generatorToUse(baseXPLevel, levelVariance);
 
                     levelMonsterXP += monsterSetGenerated.Select(m => m.GetCombatXP()).Sum();
@@ -237,17 +285,62 @@ namespace RogueBasin
         private IEnumerable<IEnumerable<Item>> GetRandomsItemForPlayer(int numberOfItems)
         {
             var player = Game.Dungeon.Player;
+            IEnumerable<IEnumerable<Item>> items = new List<List<Item>>();
 
             var itemTypesToGenerate = Enumerable.Repeat(0, numberOfItems).Select(x => ChooseItemFromWeights(classItemCategories[player.PlayerClass]));
             var weightedGenerators = itemTypesToGenerate.Select(itemType => itemGenerators[itemType]);
             var generatorsToUse = weightedGenerators.Select(weightedGen => ChooseItemFromWeights(weightedGen));
-            var items = generatorsToUse.Select(gen => gen());
+            items = generatorsToUse.Select(gen => gen());
+
+            //Add extra utilities for the nerd
+            if (player.PlayerClass == PlayerClass.Sneaker)
+            {
+                var extraItemNumber = numberOfItems / 2;
+                items = AddExtraItemsToSets(extraItemNumber, items, ItemType.NerdExtras);               
+
+                LogFile.Log.LogEntryDebug("Adding extra utility items: " + extraItemNumber, LogDebugLevel.Medium);
+            }
+
+            if (player.PlayerClass == PlayerClass.Athlete)
+            {
+                var extraItemNumber = numberOfItems / 3;
+                items = AddExtraItemsToSets(extraItemNumber, items, ItemType.MeleeExtras);
+
+                LogFile.Log.LogEntryDebug("Adding extra melee items: " + extraItemNumber, LogDebugLevel.Medium);
+            }
 
             return items;
         }
 
+        private IEnumerable<IEnumerable<Item>> AddExtraItemsToSets(int noExtraItems, IEnumerable<IEnumerable<Item>> originalItems, ItemType extraItemTypes)
+        {
+            if (noExtraItems > originalItems.Count())
+            {
+                LogFile.Log.LogEntryDebug("Too many extra items, will not be added", LogDebugLevel.High);
+            }
+
+            var itemTypesToGenerate = Enumerable.Repeat(0, noExtraItems).Select(x => extraItemTypes);
+            var weightedGenerators = itemTypesToGenerate.Select(itemType => itemGenerators[itemType]);
+            var generatorsToUse = weightedGenerators.Select(weightedGen => ChooseItemFromWeights(weightedGen));
+            var extraItems = generatorsToUse.Select(gen => gen());
+
+            //Add to existing sets, preserving items that are already there
+            var extraItemsAdded = originalItems.Zip(extraItems, (a, b) => a.Concat(b));
+            var allItems = extraItemsAdded.Concat(originalItems.Skip(extraItems.Count()));
+            return allItems;
+
+        }
+
+
         private void PlaceItemSets(MapInfo mapInfo, int levelNo, List<Point> monsterSetPositions, IEnumerable<IEnumerable<Item>> itemSetsToPlace)
         {
+
+            //remove in production code
+            if (monsterSetPositions.Count() != itemSetsToPlace.Count())
+            {
+                throw new ApplicationException("items and monster sets different lengths");
+            }
+
             var itemsAndPlaces = monsterSetPositions.Zip(itemSetsToPlace, (f, s) => new Tuple<Point, IEnumerable<Item>>(f, s));
 
             //Place a couple of random items near each group
@@ -333,18 +426,32 @@ namespace RogueBasin
             Dungeon dungeon = Game.Dungeon;
             var totalSetNo = 0;
 
+            var pointsCloseToPlayer = Game.Dungeon.GetValidMapSquaresWithinRange(levelNo, playerStart, 3);
+                    
             for (int r = 0; r < noRooms; r++)
             {
                 int monsterSetsToPlaceInRoom = monstersPerRoom[r];
 
+                var longShortRatio = 4 / 3.0;
+                var longDivision = Math.Sqrt(longShortRatio * monsterSetsToPlaceInRoom);
+                var shortDivison = longDivision / longShortRatio;
+
+                var regularGridOfCentres = RoyaleDungeonLevelMaker.DivideRoomIntoCentres(mapInfo.GetRoom(rooms.ElementAt(r)).Room, (int)Math.Ceiling(longDivision), (int)Math.Ceiling(shortDivison), 0.3, new Point(2,2));
+                var regularGridOfCentresMapCoords = regularGridOfCentres.Select(p => mapInfo.GetRoom(rooms.ElementAt(r)).Location + p).Shuffle();
+
+
                 for (int setNo = 0; setNo < monstersPerRoom[r]; setNo++)
                 {
-
-                    var candidatePointsInRoom = roomsAndPointsInRooms.ElementAt(r).Item2.Shuffle();
-                    var pointsCloseToPlayer = Game.Dungeon.GetValidMapSquaresWithinRange(levelNo, playerStart, 3);
+                    var candidatePointsInRoom = roomsAndPointsInRooms.ElementAt(r).Item2;
                     var safeCandidatePointsInRoom = candidatePointsInRoom.Except(pointsCloseToPlayer);
 
                     Point origin = safeCandidatePointsInRoom.First();
+
+                    if (setNo < regularGridOfCentresMapCoords.Count())
+                    {
+                        origin = regularGridOfCentresMapCoords.ElementAt(setNo);
+                    }
+
                     var candidatePointsFromFirstPoint = candidatePointsInRoom.OrderBy(pt => Utility.GetDistanceBetween(origin, pt));
 
                     List<Point> candidatePointsSpaced = new List<Point>();

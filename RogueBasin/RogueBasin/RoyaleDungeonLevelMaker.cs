@@ -115,7 +115,7 @@ namespace RogueBasin
 
                 List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(),
                 new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(),
-                new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade(), new Items.SoundGrenade()};
+                new Items.Mine(), new Items.Mine(), new Items.Mine(), new Items.SoundGrenade(), new Items.SoundGrenade()};
                 //AddItemsToRoom(mapInfo, i, 0, items);
             }
 
@@ -606,7 +606,7 @@ namespace RogueBasin
             }
         }
 
-        private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool blocksLight)
+        private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, IEnumerable<Point> pointsToPlaceTerrain, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool blocksLight, bool isSoft)
         {
             var roomFiller = new RoomFilling(positionedRoom.Room);
 
@@ -619,6 +619,11 @@ namespace RogueBasin
                 {
                     var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
                     var featureLocationInMapCoords = positionedRoom.Location + roomPoint;
+
+                    if (isSoft)
+                    {
+                        featureToPlace.isBlocking = false;
+                    }
 
                     if (!featureToPlace.isBlocking)
                     {
@@ -667,7 +672,7 @@ namespace RogueBasin
                   continue;
 
                 //var regularGridOfCentres = RoomTemplateUtilities.GetPointsInRoomWithTerrain(thisRoom.Room, RoomTemplateTerrain.Floor)
-                var regularGridOfCentres = DivideRoomIntoCentres(thisRoom.Room, 3, 3, 0.3);
+                var regularGridOfCentres = DivideRoomIntoCentres(thisRoom.Room, 3, 3, 0.3, new Point(2,2));
                 
                 foreach (Point centre in regularGridOfCentres)
                 {
@@ -678,7 +683,12 @@ namespace RogueBasin
 
                         var crossPiece = new CrossPiece(centre, 4 + Game.Random.Next(3), 4 + Game.Random.Next(3), Math.PI / Game.Random.NextDouble());
                         var crossPoints = crossPiece.Generate();
-                        AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights, false);// Game.Random.Next(2) > 0 ? true : false);
+                        var isLightBlockingRoll = Game.Random.Next(20);
+                        bool isLightBlocking = isLightBlockingRoll > 10 ? true : false;
+                        var softCoverRoll = Game.Random.Next(20);
+                        bool isSoftCover = softCoverRoll > 15 ? true : false;
+                        LogFile.Log.LogEntryDebug("Picking soft cover: " + isSoftCover + " from roll " + softCoverRoll, LogDebugLevel.Medium);
+                        AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights, isLightBlocking, isSoftCover);
                     }
                     else
                     {
@@ -705,22 +715,24 @@ namespace RogueBasin
         /// </summary>
         /// <param name="room"></param>
         /// <returns></returns>
-        private List<Point> DivideRoomIntoCentres(RoomTemplate room, int xSubdivisons, int ySubdivisions, double gaussianJitter)
+        public static List<Point> DivideRoomIntoCentres(RoomTemplate room, int xSubdivisons, int ySubdivisions, double gaussianJitter, Point interiorOffset)
         {
             List<Point> pointsToReturn = new List<Point>();
 
-            double xStep = room.Width / (double)xSubdivisons;
-            double yStep = room.Height / (double)ySubdivisions;
+            double xStart = interiorOffset.x;
+            double yStart = interiorOffset.y;
+
+            double xStep = (room.Width - interiorOffset.x * 2)/ (double)xSubdivisons;
+            double yStep = (room.Height - interiorOffset.y * 2) / (double)ySubdivisions;
 
             List<Point> xCentres = new List<Point>();
-
 
             for (int i = 0; i < xSubdivisons; i++)
             {
                 for (int j = 0; j < ySubdivisions; j++)
                 {
-                    double xCentre = Math.Round((i + 0.5) * xStep);
-                    double yCentre = Math.Round((j + 0.5) * yStep);
+                    double xCentre = xStart + Math.Round((i + 0.5) * xStep);
+                    double yCentre = yStart + Math.Round((j + 0.5) * yStep);
                     
                     double xJitter = Gaussian.BoxMuller(0, gaussianJitter * xStep);
                     double yJitter = Gaussian.BoxMuller(0, gaussianJitter * yStep);

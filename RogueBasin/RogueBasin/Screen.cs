@@ -1105,23 +1105,27 @@ namespace RogueBasin {
             //E.g. an animation only changes anim, targetting only changes targetting
 
             //Build the full tiled map representation
-            BuildTiledMap();
-            
-            //Render tiled map to screen
-            mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
-            //Draw Stats
-            //DrawStats(dungeon.Player);
-            DrawUI();
+            if (Game.Base.GameStarted)
+            {
+                BuildTiledMap();
 
-            if (ShowMsgHistory)
-                DrawMsgHistory();
+                //Render tiled map to screen
+                mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
-            if (ShowClueList)
-                DrawCluesList();
+                //Draw Stats
+                //DrawStats(dungeon.Player);
+                DrawUI();
 
-            if (ShowLogList)
-                DrawLogList();
+                if (ShowMsgHistory)
+                    DrawMsgHistory();
+
+                if (ShowClueList)
+                    DrawCluesList();
+
+                if (ShowLogList)
+                    DrawLogList();
+            }
 
             if(MoviesToPlay())
                 PlayFirstMovieInQueue();

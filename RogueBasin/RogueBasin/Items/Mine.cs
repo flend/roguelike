@@ -5,7 +5,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class FragGrenade : Item, IEquippableItem
+    public class Mine : Item, IEquippableItem
     {
  
         /// <summary>
@@ -72,7 +72,7 @@ namespace RogueBasin.Items
         {
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
-            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 2.0, Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase()));
+            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 2.0, 30);
             
             return dest;
         }
@@ -84,7 +84,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Frag Grenade unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Mine unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -97,7 +97,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Frag grenade"; }
+            get { return "Mine"; }
         }
 
         /// <summary>
@@ -115,12 +115,12 @@ namespace RogueBasin.Items
 
         protected override string GetGameSprite()
         {
-            return "grenade";
+            return "mine";
         }
 
         protected override string GetUISprite()
         {
-            return "ui-grenade";
+            return "ui-mine";
         }
 
         public override System.Drawing.Color GetColour()
@@ -136,7 +136,7 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 30;
+            return 0;
         }
 
         public double DamageModifier()
@@ -167,7 +167,7 @@ namespace RogueBasin.Items
         public bool HasThrowAction()
         {
 
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool HasOperateAction()
         {
-            return false;
+            return true;
         }
 
         public int RemainingAmmo()
@@ -210,6 +210,22 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool OperateItem()
         {
+            //Add a mine here
+            var player = Game.Dungeon.Player;
+
+            //var adjacentSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(player.LocationLevel, player.LocationMap);
+
+           // if (adjacentSquares.Count > 0)
+            //{
+                LogFile.Log.LogEntryDebug("Laying mine", LogDebugLevel.Medium);
+
+                var grenadeCreature = new Creatures.Mine(player.ScaleRangedDamage(this, 30));
+                //var grenadeSquare = adjacentSquares.RandomElement();
+
+                var success = Game.Dungeon.AddMonsterDynamic(grenadeCreature, player.LocationLevel, player.LocationMap, true);
+                return success;
+          //  }
+
             return false;
         }
 

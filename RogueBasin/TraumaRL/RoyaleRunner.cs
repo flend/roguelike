@@ -32,7 +32,7 @@ namespace TraumaRL
                 //{
                     StandardDungeonSetup();
 
-                    BuildEntryLevels(retry);
+                    //BuildEntryLevels(retry);
 
                     break;
                // }
@@ -181,10 +181,6 @@ namespace TraumaRL
 
         private void RunGame()
         {
-            Game.Dungeon.Player.LocationLevel = 0;
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
-
-            rb.PrepareGameEntry();
 
             DoCharacterSelection();
 

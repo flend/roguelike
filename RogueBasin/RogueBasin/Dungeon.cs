@@ -1241,7 +1241,7 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1250,13 +1250,14 @@ namespace RogueBasin
 
                 if (contents.monster != null)
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Medium);
                     return false;
                 }
 
-                if (contents.player != null)
+                //horrible exception
+                if (contents.player != null && !(creature is Creatures.Mine))
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1320,7 +1321,7 @@ namespace RogueBasin
         /// <param name="level"></param>
         /// <param name="location"></param>
         /// <returns></returns>
-        public bool AddMonsterDynamic(Monster creature, int level, Point location)
+        public bool AddMonsterDynamic(Monster creature, int level, Point location, bool allowPlayer=false)
         {
             //Try to add a creature at the requested location
             //This may fail due to something else being there or being non-walkable
@@ -1331,7 +1332,7 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Square not enterable", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1340,13 +1341,13 @@ namespace RogueBasin
 
                 if (contents.monster != null)
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Monster at this square", LogDebugLevel.Medium);
                     return false;
                 }
 
-                if (contents.player != null)
+                if (contents.player != null && !allowPlayer)
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Player at this square", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1361,7 +1362,7 @@ namespace RogueBasin
             }
             catch (Exception ex)
             {
-                LogFile.Log.LogEntry(String.Format("AddCreatureDynamic: ") + ex.Message);
+                LogFile.Log.LogEntry(String.Format("AddMonsterDynamic: ") + ex.Message);
                 return false;
             }
 
@@ -2252,10 +2253,7 @@ namespace RogueBasin
                     else if (monster.Passive)
                     {
                         //Attack the passive creature.
-                        CombatResults results = player.AttackMonsterMelee(contents.monster);
-                        Screen.Instance.CreatureToView = contents.monster;
-
-                        Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
+                        DoMeleeAttackOnMonster(contents.monster, deltaMove, newPCLocation);
                         okToMoveIntoSquare = false;
 
                         stationaryAction = true;
@@ -2264,9 +2262,7 @@ namespace RogueBasin
                     {
                         //Monster hostile 
 
-                        CombatResults results = player.AttackMonsterMelee(contents.monster);
-                        Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
-                        Screen.Instance.CreatureToView = contents.monster;
+                        DoMeleeAttackOnMonster(contents.monster, deltaMove, newPCLocation);
 
                         okToMoveIntoSquare = false;
 
@@ -2349,6 +2345,78 @@ namespace RogueBasin
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// From PCMove, where we do our melee attack on the monster in the square entered
+        /// </summary>
+        /// <param name="monster"></param>
+        private void DoMeleeAttackOnMonster(Monster monster, Point moveDelta, Point newPCLocation)
+        {
+            var monstersToAttack = new List<Monster> {monster};
+
+            if (player.GetEquippedMeleeWeapon() is Items.Axe)
+            {
+                //Also attack the neighbours
+                var neighbours = GetNeighbourPointsToDelta(moveDelta).Select(p => newPCLocation - moveDelta + p);
+
+                foreach (var point in neighbours)
+                {
+                    SquareContents contents = MapSquareContents(player.LocationLevel, point);
+
+                    if (contents.monster != null)
+                    {
+                        if (!contents.monster.Charmed)
+                        {
+                            monstersToAttack.Add(contents.monster);
+                        }
+                    }
+                }
+            }
+
+            foreach (Monster m in monstersToAttack)
+            {
+                CombatResults results = player.AttackMonsterMelee(m);
+                Screen.Instance.DrawMeleeAttack(player, m, results);
+                Screen.Instance.CreatureToView = m;
+            }
+        }
+
+        public List<Point> GetNeighbourPointsToDelta(Point delta)
+        {
+            if (delta == new Point(0, -1))
+            {
+                return new List<Point> { new Point(-1, -1), new Point(1, -1) };
+            }
+            if (delta == new Point(1, -1))
+            {
+                return new List<Point> { new Point(0, -1), new Point(1, 0) };
+            }
+            if (delta == new Point(1, 0))
+            {
+                return new List<Point> { new Point(1, -1), new Point(1, 1) };
+            }
+            if (delta == new Point(1, 1))
+            {
+                return new List<Point> { new Point(1, 0), new Point(0, 1) };
+            }
+            if (delta == new Point(0, 1))
+            {
+                return new List<Point> { new Point(1, 1), new Point(-1, 1) };
+            }
+            if (delta == new Point(-1, 1))
+            {
+                return new List<Point> { new Point(0, 1), new Point(-1, 0) };
+            }
+            if (delta == new Point(-1, 0))
+            {
+                return new List<Point> { new Point(-1, 1), new Point(-1, 1) };
+            }
+            else// (delta == new Point(-1, -1))
+            {
+                return new List<Point> { new Point(-1, 0), new Point(-1, 0) };
+            }
+
         }
 
         private void ResetPCTurnCountersOnActionStatonary(bool attackAction)
