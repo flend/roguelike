@@ -178,7 +178,7 @@ namespace RogueBasin {
         Point movieTL = new Point(0, 0);
         uint movieMSBetweenFrames = 500;
 
-        int combationAnimationFrameDuration = 200; //ms
+        public static int combationAnimationFrameDuration = 300; //ms
 
         /// <summary>
         /// Targetting mode
@@ -1251,17 +1251,8 @@ namespace RogueBasin {
         /// <summary>
         /// Draws an animated attack.
         /// </summary>
-        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, AttackType attackType)
+        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, AttackType attackType, bool progressive = false, int animationDelay = 0)
         {
-            //Clone the list since we mangle it
-            List<Point> mangledPoints = new List<Point>();
-            foreach (Point p in targetSquares)
-            {
-                mangledPoints.Add(new Point(p));
-            }
-
-            //Add animation points into the animation layer
-
             string explosionSprite = "explosion";
 
             switch (attackType)
@@ -1279,21 +1270,16 @@ namespace RogueBasin {
                     break;
             }
 
-            foreach (Point p in mangledPoints)
-            {
-                if (!isViewVisible(p))
-                    continue;
-
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionSprite);
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
-
-            }
+            if (!progressive)
+                DrawAreaAttackAnimation(targetSquares, explosionSprite, animationDelay);
+            else
+                DrawAreaAttackAnimationProgressive(targetSquares, explosionSprite, animationDelay);
         }
 
         /// <summary>
         /// Draws an animated attack.
         /// </summary>
-        public void DrawAreaAttackAnimation(IEnumerable<Point> targetSquares, string spriteName)
+        public void DrawAreaAttackAnimation(IEnumerable<Point> targetSquares, string spriteName, int animationDelay = 0)
         {
             //Clone the list since we mangle it
             List<Point> mangledPoints = new List<Point>();
@@ -1311,7 +1297,37 @@ namespace RogueBasin {
 
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileSprite = spriteName;
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration, animationDelay);
+
+            }
+        }
+
+        /// <summary>
+        /// Draws an animated attack.
+        /// </summary>
+        public void DrawAreaAttackAnimationProgressive(IEnumerable<Point> targetSquares, string spriteName, int animationDelay = 0)
+        {
+            //Clone the list since we mangle it
+            List<Point> mangledPoints = new List<Point>();
+            foreach (Point p in targetSquares)
+            {
+                mangledPoints.Add(new Point(p));
+            }
+
+            //Add animation points into the animation layer
+
+            var frameTime = (int)Math.Round(combationAnimationFrameDuration / (double)mangledPoints.Count());
+
+            int counter = 0;
+            foreach (Point p in mangledPoints)
+            {
+                if (!isViewVisible(p))
+                    continue;
+
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileSprite = spriteName;
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(frameTime, animationDelay + counter * frameTime);
+                counter++;
 
             }
         }
@@ -1447,7 +1463,7 @@ namespace RogueBasin {
 
                 //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
 
-                var targetSprite = "bluetarget";
+                var targetSprite = "orangetarget";
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(targetSprite);
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
             }
@@ -1931,7 +1947,7 @@ namespace RogueBasin {
                     DrawUITraumaSpriteByCentre(meleeWeapon.Representation, playerUI_TL.X + meleeWeaponUICenter.X, playerUI_TL.Y + meleeWeaponUICenter.Y);
                 }
 
-                var rangedDamage = weaponE.MeleeDamage();
+                var rangedDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
 
                 //Ranged Damage base
                 var playerRangedTextOffset = new System.Drawing.Point(10, 45);
@@ -2055,8 +2071,13 @@ namespace RogueBasin {
 
                 //Damage
                 var monsterDamageTextOffset = new System.Drawing.Point(10, 15);
-                var dmStr = "DMG: " + CreatureToView.DamageBase();
+                var dmStr = "DMG: " + CreatureToView.GetScaledDamage();
                 DrawText(dmStr, monsterTextUI_UsefulTL.Add(monsterDamageTextOffset));
+
+                var cover = Game.Dungeon.Player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView, true);
+                var monsterCoverTextOffset = new System.Drawing.Point(10, 30);
+                var cvStr = "CV: " + cover;
+                DrawText(cvStr, monsterTextUI_UsefulTL.Add(monsterCoverTextOffset));
 
                 //Creature picture.Representation
                 DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
@@ -3856,7 +3877,16 @@ namespace RogueBasin {
                     }
 
                     cellAnimation.CurrentFrame += tickIncrement;
-                    if (cellAnimation.CurrentFrame > cellAnimation.DurationMS)
+                    if (cellAnimation.CurrentFrame > cellAnimation.DelayMS)
+                    {
+                        cellAnimation.Displayed = true;
+                        animationChangeOccurred = true;
+                    }
+
+                    if (!cellAnimation.Displayed)
+                        continue;
+
+                    if (cellAnimation.CurrentFrame > cellAnimation.DurationMS + cellAnimation.DelayMS)
                     {
                         thisCell.Reset();
                         animationChangeOccurred = true;
@@ -3905,7 +3935,7 @@ namespace RogueBasin {
 
             //Calculate and draw the line overlay
             List<Point> thisLineSquares = Game.Dungeon.GetPathLinePoints(originCreature.LocationMap, target.LocationMap);
-            DrawAreaAttackAnimation(thisLineSquares, AttackType.Bullet);    
+            DrawAreaAttackAnimation(thisLineSquares, AttackType.Bullet, true);    
             //DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, System.Drawing.Color.Black);
 
             //Flash the target if they were damaged

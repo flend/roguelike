@@ -100,7 +100,7 @@ namespace RogueBasin
             effects = new List<MonsterEffect>();
 
             //Set up attributes from class start values
-            maxHitpoints = (int)Math.Ceiling(ClassMaxHitpoints() * (1 + 0.2 * (Level - 1)));
+            maxHitpoints = Game.Dungeon.LevelScalingCalculation(ClassMaxHitpoints(), Level);
 
             hitpoints = maxHitpoints;
             //LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints + " on construction", LogDebugLevel.Medium);
@@ -559,12 +559,12 @@ namespace RogueBasin
 
         internal int ScaleRangedDamage(int damageBase)
         {
-            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
+            return Game.Dungeon.LevelScalingCalculation(damageBase, Level);
         }
 
         internal int ScaleMeleeDamage(int damageBase)
         {
-            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
+            return Game.Dungeon.LevelScalingCalculation(damageBase, Level);
         }
 
         protected virtual int AttackCreatureWithModifiers(Creature creature, int hitMod, int damBase, int damMod, int ACmod)
@@ -692,6 +692,11 @@ namespace RogueBasin
             var scaledDamage = ScaleRangedDamage(this.DamageBase());
             Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, scaledDamage, 0.0, Math.PI / 8, scaledDamage / 10, scaledDamage / 10);
             SoundPlayer.Instance().EnqueueSound("shotgun");
+        }
+
+        public int GetScaledDamage()
+        {
+            return ScaleRangedDamage(DamageBase());
         }
 
         private void StandardPreCombat()

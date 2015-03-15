@@ -724,7 +724,7 @@ namespace RogueBasin
 
             //Draw attack
 
-            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Bullet);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Bullet, true);
 
             //Apply damage
             player.AttackMonsterRanged(monster, damageBase);
@@ -1261,6 +1261,12 @@ namespace RogueBasin
                     return false;
                 }
 
+                if (DangerousFeatureAtLocation(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Dangerous terrain at square", LogDebugLevel.Medium);
+                    return false;
+                }
+
                 //Otherwise OK
                 creature.LocationLevel = level;
                 creature.LocationMap = location;
@@ -1289,6 +1295,18 @@ namespace RogueBasin
             nextUniqueID++;
 
             monsters.Add(monster);
+        }
+
+
+        public static double LevelScalingFactor = 0.6;
+        /// <summary>
+        /// Scale anything for monster level
+        /// </summary>
+        /// <param name="input"></param>
+        /// 
+
+        public int LevelScalingCalculation(int input, int level) {
+            return (int)Math.Ceiling(input * (1 + LevelScalingFactor * (level - 1)));
         }
 
         /// <summary>
@@ -1348,6 +1366,12 @@ namespace RogueBasin
                 if (contents.player != null && !allowPlayer)
                 {
                     LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Player at this square", LogDebugLevel.Medium);
+                    return false;
+                }
+
+                if (DangerousFeatureAtLocation(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Dangerous terrain at square", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -2253,7 +2277,7 @@ namespace RogueBasin
                     else if (monster.Passive)
                     {
                         //Attack the passive creature.
-                        DoMeleeAttackOnMonster(contents.monster, deltaMove, newPCLocation);
+                        DoMeleeAttackOnMonster(deltaMove, newPCLocation);
                         okToMoveIntoSquare = false;
 
                         stationaryAction = true;
@@ -2262,12 +2286,30 @@ namespace RogueBasin
                     {
                         //Monster hostile 
 
-                        DoMeleeAttackOnMonster(contents.monster, deltaMove, newPCLocation);
+                        DoMeleeAttackOnMonster(deltaMove, newPCLocation);
 
                         okToMoveIntoSquare = false;
 
                         stationaryAction = true;
                         attackAction = true;
+                    }
+                }
+
+                //Ranged melee weapons
+                if (player.GetEquippedMeleeWeapon() is Items.Pole)
+                {
+                    //Check 2 squares ahead
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Point p = newPCLocation + deltaMove * (i + 1);
+
+                        SquareContents poleContents = MapSquareContents(player.LocationLevel, p);
+                        if (poleContents.monster != null && !poleContents.monster.Charmed)
+                        {
+                            //Pole will start from the origin anyway
+                            DoMeleeAttackOnMonster(deltaMove, newPCLocation);
+                            break;
+                        }
                     }
                 }
 
@@ -2351,10 +2393,21 @@ namespace RogueBasin
         /// From PCMove, where we do our melee attack on the monster in the square entered
         /// </summary>
         /// <param name="monster"></param>
-        private void DoMeleeAttackOnMonster(Monster monster, Point moveDelta, Point newPCLocation)
+        private void DoMeleeAttackOnMonster(Point moveDelta, Point newPCLocation)
         {
-            var monstersToAttack = new List<Monster> {monster};
+            //Attack at pc's direct move location
 
+            var monstersToAttack = new List<Monster>();
+            SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
+
+            if (contents.monster != null)
+            {
+                if (!contents.monster.Charmed)
+                {
+                    monstersToAttack.Add(contents.monster);
+                }
+            }
+            
             if (player.GetEquippedMeleeWeapon() is Items.Axe)
             {
                 //Also attack the neighbours
@@ -2362,7 +2415,26 @@ namespace RogueBasin
 
                 foreach (var point in neighbours)
                 {
-                    SquareContents contents = MapSquareContents(player.LocationLevel, point);
+                    contents = MapSquareContents(player.LocationLevel, point);
+
+                    if (contents.monster != null)
+                    {
+                        if (!contents.monster.Charmed)
+                        {
+                            monstersToAttack.Add(contents.monster);
+                        }
+                    }
+                }
+            }
+
+            if (player.GetEquippedMeleeWeapon() is Items.Pole)
+            {
+                //Also attack the points behind
+                var neighbours = new List<Point> { new Point(newPCLocation + moveDelta), new Point(newPCLocation + moveDelta + moveDelta) };
+
+                foreach (var point in neighbours)
+                {
+                    contents = MapSquareContents(player.LocationLevel, point);
 
                     if (contents.monster != null)
                     {
@@ -2709,7 +2781,7 @@ namespace RogueBasin
         /// <param name="size"></param>
         /// <param name="damage"></param>
         /// <param name="originMonster"></param>
-        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Creature originMonster)
+        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Creature originMonster, int animationDelay = 0)
         {
             //Work out grenade splash and damage
             List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
@@ -2720,7 +2792,7 @@ namespace RogueBasin
             var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion, false, animationDelay);
            
             foreach (Point sq in grenadeAffectsFiltered)
             {
@@ -2945,7 +3017,7 @@ namespace RogueBasin
             int modifiedXP = baseXP;
             if (player.Level < monster.Level)
             {
-                modifiedXP = (monster.Level - player.Level) * baseXP;
+                modifiedXP = (int)Math.Floor((monster.Level - player.Level) * 0.5 * baseXP);
             }
             else if (player.Level > monster.Level)
             {
@@ -5323,7 +5395,8 @@ namespace RogueBasin
 
         public void GenerateNextRoyaleLevels()
         {
-            royaleDungeonMaker.CreateNextDungeonChoices(player.Level);
+            var minLevel = (int)Math.Max(player.Level, ArenaLevelNumber() + 2);
+            royaleDungeonMaker.CreateNextDungeonChoices(minLevel);
         }
 
         /// <summary>
@@ -5352,6 +5425,15 @@ namespace RogueBasin
             MovePCAbsolute(newLevel, entryPoint);
         }
 
+        /// <summary>
+        /// First is 0
+        /// </summary>
+        /// <returns></returns>
+        internal int ArenaLevelNumber()
+        {
+            return player.LocationLevel / 3;
+        }
+
         internal void ExitLevel()
         {
             if (player.LocationLevel / 3 == 5)
@@ -5371,6 +5453,14 @@ namespace RogueBasin
                 //Offer the user the choice of arenas
                 Game.Base.DoArenaSelection();
             }
+        }
+
+        internal bool DangerousFeatureAtLocation(int LocationLevel, Point newLocation)
+        {
+            var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(LocationLevel, newLocation)).Where(f => f is DangerousActiveFeature);
+            if (dangeousTerrainAtPoint.Count() > 0)
+                return true;
+            return false;
         }
     }
 }

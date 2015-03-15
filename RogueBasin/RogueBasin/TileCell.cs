@@ -16,8 +16,18 @@ namespace TileEngine
     {
         public Animation(int durationMS) {
             DurationMS = durationMS;
+            Displayed = true;
         }
 
+        public Animation(int durationMS, int delayMS)
+        {
+            DurationMS = durationMS;
+            DelayMS = delayMS;
+            Displayed = false;
+        }
+
+        public bool Displayed { get; set; }
+        public int DelayMS { get; set; }
         public int DurationMS { get; set; }
         public int CurrentFrame { get; set; }
     }

@@ -200,7 +200,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public override double FireSoundMagnitude()
         {
-            return 1.0;
+            return 0.5;
         }
 
         /// <summary>

@@ -264,7 +264,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double ThrowSoundMagnitude()
         {
-            return 1;
+            return 0.8;
         }
 
         /// <summary>

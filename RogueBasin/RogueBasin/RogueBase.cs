@@ -11,6 +11,7 @@ using System.Linq;
 using SdlDotNet.Core;
 using SdlDotNet.Graphics;
 using SdlDotNet.Input;
+using SdlDotNet.Audio;
 
 namespace RogueBasin
 {
@@ -69,6 +70,7 @@ namespace RogueBasin
 
 
         public bool PlaySounds { get; set; }
+        public bool PlayMusic { get; set; }
 
         /// <summary>
         /// Setup internal systems
@@ -102,7 +104,20 @@ namespace RogueBasin
             //Setup message queue
             Game.MessageQueue = new MessageQueue();
 
+            SetupFromConfig();
+
             SetupSDLDotNetEvents();
+        }
+
+        private void SetupFromConfig()
+        {
+            if(Game.Config.Sound)
+            {   
+                PlaySounds = true;
+            }
+
+            if(Game.Config.Music)
+                PlayMusic = true;
         }
 
         private void SetupSDLDotNetEvents()
@@ -110,6 +125,13 @@ namespace RogueBasin
             Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
             Events.Tick += new EventHandler<TickEventArgs>(ApplicationTickEventHandler);
             Events.KeyboardUp += new EventHandler<KeyboardEventArgs>(KeyboardEventHandler);
+            Events.MusicFinished += new EventHandler<MusicFinishedEventArgs>(MusicFinishedEventHandler);
+        }
+
+        private void MusicFinishedEventHandler(object sender, MusicFinishedEventArgs e)
+        {
+            LogFile.Log.LogEntryDebug("In music end call back", LogDebugLevel.High);
+            MusicPlayer.Instance().Play();
         }
 
         public void StartEventLoop()
@@ -244,10 +266,14 @@ namespace RogueBasin
 
             waitingForTurnTick = false;
 
-            //Play any enqueued sounds - pre player
-            if (!MusicPlayer.Instance().Initialised)
-                MusicPlayer.Instance().ToggleMusic();
+            if (PlayMusic)
+            {
+                if (!MusicPlayer.Instance().Initialised)
+                    MusicPlayer.Instance().Play();
+            }
 
+            //Play any enqueued sounds - pre player
+           
             if(PlaySounds)
                 SoundPlayer.Instance().PlaySounds();
         }
@@ -593,7 +619,19 @@ namespace RogueBasin
                                     break;
 
                                 case Key.M:
-                                    MusicPlayer.Instance().ToggleMusic();
+                                    if (PlayMusic)
+                                    {
+                                        Game.MessageQueue.AddMessage("Music off");
+                                        MusicPlayer.Instance().Stop();
+                                        PlayMusic = false;
+                                    }
+                                    else
+                                    {
+                                        Game.MessageQueue.AddMessage("Music on");
+                                        MusicPlayer.Instance().Play();
+                                        PlayMusic = true;
+                                    }
+                                    
                                     break;
                                     /*
                                 case Key.M:
@@ -608,17 +646,7 @@ namespace RogueBasin
                                     timeAdvances = false;
                                     break;
                                     */
-                                case Key.L:
 
-                                    Game.Dungeon.Player.LevelUpWithXP();
-                                    timeAdvances = false;
-                                    break;
-
-                                case Key.H:
-
-                                    Game.Dungeon.Player.HealWithXP();
-                                    timeAdvances = false;
-                                    break;
 
                                 case Key.Slash:
                                     Game.Base.PlayMovie("helpkeys", true);
@@ -699,7 +727,17 @@ namespace RogueBasin
                                     centreOnPC = false;
                                     break;
 
+                                case Key.V:
 
+                                    Game.Dungeon.Player.LevelUpWithXP();
+                                    timeAdvances = false;
+                                    break;
+
+                                case Key.C:
+
+                                    Game.Dungeon.Player.HealWithXP();
+                                    timeAdvances = false;
+                                    break;
                             }
                         }
 
@@ -717,7 +755,7 @@ namespace RogueBasin
                                         if (timeAdvances)
                                             SpecialMoveNonMoveAction();
                                         break;
-
+                                        /*
                                     case Key.E:
                                         //this.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
                                         DoArenaSelection();
@@ -726,8 +764,8 @@ namespace RogueBasin
                                     case Key.R:
                                         //Reload
                                         Game.Dungeon.Player.RefillWeapons();
-                                        break;
-
+                                        break;*/
+                                        /*
                                     case Key.K:
                                         if (!Game.Dungeon.AllLocksOpen)
                                         {
@@ -739,30 +777,32 @@ namespace RogueBasin
                                             Game.Dungeon.AllLocksOpen = false;
                                             Game.MessageQueue.AddMessage("All locks are now in their normal state.");
                                         }
-                                        break;
+                                        break;*/
 
                                     case Key.I:
                                         Game.MessageQueue.AddMessage("Player levelled up.");
                                         Game.Dungeon.Player.LevelUp();
                                         break;
 
-
+                                        /*
                                     case Key.N:
                                         //screen numbering
                                         Screen.Instance.CycleRoomNumbering();
-                                        break;
+                                        break;*/
 
                                     case Key.W:
                                         //screen debug mode
                                         Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
+                                        Screen.Instance.NeedsUpdate = true;
                                         break;
 
-                                    case Key.V:
+                                    case Key.B:
                                         //screen debug mode
                                         Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
                                         Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
+                                        Screen.Instance.NeedsUpdate = true;
                                         break;
-
+                                        /*
                                     case Key.Y:
                                         //next mission
                                         Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
@@ -773,7 +813,7 @@ namespace RogueBasin
                                         //last mission
                                         Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
                                         timeAdvances = true;
-                                        break;
+                                        break;*/
 
                                     case Key.J:
                                         //change debug level
@@ -785,16 +825,16 @@ namespace RogueBasin
 
                                         break;
 
-                                    case Key.C:
+                                    case Key.N:
                                         //Add a healing event on the player
                                         Game.Dungeon.Player.HealCompletely();
                                         Game.Dungeon.Player.FullAmmo();
                                         break;
 
-                                    case Key.B:
-                                        Game.Dungeon.Player.LevelUp();
+                                    case Key.Z:
+                                        Game.Dungeon.ExitLevel();
                                         break;
-
+                                        /*
                                     case Key.H:
                                         Game.Dungeon.Player.GiveAllWeapons(1);
                                         Game.Dungeon.Player.GiveAllWetware(2);
@@ -804,6 +844,7 @@ namespace RogueBasin
                                         Game.Dungeon.Player.GiveAllWeapons(2);
                                         Game.Dungeon.Player.GiveAllWetware(3);
                                         break;
+                                         * */
                                 }
                             }
                         }
@@ -1179,6 +1220,7 @@ namespace RogueBasin
 
 
                         //Handle weapons
+                        /*
                         int numberPressed = GetNumberFromNonKeypadKeyPress(args);
                         if (numberPressed != -1)
                         {
@@ -1191,7 +1233,7 @@ namespace RogueBasin
                                     break;
                                 }
                             }
-                        }
+                        }*/
 
                         //Handle direction keys (both arrows and vi keys)
 

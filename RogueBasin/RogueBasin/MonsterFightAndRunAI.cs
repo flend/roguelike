@@ -830,7 +830,7 @@ namespace RogueBasin
                         bool validMove = false;
                         Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
 
-                        validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation);
+                        validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation) && !Game.Dungeon.DangerousFeatureAtLocation(LocationLevel, newLocation);
 
                         //Give up if this is not a valid move
                         if (!validMove)

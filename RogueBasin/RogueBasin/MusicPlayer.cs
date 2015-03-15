@@ -13,9 +13,9 @@ namespace RogueBasin
         public bool Initialised { get; private set; }
 
         protected MusicPlayer() {
-            Music bgMusic = new Music("music/hitman.mp3");
-            SdlDotNet.Audio.MusicPlayer.Volume = 30;
-            SdlDotNet.Audio.MusicPlayer.Load(bgMusic);
+
+            SdlDotNet.Audio.MusicPlayer.EnableMusicFinishedCallback();
+            SetupTune();
         }
 
         public static MusicPlayer Instance()
@@ -26,14 +26,22 @@ namespace RogueBasin
             return instance;
         }
 
-        internal void ToggleMusic()
+        internal void SetupTune()
+        {
+            Music bgMusic = new Music("music/hitman.ogg");
+            SdlDotNet.Audio.MusicPlayer.Volume = 30;
+            SdlDotNet.Audio.MusicPlayer.Load(bgMusic);
+            SdlDotNet.Audio.MusicPlayer.Stop();
+        }
+
+        internal void Play()
         {
 
             try
             {
                 if (!Initialised)
                 {
-                    SdlDotNet.Audio.MusicPlayer.Play();
+                    SdlDotNet.Audio.MusicPlayer.Play(true);
                     Initialised = true;
                 }
 
@@ -42,11 +50,21 @@ namespace RogueBasin
                     SdlDotNet.Audio.MusicPlayer.Resume();
                     playing = true;
                 }
-                else
-                {
-                    SdlDotNet.Audio.MusicPlayer.Pause();
-                    playing = false;
-                }
+                
+            }
+            catch (Exception ex)
+            {
+                LogFile.Log.LogEntryDebug("Failed to play music " + ex.Message, LogDebugLevel.High);
+            }
+        }
+
+        internal void Stop()
+        {
+            try
+            {
+
+                SdlDotNet.Audio.MusicPlayer.Pause();
+                playing = false;
             }
             catch (Exception ex)
             {

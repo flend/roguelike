@@ -24,7 +24,7 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Fists equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Knife equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
@@ -82,7 +82,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Fists 'unequipped'", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Knife 'unequipped'", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -95,7 +95,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Fists"; }
+            get { return "Knife"; }
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Fists"; }
+            get { return "Knives"; }
         }
 
         protected override char GetRepresentation()
@@ -270,7 +270,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return Game.Dungeon.Player.ScaleMeleeDamage(this, 10);
+            return 10;
         }
 
         /// <summary>
@@ -299,6 +299,16 @@ namespace RogueBasin.Items
         public int GetEnergyDrain()
         {
             return 0;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "knife";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-knife";
         }
 
     }

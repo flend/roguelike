@@ -5,74 +5,85 @@ using libtcodWrapper;
 
 namespace RogueBasin.Items
 {
-    public class Pole : Item, IEquippableItem
+    public class RocketLauncher : RangedWeapon, IEquippableItem
     {
- 
+        public RocketLauncher()
+        {
+        }
+
         /// <summary>
-        /// Equipment slots where we can be equipped
+        /// Fires the item - probably should be a method
         /// </summary>
+        /// <param name="target"></param>
+        /// <param name="enemyTarget"></param>
+        /// <returns></returns>
+        public bool FireItem(Point target)
+        {
+            //Should be guaranteed in range by caller
+
+            var scaledDamage = Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase());
+            //Sounds everywhere
+            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, target);
+
+            Game.Dungeon.DoGrenadeExplosion(Game.Dungeon.Player.LocationLevel, target, 4.0, scaledDamage, Game.Dungeon.Player, Screen.combationAnimationFrameDuration);
+
+            var targetSquares = Game.Dungeon.CalculateTrajectory(Game.Dungeon.Player, target);
+            Screen.Instance.DrawAreaAttackAnimationProgressive(targetSquares, "rocket");
+
+            //Remove 1 ammo
+            Ammo--;
+
+            return true;
+        }
+
         public List<EquipmentSlot> EquipmentSlots
         {
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Melee);
+                retList.Add(EquipmentSlot.Weapon);
 
                 return retList;
             }
         }
 
-        public void FireAudio()
-        {
-            return;
-        }
-
-        public void ThrowAudio()
-        {
-            return;
-        }
-
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Pole equipped", LogDebugLevel.Medium);
-
-            //Give player story. Mention level up if one will occur.
-
-            if (Game.Dungeon.Player.PlayItemMovies)
-            {
-                //Game.Base.PlayMovie("plotbadge", true);
-                //Game.Base.PlayMovie("multiattack", false);
-            }
-
-            //Messages
-            //Game.MessageQueue.AddMessage("Vibro-blade.");
-
-            //Game.Base.PlayMovie("plotbadge", true);
-
-            //Level up?
-            //Game.Dungeon.Player.LevelUp();
-
-            //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Game.Base.PlayMovie("multiattack", false);
-
-            //Add any equipped (actually permanent) effects
-            //Game.Dungeon.Player.Speed += 10;
+            LogFile.Log.LogEntryDebug("Launcher equipped", LogDebugLevel.Medium);
 
             return true;
         }
 
+                /// <summary>
+        /// Spread for shotgun target
+        /// </summary>
+        /// <returns></returns>
+        public virtual double ShotgunSpreadAngle()
+        {
+            return 0.0;
+        }
+
+        public bool HasMeleeAction()
+        {
+            return false;
+        }
+
+        public bool HasFireAction()
+        {
+            return true;
+        }
+
         /// <summary>
-        /// Throws the item. Can use generic, it's just 
+        /// Throws the item
         /// </summary>
         /// <param name="target"></param>
         /// <param name="enemyTarget"></param>
         /// <returns></returns>
         public Point ThrowItem(Point target)
         {
-            //Damage for 50 pts
-            Point dest = Game.Dungeon.Player.ThrowItemGeneric(this, target, 50, false);
-            return dest;
+            //Stun for 3 turns
+            return Game.Dungeon.Player.ThrowItemGeneric(this, target, 3, true);
         }
 
         /// <summary>
@@ -82,7 +93,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Pole unequipped", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Launcher unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -95,7 +106,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Pole"; }
+            get { return "Launcher"; }
         }
 
         /// <summary>
@@ -103,17 +114,27 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Poles"; }
+            get { return "Launchers"; }
         }
 
         protected override char GetRepresentation()
         {
-            return (char)278;
+            return (char)274;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "launcher";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-launcher";
         }
 
         public override System.Drawing.Color GetColour()
         {
-            return System.Drawing.Color.LawnGreen;
+            return System.Drawing.Color.Cyan;
         }
 
         public int ArmourClassModifier()
@@ -124,7 +145,7 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 0;
+            return 50;
         }
 
         public double DamageModifier()
@@ -137,58 +158,10 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public bool HasMeleeAction()
+        public override int MaxAmmo()
         {
-            return true;
+            return 1;
         }
-
-        public bool HasFireAction()
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// Can be thrown
-        /// </summary>
-        /// <returns></returns>
-        public bool HasThrowAction()
-        {
-
-            return false;
-        }
-
-        /// <summary>
-        /// Can be operated
-        /// </summary>
-        /// <returns></returns>
-        public bool HasOperateAction()
-        {
-            return false;
-        }
-
-        public int RemainingAmmo()
-        {
-
-            return 0;
-        }
-
-        public int MaxAmmo()
-        {
-            return 0;
-        }
-
-
-        /// <summary>
-        /// Fires the item - probably should be a method
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public bool FireItem(Point target)
-        {
-            return false;
-        }
-
 
         /// <summary>
         /// Operates the item - definitely a method
@@ -216,7 +189,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public virtual TargettingType TargetTypeFire()
         {
-            return TargettingType.Line;
+            return TargettingType.Shotgun;
         }
 
         /// <summary>
@@ -225,7 +198,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 5;
+            return 3;
         }
 
         /// <summary>
@@ -234,16 +207,16 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 5;
+            return 10;
         }
 
         /// <summary>
         /// Noise mag of this weapon on firing
         /// </summary>
         /// <returns></returns>
-        public double FireSoundMagnitude()
+        public override double FireSoundMagnitude()
         {
-            return 0.0;
+            return 1.0;
         }
 
         /// <summary>
@@ -252,7 +225,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double ThrowSoundMagnitude()
         {
-            return 0.1;
+            return 0.3;
         }
 
         /// <summary>
@@ -270,23 +243,29 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int MeleeDamage()
         {
-            return 30;
-        }
-
-        /// <summary>
-        /// Spread for shotgun target
-        /// </summary>
-        /// <returns></returns>
-        public virtual double ShotgunSpreadAngle()
-        {
-            return 0.0;
+            return 5;
         }
 
         public override int ItemCost()
         {
-            return 20;
+            return 25;
+        }
+        /// Can be thrown
+        /// </summary>
+        /// <returns></returns>
+        public bool HasThrowAction()
+        {
+            return false;
         }
 
+        /// <summary>
+        /// Can be operated
+        /// </summary>
+        /// <returns></returns>
+        public bool HasOperateAction()
+        {
+            return false;
+        }
         /// <summary>
         /// Destroyed on use
         /// </summary>
@@ -295,20 +274,19 @@ namespace RogueBasin.Items
         {
             return false;
         }
-
         public int GetEnergyDrain()
         {
             return 0;
         }
 
-        protected override string GetGameSprite()
+        public void FireAudio()
         {
-            return "pole";
+            SoundPlayer.Instance().EnqueueSound("explosion");
         }
 
-        protected override string GetUISprite()
+        public void ThrowAudio()
         {
-            return "ui-pole";
+            return;
         }
     }
 }

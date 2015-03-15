@@ -121,10 +121,20 @@ namespace RogueBasin
                                     offsetY = 5;
                                     offsetX = -5;
                                 }
+                                else if (thisCell.TileSprite == "pole")
+                                {
+                                    offsetY = 25;
+                                }
                                 else
                                 {
                                     offsetY = 15;
                                 }
+                            }
+
+                            if (layerNumber == (int)RogueBasin.Screen.TileLevel.Animations)
+                            {
+                                if (thisCell.Animation != null && !thisCell.Animation.Displayed)
+                                    continue;
                             }
 
                             DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency);

@@ -200,7 +200,9 @@
     <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
+    <Compile Include="Items\Pole.cs" />
     <Compile Include="Items\Mine.cs" />
+    <Compile Include="Items\RocketLauncher.cs" />
     <Compile Include="PlayerEffects\Aim.cs" />
     <Compile Include="Dodge.cs" />
     <Compile Include="Dungeon.cs" />

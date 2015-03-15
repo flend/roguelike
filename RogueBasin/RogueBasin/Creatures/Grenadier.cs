@@ -31,7 +31,7 @@ namespace RogueBasin.Creatures
                 Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, grenadeSquare);
 
                 var targetSquares = Game.Dungeon.CalculateTrajectory(this, grenadeSquare);
-                Screen.Instance.DrawAreaAttackAnimation(targetSquares, grenadeCreature.GameSprite);
+                Screen.Instance.DrawAreaAttackAnimationProgressive(targetSquares, grenadeCreature.GameSprite);
             }
             else {
                 LogFile.Log.LogEntryDebug("Grenadier failed to throw grenade at " + currentTarget.Representation, LogDebugLevel.Medium);

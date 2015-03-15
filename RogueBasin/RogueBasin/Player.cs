@@ -2352,7 +2352,7 @@ namespace RogueBasin
         /// </summary>
         private void HPOnLevelUP()
         {
-            MaxHitpoints = (int)Math.Ceiling(100 * (1 + (Level - 1) * 0.2));
+            MaxHitpoints = Game.Dungeon.LevelScalingCalculation(100, Level);
         }
 
         /// <summary>
@@ -2929,12 +2929,17 @@ namespace RogueBasin
 
         internal int ScaleRangedDamage(Item item, int damageBase)
         {
-            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
+            return Game.Dungeon.LevelScalingCalculation(damageBase, Level);
         }
 
         internal int ScaleMeleeDamage(Item item, int damageBase)
         {
-            return (int)Math.Ceiling(damageBase * (1 + 0.2 * (Level - 1)));
+            var scaledDamage = Game.Dungeon.LevelScalingCalculation(damageBase, Level);
+            //Get a boost for dodge
+            if(IsDodgeActive())
+                return scaledDamage * 2;
+            else
+                return scaledDamage;
         }
 
         public bool LastMoveWasMeleeAttack { get; set; }
@@ -2946,7 +2951,7 @@ namespace RogueBasin
 
         internal bool IsAimActive()
         {
-            return TurnsMoving == 0 && TurnsSinceAction > 1 && TurnsInactive > 1 && IsEffectActive(typeof(PlayerEffects.Aim));
+            return TurnsMoving == 0 && TurnsInactive > 0 && IsEffectActive(typeof(PlayerEffects.Aim));
         }
 
         internal void GivePistol()
