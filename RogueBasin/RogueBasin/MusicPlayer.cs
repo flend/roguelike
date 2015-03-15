@@ -28,13 +28,18 @@ namespace RogueBasin
 
         internal void ToggleMusic()
         {
-            Initialised = true;
 
             try
             {
-                if (!playing)
+                if (!Initialised)
                 {
                     SdlDotNet.Audio.MusicPlayer.Play();
+                    Initialised = true;
+                }
+
+                if (!playing)
+                {
+                    SdlDotNet.Audio.MusicPlayer.Resume();
                     playing = true;
                 }
                 else

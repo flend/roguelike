@@ -1027,6 +1027,11 @@ namespace RogueBasin {
             {
                 tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(PClocation)].TileSprite = "aiming";
             }
+
+            if (player.IsEffectActive(typeof(PlayerEffects.StealthBoost)))
+            {
+                tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(PClocation)].TileSprite = "stealth";
+            }
         }
 
 

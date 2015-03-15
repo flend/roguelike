@@ -263,7 +263,7 @@ namespace RogueBasin.Items
 
         public int GetEnergyDrain()
         {
-            return 10;
+            return 0;
         }
 
         public void FireAudio()

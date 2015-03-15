@@ -254,6 +254,7 @@ namespace RogueBasin
                     break;
                 case RogueBasin.PlayerClass.Sneaker:
                     GameSprite = "nerd";
+                    Inventory.AddItemNotFromDungeon(new Items.StealthWare());
                     break;
             }
         }

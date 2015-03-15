@@ -244,7 +244,9 @@ namespace RogueBasin
             //Play any enqueued sounds - pre player
             if (!MusicPlayer.Instance().Initialised)
                 MusicPlayer.Instance().ToggleMusic();
-            SoundPlayer.Instance().PlaySounds();
+
+            if(PlaySounds)
+                SoundPlayer.Instance().PlaySounds();
         }
 
         private bool ProcessKeypress(KeyboardEventArgs args)
@@ -269,7 +271,8 @@ namespace RogueBasin
                 Screen.Instance.NeedsUpdate = true;
 
                 //Play any enqueued sounds
-                SoundPlayer.Instance().PlaySounds();
+                if(PlaySounds)
+                    SoundPlayer.Instance().PlaySounds();
 
                 return timeAdvances;
             }
@@ -2281,7 +2284,7 @@ namespace RogueBasin
             Point destinationSq = toThrow.ThrowItem(target);
 
             //Remove stealth
-            RemoveEffectsDueToThrowing(player);
+            RemoveEffectsDueToThrowing(player, toThrowItem);
             
             //Destroy it if required
             if (toThrow.DestroyedOnThrow())
@@ -2322,9 +2325,13 @@ namespace RogueBasin
             return true;
         }
 
-        private static void RemoveEffectsDueToThrowing(Player player)
+        private static void RemoveEffectsDueToThrowing(Player player, Item toThrow)
         {
-            //player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
+            //Some items permit stealth
+            if (toThrow is Items.SoundGrenade)
+                return;
+
+            player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
         }
 
         /// <summary>
@@ -2416,7 +2423,7 @@ namespace RogueBasin
             Point destinationSq = toThrow.ThrowItem(target);
 
             //Remove stealth
-            RemoveEffectsDueToThrowing(player);
+            RemoveEffectsDueToThrowing(player, toThrowItem);
 
             //Play any audio
             toThrow.ThrowAudio();
@@ -3216,6 +3223,11 @@ namespace RogueBasin
         {
             //Normal input state
             PostArenaEntryState();
+
+            //If we are nerd, activate stealth
+            if(Game.Dungeon.Player.PlayerClass == PlayerClass.Sneaker) {
+                Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
+            }
 
             LogFile.Log.LogEntryDebug("Player enters level " + level, LogDebugLevel.Medium);
         }
