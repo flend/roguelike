@@ -741,6 +741,16 @@ namespace RogueBasin
             //Only creatures that pursue actually move
             if (WillPursue() && CanMove())
             {
+                //For some reason they are ignoring dangerous terrain so hack here
+                if (Game.Dungeon.DangerousFeatureAtLocation(this.LocationLevel, pathingResult.MonsterFinalLocation))
+                {
+                    ResetFollowingSound();
+                    headingSetToSound = true;
+                    AIState = SimpleAIStates.Patrol;
+                    return true;
+                }
+
+
                 SetHeadingToMapSquare(pathingResult.MonsterFinalLocation);
                 MoveIntoSquare(pathingResult.MonsterFinalLocation);
             }

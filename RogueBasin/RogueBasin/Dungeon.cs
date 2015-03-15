@@ -913,6 +913,9 @@ namespace RogueBasin
                 if (creature.Charmed || creature.Passive)
                     continue;
 
+                if (IgnoreHostileCreaturesOfType(creature.GetType()))
+                    continue;
+
                 distance = Utility.GetDistanceBetween(origin, creature);
 
                 if (distance > 0 && distance < closestDistance && origin != creature)
@@ -929,6 +932,14 @@ namespace RogueBasin
             }
 
             return closestCreature;
+        }
+
+        private bool IgnoreHostileCreaturesOfType(Type monsterType)
+        {
+            if (monsterType is Creatures.Grenade || monsterType is Creatures.Mine)
+                return true;
+
+            return false;
         }
 
 
@@ -5422,7 +5433,7 @@ namespace RogueBasin
 
         internal void ExitLevel()
         {
-            if (player.LocationLevel / 3 == TotalArenas)
+            if (ArenaLevelNumber() == TotalArenas)
             {
                 //Game over folks
                 Game.Base.DoEndOfGame(true, true, false);

@@ -228,13 +228,9 @@ namespace RogueBasin
                 //Special abilities are defined in derived classes
 
                 bool usingSpecial = UseSpecialAbility();
-
-                if (usingSpecial)
-                    CheckReload();
-
-                //Disable this so no reloads
-                /*
-                if (!usingSpecial)
+                               
+                //Stop guy we don't want to fire from having to
+                if (!usingSpecial && DamageBase() > 0)
                 {
                     //In FOV - fire at the player
                     CombatResults result;
@@ -255,7 +251,7 @@ namespace RogueBasin
 
                     //Missile animation
                     Screen.Instance.DrawMissileAttack(this, newTarget, result, GetWeaponColor());
-                }*/
+                }
             }
 
             //Not in range, chase the target

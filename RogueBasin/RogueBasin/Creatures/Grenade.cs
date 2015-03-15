@@ -14,8 +14,9 @@ namespace RogueBasin.Creatures
         bool exploded = false;
         private int p1;
         private double p2;
+        double range;
 
-        public Grenade(int damage, int timer)
+        public Grenade(int damage, int timer, double range)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -26,8 +27,7 @@ namespace RogueBasin.Creatures
 
             this.damage = damage;
             this.timer = timer;
-
-            Passive = true;
+            this.range = range;
         }
 
         protected override void SetupAnimationForObject()
@@ -65,7 +65,7 @@ namespace RogueBasin.Creatures
 
                 Game.Dungeon.AddSoundEffect(0.5, LocationLevel, LocationMap);
 
-                Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 2.0, damage, this);
+                Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, range, damage, this);
 
                 SoundPlayer.Instance().EnqueueSound("explosion");
             }
@@ -94,7 +94,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Grenade(damage, timer);
+            return new Grenade(damage, timer, range);
         }
 
         protected override int ClassMaxHitpoints()

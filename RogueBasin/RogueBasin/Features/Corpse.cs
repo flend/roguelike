@@ -38,6 +38,11 @@ namespace RogueBasin.Features
             return "corpse";
         }
 
+        protected override string GetUISprite()
+        {
+            return "corpse";
+        }
+
         public override string Description
         {
             get

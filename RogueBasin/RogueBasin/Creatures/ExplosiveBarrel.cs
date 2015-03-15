@@ -8,10 +8,10 @@ namespace RogueBasin.Creatures
     /// <summary>
     /// Swarmer. Light melee with wide FOV. Responds to sounds.
     /// </summary>
-    public class ExplosiveBarrel : MonsterNullAI
+    public class ExplosiveBarrel : MonsterThrowAndRunAI
     {
 
-        public ExplosiveBarrel()
+        public ExplosiveBarrel(int level) : base (level)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -24,18 +24,24 @@ namespace RogueBasin.Creatures
         /// </summary>
         protected void Explode()
         {
-            double size = 4.0;
-            int damage = 50;
+            Game.Dungeon.AddSoundEffect(0.5, LocationLevel, LocationMap);
 
-            if (this.LocationLevel >= 6)
-                damage *= 2;
-
-            //Make explosion sound AT target location
-            Game.Dungeon.AddSoundEffect(1, LocationLevel, LocationMap);
-
-            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, size, damage, this);
+            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 2.5, this.ScaleRangedDamage(DamageBase()), this);
+        }
+        /// <summary>
+        /// Only explodes when next to you
+        /// </summary>
+        /// <returns></returns>
+        public override double GetMissileRange()
+        {
+            //Explodes if anyone is even vaguely nearby
+            return 1000;
         }
 
+        protected override string GetWeaponName()
+        {
+            return "explodes!";
+        }
 
 
         public override void InventoryDrop()
@@ -47,7 +53,7 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new ExplosiveBarrel();
+            return new ExplosiveBarrel(Level);
         }
 
         protected override int ClassMaxHitpoints()
@@ -57,7 +63,7 @@ namespace RogueBasin.Creatures
 
         public override int DamageBase()
         {
-            return 4;
+            return 20;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
@@ -111,7 +117,7 @@ namespace RogueBasin.Creatures
 
         public override int GetCombatXP()
         {
-            return 40;
+            return 0;
         }
 
         public override int GetMagicXP()
@@ -164,6 +170,30 @@ namespace RogueBasin.Creatures
         public override int DropChance()
         {
             return 0;
+        }
+
+        public override bool CanMove()
+        {
+            return false;
+        }
+        protected override bool WillInvestigateSounds()
+        {
+            return false;
+        }
+
+        protected override bool WillPursue()
+        {
+            return false;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "barrel";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "barrel";
         }
 
     }

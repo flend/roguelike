@@ -2385,6 +2385,9 @@ namespace RogueBasin
             if (toThrow is Items.SoundGrenade)
                 return;
 
+            if (toThrow is Items.AcidGrenade)
+                return;
+
             player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
         }
 

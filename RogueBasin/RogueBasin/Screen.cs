@@ -1258,7 +1258,7 @@ namespace RogueBasin {
         public enum AttackType
         {
             Explosion, Bullet, Laser,
-            Stun
+            Stun, Acid
         }
 
         /// <summary>
@@ -1280,6 +1280,10 @@ namespace RogueBasin {
 
                 case AttackType.Stun:
                     explosionSprite = "paralexp";
+                    break;
+
+                case AttackType.Acid:
+                    explosionSprite = "acidexp";
                     break;
             }
 
@@ -1310,7 +1314,7 @@ namespace RogueBasin {
 
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileSprite = spriteName;
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combatFastAnimationFrameDuration, animationDelay);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration, animationDelay);
 
             }
         }
@@ -2750,9 +2754,9 @@ namespace RogueBasin {
                     if (!isViewVisible(item.LocationMap))
                         continue;
 
-                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)] = new TileEngine.TileCell(item.Representation);
+                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)] = new TileEngine.TileCell(item.GameSprite);
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileFlag = new LibtcodColorFlags(itemColorToUse);
-                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileSprite = item.GameSprite;
+                    //tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileSprite = ;
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].Transparency = spriteAlpha;
 
                 }
@@ -2859,9 +2863,8 @@ namespace RogueBasin {
                     if (!isViewVisible(feature.LocationMap))
                         continue;
 
-                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.Representation);
+                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.GameSprite);
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor, feature.RepresentationBackgroundColor());
-                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileSprite = feature.GameSprite;
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].Transparency = spriteAlpha;
                 }
             }
@@ -3157,8 +3160,8 @@ namespace RogueBasin {
 
                     if (isViewVisible(creature.LocationMap))
                     {
-                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(creature.Representation);
-                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameSprite;
+                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(creature.GameSprite);
+                        //tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileSprite = ;
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
 
                         tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameOverlaySprite;
@@ -3170,8 +3173,8 @@ namespace RogueBasin {
 
                         tileMapLayer(TileLevel.CreatureTarget)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(targetSprite);
 
-
-                        tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
+                        if(creature.Level != 0)
+                            tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
 
                         if (creature.HasAnimation)
                             tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].RecurringAnimation = creature.GetAnimation();

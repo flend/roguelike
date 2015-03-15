@@ -107,15 +107,13 @@ namespace RogueBasin
             for (int i = NextDungeonLevelChoice; i < NextDungeonLevelChoice + NumberDungeonLevelChoices; i++)
             {
                 List<Monster> punks = new List<Monster> { //new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Punk(1), new Creatures.Thug(1), 
-                    new Creatures.Grenade(100, 20), new Creatures.Grenade(100, 20),
-                new Creatures.Mine(50), new Creatures.Mine(50),
-                new Creatures.Zomborg(1), new Creatures.Zomborg(1) };
+                new Creatures.ArenaMaster(21) };
                 AddMonstersToRoom(mapInfo, i, 0, punks);
                
 
                 List<Item> items = new List<Item> { new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(), new Items.FragGrenade(),
-                new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(),
-                new Items.RocketLauncher(), new Items.RocketLauncher(), new Items.RocketLauncher(), new Items.SoundGrenade(), new Items.SoundGrenade()};
+                //new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(), new Items.StunGrenade(),
+                new Items.RocketLauncher(), new Items.RocketLauncher(), new Items.RocketLauncher(), new Items.AcidGrenade(), new Items.AcidGrenade(), new Items.AcidGrenade(), new Items.AcidGrenade(), new Items.AcidGrenade(), new Items.AcidGrenade()};
                 //AddItemsToRoom(mapInfo, i, 0, items);
             }
 

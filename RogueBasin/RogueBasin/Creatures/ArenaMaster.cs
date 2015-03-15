@@ -1,14 +1,14 @@
 ﻿using System;using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
-using System.Linq;
 
 namespace RogueBasin.Creatures
 {
-    public class Junkborg : MonsterThrowAndRunAI
+    public class ArenaMaster : MonsterThrowAndRunAI
     {
 
-        public Junkborg(int level): base(level)
+        public ArenaMaster(int level)
+            : base(level)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -17,66 +17,69 @@ namespace RogueBasin.Creatures
 
        }
 
-        public static bool RaiseCorpse(Monster summoner, double range) {
-        
-            //Look for a nearby corpse
-            List<Feature> corpseInRange = new List<Feature>();
-
-            foreach (Feature feature in Game.Dungeon.Features)
-            {
-                if (summoner.LocationLevel != feature.LocationLevel)
-                    continue;
-
-                if (Utility.GetDistanceBetween(summoner, feature) < range + 0.005)
-                {
-                    if (feature is Features.Corpse)
-                    {
-                        corpseInRange.Add(feature);
-                    }
-                }
-            }
-
-            if (corpseInRange.Count == 0)
-                return false;
-
-            //Pick a corpse at random
-            var corpsesByRange = corpseInRange.OrderBy(f => Utility.GetDistanceBetween(summoner, f));
-
-            foreach (Feature actualCorpse in corpseInRange)
-            {
-                //Check this square is empty
-                int corpseLevel = actualCorpse.LocationLevel;
-                Point corpseMap = actualCorpse.LocationMap;
-
-                SquareContents contents = Game.Dungeon.MapSquareContents(corpseLevel, corpseMap);
-
-                if (!contents.empty)
-                    continue;
-
-                //Raise a creature here
-
-                //For now just raise skeletons I think we might need to make a separate AI for each raisey creature
-                Game.Dungeon.Features.Remove(actualCorpse); //should have a helper for this really
-
-                //Spawn a zombie
-                var zombieCreature = new Creatures.Zomborg(summoner.Level);
-                Game.Dungeon.AddMonsterDynamic(zombieCreature, actualCorpse.LocationLevel, actualCorpse.LocationMap);
-
-                Game.MessageQueue.AddMessage("The " + summoner.SingleDescription + " produces something horrible!");
-                LogFile.Log.LogEntryDebug(summoner.SingleDescription + " raises corpse", LogDebugLevel.Medium);
-                break;
-            }
-
-            return true;
-        }
-
         protected override bool UseSpecialAbility()
         {
-            //Raises corpses
 
-            //Look for a nearby corpse
-            return Junkborg.RaiseCorpse(this, GetMissileRange());
+            if (this.Hitpoints < (int)Math.Floor(this.MaxHitpoints / 2.0))
+            {
+                int oldHP = this.Hitpoints;
+                this.Hitpoints += (int)Math.Floor((this.MaxHitpoints - this.Hitpoints) / 4.0);
 
+                //Update msg
+                Game.MessageQueue.AddMessage("The Arena master looks inward!");
+                LogFile.Log.LogEntryDebug(this.SingleDescription + " hp: " + oldHP + " -> " + this.Hitpoints, LogDebugLevel.Medium);
+
+                return true;
+            }
+
+            var whichAbility = Game.Random.Next(3);
+
+
+            if (whichAbility == 0)
+            {
+                var result = Junkborg.RaiseCorpse(this, GetMissileRange());
+
+                if (result)
+                    return result;
+
+                //Fall through
+                whichAbility = 1;
+            }
+
+            if (whichAbility == 1)
+            {
+                //Find an adjacent square to the target
+                var adjacentSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(currentTarget.LocationLevel, currentTarget.LocationMap);
+
+                if (adjacentSquares.Count > 0)
+                {
+                    LogFile.Log.LogEntryDebug("Arena master throwing grenade at " + currentTarget.Representation, LogDebugLevel.Medium);
+
+                    var grenadeCreature = new Creatures.Grenade(this.ScaleRangedDamage(30), 3, 3.0);
+                    var grenadeSquare = adjacentSquares.RandomElement();
+                    Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, grenadeSquare);
+
+                    var targetSquares = Game.Dungeon.CalculateTrajectory(this, grenadeSquare);
+                    Screen.Instance.DrawAreaAttackAnimationProgressive(targetSquares, grenadeCreature.GameSprite);
+                    return true;
+
+                }
+                else
+                {
+                    LogFile.Log.LogEntryDebug("Arena master failed to throw grenade at " + currentTarget.Representation, LogDebugLevel.Medium);
+                }
+
+                //Falls through
+                whichAbility = 2;
+            }
+
+            if (whichAbility == 2)
+            {
+                
+            }
+
+            //Always use this rather than shoot
+            return false;
         }
 
         public override double GetMissileRange()
@@ -84,14 +87,9 @@ namespace RogueBasin.Creatures
             return 5.0;
         }
 
-        internal override int ReloadTurnsRequired()
-        {
-            return 2;
-        }
-
         protected override string GetWeaponName()
         {
-            return "throws a cybernetic part";
+            return "unleashes!";
         }
 
         public override void InventoryDrop()
@@ -103,17 +101,17 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Junkborg(Level);
+            return new ArenaMaster(Level);
         }
 
         protected override int ClassMaxHitpoints()
         {
-            return 100;
+            return 150;
         }
 
         public override int DamageBase()
         {
-            return 0;
+            return 50;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
@@ -158,12 +156,12 @@ namespace RogueBasin.Creatures
         /// Rat
         /// </summary>
         /// <returns></returns>
-        public override string SingleDescription { get { return "Junkborg"; } }
+        public override string SingleDescription { get { return "Grenadier"; } }
 
         /// <summary>
         /// Rats
         /// </summary>
-        public override string GroupDescription { get { return "Junkborgs"; } }
+        public override string GroupDescription { get { return "Grenadier"; } }
 
         protected override char GetRepresentation()
         {
@@ -264,22 +262,17 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "pyro";
+            return "wanker";
         }
 
         protected override string GetUISprite()
         {
-            return "pyro";
-        }
-
-        protected override int GetChanceToBackAway()
-        {
-            return 100;
+            return "wanker";
         }
 
         public override int GetCombatXP()
         {
-            return 40;
+            return 20;
         }
 
     }

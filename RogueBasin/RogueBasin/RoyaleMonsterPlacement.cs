@@ -127,13 +127,15 @@ namespace RogueBasin
             itemGenerators[ItemType.Utility] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, FragGrenade ),
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, StunGrenade ),
-                new Tuple<int, Func<IEnumerable<Item>>> ( 50, SoundGrenade ),
-                new Tuple<int, Func<IEnumerable<Item>>> ( 50, Mine )
+                new Tuple<int, Func<IEnumerable<Item>>> ( 30, SoundGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 30, Mine ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 30, AcidGrenade )
             };
 
             itemGenerators[ItemType.NerdExtras] = new List<Tuple<int, Func<IEnumerable<Item>>>> {
                 new Tuple<int, Func<IEnumerable<Item>>> ( 40, FragGrenade ),
                 new Tuple<int, Func<IEnumerable<Item>>> ( 40, StunGrenade ),
+                new Tuple<int, Func<IEnumerable<Item>>> ( 100, AcidGrenade ),
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, SoundGrenade ),
                 new Tuple<int, Func<IEnumerable<Item>>> ( 100, Mine )
             };
@@ -200,6 +202,11 @@ namespace RogueBasin
             return new List<Item> { new Items.StunGrenade() };
         }
 
+        public IEnumerable<Item> AcidGrenade()
+        {
+            return new List<Item> { new Items.StunGrenade() };
+        }
+
         public IEnumerable<Item> SoundGrenade()
         {
             return new List<Item> { new Items.SoundGrenade() };
@@ -213,6 +220,11 @@ namespace RogueBasin
         public Monster MonsterSwarmer(int level) 
         {
             return new Creatures.Swarmer(level);
+        }
+
+        public Monster MonsterExplosiveBarrel(int level)
+        {
+            return new Creatures.ExplosiveBarrel(level);
         }
 
         public Monster MonsterPunk(int level)
@@ -240,6 +252,11 @@ namespace RogueBasin
             return new Creatures.Hunter(level);
         }
 
+        public Monster MonsterArenaMaster(int level)
+        {
+            return new Creatures.ArenaMaster(level);
+        }
+
         public Monster MonsterJunkborg(int level)
         {
             return new Creatures.Junkborg(level);
@@ -262,6 +279,11 @@ namespace RogueBasin
         public IEnumerable<Monster> SwarmerSet(int level, double levelVariance)
         {
             return MonsterType(6, 3, 0.2, level, levelVariance, MonsterSwarmer);
+        }
+
+        public IEnumerable<Monster> ExplosiveBarrelSet(int level, double levelVariance)
+        {
+            return MonsterType(1, 0, 0.2, level, levelVariance, MonsterExplosiveBarrel);
         }
 
         public IEnumerable<Monster> PunkSet(int level, double levelVariance)
@@ -306,6 +328,14 @@ namespace RogueBasin
             return hunters;
         }
 
+        public IEnumerable<Monster> ArenaMasterSet(int level, double levelVariance)
+        {
+            var master = MonsterType(1, 0, 0.2, level, levelVariance, MonsterArenaMaster);
+            var punks = MonsterType(3, 2, 0.2, level, levelVariance, MonsterPunk);
+
+            return master.Concat(punks);
+        }
+
 
         public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<Tuple<int, int>> levelsToProcess, IEnumerable<Point> entryPoints)
         {
@@ -337,12 +367,31 @@ namespace RogueBasin
                     monsterSets.Add(monsterSetGenerated);
                 }
 
+                //Random chance for some barrels
+
+                var random = Game.Random.Next(4);
+
+                if (random < 1)
+                {
+                    var numBarrels = 3 + Game.Random.Next(6);
+
+                    for (int i = 0; i < numBarrels;i++ )
+                        monsterSets.Add(ExplosiveBarrelSet(baseXPLevel, levelVariance));
+                }
+
                 LogFile.Log.LogEntryDebug("Placing total monster XP (base)" + levelMonsterXP, LogDebugLevel.Medium);
+                //End boss
+                if (Game.Dungeon.ArenaLevelNumber() == 4)
+                {
+                    monsterSets.Add(ArenaMasterSet(baseXPLevel, levelVariance));
+                }
 
                 var monsterSetPositions = PlaceMonsterSets(mapInfo, levelNo, monsterSets, entryPoint);
                 var items = GetRandomsItemForPlayer(8);
                 PlaceItemSets(mapInfo, levelNo, monsterSetPositions, items);
             }
+
+            
         }
 
         private IEnumerable<IEnumerable<Item>> GetRandomsItemForPlayer(int numberOfItems)

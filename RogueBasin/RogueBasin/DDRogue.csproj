@@ -62,6 +62,7 @@
     <Compile Include="Creatures\Camera.cs" />
     <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
+    <Compile Include="Creatures\ArenaMaster.cs" />
     <Compile Include="Creatures\Junkborg.cs" />
     <Compile Include="Creatures\Grenadier.cs" />
     <Compile Include="Creatures\Mine.cs" />
@@ -202,6 +203,7 @@
     <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
+    <Compile Include="Items\AcidGrenade.cs" />
     <Compile Include="Items\Pole.cs" />
     <Compile Include="Items\Mine.cs" />
     <Compile Include="Items\RocketLauncher.cs" />

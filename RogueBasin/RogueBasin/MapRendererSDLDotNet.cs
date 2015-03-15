@@ -137,6 +137,38 @@ namespace RogueBasin
                                     continue;
                             }
 
+                            try
+                            {
+                                if (thisCell.TileSprite.Length > 14 && thisCell.TileSprite.Substring(0, 14) == "monster_level_")
+                                {
+                                    var thisLevel = thisCell.TileSprite.Substring(14);
+                                    var thisLevelNum = Convert.ToInt32(thisLevel);
+                                    var thisTens = thisLevelNum / 10;
+                                    var thisRem = thisTens % 10;
+
+                                    if (thisTens == 0)
+                                    {
+                                        DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
+                                    }
+                                    else
+                                    {
+                                        var tens = "monster_level_" + thisTens.ToString();
+                                        var units = "monster_level_" + thisRem.ToString();
+
+                                        DrawTileSprite(units, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
+                                        offsetX = -10;
+                                        DrawTileSprite(tens, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
+                                    }
+                                    continue;
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                //parsing
+                            }
+
+                            //Handle 2 frame anims
+
                             int frameNo = 0;
                             bool isAnimated = false;
                             if (thisCell.RecurringAnimation != null)

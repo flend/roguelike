@@ -17,8 +17,7 @@ namespace RogueBasin.Creatures
             NormalSightRadius = 1000;
 
             Sleeping = false;
-            Passive = true;
-
+           
             this.damage = damage;
         }
 

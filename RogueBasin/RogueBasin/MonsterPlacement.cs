@@ -88,7 +88,7 @@ namespace RogueBasin
 
                 if (monsterSetContainsBarrels.Any())
                 {
-                    AddMonstersToLevelGaussianDistribution(mapInfo, level, new List<Tuple<int, Monster>> { new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel()) }, monstersForLevel / 3);
+                    AddMonstersToLevelGaussianDistribution(mapInfo, level, new List<Tuple<int, Monster>> { new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel(1)) }, monstersForLevel / 3);
                 }
 
                 //Not working for the time being - maybe check tomorrow morning 
@@ -119,7 +119,7 @@ namespace RogueBasin
 
             oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer(1));
             oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
-            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(oneDifficultySet);
 
@@ -143,7 +143,7 @@ namespace RogueBasin
 
             twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer(1));
             twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
-            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(twoDifficultySet3);
 
@@ -159,7 +159,7 @@ namespace RogueBasin
 
             threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
             threeDiffSet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
-            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.ExplosiveBarrel());
+            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(threeDiffSet3);
 
@@ -167,7 +167,7 @@ namespace RogueBasin
 
             fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgRanged());
             fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgMelee());
-            fourDifficultySet.AddMonsterType(30, new RogueBasin.Creatures.ExplosiveBarrel());
+            fourDifficultySet.AddMonsterType(30, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(fourDifficultySet);
 
@@ -175,7 +175,7 @@ namespace RogueBasin
 
             fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgRanged());
             fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgMelee());
-            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.ExplosiveBarrel());
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             var fiveDifficultySet2 = new MonsterSet(5);
 
