@@ -51,6 +51,8 @@ namespace RogueBasin
         private static void SetupTerrainSprites()
         {
             TerrainSprites.Add(MapTerrain.Empty, "ground");
+            TerrainSprites.Add(MapTerrain.NonWalkableFeature, "ground");
+            TerrainSprites.Add(MapTerrain.NonWalkableFeatureLightBlocking, "ground");
         }
 
         public static void OverrideTerrainChar(MapTerrain terrain, char c)

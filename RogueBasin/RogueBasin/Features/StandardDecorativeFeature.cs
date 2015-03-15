@@ -38,5 +38,21 @@ namespace RogueBasin.Features
             }
         }
 
+
+        protected override string GetGameSprite()
+        {
+            if (IsBlocking)
+                return "hardcover";
+            else 
+                return "softcover";
+        }
+
+        protected override string GetUISprite()
+        {
+            if (IsBlocking) 
+                return "hardcover";
+            else
+                return "softcover";
+        }
     }
 }

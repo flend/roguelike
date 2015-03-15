@@ -678,7 +678,7 @@ namespace RogueBasin
 
                         var crossPiece = new CrossPiece(centre, 4 + Game.Random.Next(3), 4 + Game.Random.Next(3), Math.PI / Game.Random.NextDouble());
                         var crossPoints = crossPiece.Generate();
-                        AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights, Game.Random.Next(2) > 0 ? true : false);
+                        AddStandardDecorativeFeaturesToRoom(levelInfo.LevelNo, thisRoom, crossPoints, decorationWeights, false);// Game.Random.Next(2) > 0 ? true : false);
                     }
                     else
                     {

@@ -2781,7 +2781,7 @@ namespace RogueBasin {
                 MapSquare featureSquare = Game.Dungeon.Levels[feature.LocationLevel].mapSquares[feature.LocationMap.x, feature.LocationMap.y];
 
                 System.Drawing.Color featureColor = feature.RepresentationColor();
-                double spriteAlpha = 0.0;
+                double spriteAlpha = 1.0;
                 bool drawFeature = true;
 
                 if (featureSquare.InPlayerFOV || SeeAllMap)
