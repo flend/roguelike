@@ -23,7 +23,7 @@ namespace RogueBasin.Creatures
             if (this.Hitpoints < (int)Math.Floor(this.MaxHitpoints / 2.0))
             {
                 int oldHP = this.Hitpoints;
-                this.Hitpoints += (int)Math.Floor((this.MaxHitpoints - this.Hitpoints) / 4.0);
+                this.Hitpoints += (int)Math.Floor((this.MaxHitpoints - this.Hitpoints) / 5.0);
 
                 //Update msg
                 Game.MessageQueue.AddMessage("The Arena master looks inward!");
@@ -262,12 +262,12 @@ namespace RogueBasin.Creatures
 
         protected override string GetGameSprite()
         {
-            return "wanker";
+            return "boss";
         }
 
         protected override string GetUISprite()
         {
-            return "wanker";
+            return "pyro";
         }
 
         public override int GetCombatXP()

@@ -88,7 +88,7 @@ namespace RogueBasin {
         System.Drawing.Color neverSeenFOVTerrainColor;
         System.Drawing.Color inMonsterFOVTerrainColor = System.Drawing.Color.Blue;
 
-        System.Drawing.Color statsColor = System.Drawing.Color.Khaki;
+        System.Drawing.Color statsColor = System.Drawing.Color.FromArgb(255, 108, 215, 224);
         System.Drawing.Color nothingColor = System.Drawing.Color.Gray;
 
         System.Drawing.Color creatureColor = System.Drawing.Color.White;
@@ -1887,6 +1887,21 @@ namespace RogueBasin {
             }
         }
 
+        private void DrawGraduatedBarVertical(string id, double fullness, Rectangle barArea, double spacing)
+        {
+            //This isn't quite right since it ends with a gap
+            Size barSize = UISpriteSize(id);
+            double barSpacing = (barSize.Height * (1.0 + spacing));
+            double oneBarProportion = barSpacing / barArea.Height;
+            int barsToDraw = (int)Math.Floor(fullness / oneBarProportion);
+
+            for (int i = 0; i < barsToDraw; i++)
+            {
+                int y = barArea.Y + (int)Math.Floor(i * barSpacing);
+                DrawUISprite(id, barArea.X, y);
+            }
+        }
+
         System.Drawing.Point playerUI_TL;
         System.Drawing.Point playerTextUI_TL;
         System.Drawing.Point monsterUI_TL;
@@ -1904,18 +1919,21 @@ namespace RogueBasin {
 
             DrawUISprite("ui_left", playerUI_TL.X, playerUI_TL.Y);
 
-            Size uiMidDim = UISpriteSize("ui_mid");
-            playerTextUI_TL = playerUI_TL.Add(new System.Drawing.Point(uiLeftDim.Width, 0));
-            DrawUISprite("ui_mid", playerTextUI_TL);
-            
-            Size uiRightDim = UISpriteSize("ui_right");
-            monsterUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
+            var debug = false;
+            if (debug)
+            {
+                Size uiMidDim = UISpriteSize("ui_mid");
+                playerTextUI_TL = playerUI_TL.Add(new System.Drawing.Point(uiLeftDim.Width, 0));
+                DrawUISprite("ui_mid", playerTextUI_TL);
+                Size uiRightDim = UISpriteSize("ui_right");
 
-            DrawUISprite("ui_right", monsterUI_TL.X, monsterUI_TL.Y);
+                monsterTextUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width - uiMidDim.Width, ScreenHeight - uiMidDim.Height);
+                DrawUISprite("ui_mid", monsterTextUI_TL);
 
-            monsterTextUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width - uiMidDim.Width, ScreenHeight - uiMidDim.Height);
-            DrawUISprite("ui_mid", monsterTextUI_TL);
+            }
 
+
+           
             Player player = Game.Dungeon.Player;
 
             //Draw equipped ranged weapon
@@ -1940,10 +1958,20 @@ namespace RogueBasin {
 
                 var rangedDamage = Game.Dungeon.Player.ScaleRangedDamage(weapon, weaponE.DamageBase());
 
+
+                //Draw bullets
+                double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
+                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(playerUI_TL.X + 86, playerUI_TL.Y + 127, 20, 54), 0.5);
+
                 //Ranged Damage base
-                var playerRangedTextOffset = new System.Drawing.Point(10, 30);
-                var rangedStr = "Ranged: " + rangedDamage;
-                DrawText(rangedStr, playerTextUI_UsefulTL.Add(playerRangedTextOffset));
+                var playerRangedTextOffset = new System.Drawing.Point(210, 177);
+                var rangedStr = "DMG: " + rangedDamage;
+                DrawSmallText(rangedStr, playerUI_TL.Add(playerRangedTextOffset), LineAlignment.Center, statsColor);
+
+                //Help
+                var rangedHelpOffset = new System.Drawing.Point(218, 134);
+                var rangedHelp = "(F)";
+                DrawText(rangedHelp, playerUI_TL.Add(rangedHelpOffset), LineAlignment.Center, statsColor);
             }
 
             //Draw equipped melee weapon
@@ -1966,10 +1994,10 @@ namespace RogueBasin {
 
                 var rangedDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
 
-                //Ranged Damage base
-                var playerRangedTextOffset = new System.Drawing.Point(10, 45);
-                var rangedStr = "Melee: " + rangedDamage;
-                DrawText(rangedStr, playerTextUI_UsefulTL.Add(playerRangedTextOffset));
+                var playerRangedTextOffset = new System.Drawing.Point(40, 177);
+                var rangedStr = "DMG: " + rangedDamage;
+                DrawSmallText(rangedStr, playerUI_TL.Add(playerRangedTextOffset), LineAlignment.Center, statsColor);
+
             }
 
             //Draw equipped utility weapon
@@ -1990,45 +2018,77 @@ namespace RogueBasin {
                     DrawUITraumaSpriteByCentre(utility.Representation, playerUI_TL.X + utilityUICenter.X, playerUI_TL.Y + utilityUICenter.Y);
                 }
             }
-            
+
+            //Help
+            var utilityHelpOffset = new System.Drawing.Point(298, 134);
+            var utilityHelp = "(T)";
+            DrawText(utilityHelp, playerUI_TL.Add(utilityHelpOffset), LineAlignment.Center, statsColor);
+
+
             //Draw Shield
             //double playerShieldRatio = player.Shield / (double)player.MaxShield;
             //DrawGraduatedBar("shieldbar", playerShieldRatio, new Rectangle(leftUI_TL.X + 49, leftUI_TL.Y + 70, 266, 12), 0.2);
 
             //Draw HP
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            DrawGraduatedBar("healthbar", playerHPRatio, new Rectangle(playerUI_TL.X + 49, playerUI_TL.Y + 92, 266, 12), 0.2);
+            DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(playerUI_TL.X + 57, playerUI_TL.Y + 73, 180, 12), 0.2);
+
+            //Draw fame
+            double playerFameRatio = player.CombatXP / 150.0;
+            DrawGraduatedBar("ui_bar", playerFameRatio, new Rectangle(playerUI_TL.X + 57, playerUI_TL.Y + 94, 180, 12), 0.2);
+
+            //Draw fame sprites
+            DrawUISprite("ui_triangle", playerUI_TL.X + 146, playerUI_TL.Y + 97);
+            DrawUISprite("ui_triangle", playerUI_TL.X + 237, playerUI_TL.Y + 97);
+
+
+            DrawSmallText("Heal (C)", new System.Drawing.Point(playerUI_TL.X + 156, playerUI_TL.Y + 110), LineAlignment.Center, statsColor);
+            DrawSmallText("LVL (V)", new System.Drawing.Point(playerUI_TL.X + 247, playerUI_TL.Y + 110), LineAlignment.Center, statsColor);
+
+            //maybe grey them out
+            var playerFMNuOffset = new System.Drawing.Point(269, 93);
+            DrawLargeText(player.CombatXP.ToString(), playerUI_TL.Add(playerFMNuOffset), LineAlignment.Center, statsColor);
+
+            //HP
 
             var playerHPTextOffset = new System.Drawing.Point(10, 0);
             var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
             DrawText(hpStr, playerTextUI_UsefulTL.Add(playerHPTextOffset));
 
-            //Draw Fame
-            var playerFameTextOffset = new System.Drawing.Point(10, 60);
-            var fameStr = "Fame: " + player.CombatXP;
-            DrawText(fameStr, playerTextUI_UsefulTL.Add(playerFameTextOffset));
-            var playerExpFameTextOffset = new System.Drawing.Point(10, 75);
-            var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
-            DrawText(fameExpStr, playerTextUI_UsefulTL.Add(playerExpFameTextOffset));
+            var playerHPNuOffset = new System.Drawing.Point(25, 93);
+            DrawLargeText(player.Hitpoints.ToString(), playerUI_TL.Add(playerHPNuOffset), LineAlignment.Center, statsColor);
+
+            
 
             //Draw timers
-            
-            var playerMoveOffset = new System.Drawing.Point(170, 0);
-            var moveStr = "Move: " + player.TurnsMoving;
-            DrawText(moveStr, playerTextUI_UsefulTL.Add(playerMoveOffset));
 
-            var playerStationaryOffset = new System.Drawing.Point(170, 15);
-            var actionStr = "No A: " + player.TurnsSinceAction;
-            DrawText(actionStr, playerTextUI_UsefulTL.Add(playerStationaryOffset));
+            if (debug)
+            {
 
-            var playerRestOffset = new System.Drawing.Point(170, 30);
-            var restStr = "Rest: " + player.TurnsInactive;
-            DrawText(restStr, playerTextUI_UsefulTL.Add(playerRestOffset));
+                //Draw Fame
+                var playerFameTextOffset = new System.Drawing.Point(10, 60);
+                var fameStr = "Fame: " + player.CombatXP;
+                DrawText(fameStr, playerTextUI_UsefulTL.Add(playerFameTextOffset));
+                var playerExpFameTextOffset = new System.Drawing.Point(10, 75);
+                //var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
+                //DrawText(fameExpStr, playerUI_TL.Add(playerExpFameTextOffset));
 
-            var dodgeBonusOffset = new System.Drawing.Point(170, 45);
-            var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
-            DrawText(dodgeStr, playerTextUI_UsefulTL.Add(dodgeBonusOffset));
+                var playerMoveOffset = new System.Drawing.Point(170, 0);
+                var moveStr = "Move: " + player.TurnsMoving;
+                DrawText(moveStr, playerTextUI_UsefulTL.Add(playerMoveOffset));
 
+                var playerStationaryOffset = new System.Drawing.Point(170, 15);
+                var actionStr = "No A: " + player.TurnsSinceAction;
+                DrawText(actionStr, playerTextUI_UsefulTL.Add(playerStationaryOffset));
+
+                var playerRestOffset = new System.Drawing.Point(170, 30);
+                var restStr = "Rest: " + player.TurnsInactive;
+                DrawText(restStr, playerTextUI_UsefulTL.Add(playerRestOffset));
+
+                var dodgeBonusOffset = new System.Drawing.Point(170, 45);
+                var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
+                DrawText(dodgeStr, playerTextUI_UsefulTL.Add(dodgeBonusOffset));
+            }
 
             //Monster stats
             DrawFocusWindow();
@@ -2038,10 +2098,19 @@ namespace RogueBasin {
         {
             mapRenderer.DrawText(msg, p.X, p.Y, statsColor);
         }
-
+        
         private void DrawText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
             mapRenderer.DrawText(msg, p.X, p.Y, lineAlignment, color);
+        }
+
+        private void DrawSmallText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawSmallText(msg, p.X, p.Y, lineAlignment, color);
+        }
+        private void DrawLargeText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawLargeText(msg, p.X, p.Y, lineAlignment, color);
         }
 
         private void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
@@ -2053,7 +2122,21 @@ namespace RogueBasin {
         {
             Player player = Game.Dungeon.Player;
 
-            System.Drawing.Point rightUIIconCentre = new System.Drawing.Point(90, 152);
+            System.Drawing.Point rightUIIconCentre = new System.Drawing.Point(118, 152);
+            Size uiRightDim = UISpriteSize("ui_right");
+
+            monsterUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
+
+            DrawUISprite("ui_right", monsterUI_TL.X, monsterUI_TL.Y);
+
+            //Creature picture.Representation (overwrite with frame)
+
+            if (CreatureToView != null && CreatureToView.Alive == true)
+            {
+                DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+            }
+
+            DrawUISprite("frame", monsterUI_TL.X + 79, monsterUI_TL.Y + 107);
 
             //Calculate some point offsets
             var monsterTextUI_UsefulTL = monsterTextUI_TL.Add(new System.Drawing.Point(0, 90));
@@ -2080,33 +2163,45 @@ namespace RogueBasin {
 
                 //Monster hp
                 double enemyHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
-                DrawGraduatedBar("healthbar", enemyHPRatio, new Rectangle(monsterUI_TL.X + 10, monsterUI_TL.Y + 90, 70, 10), 0.2);
-
-                var monsterHPTextOffset = new System.Drawing.Point(10, 0);
-                var hpStr = "HP: " + CreatureToView.Hitpoints + "/" + CreatureToView.MaxHitpoints;
-                DrawText(hpStr, monsterTextUI_UsefulTL.Add(monsterHPTextOffset));
+                DrawGraduatedBar("ui_bar", enemyHPRatio, new Rectangle(monsterUI_TL.X + 14, monsterUI_TL.Y + 92, 95, 12), 0.2);
 
                 //Damage
-                var monsterDamageTextOffset = new System.Drawing.Point(10, 15);
+                var monsterLVLTextOffset = new System.Drawing.Point(47, 142);
+                var lvlStr = "LVL: " + CreatureToView.Level;
+                DrawSmallText(lvlStr, monsterUI_TL.Add(monsterLVLTextOffset), LineAlignment.Center, statsColor);
+
+                var monsterDamageTextOffset = new System.Drawing.Point(47, 162);
                 var dmStr = "DMG: " + CreatureToView.GetScaledDamage();
-                DrawText(dmStr, monsterTextUI_UsefulTL.Add(monsterDamageTextOffset));
+                DrawSmallText(dmStr, monsterUI_TL.Add(monsterDamageTextOffset), LineAlignment.Center, statsColor);
 
-                var cover = Game.Dungeon.Player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView, true);
-                var monsterCoverTextOffset = new System.Drawing.Point(10, 30);
-                var cvStr = "CV: " + cover;
-                DrawText(cvStr, monsterTextUI_UsefulTL.Add(monsterCoverTextOffset));
+                var monsterHPNumOffset = new System.Drawing.Point(134, 93);
+                DrawLargeText(CreatureToView.Hitpoints.ToString(), monsterUI_TL.Add(monsterHPNumOffset), LineAlignment.Center, statsColor);
+                
 
-                //Creature picture.Representation
-                DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+                bool debug = false;
+                if (debug)
+                {
+
+                    var monsterHPTextOffset = new System.Drawing.Point(10, 0);
+                    var hpStr = "HP: " + CreatureToView.Hitpoints + "/" + CreatureToView.MaxHitpoints;
+                    DrawText(hpStr, monsterTextUI_UsefulTL.Add(monsterHPTextOffset));
+
+
+                    var cover = Game.Dungeon.Player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView, true);
+                    var monsterCoverTextOffset = new System.Drawing.Point(10, 30);
+                    var cvStr = "CV: " + cover;
+                    DrawText(cvStr, monsterTextUI_UsefulTL.Add(monsterCoverTextOffset));
+                }
+
             }
 
             else if (ItemToView != null)
             {
-                DrawUISpriteByCentre(ItemToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+                //DrawUISpriteByCentre(ItemToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
             }
             else if (FeatureToView != null)
             {
-                DrawUISpriteByCentre(FeatureToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+                //DrawUISpriteByCentre(FeatureToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
 
             }
         }
@@ -3173,7 +3268,7 @@ namespace RogueBasin {
 
                         tileMapLayer(TileLevel.CreatureTarget)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(targetSprite);
 
-                        if(creature.Level != 0)
+                        if(creature.Level != 0 && !(creature is Creatures.ArenaMaster))
                             tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
 
                         if (creature.HasAnimation)

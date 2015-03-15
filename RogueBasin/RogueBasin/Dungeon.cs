@@ -2830,6 +2830,8 @@ namespace RogueBasin
                         Game.Dungeon.Player.AttackMonsterRanged(squareContents.monster, damage);
                     }
                 }
+
+                Game.Dungeon.AddDecorationFeature(new Features.Scorch(), level, sq);
             }
 
             //And the player

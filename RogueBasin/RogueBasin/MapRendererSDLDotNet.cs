@@ -52,7 +52,10 @@ namespace RogueBasin
     /// </summary>
     class MapRendererSDLDotNet : IMapRenderer
     {
-        SdlDotNet.Graphics.Font font;
+        SdlDotNet.Graphics.Font largeFont;
+        SdlDotNet.Graphics.Font veryLargeFont;
+        SdlDotNet.Graphics.Font smallFont;
+
         Dictionary<SurfaceCacheEntry, Surface> surfaceCache = new Dictionary<SurfaceCacheEntry,Surface>();
         Dictionary<SurfaceCacheEntry, Surface> surfaceUICache = new Dictionary<SurfaceCacheEntry, Surface>();
 
@@ -156,7 +159,7 @@ namespace RogueBasin
                                         var units = "monster_level_" + thisRem.ToString();
 
                                         DrawTileSprite(units, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
-                                        offsetX = -10;
+                                        offsetX = -15;
                                         DrawTileSprite(tens, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
                                     }
                                     continue;
@@ -347,6 +350,12 @@ namespace RogueBasin
             int screenX = x * spriteVideoWidth + offset.x;
             int screenY = (y * spriteVideoHeight) - (tileDimensions.Height - 64) + offset.y;
 
+            if (id == "boss")
+            {
+                screenX = x * spriteVideoWidth + offset.x - 32;
+                screenY = (y * spriteVideoHeight) - 64;
+            }
+
             DrawSprite(TileSpritePath(id), screenX, screenY, alpha, frameNo, isAnimated);
         }
 
@@ -504,7 +513,9 @@ namespace RogueBasin
 
             spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
 
-            font = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 22);
+            veryLargeFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 26);
+            largeFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 22);
+            smallFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 12);
         }
 
 
@@ -584,7 +595,7 @@ namespace RogueBasin
         public void DrawText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
         {
             // Create the Font Surfaces
-            Surface fontSurface = font.Render(msg, color);
+            Surface fontSurface = largeFont.Render(msg, color);
 
             LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
 
@@ -592,13 +603,48 @@ namespace RogueBasin
 
             if (lineAlignment == LineAlignment.Center)
             {
-                var size = font.SizeText(msg);
+                var size = largeFont.SizeText(msg);
                 pointToDraw = new System.Drawing.Point(x - size.Width / 2, y - size.Height / 2);
             }
 
             videoSurface.Blit(fontSurface, pointToDraw);
         }
 
+        public void DrawSmallText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
+        {
+            // Create the Font Surfaces
+            Surface fontSurface = smallFont.Render(msg, color);
+
+            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
+
+            var pointToDraw = new System.Drawing.Point(x, y);
+
+            if (lineAlignment == LineAlignment.Center)
+            {
+                var size = smallFont.SizeText(msg);
+                pointToDraw = new System.Drawing.Point(x - size.Width / 2, y - size.Height / 2);
+            }
+
+            videoSurface.Blit(fontSurface, pointToDraw);
+        }
+
+        public void DrawLargeText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
+        {
+            // Create the Font Surfaces
+            Surface fontSurface = veryLargeFont.Render(msg, color);
+
+            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
+
+            var pointToDraw = new System.Drawing.Point(x, y);
+
+            if (lineAlignment == LineAlignment.Center)
+            {
+                var size = veryLargeFont.SizeText(msg);
+                pointToDraw = new System.Drawing.Point(x - size.Width / 2, y - size.Height / 2);
+            }
+
+            videoSurface.Blit(fontSurface, pointToDraw);
+        }
         public void PrintString(string msg, int x, int y, Color color)
         {
             //Screen real coords

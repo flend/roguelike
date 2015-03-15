@@ -203,6 +203,7 @@
     <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
+    <Compile Include="Features\Scorch.cs" />
     <Compile Include="Items\AcidGrenade.cs" />
     <Compile Include="Items\Pole.cs" />
     <Compile Include="Items\Mine.cs" />
