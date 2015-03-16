@@ -1313,7 +1313,7 @@ namespace RogueBasin {
 
             DrawNextLine(fameText, centrePoint, titleColor);
 
-            var viewingFigures = (int)Math.Round(100 * totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 ));
+            var viewingFigures = (int)Math.Round(100 * totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 * 2));
 
             string fameStr = "A slime mold";
 

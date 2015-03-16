@@ -178,7 +178,6 @@ namespace TraumaRL
             if(Game.Config.DebugMode)
                 Game.Dungeon.PlayerImmortal = true;
 
-            Game.Dungeon.PlayerImmortal = true;
             //Game.Dungeon.FunMode = true;
         }
 
