@@ -265,8 +265,8 @@ namespace RogueBasin {
             DebugMode = false;
             CombatAnimations = true;
 
-            msgDisplayTopLeft = new Point(2, 1);
-            msgDisplayBotRight = new Point(57, 3);
+            msgDisplayTopLeft = new Point(50, 50);
+            msgDisplayBotRight = new Point(850, 100);
 
             MessageQueueWidth = (uint)(msgDisplayBotRight.y - msgDisplayBotRight.x);
 
@@ -309,6 +309,16 @@ namespace RogueBasin {
         public void InitialSetup()
         {
             mapRenderer.Setup(ScreenWidth, ScreenHeight);
+        }
+
+        public void ShowMessageLine(string msg, System.Drawing.Color color)
+        {
+            DrawTextWidth(msg, msgDisplayTopLeft, msgDisplayBotRight.x - msgDisplayTopLeft.x, color);
+        }
+
+        public void ShowMessageLine(string msg)
+        {
+            DrawTextWidth(msg, msgDisplayTopLeft, msgDisplayBotRight.x - msgDisplayTopLeft.x, messageColor);
         }
 
         public bool TargetSelected()
@@ -3689,7 +3699,7 @@ namespace RogueBasin {
             lastMessage = message;
 
             //Display new message
-            PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x + 1, msgDisplayNumLines, LineAlignment.Left, color);
+            DrawTextWidth(message, msgDisplayTopLeft, 800, color);
         }
 
         /// <summary>
@@ -3728,7 +3738,7 @@ namespace RogueBasin {
         void ClearMessageBar()
         {
 
-            ClearRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1);
+            //ClearRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1);
         }
 
 
@@ -4122,7 +4132,8 @@ namespace RogueBasin {
                 {
                     //Message queue - requires keyboard to advance messages - not sure about this yet
                     //(in same area as prompt)
-                    //Game.MessageQueue.RunMessageQueue();
+                    if(ShowMessageQueue)
+                        Game.MessageQueue.RunMessageQueue();
                 }
                 NeedsUpdate = false;
 
@@ -4315,6 +4326,8 @@ namespace RogueBasin {
         public bool EndOfGameQuit { get; set; }
 
         public bool EndOfGameWon { get; set; }
+
+        public bool ShowMessageQueue { get; set; }
     }
 
     static class ScreenExtensionMethods

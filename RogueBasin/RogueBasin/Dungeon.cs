@@ -2221,13 +2221,14 @@ namespace RogueBasin
             bool okToMoveIntoSquare = true;
 
             //Apply environmental effects
+            /*
             if (player.LocationLevel < dungeonInfo.LevelNaming.Count && dungeonInfo.LevelNaming[player.LocationLevel] == "Arcology")
             {
                 if (!player.IsEffectActive(typeof(PlayerEffects.BioProtect)))
                 {
                     player.ApplyDamageToPlayerHitpoints(5);
                 }
-            }
+            }*/
 
             bool stationaryAction = false;
             bool attackAction = false;
@@ -3914,7 +3915,7 @@ namespace RogueBasin
                 return;
             }
 
-            if (FunMode)
+            if (FunMode && !verb.Contains("quit"))
             {
                 //Restart the level with 0 fame
                 RestartLevelOnFailure();

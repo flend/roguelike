@@ -1400,6 +1400,7 @@ namespace RogueBasin
             {
                 ClearSpecialScreenAndHandler();
 
+                Screen.Instance.ShowMessageQueue = true;
                 Screen.Instance.NeedsUpdate = true;
                 Screen.Instance.Update(0);
                 Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
@@ -1421,6 +1422,7 @@ namespace RogueBasin
         public void EndOfGameSelectionKeyHandler(KeyboardEventArgs args)
         {
             Game.Dungeon.RunMainLoop = false;
+            Events.QuitApplication();
 
             if (args.Key == Key.Return)
             {

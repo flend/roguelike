@@ -22,7 +22,7 @@ namespace RogueBasin.Locks
             //Might want to confirm with the player here, which is tricky now in this event driven system
 
             Game.Base.PlayerEntersLevel(level);
-            Game.MessageQueue.AddMessage("You bravely enter arena " + level);
+            Game.MessageQueue.AddMessage("You bravely enter arena " + Game.Dungeon.ArenaLevelNumber() + 1);
 
             return true;
         }

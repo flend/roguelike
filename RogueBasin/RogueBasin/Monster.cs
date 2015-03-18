@@ -800,7 +800,7 @@ namespace RogueBasin
                     if (attackingCreature != null)
                     {
                         string attackerStr = AttackerString(attackingCreature);
-                        string playerMsg = attackingCreature + "destroyed the";
+                        string playerMsg = attackerStr + " destroyed the ";
                         playerMsg += monster.SingleDescription + ".";
                         Game.MessageQueue.AddMessage(playerMsg);
                          

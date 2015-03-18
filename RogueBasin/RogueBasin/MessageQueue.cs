@@ -133,6 +133,10 @@ namespace RogueBasin
         {
             List<string> messages = Game.MessageQueue.GetMessages();
 
+            int msgDisplayTopLeftX = 50;
+            int msgDisplayTopLeftY = 50;
+            int msgDisplayWidth = 800;
+
             //Increment no of turns we have shown cached msg. Turn it off if too many
             IncrementCachedMsgCounter();
             if (CachedMsgTurnCount > displayCachedMsgTurns)
@@ -144,7 +148,7 @@ namespace RogueBasin
                 if (showCachedMsg)
                 {
                     Screen.Instance.ClearMessageLine();
-                    Screen.Instance.PrintMessage(cachedMsg, cachedMsgColor);
+                    Screen.Instance.ShowMessageLine(cachedMsg, cachedMsgColor);
                 }
 
                 //Don't clear if we don't have anything to display (for prompts etc.)
@@ -155,7 +159,7 @@ namespace RogueBasin
             if (messages.Count == 1)
             {
                 //Single message just print it
-                Screen.Instance.PrintMessage(messages[0]);
+                Screen.Instance.ShowMessageLine(messages[0]);
 
                 //Add to history
                 AddToHistory(messages[0]);
@@ -219,7 +223,7 @@ namespace RogueBasin
 
                     //Show on screen
 
-                    Screen.Instance.PrintMessage(outputMsg + " <more>");
+                    Screen.Instance.ShowMessageLine(outputMsg + " <more>");
 
                     //Block for this keypress - may want to listen for exit too
                     //KeyPress userKey;
@@ -255,7 +259,7 @@ namespace RogueBasin
 
                     //Show on screen
 
-                    Screen.Instance.PrintMessage(outputMsg);
+                    Screen.Instance.ShowMessageLine(outputMsg);
                    
                 }
             } while (i < wrappedMsgs.Count);
