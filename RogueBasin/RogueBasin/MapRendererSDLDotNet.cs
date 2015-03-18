@@ -4,6 +4,9 @@ using System.Text;
 using System.Drawing;
 using SdlDotNet.Graphics;
 using SdlDotNet.Core;
+using System.Reflection;
+using System.IO;
+using System.Windows.Forms;
 
 
 namespace RogueBasin
@@ -223,13 +226,13 @@ namespace RogueBasin
             entry.Id = id;
             entry.ForegroundColor = foregroundColor;
             entry.BackgroundColor = backgroundColor;
-
+            /*
             Surface spriteSurface = GetTraumaSprite(entry);
 
             //LogFile.Log.LogEntryDebug("Drawing sprite " + id + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
             //    + screenX + "/" + screenY, LogDebugLevel.Profiling);
 
-            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY));
+            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY));*/
         }
 
         private Surface GetTraumaSprite(SurfaceCacheEntry entry)
@@ -322,12 +325,12 @@ namespace RogueBasin
 
         private string TileSpritePath(string id)
         {
-            return "graphics/tiles/" + id + ".png";
+            return "tiles." + id + ".png";
         }
 
         private string UISpritePath(string id)
         {
-            return "graphics/ui/" + id + ".png";
+            return "ui." + id + ".png";
         }
 
         public void DrawUISprite(string id, int x, int y)
@@ -366,9 +369,10 @@ namespace RogueBasin
             entry.ForegroundColor = Color.Wheat;
             entry.BackgroundColor = Color.Black;
 
+            /*
             Surface traumaSprite = GetTraumaSprite(entry);
 
-            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));
+            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));*/
         }
 
         public void DrawTraumaUISprite(int id, int x, int y)
@@ -378,9 +382,10 @@ namespace RogueBasin
             entry.ForegroundColor = Color.Wheat;
             entry.BackgroundColor = Color.Black;
 
+            /*
             Surface traumaSprite = GetTraumaUISprite(entry);
 
-            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));
+            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));*/
         }
 
         public Size GetUISpriteDimensions(string id)
@@ -459,7 +464,13 @@ namespace RogueBasin
             if (spriteSurface == null)
             {
                 //Convert knocks out alpha for some goddamn reason
-                spriteSurface = new Surface(entry.StrId);//.Convert(videoSurface, true, false);
+                Assembly _assembly = Assembly.GetExecutingAssembly();
+                string filename = "RogueBasin.bin.Debug.graphics." + entry.StrId;
+                Stream fileStream = _assembly.GetManifestResourceStream(filename);
+                MemoryStream memoryStream = new MemoryStream();
+                fileStream.CopyTo(memoryStream);
+
+                spriteSurface = new Surface(memoryStream);//.Convert(videoSurface, true, false);
                 if (entry.AlphaOverride > 0.01)
                 {
                     ModifyAlpha(spriteSurface, entry.AlphaOverride);
@@ -511,7 +522,7 @@ namespace RogueBasin
             videoSurface = Video.SetVideoMode(width, height, 32, false, false, false, true);
             videoSurface.AlphaBlending = true;
 
-            spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
+            //spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
 
             veryLargeFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 26);
             largeFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 22);
