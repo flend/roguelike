@@ -129,7 +129,7 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 30;
+            return 40;
         }
 
         public double DamageModifier()

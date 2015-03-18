@@ -40,9 +40,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\QuickGraph.dll</HintPath>
     </Reference>
-    <Reference Include="SdlDotNet, Version=6.1.0.0, Culture=neutral, PublicKeyToken=26ad4f7e10c61408, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Program Files (x86)\SdlDotNet\bin\SdlDotNet.dll</HintPath>
+    <Reference Include="SdlDotNet">
+      <HintPath>bin\Debug\SdlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
