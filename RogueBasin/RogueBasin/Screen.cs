@@ -1577,8 +1577,16 @@ namespace RogueBasin {
                 return;
 
             //Draw actual target point
-            var targetSprite = "redtarget";
-            tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+            if (SetTargetInRange)
+            {
+                var targetSprite = "bluetarget";
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+            }
+            else
+            {
+                var targetSprite = "redtarget";
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+            }
                        
 
             /*

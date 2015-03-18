@@ -241,7 +241,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 6;
+            return 8;
         }
 
         /// <summary>

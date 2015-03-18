@@ -2958,6 +2958,7 @@ namespace RogueBasin
             inputState = InputState.Targetting;
             TargettingConfirmChar = confirmChar;
             currentTarget = start;
+            currentTargetRange = range;
         }
 
         private static SquareContents SetViewPanelToTargetAtSquare(Point start)
