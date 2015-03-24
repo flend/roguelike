@@ -184,7 +184,7 @@ namespace TraumaRL
         private void RunGame()
         {
 
-            DoCharacterSelection();
+            rb.DoCharacterSelection();
 
             rb.StartEventLoop();
 
@@ -192,10 +192,5 @@ namespace TraumaRL
             //ShowIntroMovies();
         }
 
-        private void DoCharacterSelection()
-        {
-            rb.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, rb.CharacterSelectionKeyHandler);
-            LogFile.Log.LogEntryDebug("Requesting character gen screen", LogDebugLevel.High);
-        }
     }
 }

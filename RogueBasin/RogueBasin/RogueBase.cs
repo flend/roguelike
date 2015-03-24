@@ -109,6 +109,25 @@ namespace RogueBasin
             SetupSDLDotNetEvents();
         }
 
+        public void SetupGame()
+        {
+            var dungeonInfo = new DungeonInfo();
+            Game.Dungeon = new Dungeon(dungeonInfo);
+
+            Game.Dungeon.Player.StartGameSetup();
+
+            Game.Dungeon.Difficulty = GameDifficulty.Medium;
+            Game.Dungeon.Player.Name = "Gladiator";
+            Game.Dungeon.Player.PlayItemMovies = false;
+
+            Game.Dungeon.AllLocksOpen = false;
+
+            if(Game.Config.DebugMode)
+                Game.Dungeon.PlayerImmortal = true;
+
+            //Game.Dungeon.FunMode = true;
+        }
+
         private void SetupFromConfig()
         {
             if(Game.Config.Sound)
@@ -1372,6 +1391,8 @@ namespace RogueBasin
         {
             ClearSpecialScreenAndHandler();
 
+            SetupGame();
+
             //Setup initial levels
             SetupRoyaleEntryLevels();
 
@@ -1421,14 +1442,26 @@ namespace RogueBasin
 
         public void EndOfGameSelectionKeyHandler(KeyboardEventArgs args)
         {
-            Game.Dungeon.RunMainLoop = false;
-            Events.QuitApplication();
-
             if (args.Key == Key.Return)
             {
+                ClearSpecialScreenAndHandler();
+                RestartGameAfterDeath();
             }
         }
-        
+
+        private void RestartGameAfterDeath()
+        {
+            SetupGame();
+            DoCharacterSelection();
+        }
+
+
+        public void DoCharacterSelection()
+        {
+            SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
+            LogFile.Log.LogEntryDebug("Requesting character gen screen", LogDebugLevel.High);
+        }
+
         private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
 
         private void SpecialScreenKeyboardEvent(KeyboardEventArgs args)
@@ -3228,59 +3261,6 @@ namespace RogueBasin
             } while (true);
         }
 
-
-        public bool SetupGame()
-        {
-
-            //Intro screen pre-game (must come after screen)
-
-            //  GameIntro intro = new GameIntro();
-            //  intro.ShowIntroScreen();
-
-            string playerName = "Dave";
-            bool showMovies = false;
-            GameDifficulty diff = GameDifficulty.Easy;
-
-            /*
-
-            string playerName = "Dave";
-            bool showMovies = true;
-            GameDifficulty diff = GameDifficulty.Easy;
-            */
-
-            //Setup dungeon
-
-            //Is there a save game to load?
-            //   if (Utility.DoesSaveGameExist(playerName))
-            //    {
-            //         LoadGame(playerName);
-            //         return true;
-            //    }
-            //    else {
-
-            //If not, make a new dungeon for the new player
-            //Dungeon really contains all the state, so also sets up player etc.
-
-            dungeonMaker = new DungeonMaker(diff);
-            Game.Dungeon = dungeonMaker.SpawnNewDungeon();
-
-            Game.Dungeon.Player.Name = playerName;
-            Game.Dungeon.Player.PlayItemMovies = showMovies;
-            Game.Dungeon.Difficulty = diff;
-
-            //Do final player setup
-            Game.Dungeon.Player.StartGameSetup();
-
-            //See everything
-            Screen.Instance.SeeAllMap = true;
-            Screen.Instance.SeeAllMonsters = true;
-
-            //Move the player to the start location, triggering any triggers etc.
-            Game.Dungeon.MoveToFirstMission();
-
-            return false;
-        }
-
         public void YesNoQuestion(string introMessage, Action<bool> action)
         {
             Screen.Instance.SetPrompt(introMessage + " (y / n):");
@@ -3381,6 +3361,8 @@ namespace RogueBasin
         {
             Screen.Instance.EndOfGameWon = won;
             Screen.Instance.EndOfGameQuit = quit;
+
+            GameStarted = false;
 
             this.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, EndOfGameSelectionKeyHandler);
         }

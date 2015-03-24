@@ -625,6 +625,10 @@ namespace RogueBasin
         {
             // Create the Font Surfaces
             Surface fontSurface = largeFont.Render(msg, color, true, width, 100);
+            fontSurface.Alpha = 128;
+            fontSurface.AlphaBlending = true;
+            fontSurface.Transparent = true;
+            fontSurface.TransparentColor = Color.FromArgb(255, 0, 255);
 
             LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
 

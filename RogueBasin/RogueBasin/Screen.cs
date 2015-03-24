@@ -1067,6 +1067,17 @@ namespace RogueBasin {
             {
                 SpecialScreen();
             }
+
+            //Prompt for user
+            if (Prompt != null)
+            {
+                DrawPrompt();
+            }
+            else if (ShowMessageQueue && SpecialScreen == null) {
+                Game.MessageQueue.RunMessageQueue();
+            }
+            NeedsUpdate = false;
+
         }
 
 
@@ -1283,6 +1294,8 @@ namespace RogueBasin {
 
         internal void EndOfGameScreen()
         {
+            textLineNumber = 0;
+
             mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
             mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
 
@@ -1325,7 +1338,7 @@ namespace RogueBasin {
 
             var viewingFigures = (int)Math.Round(100 * totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 * 2));
 
-            string fameStr = "A slime mold";
+            string fameStr = "Slime Mold";
 
             if (viewingFigures > 10)
             {
@@ -1349,11 +1362,11 @@ namespace RogueBasin {
             }
             if (viewingFigures > 60)
             {
-                fameStr = "Mr. Riddick";
+                fameStr = "Riddick";
             }
             if (viewingFigures > 70)
             {
-                fameStr = "Max Max";
+                fameStr = "Mad Max";
             }
             if (viewingFigures > 80)
             {
@@ -1361,7 +1374,7 @@ namespace RogueBasin {
             }
             if (viewingFigures > 90)
             {
-                fameStr = "The King";
+                fameStr = "Ripley";
             }
             
             DrawNextLine("Your viewing figures: " + viewingFigures + "%!", centrePoint, titleColor);
@@ -1404,13 +1417,19 @@ namespace RogueBasin {
             var thanks = "Thanks for playing another of our 7DRLs! -flend and ShroomArts";
             DrawNextLine(thanks, centrePoint, titleColor);
 
-            //Compose the obituary
+            textLineNumber+= 4;
 
+            var nextGame = "Press RETURN to play again!";
+            DrawNextLine(nextGame, centrePoint, titleColor);
+
+            //Compose the obituary
+            /*
             List<string> obString = new List<string>();
 
             obString.Add(fameStr);
 
             Game.Dungeon.SaveObituary(obString, killRecord.killStrings);
+             */
         }
 
         private void DrawNextLine(string msg, Point centreOrigin, System.Drawing.Color color) {
@@ -4130,20 +4149,6 @@ namespace RogueBasin {
             {
                 //Draw screen 
                 Draw();
-
-                //Prompt for user
-                if (Prompt != null)
-                {
-                    DrawPrompt();
-                }
-                else
-                {
-                    //Message queue - requires keyboard to advance messages - not sure about this yet
-                    //(in same area as prompt)
-                    if(ShowMessageQueue)
-                        Game.MessageQueue.RunMessageQueue();
-                }
-                NeedsUpdate = false;
 
                 FlushConsole();
             }
