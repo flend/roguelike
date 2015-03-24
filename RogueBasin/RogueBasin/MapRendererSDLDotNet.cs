@@ -624,11 +624,9 @@ namespace RogueBasin
         public void DrawTextWidth(string msg, int x, int y, int width, Color color)
         {
             // Create the Font Surfaces
-            Surface fontSurface = largeFont.Render(msg, color, true, width, 100);
-            fontSurface.Alpha = 128;
-            fontSurface.AlphaBlending = true;
+            Surface fontSurface = largeFont.Render(msg, color, Color.Black, true, width, 100);
             fontSurface.Transparent = true;
-            fontSurface.TransparentColor = Color.FromArgb(255, 0, 255);
+            fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
 
             LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
 

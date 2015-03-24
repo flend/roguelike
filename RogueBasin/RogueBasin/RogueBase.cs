@@ -191,19 +191,18 @@ namespace RogueBasin
             //LogFile.Log.LogEntryDebug("FPS: " + args.Fps, LogDebugLevel.Medium);
             //LogFile.Log.LogEntryDebug("FPS tick: " + args.Tick, LogDebugLevel.Medium);
 
-            
-
             if(GameStarted)
                 AdvanceDungeonToNextPlayerTick();
 
             ProfileEntry("Tick Update Film");
 
+            /*
             if (GameStarted && firstRun)
             {
                 //Should be called as a one-off earlier
                 InitializeScreen();
                 firstRun = false;
-            }
+            }*/
 
             Screen.Instance.Update(args.TicksElapsed);
 
@@ -1364,18 +1363,15 @@ namespace RogueBasin
         {
             if (args.Key == Key.One)
             {
-                Game.Dungeon.Player.SetPlayerClass(PlayerClass.Athlete);
-                PostCharacterSelection();
+                PostCharacterSelection(PlayerClass.Athlete);
             }
             if (args.Key == Key.Two)
             {
-                Game.Dungeon.Player.SetPlayerClass(PlayerClass.Gunner);
-                PostCharacterSelection();
+                PostCharacterSelection(PlayerClass.Gunner);
             }
             if (args.Key == Key.Three)
             {
-                Game.Dungeon.Player.SetPlayerClass(PlayerClass.Sneaker);
-                PostCharacterSelection();
+                PostCharacterSelection(PlayerClass.Sneaker);
             }
             if (args.Key == Key.R)
             {
@@ -1387,11 +1383,12 @@ namespace RogueBasin
             }
         }
 
-        public void PostCharacterSelection()
+        public void PostCharacterSelection(PlayerClass playerClass)
         {
             ClearSpecialScreenAndHandler();
 
             SetupGame();
+            Game.Dungeon.Player.SetPlayerClass(playerClass);
 
             //Setup initial levels
             SetupRoyaleEntryLevels();
@@ -1421,10 +1418,11 @@ namespace RogueBasin
             {
                 ClearSpecialScreenAndHandler();
 
+                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+                GameStarted = true;
                 Screen.Instance.ShowMessageQueue = true;
                 Screen.Instance.NeedsUpdate = true;
                 Screen.Instance.Update(0);
-                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
             }
         }
 
@@ -3352,7 +3350,6 @@ namespace RogueBasin
         {
             PlayerStartsLevel(0);
 
-            GameStarted = true;
         }
 
         public char TargettingConfirmChar { get; set; }
