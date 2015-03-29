@@ -1,9 +1,9 @@
-RoyaLe v1.02 7DRL
+RoyaLe v1.03 7DRL
 =================
 
 Welcome to the RoyaLe - a 7DRL roguelike by flend and ShroomArts.
 
-This is the v1.02 almost-straight-from-the-7DRL release!
+This is the v1.03 almost-straight-from-the-7DRL release!
 A few minor bugs and UI annoyances have been fixed (rapidly!) from
 the 7DRL release. You should play this version :)
 
@@ -75,6 +75,10 @@ Look at Shroom's handy help.png!
 Changelog
 =========
 
+v1.03 (29/3/14)
+
+Improving targetting UI, fixing corpse and explosive tiles
+
 v1.02
 
 Fixing the UI quit screen so it doesn't knock you out of the game
@@ -84,6 +88,10 @@ v1.01
 
 Bringing back the message log
 Changing colour of the target when out-of-range
+
+v1.00
+
+True 7DRL release. Some dubious last minute UI decisions!
 
 Credits
 =======
