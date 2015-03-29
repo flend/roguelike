@@ -1043,6 +1043,11 @@ namespace RogueBasin
             return 10;
         }
 
+        public virtual Feature GenerateCorpse()
+        {
+            return new Features.Corpse(GetCorpseRepresentation(), GetCorpseRepresentationColour());
+        }
+
         public virtual Pathing.PathingType PathingType()
         {
             return Pathing.PathingType.Normal;

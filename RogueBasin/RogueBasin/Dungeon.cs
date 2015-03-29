@@ -2935,7 +2935,7 @@ namespace RogueBasin
 
             if (!autoKill) { 
                 //Leave a corpse
-                AddDecorationFeature(new Features.Corpse(monster.GetCorpseRepresentation(), monster.GetCorpseRepresentationColour()), monster.LocationLevel, monster.LocationMap);
+                AddMonsterCorpse(monster);
 
                 //Add experience
                 AddXPForMonster(monster);
@@ -3021,6 +3021,16 @@ namespace RogueBasin
 
                     dungeonInfo.DragonDead = true;
                 }*/
+        }
+
+        private void AddMonsterCorpse(Monster monster)
+        {
+            var corpseToAdd = monster.GenerateCorpse();
+
+            if (corpseToAdd != null)
+            {
+                AddDecorationFeature(corpseToAdd, monster.LocationLevel, monster.LocationMap);
+            }
         }
 
 

@@ -56,9 +56,9 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        public override string SingleDescription { get { return "punk"; } }
+        public override string SingleDescription { get { return "psycho"; } }
 
-        public override string GroupDescription { get { return "punks"; } }
+        public override string GroupDescription { get { return "psychos"; } }
 
         protected override char GetRepresentation()
         {

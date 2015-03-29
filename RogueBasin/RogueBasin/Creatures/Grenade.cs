@@ -18,8 +18,6 @@ namespace RogueBasin.Creatures
 
         public Grenade(int damage, int timer, double range)
         {
-            //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
 
             NormalSightRadius = 100;
 
@@ -95,6 +93,11 @@ namespace RogueBasin.Creatures
         public override Monster NewCreatureOfThisType()
         {
             return new Grenade(damage, timer, range);
+        }
+
+        public override Feature GenerateCorpse()
+        {
+            return null;
         }
 
         protected override int ClassMaxHitpoints()

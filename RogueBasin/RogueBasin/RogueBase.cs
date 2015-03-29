@@ -126,6 +126,17 @@ namespace RogueBasin
                 Game.Dungeon.PlayerImmortal = true;
 
             //Game.Dungeon.FunMode = true;
+
+            ResetScreen();
+        }
+
+        private static void ResetScreen()
+        {
+            Screen.Instance.CreatureToView = null;
+            Screen.Instance.ItemToView = null;
+            Screen.Instance.FeatureToView = null;
+
+            Game.MessageQueue.ClearList();
         }
 
         private void SetupFromConfig()
@@ -1359,36 +1370,43 @@ namespace RogueBasin
             }
         }
 
+        private Boolean FunMode { get; set; }
+
         public void CharacterSelectionKeyHandler(KeyboardEventArgs args)
         {
+
             if (args.Key == Key.One)
             {
-                PostCharacterSelection(PlayerClass.Athlete);
+                PostCharacterSelection(PlayerClass.Athlete, FunMode);
             }
             if (args.Key == Key.Two)
             {
-                PostCharacterSelection(PlayerClass.Gunner);
+                PostCharacterSelection(PlayerClass.Gunner, FunMode);
             }
             if (args.Key == Key.Three)
             {
-                PostCharacterSelection(PlayerClass.Sneaker);
+                PostCharacterSelection(PlayerClass.Sneaker, FunMode);
             }
             if (args.Key == Key.R)
             {
+                FunMode = false;
+                //Is reset next method, but used to toggle display
                 Game.Dungeon.FunMode = false;
             }
             if (args.Key == Key.F)
             {
+                FunMode = true;
                 Game.Dungeon.FunMode = true;
             }
         }
 
-        public void PostCharacterSelection(PlayerClass playerClass)
+        public void PostCharacterSelection(PlayerClass playerClass, bool funMode)
         {
             ClearSpecialScreenAndHandler();
 
             SetupGame();
             Game.Dungeon.Player.SetPlayerClass(playerClass);
+            Game.Dungeon.FunMode = funMode;
 
             //Setup initial levels
             SetupRoyaleEntryLevels();
@@ -1418,12 +1436,19 @@ namespace RogueBasin
             {
                 ClearSpecialScreenAndHandler();
 
-                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
-                GameStarted = true;
-                Screen.Instance.ShowMessageQueue = true;
-                Screen.Instance.NeedsUpdate = true;
-                Screen.Instance.Update(0);
+                StartGame();
             }
+        }
+
+        private void StartGame()
+        {
+            GameStarted = true;
+            Screen.Instance.ShowMessageQueue = true;
+
+            Game.Dungeon.CalculatePlayerFOV();
+            Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+
+            Screen.Instance.NeedsUpdate = true;
         }
 
         public void FunModeDeathKeyHandler(KeyboardEventArgs args)
@@ -1431,10 +1456,8 @@ namespace RogueBasin
             if (args.Key == Key.F)
             {
                 ClearSpecialScreenAndHandler();
-
-                Screen.Instance.NeedsUpdate = true;
-                Screen.Instance.Update(0);
-                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+                ResetScreen();
+                StartGame();
             }
         }
 

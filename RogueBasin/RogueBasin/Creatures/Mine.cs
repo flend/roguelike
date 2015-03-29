@@ -67,6 +67,12 @@ namespace RogueBasin.Creatures
                 SoundPlayer.Instance().EnqueueSound("explosion");
             }
         }
+
+        public override Feature GenerateCorpse()
+        {
+            return null;
+        }
+
         /// <summary>
         /// Only explodes when next to you
         /// </summary>

@@ -13,9 +13,6 @@ namespace RogueBasin.Creatures
 
         public ExplosiveBarrel(int level) : base (level)
         {
-            //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
-
             this.Passive = true;
         }
 
@@ -43,17 +40,14 @@ namespace RogueBasin.Creatures
             return "explodes!";
         }
 
-
-        public override void InventoryDrop()
-        {
-            //Nothing to drop
-
-            //Hmm, could use this corpses
-        }
-
         public override Monster NewCreatureOfThisType()
         {
             return new ExplosiveBarrel(Level);
+        }
+
+        public override Feature GenerateCorpse()
+        {
+            return null;
         }
 
         protected override int ClassMaxHitpoints()
@@ -109,7 +103,6 @@ namespace RogueBasin.Creatures
             return 3;
         }
 
-
         public override System.Drawing.Color RepresentationColor()
         {
             return System.Drawing.Color.Gold;
@@ -118,48 +111,6 @@ namespace RogueBasin.Creatures
         public override int GetCombatXP()
         {
             return 0;
-        }
-
-        public override int GetMagicXP()
-        {
-            return 40;
-        }
-
-        public override int GetMagicRes()
-        {
-            return 0;
-        }
-
-        public override int GetCharmRes()
-        {
-            return 30;
-        }
-
-        public override bool CanBeCharmed()
-        {
-            return true;
-        }
-
-
-        /// <summary>
-        /// Creature AC. Set by type of creature.
-        /// </summary>
-        public override int ArmourClass()
-        {
-            return 12;
-        }
-
-        /// <summary>
-        /// Creature damage modifier.  Set by type of creature.
-        /// </summary>
-        public override double DamageModifier()
-        {
-            return 1;
-        }
-
-        public override int HitModifier()
-        {
-            return 3;
         }
 
         internal override void OnKilledSpecialEffects()
@@ -176,6 +127,7 @@ namespace RogueBasin.Creatures
         {
             return false;
         }
+
         protected override bool WillInvestigateSounds()
         {
             return false;
