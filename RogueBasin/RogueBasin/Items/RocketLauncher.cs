@@ -189,7 +189,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public virtual TargettingType TargetTypeFire()
         {
-            return TargettingType.Shotgun;
+            return TargettingType.Line;
         }
 
         /// <summary>

@@ -1106,4 +1106,7 @@
     <EmbeddedResource Include="bin\Debug\graphics\ui\ui_triangle.png" />
     <EmbeddedResource Include="bin\Debug\graphics\ui\zomboid.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\blacktarget.png" />
+  </ItemGroup>
 </Project>

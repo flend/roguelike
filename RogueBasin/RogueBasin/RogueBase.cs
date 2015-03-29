@@ -30,7 +30,7 @@ namespace RogueBasin
             MovieDisplay, PreMapMovement, SpecialScreen
         }
 
-        enum TargettingAction
+        public enum TargettingAction
         {
             Weapon, Examine, Utility
         }
@@ -2427,7 +2427,7 @@ namespace RogueBasin
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             targettingSuccess = true;
-            TargetAttack(range, targetType, angle, confirmChar, currentFOV);
+            TargetAttack(range, targetType, TargettingAction.Utility, angle, confirmChar, currentFOV);
 
             //User exited
             if (!targettingSuccess)
@@ -2521,7 +2521,7 @@ namespace RogueBasin
 
             targettingSuccess = true;
             targettingAction = TargettingAction.Examine;
-            TargetAttack(TargettingType.Line, 0, 'x', currentFOV);
+            TargetAttack(TargettingType.Line, targettingAction, 0, 'x', currentFOV);
 
             if (!targettingSuccess)
             {
@@ -2561,7 +2561,7 @@ namespace RogueBasin
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             targettingAction = TargettingAction.Utility;
-            TargetAttack(range, targetType, 0.0, 't', currentFOV);
+            TargetAttack(range, targetType, targettingAction, 0.0, 't', currentFOV);
         }
 
         private bool ThrowTargettedUtility(Point target)
@@ -2659,7 +2659,7 @@ namespace RogueBasin
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
             targettingAction = TargettingAction.Weapon;
-            TargetAttack(range, targetType, spreadAngle, 'f', currentFOV);
+            TargetAttack(range, targetType, targettingAction, spreadAngle, 'f', currentFOV);
         }
 
         private bool FireTargettedWeapon(Point target) {
@@ -2916,16 +2916,16 @@ namespace RogueBasin
             return knownSpells[selectedSpell];
         }
 
-        private void TargetAttack(TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
+        private void TargetAttack(TargettingType targetType, TargettingAction targetAction, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
-            TargetAttack(-1, targetType, spreadAngle, confirmChar, currentFOV);
+            TargetAttack(-1, targetType, targetAction, spreadAngle, confirmChar, currentFOV);
         }
 
         /// <summary>
         /// Let the user target something
         /// </summary>
         /// <returns></returns>
-        private void TargetAttack(int range, TargettingType targetType, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
+        private void TargetAttack(int range, TargettingType targetType, TargettingAction targetAction, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
             Player player = Game.Dungeon.Player;
 
@@ -2956,7 +2956,7 @@ namespace RogueBasin
 
             //Get the desired target from the player
 
-             GetTargetFromPlayer(startPoint, targetType, range, spreadAngle, confirmChar, currentFOV);
+             GetTargetFromPlayer(startPoint, targetType, targetAction, range, spreadAngle, confirmChar, currentFOV);
         }
 
         private void TargetItemsCloseToPlayer(double range, CreatureFOV currentFOV)
@@ -2987,12 +2987,13 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        private void GetTargetFromPlayer(Point start, TargettingType type, int range, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
+        private void GetTargetFromPlayer(Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
             //Turn targetting mode on the screen
             Screen.Instance.TargettingModeOn();
             Screen.Instance.Target = start;
             Screen.Instance.TargetType = type;
+            Screen.Instance.TargetAction = targetAction;
             Screen.Instance.TargetRange = range;
             Screen.Instance.TargetPermissiveAngle = spreadAngle;
 

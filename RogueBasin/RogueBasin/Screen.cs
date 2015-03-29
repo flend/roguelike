@@ -192,6 +192,7 @@ namespace RogueBasin {
         public Point Target { get; set; }
 
         public TargettingType TargetType { get; set; }
+        public RogueBase.TargettingAction TargetAction { get; set; }
 
         public int TargetRange { get; set; }
         public double TargetPermissiveAngle { get; set; }
@@ -236,6 +237,11 @@ namespace RogueBasin {
         private int ViewableHeight {get; set; }
 
         char explosionIcon = (char)505;
+
+        static readonly string blueTargetTile = "bluetarget";
+        static readonly string greenTargetTile = "greentarget";
+        static readonly string redTargetTile = "redtarget";
+        static readonly string blackTargetTile = "blacktarget";
 
         public int LevelToDisplay
         {
@@ -1598,12 +1604,12 @@ namespace RogueBasin {
             //Draw actual target point
             if (SetTargetInRange)
             {
-                var targetSprite = "bluetarget";
+                var targetSprite = TargetAction == RogueBase.TargettingAction.Examine ? greenTargetTile : redTargetTile;
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
             }
             else
             {
-                var targetSprite = "redtarget";
+                var targetSprite = blackTargetTile;
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
             }
                        
@@ -3404,7 +3410,7 @@ namespace RogueBasin {
                         //In range firing
                         if (weapon.HasFireAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                         {
-                            targetSprite = "bluetarget";
+                            targetSprite = blueTargetTile;
                         }
                         else
                         {
@@ -3422,7 +3428,7 @@ namespace RogueBasin {
                     }
 
                     if (creature == Screen.Instance.CreatureToView)
-                        targetSprite = "greenTarget";
+                        targetSprite = greenTargetTile;
 
                     if (creature.InPursuit())
                     {
