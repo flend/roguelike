@@ -1663,25 +1663,21 @@ namespace RogueBasin
         public bool AddDecorationFeature(Feature feature, int level, Point location)
         {
             //Try to add a feature at the requested location
-            //This may fail due to something else being there or being non-walkable
             try
             {
                 Map featureLevel = levels[level];
                 Location thisLocation = new Location(level, location);
 
-                //Check another non-decoration feature isn't there
-
-                var featuresAtLocation = GetFeaturesAtLocation(thisLocation);
-
-                if (featuresAtLocation.Select(f => f as UseableFeature != null || f as ActiveFeature != null).Any())
+                //Check square is accessable
+                if (!MapSquareIsWalkable(level, location))
                 {
-                    LogFile.Log.LogEntry("AddDecorationFeature: non-decoration feature already there");
+                    LogFile.Log.LogEntry("AddFeature: map square can't be entered");
                     return false;
                 }
-                
+
                 feature.LocationLevel = level;
                 feature.LocationMap = location;
-
+                
                 AddFeatureAtLocation(thisLocation, feature);
                 return true;
             }
@@ -2812,11 +2808,8 @@ namespace RogueBasin
 
                 Monster m = squareContents.monster;
 
-                if (m != null && !m.Alive)
-                    continue;
-
                 //Hit the monster if it's there
-                if (m != null)
+                if (m != null && m.Alive)
                 {
                     string combatResultsMsg = "PvM (" + m.Representation + ") Grenade: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
@@ -2871,11 +2864,8 @@ namespace RogueBasin
 
                 Monster m = squareContents.monster;
 
-                if (m != null && !m.Alive)
-                    continue;
-
                 //Hit the monster if it's there
-                if (m != null)
+                if (m != null && m.Alive)
                 {
                     string combatResultsMsg = "PvM (" + m.Representation + ") Stun Grenade: Dam: " + stunDamage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
@@ -2898,8 +2888,6 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
                 }
 
-                //Apply damage (uses damage base)
-                //player.a.ApplyCombatDamageToPlayer(damage);
                 //No stun damage for players right now
             }
         }
