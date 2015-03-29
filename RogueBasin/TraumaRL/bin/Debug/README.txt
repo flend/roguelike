@@ -98,6 +98,10 @@ Credits
 
 flend - programming and design
 ShroomArts - art and playtesting
+
+Assets
+======
+
 Kevin MacLeod - free music (Hitman) - http://incompetech.com/
 Freesound.net - free sounds [CC0]!
 	(acid.ogg) freesound 87535 - flasher21
@@ -108,5 +112,14 @@ Freesound.net - free sounds [CC0]!
 	(laser.ogg) freesound 253446 - jmayoff
 	(punch.ogg) freesound 104183 - Ekokubza123
 	(shotgun.ogg) freesound 166191 - ShawnyBoy
-	
+Dan Zadorozny - Alexis Regular font
+
+Many thanks to all those who made their work available for free.
+
+Libraries
+=========
+
+sdldotnet - http://cs-sdl.sourceforge.net/
+sdl - https://www.libsdl.org/
+libtcod - http://roguecentral.org/doryen/libtcod/
 	
