@@ -663,15 +663,14 @@ namespace RogueBasin
 
         public bool FireLaserLineWeapon(Point target, RangedWeapon item, int damage)
         {
-            //Calculate a huge FOV
+            Point lineEnd = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
 
-            Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
-
-            WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
-            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
+            WrappedFOV fovForWeapon = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
+            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, lineEnd, fovForWeapon);
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, Screen.AttackType.Laser);
+            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) : targetSquares;
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Laser);
 
             //Make firing sound
             Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
@@ -719,8 +718,7 @@ namespace RogueBasin
                 return true;
             }
 
-            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) :
-                targetSquares;
+            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) : targetSquares;
 
             //Draw attack
 
@@ -3212,6 +3210,13 @@ namespace RogueBasin
             return wrappedFOV;
         }
 
+        /// <summary>
+        /// Project a line until the maximum extent of the level
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="midPoint"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
         public Point GetEndOfLine(Point start, Point midPoint, int level)
         {
             int deltaX = midPoint.x - start.x;
