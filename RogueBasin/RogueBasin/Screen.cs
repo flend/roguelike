@@ -1112,7 +1112,7 @@ namespace RogueBasin {
             var crackCentre = new Point(centreXOffset * 2, graphicsY);
             var nerdCentre = new Point(centreXOffset * 3, graphicsY);
 
-            var titleLineOffset = 30;
+            var titleLineOffset = ScreenHeight / 32;
 
             DrawLargeText("Congratulations!", new System.Drawing.Point(centreX, topY), LineAlignment.Center, statsColor);
             DrawLargeText("You VOLUNTEERed for the RoyaLe!", new System.Drawing.Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
@@ -1121,7 +1121,7 @@ namespace RogueBasin {
 
             DrawLargeText("State your name and history:", new System.Drawing.Point(centreX, topY + titleLineOffset * 5), LineAlignment.Center, textColor);
             
-            var characterOffset = 50;
+            var characterOffset = ScreenHeight / 19;
 
             DrawText("[1] Lance", lanceCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
             DrawUISpriteByCentre("lance", lanceCentre);
@@ -1132,29 +1132,31 @@ namespace RogueBasin {
             DrawText("[3] N3rd", nerdCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
             DrawUISpriteByCentre("nerd", nerdCentre);
 
-            var textY = 90;
+            var textY = ScreenHeight / 11;
+            var textWidth = (int)Math.Floor(ScreenWidth / 5.0);
+            var textXOffset = (int)Math.Floor(-ScreenWidth / 10.0);
 
             var lanceText = "A disgraced athlete who was dismissed for his violent conduct in track and field. Ideal for the Arena.";
-            DrawTextWidth(lanceText, lanceCentre + new Point(-100, textY), 244, statsColor);
+            DrawTextWidth(lanceText, lanceCentre + new Point(textXOffset, textY), textWidth, statsColor);
 
             var crackText = "In 2072 a commando was sent to prison by a military court for a crime he absolutely did commit. Now fighting for the pleasure of TV viewers everywhere!";
-            DrawTextWidth(crackText, crackCentre + new Point(-100, textY), 244, statsColor);
+            DrawTextWidth(crackText, crackCentre + new Point(textXOffset, textY), textWidth, statsColor);
 
             var nerdText = "Having finally won GrandMaster league in popular video game 'Running Hunger Royale' the nerd was completely unprepared for his 'prize'!";
-            DrawTextWidth(nerdText, nerdCentre + new Point(-100, textY), 244, statsColor);
+            DrawTextWidth(nerdText, nerdCentre + new Point(textXOffset, textY), textWidth, statsColor);
 
-            var specialY = 300;
+            var specialY = (int)Math.Floor(ScreenHeight / 3.2);
 
             var lanceSpecial = "Special: Keep moving for a melee and defence bonus!";
-            DrawTextWidth(lanceSpecial, lanceCentre + new Point(-100, specialY), 244, textColor);
+            DrawTextWidth(lanceSpecial, lanceCentre + new Point(textXOffset, specialY), textWidth, textColor);
 
             var crackSpecial = "Special: Halt in place for a ranged and defence bonus!";
-            DrawTextWidth(crackSpecial, crackCentre + new Point(-100, specialY), 244, textColor);
+            DrawTextWidth(crackSpecial, crackCentre + new Point(textXOffset, specialY), textWidth, textColor);
 
             var nerdSpecial = "Special: Sneak around and cause mayhem!";
-            DrawTextWidth(nerdSpecial, nerdCentre + new Point(-100, specialY), 244, textColor);
+            DrawTextWidth(nerdSpecial, nerdCentre + new Point(textXOffset, specialY), textWidth, textColor);
 
-            var styleY = 450;
+            var styleY = (int)Math.Floor(ScreenHeight / 2.1);
 
             if (Game.Dungeon.FunMode)
             {
@@ -1162,7 +1164,7 @@ namespace RogueBasin {
                 var funText2 = "[R]: For roguelike mode!";
 
                 DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
-                DrawText(funText2, new Point(centreX, graphicsY + styleY + 30), LineAlignment.Center, textColor);
+                DrawText(funText2, new Point(centreX, graphicsY + styleY + titleLineOffset), LineAlignment.Center, textColor);
             }
             else
             {
@@ -1170,7 +1172,7 @@ namespace RogueBasin {
                 var funText2 = "[F]: For FUN mode!";
 
                 DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
-                DrawText(funText2, new Point(centreX, graphicsY + styleY + 30), LineAlignment.Center, textColor);
+                DrawText(funText2, new Point(centreX, graphicsY + styleY + titleLineOffset), LineAlignment.Center, textColor);
             }
         }
 
