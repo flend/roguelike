@@ -63,6 +63,7 @@ namespace RogueBasin
         Dictionary<SurfaceCacheEntry, Surface> surfaceUICache = new Dictionary<SurfaceCacheEntry, Surface>();
 
         Dictionary<SpriteCacheEntry, Surface> spriteCache = new Dictionary<SpriteCacheEntry, Surface>();
+        Dictionary<SpriteCacheEntry, Surface> scaledSpriteCache = new Dictionary<SpriteCacheEntry, Surface>();
 
         private Color transparentColor = Color.FromArgb(255, 0, 255);
 
@@ -71,12 +72,35 @@ namespace RogueBasin
         private int spritesPerRow = 16;
         private int spriteSheetWidth = 16;
         private int spriteSheetHeight = 16;
-        private int spriteVideoWidth = 64;
-        private int spriteVideoHeight = 64;
+        private int tileSpriteSheetWidth = 64;
+        private int tileSpriteSheetHeight = 64;
 
         private int traumaSpriteScaling = 4;
         private int traumaUISpriteScaling = 4;
 
+        public int spriteVideoWidth { get; set; }
+        public int spriteVideoHeight { get; set; }
+
+        private double spriteVideoWidthScaling = 1.0;
+        private double spriteVideoHeightScaling = 1.0;
+
+        public MapRendererSDLDotNet()
+        {
+            spriteVideoWidth = 64;
+            spriteVideoHeight = 64;
+        }
+
+        public void SetSpriteVideoSize(int width, int height)
+        {
+            spriteVideoWidth = width;
+            spriteVideoHeight = height;
+
+            spriteVideoWidthScaling = spriteVideoWidth / (double)tileSpriteSheetWidth;
+            spriteVideoHeightScaling = spriteVideoHeight / (double)tileSpriteSheetHeight;
+
+            //Drop scaled cache
+            scaledSpriteCache.Clear();
+        }
 
         /// <summary>
         /// Render the map, with TL in map at mapOffset. Screenviewport is the screen viewport in tile dimensions (for now)
@@ -154,16 +178,16 @@ namespace RogueBasin
 
                                     if (thisTens == 0)
                                     {
-                                        DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
+                                        DrawTileSprite(thisCell.TileSprite, new Point(screenTileX, screenTileY), new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
                                     }
                                     else
                                     {
                                         var tens = "monster_level_" + thisTens.ToString();
                                         var units = "monster_level_" + thisRem.ToString();
 
-                                        DrawTileSprite(units, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
+                                        DrawTileSprite(units, new Point(screenTileX, screenTileY), new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
                                         offsetX = -15;
-                                        DrawTileSprite(tens, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
+                                        DrawTileSprite(tens, new Point(screenTileX, screenTileY), new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
                                     }
                                     continue;
                                 }
@@ -183,7 +207,7 @@ namespace RogueBasin
                                 isAnimated = true;
                             }
 
-                            DrawTileSprite(thisCell.TileSprite, screenTileX, screenTileY, new Point(offsetX, offsetY), thisCell.Transparency, frameNo, isAnimated);
+                            DrawTileSprite(thisCell.TileSprite, new Point(screenTileX, screenTileY), new Point(offsetX, offsetY), thisCell.Transparency, frameNo, isAnimated);
                             continue;
                         }
 
@@ -343,23 +367,28 @@ namespace RogueBasin
             DrawSprite(TileSpritePath(id), x, y, 1.0);
         }
 
-        private void DrawTileSprite(string id, int x, int y, Point offset, double alpha,  int frameNo = 0, bool isAnimated=false)
+        private void DrawTileSprite(string id, Point tileCoords, Point offset, double alpha,  int frameNo = 0, bool isAnimated = false)
         {
             //Tile x, y are the top left of a 64x64 tile
             //Our tile sprites may not be 64x64, but are aligned to the BOTTOM-LEFT of a 64x64 tile (I hope)
             Size tileDimensions = GetTileSpriteDimensions(id);
 
-            //Screen real coords
-            int screenX = x * spriteVideoWidth + offset.x;
-            int screenY = (y * spriteVideoHeight) - (tileDimensions.Height - 64) + offset.y;
+            //Offset into source bitmap
+            Point offsetIntoSourceBitmap = new Point(offset.x, -(tileDimensions.Height - tileSpriteSheetHeight) + offset.y);
 
             if (id == "boss")
             {
-                screenX = x * spriteVideoWidth + offset.x - 32;
-                screenY = (y * spriteVideoHeight) - 128;
+                offsetIntoSourceBitmap = new Point(offset.x - tileSpriteSheetWidth / 2, offset.y - 128);
             }
 
-            DrawSprite(TileSpritePath(id), screenX, screenY, alpha, frameNo, isAnimated);
+            Point screenOffset = new Point((int)Math.Floor(offsetIntoSourceBitmap.x * spriteVideoWidthScaling),
+                (int)Math.Floor(offsetIntoSourceBitmap.y * spriteVideoHeightScaling));
+
+            //Screen real coords
+            Point screenCoords = new Point(tileCoords.x * spriteVideoWidth + screenOffset.x,
+                tileCoords.y * spriteVideoHeight + screenOffset.y);
+
+            DrawSprite(TileSpritePath(id), screenCoords, alpha, frameNo, isAnimated);
         }
 
         public void DrawTraumaSprite(int id, int x, int y)
@@ -429,7 +458,7 @@ namespace RogueBasin
         /// <param name="id"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void DrawSprite(string filePath, int x, int y, double alpha = 1.0, int frameNo = 0, bool isAnimated=false)
+        private void DrawSprite(string filePath, int x, int y, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
         {
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = filePath;
@@ -454,6 +483,70 @@ namespace RogueBasin
             {
                 LogFile.Log.LogEntryDebug("Can't find sprite " + filePath, LogDebugLevel.High);
             }
+        }
+
+        /// <summary>
+        /// Draw sprite in absolute screen coordinates, with scaling
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void DrawSprite(string filePath, Point screenCoords, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
+        {
+            SpriteCacheEntry entry = new SpriteCacheEntry();
+            entry.StrId = filePath;
+            entry.AlphaOverride = alpha;
+
+            try
+            {
+                Surface spriteSurface = GetScaledTileSpriteFromCache(entry);
+
+                if (!isAnimated)
+                {
+                    videoSurface.Blit(spriteSurface, screenCoords.ToPoint());
+                }
+                else
+                {
+                    videoSurface.Blit(spriteSurface, screenCoords.ToPoint(), new Rectangle(frameNo * spriteVideoWidth, 0, spriteVideoWidth, spriteVideoHeight));
+                }
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Can't find sprite " + filePath, LogDebugLevel.High);
+            }
+        }
+
+        private Surface GetScaledTileSpriteFromCache(SpriteCacheEntry entry)
+        {
+            Surface spriteSurface;
+            scaledSpriteCache.TryGetValue(entry, out spriteSurface);
+
+            if (spriteSurface == null)
+            {
+                Assembly _assembly = Assembly.GetExecutingAssembly();
+                string filename = "RogueBasin.bin.Debug.graphics." + entry.StrId;
+                Stream fileStream = _assembly.GetManifestResourceStream(filename);
+                MemoryStream memoryStream = new MemoryStream();
+                fileStream.CopyTo(memoryStream);
+
+                spriteSurface = new Surface(memoryStream);//.Convert(videoSurface, true, false);
+                if (entry.AlphaOverride > 0.01)
+                {
+                    ModifyAlpha(spriteSurface, entry.AlphaOverride);
+                }
+
+                //Scale if required
+                Surface scaledSpriteSurface = spriteSurface;
+                
+                if(spriteVideoWidth != tileSpriteSheetWidth || spriteVideoHeight != tileSpriteSheetHeight) {
+                    scaledSpriteSurface = spriteSurface.CreateScaledSurface(spriteVideoWidthScaling, spriteVideoHeightScaling, false);
+                }
+
+                scaledSpriteCache.Add(entry, scaledSpriteSurface);
+
+                LogFile.Log.LogEntryDebug("Storing ui sprite" + entry.StrId, LogDebugLevel.Profiling);
+            }
+            return spriteSurface;
         }
 
         private Surface GetSpriteFromCache(SpriteCacheEntry entry)

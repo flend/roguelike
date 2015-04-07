@@ -96,6 +96,11 @@ namespace RogueBasin
         {
             return "(x: " + this.x + ", y: " + this.y + ")";
         }
+
+        public System.Drawing.Point ToPoint()
+        {
+            return new System.Drawing.Point(this.x, this.y);
+        }
     }
     
     public enum MapTerrain
