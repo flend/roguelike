@@ -255,11 +255,25 @@ namespace RogueBasin {
             ScreenWidth = 1280;
             ScreenHeight = 960;
 
-            Width = 20;
-            Height = 15;
+            int nativeSpriteDim = 64;
+            
+            //Try these
 
-            ViewableWidth = 20;
-            ViewableHeight = 15;
+            int scaledSpriteDim = 64;
+            //int scaledSpriteDim = 32;
+            //int scaledSpriteDim = 128;
+
+            //These two are basically unused now
+            Width = ScreenWidth / scaledSpriteDim;
+            Height = ScreenHeight / scaledSpriteDim;
+
+            ViewableWidth = ScreenWidth / scaledSpriteDim;
+            ViewableHeight = ScreenHeight / scaledSpriteDim;
+
+            if (nativeSpriteDim != scaledSpriteDim)
+            {
+                mapRenderer.SetSpriteVideoSize(scaledSpriteDim, scaledSpriteDim);
+            }
 
             ViewportScrollSpeed = 1;
 
@@ -350,34 +364,6 @@ namespace RogueBasin {
                 ShowRoomNumbering = 0;
         }
 
-        /// <summary>
-        /// Returns the points in a triangular target from origin to target
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        public List<Point> GetPointsForTriangularTarget(Point origin, Point target, int range, double fovAngle)
-        {
-            List<Point> triangularPoints = new List<Point>();
-
-            double angle = DirectionUtil.AngleFromOriginToTarget(origin, target);
-
-            for (int i = origin.x - range; i < origin.x + range; i++)
-            {
-                for (int j = origin.y - range; j < origin.y + range; j++)
-                {
-                    if (i >= 0 && i < this.Width && j >= 0 && j < this.Height)
-                    {
-                        if (CreatureFOV.TriangularFOV(origin, angle, range, i, j, fovAngle))
-                        {
-                            triangularPoints.Add(new Point(i, j));
-                        }
-                    }
-                }
-            }
-
-            return triangularPoints;
-        }
 
         /// <summary>
         /// Centre the view on a point
@@ -407,34 +393,6 @@ namespace RogueBasin {
         private void SetViewBRFromTL()
         {
             viewBR = new Point(viewTL.x + ViewableWidth - 1, viewTL.y + ViewableHeight - 1);
-        }
-
-        /// <summary>
-        /// Returns the points in a circular target
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        public List<Point> GetPointsForCircularTarget(Point location, int size)
-        {
-            List<Point> splashSquares = new List<Point>();
-
-            for (int i = location.x - size; i < location.x + size; i++)
-            {
-                for (int j = location.y - size; j < location.y + size; j++)
-                {
-                    if (i >= 0 && i < Width && j >= 0 && j < Height)
-                    {
-
-                        if (Math.Pow(i - location.x, 2) + Math.Pow(j - location.y, 2) < Math.Pow(size, 2))
-                        {
-                            splashSquares.Add(new Point(i, j));
-                        }
-                    }
-                }
-            }
-
-            return splashSquares;
         }
 
         /// <summary>
@@ -1573,15 +1531,7 @@ namespace RogueBasin {
                     
                 case TargettingType.Rocket:
                     {
-                        //Get potention explosion points
-                        int size = 2;
-
-                        List<Point> splashSquares = GetPointsForCircularTarget(Target, size);
-
-                        //Draw a line up to the target square
-                        DrawPathLine(TileLevel.TargettingUI, player.LocationMap, Target, targetForeground, targetBackground);
-
-                        DrawTargettingOverSquaresAndCreatures(splashSquares); 
+                        //Todo
 
                     }
                     break;

@@ -539,10 +539,12 @@ namespace RogueBasin
                 Surface scaledSpriteSurface = spriteSurface;
                 
                 if(spriteVideoWidth != tileSpriteSheetWidth || spriteVideoHeight != tileSpriteSheetHeight) {
-                    scaledSpriteSurface = spriteSurface.CreateScaledSurface(spriteVideoWidthScaling, spriteVideoHeightScaling, false);
+                    scaledSpriteSurface = spriteSurface.CreateScaledSurface(spriteVideoWidthScaling, spriteVideoHeightScaling, true);
                 }
 
                 scaledSpriteCache.Add(entry, scaledSpriteSurface);
+
+                spriteSurface = scaledSpriteSurface;
 
                 LogFile.Log.LogEntryDebug("Storing ui sprite" + entry.StrId, LogDebugLevel.Profiling);
             }

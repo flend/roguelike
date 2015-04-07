@@ -12,6 +12,8 @@ namespace RogueBasin
     {
         void RenderMap(TileEngine.TileMap mapToRender, Point mapOffset, Rectangle screenViewport);
 
+        void SetSpriteVideoSize(int width, int height);
+
         void Sleep(ulong milliseconds);
 
         void Setup(int width, int height);
