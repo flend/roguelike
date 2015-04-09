@@ -64,7 +64,7 @@ namespace RogueBasin.Triggers
                 //Go back to town
                 LogFile.Log.LogEntryDebug("Player Completing level: " + level, LogDebugLevel.Medium);
 
-                Game.Dungeon.MissionComplete();
+                //Game.Dungeon.MissionComplete();
 
                 return true;
             }

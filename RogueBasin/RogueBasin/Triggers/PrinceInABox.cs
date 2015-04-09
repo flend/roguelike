@@ -33,7 +33,7 @@ namespace RogueBasin.Triggers
             {
                 Game.Base.PlayMovie("letoutprince", true);
                 //End of the game
-                Game.Dungeon.PlayerLeavesDungeon();
+                //Game.Dungeon.PlayerLeavesDungeon();
             }
             
             return true;

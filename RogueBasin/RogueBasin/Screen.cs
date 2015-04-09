@@ -49,6 +49,9 @@ namespace RogueBasin {
         public int ScreenWidth { get; set; }
         public int ScreenHeight { get; set; }
 
+        //UI size
+        public double UIScaling { get; set; }
+
         public bool DebugMode { get; set; }
 
         /// <summary>
@@ -77,9 +80,6 @@ namespace RogueBasin {
         Point msgDisplayTopLeft;
         Point msgDisplayBotRight;
         public int msgDisplayNumLines;
-
-        Point statsDisplayTopLeft;
-        Point statsDisplayBotRight;
 
         Point hitpointsOffset;     
 
@@ -146,16 +146,6 @@ namespace RogueBasin {
         
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
-
-        //Inventory
-        Point inventoryTL;
-        Point inventoryTR;
-        Point inventoryBL;
-
-        //Training
-        Point trainingTL;
-        Point trainingTR;
-        Point trainingBL;
 
         //For examining
         public Monster CreatureToView { get; set; }
@@ -267,6 +257,7 @@ namespace RogueBasin {
             Width = ScreenWidth / scaledSpriteDim;
             Height = ScreenHeight / scaledSpriteDim;
 
+            //These control the map 
             ViewableWidth = ScreenWidth / scaledSpriteDim;
             ViewableHeight = ScreenHeight / scaledSpriteDim;
 
@@ -274,6 +265,8 @@ namespace RogueBasin {
             {
                 mapRenderer.SetSpriteVideoSize(scaledSpriteDim, scaledSpriteDim);
             }
+
+            UIScaling = 1.0;
 
             ViewportScrollSpeed = 1;
 
@@ -295,27 +288,12 @@ namespace RogueBasin {
             mapTopLeftBase = new Point(0, 0);
             mapBotRightBase = new Point(31, 23);
 
-            statsDisplayTopLeft = new Point(40, 6);
-            statsDisplayBotRight = new Point(57, 32);
-
-            inventoryTL = new Point(5, 5);
-            inventoryTR = new Point(55, 5);
-            inventoryBL = new Point(5, 30);
-
-            trainingTL = new Point(15, 10);
-            trainingTR = new Point(45, 10);
-            trainingBL = new Point(15, 25);
-
-            MsgLogWrapWidth = inventoryTR.x - inventoryTL.x - 4;
+            MsgLogWrapWidth = 80;
 
             //Colors
             neverSeenFOVTerrainColor = System.Drawing.Color.Gray;// Color.FromRGB(90, 90, 90);
 
             TotalKills = null;
-
-            DeathTL = new Point(1, 1);
-            DeathWidth = 59;
-            DeathHeight = 34;
 
             PCColor = System.Drawing.Color.White;
 
@@ -1013,15 +991,6 @@ namespace RogueBasin {
                 //Draw Stats
                 //DrawStats(dungeon.Player);
                 DrawUI();
-
-                if (ShowMsgHistory)
-                    DrawMsgHistory();
-
-                if (ShowClueList)
-                    DrawCluesList();
-
-                if (ShowLogList)
-                    DrawLogList();
             }
 
             if(MoviesToPlay())
@@ -1072,12 +1041,12 @@ namespace RogueBasin {
 
             var titleLineOffset = ScreenHeight / 32;
 
-            DrawLargeText("Congratulations!", new System.Drawing.Point(centreX, topY), LineAlignment.Center, statsColor);
-            DrawLargeText("You VOLUNTEERed for the RoyaLe!", new System.Drawing.Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("VERY LITTLE (6 arenas)", new System.Drawing.Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("now stands between you and victory!", new System.Drawing.Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("Congratulations!", new Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("You VOLUNTEERed for the RoyaLe!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("VERY LITTLE (6 arenas)", new Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("now stands between you and victory!", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
 
-            DrawLargeText("State your name and history:", new System.Drawing.Point(centreX, topY + titleLineOffset * 5), LineAlignment.Center, textColor);
+            DrawLargeText("State your name and history:", new Point(centreX, topY + titleLineOffset * 5), LineAlignment.Center, textColor);
             
             var characterOffset = ScreenHeight / 19;
 
@@ -1155,16 +1124,16 @@ namespace RogueBasin {
 
             var titleLineOffset = 30;
 
-            DrawLargeText("Congratulations!", new System.Drawing.Point(centreX, topY), LineAlignment.Center, statsColor);
-            DrawLargeText("You DIED in the service of PRIME TIME TV!", new System.Drawing.Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("But...", new System.Drawing.Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("But...", new System.Drawing.Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("Congratulations!", new Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("You DIED in the service of PRIME TIME TV!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("But...", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("But...", new Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, textColor);
 
-            DrawLargeText("You think the TV execs let you off that easy?", new System.Drawing.Point(centreX, topY + titleLineOffset * 6), LineAlignment.Center, textColor);
+            DrawLargeText("You think the TV execs let you off that easy?", new Point(centreX, topY + titleLineOffset * 6), LineAlignment.Center, textColor);
 
-            DrawLargeText("Press [F] to restart the area", new System.Drawing.Point(centreX, topY + titleLineOffset * 8), LineAlignment.Center, statsColor);
+            DrawLargeText("Press [F] to restart the area", new Point(centreX, topY + titleLineOffset * 8), LineAlignment.Center, statsColor);
 
-            DrawLargeText("Oh yeah, you lose any fame you had...", new System.Drawing.Point(centreX, topY + titleLineOffset * 9), LineAlignment.Center, textColor);
+            DrawLargeText("Oh yeah, you lose any fame you had...", new Point(centreX, topY + titleLineOffset * 9), LineAlignment.Center, textColor);
         }
 
         public int ArenaSelected { get; set; }
@@ -1192,10 +1161,10 @@ namespace RogueBasin {
 
             var titleLineOffset = 30;
 
-            DrawLargeText("Entering arena: " + (Game.Dungeon.ArenaLevelNumber() + 1), new System.Drawing.Point(centreX, topY), LineAlignment.Center, statsColor);
-            DrawLargeText("Pick your poison!", new System.Drawing.Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("[Left] and [Right] to choose difficulty", new System.Drawing.Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("[F] to begin", new System.Drawing.Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("Entering arena: " + (Game.Dungeon.ArenaLevelNumber() + 1), new Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("Pick your poison!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("[Left] and [Right] to choose difficulty", new Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("[F] to begin", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
 
             string difficultyText = null;
             if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 3)
@@ -1211,10 +1180,10 @@ namespace RogueBasin {
                 difficultyText = "You must be joking (!!!)";
             }
 
-            DrawLargeText("Difficulty: " + difficultyText, new System.Drawing.Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, statsColor);
+            DrawLargeText("Difficulty: " + difficultyText, new Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, statsColor);
 
             var monsterStr = "Arena denizens:";
-            DrawLargeText(monsterStr, new System.Drawing.Point(centreX, topY + 6 * titleLineOffset), LineAlignment.Center, titleColor);
+            DrawLargeText(monsterStr, new Point(centreX, topY + 6 * titleLineOffset), LineAlignment.Center, titleColor);
 
             var monsterTL = new Point(ScreenWidth / 8, topY + 7 * titleLineOffset + 30);
             var maxWidth = 3 * ScreenWidth / 4;
@@ -1243,7 +1212,7 @@ namespace RogueBasin {
             var itemTL = new Point(ScreenWidth / 8, centreYOffset + 500);
 
             var equipStr = "Equipment:";
-            DrawLargeText(equipStr, new System.Drawing.Point(centreX, itemTL.y - titleLineOffset), LineAlignment.Center, titleColor);
+            DrawLargeText(equipStr, new Point(centreX, itemTL.y - titleLineOffset), LineAlignment.Center, titleColor);
 
             for (int i = 0; i < ArenaItems.Count(); i++)
             {
@@ -1400,7 +1369,7 @@ namespace RogueBasin {
 
         private void DrawNextLine(string msg, Point centreOrigin, System.Drawing.Color color) {
             var pt = centreOrigin + new Point(0, textLineNumber * 40);
-            DrawLargeText(msg, new System.Drawing.Point(pt.x, pt.y), LineAlignment.Center, color);
+            DrawLargeText(msg, new Point(pt.x, pt.y), LineAlignment.Center, color);
             textLineNumber++;
         }
 
@@ -1636,76 +1605,6 @@ namespace RogueBasin {
         }
 
 
-        /// <summary>
-        /// Screen for end of game info
-        /// </summary>
-        public void DrawEndOfGameInfo(List<string> stuffToDisplay)
-        {
-            //Clear screen
-            ClearScreen();
-
-            //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, System.Drawing.Color.White);
-
-            //Draw title
-            PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
-
-            //Draw preamble
-            int count = 0;
-            foreach (string s in stuffToDisplay)
-            {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left, normalMovieColor);
-                count++;
-            }
-
-            //Draw instructions
-
-            PrintLineRect("Press ENTER to continue...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
-            FlushConsole();
-
-            WaitForEnterKey();
-        }
-
-
-
-        /// <summary>
-        /// Screen for player victory
-        /// </summary>
-        public void DrawVictoryScreen()
-        {
-         
-            //Clear screen
-            ClearScreen();
-
-            //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true, System.Drawing.Color.White);
-
-            //Draw title
-            PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, System.Drawing.Color.White);
-
-            //Draw preamble
-            int count = 0;
-            foreach (string s in DeathPreamble)
-            {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left, System.Drawing.Color.White);
-                count++;
-            }
-
-            //Draw kills
-
-            PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center, System.Drawing.Color.White);
-
-            foreach (string s in TotalKills)
-            {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left, System.Drawing.Color.White);
-                count++;
-            }
-
-            //Draw instructions
-
-            PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center, System.Drawing.Color.White);
-        }
-
 
         public bool ShowMsgHistory { get; set; }
 
@@ -1718,22 +1617,6 @@ namespace RogueBasin {
         void ClearScreen()
         {
             mapRenderer.Clear(); 
-        }
-
-        /// <summary>
-        /// Draws a frame on the screen in a particular color
-        /// </summary>
-        void DrawFrame(int x, int y, int width, int height, bool clear, System.Drawing.Color color)
-        {
-            mapRenderer.DrawFrame(x, y, width, height, clear, color);
-        }
-
-        /// <summary>
-        /// Character-based drawing. Kept only for stats etc. in transitional period. All map stuff now works in the tile layer
-        /// </summary>
-        void PutChar(int x, int y, char c, System.Drawing.Color color)
-        {
-            mapRenderer.PutChar(x, y, c, color);
         }
 
         /// <summary>
@@ -1760,235 +1643,10 @@ namespace RogueBasin {
             mapRenderer.ClearRect(x, y, width, height);
         }
 
-        /// <summary>
-        /// Draw the msg history and allow the player to scroll
-        /// </summary>
-        private void DrawMsgHistory()
-        {
-            //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
-
-            //Draw title
-            PrintLineRect("Message History", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            LinkedList<string> msgHistory = Game.MessageQueue.messageHistory;
-
-            //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, msgHistory, normalMovieColor);
-        }
-
-        /// <summary>
-        /// Draw the msg history and allow the player to scroll
-        /// </summary>
-        private void DrawCluesList()
-        {
-            //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
-
-            //Draw title
-            PrintLineRect("Clue List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            var allPlayerClueItems = Game.Dungeon.Player.Inventory.GetItemsOfType<Items.Clue>();
-            var allPlayerClues = allPlayerClueItems.Select(i => i.ClueDescription);
-            var noCluesForDoors = allPlayerClues.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
-
-            var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ") " + kv.Key);
-            //var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")");
-            
-            //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(cluesForDoorsAsStrings), normalMovieColor);
-        }
-
-        /// <summary>
-        /// Draw the msg history and allow the player to scroll
-        /// </summary>
-        private void DrawLogList()
-        {
-            //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
-
-            //Draw title
-            PrintLineRect("Log List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            var allPlayerLogItems = Game.Dungeon.Player.Inventory.GetItemsOfType<Items.Log>();
-            var allPlayerLogEntriesSortedByLevel = allPlayerLogItems.GroupBy(i => i.LocationLevel).ToDictionary(gr => gr.Key, gr => gr.Select(i => i.LogEntry));
-            
-            List<string> clueLines = new List<string>();
-            foreach (var kv in allPlayerLogEntriesSortedByLevel)
-            {
-                var level = kv.Key;
-                clueLines.Add("-+-+-+-" + Game.Dungeon.DungeonInfo.LevelNaming[level].ToUpper() + "-+-+-+-");
-                clueLines.Add("");
-
-                foreach (var logEntry in kv.Value)
-                {
-                    clueLines.Add(logEntry.title);
-                    clueLines.AddRange(logEntry.lines);
-                    clueLines.Add("");
-                }
-            }
-
-            //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(clueLines), normalMovieColor);
-        }
-
-        private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory, System.Drawing.Color textColor)
-        {
-            LinkedListNode<string> displayedMsg;
-            LinkedListNode<string> topLineDisplayed = null;
-
-            LinkedListNode<string> bottomTopLineDisplayed = msgHistory.Last;
-
-            if (msgHistory.Count > 0)
-            {
-                //Find the line at the top of the screen when the list is fully scrolled down
-                for (int i = 0; i < inventoryListH - 1; i++)
-                {
-                    if (bottomTopLineDisplayed.Previous != null)
-                        bottomTopLineDisplayed = bottomTopLineDisplayed.Previous;
-                }
-                topLineDisplayed = bottomTopLineDisplayed;
-
-                //Display the message log
-                displayedMsg = topLineDisplayed;
-                for (int i = 0; i < inventoryListH; i++)
-                {
-                    PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, textColor);
-                    displayedMsg = displayedMsg.Next;
-                    if (displayedMsg == null)
-                        break;
-                }
-            }
-
-            Screen.Instance.FlushConsole();
-
-            bool keepLooping = true;
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-                Direction dir = Direction.none;
-                bool page = false;
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-                    char keyCode = (char)userKey.Character;
-
-                    if (keyCode == 'x')
-                        keepLooping = false;
-
-                    if (keyCode == 'j')
-                    {
-                        dir = Direction.up;
-                    }
-
-                    if (keyCode == 'k')
-                    {
-                        dir = Direction.down;
-                    }
-                }
-
-                else
-                {
-                    //Special keys
-                    switch (userKey.KeyCode)
-                    {
-                        case KeyCode.TCODK_UP:
-                        case KeyCode.TCODK_KP8:
-                            dir = Direction.up;
-                            break;
-
-                        case KeyCode.TCODK_KP2:
-                        case KeyCode.TCODK_DOWN:
-                            dir = Direction.down;
-                            break;
-
-                        case KeyCode.TCODK_PAGEUP:
-                            dir = Direction.up;
-                            page = true;
-                            break;
-
-                        case KeyCode.TCODK_PAGEDOWN:
-                            dir = Direction.down;
-                            page = true;
-                            break;
-                    }
-                }
-
-                if (msgHistory.Count > 0)
-                {
-                    if (dir == Direction.up)
-                    {
-                        var iterations = 1;
-                        if (page)
-                            iterations = 20;
-
-                        for (int i = 0; i < iterations;i++)
-                            if (topLineDisplayed.Previous != null)
-                                topLineDisplayed = topLineDisplayed.Previous;
-                    }
-                    else if (dir == Direction.down)
-                    {
-                        var iterations = 1;
-                        if (page)
-                            iterations = 20;
-
-                        for (int i = 0; i < iterations; i++)
-                            if (topLineDisplayed != bottomTopLineDisplayed)
-                                topLineDisplayed = topLineDisplayed.Next;
-                    }
-
-                    //Clear the rectangle
-                    ClearRect(inventoryTL.x + 1, inventoryTL.y + 1, inventoryTR.x - inventoryTL.x - 1, inventoryBL.y - inventoryTL.y - 1);
-
-                    //Display the message log
-                    displayedMsg = topLineDisplayed;
-                    for (int i = 0; i < inventoryListH; i++)
-                    {
-                        PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, textColor);
-                        displayedMsg = displayedMsg.Next;
-                        if (displayedMsg == null)
-                            break;
-                    }
-                }
-                Screen.Instance.FlushConsole();
-
-            } while (keepLooping);
-        }
 
         private void DrawUISpriteByCentre(string id, int xCenter, int yCentre) {
             Size spriteDim = UISpriteSize(id);
-            DrawUISprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
+            DrawUISprite(id, new Point(xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2));
         }
 
         private void DrawTileSpriteByCentre(string id, int xCenter, int yCentre)
@@ -2002,12 +1660,7 @@ namespace RogueBasin {
             DrawUITraumaSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
         }
 
-        private void DrawUISpriteByCentre(string id, System.Drawing.Point point) {
-            DrawUISpriteByCentre(id, point.X, point.Y);
-        }
-
-        private void DrawUISpriteByCentre(string id, Point point)
-        {
+        private void DrawUISpriteByCentre(string id, Point point) {
             DrawUISpriteByCentre(id, point.x, point.y);
         }
 
@@ -2017,9 +1670,6 @@ namespace RogueBasin {
         }
 
 
-        System.Drawing.Point rangedWeaponUICenter = new System.Drawing.Point(160, 152);
-        System.Drawing.Point meleeWeaponUICenter = new System.Drawing.Point(38, 152);
-        System.Drawing.Point utilityUICenter = new System.Drawing.Point(282, 152);
 
         private void DrawGraduatedBar(string id, double fullness, Rectangle barArea, double spacing)
         {
@@ -2032,7 +1682,7 @@ namespace RogueBasin {
             for (int i = 0; i < barsToDraw; i++)
             {
                 int x = barArea.X + (int)Math.Floor(i * barSpacing);
-                DrawUISprite(id, x, barArea.Y);
+                DrawUISprite(id, new Point(x, barArea.Y));
             }
         }
 
@@ -2047,40 +1697,54 @@ namespace RogueBasin {
             for (int i = 0; i < barsToDraw; i++)
             {
                 int y = barArea.Y + (int)Math.Floor(i * barSpacing);
-                DrawUISprite(id, barArea.X, y);
+                DrawUISprite(id, new Point(barArea.X, y));
             }
         }
 
-        System.Drawing.Point playerUI_TL;
-        System.Drawing.Point playerTextUI_TL;
-        System.Drawing.Point monsterUI_TL;
-        System.Drawing.Point monsterTextUI_TL;
+        Point playerUI_TL = new Point(0, 0);
+        Point playerTextUI_TL = new Point(0, 0);
+        Point monsterUI_TL = new Point(0, 0);
+        Point monsterTextUI_TL = new Point(0, 0);
 
+        private Point UIScale(Point p)
+        {
+            return p * UIScaling;
+        }
+
+        private int UIScale(int coord)
+        {
+            return (int)Math.Round(coord * UIScaling);
+        }
 
         private void DrawUI()
         {
             //Calculate some point offsets
-            var playerTextUI_UsefulTL = playerTextUI_TL.Add(new System.Drawing.Point(0, 90));
+
+
+            Point rangedWeaponUICenter = UIScale(new Point(160, 152));
+            Point meleeWeaponUICenter = UIScale(new Point(38, 152));
+            Point utilityUICenter = UIScale(new Point(282, 152));
 
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left");
-            playerUI_TL = new System.Drawing.Point(0, ScreenHeight - uiLeftDim.Height);
+            playerUI_TL = new Point(0, ScreenHeight - UIScale(uiLeftDim.Height));
 
-            DrawUISprite("ui_left", playerUI_TL.X, playerUI_TL.Y);
+            DrawUISprite("ui_left", new Point(playerUI_TL.x, playerUI_TL.y));
 
             var debug = false;
             if (debug)
             {
                 Size uiMidDim = UISpriteSize("ui_mid");
-                playerTextUI_TL = playerUI_TL.Add(new System.Drawing.Point(uiLeftDim.Width, 0));
+                playerTextUI_TL = playerUI_TL + new Point(uiLeftDim.Width, 0);
                 DrawUISprite("ui_mid", playerTextUI_TL);
                 Size uiRightDim = UISpriteSize("ui_right");
 
-                monsterTextUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width - uiMidDim.Width, ScreenHeight - uiMidDim.Height);
+                monsterTextUI_TL = new Point(ScreenWidth - uiRightDim.Width - uiMidDim.Width, ScreenHeight - uiMidDim.Height);
                 DrawUISprite("ui_mid", monsterTextUI_TL);
 
             }
 
+            var playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 90));
 
            
             Player player = Game.Dungeon.Player;
@@ -2096,11 +1760,11 @@ namespace RogueBasin {
 
                 if (weaponSpriteId != null)
                 {
-                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.X + rangedWeaponUICenter.X, playerUI_TL.Y + rangedWeaponUICenter.Y);
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y);
                 }
                 else
                 {
-                    DrawUITraumaSpriteByCentre(weapon.Representation, playerUI_TL.X + rangedWeaponUICenter.X, playerUI_TL.Y + rangedWeaponUICenter.Y);
+                    DrawUITraumaSpriteByCentre(weapon.Representation, playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y);
                 }
 
                 RangedWeapon weaponR = weapon as RangedWeapon;
@@ -2110,17 +1774,17 @@ namespace RogueBasin {
 
                 //Draw bullets
                 double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
-                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(playerUI_TL.X + 86, playerUI_TL.Y + 127, 20, 54), 0.5);
+                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(playerUI_TL.x + 86, playerUI_TL.y + 127, 20, 54), 0.5);
 
                 //Ranged Damage base
-                var playerRangedTextOffset = new System.Drawing.Point(210, 177);
+                var playerRangedTextOffset = new Point(210, 177);
                 var rangedStr = "DMG: " + rangedDamage;
-                DrawSmallText(rangedStr, playerUI_TL.Add(playerRangedTextOffset), LineAlignment.Center, statsColor);
+                DrawSmallText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
                 //Help
-                var rangedHelpOffset = new System.Drawing.Point(218, 134);
+                var rangedHelpOffset = new Point(218, 134);
                 var rangedHelp = "(F)";
-                DrawText(rangedHelp, playerUI_TL.Add(rangedHelpOffset), LineAlignment.Center, statsColor);
+                DrawText(rangedHelp, playerUI_TL + rangedHelpOffset, LineAlignment.Center, statsColor);
             }
 
             //Draw equipped melee weapon
@@ -2134,18 +1798,18 @@ namespace RogueBasin {
 
                 if (weaponSpriteId != null)
                 {
-                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.X + meleeWeaponUICenter.X, playerUI_TL.Y + meleeWeaponUICenter.Y);
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + meleeWeaponUICenter.x, playerUI_TL.y + meleeWeaponUICenter.y);
                 }
                 else
                 {
-                    DrawUITraumaSpriteByCentre(meleeWeapon.Representation, playerUI_TL.X + meleeWeaponUICenter.X, playerUI_TL.Y + meleeWeaponUICenter.Y);
+                    DrawUITraumaSpriteByCentre(meleeWeapon.Representation, playerUI_TL.x + meleeWeaponUICenter.x, playerUI_TL.y + meleeWeaponUICenter.y);
                 }
 
                 var rangedDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
 
-                var playerRangedTextOffset = new System.Drawing.Point(40, 177);
+                var playerRangedTextOffset = new Point(40, 177);
                 var rangedStr = "DMG: " + rangedDamage;
-                DrawSmallText(rangedStr, playerUI_TL.Add(playerRangedTextOffset), LineAlignment.Center, statsColor);
+                DrawSmallText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
             }
 
@@ -2160,50 +1824,50 @@ namespace RogueBasin {
 
                 if (weaponSpriteId != null)
                 {
-                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.X + utilityUICenter.X, playerUI_TL.Y + utilityUICenter.Y);
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + utilityUICenter.x, playerUI_TL.y + utilityUICenter.y);
                 }
                 else
                 {
-                    DrawUITraumaSpriteByCentre(utility.Representation, playerUI_TL.X + utilityUICenter.X, playerUI_TL.Y + utilityUICenter.Y);
+                    DrawUITraumaSpriteByCentre(utility.Representation, playerUI_TL.x + utilityUICenter.x, playerUI_TL.y + utilityUICenter.y);
                 }
             }
 
             //Help
-            var utilityHelpOffset = new System.Drawing.Point(298, 134);
+            var utilityHelpOffset = new Point(298, 134);
             var utilityHelp = "(T)";
-            DrawText(utilityHelp, playerUI_TL.Add(utilityHelpOffset), LineAlignment.Center, statsColor);
-            DrawSmallText("(E)", playerUI_TL.Add(new System.Drawing.Point(262, 177)), LineAlignment.Center, statsColor);
-            DrawSmallText("(R)", playerUI_TL.Add(new System.Drawing.Point(298, 177)), LineAlignment.Center, statsColor);
+            DrawText(utilityHelp, playerUI_TL + utilityHelpOffset, LineAlignment.Center, statsColor);
+            DrawSmallText("(E)", playerUI_TL + new Point(262, 177), LineAlignment.Center, statsColor);
+            DrawSmallText("(R)", playerUI_TL + new Point(298, 177), LineAlignment.Center, statsColor);
 
             //Draw Shield
             //double playerShieldRatio = player.Shield / (double)player.MaxShield;
-            //DrawGraduatedBar("shieldbar", playerShieldRatio, new Rectangle(leftUI_TL.X + 49, leftUI_TL.Y + 70, 266, 12), 0.2);
+            //DrawGraduatedBar("shieldbar", playerShieldRatio, new Rectangle(leftUI_TL.x + 49, leftUI_TL.y + 70, 266, 12), 0.2);
 
             //Draw HP
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(playerUI_TL.X + 57, playerUI_TL.Y + 73, 180, 12), 0.2);
+            DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(playerUI_TL.x + 57, playerUI_TL.y + 73, 180, 12), 0.2);
 
             //Draw fame
             double playerFameRatio = Math.Min(150.0, player.CombatXP) / 150.0;
-            DrawGraduatedBar("ui_bar", playerFameRatio, new Rectangle(playerUI_TL.X + 57, playerUI_TL.Y + 94, 180, 12), 0.2);
+            DrawGraduatedBar("ui_bar", playerFameRatio, new Rectangle(playerUI_TL.x + 57, playerUI_TL.y + 94, 180, 12), 0.2);
 
             //Draw fame sprites
-            DrawUISprite("ui_triangle", playerUI_TL.X + 146, playerUI_TL.Y + 97);
-            DrawUISprite("ui_triangle", playerUI_TL.X + 227, playerUI_TL.Y + 97);
+            DrawUISprite("ui_triangle", new Point(playerUI_TL.x + 146, playerUI_TL.y + 97));
+            DrawUISprite("ui_triangle", new Point(playerUI_TL.x + 227, playerUI_TL.y + 97));
 
 
-            DrawSmallText("Heal (C)", new System.Drawing.Point(playerUI_TL.X + 156, playerUI_TL.Y + 110), LineAlignment.Center, statsColor);
-            DrawSmallText("LVL (V)", new System.Drawing.Point(playerUI_TL.X + 237, playerUI_TL.Y + 110), LineAlignment.Center, statsColor);
+            DrawSmallText("Heal (C)", new Point(playerUI_TL.x + 156, playerUI_TL.y + 110), LineAlignment.Center, statsColor);
+            DrawSmallText("LVL (V)", new Point(playerUI_TL.x + 237, playerUI_TL.y + 110), LineAlignment.Center, statsColor);
 
             //maybe grey them out
-            var playerFMNuOffset = new System.Drawing.Point(269, 93);
-            DrawLargeText(player.CombatXP.ToString(), playerUI_TL.Add(playerFMNuOffset), LineAlignment.Center, statsColor);
+            var playerFMNuOffset = new Point(269, 93);
+            DrawLargeText(player.CombatXP.ToString(), playerUI_TL + playerFMNuOffset, LineAlignment.Center, statsColor);
 
             //HP
 
 
-            var playerHPNuOffset = new System.Drawing.Point(25, 93);
-            DrawLargeText(player.Hitpoints.ToString(), playerUI_TL.Add(playerHPNuOffset), LineAlignment.Center, statsColor);
+            var playerHPNuOffset = new Point(25, 93);
+            DrawLargeText(player.Hitpoints.ToString(), playerUI_TL + playerHPNuOffset, LineAlignment.Center, statsColor);
 
             
 
@@ -2211,56 +1875,56 @@ namespace RogueBasin {
 
             if (debug)
             {
-                var playerHPTextOffset = new System.Drawing.Point(10, 0);
+                var playerHPTextOffset = new Point(10, 0);
                 var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
-                DrawText(hpStr, playerTextUI_UsefulTL.Add(playerHPTextOffset));
+                DrawText(hpStr, playerTextUI_UsefulTL + playerHPTextOffset);
 
                 //Draw Fame
-                var playerFameTextOffset = new System.Drawing.Point(10, 60);
+                var playerFameTextOffset = new Point(10, 60);
                 var fameStr = "Fame: " + player.CombatXP;
-                DrawText(fameStr, playerTextUI_UsefulTL.Add(playerFameTextOffset));
-                var playerExpFameTextOffset = new System.Drawing.Point(10, 75);
+                DrawText(fameStr, playerTextUI_UsefulTL + playerFameTextOffset);
+                var playerExpFameTextOffset = new Point(10, 75);
                 //var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
                 //DrawText(fameExpStr, playerUI_TL.Add(playerExpFameTextOffset));
 
-                var playerMoveOffset = new System.Drawing.Point(170, 0);
+                var playerMoveOffset = new Point(170, 0);
                 var moveStr = "Move: " + player.TurnsMoving;
-                DrawText(moveStr, playerTextUI_UsefulTL.Add(playerMoveOffset));
+                DrawText(moveStr, playerTextUI_UsefulTL + playerMoveOffset);
 
-                var playerStationaryOffset = new System.Drawing.Point(170, 15);
+                var playerStationaryOffset = new Point(170, 15);
                 var actionStr = "No A: " + player.TurnsSinceAction;
-                DrawText(actionStr, playerTextUI_UsefulTL.Add(playerStationaryOffset));
+                DrawText(actionStr, playerTextUI_UsefulTL + playerStationaryOffset);
 
-                var playerRestOffset = new System.Drawing.Point(170, 30);
+                var playerRestOffset = new Point(170, 30);
                 var restStr = "Rest: " + player.TurnsInactive;
-                DrawText(restStr, playerTextUI_UsefulTL.Add(playerRestOffset));
+                DrawText(restStr, playerTextUI_UsefulTL + playerRestOffset);
 
-                var dodgeBonusOffset = new System.Drawing.Point(170, 45);
+                var dodgeBonusOffset = new Point(170, 45);
                 var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
-                DrawText(dodgeStr, playerTextUI_UsefulTL.Add(dodgeBonusOffset));
+                DrawText(dodgeStr, playerTextUI_UsefulTL + dodgeBonusOffset);
             }
 
             //Monster stats
             DrawFocusWindow();
         }
 
-        private void DrawText(string msg, System.Drawing.Point p)
+        private void DrawText(string msg, Point p)
         {
-            mapRenderer.DrawText(msg, p.X, p.Y, statsColor);
+            mapRenderer.DrawText(msg, p.x, p.y, statsColor);
         }
         
-        private void DrawText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        private void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.X, p.Y, lineAlignment, color);
+            mapRenderer.DrawText(msg, p.x, p.y, lineAlignment, color);
         }
 
-        private void DrawSmallText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        private void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawSmallText(msg, p.X, p.Y, lineAlignment, color);
+            mapRenderer.DrawSmallText(msg, p.x, p.y, lineAlignment, color);
         }
-        private void DrawLargeText(string msg, System.Drawing.Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        private void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawLargeText(msg, p.X, p.Y, lineAlignment, color);
+            mapRenderer.DrawLargeText(msg, p.x, p.y, lineAlignment, color);
         }
 
         void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
@@ -2268,38 +1932,28 @@ namespace RogueBasin {
             mapRenderer.DrawTextWidth(msg, p.x, p.y, width, color);
         }
 
-        void DrawTextWidth(string msg, System.Drawing.Point p, int width, System.Drawing.Color color)
-        {
-            mapRenderer.DrawTextWidth(msg, p.X, p.Y, width, color);
-        }
-
-        private void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
-        {
-            DrawText(msg, new System.Drawing.Point(p.x, p.y), lineAlignment, color);
-        }
-
         private void DrawFocusWindow()
         {
             Player player = Game.Dungeon.Player;
 
-            System.Drawing.Point rightUIIconCentre = new System.Drawing.Point(118, 152);
+            Point rightUIIconCentre = new Point(118, 152);
             Size uiRightDim = UISpriteSize("ui_right");
 
-            monsterUI_TL = new System.Drawing.Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
+            monsterUI_TL = new Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
 
-            DrawUISprite("ui_right", monsterUI_TL.X, monsterUI_TL.Y);
+            DrawUISprite("ui_right", new Point(monsterUI_TL.x, monsterUI_TL.y));
 
             //Creature picture.Representation (overwrite with frame)
 
             if (CreatureToView != null && CreatureToView.Alive == true)
             {
-                DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+                DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL.x + rightUIIconCentre.x, monsterUI_TL.y + rightUIIconCentre.y);
             }
 
-            DrawUISprite("frame", monsterUI_TL.X + 79, monsterUI_TL.Y + 107);
+            DrawUISprite("frame", new Point(monsterUI_TL.x + 79, monsterUI_TL.y + 107));
 
             //Calculate some point offsets
-            var monsterTextUI_UsefulTL = monsterTextUI_TL.Add(new System.Drawing.Point(0, 90));
+            var monsterTextUI_UsefulTL = monsterTextUI_TL + new Point(0, 90);
 
 
             if (CreatureToView != null && CreatureToView.Alive == true)
@@ -2323,45 +1977,45 @@ namespace RogueBasin {
 
                 //Monster hp
                 double enemyHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
-                DrawGraduatedBar("ui_bar", enemyHPRatio, new Rectangle(monsterUI_TL.X + 14, monsterUI_TL.Y + 92, 95, 12), 0.2);
+                DrawGraduatedBar("ui_bar", enemyHPRatio, new Rectangle(monsterUI_TL.x + 14, monsterUI_TL.y + 92, 95, 12), 0.2);
 
                 //Damage
-                var monsterLVLTextOffset = new System.Drawing.Point(47, 142);
+                var monsterLVLTextOffset = new Point(47, 142);
                 var lvlStr = "LVL: " + CreatureToView.Level;
-                DrawSmallText(lvlStr, monsterUI_TL.Add(monsterLVLTextOffset), LineAlignment.Center, statsColor);
+                DrawSmallText(lvlStr, monsterUI_TL + monsterLVLTextOffset, LineAlignment.Center, statsColor);
 
-                var monsterDamageTextOffset = new System.Drawing.Point(47, 162);
+                var monsterDamageTextOffset = new Point(47, 162);
                 var dmStr = "DMG: " + CreatureToView.GetScaledDamage();
-                DrawSmallText(dmStr, monsterUI_TL.Add(monsterDamageTextOffset), LineAlignment.Center, statsColor);
+                DrawSmallText(dmStr, monsterUI_TL + monsterDamageTextOffset, LineAlignment.Center, statsColor);
 
-                var monsterHPNumOffset = new System.Drawing.Point(134, 93);
-                DrawLargeText(CreatureToView.Hitpoints.ToString(), monsterUI_TL.Add(monsterHPNumOffset), LineAlignment.Center, statsColor);
+                var monsterHPNumOffset = new Point(134, 93);
+                DrawLargeText(CreatureToView.Hitpoints.ToString(), monsterUI_TL + monsterHPNumOffset, LineAlignment.Center, statsColor);
                 
 
                 bool debug = false;
                 if (debug)
                 {
 
-                    var monsterHPTextOffset = new System.Drawing.Point(10, 0);
+                    var monsterHPTextOffset = new Point(10, 0);
                     var hpStr = "HP: " + CreatureToView.Hitpoints + "/" + CreatureToView.MaxHitpoints;
-                    DrawText(hpStr, monsterTextUI_UsefulTL.Add(monsterHPTextOffset));
+                    DrawText(hpStr, monsterTextUI_UsefulTL + monsterHPTextOffset);
 
 
                     var cover = Game.Dungeon.Player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView, true);
-                    var monsterCoverTextOffset = new System.Drawing.Point(10, 30);
+                    var monsterCoverTextOffset = new Point(10, 30);
                     var cvStr = "CV: " + cover;
-                    DrawText(cvStr, monsterTextUI_UsefulTL.Add(monsterCoverTextOffset));
+                    DrawText(cvStr, monsterTextUI_UsefulTL + monsterCoverTextOffset);
                 }
 
             }
 
             else if (ItemToView != null)
             {
-                //DrawUISpriteByCentre(ItemToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+                //DrawUISpriteByCentre(ItemToView.UISprite, monsterUI_TL.x + rightUIIconCentre.x, monsterUI_TL.y + rightUIIconCentre.y);
             }
             else if (FeatureToView != null)
             {
-                //DrawUISpriteByCentre(FeatureToView.UISprite, monsterUI_TL.X + rightUIIconCentre.X, monsterUI_TL.Y + rightUIIconCentre.Y);
+                //DrawUISpriteByCentre(FeatureToView.UISprite, monsterUI_TL.x + rightUIIconCentre.x, monsterUI_TL.y + rightUIIconCentre.y);
 
             }
         }
@@ -2376,9 +2030,9 @@ namespace RogueBasin {
             return mapRenderer.GetTraumaSpriteDimensions(id);
         }
 
-        private void DrawUITraumaSprite(int id, System.Drawing.Point p)
+        private void DrawUITraumaSprite(int id, Point p)
         {
-            DrawUITraumaSprite(id, p.X, p.Y);
+            DrawUITraumaSprite(id, p.x, p.y);
         }
 
         private void DrawUITraumaSprite(int id, int x, int y)
@@ -2386,500 +2040,14 @@ namespace RogueBasin {
             mapRenderer.DrawTraumaUISprite(id, x, y);
         }
 
-        private void DrawUISprite(string name, int x, int y)
-        {
-            mapRenderer.DrawUISprite(name, x, y);
-        }
-
         private void DrawTileSprite(string name, int x, int y)
         {
-            mapRenderer.DrawTileSprite(name, x, y);
+            mapRenderer.DrawTileSprite(name, x, y, 1.0);
         }
 
-        private void DrawUISprite(string name, System.Drawing.Point p)
+        private void DrawUISprite(string name, Point p)
         {
-            DrawUISprite(name, p.X, p.Y);
-        }
-
-        private void DrawStats(Player player)
-        {
-
-            //Blank stats area
-            //rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
-            DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false, statsFrameColor);
-
-            int baseOffset = 2;
-
-            //Mission
-            Point missionOffset = new Point(baseOffset, 0);
-            hitpointsOffset = new Point(baseOffset, 4);
-            Point shieldOffset = new Point(baseOffset, 5);
-            Point weaponOffset = new Point(baseOffset, 8);
-            Point utilityOffset = new Point(baseOffset, 14);
-            Point viewOffset = new Point(baseOffset, 20);
-            Point cmbtOffset = new Point(baseOffset, 18);
-            Point gameDataOffset = new Point(baseOffset, 25);
-
-            var zoneName = "[" + (LevelToDisplay).ToString("00") + "] ";
-            var zoneName2 = Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay);
-            PrintLine(zoneName, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left, statsColor);
-            PrintLine(zoneName2, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 2, LineAlignment.Left, statsColor);
-            
-            //Draw HP Status
-
-            int hpBarLength = 10;
-            double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            int hpBarEntries = (int)Math.Ceiling(hpBarLength * playerHPRatio);
-
-            PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left, statsColor);
-
-            for (int i = 0; i < hpBarLength; i++)
-            {
-                if (i < hpBarEntries)
-                {
-                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, heartChar, heartColor);
-                }
-                else
-                {
-                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, heartChar, disabledColor);
-                }
-            }
-
-            //Draw shield
-
-            int shieldBarLength = 20;
-            double playerShieldRatio = player.Shield / (double)player.MaxShield;
-            int shieldBarEntries = (int)Math.Ceiling(shieldBarLength * playerShieldRatio);
-
-            PrintLine("SD: ", statsDisplayTopLeft.x + shieldOffset.x, statsDisplayTopLeft.y + shieldOffset.y, LineAlignment.Left, statsColor);
-
-            DrawShieldBar(player, shieldOffset, shieldBarEntries - 10);
-            DrawShieldBar(player, shieldOffset + new Point(0, 1), Math.Min(shieldBarEntries, 10));
-
-            //Draw equipped weapon
-
-            Item weapon = Game.Dungeon.Player.GetEquippedRangedWeaponAsItem();
-
-            //string weaponStr = "Weapon: ";
-
-            //PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left);
-
-            if (weapon != null)
-            {
-                IEquippableItem weaponE = weapon as IEquippableItem;
-
-                PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, weapon.Representation, weaponColor);
-
-                string weaponStr = weapon.SingleItemDescription;
-                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x + 2, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left, weaponColor);
-
-                //Ammo
-                if (weaponE.HasFireAction())
-                {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left, weaponColor);
-        
-                    //TODO infinite ammo?
-                    int ammoBarLength = 10;
-                    double weaponAmmoRatio = weaponE.RemainingAmmo() / (double) weaponE.MaxAmmo();
-                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
-
-                    for (int i = 0; i < ammoBarLength; i++)
-                    {
-                        if (i < ammoBarEntries)
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, ammoChar, orangeActivatedColor);
-                        }
-                        else
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, ammoChar, orangeDisactivatedColor);
-                        }
-                    }
-                }
-                else if (weaponE.HasThrowAction() || weaponE.HasOperateAction())
-                {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left, statsColor);
-
-                    //TODO infinite ammo?
-                    int ammoBarLength = 10;
-                    int ammoBarEntries = Math.Min(player.InventoryQuantityAvailable(weapon.GetType()), 10);
-                    //int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
-
-                    for (int i = 0; i < ammoBarLength; i++)
-                    {
-                        if (i < ammoBarEntries)
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, weapon.Representation, orangeActivatedColor);
-                        }
-                        else
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, weapon.Representation, orangeDisactivatedColor);
-                        }
-                    }
-                }
-                
-                /*
-                //Uses
-                int useYOffset = 3;
-
-                string uses = "";
-                if (weaponE.HasMeleeAction())
-                {
-                    PrintLine("Melee", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left); 
-                }
-                else if (weaponE.HasFireAction() && weaponE.HasThrowAction())
-                {
-                    PrintLine("fire   throw", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), System.Drawing.Color.White);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x + 7, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), System.Drawing.Color.White);
-                }
-
-                else if (weaponE.HasFireAction())
-                {
-                    PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), System.Drawing.Color.White);
-                }
-
-                else if (weaponE.HasThrowAction())
-                {
-                    PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), System.Drawing.Color.White);
-                }*/
-
-                //if (weaponE.HasOperateAction())
-                //{
-                //    uses += "(u)se";
-                //}
-
-               // PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
-            }
-            else
-            {
-                var weaponStr = "None";
-                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left, weaponColor);
-            }
-
-            //Draw weapon choices
-            var weaponOptionRow = 1;
-            var weaponIconXOffset = -3;
-            foreach (var kv in ItemMapping.WeaponMapping)
-            {
-                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 3, weaponOptionRow), kv.Value, kv.Key);
-            }
-            
-            //Draw energy bar and use keys
-
-            int energyBarLength = 20;
-            double playerEnergyRatio = player.Energy / (double)player.MaxEnergy;
-            int energyBarEntries = (int)Math.Ceiling(energyBarLength * playerEnergyRatio);
-
-            PrintLine("EN: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left, statsColor);
-
-            DrawEnergyBar(player, utilityOffset + new Point(0, 2), energyBarEntries - 10);
-            DrawEnergyBar(player, utilityOffset + new Point(0, 3), Math.Min(energyBarEntries, 10));
-
-            //Enable wetware name
-            var equippedWetware = player.GetEquippedWetware();
-
-            if (equippedWetware != null)
-            {
-                var equippedWetwareItem = (equippedWetware as Item);
-
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, equippedWetwareItem.Representation, weaponColor);
-
-                var wetwareStr = equippedWetwareItem.SingleItemDescription;
-                PrintLine(wetwareStr, statsDisplayTopLeft.x + utilityOffset.x + 2, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, weaponColor);
-            }
-            else
-            {
-                PrintLine("None", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, weaponColor);
-            }
-
-            //Draw all available wetware
-            var wetwareOptionRow = 1;
-            int offset = 0;
-            foreach (var kv in ItemMapping.WetwareMapping)
-            {
-                DrawWetwareChar(utilityOffset + new Point(offset * 3, wetwareOptionRow), kv.Value, kv.Key.ToString());
-                offset++;
-            }
-
-            //
-
-            /*
-            //Draw equipped utility
-
-            Item utility = Game.Dungeon.Player.GetEquippedUtilityAsItem();
-
-            string utilityStr = "Utility: ";
-            PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left);
-
-            if (utility != null)
-            {
-                utilityStr = utility.SingleItemDescription;
-                PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left, utility.GetColour());
-                IEquippableItem utilityE = utility as IEquippableItem;
-
-                string uses = "";
-                
-                if (utilityE.HasOperateAction())
-                {
-                    uses += "(U)se";
-                }
-
-                if (utilityE.HasThrowAction())
-                {
-                    uses += "(T)hrow ";
-                }
-
-                PrintLine(uses, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
-            }
-             
-            else
-            {
-                utilityStr = "Nothing";
-                PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left, nothingColor);
-            }
-
-            //Effect active (add ors)
-            if (player.effects.Count > 0)
-            {
-                PlayerEffect thisEffect = player.effects[0];
-
-                if(thisEffect is PlayerEffectSimpleDuration) {
-
-                    PlayerEffectSimpleDuration durationEffect = thisEffect as PlayerEffectSimpleDuration;
-
-                    string effectName = thisEffect.GetName();
-                    int effectRemainingDuration = durationEffect.GetRemainingDuration();
-                    int effectTotalDuration = durationEffect.GetDuration();
-                    Color effectColor = thisEffect.GetColor();
-
-                    //Effect name
-
-                    PrintLine("Effect: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 3, LineAlignment.Left);
-
-                    PrintLine(effectName, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 4, LineAlignment.Left, effectColor);
-                    //Duration
-
-                    PrintLine("Tm: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 5, LineAlignment.Left);
-
-                    int ammoBarLength = 10;
-                    double weaponAmmoRatio = effectRemainingDuration / (double) effectTotalDuration;
-                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
-
-                    for (int i = 0; i < ammoBarLength; i++)
-                    {
-                        if (i < ammoBarEntries)
-                        {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, System.Drawing.Color.Gold);
-                        }
-                        else
-                        {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, System.Drawing.Color.Gray);
-                        }
-                    }
-                }
-
-            }*/
-
-            //Draw what we can see
-            
-            //Creature takes precidence
-
-
-            //string viewStr = "Target: ";
-            //PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left, statsColor);
-
-            if (CreatureToView != null && CreatureToView.Alive == true)
-            {
-
-                               //Combat vs player
-
-                var cover = player.GetPlayerCover(CreatureToView);
-                if (cover.Item1 > 0)
-                {
-                    PrintLine("(hard cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, System.Drawing.Color.Gold);
-                }
-                else if (cover.Item2 > 0)
-                {
-                    PrintLine("(soft cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
-                }
-
-                //PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, statsColor);
-                //var cover = player.GetPlayerCover(CreatureToView);
-                //PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
-
-                //Monster hp
-
-                String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, statsColor);
-
-
-                int mhpBarLength = 10;
-                double mplayerHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
-                int mhpBarEntries = (int)Math.Ceiling(mhpBarLength * mplayerHPRatio);
-
-                PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left, statsColor);
-
-                for (int i = 0; i < mhpBarLength; i++)
-                {
-                    if (i < mhpBarEntries)
-                    {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 4, heartChar, heartColor);
-                    }
-                    else
-                    {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 4, heartChar, disabledColor);
-                    }
-                }
-                
-
-                //Behaviour
-
-                if (CreatureToView.StunnedTurns > 0)
-                {
-                    PrintLine("(Stunned: " + CreatureToView.StunnedTurns + ")", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, stunnedBackground);
-                }
-                else if (CreatureToView.InPursuit())
-                {
-                    PrintLine("(Hostile)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, pursuitBackground);
-                }
-                else if (!CreatureToView.OnPatrol())
-                {
-                    PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, investigateBackground);
-                }
-                else {
-                    PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, statsColor);
-                }
-            }
-            else if (ItemToView != null && !ItemToView.InInventory)
-            {
-                String nameStr = ItemToView.SingleItemDescription;
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, ItemToView.GetColour());
-            }
-            else if(FeatureToView != null)
-            {
-                String nameStr = FeatureToView.Description;
-
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, FeatureToView.RepresentationColor());
-            }
-
-            //Combat stats
-                string bonusStr = "";
-
-                if (player.HasMeleeWeaponEquipped())
-                {
-                    var meleeBonus = player.CalculateMeleeAttackModifiersOnMonster(null);
-                    bonusStr = meleeBonus.ToString("#.#") + "x";
-                }
-                else if (player.HasThrownWeaponEquipped())
-                {
-                    bonusStr = "";
-                }
-                else
-                {
-                    var rangedBonus = player.CalculateRangedAttackModifiersOnMonster(null);
-                    bonusStr = rangedBonus.ToString("#.#") + "x";
-                }
-
-                PrintLine("Attk: " + bonusStr, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 1, LineAlignment.Left, statsColor);
-                
-                //Defence
-                var dodgeBonus = player.CalculateDamageModifierForAttacksOnPlayer(null, true);
-
-                if (dodgeBonus < 0.71)
-                {
-                    PrintLine("(s. dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, System.Drawing.Color.Gold);
-                }
-
-                else if (dodgeBonus < 0.81)
-                {
-                    PrintLine("(dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, statsColor);
-                }
-                
-               
-
-            /*
-            //Game data
-            PrintLine("Droids:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
-
-            int noDroids = Game.Dungeon.DungeonInfo.MaxDeaths - Game.Dungeon.DungeonInfo.NoDeaths;
-
-            for (int i = 0; i < noDroids; i++)
-            {
-                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y, Game.Dungeon.Player.Representation, Game.Dungeon.Player.RepresentationColor());
-            }
-
-            PrintLine("Aborts:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y + 1, LineAlignment.Left);
-
-            int noAborts = Game.Dungeon.DungeonInfo.MaxAborts - Game.Dungeon.DungeonInfo.NoAborts;
-
-            for (int i = 0; i < noAborts; i++)
-            {
-                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X',System.Drawing.Color.Red);
-            }*/
-        }
-
-        private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetwareChar)
-        {
-            var availableWetware = Game.Dungeon.Player.IsWetwareTypeAvailable(wetWareType);
-            var equippedWetware = Game.Dungeon.Player.GetEquippedWetware();
-            var disabledWetware = Game.Dungeon.Player.IsWetwareTypeDisabled(wetWareType);
-
-            if (availableWetware)
-            {
-                System.Drawing.Color colorToUse;
-                if (disabledWetware)
-                {
-                    colorToUse = disabledColor;
-                }
-                else if (equippedWetware != null && equippedWetware.GetType() == wetWareType)
-                {
-                    colorToUse = orangeHighlightedColor;
-                }
-                else
-                {
-                    colorToUse = orangeActivatedColor;
-                }
-
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForLetter(wetwareChar), System.Drawing.Color.White);
-                //+evil points
-                Item instance = (Item)Activator.CreateInstance(wetWareType);
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
-            }
-        }
-
-        private void DrawWeaponChar(Point utilityOffset, Type weaponType, int weaponNo)
-        {
-            var heavyWeaponType = Game.Dungeon.Player.HeavyWeaponTranslation(weaponType);
-
-            var availableWeapon = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType) || Game.Dungeon.Player.IsWeaponTypeAvailable(heavyWeaponType);
-            var equippedWeapon = Game.Dungeon.Player.GetEquippedRangedWeapon();
-
-            var thisWeaponEquipped = equippedWeapon != null && (equippedWeapon.GetType() == weaponType || equippedWeapon.GetType() == heavyWeaponType);
-
-            System.Drawing.Color colorToUse;
-            if (!availableWeapon)
-            {
-                colorToUse = disabledColor;
-            }
-            else if (thisWeaponEquipped)
-            {
-                colorToUse = orangeHighlightedColor;
-            }
-            else
-            {
-                colorToUse = orangeActivatedColor;
-            }
-
-            if (weaponNo > 5)
-                utilityOffset = utilityOffset + new Point(-15, 2);
-
-            PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), System.Drawing.Color.White);
-           
-            //+evil points
-            Item instance = (Item)Activator.CreateInstance(heavyWeaponType);
-            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
+            mapRenderer.DrawUISprite(name, p.x, p.y, UIScaling);
         }
 
         private char GetCharIconForNumber(int no)
@@ -2910,39 +2078,6 @@ namespace RogueBasin {
             }
         }
 
-        private void DrawShieldBar(Player player, Point shieldOffset, int shieldBarFirstBar)
-        {
-            for (int i = 0; i < shieldBarFirstBar; i++)
-            {
-                if (i < shieldBarFirstBar)
-                {
-                    System.Drawing.Color shieldColor = player.IsEffectActive(typeof(PlayerEffects.ShieldEnhance)) ? System.Drawing.Color.Yellow : orangeActivatedColor;
-
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
-                }
-                else
-                {
-                    System.Drawing.Color shieldColor = player.ShieldIsDisabled ? orangeActivatedColor : orangeDisactivatedColor;
-
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
-                }
-            }
-        }
-
-        private void DrawEnergyBar(Player player, Point shieldOffset, int shieldBarFirstBar)
-        {
-            for (int i = 0; i < shieldBarFirstBar; i++)
-            {
-                if (i < shieldBarFirstBar)
-                {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, batteryChar, batteryActivatedColor);
-                }
-                else
-                {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, batteryChar, disabledColor);
-                }
-            }
-        }
 
         private void DrawItems(int levelToDraw, List<Item> itemList)
         {
@@ -3855,241 +2990,6 @@ namespace RogueBasin {
             } while (continueInput);
 
             return null;
-        }
-
-        /// <summary>
-        /// Get a string from the user. One line only.
-        /// maxChars is the max length of the input string (not including the introMessage)
-        /// </summary>
-        /// <returns></returns>
-
-        internal string GetUserString(string introMessage, Point topLeft, int maxChars)
-        {
-
-            ClearMessageLine();
-
-            PrintMessage(introMessage + "", topLeft, introMessage.Length + 2 + maxChars);
-            FlushConsole();
-
-            bool continueInput = true;
-
-            string userString = "";
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-                    char keyCode = (char)userKey.Character;
-                    if (userString.Length < maxChars)
-                    {
-                        userString += keyCode.ToString();
-                    }
-                }
-                else
-                {
-                    //Special keys
-                    switch (userKey.KeyCode)
-                    {
-                        case KeyCode.TCODK_0:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "0";
-                            }
-                            break;
-                        case KeyCode.TCODK_1:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "1";
-                            }
-                            break;
-                        case KeyCode.TCODK_2:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "2";
-                            }
-                            break;
-                        case KeyCode.TCODK_3:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "3";
-                            }
-                            break;
-                        case KeyCode.TCODK_4:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "4";
-                            }
-                            break;
-                        case KeyCode.TCODK_5:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "5";
-                            }
-                            break;
-                        case KeyCode.TCODK_6:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "6";
-                            }
-                            break;
-                        case KeyCode.TCODK_7:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "7";
-                            }
-                            break;
-                        case KeyCode.TCODK_8:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "8";
-                            }
-                            break;
-                        case KeyCode.TCODK_9:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "9";
-                            }
-                            break;
-                        case KeyCode.TCODK_SPACE:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += " ";
-                            }
-                            break;
-
-
-                        case KeyCode.TCODK_ESCAPE:
-                            //Exit
-                            return null;
-                        case KeyCode.TCODK_BACKSPACE:
-                            if (userString.Length != 0)
-                            {
-                                userString = userString.Substring(0, userString.Length - 1);
-                            }
-                            break;
-                        case KeyCode.TCODK_ENTER:
-                            //Exit with what we have
-                            return userString;
-                    }
-                }
-
-                PrintMessage(introMessage + "" + userString + "_", topLeft, introMessage.Length + 2 + maxChars);
-                FlushConsole();
-
-            } while (continueInput);
-
-            return null;
-        }
-
-        public bool YesNoQuestionWithFrame(string introMessage, int extrayOffset, System.Drawing.Color frameColor, System.Drawing.Color textColor)
-        {
-            var width = introMessage.Count() + 7;
-            var height = 1;
-
-            int xOffset = (Width - movieTL.x * 2 - width) / 2;
-            int yOffset = (Height - movieTL.y * 2 - height) / 2;
-
-            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset + extrayOffset);
-            int frameOffset = 2;
-
-            //Draw frame
-            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, frameColor);
-
-            FlushConsole();
-
-            return YesNoQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
-        }
-
-        public GameDifficulty DifficultyQuestionWithFrame(string introMessage, int extrayOffset, System.Drawing.Color frameColor, System.Drawing.Color textColor)
-        {
-            var width = introMessage.Count() + 7;
-            var height = 1;
-
-            int xOffset = (Width - movieTL.x * 2 - width) / 2;
-            int yOffset = (Height - movieTL.y * 2 - height) / 2;
-
-            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset + extrayOffset);
-            int frameOffset = 2;
-
-            //Draw frame
-            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, frameColor);
-
-            FlushConsole();
-
-            return DifficultyQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
-        }
-
-        internal bool YesNoQuestion(string introMessage, Point topLeft, System.Drawing.Color textColor)
-        {
-
-            PrintMessage(introMessage + " (y / n):", topLeft, introMessage.Length + 8, textColor);
-            FlushConsole();
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                   char keyCode = (char)userKey.Character;
-                   switch (keyCode)
-                   {
-                       case 'y':
-                           ClearMessageLine();
-                           return true;
-                           
-                       case 'n':
-                           ClearMessageLine();
-                           return false;
-                           
-                   }
-                }
-            } while(true);
-        }
-
-        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft, System.Drawing.Color textColor) {
-            
-            PrintMessage(introMessage, topLeft, introMessage.Length + 8, textColor);
-            FlushConsole();
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                    char keyCode = (char)userKey.Character;
-                    switch (keyCode)
-                    {
-                        case 'e':
-                            ClearMessageLine();
-                            return GameDifficulty.Easy;
-
-                        case 'm':
-                            ClearMessageLine();
-                            return GameDifficulty.Medium;
-
-                        case 'h':
-                            ClearMessageLine();
-                            return GameDifficulty.Hard;
-                    }
-                }
-            } while (true);
-
-            return GameDifficulty.Easy;
         }
 
         /// <summary>

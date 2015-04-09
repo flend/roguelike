@@ -22,11 +22,7 @@ namespace RogueBasin
 
         void Clear();
 
-        void DrawFrame(int x, int y, int width, int height, bool clear, Color color);
-
         void DrawFramePixel(int x, int y, int width, int height, bool clear, Color color);
-
-        void PutChar(int x, int y, char c, Color color);
 
         void PrintStringRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color);
 
@@ -40,9 +36,9 @@ namespace RogueBasin
 
         void ClearRect(int x, int y, int width, int height);
 
-        void DrawUISprite(string id, int x, int y);
+        void DrawUISprite(string id, int x, int y, double scaling);
 
-        void DrawTileSprite(string id, int x, int y);
+        void DrawTileSprite(string id, int x, int y, double scaling);
 
 
         void DrawTraumaSprite(int id, int x, int y);

@@ -4560,54 +4560,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Exit a dungeon and go back to town
-        /// Do all cleanup here
-        /// </summary>
-
-        public void PlayerLeavesDungeon()
-        {
-
-            //TODO
-
-            //Check if this is the end of the game
-            if (!DungeonInfo.LastMission)
-            {
-                //Respawn the last dungeon the player was in
-                RespawnDungeon(Player.CurrentDungeon, false);
-
-                //End any events on any remaining monsters
-                RemoveAllMonsterEffects();
-
-                //Wipe the player's FOV of the last dungeon
-                WipeThisRunFOV(Player.CurrentDungeon);
-
-                //Cancel any effect
-                player.RemoveAllEffects();
-
-                //Recharge all items
-                RechargeEquippableItems();
-
-                //Put found items that were too much for inventory in store
-                //PutItemsNotInInventoryInStore();
-
-                //Remove all inventory items
-                RemoveInventoryItems();
-
-                LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
-                //Game.Dungeon.MoveToNextDate();
-                //Game.Dungeon.PlayerBackToTown();
-                //SyncStatsWithTraining();
-
-                Player.CurrentDungeon = 0;
-            }
-            else
-            {
-                //OK, it's the end, they're back from the prince mission one way or the other
-                EndOfGame(false, false);
-            }
-        }
-
-        /// <summary>
         /// Wipe the this-adventure fov for the dungeon
         /// </summary>
         /// <param name="dungeonID"></param>
@@ -4694,107 +4646,6 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Run the end of game. Produce and save the obituary.
-        /// </summary>
-        public void EndOfGame(bool playerWon, bool playerQuit)
-        {
-            //Work out which ending the player gets
-            /*
-            if (playerWon)
-                Game.Base.PlayMovie("traumawin", true);
-            else
-            {
-                if (!playerQuit)
-                    Game.Base.PlayMovie("traumalose", true);
-                else
-                    Game.Base.PlayMovie("traumaquit", true);
-            }
-            */
-            //RunMainLoop = false;
-            EndOfGameMechanics(playerWon, playerQuit);
-        }
-
-        private void EndOfGameMechanics(bool wonGame, bool quit)
-        {
-            //Check intrinsics
-
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-            
-            //The last screen to display
-            List<string> finalScreen = new List<string>();
-            
-            //A long list of stuff to put in the obituary
-            List<string> fullObit = new List<string>();
-
-            //Final stats
-
-            List<string> finalStats = new List<string>();
-
-            if (wonGame)
-            {
-                finalScreen.Add("Private " + Game.Dungeon.player.Name + " finished what he started and defeated the invasion ");
-                finalScreen.Add("of the machines from Space Hulk OE1x1!");
-            }
-            else
-            {
-                if (quit)
-                    finalScreen.Add("Private " + Game.Dungeon.player.Name + " had pressing business elsewhere.");
-                else
-                    finalScreen.Add("Private " + Game.Dungeon.player.Name + " fought bravely but was finally overcome.");
-            }
-            finalScreen.Add("");
-
-            //Total kills
-            KillRecord killRecord = GetKillRecord();
-
-            finalScreen.Add("");
-
-            finalScreen.Add("Robots destroyed: " + killRecord.killCount + " (" + killRecord.killScore + " pts)");
-            finalScreen.Add("");
-
-            //finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
-
-            var itemInfo = ItemsUsedSummary();
-
-            finalScreen.AddRange(itemInfo.Item2);
-
-            finalScreen.Add("");
-
-            //finalScreen.Add("Aborted Missions: " + noAborts);
-            finalScreen.Add("");
-
-            //finalScreen.Add("R. E. E. D.s lost: " + noDeaths);
-
-            finalScreen.Add("");
-            finalScreen.Add("Thanks for playing! -flend & shroomarts");
-
-            Screen.Instance.DrawEndOfGameInfo(finalScreen);
-
-            //Compose the obituary
-
-            List<string> obString = new List<string>();
-
-            obString.AddRange(finalScreen);
-            obString.Add("");
-            obString.Add("Robots destroyed:");
-            obString.Add("");
-
-            SaveObituary(obString, killRecord.killStrings);
-
-            if (!Game.Dungeon.SaveScumming)
-            {
-                DeleteSaveFile();
-            }
-
-            //Wait for a keypress
-            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-            //Stop the main loop
-            RunMainLoop = false;
-        }
-
         private Tuple<int, List<string>> ItemsUsedSummary()
         {
             var shieldsUsed = Player.Inventory.GetItemsOfType<Items.ShieldPack>().Count();
@@ -4831,30 +4682,6 @@ namespace RogueBasin
             return Cleared.Count;
         }
 
-        public void MissionComplete()
-        {
-            if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete)
-            {
-                //With secondary
-                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionCompleteWithSecondary)
-                {
-                    //Game.Base.PlayMovie("missioncompletewithsecondary", true);
-                    PlayedMissionCompleteWithSecondary = true;
-                }
-                Game.MessageQueue.AddMessage("Mission COMPLETE (primary + secondary objectives)!");
-            }
-            else
-            {
-                //Primary only
-                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionComplete)
-                {
-                    //Game.Base.PlayMovie("missioncomplete", true);
-                    PlayedMissionComplete = true;
-                }
-                Game.MessageQueue.AddMessage("Mission COMPLETE (primary objectives)!");
-            }
-            MoveToNextMission();
-        }
 
         public bool PlayedMissionAborted { get; set; }
         public bool PlayedMissionNoMoreAborts { get; set; }
@@ -4894,47 +4721,6 @@ namespace RogueBasin
             ResetCurrentMission(false);
 
             return true;
-        }
-
-        /// <summary>
-        /// Move player to next mission
-        /// </summary>
-        public void MoveToNextMission()
-        {
-            int newMissionLevel = Game.Dungeon.player.LocationLevel + 1;
-
-            if (newMissionLevel == Levels.Count)
-            {
-                //Completed the game
-                EndOfGame(false, false);
-                return;
-            }
-
-            //Reset no of aborts
-            DungeonInfo.NoAborts = 0;
-
-            PlayerActionsBetweenMissions();
-            DungeonActionsBetweenMissions();
-
-            SelectTilesetForMission(newMissionLevel);
-
-            //Specials
-            if (newMissionLevel == 11)
-            {
-                //Bonus units
-                DungeonInfo.MaxDeaths += 5;
-            }
-
-            //Move player to new level
-
-            player.LocationLevel = newMissionLevel;
-            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
-
-            string fmt = "00";
-            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + Game.Dungeon.DungeonInfo.LookupMissionName(newMissionLevel) + ".");
-
-            //Run a normal turn to set off any triggers
-            Game.Dungeon.PCMove(0, 0, true);
         }
 
         public IEnumerable<Feature> GetAllFeatures()

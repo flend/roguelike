@@ -92,6 +92,11 @@ namespace RogueBasin
             return new Point(i.x * magnitude, i.y * magnitude);
         }
 
+        public static Point operator *(Point i, double magnitude)
+        {
+            return new Point((int)Math.Round(i.x * magnitude), (int)Math.Round(i.y * magnitude));
+        }
+
         public override string ToString()
         {
             return "(x: " + this.x + ", y: " + this.y + ")";

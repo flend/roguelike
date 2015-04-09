@@ -35,18 +35,24 @@ namespace RogueBasin
     {
         public string StrId { get; set; }
         public double AlphaOverride { get; set; }
+        public double Scaling { get; set; }
+
+        public SpriteCacheEntry()
+        {
+            Scaling = 1.0;
+        }
 
         public override bool Equals(object other)
         {
             var otherFoo = other as SpriteCacheEntry;
             if (otherFoo == null)
                 return false;
-            return StrId == otherFoo.StrId && AlphaOverride - otherFoo.AlphaOverride < 0.001;
+            return StrId == otherFoo.StrId && AlphaOverride - otherFoo.AlphaOverride < 0.001 && Scaling - otherFoo.Scaling < 0.001;
         }
 
         public override int GetHashCode()
         {
-            return 17 * StrId.GetHashCode() + 17 * AlphaOverride.GetHashCode();
+            return 17 * StrId.GetHashCode() + 17 * AlphaOverride.GetHashCode() + 17 * Scaling.GetHashCode();
         }
     }
 
@@ -210,53 +216,10 @@ namespace RogueBasin
                             DrawTileSprite(thisCell.TileSprite, new Point(screenTileX, screenTileY), new Point(offsetX, offsetY), thisCell.Transparency, frameNo, isAnimated);
                             continue;
                         }
-
-                        if (thisCell.TileID == -1)
-                            continue;
-
-                        LibtcodColorFlags colorFlags = thisCell.TileFlag as LibtcodColorFlags;
-                        Color foregroundColor = Color.White;
-                        Color backgroundColor = transparentColor;
-                        
-                        if(colorFlags != null)
-                        {
-                            if (colorFlags.BackgroundColor != null)
-                            {
-                                backgroundColor = colorFlags.BackgroundColor;
-                            }
-
-                            if (colorFlags.ForegroundColor != null)
-                            {
-                                foregroundColor = colorFlags.ForegroundColor;
-                            }
-                        }
-
-                        DrawSprite(thisCell.TileID, screenTileX, screenTileY, foregroundColor, backgroundColor);
                     }
                 }
                 layerNumber++;
             }
-        }
-
-        private void DrawSprite(int id, int x, int y, Color foregroundColor, Color backgroundColor)
-        {
-            var spriteLoc = tileIDToSpriteLocation(id);
-
-            //Screen real coords
-            int screenX = x * spriteVideoWidth;
-            int screenY = y * spriteVideoHeight;
-
-            SurfaceCacheEntry entry = new SurfaceCacheEntry();
-            entry.Id = id;
-            entry.ForegroundColor = foregroundColor;
-            entry.BackgroundColor = backgroundColor;
-            /*
-            Surface spriteSurface = GetTraumaSprite(entry);
-
-            //LogFile.Log.LogEntryDebug("Drawing sprite " + id + " from " + spriteLoc.X + "/" + spriteLoc.Y + "at: "
-            //    + screenX + "/" + screenY, LogDebugLevel.Profiling);
-
-            videoSurface.Blit(spriteSurface, new System.Drawing.Point(screenX, screenY));*/
         }
 
         private Surface GetTraumaSprite(SurfaceCacheEntry entry)
@@ -357,14 +320,14 @@ namespace RogueBasin
             return "ui." + id + ".png";
         }
 
-        public void DrawUISprite(string id, int x, int y)
+        public void DrawUISprite(string id, int x, int y, double scaling)
         {
-            DrawSprite(UISpritePath(id), x, y, 1.0);
+            DrawScaledSprite(UISpritePath(id), x, y, scaling, 1.0);
         }
 
-        public void DrawTileSprite(string id, int x, int y)
+        public void DrawTileSprite(string id, int x, int y, double scaling = 1.0)
         {
-            DrawSprite(TileSpritePath(id), x, y, 1.0);
+            DrawScaledSprite(TileSpritePath(id), x, y, scaling, 1.0);
         }
 
         private void DrawTileSprite(string id, Point tileCoords, Point offset, double alpha,  int frameNo = 0, bool isAnimated = false)
@@ -388,7 +351,7 @@ namespace RogueBasin
             Point screenCoords = new Point(tileCoords.x * spriteVideoWidth + screenOffset.x,
                 tileCoords.y * spriteVideoHeight + screenOffset.y);
 
-            DrawSprite(TileSpritePath(id), screenCoords, alpha, frameNo, isAnimated);
+            DrawScaledTileSprite(TileSpritePath(id), screenCoords, alpha, frameNo, isAnimated);
         }
 
         public void DrawTraumaSprite(int id, int x, int y)
@@ -458,11 +421,12 @@ namespace RogueBasin
         /// <param name="id"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void DrawSprite(string filePath, int x, int y, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
+        private void DrawScaledSprite(string filePath, int x, int y, double spriteScaling, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
         {
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = filePath;
             entry.AlphaOverride = alpha;
+            entry.Scaling = spriteScaling;
 
             try
             {
@@ -491,7 +455,7 @@ namespace RogueBasin
         /// <param name="id"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void DrawSprite(string filePath, Point screenCoords, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
+        private void DrawScaledTileSprite(string filePath, Point screenCoords, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
         {
             SpriteCacheEntry entry = new SpriteCacheEntry();
             entry.StrId = filePath;
@@ -546,7 +510,7 @@ namespace RogueBasin
 
                 spriteSurface = scaledSpriteSurface;
 
-                LogFile.Log.LogEntryDebug("Storing ui sprite" + entry.StrId, LogDebugLevel.Profiling);
+                LogFile.Log.LogEntryDebug("Storing scaled sprite" + entry.StrId, LogDebugLevel.Profiling);
             }
             return spriteSurface;
         }
@@ -571,9 +535,21 @@ namespace RogueBasin
                     ModifyAlpha(spriteSurface, entry.AlphaOverride);
                 }
 
+                //Scale if required
+                Surface scaledSpriteSurface = spriteSurface;
+
+                if (entry.Scaling > 1.001 || entry.Scaling < 0.999)
+                {
+                    scaledSpriteSurface = spriteSurface.CreateScaledSurface(entry.Scaling, true);
+                }
+
+                scaledSpriteCache.Add(entry, scaledSpriteSurface);
+
+                spriteSurface = scaledSpriteSurface;
+
                 spriteCache.Add(entry, spriteSurface);
 
-                LogFile.Log.LogEntryDebug("Storing ui sprite" + entry.StrId, LogDebugLevel.Profiling);
+                LogFile.Log.LogEntryDebug("Storing double scaled sprite" + entry.StrId, LogDebugLevel.Profiling);
             }
             return spriteSurface;
         }
@@ -641,42 +617,6 @@ namespace RogueBasin
             {
                 videoSurface.Fill(new Rectangle(x, y, width, height), Color.Black);
             }
-        }
-
-        public void DrawFrame(int tlx, int tly, int width, int height, bool clear, Color color)
-        {
-            if (clear)
-            {
-                videoSurface.Fill(new Rectangle(tlx * spriteSheetWidth, tly * spriteSheetHeight, width * spriteSheetWidth, height * spriteSheetHeight), Color.Black);
-            }
-
-            for (int x = tlx + 1; x < tlx + width - 1; x++)
-            {
-                PutChar(x, tly, '-', color);
-            }
-            for (int x = tlx + 1; x < tlx + width - 1; x++)
-            {
-                PutChar(x, tly + height - 1, '-', color);
-            }
-            for (int y = tly + 1; y < tly + height - 1; y++)
-            {
-                PutChar(tlx, y, '|', color);
-            }
-            for (int y = tly + 1; y < tly + height - 1; y++)
-            {
-                PutChar(tlx + width - 1, y, '|', color);
-            }
-            PutChar(tlx, tly, '+', color);
-            PutChar(tlx + width - 1, tly, '+', color);
-            PutChar(tlx, tly + height - 1, '+', color);
-            PutChar(tlx + width - 1, tly + height - 1, '+', color);
-        }
-
-        public void PutChar(int x, int y, char c, Color color)
-        {
-            var spriteLoc = tileIDToSpriteLocation(Convert.ToInt32(c));
-
-            DrawSprite(Convert.ToInt32(c), x, y, color, transparentColor);
         }
 
         public void PrintStringRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color)

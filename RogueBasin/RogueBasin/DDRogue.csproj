@@ -237,7 +237,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FOV\MRPAS.cs" />
-    <Compile Include="GameIntro.cs" />
     <Compile Include="Gaussian.cs" />
     <Compile Include="GraphVizUtils.cs" />
     <Compile Include="IEquippableItem.cs" />
