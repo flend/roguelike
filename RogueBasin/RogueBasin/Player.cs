@@ -2928,7 +2928,7 @@ namespace RogueBasin
             }
         }
 
-        internal int ScaleRangedDamage(Item item, int damageBase)
+        internal int ScaleRangedDamage(IEquippableItem item, int damageBase)
         {
             return Game.Dungeon.LevelScalingCalculation(damageBase, Level);
         }

@@ -1703,6 +1703,7 @@ namespace RogueBasin {
 
         Point playerUI_TL = new Point(0, 0);
         Point playerTextUI_TL = new Point(0, 0);
+        Point playerTextUI_UsefulTL = new Point(0, 0);
         Point monsterUI_TL = new Point(0, 0);
         Point monsterTextUI_TL = new Point(0, 0);
 
@@ -1716,11 +1717,16 @@ namespace RogueBasin {
             return (int)Math.Round(coord * UIScaling);
         }
 
+        private Size UIScale(Size size)
+        {
+            return new Size(UIScale(size.Width), UIScale(size.Height));
+        }
+
         private void DrawUI()
         {
+            Player player = Game.Dungeon.Player;
+
             //Calculate some point offsets
-
-
             Point rangedWeaponUICenter = UIScale(new Point(160, 152));
             Point meleeWeaponUICenter = UIScale(new Point(38, 152));
             Point utilityUICenter = UIScale(new Point(282, 152));
@@ -1736,18 +1742,14 @@ namespace RogueBasin {
             {
                 Size uiMidDim = UISpriteSize("ui_mid");
                 playerTextUI_TL = playerUI_TL + new Point(uiLeftDim.Width, 0);
+                playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 90));
+                
                 DrawUISprite("ui_mid", playerTextUI_TL);
                 Size uiRightDim = UISpriteSize("ui_right");
 
                 monsterTextUI_TL = new Point(ScreenWidth - uiRightDim.Width - uiMidDim.Width, ScreenHeight - uiMidDim.Height);
                 DrawUISprite("ui_mid", monsterTextUI_TL);
-
             }
-
-            var playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 90));
-
-           
-            Player player = Game.Dungeon.Player;
 
             //Draw equipped ranged weapon
             Item weapon = player.GetEquippedRangedWeaponAsItem();
@@ -1755,6 +1757,7 @@ namespace RogueBasin {
             if (weapon != null)
             {
                 IEquippableItem weaponE = weapon as IEquippableItem;
+                RangedWeapon weaponR = weapon as RangedWeapon;
 
                 String weaponSpriteId = weapon.UISprite;
 
@@ -1762,19 +1765,13 @@ namespace RogueBasin {
                 {
                     DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y);
                 }
-                else
-                {
-                    DrawUITraumaSpriteByCentre(weapon.Representation, playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y);
-                }
 
-                RangedWeapon weaponR = weapon as RangedWeapon;
-
-                var rangedDamage = Game.Dungeon.Player.ScaleRangedDamage(weapon, weaponE.DamageBase());
-
-
+                var rangedDamage = player.ScaleRangedDamage(weaponE, weaponE.DamageBase());
+                
                 //Draw bullets
                 double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
-                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(playerUI_TL.x + 86, playerUI_TL.y + 127, 20, 54), 0.5);
+                var ammoBarTL = playerUI_TL + UIScale(new Point(86, 127));
+                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.5);
 
                 //Ranged Damage base
                 var playerRangedTextOffset = new Point(210, 177);
@@ -2022,7 +2019,8 @@ namespace RogueBasin {
 
         private Size UISpriteSize(string name)
         {
-            return mapRenderer.GetUISpriteDimensions(name);
+            var unscaledSize = mapRenderer.GetUISpriteDimensions(name);
+            return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
         }
 
         private Size TraumaSpriteSize(int id)
