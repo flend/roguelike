@@ -269,7 +269,7 @@ namespace RogueBasin {
                 mapRenderer.SetSpriteVideoSize(scaledSpriteDim, scaledSpriteDim);
             }
 
-            UIScaling = 1.0;
+            UIScaling = 1.5;
 
             ViewportScrollSpeed = 1;
 
@@ -1642,10 +1642,6 @@ namespace RogueBasin {
             DrawTileSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
         }
 
-        private void DrawUITraumaSpriteByCentre(int id, int xCenter, int yCentre) {
-            Size spriteDim = TraumaSpriteSize(id);
-            DrawUITraumaSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
-        }
 
         private void DrawUISpriteByCentre(string id, Point point) {
             DrawUISpriteByCentre(id, point.x, point.y);
@@ -1761,12 +1757,12 @@ namespace RogueBasin {
                 DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.5);
 
                 //Ranged Damage base
-                var playerRangedTextOffset = new Point(210, 177);
+                var playerRangedTextOffset = UIScale(new Point(210, 177));
                 var rangedStr = "DMG: " + rangedDamage;
-                DrawSmallText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
+                DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
                 //Help
-                var rangedHelpOffset = new Point(218, 134);
+                var rangedHelpOffset = UIScale(new Point(218, 134));
                 var rangedHelp = "(F)";
                 DrawText(rangedHelp, playerUI_TL + rangedHelpOffset, LineAlignment.Center, statsColor);
             }
@@ -1784,16 +1780,12 @@ namespace RogueBasin {
                 {
                     DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + meleeWeaponUICenter.x, playerUI_TL.y + meleeWeaponUICenter.y);
                 }
-                else
-                {
-                    DrawUITraumaSpriteByCentre(meleeWeapon.Representation, playerUI_TL.x + meleeWeaponUICenter.x, playerUI_TL.y + meleeWeaponUICenter.y);
-                }
 
                 var rangedDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
 
-                var playerRangedTextOffset = new Point(40, 177);
+                var playerRangedTextOffset = UIScale(new Point(40, 177));
                 var rangedStr = "DMG: " + rangedDamage;
-                DrawSmallText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
+                DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
             }
 
@@ -1810,18 +1802,14 @@ namespace RogueBasin {
                 {
                     DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + utilityUICenter.x, playerUI_TL.y + utilityUICenter.y);
                 }
-                else
-                {
-                    DrawUITraumaSpriteByCentre(utility.Representation, playerUI_TL.x + utilityUICenter.x, playerUI_TL.y + utilityUICenter.y);
-                }
             }
 
             //Help
-            var utilityHelpOffset = new Point(298, 134);
+            var utilityHelpOffset = UIScale(new Point(298, 134));
             var utilityHelp = "(T)";
-            DrawText(utilityHelp, playerUI_TL + utilityHelpOffset, LineAlignment.Center, statsColor);
-            DrawSmallText("(E)", playerUI_TL + new Point(262, 177), LineAlignment.Center, statsColor);
-            DrawSmallText("(R)", playerUI_TL + new Point(298, 177), LineAlignment.Center, statsColor);
+            DrawUIText(utilityHelp, playerUI_TL + utilityHelpOffset, LineAlignment.Center, statsColor);
+            DrawSmallUIText("(E)", playerUI_TL + UIScale(new Point(262, 177)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(R)", playerUI_TL + UIScale(new Point(298, 177)), LineAlignment.Center, statsColor);
 
             //Draw Shield
             //double playerShieldRatio = player.Shield / (double)player.MaxShield;
@@ -1829,61 +1817,62 @@ namespace RogueBasin {
 
             //Draw HP
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(playerUI_TL.x + 57, playerUI_TL.y + 73, 180, 12), 0.2);
+            Point hpOffset = playerUI_TL + UIScale(new Point(57, 73));
+            Size hpSize = UIScale(new Size(180, 12));
+            DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(hpOffset.ToPoint(), hpSize), 0.2);
+
+            //Draw HP digits
+            var playerHPNuOffset = UIScale(new Point(25, 93));
+            DrawUIText(player.Hitpoints.ToString(), playerUI_TL + playerHPNuOffset, LineAlignment.Center, statsColor);
+
 
             //Draw fame
             double playerFameRatio = Math.Min(150.0, player.CombatXP) / 150.0;
-            DrawGraduatedBar("ui_bar", playerFameRatio, new Rectangle(playerUI_TL.x + 57, playerUI_TL.y + 94, 180, 12), 0.2);
+            Point fameOffset = playerUI_TL + UIScale(new Point(57, 94));
+            Size fameSize = UIScale(new Size(180, 12));
+            DrawGraduatedBar("ui_bar", playerFameRatio, new Rectangle(fameOffset.ToPoint(), fameSize), 0.2);
 
             //Draw fame sprites
-            DrawUISprite("ui_triangle", new Point(playerUI_TL.x + 146, playerUI_TL.y + 97));
-            DrawUISprite("ui_triangle", new Point(playerUI_TL.x + 227, playerUI_TL.y + 97));
-
-
-            DrawSmallText("Heal (C)", new Point(playerUI_TL.x + 156, playerUI_TL.y + 110), LineAlignment.Center, statsColor);
-            DrawSmallText("LVL (V)", new Point(playerUI_TL.x + 237, playerUI_TL.y + 110), LineAlignment.Center, statsColor);
-
-            //maybe grey them out
-            var playerFMNuOffset = new Point(269, 93);
-            DrawLargeText(player.CombatXP.ToString(), playerUI_TL + playerFMNuOffset, LineAlignment.Center, statsColor);
-
-            //HP
-
-
-            var playerHPNuOffset = new Point(25, 93);
-            DrawLargeText(player.Hitpoints.ToString(), playerUI_TL + playerHPNuOffset, LineAlignment.Center, statsColor);
-
+            DrawUISprite("ui_triangle", playerUI_TL + UIScale(new Point(146, 97)));
+            DrawUISprite("ui_triangle", playerUI_TL + UIScale(new Point(227, 97)));
             
+            DrawSmallUIText("Heal (C)", playerUI_TL + UIScale(new Point(156, 110)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("LVL (V)", playerUI_TL + UIScale(new Point(237, 110)), LineAlignment.Center, statsColor);
+
+            //Draw fame digits
+            var playerFMNuOffset = UIScale(new Point(269, 93));
+            DrawUIText(player.CombatXP.ToString(), playerUI_TL + playerFMNuOffset, LineAlignment.Center, statsColor);
+
 
             //Draw timers
 
             if (debug)
             {
-                var playerHPTextOffset = new Point(10, 0);
+                var playerHPTextOffset = UIScale(new Point(10, 0));
                 var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
-                DrawText(hpStr, playerTextUI_UsefulTL + playerHPTextOffset);
+                DrawUIText(hpStr, playerTextUI_UsefulTL + playerHPTextOffset);
 
                 //Draw Fame
-                var playerFameTextOffset = new Point(10, 60);
+                var playerFameTextOffset = UIScale(new Point(10, 60));
                 var fameStr = "Fame: " + player.CombatXP;
                 DrawText(fameStr, playerTextUI_UsefulTL + playerFameTextOffset);
-                var playerExpFameTextOffset = new Point(10, 75);
+                var playerExpFameTextOffset = UIScale(new Point(10, 75));
                 //var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
                 //DrawText(fameExpStr, playerUI_TL.Add(playerExpFameTextOffset));
 
-                var playerMoveOffset = new Point(170, 0);
+                var playerMoveOffset = UIScale(new Point(170, 0));
                 var moveStr = "Move: " + player.TurnsMoving;
                 DrawText(moveStr, playerTextUI_UsefulTL + playerMoveOffset);
 
-                var playerStationaryOffset = new Point(170, 15);
+                var playerStationaryOffset = UIScale(new Point(170, 15));
                 var actionStr = "No A: " + player.TurnsSinceAction;
                 DrawText(actionStr, playerTextUI_UsefulTL + playerStationaryOffset);
 
-                var playerRestOffset = new Point(170, 30);
+                var playerRestOffset = UIScale(new Point(170, 30));
                 var restStr = "Rest: " + player.TurnsInactive;
                 DrawText(restStr, playerTextUI_UsefulTL + playerRestOffset);
 
-                var dodgeBonusOffset = new Point(170, 45);
+                var dodgeBonusOffset = UIScale(new Point(170, 45));
                 var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
                 DrawText(dodgeStr, playerTextUI_UsefulTL + dodgeBonusOffset);
             }
@@ -1906,6 +1895,7 @@ namespace RogueBasin {
         {
             mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, color);
         }
+
         private void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
             mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
@@ -1916,11 +1906,26 @@ namespace RogueBasin {
             mapRenderer.DrawTextWidth(msg, p.x, p.y, largeTextSize, width, color);
         }
 
+        private void DrawUIText(string msg, Point p)
+        {
+            DrawUIText(msg, p, LineAlignment.Left, statsColor);
+        }
+
+        private void DrawUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, (int)Math.Round(largeTextSize * UIScaling), lineAlignment, color);
+        }
+
+        private void DrawSmallUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, (int)Math.Round(smallTextSize * UIScaling), lineAlignment, color);
+        }
+
         private void DrawFocusWindow()
         {
             Player player = Game.Dungeon.Player;
 
-            Point rightUIIconCentre = new Point(118, 152);
+            Point rightUIIconCentre = UIScale(new Point(118, 152));
             Size uiRightDim = UISpriteSize("ui_right");
 
             monsterUI_TL = new Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
@@ -1931,13 +1936,13 @@ namespace RogueBasin {
 
             if (CreatureToView != null && CreatureToView.Alive == true)
             {
-                DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL.x + rightUIIconCentre.x, monsterUI_TL.y + rightUIIconCentre.y);
+                DrawUISpriteByCentre(CreatureToView.GameSprite, monsterUI_TL + rightUIIconCentre);
             }
 
-            DrawUISprite("frame", new Point(monsterUI_TL.x + 79, monsterUI_TL.y + 107));
+            DrawUISprite("frame", monsterUI_TL + UIScale(new Point(79, 107)));
 
             //Calculate some point offsets
-            var monsterTextUI_UsefulTL = monsterTextUI_TL + new Point(0, 90);
+            var monsterTextUI_UsefulTL = monsterTextUI_TL + UIScale(new Point(0, 90));
 
 
             if (CreatureToView != null && CreatureToView.Alive == true)
@@ -1961,34 +1966,36 @@ namespace RogueBasin {
 
                 //Monster hp
                 double enemyHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
-                DrawGraduatedBar("ui_bar", enemyHPRatio, new Rectangle(monsterUI_TL.x + 14, monsterUI_TL.y + 92, 95, 12), 0.2);
+                Point hpLocation = monsterUI_TL + UIScale(new Point(14, 92));
+                Size hpSize = UIScale(new Size(95, 12));
+                DrawGraduatedBar("ui_bar", enemyHPRatio, new Rectangle(hpLocation.ToPoint(), hpSize), 0.2);
 
                 //Damage
-                var monsterLVLTextOffset = new Point(47, 142);
+                var monsterLVLTextOffset = UIScale(new Point(47, 142));
                 var lvlStr = "LVL: " + CreatureToView.Level;
-                DrawSmallText(lvlStr, monsterUI_TL + monsterLVLTextOffset, LineAlignment.Center, statsColor);
+                DrawSmallUIText(lvlStr, monsterUI_TL + monsterLVLTextOffset, LineAlignment.Center, statsColor);
 
-                var monsterDamageTextOffset = new Point(47, 162);
+                var monsterDamageTextOffset = UIScale(new Point(47, 162));
                 var dmStr = "DMG: " + CreatureToView.GetScaledDamage();
-                DrawSmallText(dmStr, monsterUI_TL + monsterDamageTextOffset, LineAlignment.Center, statsColor);
+                DrawSmallUIText(dmStr, monsterUI_TL + monsterDamageTextOffset, LineAlignment.Center, statsColor);
 
-                var monsterHPNumOffset = new Point(134, 93);
-                DrawLargeText(CreatureToView.Hitpoints.ToString(), monsterUI_TL + monsterHPNumOffset, LineAlignment.Center, statsColor);
+                var monsterHPNumOffset = UIScale(new Point(134, 93));
+                DrawUIText(CreatureToView.Hitpoints.ToString(), monsterUI_TL + monsterHPNumOffset, LineAlignment.Center, statsColor);
                 
 
                 bool debug = false;
                 if (debug)
                 {
 
-                    var monsterHPTextOffset = new Point(10, 0);
+                    var monsterHPTextOffset = UIScale(new Point(10, 0));
                     var hpStr = "HP: " + CreatureToView.Hitpoints + "/" + CreatureToView.MaxHitpoints;
-                    DrawText(hpStr, monsterTextUI_UsefulTL + monsterHPTextOffset);
+                    DrawUIText(hpStr, monsterTextUI_UsefulTL + monsterHPTextOffset);
 
 
                     var cover = Game.Dungeon.Player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView, true);
-                    var monsterCoverTextOffset = new Point(10, 30);
+                    var monsterCoverTextOffset = UIScale(new Point(10, 30));
                     var cvStr = "CV: " + cover;
-                    DrawText(cvStr, monsterTextUI_UsefulTL + monsterCoverTextOffset);
+                    DrawUIText(cvStr, monsterTextUI_UsefulTL + monsterCoverTextOffset);
                 }
 
             }
@@ -2008,21 +2015,6 @@ namespace RogueBasin {
         {
             var unscaledSize = mapRenderer.GetUISpriteDimensions(name);
             return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
-        }
-
-        private Size TraumaSpriteSize(int id)
-        {
-            return mapRenderer.GetTraumaSpriteDimensions(id);
-        }
-
-        private void DrawUITraumaSprite(int id, Point p)
-        {
-            DrawUITraumaSprite(id, p.x, p.y);
-        }
-
-        private void DrawUITraumaSprite(int id, int x, int y)
-        {
-            mapRenderer.DrawTraumaUISprite(id, x, y);
         }
 
         private void DrawTileSprite(string name, int x, int y)

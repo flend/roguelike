@@ -1669,7 +1669,14 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
                 {
-                    LogFile.Log.LogEntry("AddFeature: map square can't be entered");
+                    LogFile.Log.LogEntry("AddDecorationFeature: map square can't be entered");
+                    return false;
+                }
+
+                //Don't obscure dangerous terrain
+                if (DangerousFeatureAtLocation(level, location))
+                {
+                    LogFile.Log.LogEntry("AddDecorationFeature: dangerous terrain, not adding");
                     return false;
                 }
 
