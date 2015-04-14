@@ -61,15 +61,13 @@ namespace RogueBasin
     /// </summary>
     class MapRendererSDLDotNet : IMapRenderer
     {
-        SdlDotNet.Graphics.Font largeFont;
-        SdlDotNet.Graphics.Font veryLargeFont;
-        SdlDotNet.Graphics.Font smallFont;
-
         Dictionary<SurfaceCacheEntry, Surface> surfaceCache = new Dictionary<SurfaceCacheEntry,Surface>();
         Dictionary<SurfaceCacheEntry, Surface> surfaceUICache = new Dictionary<SurfaceCacheEntry, Surface>();
 
         Dictionary<SpriteCacheEntry, Surface> spriteCache = new Dictionary<SpriteCacheEntry, Surface>();
         Dictionary<SpriteCacheEntry, Surface> scaledSpriteCache = new Dictionary<SpriteCacheEntry, Surface>();
+
+        Dictionary<int, SdlDotNet.Graphics.Font> fontCache = new Dictionary<int, SdlDotNet.Graphics.Font>();
 
         private Color transparentColor = Color.FromArgb(255, 0, 255);
 
@@ -594,10 +592,6 @@ namespace RogueBasin
             videoSurface.AlphaBlending = true;
 
             //spriteSheet = new Surface(@"TraumaSprites.png").Convert(videoSurface, true, true);
-
-            veryLargeFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 26);
-            largeFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 22);
-            smallFont = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", 12);
         }
 
 
@@ -619,101 +613,63 @@ namespace RogueBasin
             }
         }
 
-        public void PrintStringRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color)
-        {
-            int xCoord = x;
-            int yCoord = y;
+        public SdlDotNet.Graphics.Font GetFontSurfaceFromCache(int size) {
+            
+            SdlDotNet.Graphics.Font font;
+            fontCache.TryGetValue(size, out font);
 
-            if (alignment == LineAlignment.Center)
+            if (font == null)
             {
-                xCoord = x + Math.Max(width - msg.Length, 0) / 2;
-                yCoord = y + Math.Max(height - 1, 0) / 2;
+                font = new SdlDotNet.Graphics.Font(@"alexisv3.ttf", size);
+                fontCache.Add(size, font);
             }
 
-            PrintString(msg, xCoord, yCoord, color);
+            return font;
         }
 
-        public void DrawText(string msg, int x, int y, Color color) {
-
-            DrawText(msg, x, y, LineAlignment.Left, color);
-        }
-
-        public void DrawText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
+        public void DrawText(string msg, int x, int y, int size, LineAlignment lineAlignment, Color color)
         {
-            // Create the Font Surfaces
-            Surface fontSurface = largeFont.Render(msg, color);
+            SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
+            Surface fontSurface = font.Render(msg, color);
 
-            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
-
-            var pointToDraw =  new System.Drawing.Point(x, y);
+            var pointToDraw = new System.Drawing.Point(x, y);
 
             if (lineAlignment == LineAlignment.Center)
             {
-                var size = largeFont.SizeText(msg);
-                pointToDraw = new System.Drawing.Point(x - size.Width / 2, y - size.Height / 2);
+                var dimensions = font.SizeText(msg);
+                pointToDraw = new System.Drawing.Point(x - dimensions.Width / 2, y - dimensions.Height / 2);
             }
 
             videoSurface.Blit(fontSurface, pointToDraw);
         }
 
-        public void DrawTextWidth(string msg, int x, int y, int width, Color color)
+        public void DrawTextWidth(string msg, int x, int y, int size, int width, Color color)
         {
             // Create the Font Surfaces
-            Surface fontSurface = largeFont.Render(msg, color, Color.Black, true, width, 100);
+            SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
+            Surface fontSurface = font.Render(msg, color, Color.Black, true, width, 100);
             fontSurface.Transparent = true;
             fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
 
-            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
-
             var pointToDraw = new System.Drawing.Point(x, y);
-
-           videoSurface.Blit(fontSurface, pointToDraw);
-        }
-
-        public void DrawSmallText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
-        {
-            // Create the Font Surfaces
-            Surface fontSurface = smallFont.Render(msg, color);
-
-            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
-
-            var pointToDraw = new System.Drawing.Point(x, y);
-
-            if (lineAlignment == LineAlignment.Center)
-            {
-                var size = smallFont.SizeText(msg);
-                pointToDraw = new System.Drawing.Point(x - size.Width / 2, y - size.Height / 2);
-            }
 
             videoSurface.Blit(fontSurface, pointToDraw);
         }
 
-        public void DrawLargeText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
+        public Size TextSize(string msg, int size)
         {
-            // Create the Font Surfaces
-            Surface fontSurface = veryLargeFont.Render(msg, color);
-
-            LogFile.Log.LogEntryDebug("Drawing string " + msg + x + "/" + y, LogDebugLevel.Profiling);
-
-            var pointToDraw = new System.Drawing.Point(x, y);
-
-            if (lineAlignment == LineAlignment.Center)
-            {
-                var size = veryLargeFont.SizeText(msg);
-                pointToDraw = new System.Drawing.Point(x - size.Width / 2, y - size.Height / 2);
-            }
-
-            videoSurface.Blit(fontSurface, pointToDraw);
+            SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
+            return font.SizeText(msg);
         }
-        public void PrintString(string msg, int x, int y, Color color)
+        
+        private void DrawSmallText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
         {
-            //Screen real coords
-            int screenX = x * spriteSheetWidth;
-            int screenY = y * spriteSheetHeight;
+            DrawText(msg, x, y, 12, lineAlignment, color);
+        }
 
-            LogFile.Log.LogEntryDebug("Drawing string " + msg + screenX + "/" + screenY, LogDebugLevel.Profiling);
-
-            DrawText(msg, screenX, screenY, color);
+        private void DrawLargeText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
+        {
+            DrawText(msg, x, y, 22, lineAlignment, color);
         }
 
         public void ClearRect(int x, int y, int width, int height)

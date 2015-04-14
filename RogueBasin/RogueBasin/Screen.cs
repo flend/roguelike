@@ -171,6 +171,9 @@ namespace RogueBasin {
         public static int combationAnimationFrameDuration = 300; //ms
         public static int combatFastAnimationFrameDuration = 150;
 
+        int smallTextSize = 12;
+        int largeTextSize = 22;
+
         /// <summary>
         /// Targetting mode
         /// </summary>
@@ -1620,22 +1623,6 @@ namespace RogueBasin {
         }
 
         /// <summary>
-        /// Print a string in a rectangle
-        /// </summary>
-        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment, System.Drawing.Color color)
-        {
-            mapRenderer.PrintStringRect(msg, x, y, width, height, alignment, color);
-        }
-
-        /// <summary>
-        /// Print a string at a location
-        /// </summary>
-        void PrintLine(string msg, int x, int y, LineAlignment alignment, System.Drawing.Color color)
-        {
-            mapRenderer.PrintString(msg, x, y, color);
-        }
-
-        /// <summary>
         /// Draw rectangle
         /// </summary>
         void ClearRect(int x, int y, int width, int height)
@@ -1733,7 +1720,7 @@ namespace RogueBasin {
 
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left");
-            playerUI_TL = new Point(0, ScreenHeight - UIScale(uiLeftDim.Height));
+            playerUI_TL = new Point(0, ScreenHeight - uiLeftDim.Height);
 
             DrawUISprite("ui_left", new Point(playerUI_TL.x, playerUI_TL.y));
 
@@ -1763,7 +1750,7 @@ namespace RogueBasin {
 
                 if (weaponSpriteId != null)
                 {
-                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y);
+                    DrawUISpriteByCentre(weaponSpriteId, new Point(playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y));
                 }
 
                 var rangedDamage = player.ScaleRangedDamage(weaponE, weaponE.DamageBase());
@@ -1907,26 +1894,26 @@ namespace RogueBasin {
 
         private void DrawText(string msg, Point p)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, statsColor);
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, LineAlignment.Left, statsColor);
         }
         
         private void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, lineAlignment, color);
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
         }
 
         private void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawSmallText(msg, p.x, p.y, lineAlignment, color);
+            mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, color);
         }
         private void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawLargeText(msg, p.x, p.y, lineAlignment, color);
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
         }
 
         void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
         {
-            mapRenderer.DrawTextWidth(msg, p.x, p.y, width, color);
+            mapRenderer.DrawTextWidth(msg, p.x, p.y, largeTextSize, width, color);
         }
 
         private void DrawFocusWindow()
@@ -2833,24 +2820,7 @@ namespace RogueBasin {
             ClearRect(topLeft.x, topLeft.y, width, 1);
 
             //Display new message
-            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, System.Drawing.Color.White);
-        }
-
-        /// <summary>
-        /// Print message at any point on screen
-        /// </summary>
-        /// <param name="message"></param>
-        internal void PrintMessage(string message, Point topLeft, int width, System.Drawing.Color color)
-        {
-
-            //Update state
-            lastMessage = message;
-
-            //Clear message bar
-            ClearRect(topLeft.x, topLeft.y, width, 1);
-
-            //Display new message
-            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, color);
+            DrawTextWidth(message, topLeft, width, System.Drawing.Color.White);
         }
 
         void ClearMessageBar()

@@ -24,15 +24,9 @@ namespace RogueBasin
 
         void DrawFramePixel(int x, int y, int width, int height, bool clear, Color color);
 
-        void PrintStringRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color);
-
-        void PrintString(string msg, int x, int y, Color color);
-
-        void DrawText(string msg, int x, int y, Color color);
-        void DrawTextWidth(string msg, int x, int y, int width, Color color);
-        void DrawText(string msg, int x, int y, LineAlignment alignment, Color color);
-        void DrawSmallText(string msg, int x, int y, LineAlignment alignment, Color color);
-        void DrawLargeText(string msg, int x, int y, LineAlignment alignment, Color color);
+        void DrawTextWidth(string msg, int x, int y, int size, int width, Color color);
+        void DrawText(string msg, int x, int y, int size, LineAlignment alignment, Color color);
+        Size TextSize(string msg, int size);
 
         void ClearRect(int x, int y, int width, int height);
 
