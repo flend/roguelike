@@ -42,7 +42,5 @@ namespace RogueBasin
         Size GetUISpriteDimensions(string id);
 
         Size GetTraumaSpriteDimensions(int id);
-
-
     }
 }

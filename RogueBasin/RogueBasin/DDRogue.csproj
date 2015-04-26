@@ -1108,4 +1108,25 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\tiles\blacktarget.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\acidgrenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\axe.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\chainsaw.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\flame.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\grenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\knife.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\laser.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\launcher.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\mine.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\plasma.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\pole.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ref-laser.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\rifle.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\rock.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\screamer.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\shotgun.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\stun_grenade.png" />
+  </ItemGroup>
 </Project>

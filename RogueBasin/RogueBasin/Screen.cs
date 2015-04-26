@@ -1054,13 +1054,13 @@ namespace RogueBasin {
             var characterOffset = ScreenHeight / 19;
 
             DrawText("[1] Lance", lanceCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
-            DrawUISpriteByCentre("lance", lanceCentre);
+            DrawSpriteByCentre("lance", lanceCentre);
 
             DrawText("[2] Crack", crackCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
-            DrawUISpriteByCentre("crack", crackCentre);
+            DrawSpriteByCentre("crack", crackCentre);
 
             DrawText("[3] N3rd", nerdCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
-            DrawUISpriteByCentre("nerd", nerdCentre);
+            DrawSpriteByCentre("nerd", nerdCentre);
 
             var textY = ScreenHeight / 11;
             var textWidth = (int)Math.Floor(ScreenWidth / 5.0);
@@ -1202,20 +1202,20 @@ namespace RogueBasin {
                 if (monster.GameSprite == "boss")
                 {
                     offset = new Point(-32, 32);
-                    DrawTileSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
+                    DrawSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
 
                 }
                 else
                 {
-                    DrawTileSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
-                    DrawTileSpriteByCentre("monster_level_" + monster.Level, monsterTL + thisPoint + new Point(0, 32) + offset);
+                    DrawSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
+                    DrawSpriteByCentre("monster_level_" + monster.Level, monsterTL + thisPoint + new Point(0, 32) + offset);
                 }
             }
 
             var itemTL = new Point(ScreenWidth / 8, centreYOffset + 500);
 
             var equipStr = "Equipment:";
-            DrawLargeText(equipStr, new Point(centreX, itemTL.y - titleLineOffset), LineAlignment.Center, titleColor);
+            DrawLargeText(equipStr, new Point(centreX, itemTL.y - (int)Math.Ceiling(titleLineOffset * 1.5)), LineAlignment.Center, titleColor);
 
             for (int i = 0; i < ArenaItems.Count(); i++)
             {
@@ -1223,7 +1223,7 @@ namespace RogueBasin {
                 var columnNo = i % maxIcons;
                 var rowNo = (int)Math.Floor(i / (double)maxIcons);
                 var thisPoint = new Point(columnNo * 64, rowNo * 96);
-                DrawTileSpriteByCentre(item.GameSprite, itemTL + thisPoint);
+                DrawSpriteByCentre(item.GameSprite, itemTL + thisPoint);
             }
 
         }
@@ -1630,30 +1630,18 @@ namespace RogueBasin {
             mapRenderer.ClearRect(x, y, width, height);
         }
 
-
-        private void DrawUISpriteByCentre(string id, int xCenter, int yCentre) {
-            Size spriteDim = UISpriteSize(id);
-            DrawUISprite(id, new Point(xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2));
-        }
-
-        private void DrawTileSpriteByCentre(string id, int xCenter, int yCentre)
+        private void DrawUISpriteByCentre(string id, Point point)
         {
             Size spriteDim = UISpriteSize(id);
-            DrawTileSprite(id, xCenter - spriteDim.Width / 2, yCentre - spriteDim.Height / 2);
+            DrawUISprite(id, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2));
         }
 
-
-        private void DrawUISpriteByCentre(string id, Point point) {
-            DrawUISpriteByCentre(id, point.x, point.y);
-        }
-
-        private void DrawTileSpriteByCentre(string id, Point point)
+        private void DrawSpriteByCentre(string id, Point point)
         {
-            DrawTileSpriteByCentre(id, point.x, point.y);
+            Size spriteDim = SpriteSize(id);
+            DrawSprite(id, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2));
         }
-
-
-
+        
         private void DrawGraduatedBar(string id, double fullness, Rectangle barArea, double spacing)
         {
             //This isn't quite right since it ends with a gap
@@ -1778,7 +1766,7 @@ namespace RogueBasin {
 
                 if (weaponSpriteId != null)
                 {
-                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + meleeWeaponUICenter.x, playerUI_TL.y + meleeWeaponUICenter.y);
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL + meleeWeaponUICenter);
                 }
 
                 var rangedDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
@@ -1800,7 +1788,7 @@ namespace RogueBasin {
 
                 if (weaponSpriteId != null)
                 {
-                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL.x + utilityUICenter.x, playerUI_TL.y + utilityUICenter.y);
+                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL + utilityUICenter);
                 }
             }
 
@@ -2017,14 +2005,19 @@ namespace RogueBasin {
             return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
         }
 
-        private void DrawTileSprite(string name, int x, int y)
+        private Size SpriteSize(string name)
         {
-            mapRenderer.DrawTileSprite(name, x, y, 1.0);
+            return mapRenderer.GetUISpriteDimensions(name);
         }
 
         private void DrawUISprite(string name, Point p)
         {
             mapRenderer.DrawUISprite(name, p.x, p.y, UIScaling);
+        }
+
+        private void DrawSprite(string name, Point p)
+        {
+            mapRenderer.DrawUISprite(name, p.x, p.y, 1.0);
         }
 
         private char GetCharIconForNumber(int no)
