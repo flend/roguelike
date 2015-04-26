@@ -1134,9 +1134,16 @@ namespace RogueBasin {
 
             DrawLargeText("You think the TV execs let you off that easy?", new Point(centreX, topY + titleLineOffset * 6), LineAlignment.Center, textColor);
 
-            DrawLargeText("Press [F] to restart the area", new Point(centreX, topY + titleLineOffset * 8), LineAlignment.Center, statsColor);
+            string deathStr = "After just " + Game.Dungeon.NumberOfFunModeDeaths + " stupid deaths?";
+            if (Game.Dungeon.NumberOfFunModeDeaths == 1)
+            {
+                deathStr = "After just one stupid death?";
+            }
+            DrawLargeText(deathStr, new Point(centreX, topY + titleLineOffset * 7), LineAlignment.Center, textColor);
 
-            DrawLargeText("Oh yeah, you lose any fame you had...", new Point(centreX, topY + titleLineOffset * 9), LineAlignment.Center, textColor);
+            DrawLargeText("Press [F] to restart the area", new Point(centreX, topY + titleLineOffset * 9), LineAlignment.Center, statsColor);
+
+            DrawLargeText("Oh yeah, you lose any fame you had...", new Point(centreX, topY + titleLineOffset * 10), LineAlignment.Center, textColor);
         }
 
         public int ArenaSelected { get; set; }

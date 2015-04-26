@@ -1517,8 +1517,7 @@ namespace RogueBasin
                 if (promptAction != null)
                 {
                     promptAction(true);
-                    inputState = InputState.MapMovement;
-                    Screen.Instance.ClearPrompt();
+                    ResetPrompt();
                 }
             }
 
@@ -1527,10 +1526,17 @@ namespace RogueBasin
                 if (promptAction != null)
                 {
                     promptAction(false);
-                    inputState = InputState.MapMovement;
-                    Screen.Instance.ClearPrompt();
+                    ResetPrompt();
                 }
             }
+        }
+
+        private void ResetPrompt()
+        {
+            //Only reset input state if called function doesn't set it to something else
+            if (inputState == InputState.YesNoPrompt)
+                inputState = InputState.MapMovement;
+            Screen.Instance.ClearPrompt();
         }
 
         private void FPromptKeyboardEvent(KeyboardEventArgs args)
