@@ -1322,7 +1322,7 @@ namespace RogueBasin {
                 fameStr = "Ripley";
             }
             
-            DrawNextLine("Your viewing figures: " + viewingFigures + "%!", centrePoint, titleColor);
+            DrawNextLine("Your viewing figures: ", centrePoint, titleColor);
             DrawNextLine(viewingFigures.ToString() + "%!", centrePoint, statsColor);
 
             DrawNextLine("Your exploits grant you an honourable place in history as the new:", centrePoint, titleColor);
@@ -1335,7 +1335,7 @@ namespace RogueBasin {
             if(Game.Dungeon.FunMode) {
                 if (Game.Dungeon.NumberOfFunModeDeaths > 0)
                 {
-                    var deathStr = "You died: " + Game.Dungeon.NumberOfFunModeDeaths + "times (it's just for fun, right?)";
+                    var deathStr = "You died: " + Game.Dungeon.NumberOfFunModeDeaths + " times (it's just for fun, right?)";
                     DrawNextLine(deathStr, centrePoint, statsColor);
                 }
 
