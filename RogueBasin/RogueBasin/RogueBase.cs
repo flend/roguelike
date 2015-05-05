@@ -642,31 +642,11 @@ namespace RogueBasin
 
                                 case Key.S:
                                     //Toggle sounds
-                                    if (PlaySounds)
-                                    {
-                                        Game.MessageQueue.AddMessage("Sounds off");
-                                        PlaySounds = false;
-                                    }
-                                    else
-                                    {
-                                        Game.MessageQueue.AddMessage("Sounds on");
-                                        PlaySounds = true;
-                                    }
+                                    ToggleSounds();
                                     break;
 
                                 case Key.M:
-                                    if (PlayMusic)
-                                    {
-                                        Game.MessageQueue.AddMessage("Music off");
-                                        MusicPlayer.Instance().Stop();
-                                        PlayMusic = false;
-                                    }
-                                    else
-                                    {
-                                        Game.MessageQueue.AddMessage("Music on");
-                                        MusicPlayer.Instance().Play();
-                                        PlayMusic = true;
-                                    }
+                                    ToggleMusic();
                                     
                                     break;
                                     /*
@@ -1341,6 +1321,56 @@ namespace RogueBasin
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
 
+        public void ToggleSounds()
+        {
+            if (PlaySounds)
+            {
+                SoundsOff();
+            }
+            else
+            {
+                SoundsOn();
+            }
+        }
+
+        private void SoundsOn()
+        {
+            Game.MessageQueue.AddMessage("Sounds on");
+            PlaySounds = true;
+        }
+
+        private void SoundsOff()
+        {
+            Game.MessageQueue.AddMessage("Sounds off");
+            PlaySounds = false;
+        }
+
+        public void ToggleMusic()
+        {
+            if (PlayMusic)
+            {
+                MusicStop();
+            }
+            else
+            {
+                MusicStart();
+            }
+        }
+
+        private void MusicStart()
+        {
+            Game.MessageQueue.AddMessage("Music on");
+            MusicPlayer.Instance().Play();
+            PlayMusic = true;
+        }
+
+        private void MusicStop()
+        {
+            Game.MessageQueue.AddMessage("Music off");
+            MusicPlayer.Instance().Stop();
+            PlayMusic = false;
+        }
+
         public void DoArenaSelection()
         {
             this.SetSpecialScreenAndHandler(Screen.Instance.ArenaSelectionScreen, ArenaSelectionKeyHandler);
@@ -1473,9 +1503,15 @@ namespace RogueBasin
         private void RestartGameAfterDeath()
         {
             SetupGame();
-            DoCharacterSelection();
+            DoMenuScreen();
         }
 
+        //Do menu screen, onto character selection
+        public void DoMenuScreen()
+        {
+            var menuScreen = new MenuScreen(DoCharacterSelection);
+            SetSpecialScreenAndHandler(menuScreen.DrawMenuScreen, menuScreen.MenuScreenKeyboardHandler);
+        }
 
         public void DoCharacterSelection()
         {
@@ -3397,6 +3433,12 @@ namespace RogueBasin
         internal void SetupFunModeDeath()
         {
             this.SetSpecialScreenAndHandler(Screen.Instance.FunModeDeathScreen, FunModeDeathKeyHandler);
+        }
+
+        internal void QuitImmediately()
+        {
+            Game.Dungeon.RunMainLoop = false;
+            Events.QuitApplication();
         }
     }
 }

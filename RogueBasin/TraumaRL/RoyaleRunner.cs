@@ -184,7 +184,7 @@ namespace TraumaRL
         private void RunGame()
         {
 
-            rb.DoCharacterSelection();
+            rb.DoMenuScreen();
 
             rb.StartEventLoop();
 

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RogueBasin
 {
-    enum LineAlignment { Left, Center, Right }
+    public enum LineAlignment { Left, Center, Right }
 
     interface IMapRenderer
     {
@@ -24,8 +24,12 @@ namespace RogueBasin
 
         void DrawFramePixel(int x, int y, int width, int height, bool clear, Color color);
 
+        void DrawTextWidth(string msg, int x, int y, int size, int width, Color foregroundColor, Color backgroundColor);
+        void DrawText(string msg, int x, int y, int size, LineAlignment alignment, Color foregroundColor, Color backgroundColor);
+
         void DrawTextWidth(string msg, int x, int y, int size, int width, Color color);
         void DrawText(string msg, int x, int y, int size, LineAlignment alignment, Color color);
+        
         Size TextSize(string msg, int size);
 
         void ClearRect(int x, int y, int width, int height);
@@ -34,13 +38,10 @@ namespace RogueBasin
 
         void DrawTileSprite(string id, int x, int y, double scaling);
 
-
-        void DrawTraumaSprite(int id, int x, int y);
-
-        void DrawTraumaUISprite(int id, int x, int y);
-
         Size GetUISpriteDimensions(string id);
 
+        void DrawTraumaSprite(int id, int x, int y);
+        void DrawTraumaUISprite(int id, int x, int y);
         Size GetTraumaSpriteDimensions(int id);
     }
 }

@@ -627,10 +627,28 @@ namespace RogueBasin
             return font;
         }
 
-        public void DrawText(string msg, int x, int y, int size, LineAlignment lineAlignment, Color color)
+        public void DrawText(string msg, int x, int y, int size, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
-            Surface fontSurface = font.Render(msg, color);
+            Surface fontSurface = font.Render(msg, foregroundColor, backgroundColor, true);
+
+            var pointToDraw = new System.Drawing.Point(x, y);
+
+            if (lineAlignment == LineAlignment.Center)
+            {
+                var dimensions = font.SizeText(msg);
+                pointToDraw = new System.Drawing.Point(x - dimensions.Width / 2, y - dimensions.Height / 2);
+            }
+
+            videoSurface.Blit(fontSurface, pointToDraw);
+        }
+
+        public void DrawText(string msg, int x, int y, int size, LineAlignment lineAlignment, Color foregroundColor)
+        {
+            SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
+            Surface fontSurface = font.Render(msg, foregroundColor, Color.Black, true);
+            fontSurface.Transparent = true;
+            fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
 
             var pointToDraw = new System.Drawing.Point(x, y);
 
@@ -645,9 +663,20 @@ namespace RogueBasin
 
         public void DrawTextWidth(string msg, int x, int y, int size, int width, Color color)
         {
-            // Create the Font Surfaces
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             Surface fontSurface = font.Render(msg, color, Color.Black, true, width, 100);
+            fontSurface.Transparent = true;
+            fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
+
+            var pointToDraw = new System.Drawing.Point(x, y);
+
+            videoSurface.Blit(fontSurface, pointToDraw);
+        }
+
+        public void DrawTextWidth(string msg, int x, int y, int size, int width, Color foregroundColor, Color backgroundColor)
+        {
+            SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
+            Surface fontSurface = font.Render(msg, foregroundColor, backgroundColor, true, width, 100);
             fontSurface.Transparent = true;
             fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
 

@@ -1876,24 +1876,49 @@ namespace RogueBasin {
             DrawFocusWindow();
         }
 
-        private void DrawText(string msg, Point p)
+        public void DrawText(string msg, Point p)
         {
             mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, LineAlignment.Left, statsColor);
         }
-        
-        private void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
             mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
         }
 
-        private void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
             mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, color);
         }
 
-        private void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
             mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
+        }
+
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, size, lineAlignment, color);
+        }
+
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+        }
+
+        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, foregroundColor, backgroundColor);
+        }
+
+        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+        }
+
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, size, lineAlignment, foregroundColor, backgroundColor);
         }
 
         void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
