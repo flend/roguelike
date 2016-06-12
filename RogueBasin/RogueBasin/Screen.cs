@@ -252,8 +252,9 @@ namespace RogueBasin {
             
             //Try these
 
-            int scaledSpriteDim = 64;
-            //int scaledSpriteDim = 32;
+            //int scaledSpriteDim = 64;
+            int scaledSpriteDim = 32;
+            //int scaledSpriteDim = 16; //doesn't work. why?
             //int scaledSpriteDim = 128;
 
             //These two are basically unused now

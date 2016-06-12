@@ -112,6 +112,9 @@ namespace RogueBasin
         private int tileSpriteSheetWidth = 64;
         private int tileSpriteSheetHeight = 64;
 
+        private int traumaSpriteSheetWidth = 16;
+        private int traumaSpriteSheetHeight = 16;
+
         private int traumaSpriteScaling = 4;
         private int traumaUISpriteScaling = 4;
 
@@ -275,15 +278,17 @@ namespace RogueBasin
 
             spriteSurface = tempSpriteSurface;
 
-            if (traumaSpriteScaling > 1)
+            double totalScaling = traumaSpriteScaling * entry.Scaling;
+
+            if (totalScaling > 1.001 || totalScaling < 0.999)
             {
-                if (traumaSpriteScaling == 2)
+                if (totalScaling < 2.12 && traumaSpriteScaling > 1.98)
                 {
                     spriteSurface = tempSpriteSurface.CreateScaleDoubleSurface(false);
                 }
                 else
                 {
-                    spriteSurface = tempSpriteSurface.CreateScaledSurface(traumaSpriteScaling, false);
+                    spriteSurface = tempSpriteSurface.CreateScaledSurface(totalScaling, false);
                 }
             }
 
@@ -504,6 +509,7 @@ namespace RogueBasin
                 }
 
                 entry.AlphaOverride = alpha;
+                entry.Scaling = spriteVideoWidthScaling;
 
                 Surface spriteSurface = GetSpriteFromCache(entry);
 
@@ -520,42 +526,6 @@ namespace RogueBasin
             {
                 LogFile.Log.LogEntryDebug("Can't find sprite " + cell, LogDebugLevel.High);
             }
-        }
-
-        private Surface GetScaledTileSpriteFromCache(SpriteCacheEntry entry)
-        {
-            Surface spriteSurface;
-            scaledSpriteCache.TryGetValue(entry, out spriteSurface);
-
-            if (spriteSurface == null)
-            {
-                string filename = GetSpriteAssetPath(entry);
-                                
-                Assembly _assembly = Assembly.GetExecutingAssembly();
-                Stream fileStream = _assembly.GetManifestResourceStream(filename);
-                MemoryStream memoryStream = new MemoryStream();
-                fileStream.CopyTo(memoryStream);
-
-                spriteSurface = new Surface(memoryStream);//.Convert(videoSurface, true, false);
-                if (entry.AlphaOverride > 0.01)
-                {
-                    ModifyAlpha(spriteSurface, entry.AlphaOverride);
-                }
-
-                //Scale if required
-                Surface scaledSpriteSurface = spriteSurface;
-                
-                if(spriteVideoWidth != tileSpriteSheetWidth || spriteVideoHeight != tileSpriteSheetHeight) {
-                    scaledSpriteSurface = spriteSurface.CreateScaledSurface(spriteVideoWidthScaling, spriteVideoHeightScaling, true);
-                }
-
-                scaledSpriteCache.Add(entry, scaledSpriteSurface);
-
-                spriteSurface = scaledSpriteSurface;
-
-                LogFile.Log.LogEntryDebug("Storing scaled sprite" + entry.StrId, LogDebugLevel.Profiling);
-            }
-            return spriteSurface;
         }
 
         private string GetSpriteAssetPath(SpriteCacheEntry entry)
@@ -590,18 +560,6 @@ namespace RogueBasin
                     ModifyAlpha(spriteSurface, entry.AlphaOverride);
                 }
 
-                //Scale if required
-                Surface scaledSpriteSurface = spriteSurface;
-
-                if (entry.Scaling > 1.001 || entry.Scaling < 0.999)
-                {
-                    scaledSpriteSurface = spriteSurface.CreateScaledSurface(entry.Scaling, true);
-                }
-
-                scaledSpriteCache.Add(entry, scaledSpriteSurface);
-
-                spriteSurface = scaledSpriteSurface;
-
                 spriteCache.Add(entry, spriteSurface);
 
                 LogFile.Log.LogEntryDebug("Storing double scaled sprite" + entry.StrId, LogDebugLevel.Profiling);
@@ -620,7 +578,16 @@ namespace RogueBasin
             fileStream.CopyTo(memoryStream);
 
             spriteSurface = new Surface(memoryStream);//.Convert(videoSurface, true, false);
-            return spriteSurface;
+
+            //Scale if required
+            Surface scaledSpriteSurface = spriteSurface;
+
+            if (entry.StrId != null && (entry.Scaling > 1.001 || entry.Scaling < 0.999))
+            {
+                scaledSpriteSurface = spriteSurface.CreateScaledSurface(entry.Scaling, true);
+            }
+
+            return scaledSpriteSurface;
         }
 
         private void ModifyAlpha(Surface spriteSurface, double alpha)
