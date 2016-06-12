@@ -947,7 +947,7 @@ namespace RogueBasin {
             DrawMap(levelToDisplay, dungeon.Levels);
 
             //Draw locks
-            //DrawLocks(levelToDisplay, dungeon.Locks);
+            DrawLocks(levelToDisplay, dungeon.Locks);
 
             //Draw fixed features
             DrawFeatures(levelToDisplay, dungeon.Features);
@@ -2147,8 +2147,8 @@ namespace RogueBasin {
                         continue;
 
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)] = new TileEngine.TileCell(item.GameSprite);
+                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileID = item.Representation;
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileFlag = new LibtcodColorFlags(itemColorToUse);
-                    //tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileSprite = ;
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].Transparency = spriteAlpha;
 
                 }
@@ -2554,7 +2554,7 @@ namespace RogueBasin {
                     if (isViewVisible(creature.LocationMap))
                     {
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(creature.GameSprite);
-                        //tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileSprite = ;
+                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileID = creature.Representation;
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
 
                         tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameOverlaySprite;
@@ -2767,12 +2767,12 @@ namespace RogueBasin {
 
                     if (isViewVisible(mapTerrainLoc) && drawSquare)
                     {
-                        //tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(screenChar);
-                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(terrainSprite); 
+                        
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(terrainSprite);
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileID = screenChar;
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileFlag = new LibtcodColorFlags(drawColor);
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].Transparency = spriteTransparency;
                         
-
                         tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(effectSprite);
                         tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)].Transparency = effectTransparency;
                     }

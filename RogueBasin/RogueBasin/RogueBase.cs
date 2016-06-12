@@ -197,7 +197,7 @@ namespace RogueBasin
                 return;
             }
 
-            ProfileEntry("Tick Event");
+            //ProfileEntry("Tick Event");
 
             //LogFile.Log.LogEntryDebug("FPS: " + args.Fps, LogDebugLevel.Medium);
             //LogFile.Log.LogEntryDebug("FPS tick: " + args.Tick, LogDebugLevel.Medium);
@@ -205,7 +205,7 @@ namespace RogueBasin
             if(GameStarted)
                 AdvanceDungeonToNextPlayerTick();
 
-            ProfileEntry("Tick Update Film");
+            //ProfileEntry("Tick Update Film");
 
             /*
             if (GameStarted && firstRun)

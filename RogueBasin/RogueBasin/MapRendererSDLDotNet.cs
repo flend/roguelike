@@ -57,7 +57,7 @@ namespace RogueBasin
             var otherFoo = other as SpriteCacheEntry;
             if (otherFoo == null)
                 return false;
-            return Flags == otherFoo.Flags && GetUniqueIdString() == otherFoo.GetUniqueIdString() && AlphaOverride - otherFoo.AlphaOverride < 0.001 && Scaling - otherFoo.Scaling < 0.001;
+            return GetUniqueIdString() == otherFoo.GetUniqueIdString() && AlphaOverride - otherFoo.AlphaOverride < 0.001 && Scaling - otherFoo.Scaling < 0.001;
         }
 
         public string GetUniqueIdString() {
@@ -159,6 +159,11 @@ namespace RogueBasin
                     for (int x = mapOffset.x; x <= maxColumn; x++)
                     {
                         TileEngine.TileCell thisCell = layer.Rows[y].Columns[x];
+
+                        if (thisCell.TileSprite == null && thisCell.TileID == -1)
+                        {
+                            continue;
+                        }
 
                         //Screen tile coords
                         int screenTileX = screenViewport.X + (x - mapOffset.x);
@@ -273,6 +278,8 @@ namespace RogueBasin
             //Set this after doing background replacement
             spriteSurface.Transparent = true;
             spriteSurface.TransparentColor = transparentColor;
+
+            LogFile.Log.LogEntryDebug("Loading trauma sprite: " + entry.Id, LogDebugLevel.Medium);
 
             return spriteSurface;
         }
@@ -483,8 +490,6 @@ namespace RogueBasin
                 {
                     entry = new SpriteCacheEntry(TileSpritePath(cell.TileSprite));
                 }
-
-                LogFile.Log.LogEntryDebug("sprite name" + cell.TileSprite, LogDebugLevel.High);
 
                 entry.AlphaOverride = alpha;
 
