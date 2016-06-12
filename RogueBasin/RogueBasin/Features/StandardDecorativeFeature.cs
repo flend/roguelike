@@ -8,18 +8,12 @@ namespace RogueBasin.Features
 {
     public class StandardDecorativeFeature : DecorationFeature
     {
-        char representation;
         System.Drawing.Color representationColour;
 
         public StandardDecorativeFeature(char representation, System.Drawing.Color representationColour)
         {
-            this.representation = representation;
+            Representation = representation;
             this.representationColour = representationColour;
-        }
-
-        protected override char GetRepresentation()
-        {
-            return representation;
         }
 
         public override System.Drawing.Color RepresentationColor()
@@ -36,23 +30,6 @@ namespace RogueBasin.Features
                 else
                     return "Soft cover";
             }
-        }
-
-
-        protected override string GetGameSprite()
-        {
-            if (IsBlocking)
-                return "hardcover";
-            else 
-                return "softcover";
-        }
-
-        protected override string GetUISprite()
-        {
-            if (IsBlocking) 
-                return "hardcover";
-            else
-                return "softcover";
         }
     }
 }

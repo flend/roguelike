@@ -111,5 +111,17 @@ namespace TileEngine
             TileSprite = tileSprite;
             Transparency = 0.0;
         }
+
+        public override string ToString()
+        {
+            if (tileSprite != null)
+            {
+                return tileSprite;
+            }
+            else
+            {
+                return "tileid:" + tileID;
+            }
+        }
     }
 }

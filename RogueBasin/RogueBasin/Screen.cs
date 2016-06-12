@@ -2256,6 +2256,7 @@ namespace RogueBasin {
                         continue;
 
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.GameSprite);
+                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileID = feature.Representation;
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor, feature.RepresentationBackgroundColor());
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].Transparency = spriteAlpha;
                 }

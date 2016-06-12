@@ -162,7 +162,7 @@ namespace RogueBasin
         /// <returns></returns>
         protected virtual char GetRepresentation()
         {
-            return 'X';
+            return representation;
         }
 
         /// <summary>

@@ -1130,4 +1130,7 @@
     <EmbeddedResource Include="bin\Debug\graphics\ui\shotgun.png" />
     <EmbeddedResource Include="bin\Debug\graphics\ui\stun_grenade.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\trauma_tiles.png" />
+  </ItemGroup>
 </Project>

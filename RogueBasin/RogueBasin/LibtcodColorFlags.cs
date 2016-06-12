@@ -39,5 +39,18 @@ namespace RogueBasin
             get { return backgroundColor; }
         }
 
+        public override bool Equals(object other)
+        {
+            var otherFoo = other as LibtcodColorFlags;
+            if (otherFoo == null)
+                return false;
+            return foregroundColor == otherFoo.foregroundColor && backgroundColor == otherFoo.backgroundColor;
+        }
+
+        public override int GetHashCode()
+        {
+            return 17 * backgroundColor.GetHashCode() + 17 * foregroundColor.GetHashCode();
+        }
+
     }
 }
