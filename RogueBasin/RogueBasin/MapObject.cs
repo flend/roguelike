@@ -153,7 +153,7 @@ namespace RogueBasin
         /// <returns></returns>
         virtual public System.Drawing.Color RepresentationBackgroundColor()
         {
-            return System.Drawing.Color.Black;
+            return System.Drawing.Color.Transparent;
         }
 
         /// <summary>

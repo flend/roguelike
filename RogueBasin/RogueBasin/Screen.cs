@@ -2455,7 +2455,7 @@ namespace RogueBasin {
                 if (drawCreature)
                 {
                     foregroundColor = creatureColor;
-                    backgroundColor = System.Drawing.Color.Black;
+                    backgroundColor = System.Drawing.Color.Transparent;
                     string overlapSprite = null;
 
                     //Overlay depends on status

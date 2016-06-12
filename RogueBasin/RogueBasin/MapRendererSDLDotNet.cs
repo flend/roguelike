@@ -66,7 +66,19 @@ namespace RogueBasin
                 return StrId;
             }
             else {
-                return "trauma" + Id + Flags.ForegroundColor + "/" + Flags.BackgroundColor;
+                string cacheStr = "trauma" + Id;
+                if (Flags != null)
+                {
+                    if (Flags.ForegroundColor != null)
+                    {
+                        cacheStr += Flags.ForegroundColor;
+                    }
+                    cacheStr += "/";
+                    if (Flags.BackgroundColor != null) {
+                        cacheStr += Flags.BackgroundColor;
+                    }
+                }
+                return cacheStr;
             }
         }
 
@@ -258,7 +270,7 @@ namespace RogueBasin
 
             if (colorFlags.ForegroundColor != Color.White)
                 tempSpriteSurface.ReplaceColor(Color.White, colorFlags.ForegroundColor);
-            if (colorFlags.BackgroundColor != transparentColor)
+            if (colorFlags.BackgroundColor != Color.Transparent)
                 tempSpriteSurface.ReplaceColor(transparentColor, colorFlags.BackgroundColor);
 
             spriteSurface = tempSpriteSurface;
