@@ -12,15 +12,15 @@ namespace TraumaRL
     {
         static void Main(string[] args)
         {
-            /*
+            
             var traumaRunner = new TraumaRunner();
 
             traumaRunner.TemplatedMapTest();
-             */
+             
 
-            var royaleRunner = new RoyaleRunner();
+            //var royaleRunner = new RoyaleRunner();
 
-            royaleRunner.RunProgram();
+            //royaleRunner.RunProgram();
         }
     }
 }

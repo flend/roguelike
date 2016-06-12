@@ -1470,7 +1470,7 @@ namespace RogueBasin
             }
         }
 
-        private void StartGame()
+        public void StartGame()
         {
             GameStarted = true;
             Screen.Instance.ShowMessageQueue = true;
