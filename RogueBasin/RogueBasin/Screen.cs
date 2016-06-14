@@ -2008,7 +2008,7 @@ namespace RogueBasin {
                         coverStr = "(soft cover)";
                     }
 
-                    var monsterCoverTextOffset = UIScale(new Point(70, lineOffset * 1));
+                    var monsterCoverTextOffset = UIScale(new Point(100, lineOffset * 1));
                     DrawUIText(coverStr, monsterTextUI_UsefulTL + monsterCoverTextOffset);
 
                     //Behaviour

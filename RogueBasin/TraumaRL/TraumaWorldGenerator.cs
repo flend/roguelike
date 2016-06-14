@@ -7,6 +7,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace TraumaRL
 {
@@ -496,9 +498,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
             //Make other levels generically
 
-            //var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel });
+            IEnumerable<int> standardGameLevels;
 
-            var standardGameLevels = gameLevels.Except(new List<int> { medicalLevel });
+            if (quickLevelGen)
+            {
+                standardGameLevels = gameLevels.Except(new List<int> { medicalLevel });
+            }
+            else {
+                standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel });
+            }
 
             foreach (var level in standardGameLevels)
             {
@@ -584,10 +592,12 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add elevator features to link the maps
             if (!quickLevelGen)
                 AddElevatorFeatures(mapInfo, levelInfo);
+            
+            //Attach debugger at this point to avoid slow 
+            //MessageBox.Show("Attach debugger now for any generation post slow pathing setup");
 
             //Generate quests at mapmodel level
-            if (!quickLevelGen)
-                GenerateQuests(mapInfo, levelInfo);
+            GenerateQuests(mapInfo, levelInfo);
 
             //Place loot
             CalculateLevelDifficulty();
@@ -616,7 +626,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
             }
 
-            if (!CheckItemRouteability())
+            if (!quickLevelGen && !CheckItemRouteability())
             {
                 throw new ApplicationException("Item is not connected to elevator, aborting.");
             }
@@ -783,15 +793,20 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
-            BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
-            
+            if (!quickLevelGen)
+            {
+                BuildMainQuest(mapInfo, levelInfo, roomConnectivityMap);
+            }
             BuildMedicalLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
-            
-            BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+            if (!quickLevelGen)
+            {
+                BuildAtriumLevelQuests(mapInfo, levelInfo, roomConnectivityMap);
 
-            BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
+                BuildRandomElevatorQuests(mapInfo, levelInfo, roomConnectivityMap);
+
+                BuildGoodyQuests(mapInfo, levelInfo, roomConnectivityMap);
+            }
         }
 
         private void BuildRandomElevatorQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
