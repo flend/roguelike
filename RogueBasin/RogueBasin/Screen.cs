@@ -42,10 +42,7 @@ namespace RogueBasin {
         //A prompt for the user to respond to
         string Prompt { get; set; }
 
-        //Console size
-        public int Width { get; set; }
-        public int Height { get; set; }
-
+        //Screen size
         public int ScreenWidth { get; set; }
         public int ScreenHeight { get; set; }
 
@@ -67,10 +64,7 @@ namespace RogueBasin {
 
         public bool SetTargetInRange = false;
 
-        //Top left coord to start drawing the map at
-        //Set by DrawMap
-        Point mapTopLeft;
-
+        //Viewport in tile coordinates
         Point mapTopLeftBase;
         Point mapBotRightBase;
 
@@ -245,8 +239,8 @@ namespace RogueBasin {
         {
             mapRenderer = renderer;
 
-            ScreenWidth = 1280;
-            ScreenHeight = 960;
+            ScreenWidth = 1285;
+            ScreenHeight = 965;
 
             int nativeSpriteDim = 64;
             
@@ -256,10 +250,6 @@ namespace RogueBasin {
             int scaledSpriteDim = 32;
             //int scaledSpriteDim = 16; //doesn't work. why?
             //int scaledSpriteDim = 128;
-
-            //These two are basically unused now
-            Width = ScreenWidth / scaledSpriteDim;
-            Height = ScreenHeight / scaledSpriteDim;
 
             //These control the map 
             ViewableWidth = ScreenWidth / scaledSpriteDim;
@@ -290,7 +280,7 @@ namespace RogueBasin {
             msgDisplayNumLines = 3;
 
             mapTopLeftBase = new Point(0, 0);
-            mapBotRightBase = new Point(31, 23);
+            mapBotRightBase = new Point(ViewableWidth, ViewableHeight);
 
             MsgLogWrapWidth = 80;
 
@@ -647,7 +637,7 @@ namespace RogueBasin {
             int frameNo = 0;
 
             int width = 6 * ScreenWidth / 8;
-            int height = Height - movieTL.y - 5;
+            int height = ScreenHeight - movieTL.y - 5;
             Point frameTL = new Point(ScreenWidth / 8, ScreenHeight / 8);
 
 
@@ -990,7 +980,7 @@ namespace RogueBasin {
                 BuildTiledMap();
 
                 //Render tiled map to screen
-                mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
+                mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeftBase.x, mapTopLeftBase.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
                 //Draw Stats
                 //DrawStats(dungeon.Player);
@@ -2439,8 +2429,8 @@ namespace RogueBasin {
                         int wpNo = 0;
                         foreach (Point wp in monsterWithWP.Waypoints)
                         {
-                            int wpX = mapTopLeft.x + wp.x;
-                            int wpY = mapTopLeft.y + wp.y;
+                            int wpX = mapTopLeftBase.x + wp.x;
+                            int wpY = mapTopLeftBase.y + wp.y;
 
                             if (isViewVisible(wp))
                             {
@@ -2620,14 +2610,13 @@ namespace RogueBasin {
             //Put the map in the centre
             //mapTopLeft = new Point(mapTopLeftBase.x + (widthAvail - width) / 2, mapTopLeftBase.y + (heightAvail - height) / 2);
             //not appropriate with viewport approach
-            mapTopLeft = mapTopLeftBase;
 
             for (int i = 0; i < map.width; i++)
             {
                 for (int j = 0; j < map.height; j++)
                 {
-                    int screenX = mapTopLeft.x + i;
-                    int screenY = mapTopLeft.y + j;
+                    int screenX = mapTopLeftBase.x + i;
+                    int screenY = mapTopLeftBase.y + j;
 
                     char screenChar;
                     System.Drawing.Color baseDrawColor;

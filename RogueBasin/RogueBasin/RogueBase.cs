@@ -781,7 +781,7 @@ namespace RogueBasin
                                         //Reload
                                         Game.Dungeon.Player.RefillWeapons();
                                         break;*/
-                                        /*
+                                        
                                     case Key.K:
                                         if (!Game.Dungeon.AllLocksOpen)
                                         {
@@ -793,18 +793,18 @@ namespace RogueBasin
                                             Game.Dungeon.AllLocksOpen = false;
                                             Game.MessageQueue.AddMessage("All locks are now in their normal state.");
                                         }
-                                        break;*/
+                                        break;
 
                                     case Key.I:
                                         Game.MessageQueue.AddMessage("Player levelled up.");
                                         Game.Dungeon.Player.LevelUp();
                                         break;
 
-                                        /*
+                                        
                                     case Key.N:
                                         //screen numbering
                                         Screen.Instance.CycleRoomNumbering();
-                                        break;*/
+                                        break;
 
                                     case Key.W:
                                         //screen debug mode
@@ -841,11 +841,12 @@ namespace RogueBasin
 
                                         break;
 
+                                        /*
                                     case Key.N:
                                         //Add a healing event on the player
                                         Game.Dungeon.Player.HealCompletely();
                                         Game.Dungeon.Player.FullAmmo();
-                                        break;
+                                        break;*/
 
                                     case Key.Z:
                                         Game.Dungeon.ExitLevel();
