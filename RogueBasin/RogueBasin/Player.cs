@@ -223,16 +223,16 @@ namespace RogueBasin
         private void SetupInitialStats()
         {
             //CalculateCombatStats();
-            maxHitpoints = 100;
+            maxHitpoints = 50;
             hitpoints = maxHitpoints;
 
-            MaxShield = 0;
+            MaxShield = 100;
             Shield = MaxShield;
 
             MaxEnergy = 200;
             Energy = MaxEnergy;
 
-            DoesShieldRecharge = false;
+            DoesShieldRecharge = true;
             DoHitpointsRecharge = false;
         }
 
@@ -1841,14 +1841,25 @@ namespace RogueBasin
                 }
                 else
                 {
-                    if (oldItemEquippable.EquipmentSlots.Where(x => x == EquipmentSlot.Utility).Any())
+
+                    //Drop old item
+                    bool dropPreviousItem = false;
+
+                    if (dropPreviousItem)
                     {
-                        //Don't drop utilities
-                        UnequipItem(oldItem);
+                        if (oldItemEquippable.EquipmentSlots.Where(x => x == EquipmentSlot.Utility).Any())
+                        {
+                            //Don't drop utilities
+                            UnequipItem(oldItem);
+                        }
+                        else
+                        {
+                            UnequipAndDropItem(oldItem);
+                        }
                     }
                     else
                     {
-                        UnequipAndDropItem(oldItem);
+                        UnequipItem(oldItem);
                     }
                 }
                     

@@ -144,7 +144,21 @@ namespace RogueBasin
             return false;
         }
 
+        /// <summary>
+        /// Item is destroyed on pickup and doesn't reach inventory
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool DestroyedOnPickup()
+        {
+            return false;
+        }
+
         public virtual bool OnDrop(Creature droppingCreature)
+        {
+            return false;
+        }
+
+        public virtual bool DoNotPickupDuplicates()
         {
             return false;
         }

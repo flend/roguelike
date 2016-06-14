@@ -386,30 +386,10 @@ namespace RogueBasin
             DrawScaledTileSprite(cell, screenCoords, alpha, frameNo, isAnimated);
         }
 
-        public void DrawTraumaSprite(int id, int x, int y)
+
+        public void DrawTraumaUISprite(int id, int x, int y, LibtcodColorFlags flags, double scaling = 1.0)
         {
-            SurfaceCacheEntry entry = new SurfaceCacheEntry();
-            entry.Id = id;
-            entry.ForegroundColor = Color.Wheat;
-            entry.BackgroundColor = Color.Black;
-
-            /*
-            Surface traumaSprite = GetTraumaSprite(entry);
-
-            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));*/
-        }
-
-        public void DrawTraumaUISprite(int id, int x, int y)
-        {
-            SurfaceCacheEntry entry = new SurfaceCacheEntry();
-            entry.Id = id;
-            entry.ForegroundColor = Color.Wheat;
-            entry.BackgroundColor = Color.Black;
-
-            /*
-            Surface traumaSprite = GetTraumaUISprite(entry);
-
-            videoSurface.Blit(traumaSprite, new System.Drawing.Point(x, y));*/
+            DrawScaledSprite(id, new Point(x, y), flags, scaling);     
         }
 
         public Size GetTileSpriteDimensions(TileEngine.TileCell cell)
@@ -451,7 +431,7 @@ namespace RogueBasin
 
         public Size GetTraumaSpriteDimensions(int id)
         {
-            return new Size(spriteVideoWidth, spriteVideoHeight);
+            return new Size(traumaSpriteSheetWidth * traumaSpriteScaling, traumaSpriteSheetHeight * traumaSpriteScaling);
         }
 
         /// <summary>
@@ -476,7 +456,9 @@ namespace RogueBasin
                 }
                 else
                 {
-                    videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y), new Rectangle(frameNo * 64, 0, 64, 64));
+                    //Probably unsafe with scaling
+                    videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y), new Rectangle(frameNo * spriteVideoWidth, 0,
+                        spriteVideoWidth, spriteVideoHeight));
                 }
 
                
@@ -484,6 +466,25 @@ namespace RogueBasin
             catch (Exception)
             {
                 LogFile.Log.LogEntryDebug("Can't find sprite " + filePath, LogDebugLevel.High);
+            }
+        }
+
+        private void DrawScaledSprite(int id, Point p, LibtcodColorFlags flags, double spriteScaling, double alpha = 1.0)
+        {
+            SpriteCacheEntry entry = new SpriteCacheEntry(id, flags);
+            entry.AlphaOverride = alpha;
+            entry.Scaling = spriteScaling;
+
+            try
+            {
+                Surface spriteSurface = GetSpriteFromCache(entry);
+
+                videoSurface.Blit(spriteSurface, p.ToPoint());
+
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Can't find sprite id: " + id, LogDebugLevel.High);
             }
         }
 

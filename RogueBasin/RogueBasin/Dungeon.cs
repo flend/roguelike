@@ -3095,10 +3095,36 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage(item.SingleItemDescription + " picked up.");
 
                 item.OnPickup(player);
-                player.PickUpItem(item);
+                
+                if (item.DestroyedOnPickup())
+                {
+                    Game.Dungeon.RemoveItemFromDungeon(item);
+                }
+                else
+                {
+                    player.PickUpItem(item);
+                }
 
             }
             return true;
+        }
+
+        /// <summary>
+        /// This is used in two scenarios - actually destroying an item (e.g. a use-once)
+        /// Moving an item from dungeon tracking into an inventory where it is tracked on the creature
+        /// (yeah, that's kinda yuck)
+        /// </summary>
+        /// <param name="item"></param>
+        public bool RemoveItemFromDungeon(Item item)
+        {
+            if (Game.Dungeon.Items.Contains(item))
+            {
+                Game.Dungeon.RemoveItem(item);
+                return true;
+            }
+            else {
+                return false;
+            }
         }
 
         /// <summary>

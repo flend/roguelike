@@ -250,7 +250,7 @@ namespace RogueBasin
             //Set the item as found
             itemToPickUp.IsFound = true;
 
-            if(Inventory.ContainsItemOfType(itemToPickUp.GetType())) {
+            if(Inventory.ContainsItemOfType(itemToPickUp.GetType()) && itemToPickUp.DoNotPickupDuplicates()) {
                 LogFile.Log.LogEntryDebug("Won't pick up duplicate " + itemToPickUp.SingleItemDescription, LogDebugLevel.Medium);
                 Game.MessageQueue.AddMessage("Already have one of those!");
                 return false;

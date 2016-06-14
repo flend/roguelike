@@ -776,11 +776,11 @@ namespace RogueBasin
                                         //this.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
                                         DoArenaSelection();
                                         break;
-
+                                        */
                                     case Key.R:
                                         //Reload
                                         Game.Dungeon.Player.RefillWeapons();
-                                        break;*/
+                                        break;
                                         
                                     case Key.K:
                                         if (!Game.Dungeon.AllLocksOpen)
@@ -851,7 +851,7 @@ namespace RogueBasin
                                     case Key.Z:
                                         Game.Dungeon.ExitLevel();
                                         break;
-                                        /*
+                                        
                                     case Key.H:
                                         Game.Dungeon.Player.GiveAllWeapons(1);
                                         Game.Dungeon.Player.GiveAllWetware(2);
@@ -861,7 +861,7 @@ namespace RogueBasin
                                         Game.Dungeon.Player.GiveAllWeapons(2);
                                         Game.Dungeon.Player.GiveAllWetware(3);
                                         break;
-                                         * */
+                                        
                                 }
                             }
                         }
@@ -1237,7 +1237,7 @@ namespace RogueBasin
 
 
                         //Handle weapons
-                        /*
+                        
                         int numberPressed = GetNumberFromNonKeypadKeyPress(args);
                         if (numberPressed != -1)
                         {
@@ -1250,7 +1250,7 @@ namespace RogueBasin
                                     break;
                                 }
                             }
-                        }*/
+                        }
 
                         //Handle direction keys (both arrows and vi keys)
 
@@ -2750,13 +2750,14 @@ namespace RogueBasin
             }
 
             //Ditch empty weapons
+            /*
             if (weapon.RemainingAmmo() < 1)
             {
                 Game.MessageQueue.AddMessage("This " + (weapon as Item).SingleItemDescription + " is all out of ammo! Ditching it!");
                 LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
                 player.UnequipAndDestroyItem(weapon as Item);
                 player.GivePistol();
-            }
+            }*/
 
             //Store details for a recast
 
