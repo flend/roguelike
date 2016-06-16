@@ -1220,13 +1220,13 @@ namespace RogueBasin
                             centreOnPC = true;
                         }
 
-                        if (wasDirection && (mod == KeyModifier.Arrow || mod == KeyModifier.Vi) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
+                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
                         {
                             timeAdvances = StartRunning(direction.x, direction.y);
                             centreOnPC = true;
                         }
 
-                        if (wasDirection && mod == KeyModifier.Arrow && (args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.LeftAlt)))
+                        if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
                         {
                             Screen.Instance.ViewportScrollSpeed = 4;
                             Screen.Instance.ScrollViewport(direction);
