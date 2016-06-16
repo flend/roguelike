@@ -22,8 +22,6 @@ namespace RogueBasin
 
         void Clear();
 
-        void DrawFramePixel(int x, int y, int width, int height, bool clear, Color color);
-
         void DrawTextWidth(string msg, int x, int y, int size, int width, Color foregroundColor, Color backgroundColor);
         void DrawText(string msg, int x, int y, int size, LineAlignment alignment, Color foregroundColor, Color backgroundColor);
 
@@ -32,12 +30,13 @@ namespace RogueBasin
         
         Size TextSize(string msg, int size);
 
-        void ClearRect(int x, int y, int width, int height);
-
         void DrawUISprite(string id, int x, int y, double scaling);
         Size GetUISpriteDimensions(string id);
 
         void DrawTraumaUISprite(int id, int x, int y, LibtcodColorFlags flags, double scaling);
         Size GetTraumaSpriteDimensions(int id);
+
+        void DrawLine(Point p1, Point p2, Color color);
+        void DrawRectangle(Rectangle rect, Color color);
     }
 }

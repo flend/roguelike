@@ -124,6 +124,8 @@ namespace RogueBasin {
 
         System.Drawing.Color promptColor = System.Drawing.Color.Orange;
 
+        int movieFrameWidth = 4;
+
         const char heartChar = (char)567;
         const char shieldChar = (char)561;
         const char ammoChar = (char)568;
@@ -167,6 +169,7 @@ namespace RogueBasin {
 
         int smallTextSize = 12;
         int largeTextSize = 22;
+        int largeTextSizeLineOffset = 11;
 
         /// <summary>
         /// Targetting mode
@@ -183,9 +186,6 @@ namespace RogueBasin {
 
         public int TargetRange { get; set; }
         public double TargetPermissiveAngle { get; set; }
-
-        //Current movie
-        List <MovieFrame> movieFrames;
 
         public System.Drawing.Color PCColor { get; set;}
 
@@ -508,80 +508,24 @@ namespace RogueBasin {
             targettingMode = false;
         }
 
-        /// <summary>
-        /// Get the text from a movie
-        /// </summary>
-        /// <param name="movieRoot"></param>
-        /// <returns></returns>
-        public List<string> GetMovieText(string movieRoot)
-        {
-            bool loadSuccess = Screen.Instance.LoadMovie(movieRoot);
 
-            if (!loadSuccess)
-            {
-                LogFile.Log.LogEntryDebug("Failed to load movie file: " + movieRoot, LogDebugLevel.High);
-                return new List<string>();
-            }
+        List<Movie> moviesToPlay = new List<Movie>();
 
-            List<string> outputText = new List<string>();
-
-            //Concatenate the movie into a string list
-            foreach (MovieFrame frame in movieFrames)
-            {
-                if (outputText.Count > 0)
-                    outputText.Add("\n");
-
-                outputText.AddRange(frame.scanLines);
-            }
-
-            return outputText;
-
-        }
-
-        private Tuple<int, int> CalculateWidthHeightFromLines(List<string> lines)
-        {
-            int width = 0;
-
-            foreach (string row in lines)
-            {
-                if (row.Length > width)
-                    width = row.Length;
-            }
-
-            var height = lines.Count;
-
-            return new Tuple<int, int>(width, height);
-        }
-
-        public void PlayLog(LogEntry logEntry)
+        public void EnqueueMovie(string filenameRoot)
         {
             try
             {
-                movieFrames = new List<MovieFrame>();
-                var logFrame = new MovieFrame();
-                var allLines = new List<string>();
-                allLines.Add(logEntry.title);
-                allLines.AddRange(logEntry.lines);
-                logFrame.scanLines = allLines;
-                var dimensions = CalculateWidthHeightFromLines(allLines);
-                logFrame.width = dimensions.Item1;
-                logFrame.height = dimensions.Item2;
-
-                movieFrames.Add(logFrame);
-
-                PlayMovieFrames(false);
+                moviesToPlay.Add(LoadMovie(filenameRoot));
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to play movie from frames " + ex.Message);
+                LogFile.Log.LogEntry("Failed to load movie " + filenameRoot);
             }
         }
 
-        List<string> moviesToPlay = new List<string>();
-
-        private void EnqueueMovie(string filenameRoot)
+        public void EnqueueMovie(Movie movie)
         {
-            moviesToPlay.Add(filenameRoot);
+            moviesToPlay.Add(movie);
         }
 
         public void DequeueFirstMovie()
@@ -597,17 +541,6 @@ namespace RogueBasin {
             return moviesToPlay.Count > 0;
         }
 
-        public void PlayMovie(string filenameRoot, bool keypressBetweenFrames)
-        {
-            if (filenameRoot == "" || filenameRoot.Length == 0)
-            {
-                LogFile.Log.LogEntryDebug("Not playing movie with no name", LogDebugLevel.Medium);
-                return;
-            }
-
-            EnqueueMovie(filenameRoot);
-        }
-
         private void PlayFirstMovieInQueue() {
 
             if (moviesToPlay.Count == 0)
@@ -615,60 +548,85 @@ namespace RogueBasin {
                 LogFile.Log.LogEntryDebug("No movies in queue", LogDebugLevel.High);
                 return;
             }
-
-            string filenameRoot = moviesToPlay[0];
-
-            try
-            {
-                //Load whole movie
-                bool loadSuccess = LoadMovie(filenameRoot);
-
-                if (!loadSuccess)
-                {
-                    LogFile.Log.LogEntryDebug("Failed to load movie file: " + filenameRoot, LogDebugLevel.High);
-                    return;
-                }
-
-                PlayMovieFrames(false);
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntryDebug("Failed to play movie: " + filenameRoot + " : " + ex.Message, LogDebugLevel.High);
-            }
+                
+            RenderMovie(moviesToPlay[0]);
         }
 
-        private void PlayMovieFrames(bool keypressBetweenFrames)
+        private void RenderMovie(Movie movie)
         {
             int frameNo = 0;
 
-            int width = 6 * ScreenWidth / 8;
-            int height = ScreenHeight - movieTL.y - 5;
-            Point frameTL = new Point(ScreenWidth / 8, ScreenHeight / 8);
+            int frameBufferX = ScreenWidth / 8;
+            int frameBufferY = ScreenHeight / 8;
 
+            //Calculate dimensions
+            int maxWidth = 0;
+            int totalHeight = 0;
+
+            int textHeight = 0;
+            int textHeightWithSpacing = 0;
+
+            foreach (MovieFrame frame in movie.Frames)
+            {
+                foreach (String scanLine in frame.ScanLines)
+                {
+                    Size textSize = mapRenderer.TextSize(scanLine, largeTextSize);
+                    textHeight = textSize.Height;
+                    textHeightWithSpacing = textHeight + largeTextSizeLineOffset;
+
+                    if (textSize.Width > maxWidth)
+                    {
+                        maxWidth = textSize.Width;
+                    }
+
+                    totalHeight += textHeightWithSpacing;
+                }
+            }
+
+            int bufferedWidth = maxWidth + frameBufferX;
+            int bufferedHeight = totalHeight + frameBufferY;
+
+            int widthOffset = Math.Max(0, (ScreenWidth - bufferedWidth) / 2);
+            int heightOffset = Math.Max(0, (ScreenHeight - bufferedHeight) / 2);
+
+            Point frameTL = new Point(widthOffset, heightOffset);
+            Point movieTL = new Point(widthOffset + frameBufferX / 2, heightOffset + frameBufferY / 2);
 
             //Draw each frame of the movie
-            foreach (MovieFrame frame in movieFrames)
+            foreach (MovieFrame frame in movie.Frames)
             {
-
                 //Draw frame
-                mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Black);
+                DrawFramePixel(frameTL.x, frameTL.y, bufferedWidth, bufferedHeight, true, System.Drawing.Color.White, movieFrameWidth);
 
                 //Draw content
-                List<string> scanLines = frame.scanLines;
+                List<string> scanLines = frame.ScanLines;
+                DrawMovieFrame(frame.ScanLines, movieTL, maxWidth, textHeightWithSpacing);
 
-                bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL + new Point(0, 100), width, true);
+                DrawText("Press ENTER to continue", new Point(frameTL.x + bufferedWidth / 2, frameTL.y + bufferedHeight - textHeightWithSpacing), LineAlignment.Center, titleColor);
 
                 Screen.Instance.FlushConsole();
                 frameNo++;
                 
-                //Multi-frame unsupported for now, enqueue 3 movies instead
+                //Multi-frame unsupported for now, enqueue multiple movies instead
                 break;
             }
-
-            //Print press any key
-            //PrintLineRect("Press ENTER to continue", frameTL.x, frameTL.y + height, width, 1, LineAlignment.Center, titleColor);
-
         }
+
+        public void DrawFramePixel(int x, int y, int width, int height, bool clear, System.Drawing.Color color, int lineWidth)
+        {
+            if (clear)
+            {
+                mapRenderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
+            }
+
+            for (int j = 0; j < lineWidth; j++) {
+                mapRenderer.DrawLine(new Point(x, y + j), new Point(x + width, y + j), color);
+                mapRenderer.DrawLine(new Point(x + width - j, y), new Point(x + width - j, y + height), color);
+                mapRenderer.DrawLine(new Point(x + j, y), new Point(x + j, y + height), color);
+                mapRenderer.DrawLine(new Point(x, y + height - j), new Point(x + width, y + height - j), color);
+            }
+        }
+
 
         /// <summary>
         /// Wait for ENTER
@@ -694,104 +652,77 @@ namespace RogueBasin {
         /// <param name="frameTL"></param>
         /// <param name="width"></param>
         /// <param name="flashOn"></param>
-        private bool DrawMovieFrame(List<string> scanLines, Point frameTL, int width, bool flashOn)
+        private void DrawMovieFrame(List<string> scanLines, Point frameTL, int width, int lineOffset)
         {
             int offset = 0;
 
-            bool flashingChars = false;
-            char flashChar = '£';
-
             foreach (string line in scanLines)
             {
-                    //Print whole line
-                DrawText(line, new Point(frameTL.x + width / 2, frameTL.y + offset * 20), LineAlignment.Center, normalMovieColor);
+                DrawText(line, new Point(frameTL.x + width / 2, frameTL.y + offset * lineOffset), LineAlignment.Center, normalMovieColor);
                 offset++;
-
             }
-
-            return flashingChars;
         }
 
-        public bool LoadMovie(string filenameRoot)
+        public Movie LoadMovie(string filenameRoot)
         {
-            try
+
+            LogFile.Log.LogEntry("Loading movie: " + filenameRoot);
+
+            int frameNo = 0;
+
+            var thisMovieFrames = new List<MovieFrame>();
+
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+
+            //MessageBox.Show("Showing all embedded resource names");
+
+            //string[] names = _assembly.GetManifestResourceNames();
+            //foreach (string name in names)
+            //    MessageBox.Show(name);
+
+            do
             {
-                LogFile.Log.LogEntry("Loading movie: " + filenameRoot);
+                string filename = "RogueBasin.bin.Debug.movies." + filenameRoot + frameNo.ToString() + ".amf";
+                Stream _fileStream = _assembly.GetManifestResourceStream(filename);
 
-                int frameNo = 0;
-
-                movieFrames = new List<MovieFrame>();
-
-                Assembly _assembly = Assembly.GetExecutingAssembly();
-
-                //MessageBox.Show("Showing all embedded resource names");
-
-                //string[] names = _assembly.GetManifestResourceNames();
-                //foreach (string name in names)
-                //    MessageBox.Show(name);
-
-                do
+                //If this is the first frame check if there is at least one frame
+                if (frameNo == 0)
                 {
-                    string filename = "RogueBasin.bin.Debug.movies." + filenameRoot + frameNo.ToString() + ".amf";
-                    Stream _fileStream = _assembly.GetManifestResourceStream(filename);
-
-                    //If this is the first frame check if there is at least one frame
-                    if (frameNo == 0)
-                    {
-                        if (_fileStream == null)
-                        {
-                            throw new ApplicationException("Can't find file: " + filename);
-                        }
-                    }
-                    //Otherwise, not finding a file just means the end of a movie
-
                     if (_fileStream == null)
                     {
-                        break;
+                        throw new ApplicationException("Can't find file: " + filename);
                     }
+                }
+                //Otherwise, not finding a file just means the end of a movie
 
-                    //File exists, load the frame
-                    MovieFrame frame = new MovieFrame();
+                if (_fileStream == null)
+                {
+                    break;
+                }
 
-                    using (StreamReader reader = new StreamReader(_fileStream))
+                //File exists, load the frame
+                MovieFrame frame = new MovieFrame();
+
+                using (StreamReader reader = new StreamReader(_fileStream))
+                {
+                    string thisLine;
+
+                    frame.ScanLines = new List<string>();
+
+                    while ((thisLine = reader.ReadLine()) != null)
                     {
-                        string thisLine;
-
-                        frame.scanLines = new List<string>();
-
-                        while ((thisLine = reader.ReadLine()) != null)
-                        {
-                            frame.scanLines.Add(thisLine);
-                        }
-
-                        //Set width and height
-
-                        //Calculate dimensions
-                        frame.width = 0;
-
-                        foreach (string row in frame.scanLines)
-                        {
-                            if (row.Length > frame.width)
-                                frame.width = row.Length;
-                        }
-
-                        frame.height = frame.scanLines.Count;
-
-                        //Add the frame
-                        movieFrames.Add(frame);
-
-                        //Increment the frame no
-                        frameNo++;
+                        frame.ScanLines.Add(thisLine);
                     }
-                } while (true);
 
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogFile.Log.LogEntry("Failed to load movie: " + e.Message);
-                return false;
-            }
+                    //Add the frame
+                    thisMovieFrames.Add(frame);
+
+                    //Increment the frame no
+                    frameNo++;
+                }
+            } while (true);
+
+            return new Movie(thisMovieFrames);
         }
 
         /// <summary>
@@ -1021,8 +952,8 @@ namespace RogueBasin {
 
         public void CharacterSelectionScreen()
         {
-            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
-            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
 
             var titleColor = System.Drawing.Color.Khaki;
 
@@ -1104,8 +1035,8 @@ namespace RogueBasin {
 
         public void FunModeDeathScreen()
         {
-            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
-            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
 
             var titleColor = System.Drawing.Color.Khaki;
 
@@ -1150,8 +1081,8 @@ namespace RogueBasin {
         {
             var titleColor = System.Drawing.Color.Khaki;
 
-            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
-            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
 
             var centreXOffset = ScreenWidth / 4;
             var centreYOffset = ScreenHeight / 4;
@@ -1237,8 +1168,8 @@ namespace RogueBasin {
         {
             textLineNumber = 0;
 
-            mapRenderer.DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black);
-            mapRenderer.DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue);
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
 
             var titleColor = System.Drawing.Color.Khaki;
 
@@ -1630,7 +1561,7 @@ namespace RogueBasin {
         /// </summary>
         void ClearRect(int x, int y, int width, int height)
         {
-            mapRenderer.ClearRect(x, y, width, height);
+            mapRenderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
         }
 
         private void DrawUISpriteByCentre(string id, Point point)

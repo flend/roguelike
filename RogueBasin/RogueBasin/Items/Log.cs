@@ -24,7 +24,7 @@ namespace RogueBasin.Items
         public bool Use(Creature user)
         {
             if(Game.Dungeon.Player.PlayItemMovies)
-                Screen.Instance.PlayLog(logEntry);
+                Game.Base.PlayLog(logEntry);
             return true;
         }
 

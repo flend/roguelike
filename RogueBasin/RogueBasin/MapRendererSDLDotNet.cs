@@ -212,7 +212,7 @@ namespace RogueBasin
 
                         try
                         {
-                            if (thisCell.TileSprite.Length > 14 && thisCell.TileSprite.Substring(0, 14) == "monster_level_")
+                            if (thisCell.TileSprite != null && thisCell.TileSprite.Length > 14 && thisCell.TileSprite.Substring(0, 14) == "monster_level_")
                             {
                                 var thisLevel = thisCell.TileSprite.Substring(14);
                                 var thisLevelNum = Convert.ToInt32(thisLevel);
@@ -648,14 +648,17 @@ namespace RogueBasin
             videoSurface.Fill(Color.Black);
         }
 
-        public void DrawFramePixel(int x, int y, int width, int height, bool clear, Color color)
+        public void DrawLine(Point p1, Point p2, Color color)
         {
-            if (clear)
-            {
-                videoSurface.Fill(new Rectangle(x, y, width, height), Color.Black);
-            }
+            IPrimitive line = new SdlDotNet.Graphics.Primitives.Line(p1.ToPoint(), p2.ToPoint());
+            line.Draw(videoSurface, color);
         }
 
+        public void DrawRectangle(Rectangle rect, Color color) 
+        {
+            videoSurface.Fill(rect, color);
+        }
+        
         public SdlDotNet.Graphics.Font GetFontSurfaceFromCache(int size) {
             
             SdlDotNet.Graphics.Font font;
@@ -720,8 +723,6 @@ namespace RogueBasin
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             Surface fontSurface = font.Render(msg, foregroundColor, backgroundColor, true, width, 100);
-            fontSurface.Transparent = true;
-            fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
 
             var pointToDraw = new System.Drawing.Point(x, y);
 
@@ -733,20 +734,6 @@ namespace RogueBasin
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             return font.SizeText(msg);
         }
-        
-        private void DrawSmallText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
-        {
-            DrawText(msg, x, y, 12, lineAlignment, color);
-        }
-
-        private void DrawLargeText(string msg, int x, int y, LineAlignment lineAlignment, Color color)
-        {
-            DrawText(msg, x, y, 22, lineAlignment, color);
-        }
-
-        public void ClearRect(int x, int y, int width, int height)
-        {
-
-        }
+       
     }
 }

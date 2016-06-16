@@ -563,35 +563,6 @@ namespace RogueBasin
 
                 switch (inputState)
                 {
-
-                    //Before entering an arena you can view the arenas to come
-                    case InputState.PreMapMovement:
-                        /*
-                        if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
-                        {
-                            switch (args.Key)
-                            {
-                                case Key.Comma:
-
-                                    Game.Dungeon.TeleportToAdjacentArena(true);
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.Period:
-
-                                    Game.Dungeon.TeleportToAdjacentArena(false);
-                                    centreOnPC = true;
-                                    break;
-                            }
-
-                        }*/
-                        break;
-
-                }
-
-                switch (inputState)
-                {
-
                     case InputState.Targetting:
                         TargettingKeyboardEvent(args);
                         break;
@@ -611,8 +582,6 @@ namespace RogueBasin
                     case InputState.SpecialScreen:
                         SpecialScreenKeyboardEvent(args);
                         break;
-
-
 
                     //Normal movement on the map
                     case InputState.MapMovement:
@@ -649,8 +618,8 @@ namespace RogueBasin
                                     ToggleMusic();
                                     
                                     break;
-                                    /*
-                                case Key.M:
+                                    
+                                case Key.N:
                                     SetMsgHistoryScreen();
                                     DisableMsgHistoryScreen();
                                     timeAdvances = false;
@@ -661,9 +630,7 @@ namespace RogueBasin
                                     DisableClueScreen();
                                     timeAdvances = false;
                                     break;
-                                    */
-
-
+                                    
                                 case Key.Slash:
                                     Game.Base.PlayMovie("helpkeys", true);
                                     Game.Base.PlayMovie("qe_start", true);
@@ -742,18 +709,6 @@ namespace RogueBasin
                                     // Don't recentre - useful for viewing
                                     centreOnPC = false;
                                     break;
-
-                                case Key.V:
-
-                                    Game.Dungeon.Player.LevelUpWithXP();
-                                    timeAdvances = false;
-                                    break;
-
-                                case Key.C:
-
-                                    Game.Dungeon.Player.HealWithXP();
-                                    timeAdvances = false;
-                                    break;
                             }
                         }
 
@@ -764,19 +719,6 @@ namespace RogueBasin
                             {
                                 switch (args.Key)
                                 {
-                                    //Debug events
-                                    case Key.X:
-                                        //Examine
-                                        timeAdvances = Examine(true);
-                                        if (timeAdvances)
-                                            SpecialMoveNonMoveAction();
-                                        break;
-                                        /*
-                                    case Key.E:
-                                        //this.SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
-                                        DoArenaSelection();
-                                        break;
-                                        */
                                     case Key.R:
                                         //Reload
                                         Game.Dungeon.Player.RefillWeapons();
@@ -818,7 +760,7 @@ namespace RogueBasin
                                         Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
                                         Screen.Instance.NeedsUpdate = true;
                                         break;
-                                        /*
+                                        
                                     case Key.Y:
                                         //next mission
                                         Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
@@ -829,7 +771,7 @@ namespace RogueBasin
                                         //last mission
                                         Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
                                         timeAdvances = true;
-                                        break;*/
+                                        break;
 
                                     case Key.J:
                                         //change debug level
@@ -841,18 +783,17 @@ namespace RogueBasin
 
                                         break;
 
-                                        /*
-                                    case Key.N:
+                                    case Key.H:
                                         //Add a healing event on the player
                                         Game.Dungeon.Player.HealCompletely();
-                                        Game.Dungeon.Player.FullAmmo();
-                                        break;*/
+                                        Game.Dungeon.Player.RefillWeapons();
+                                        break;
 
                                     case Key.Z:
                                         Game.Dungeon.ExitLevel();
                                         break;
                                         
-                                    case Key.H:
+                                    case Key.T:
                                         Game.Dungeon.Player.GiveAllWeapons(1);
                                         Game.Dungeon.Player.GiveAllWetware(2);
                                         break;
@@ -1291,26 +1232,6 @@ namespace RogueBasin
 
 
                         break;
-
-                    //Inventory is displayed
-                    case InputState.InventoryShow:
-                        break;
-                    /*
-                            if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                            {
-                                char keyCode = (char)userKey.Character;
-
-                                //Exit out of inventory
-                                if (keyCode == 'x')
-                                {
-                                    inputState = InputState.MapMovement;
-                                
-                                    Screen.Instance.Update();
-                                    timeAdvances = false;
-                                }
-                            }
-                    */
-
                 }
             }
             catch (Exception ex)
@@ -1741,184 +1662,9 @@ namespace RogueBasin
 
         }
 
-        /// <summary>
-        /// Drop the player's items if in town. Otherwise doesn't do anything
-        /// </summary>
-        private void DropItems()
-        {
-            if (Game.Dungeon.Player.LocationLevel == 0)
-            {
-                //Game.Dungeon.PutItemsInStore();
-                Game.MessageQueue.AddMessage("You drop the items off in the store.");
-                LogFile.Log.LogEntry("Items returned to store.");
-            }
-            else
-            {
-                Game.MessageQueue.AddMessage("You don't want to drop your precious items in this place!");
-                LogFile.Log.LogEntry("Items drop requested away from town.");
-            }
-        }
-
-
-
         private bool DoNothing()
         {
             return Game.Dungeon.PCMove(0, 0);
-        }
-
-        private void NameObject()
-        {
-            //User selects which item to name
-            int chosenIndex = PlayerChooseFromInventory();
-
-            //Player exited
-            if (chosenIndex == -1)
-                return;
-
-            Inventory playerInventory = Game.Dungeon.Player.Inventory;
-
-            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
-            int itemIndex = selectedGroup.ItemIndex[0];
-            Item itemToName = playerInventory.Items[itemIndex];
-
-            //Get user string
-            string newName = Screen.Instance.GetUserString("New name for " + Game.Dungeon.GetHiddenName(itemToName));
-            if (newName != null)
-            {
-                Game.Dungeon.AssociateNameWithItem(itemToName, newName);
-            }
-        }
-
-        private void TeleportToDownStairs()
-        {
-            //Find down stairs on this level
-            List<Feature> features = Game.Dungeon.Features;
-
-            Player player = Game.Dungeon.Player;
-
-            Features.StaircaseDown downStairs = null;
-            Point stairlocation = new Point(0,0);
-
-            foreach (Feature feature in features)
-            {
-
-                if (feature.LocationLevel == Game.Dungeon.Player.LocationLevel &&
-                    feature is Features.StaircaseDown)
-                {
-                    downStairs = feature as Features.StaircaseDown;
-                    stairlocation = feature.LocationMap;
-                    break;
-                }
-            }
-
-            if (downStairs == null)
-            {
-                LogFile.Log.LogEntryDebug("Unable to teleport to stairs", LogDebugLevel.High);
-                return;
-            }
-            
-            //Kill any monster there
-            Monster m = Game.Dungeon.MonsterAtSpace(player.LocationLevel, player.LocationMap);
-
-            if (m != null)
-            {
-                Game.Dungeon.KillMonster(m, false);
-            }
-
-            //Move the player
-            player.LocationMap = stairlocation;
-
-            //featureAtSpace.PlayerInteraction(player);
-        }
-
-        /// <summary>
-        /// Debug function - teleport to 1st dungeon
-        /// </summary>
-        private void TeleportToDungeon1Entrance()
-        {
-            //Find down stairs on this level
-            List<Feature> features = Game.Dungeon.Features;
-
-            Player player = Game.Dungeon.Player;
-
-            Features.StaircaseEntry entryStairs = null;
-            Point stairlocation = new Point(0, 0);
-
-            foreach (Feature feature in features)
-            {
-
-                if (feature is Features.StaircaseEntry)
-                {
-                    entryStairs = feature as Features.StaircaseEntry;
-                    if (entryStairs.dungeonStartLevel == 2)
-                    {
-                        stairlocation = feature.LocationMap;
-                        break;
-                    }
-                }
-            }
-
-            if (entryStairs == null)
-            {
-                LogFile.Log.LogEntryDebug("Unable to teleport to stairs", LogDebugLevel.High);
-                return;
-            }
-
-            //Move the player
-            //Wilderness
-            player.LocationLevel = 1;
-            player.LocationMap = stairlocation;
-        }
-
-
-        private void TeleportToUpStairs()
-        {
-            //Find down stairs on this level
-            List<Feature> features = Game.Dungeon.Features;
-
-            Player player = Game.Dungeon.Player;
-
-            Features.StaircaseUp downStairs = null;
-            Features.StaircaseExit exitStairs = null;
-            Point stairlocation = new Point(0, 0);
-
-            foreach (Feature feature in features)
-            {
-
-                if (feature.LocationLevel == Game.Dungeon.Player.LocationLevel &&
-                    feature is Features.StaircaseUp)
-                {
-                    downStairs = feature as Features.StaircaseUp;
-                    stairlocation = feature.LocationMap;
-                    break;
-                }
-                if (feature.LocationLevel == Game.Dungeon.Player.LocationLevel &&
-                    feature is Features.StaircaseExit)
-                {
-                    exitStairs = feature as Features.StaircaseExit;
-                    stairlocation = feature.LocationMap;
-                    break;
-                }
-            }
-
-            if (downStairs == null && exitStairs == null)
-            {
-                LogFile.Log.LogEntryDebug("Unable to teleport to stairs", LogDebugLevel.High);
-                return;
-            }
-
-            //Kill any monster there
-            Monster m = Game.Dungeon.MonsterAtSpace(player.LocationLevel, player.LocationMap);
-
-            if (m != null)
-            {
-                Game.Dungeon.KillMonster(m, false);
-            }
-
-            //Move the player
-            player.LocationMap = stairlocation;
-
-            //featureAtSpace.PlayerInteraction(player);
         }
 
         private void LoadGame(string playerName)
@@ -2793,173 +2539,6 @@ namespace RogueBasin
             player.CancelStealthDueToAttack();
         }
 
-        Spell lastSpell;
-
-        /// <summary>
-        /// Recast the last spell at the same target
-        /// </summary>
-        /// <returns></returns>
-        private bool RecastSpell()
-        {
-            //No casting in town or wilderness
-            if (Game.Dungeon.Player.LocationLevel < 2)
-            {
-                Game.MessageQueue.AddMessage("You want to save your spells for the dungeons.");
-                LogFile.Log.LogEntryDebug("Attempted to cast spell outside of dungeon", LogDebugLevel.Low);
-
-                return false;
-            }
-
-            //Do we have a valid spell?
-            if (lastSpell == null)
-            {
-                Game.MessageQueue.AddMessage("Choose a spell first.");
-                LogFile.Log.LogEntry("Tried to recast spell with no spell selected");
-                return false;
-            }
-
-            //Do we need a target?
-            /*
-            if (lastSpell.NeedsTarget())
-            {
-                if (lastSpellTarget == null)
-                {
-                    Game.MessageQueue.AddMessage("Choose a spell first.");
-                    LogFile.Log.LogEntryDebug("Tried to recast spell with no valid spell target selected", LogDebugLevel.High);
-                    return false;
-                }
-            }*/
-            
-            //Try to cast the spell
-
-            //Get the FOV from Dungeon (this also updates the map creature FOV state)
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-
-            //Try the last target
-            if (lastSpellTarget != null)
-            {
-                if (lastSpellTarget.Alive && Game.Dungeon.Player.LocationLevel == lastSpellTarget.LocationLevel)
-                {
-                    //Check they are not charmed
-                    bool charmed = false;
-                    Monster mon = lastSpellTarget as Monster;
-                    if (mon != null)
-                    {
-                        if (mon.Charmed)
-                        {
-                            charmed = true;
-                        }
-                    }
-
-                    //Are they still in sight?
-                    //Is the target in FOV
-                    if (currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y) && !charmed)
-                    {
-                        //If so, attack
-                        LogFile.Log.LogEntryDebug("Recast at last target", LogDebugLevel.Medium);
-                        return RecastSpellCastAtCreature(lastSpell, lastSpellTarget);
-                    }
-
-                    //If not, new target, fall through
-                }
-            }
-            //Find the next closest creature (need to check charm / passive status)
-
-            //Need to replace this one with find closest hostile creature in FOV.
-            //The nearest creature might not be in FOV but a further away one might be
-
-            lastSpellTarget = Game.Dungeon.FindClosestHostileCreatureInFOV(Game.Dungeon.Player);
-
-            if (lastSpellTarget == null)
-            {
-                Game.MessageQueue.AddMessage("No target in sight.");
-                LogFile.Log.LogEntryDebug("No new target for quick cast", LogDebugLevel.Medium);
-                return false;
-            }
-            /*
-            //Check they are in FOV
-            if (!currentFOV.CheckTileFOV(lastSpellTarget.LocationMap.x, lastSpellTarget.LocationMap.y))
-            {
-                LogFile.Log.LogEntryDebug("No targets in FOV", LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("No target in sight.");
-
-                return false;
-            }*/
-
-            //Otherwise target the nearest creature
-
-            Game.MessageQueue.AddMessage("Targetting closest creature.");
-            LogFile.Log.LogEntryDebug("New target for quick cast", LogDebugLevel.Medium);            
-
-            return RecastSpellCastAtCreature(lastSpell, lastSpellTarget);
-        }
-
-        private bool RecastSpellCastAtCreature(Spell spell, Creature target)
-        {
-            //Convert the stored Creature last target into a square
-            Point spellTargetSq = new Point(target.LocationMap.x, target.LocationMap.y);
-
-            return Game.Dungeon.Player.CastSpell(spell, spellTargetSq);
-        }
-
-        /// <summary>
-        /// Player selects a spell. Returns the spell into all knownSpells or -1 if none selected
-        /// </summary>
-        /// <returns></returns>
-        private Spell SelectSpell()
-        {
-            //Select a spell to cast
-
-            Screen.Instance.Update(0);
-
-            //Player presses a key from a-w to select a spell
-
-            //Build a list of the moves (in the same order as displayed)
-            List<Spell> knownSpells = Game.Dungeon.Spells.FindAll(x => x.Known);
-
-            int selectedSpell = -1;
-
-            do
-            {
-                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                    char keyCode = (char)userKey.Character;
-
-                    if (keyCode == 'x')
-                    {
-                        //Exit
-                        break;
-                    }
-                    else
-                    {
-                        //Otherwise, check if it's valid and play the movie
-                        int charIndex = (int)keyCode - (int)'a';
-
-                        if (charIndex < 0)
-                            continue;
-
-                        if (charIndex < knownSpells.Count && charIndex < 24)
-                        {
-                            selectedSpell = charIndex;
-                            break;
-                        }
-                    }
-                }
-            } while (true);
-
-            //Select a spell to cast
-
-            Screen.Instance.Update(0);
-
-            if (selectedSpell == -1)
-                return null;
-
-            return knownSpells[selectedSpell];
-        }
-
         private void TargetAttack(TargettingType targetType, TargettingAction targetAction, double spreadAngle, char confirmChar, CreatureFOV currentFOV)
         {
             TargetAttack(-1, targetType, targetAction, spreadAngle, confirmChar, currentFOV);
@@ -3078,255 +2657,6 @@ namespace RogueBasin
             Screen.Instance.ResetViewPanel();
         }
 
-        /// <summary>
-        /// Player uses item. Returns true if item was used and time should advance
-        /// </summary>
-        private bool UseItem()
-        {
-            //User selects which item to use
-            int chosenIndex = PlayerChooseFromInventory();
-
-            //Player exited
-            if (chosenIndex == -1)
-                return false;
-
-            Inventory playerInventory = Game.Dungeon.Player.Inventory;
-            
-            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
-            int itemIndex = selectedGroup.ItemIndex[0];
-            Item itemToName = playerInventory.Items[itemIndex];
-
-            bool usedSuccessfully = Game.Dungeon.Player.UseItem(selectedGroup);
-            
-            //THE BELOW DOESN'T WORK TOO WELL
-            //MESSAGES DON@T APPEAR
-            //TO IMPLEMENT PROPERLY PERHAPS USE A MEMORY DISPLAY(ALL POTIONS DRUNK) RATHER THAN THOSE IN INVENTORY
-            //WE WOULD HAVE TO STORE THIS IN PLAYER OR DUNGEON THOUGH - TODO
-            /*
-            Game.MessageQueue.AddMessage("<more>");
-            UpdateScreen();
-            RunMessageQueue();
-            //Screen.Instance.FlushConsole();
-            KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-            //Let the player rename the item
-
-
-            //Get user string
-            string newName = Screen.Instance.GetUserString("New name for " + Game.Dungeon.GetHiddenName(itemToName));
-            if (newName != null)
-            {
-                Game.Dungeon.AssociateNameWithItem(itemToName, newName);
-            }
-            */
-            return usedSuccessfully;
-        }
-
-        /// <summary>
-        /// Player equips item. Returns true if item was equipped and time should advance
-        /// </summary>
-        private bool EquipItem()
-        {
-            //User selects which item to use
-            int chosenIndex = PlayerChooseFromInventory();
-
-            //Player exited
-            if (chosenIndex == -1)
-                return false;
-
-            Inventory playerInventory = Game.Dungeon.Player.Inventory;
-
-            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
-            bool usedSuccessfully = Game.Dungeon.Player.EquipItem(selectedGroup);
-
-            return usedSuccessfully;
-        }
-
-        private void EquipPickedUpItem()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Drop an item from inventory
-        /// </summary>
-        /// <returns></returns>
-        private bool DropItem()
-        {
-            //User selects which item to use
-            int chosenIndex = PlayerChooseFromInventory();
-
-            //Player exited
-            if (chosenIndex == -1)
-                return false;
-
-            Dungeon dungeon = Game.Dungeon;
-            Player player = dungeon.Player;
-
-            Inventory playerInventory = player.Inventory;
-
-            InventoryListing selectedGroup = playerInventory.InventoryListing[chosenIndex];
-            Item selectedItem = playerInventory.Items[selectedGroup.ItemIndex[0]];
-
-            //Check there is no item here already
-            //if(dungeon.ItemAtSpace(player.LocationLevel, player.LocationMap) != null) {
-            //    Game.MessageQueue.AddMessage("Can't drop - already an item here!");
-            //    return false;
-            //}
-
-            //Remove from player inventory
-            player.DropItem(selectedItem);
-
-            Game.MessageQueue.AddMessage(selectedItem.SingleItemDescription + " dropped.");
-
-            return true;
-        }
-
-        /// <summary>
-        /// Display equipment overlay. If any items are useable let the user select them
-        /// </summary>
-        private bool DisplayEquipment()
-        {
-            //User selects which item to use
-            int chosenIndex = PlayerChooseFromEquipment();
-
-            //Player exited
-            if (chosenIndex == -1)
-                return false;
-
-            Inventory playerInventory = Game.Dungeon.Player.Inventory;
-
-            InventoryListing selectedGroup = playerInventory.EquipmentListing[chosenIndex];
-            int itemIndex = selectedGroup.ItemIndex[0];
-
-            return Game.Dungeon.Player.UseItem(selectedGroup);
-        }
-
-        /// <summary>
-        /// Movie screen overlay
-        /// </summary>
-        private void MovieScreenInteraction()
-        {
-
-            //Player presses a key from a-w to select a special move
-
-            //Build a list of the moves (in the same order as displayed)
-            List<SpecialMove> knownMoves = Game.Dungeon.SpecialMoves.FindAll(x => x.Known);
-            List<Spell> knownSpells = Game.Dungeon.Spells.FindAll(x => x.Known);
-
-            do
-            {
-                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                    char keyCode = (char)userKey.Character;
-
-                    if (keyCode == 'x')
-                    {
-                        //Exit
-                        return;
-                    }
-                    else
-                    {
-                        //Otherwise, check if it's valid and play the movie
-                        int charIndex = (int)keyCode - (int)'a';
-
-                        if (charIndex < 0)
-                            continue;
-
-                        if (charIndex < (knownMoves.Count + knownSpells.Count) && charIndex < 24)
-                        {
-                            if (charIndex < knownMoves.Count)
-                            {
-                                Game.Base.PlayMovie(knownMoves[charIndex].MovieRoot(), false);
-                            }
-                            else
-                            {
-                                charIndex = charIndex - knownMoves.Count;
-                                Game.Base.PlayMovie(knownSpells[charIndex].MovieRoot(), false);
-                            }
-                        }
-                    }
-                }
-            } while (true);
-        }
-
-        private int PlayerChooseFromEquipment() {
-
-            //Player presses a key from e-w to select an equipment listing or x to exit
-            //Check how many items are available
-            Inventory playerInventory = Game.Dungeon.Player.Inventory;
-            int numInventoryListing = playerInventory.EquipmentListing.Count;
-
-            do {
-
-                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
-            
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR) {
-                    
-                    char keyCode = (char)userKey.Character;
-
-                    if (keyCode == 'x')
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        int charIndex = (int)keyCode - (int)'a';
-
-                        if (charIndex < 0)
-                            continue;
-
-                        if (charIndex < numInventoryListing && charIndex < 24)
-                            return charIndex;
-
-                    }
-                }
-            } while (true);
-
-        }
-
-        /// <summary>
-        /// Returns the index of the inventory group selected or -1 to exit
-        /// </summary>
-        /// <returns></returns>
-        private int PlayerChooseFromInventory()
-        {
-            //Player presses a key from a-w to select an inventory listing or x to exit
-
-            //Check how many items are available
-            Inventory playerInventory = Game.Dungeon.Player.Inventory;
-            int numInventoryListing = playerInventory.InventoryListing.Count;
-
-            do {
-
-                KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
-            
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR) {
-                    
-                    char keyCode = (char)userKey.Character;
-
-                    if (keyCode == 'x')
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        int charIndex = (int)keyCode - (int)'a';
-
-                        if (charIndex < 0)
-                            continue;
-
-                        if (charIndex < numInventoryListing && charIndex < 24)
-                            return charIndex;
-
-                    }
-                }
-            } while (true);
-        }
-
         public void YesNoQuestion(string introMessage, Action<bool> action)
         {
             Screen.Instance.SetPrompt(introMessage + " (y / n):");
@@ -3346,10 +2676,41 @@ namespace RogueBasin
         }
 
 
+        public void PlayLog(LogEntry logEntry)
+        {
+            try
+            {
+
+                var movieFrames = new List<MovieFrame>();
+                
+                var logFrame = new MovieFrame();
+                var allLines = new List<string>();
+                allLines.Add(logEntry.title);
+                allLines.AddRange(logEntry.lines);
+                logFrame.ScanLines = allLines;
+
+                movieFrames.Add(logFrame);
+                var movie = new Movie(movieFrames);
+
+                PlayMovie(movie, true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to play movie from frames " + ex.Message);
+            }
+        }
+
         public void PlayMovie(string filename, bool keypressBetweenFrames)
         {
             inputState = InputState.MovieDisplay;
-            Screen.Instance.PlayMovie(filename, keypressBetweenFrames);
+            Screen.Instance.EnqueueMovie(filename);
+            Screen.Instance.NeedsUpdate = true;
+        }
+
+        public void PlayMovie(Movie movie, bool keypressBetweenFrames)
+        {
+            inputState = InputState.MovieDisplay;
+            Screen.Instance.EnqueueMovie(movie);
             Screen.Instance.NeedsUpdate = true;
         }
 

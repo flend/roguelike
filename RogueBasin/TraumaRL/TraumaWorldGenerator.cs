@@ -593,7 +593,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             if (!quickLevelGen)
                 AddElevatorFeatures(mapInfo, levelInfo);
             
-            //Attach debugger at this point to avoid slow 
+            //Attach debugger at this point
             //MessageBox.Show("Attach debugger now for any generation post slow pathing setup");
 
             //Generate quests at mapmodel level
@@ -613,6 +613,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Add monsters
             Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
+
+            //Add debug stuff in the first room
+            AddDebugItems(mapInfo);
 
             //Check we are solvable
             var graphSolver = new GraphSolver(mapInfo.Model);
@@ -637,6 +640,28 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
 
             return mapInfo;
+        }
+
+        private void AddDebugItems(MapInfo mapInfo)
+        {
+            var startRoom = mapInfo.StartRoom;
+
+            var allWalkablePointsAndLevel = GetAllWalkablePointsInRooms(mapInfo, Enumerable.Repeat(startRoom, 1), true, true);
+            var allWalkablePoints = allWalkablePointsAndLevel.Item2;
+            var level = allWalkablePointsAndLevel.Item1;
+
+            
+
+            var logItem = new RogueBasin.Items.Log(logGen.GenerateArbitaryLogEntry("qe_medicalsecurity"));
+
+
+            foreach (RogueBasin.Point p in allWalkablePoints)
+            {
+                var placedItem = Game.Dungeon.AddItem(logItem, level, p);
+
+                if (placedItem)
+                    break;
+            }
         }
 
         private bool CheckItemRouteability()
