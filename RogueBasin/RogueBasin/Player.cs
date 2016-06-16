@@ -2866,6 +2866,8 @@ namespace RogueBasin
             {
                 Screen.Instance.CreatureToView = monster;
             }
+
+            Game.Base.StopRunning();
         }
 
         internal void RefillWeapons()

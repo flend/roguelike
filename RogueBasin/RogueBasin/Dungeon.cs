@@ -63,6 +63,16 @@ namespace RogueBasin
         }
     }
 
+    public enum MoveResults
+    {
+        StoppedByObstacle,
+        InteractedWithObstacle,
+        AttackedMonster,
+        SwappedWithMonster,
+        InteractedWithFeature,
+        NormalMove
+    }
+
     public class DungeonProfile {
         public int dungeonStartLevel;
         public int dungeonEndLevel;
@@ -2188,7 +2198,7 @@ namespace RogueBasin
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        internal bool PCMove(int x, int y)
+        internal MoveResults PCMove(int x, int y)
         {
             return PCMove(x, y, false);
         }
@@ -2199,21 +2209,22 @@ namespace RogueBasin
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        internal bool PCMove(int x, int y, bool runTriggersAlways)
+        internal MoveResults PCMove(int x, int y, bool runTriggersAlways)
         {
             Point newPCLocation = new Point(Player.LocationMap.x + x, Player.LocationMap.y + y);
             Point deltaMove = newPCLocation - Player.LocationMap;
+            MoveResults moveResults = MoveResults.NormalMove;
 
             //Moves off the map don't work
 
             if (newPCLocation.x < 0 || newPCLocation.x >= levels[player.LocationLevel].width)
             {
-                return false;
+                return MoveResults.StoppedByObstacle;
             }
 
             if (newPCLocation.y < 0 || newPCLocation.y >= levels[player.LocationLevel].height)
             {
-                return false;
+                return MoveResults.StoppedByObstacle;
             }
 
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
@@ -2246,6 +2257,7 @@ namespace RogueBasin
                         OpenDoor(player.LocationLevel, newPCLocation);
                         stationaryAction = true;
                         okToMoveIntoSquare = false;
+                        moveResults = MoveResults.InteractedWithObstacle;
                     }
                     else if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedLock)
                     {
@@ -2266,8 +2278,10 @@ namespace RogueBasin
 
                         stationaryAction = true;
                         okToMoveIntoSquare = false;
+                        moveResults = MoveResults.InteractedWithObstacle;
                     }
                     okToMoveIntoSquare = false;
+                    moveResults = MoveResults.StoppedByObstacle;
                 }
 
                 //Check for monsters in the square
@@ -2285,6 +2299,7 @@ namespace RogueBasin
 
                         //PC will move to monster's old location
                         okToMoveIntoSquare = true;
+                        moveResults = MoveResults.SwappedWithMonster;
 
                     }
                     else if (monster.Passive)
@@ -2293,7 +2308,9 @@ namespace RogueBasin
                         DoMeleeAttackOnMonster(deltaMove, newPCLocation);
                         okToMoveIntoSquare = false;
 
+                        attackAction = true;
                         stationaryAction = true;
+                        moveResults = MoveResults.AttackedMonster;
                     }
                     else
                     {
@@ -2305,6 +2322,7 @@ namespace RogueBasin
 
                         stationaryAction = true;
                         attackAction = true;
+                        moveResults = MoveResults.AttackedMonster;
                     }
                 }
 
@@ -2321,6 +2339,10 @@ namespace RogueBasin
                         {
                             //Pole will start from the origin anyway
                             DoMeleeAttackOnMonster(deltaMove, newPCLocation);
+
+                            stationaryAction = true;
+                            attackAction = true;
+                            moveResults = MoveResults.AttackedMonster;
                             break;
                         }
                     }
@@ -2362,7 +2384,7 @@ namespace RogueBasin
 
                 //If not OK to move, return here
                 if (!okToMoveIntoSquare)
-                    return true;
+                    return moveResults;
 
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y, runTriggersAlways);
 
@@ -2375,10 +2397,15 @@ namespace RogueBasin
                 }
 
                 //If there is an active feature, auto interact
-                InteractWithActiveFeature();
+                bool activeFeatureInteract = InteractWithActiveFeature();
                 
                 //If there is a useable feature, auto interact
-                InteractWithUseableFeature();
+                bool useableFeatureInteract = InteractWithUseableFeature();
+
+                if (activeFeatureInteract || useableFeatureInteract)
+                {
+                    moveResults = MoveResults.InteractedWithFeature;
+                }
             }
 
             //Run any entering square messages
@@ -2399,7 +2426,7 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage("There are multiple items here.");
             }
 
-            return true;
+            return moveResults;
         }
 
         /// <summary>

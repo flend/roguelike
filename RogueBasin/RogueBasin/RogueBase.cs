@@ -27,7 +27,8 @@ namespace RogueBasin
         {
             MapMovement, Targetting, InventoryShow, InventorySelect,
             YesNoPrompt, FPrompt,
-            MovieDisplay, PreMapMovement, SpecialScreen
+            MovieDisplay, PreMapMovement, SpecialScreen,
+            Running
         }
 
         public enum TargettingAction
@@ -58,6 +59,9 @@ namespace RogueBasin
         /// Used for range checks on currently targetted object
         /// </summary>
         int currentTargetRange = 0;
+
+        Point runningDirection;
+        bool isRunning = false;
 
         public RogueBase()
         {
@@ -264,7 +268,6 @@ namespace RogueBasin
 
             ProfileEntry("Dungeon Turn");
 
-            //Reset the creature FOV display
             Game.Dungeon.ResetCreatureFOVOnMap();
             Game.Dungeon.ResetSoundOnMap();
 
@@ -298,6 +301,15 @@ namespace RogueBasin
 
             waitingForTurnTick = false;
 
+            if (inputState == InputState.Running)
+            {
+                //If the player is running, take their turn immediately without waiting for input
+                //This needs refactoring
+                ProcessKeypress(new KeyboardEventArgs(Key.Space, false));
+                Game.Dungeon.PlayerHadBonusTurn = true;
+                waitingForTurnTick = true;
+            }
+
             if (PlayMusic)
             {
                 if (!MusicPlayer.Instance().Initialised)
@@ -313,7 +325,6 @@ namespace RogueBasin
         private bool ProcessKeypress(KeyboardEventArgs args)
         {
             var player = Game.Dungeon.Player;
-
             try
             {
                 //Deal with PCs turn as appropriate
@@ -332,7 +343,7 @@ namespace RogueBasin
                 Screen.Instance.NeedsUpdate = true;
 
                 //Play any enqueued sounds
-                if(PlaySounds)
+                if (PlaySounds)
                     SoundPlayer.Instance().PlaySounds();
 
                 return timeAdvances;
@@ -581,6 +592,10 @@ namespace RogueBasin
 
                     case InputState.SpecialScreen:
                         SpecialScreenKeyboardEvent(args);
+                        break;
+
+                    case InputState.Running:
+                        timeAdvances = RunNextStep();
                         break;
 
                     //Normal movement on the map
@@ -1199,13 +1214,19 @@ namespace RogueBasin
                         KeyModifier mod = KeyModifier.Arrow;
                         bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
 
-                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
+                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift) || args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl) || args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.RightAlt)))
                         {
-                            timeAdvances = Game.Dungeon.PCMove(direction.x, direction.y);
+                            timeAdvances = TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
                             centreOnPC = true;
                         }
 
-                        if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
+                        if (wasDirection && (mod == KeyModifier.Arrow || mod == KeyModifier.Vi) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
+                        {
+                            timeAdvances = StartRunning(direction.x, direction.y);
+                            centreOnPC = true;
+                        }
+
+                        if (wasDirection && mod == KeyModifier.Arrow && (args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.LeftAlt)))
                         {
                             Screen.Instance.ViewportScrollSpeed = 4;
                             Screen.Instance.ScrollViewport(direction);
@@ -1214,7 +1235,7 @@ namespace RogueBasin
 
                         if (Game.Config.DebugMode)
                         {
-                            if (wasDirection && mod == KeyModifier.Arrow && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
+                            if (wasDirection && mod == KeyModifier.Arrow && (args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
                             {
                                 if (direction == new Point(0, -1))
                                 {
@@ -1241,6 +1262,68 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Exception occurred: " + ex.Message + "\n" + ex.StackTrace, LogDebugLevel.High);
             }
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+        }
+
+        private bool TimeAdvancesOnMove(MoveResults moveResults)
+        {
+            switch (moveResults)
+            {
+                case MoveResults.AttackedMonster:
+                    return true;
+                case MoveResults.InteractedWithFeature:
+                    return true;
+                case MoveResults.InteractedWithObstacle:
+                    return false;
+                case MoveResults.NormalMove:
+                    return true;
+                case MoveResults.StoppedByObstacle:
+                    return false;
+                case MoveResults.SwappedWithMonster:
+                    return true;
+            }
+
+            return true;
+        }
+
+        private bool StartRunning(int directionX, int directionY)
+        {
+            runningDirection = new Point(directionX, directionY);
+            isRunning = true;
+            inputState = InputState.Running;
+
+            return RunNextStep();
+        }
+
+        public void StopRunning()
+        {
+            isRunning = false;
+            inputState = InputState.MapMovement;
+        }
+
+        private bool RunNextStep()
+        {
+            MoveResults results = Game.Dungeon.PCMove(runningDirection.x, runningDirection.y);
+
+            switch (results) { 
+                case MoveResults.AttackedMonster:
+                    StopRunning();
+                    break;
+                case MoveResults.InteractedWithFeature:
+                    StopRunning();
+                    break;
+                case MoveResults.InteractedWithObstacle:
+                    StopRunning();
+                    break;
+                case MoveResults.NormalMove:
+                    break;
+                case MoveResults.StoppedByObstacle:
+                    StopRunning();
+                    break;
+                case MoveResults.SwappedWithMonster:
+                    break;
+            }
+
+            return TimeAdvancesOnMove(results);
         }
 
         public void ToggleSounds()
@@ -1664,7 +1747,7 @@ namespace RogueBasin
 
         private bool DoNothing()
         {
-            return Game.Dungeon.PCMove(0, 0);
+            return TimeAdvancesOnMove(Game.Dungeon.PCMove(0, 0));
         }
 
         private void LoadGame(string playerName)
