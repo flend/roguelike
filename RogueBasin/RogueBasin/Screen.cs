@@ -2683,7 +2683,7 @@ namespace RogueBasin {
                         if (map.mapSquares[i, j].InPlayerFOV)
                         {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Blue, 0.6);
-                            //effectSprite = "greentarget";
+                            effectSprite = "greentarget";
                             effectTransparency = 0.5;
                         }
 
