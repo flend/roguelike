@@ -918,8 +918,6 @@ namespace RogueBasin {
                 //Render tiled map to screen
                 mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeftBase.x, mapTopLeftBase.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
-                //Draw Stats
-                //DrawStats(dungeon.Player);
                 DrawUI();
             }
 

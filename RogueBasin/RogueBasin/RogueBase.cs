@@ -824,6 +824,7 @@ namespace RogueBasin
                                         break;
                                         
                                     case Key.T:
+                                        Game.MessageQueue.AddMessage("Giving all low level weapons & wetware.");
                                         Game.Dungeon.Player.GiveAllWeapons(1);
                                         Game.Dungeon.Player.GiveAllWetware(2);
                                         break;
@@ -1235,7 +1236,7 @@ namespace RogueBasin
                             centreOnPC = true;
                         }
 
-                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
+                        if (wasDirection && (mod == KeyModifier.Numeric) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
                         {
                             timeAdvances = StartRunning(direction.x, direction.y);
                             centreOnPC = true;

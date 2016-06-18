@@ -2080,7 +2080,8 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.Pistol());
                 Inventory.AddItemNotFromDungeon(new Items.Shotgun());
                 Inventory.AddItemNotFromDungeon(new Items.Laser());
-            
+
+                EquipInventoryItemType(typeof(Items.Vibroblade));
                 
             }
 
@@ -2099,22 +2100,17 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
                 Inventory.AddItemNotFromDungeon(new Items.NanoRepair());
             }
-
-            //Inventory.AddItemNotFromDungeon(new Items.Pistol());
-            //Inventory.AddItemNotFromDungeon(new Items.Shotgun());
-            //Inventory.AddItemNotFromDungeon(new Items.Laser());
-
-            
+                        
         }
         public void EquipStartupWeapons() {
 
             //Melee - Start with fists equipped
             Inventory.AddItemNotFromDungeon(new Items.Fists());
-            Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[1]);
+            Game.Dungeon.Player.EquipInventoryItemType(typeof(Items.Fists));
 
             //Ranged - Start with pistol equipped
             Inventory.AddItemNotFromDungeon(new Items.Pistol());
-            Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[2]);
+            Game.Dungeon.Player.EquipInventoryItemType(typeof(Items.Pistol));
         }
 
         /// <summary>
@@ -2429,12 +2425,7 @@ namespace RogueBasin
 
             return meleeWeapon;
         }
-
-        public void EquipBestMeleeWeapon()
-        {
-            EquipInventoryItemType(typeof(Items.Fists), true);
-        }
-
+        
         /// <summary>
         /// Heal the player by a quantity. Won't exceed max HP.
         /// </summary>

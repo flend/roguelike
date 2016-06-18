@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Melee);
 
                 return retList;
             }
@@ -25,29 +25,6 @@ namespace RogueBasin.Items
         public bool Equip(Creature user)
         {
             LogFile.Log.LogEntryDebug("Vibro-blade equipped", LogDebugLevel.Medium);
-
-            //Give player story. Mention level up if one will occur.
-
-            if (Game.Dungeon.Player.PlayItemMovies)
-            {
-                //Game.Base.PlayMovie("plotbadge", true);
-                //Game.Base.PlayMovie("multiattack", false);
-            }
-
-            //Messages
-            //Game.MessageQueue.AddMessage("Vibro-blade.");
-
-            //Game.Base.PlayMovie("plotbadge", true);
-
-            //Level up?
-            //Game.Dungeon.Player.LevelUp();
-
-            //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Game.Base.PlayMovie("multiattack", false);
-
-            //Add any equipped (actually permanent) effects
-            //Game.Dungeon.Player.Speed += 10;
 
             return true;
         }
