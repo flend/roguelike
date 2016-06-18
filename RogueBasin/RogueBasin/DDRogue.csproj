@@ -515,6 +515,9 @@
     <Compile Include="Vector3.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="MoreLinq">
+      <HintPath>..\packages\morelinq.1.4.0\lib\net35\MoreLinq.dll</HintPath>
+    </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
     </Reference>
@@ -1133,5 +1136,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\tiles\trauma_tiles.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_left_extended.png" />
   </ItemGroup>
 </Project>

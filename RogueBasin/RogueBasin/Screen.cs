@@ -1609,15 +1609,14 @@ namespace RogueBasin {
 
         private void DrawGraduatedBarVertical(string id, double fullness, Rectangle barArea, double spacing)
         {
-            //This isn't quite right since it ends with a gap
             Size barSize = UISpriteSize(id);
-            double barSpacing = (barSize.Height * (1.0 + spacing));
-            double oneBarProportion = barSpacing / barArea.Height;
-            int barsToDraw = (int)Math.Floor(fullness / oneBarProportion);
+            double barSpacing = (barSize.Height * (spacing));
+            double totalBarsThatFit = (barArea.Height - barSpacing) / (barSize.Height + barSpacing);
+            int barsToDraw = (int)Math.Ceiling(totalBarsThatFit * fullness);
 
             for (int i = 0; i < barsToDraw; i++)
             {
-                int y = barArea.Y + (int)Math.Floor(i * barSpacing);
+                int y = barArea.Y + (int)Math.Floor(i * (barSpacing + barSize.Height));
                 DrawUISprite(id, new Point(barArea.X, y));
             }
         }
@@ -1647,21 +1646,21 @@ namespace RogueBasin {
             Player player = Game.Dungeon.Player;
 
             //Calculate some point offsets
-            Point rangedWeaponUICenter = UIScale(new Point(160, 152));
-            Point meleeWeaponUICenter = UIScale(new Point(38, 152));
-            Point utilityUICenter = UIScale(new Point(282, 152));
+            Point rangedWeaponUICenter = UIScale(new Point(160, 92));
+            Point meleeWeaponUICenter = UIScale(new Point(38, 92));
+            Point utilityUICenter = UIScale(new Point(300, 92));
 
             //Draw the UI background
-            Size uiLeftDim = UISpriteSize("ui_left");
+            Size uiLeftDim = UISpriteSize("ui_left_extended");
             playerUI_TL = new Point(0, ScreenHeight - uiLeftDim.Height);
 
-            DrawUISprite("ui_left", new Point(playerUI_TL.x, playerUI_TL.y));
+            DrawUISprite("ui_left_extended", new Point(playerUI_TL.x, playerUI_TL.y));
 
             if (ExtraUI)
             {
                 Size uiMidDim = UISpriteSize("ui_mid");
                 playerTextUI_TL = playerUI_TL + new Point(uiLeftDim.Width, 0);
-                playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 90));
+                playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 30));
                 
                 DrawUISprite("ui_mid", playerTextUI_TL);
                 Size uiRightDim = UISpriteSize("ui_right");
@@ -1684,16 +1683,16 @@ namespace RogueBasin {
                 
                 //Draw bullets
                 double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
-                var ammoBarTL = playerUI_TL + UIScale(new Point(86, 127));
+                var ammoBarTL = playerUI_TL + UIScale(new Point(86, 67));
                 DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.5);
 
                 //Ranged Damage base
-                var playerRangedTextOffset = UIScale(new Point(210, 177));
+                var playerRangedTextOffset = UIScale(new Point(210, 117));
                 var rangedStr = "DMG: " + rangedDamage;
                 DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
                 //Help
-                var rangedHelpOffset = UIScale(new Point(218, 134));
+                var rangedHelpOffset = UIScale(new Point(218, 74));
                 var rangedHelp = "(F)";
                 DrawText(rangedHelp, playerUI_TL + rangedHelpOffset, LineAlignment.Center, statsColor);
             }
@@ -1709,7 +1708,7 @@ namespace RogueBasin {
 
                 var meleeDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
 
-                var playerRangedTextOffset = UIScale(new Point(40, 177));
+                var playerRangedTextOffset = UIScale(new Point(40, 117));
                 var rangedStr = "DMG: " + meleeDamage;
                 DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
@@ -1720,41 +1719,41 @@ namespace RogueBasin {
 
             if (utility != null)
             {
-                IEquippableItem weaponE = utility as IEquippableItem;
+                DrawUISpriteByCentre(utility, playerUI_TL + utilityUICenter);
 
-                String weaponSpriteId = utility.UISprite;
-
-                if (weaponSpriteId != null)
-                {
-                    DrawUISpriteByCentre(weaponSpriteId, playerUI_TL + utilityUICenter);
-                }
+                //Draw no of items
+                double itemNoRatio = Math.Min(player.GetNoItemsOfSameType(utility) / (double)7.0, 1.0);
+                var itemNoBarTL = playerUI_TL + UIScale(new Point(255, 67));
+                DrawGraduatedBarVertical("ui_bullet", itemNoRatio, new Rectangle(itemNoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.5);
             }
 
+            
+
             //Help
-            var utilityHelpOffset = UIScale(new Point(298, 134));
+            var utilityHelpOffset = UIScale(new Point(316, 74));
             var utilityHelp = "(T)";
             DrawUIText(utilityHelp, playerUI_TL + utilityHelpOffset, LineAlignment.Center, statsColor);
-            DrawSmallUIText("(E)", playerUI_TL + UIScale(new Point(262, 177)), LineAlignment.Center, statsColor);
-            DrawSmallUIText("(R)", playerUI_TL + UIScale(new Point(298, 177)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(E)", playerUI_TL + UIScale(new Point(280, 117)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(R)", playerUI_TL + UIScale(new Point(316, 117)), LineAlignment.Center, statsColor);
 
             //Draw Shield
             double playerShieldRatio = player.Shield / (double)player.MaxShield;
-            Point shieldOffset = playerUI_TL + UIScale(new Point(57, 94));
+            Point shieldOffset = playerUI_TL + UIScale(new Point(57, 34));
             Size shieldSize = UIScale(new Size(180, 12));
             DrawGraduatedBar("ui_bar", playerShieldRatio, new Rectangle(shieldOffset.ToPoint(), shieldSize), 0.2);
 
             //Draw HP
             double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            Point hpOffset = playerUI_TL + UIScale(new Point(57, 73));
+            Point hpOffset = playerUI_TL + UIScale(new Point(57, 13));
             Size hpSize = UIScale(new Size(180, 12));
             DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(hpOffset.ToPoint(), hpSize), 0.2);
 
             //Draw HP digits
-            var playerHPNuOffset = UIScale(new Point(25, 93));
+            var playerHPNuOffset = UIScale(new Point(25, 33));
             DrawUIText(player.Hitpoints.ToString(), playerUI_TL + playerHPNuOffset, LineAlignment.Center, statsColor);
 
             //Draw shield digits
-            var playerFMNuOffset = UIScale(new Point(269, 93));
+            var playerFMNuOffset = UIScale(new Point(269, 33));
             DrawUIText(player.Shield.ToString(), playerUI_TL + playerFMNuOffset, LineAlignment.Center, statsColor);
 
             //Draw timers

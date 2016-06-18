@@ -710,12 +710,12 @@ namespace RogueBasin
                                     break;
 
                                 case Key.E:
-                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(false);
+                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(-1);
                                     centreOnPC = true;
                                     break;
 
                                 case Key.R:
-                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(true);
+                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(1);
                                     centreOnPC = true;
                                     break;
 
@@ -2257,9 +2257,11 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("Using " + toUseItem.SingleItemDescription, LogDebugLevel.Medium);
             bool success = toUse.OperateItem();
 
-            if(success)
+            if (success && toUse.DestroyedOnUse()) { 
                 //Destroy the item
                 player.UnequipAndDestroyItem(toUseItem);
+                player.EquipNextUtility();
+            };
 
             return success;
             

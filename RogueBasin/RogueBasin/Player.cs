@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
 using System.Linq;
+using MoreLinq;
 
 namespace RogueBasin
 {
@@ -368,38 +369,46 @@ namespace RogueBasin
             set;
         }
 
-        public void EquipNextUtilityInventoryItem(bool forward)
+        public int GetNoItemsOfSameType(Item itemType)
+        {
+            if (itemType == null)
+                return 0;
+
+            return Inventory.Items.Where(i => i.GetType() == itemType.GetType()).Count();
+        }
+
+        public void EquipNextUtilityInventoryItem(int inventoryPositionChange)
         {
             var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Utility));
-            var orderedUtilityItems = allUtilityItems.OrderBy(i => i.SingleItemDescription);
-
-            if (orderedUtilityItems.Count() == 0)
+            var orderedUtilityItemsTypes = allUtilityItems.DistinctBy(i => i.SingleItemDescription).OrderBy(i => i.SingleItemDescription);
+            
+            if (orderedUtilityItemsTypes.Count() == 0)
             {
                 InventoryPosition = 0;
                 LogFile.Log.LogEntryDebug("No next utility item to equip", LogDebugLevel.Medium);
                 return;
             }
 
-            if (forward)
+            if (inventoryPositionChange > 0)
                 InventoryPosition++;
-            else
+            else if(inventoryPositionChange < 0)
                 InventoryPosition--;
 
-            if (InventoryPosition >= orderedUtilityItems.Count())
+            if (InventoryPosition >= orderedUtilityItemsTypes.Count())
             {
                 InventoryPosition = 0;
             }
             if (InventoryPosition < 0)
             {
-                InventoryPosition = orderedUtilityItems.Count() - 1;
+                InventoryPosition = orderedUtilityItemsTypes.Count() - 1;
             }
 
-            EquipAndReplaceItem(orderedUtilityItems.ElementAt(InventoryPosition));
+            EquipAndReplaceItem(orderedUtilityItemsTypes.ElementAt(InventoryPosition));
         }
 
         public void EquipNextUtility()
         {
-            EquipNextUtilityInventoryItem(true);
+            EquipNextUtilityInventoryItem(0);
         }
 
         /// <summary>
