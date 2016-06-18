@@ -101,6 +101,11 @@ namespace RogueBasin.Creatures
             return true;
         }
 
+        protected override int StealthRadius()
+        {
+            return 0;
+        }
+
         
 
         public override void InventoryDrop()

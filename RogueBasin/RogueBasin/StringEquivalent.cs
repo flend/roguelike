@@ -50,9 +50,9 @@ namespace RogueBasin
 
         private static void SetupTerrainSprites()
         {
-            //TerrainSprites.Add(MapTerrain.Empty, "ground");
-            //TerrainSprites.Add(MapTerrain.NonWalkableFeature, "ground");
-            //TerrainSprites.Add(MapTerrain.NonWalkableFeatureLightBlocking, "ground");
+            TerrainSprites.Add(MapTerrain.Empty, "ground");
+            TerrainSprites.Add(MapTerrain.NonWalkableFeature, "ground");
+            TerrainSprites.Add(MapTerrain.NonWalkableFeatureLightBlocking, "ground");
             TerrainSprites.Add(MapTerrain.OpenDoor, "opendoor");
             TerrainSprites.Add(MapTerrain.ClosedDoor, "closeddoor");
             TerrainSprites.Add(MapTerrain.OpenLock, "opendoor");

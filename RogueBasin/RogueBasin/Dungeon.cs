@@ -3425,27 +3425,27 @@ namespace RogueBasin
         /// <summary>
         /// Displays the creature FOV on the map. Note that this clobbers the FOV map
         /// </summary>
-        /// <param name="creature"></param>
-        public void ShowCreatureFOVOnMap(Creature creature)
+        /// <param name="monster"></param>
+        public void ShowCreatureFOVOnMap(Monster monster)
         {
 
             //Only do this if the creature is on a visible level
-            if (creature.LocationLevel != Player.LocationLevel)
+            if (monster.LocationLevel != Player.LocationLevel)
                 return;
 
-            Map currentMap = levels[creature.LocationLevel];
+            Map currentMap = levels[monster.LocationLevel];
 
             //Calculate FOV
-            CreatureFOV creatureFov = Game.Dungeon.CalculateCreatureFOV(creature);
+            CreatureFOV creatureFov = Game.Dungeon.CalculateCreatureFOV(monster);
 
             //Only check sightRadius around the creature
 
             int sightRangeMax = 20;
-            int xl = creature.LocationMap.x - sightRangeMax;
-            int xr = creature.LocationMap.x + sightRangeMax;
+            int xl = Math.Max(0, monster.LocationMap.x - sightRangeMax);
+            int xr = Math.Min(monster.LocationMap.x + sightRangeMax, currentMap.width - 1);
 
-            int yt = creature.LocationMap.y - sightRangeMax;
-            int yb = creature.LocationMap.y + sightRangeMax;
+            int yt = Math.Max(0, monster.LocationMap.y - sightRangeMax);
+            int yb = Math.Min(monster.LocationMap.y + sightRangeMax, currentMap.height - 1);
 
             //If sight is infinite, check all the map
             //if (creature.SightRadius == 0)
@@ -3456,13 +3456,8 @@ namespace RogueBasin
             // (may not be necessary) [and is certainly slow]
 
             //According to profiling this is *BY FAR* the slowest thing in the game
-
+            
             /*
-            int xl = 0;
-            int xr = currentMap.width;
-            int yt = 0;
-            int yb = currentMap.height;*/
-
             if (xl < 0)
                 xl = 0;
             if (xr >= currentMap.width)
@@ -3471,6 +3466,7 @@ namespace RogueBasin
                 yt = 0;
             if (yb >= currentMap.height)
                 yb = currentMap.height - 1;
+             * */
 
             for (int i = xl; i <= xr; i++)
             {
@@ -3482,9 +3478,10 @@ namespace RogueBasin
                         thisSquare.InMonsterFOV = true;
 
                     //Show stealth radii too
-                    if (creature is Monster)
+                    bool inMonsterStealthRadius = monster.InStealthRadius(new Point(i, j));
+                    if (inMonsterStealthRadius)
                     {
-                        thisSquare.InMonsterStealthRadius = (creature as Monster).InStealthRadius(new Point(i, j));
+                        thisSquare.InMonsterStealthRadius = true;
                     }
                 }
             }

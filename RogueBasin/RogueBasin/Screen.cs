@@ -2650,7 +2650,6 @@ namespace RogueBasin {
 
                     }
  
-                    //In FlatlineRL you can normally see the whole map
                     if (map.mapSquares[i, j].InPlayerFOV || SeeAllMap)
                     {
                         //In FOV or in town
@@ -2661,13 +2660,15 @@ namespace RogueBasin {
                         //Not in FOV but seen
                         drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.6);
                         spriteTransparency = 0.5;
-                        //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                     }
                     else
                     {
                         //Never in FOV
                         if (DebugMode)
+                        {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.7);
+                            spriteTransparency = 0.7;
+                        }
                         else
                         {
                             drawColor = hiddenColor;
@@ -2682,18 +2683,24 @@ namespace RogueBasin {
                         if (map.mapSquares[i, j].InPlayerFOV)
                         {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Blue, 0.6);
+                            //effectSprite = "greentarget";
+                            effectTransparency = 0.5;
                         }
 
                         //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Red, 0.6);
+                            effectSprite = "redtarget";
+                            effectTransparency = 0.5;
                         }
 
                         //Draw monster stealth radius
                         if (map.mapSquares[i, j].InMonsterStealthRadius)
                         {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.OrangeRed, 0.6);
+                            effectSprite = "orangetarget";
+                            effectTransparency = 0.5;
                         }
 
                         //Draw sounds
@@ -2711,14 +2718,6 @@ namespace RogueBasin {
                     }
 
                     Point mapTerrainLoc = new Point(i, j);
-                    string sprite = null;
-                    
-                    //map debug
-                    /*
-                    if ((Game.Dungeon.Pathing.PathFindingInternal as TCODPathFindingWrapper).getCellPathable(0, mapTerrainLoc))
-                    {
-                        sprite = "ground";
-                    }*/
 
                     if (isViewVisible(mapTerrainLoc) && drawSquare)
                     {

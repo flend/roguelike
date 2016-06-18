@@ -472,9 +472,6 @@ namespace RogueBasin
                     {
                         if (creature.IncrementTurnTime())
                         {
-                            if (Screen.Instance.DebugMode)
-                                Game.Dungeon.ShowCreatureFOVOnMap(creature);
-
                             //Creatures may be killed by other creatures so check they are alive before processing
                             if (creature.Alive)
                             {
@@ -784,7 +781,7 @@ namespace RogueBasin
                                             Game.MessageQueue.AddMessage("Screen debug mode on.");
                                         else
                                             Game.MessageQueue.AddMessage("Screen debug mode off.");
-                                        Screen.Instance.NeedsUpdate = true;
+                                        timeAdvances = true; //So full FoV is re-rendered
                                         break;
 
                                     case Key.B:
