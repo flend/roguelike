@@ -1432,92 +1432,7 @@ namespace RogueBasin
 
             return '@';
         }
-
-        /// <summary>
-        /// Equip an item. Item is removed from the main inventory.
-        /// Returns true if item was used successfully.
-        /// </summary>
-        /// <param name="selectedGroup"></param>
-        /// <returns></returns>
-        public bool EquipItem(InventoryListing selectedGroup)
-        {
-            //Select the first item in the stack
-            int itemIndex = selectedGroup.ItemIndex[0];
-            Item itemToUse = Inventory.Items[itemIndex];
-
-            //Check if this item is equippable
-            IEquippableItem equippableItem = itemToUse as IEquippableItem;
-
-            if (equippableItem == null)
-            {
-                LogFile.Log.LogEntryDebug("Can't equip item, not equippable: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
-                return false;
-            }
-
-            //Find all matching slots available on the player
-
-            List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
-            List<EquipmentSlotInfo> matchingEquipSlots = new List<EquipmentSlotInfo>();
-
-            foreach (EquipmentSlot slotType in itemPossibleSlots)
-            {
-                matchingEquipSlots.AddRange(this.EquipmentSlots.FindAll(x => x.slotType == slotType));
-            }
-
-            //No suitable slots
-            if (matchingEquipSlots.Count == 0)
-            {
-                LogFile.Log.LogEntryDebug("Can't equip item, no valid slots: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
-
-                return false;
-            }
-
-            //Look for first empty slot
-
-            EquipmentSlotInfo freeSlot = matchingEquipSlots.Find(x => x.equippedItem == null);
-
-            if (freeSlot == null)
-            {
-                //Not slots free, unequip first slot
-                Item oldItem = matchingEquipSlots[0].equippedItem;
-                IEquippableItem oldItemEquippable = oldItem as IEquippableItem;
-
-                //Sanity check
-                if (oldItemEquippable == null)
-                {
-                    LogFile.Log.LogEntry("Currently equipped item is not equippable!: " + oldItem.SingleItemDescription);
-                    return false;
-                }
-
-                //Run unequip routine
-                oldItemEquippable.UnEquip(this);
-                oldItem.IsEquipped = false;
-                
-                //Can't do this right now, since not in inventory items appear on the floor
-
-                //This slot is now free
-                freeSlot = matchingEquipSlots[0];
-            }
-
-            //We now have a free slot to equip in
-
-            //Put new item in first relevant slot and run equipping routine
-            matchingEquipSlots[0].equippedItem = itemToUse;
-            equippableItem.Equip(this);
-            itemToUse.IsEquipped = true;
-
-            //Update the inventory listing since equipping an item changes its stackability
-            Inventory.RefreshInventoryListing();
-
-            //Message the user
-            LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
-            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped.");
-
-            return true;
-        }
-
+        
         public bool ToggleEquipWetware(Type wetwareTypeToEquip)
         {
             if(!IsWetwareTypeAvailable(wetwareTypeToEquip)) {
@@ -1761,7 +1676,7 @@ namespace RogueBasin
                 return true;
 
             //Just equip everything
-            return true;
+            return false;
         }
 
         /// <summary>

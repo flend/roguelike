@@ -287,7 +287,7 @@ namespace RogueBasin
                         DungeonActions();
 
                     //Advance time for the PC
-                    playerNotReady = !PlayerActions();
+                    playerNotReady = !PlayerPrepareForNextTurn();
 
                     //Catch the player being killed
                     //if (!Game.Dungeon.RunMainLoop)
@@ -309,6 +309,12 @@ namespace RogueBasin
                 Game.Dungeon.PlayerHadBonusTurn = true;
                 waitingForTurnTick = true;
             }
+
+            //Render any updates to monster FoV or dungeon sounds (debug)
+            ShowFOVAndSoundsOnMap();
+
+            //Player has taken turn so update screen
+            Screen.Instance.NeedsUpdate = true;
 
             if (PlayMusic)
             {
@@ -333,11 +339,13 @@ namespace RogueBasin
                 bool timeAdvances = inputResult.Item1;
                 bool centreOnPC = inputResult.Item2;
 
-                //Update the view point before any drawing occurs (some drawing is done ad-hoc during the monster's turn directly onto the viewport)
                 if (centreOnPC)
                 {
                     Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
                 }
+
+                //Some events affect FoV but don't advance time, so recalculate here
+                RecalculatePlayerFOV();
 
                 //Currently update on all keypresses
                 Screen.Instance.NeedsUpdate = true;
@@ -357,7 +365,7 @@ namespace RogueBasin
             return false;
         }
 
-        private bool PlayerActions()
+        private bool PlayerPrepareForNextTurn()
         {
             //PC turn
             Player player = Game.Dungeon.Player;
@@ -375,39 +383,11 @@ namespace RogueBasin
                         Game.Dungeon.PlayerDeath(Game.Dungeon.PlayerDeathString);
                     }
 
-                    ProfileEntry("Pre PC POV");
-
-                    //Calculate the player's FOV
-                    var playerFOV = Game.Dungeon.CalculatePlayerFOV();
-
-                    ProfileEntry("Pre Monster POV");
-
-                    //Debug: show the FOV of all monsters. Should flag or comment this for release.
-                    //This is extremely slow, so restricting to debug mode
-                    if (Screen.Instance.DebugMode)
-                    {
-                        foreach (Monster monster in Game.Dungeon.Monsters)
-                        {
-                            Game.Dungeon.ShowCreatureFOVOnMap(monster);
-                        }
-
-                        Game.Dungeon.ShowSoundsOnMap();
-                    }
-
-                    ProfileEntry("Post Monster POV");
-
                     //For effects that end to update the screen correctly etc.
                     Game.Dungeon.Player.PreTurnActions();
 
                     //Check the 'on' status of special moves - now unnecessary?
                     //Game.Dungeon.CheckSpecialMoveValidity();
-
-                    //Do any targetting maintenance
-                    if (Screen.Instance.TargetSelected())
-                        CheckTargetInPlayerFOV(playerFOV);
-
-                    //Player has taken turn so update screen
-                    Screen.Instance.NeedsUpdate = true;
 
                     return true;
                 }
@@ -419,6 +399,40 @@ namespace RogueBasin
                 LogFile.Log.LogEntry("Exception thrown" + ex.Message);
                 return true;
             }
+        }
+
+        private CreatureFOV RecalculatePlayerFOV()
+        {
+            ProfileEntry("Pre PC POV");
+
+            //Calculate the player's FOV
+            var playerFOV = Game.Dungeon.CalculatePlayerFOV();
+
+            //Do any targetting maintenance
+            if (Screen.Instance.TargetSelected())
+                CheckTargetInPlayerFOV(playerFOV);
+
+            return playerFOV;
+        }
+
+        private void ShowFOVAndSoundsOnMap()
+        {
+
+            ProfileEntry("Pre Monster POV");
+
+            //Debug: show the FOV of all monsters. Should flag or comment this for release.
+            //This is extremely slow, so restricting to debug mode
+            if (Screen.Instance.DebugMode)
+            {
+                foreach (Monster monster in Game.Dungeon.Monsters)
+                {
+                    Game.Dungeon.ShowCreatureFOVOnMap(monster);
+                }
+
+                Game.Dungeon.ShowSoundsOnMap();
+            }
+
+            ProfileEntry("Post Monster POV");
         }
         
         private void DungeonActions()
@@ -766,11 +780,15 @@ namespace RogueBasin
                                     case Key.W:
                                         //screen debug mode
                                         Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
+                                        if(Screen.Instance.DebugMode)
+                                            Game.MessageQueue.AddMessage("Screen debug mode on.");
+                                        else
+                                            Game.MessageQueue.AddMessage("Screen debug mode off.");
                                         Screen.Instance.NeedsUpdate = true;
                                         break;
 
                                     case Key.B:
-                                        //screen debug mode
+                                        //screen see all mode
                                         Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
                                         Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
                                         Screen.Instance.NeedsUpdate = true;
