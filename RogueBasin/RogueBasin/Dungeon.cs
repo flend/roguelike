@@ -1228,32 +1228,28 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Add monster. In addition to normal checks, check connectivity between monster and down stairs. This will ensure the monster is not placed in an unaccessible place
-        /// </summary>
-        /// <param name="creature"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
+        public bool AddMonster(Monster monster, Location loc)
+        {
+            return AddMonster(monster, loc.Level, loc.MapCoord);
+        }
 
-        public bool AddMonster(Monster creature, int level, Point location)
+        public bool AddMonster(Monster monster, int level, Point location)
         {
             //Try to add a creature at the requested location
             //This may fail due to something else being there or being non-walkable
             try
             {
-                if (creature == null)
+                if (monster == null)
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Tried to add null", LogDebugLevel.High);
                     return false;
                 }
 
-                if (creature.UniqueID != 0)
+                if (monster.UniqueID != 0)
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Tried to add monster which already had ID", LogDebugLevel.High);
                     return false;
                 }
-
 
                 Map creatureLevel = levels[level];
 
@@ -1274,7 +1270,7 @@ namespace RogueBasin
                 }
 
                 //horrible exception
-                if (contents.player != null && !(creature is Creatures.Mine))
+                if (contents.player != null && !(monster is Creatures.Mine))
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Medium);
                     return false;
@@ -1287,12 +1283,12 @@ namespace RogueBasin
                 }
 
                 //Otherwise OK
-                creature.LocationLevel = level;
-                creature.LocationMap = location;
+                monster.LocationLevel = level;
+                monster.LocationMap = location;
 
-                creature.CalculateSightRadius();
+                monster.CalculateSightRadius();
 
-                AddMonsterToList(creature);
+                AddMonsterToList(monster);
                 return true;
             }
             catch (Exception ex)

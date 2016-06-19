@@ -132,11 +132,23 @@ namespace RogueBasin
         }
     }
 
+    public class MonsterRoomPlacement
+    {
+        public readonly Monster monster;
+        public readonly Location location;
+
+        public MonsterRoomPlacement(Monster m, Location loc)
+        {
+            monster = m;
+            location = loc;
+        }
+    }
+
     public class RoomInfo {
 
         private int id;
         private List<Feature> features = new List<Feature>();
-        private List<Creature> creatures = new List<Creature>();
+        private List<MonsterRoomPlacement> monsters = new List<MonsterRoomPlacement>();
         private List<Item> items = new List<Item>();
         
         public RoomInfo(int roomId) {
@@ -153,16 +165,16 @@ namespace RogueBasin
             }
         }
 
-        public void AddCreature(Creature creature)
+        public void AddMonster(Monster creature, Location loc)
         {
-            creatures.Add(creature);
+            monsters.Add(new MonsterRoomPlacement(creature, loc));
         }
 
-        public IEnumerable<Creature> Creatures
+        public IEnumerable<MonsterRoomPlacement> Monsters
         {
             get
             {
-                return creatures;
+                return monsters;
             }
         }
 
@@ -310,6 +322,11 @@ namespace RogueBasin
             }
 
             return roomInfo[roomIndex];
+        }
+
+        public IEnumerable<RoomInfo> AllRoomsInfo()
+        {
+            return roomInfo.Select(r => r.Value);
         }
 
         public DoorContentsInfo DoorInfo(string doorIndex)

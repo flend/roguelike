@@ -464,6 +464,111 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             GenerateLevelLinks();
 
             //Build each level individually
+            Dictionary<int, LevelInfo> levelInfo = GenerateLevels();
+
+            MapInfo mapInfo = BuildConnectedMapModel(levelInfo);
+
+            //Add maps to the dungeon (must be ordered)
+            AddLevelMapsToDungeon(levelInfo);
+
+            //Set player's start location (must be done before adding items)
+            SetPlayerStartLocation(mapInfo);
+
+            //Set maps in engine (needs to be done before placing items and monsters)
+            SetupMapsInEngine();
+
+            //Add elevator features to link the maps
+            if (!quickLevelGen)
+                AddElevatorFeatures(mapInfo, levelInfo);
+            
+            //Attach debugger at this point
+            MessageBox.Show("Attach debugger now for any generation post slow pathing setup");
+
+            //Generate quests at mapmodel level
+            GenerateQuests(mapInfo, levelInfo);
+
+            //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
+            //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
+            AddMapObjectsToDungeon(mapInfo);
+
+            //Place loot
+            CalculateLevelDifficulty();
+
+            if (!quickLevelGen)
+                PlaceLootInArmory(mapInfo, levelInfo);
+
+            if (!quickLevelGen)
+                AddGoodyQuestLogClues(mapInfo, levelInfo);
+
+            //Add non-interactable features
+            AddDecorationFeatures(mapInfo, levelInfo);
+
+            //Add monsters
+            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
+
+            //Add debug stuff in the first room
+            AddDebugItems(mapInfo);
+
+            //Check we are solvable
+            AssertMapIsSolveable(mapInfo);
+
+            if (retry)
+            {
+                throw new ApplicationException("It happened!");
+            }
+
+            return mapInfo;
+        }
+
+        private void AddMapObjectsToDungeon(MapInfo mapInfo)
+        {
+            var rooms = mapInfo.AllRoomsInfo();
+
+            foreach (RoomInfo roomInfo in rooms)
+            {
+                foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
+                {
+                    bool monsterResult = Game.Dungeon.AddMonster(monsterPlacement.monster, monsterPlacement.location);
+
+                    if (!monsterResult) {
+                        LogFile.Log.LogEntryDebug("Cannot add monster " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+            }
+        }
+
+        private void AssertMapIsSolveable(MapInfo mapInfo)
+        {
+            var graphSolver = new GraphSolver(mapInfo.Model);
+            if (!graphSolver.MapCanBeSolved())
+            {
+                LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
+                throw new ApplicationException("It's all over - map can't be solved.");
+            }
+            else
+            {
+                LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
+            }
+
+            if (!quickLevelGen && !RoutabilityUtilities.CheckItemRouteability())
+            {
+                throw new ApplicationException("Item is not connected to elevator, aborting.");
+            }
+
+            if (!quickLevelGen && !RoutabilityUtilities.CheckFeatureRouteability())
+            {
+                //throw new ApplicationException("Feature is not connected to elevator, aborting.");
+            }
+        }
+
+        private static void SetPlayerStartLocation(MapInfo mapInfo)
+        {
+            var firstRoom = mapInfo.GetRoom(0);
+            Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+        }
+
+        private Dictionary<int, LevelInfo> GenerateLevels()
+        {
 
             Dictionary<int, LevelInfo> levelInfo = new Dictionary<int, LevelInfo>();
 
@@ -503,7 +608,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             {
                 standardGameLevels = gameLevels.Except(new List<int> { medicalLevel });
             }
-            else {
+            else
+            {
                 standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel });
             }
 
@@ -513,9 +619,14 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 levelInfo[level] = thisLevelInfo;
             }
 
-            MapInfo mapInfo = BuildConnectedMapModel(levelInfo);
+            //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
+            allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
 
-            //Add maps to the dungeon (must be ordered)
+            return levelInfo;
+        }
+
+        private void AddLevelMapsToDungeon(Dictionary<int, LevelInfo> levelInfo)
+        {
             foreach (var kv in levelInfo.OrderBy(kv => kv.Key))
             {
                 var thisLevelInfo = kv.Value;
@@ -529,77 +640,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 Map randomizedMapL1 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMap, terrainSubstitution);
                 Game.Dungeon.AddMap(randomizedMapL1);
             }
-
-            //Set player's start location (must be done before adding items)
-
-            var firstRoom = mapInfo.GetRoom(0);
-            Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
-
-            //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
-            allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
-
-            //Set maps in engine (needs to be done before placing items and monsters)
-            SetupMapsInEngine();
-
-            //Add elevator features to link the maps
-            if (!quickLevelGen)
-                AddElevatorFeatures(mapInfo, levelInfo);
-            
-            //Attach debugger at this point
-            MessageBox.Show("Attach debugger now for any generation post slow pathing setup");
-
-            //Generate quests at mapmodel level
-            GenerateQuests(mapInfo, levelInfo);
-
-            //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
-            //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
-
-            //Place loot
-            CalculateLevelDifficulty();
-
-            if (!quickLevelGen)
-                PlaceLootInArmory(mapInfo, levelInfo);
-
-            if (!quickLevelGen)
-                AddGoodyQuestLogClues(mapInfo, levelInfo);
-
-            //Add non-interactable features
-            AddDecorationFeatures(mapInfo, levelInfo);
-
-            //Add monsters
-            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
-
-            //Add debug stuff in the first room
-            AddDebugItems(mapInfo);
-
-            //Check we are solvable
-            var graphSolver = new GraphSolver(mapInfo.Model);
-            if (!graphSolver.MapCanBeSolved())
-            {
-                LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
-                throw new ApplicationException("It's all over - map can't be solved.");
-            }
-            else
-            {
-                LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
-            }
-
-            if (!quickLevelGen && !RoutabilityUtilities.CheckItemRouteability())
-            {
-                throw new ApplicationException("Item is not connected to elevator, aborting.");
-            }
-
-            if (!quickLevelGen && !RoutabilityUtilities.CheckFeatureRouteability())
-            {
-                //throw new ApplicationException("Feature is not connected to elevator, aborting.");
-            }
-
-            if (retry)
-            {
-                throw new ApplicationException("It happened!");
-            }
-
-            return mapInfo;
         }
 
         private MapInfo BuildConnectedMapModel(Dictionary<int, LevelInfo> levelInfo)
@@ -983,8 +1023,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             lockedDoor.LocationMap = doorInfo.MapLocation;
 
             mapInfo.DoorInfo(door.Id).AddLock(lockedDoor);
-
-            //Game.Dungeon.AddLock(lockedDoor);
 
             placedDoors.Add(door);
 
@@ -1847,16 +1885,13 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 newMonster.PickUpItem(clueItem);
 
-                foreach (RoomPoint p in pointsForClues)
+                if (!pointsForClues.Any())
                 {
-                    mapInfo.RoomInfo(p.roomId).AddCreature(newMonster);
-
-                    if (placedItem)
-                        break;
+                    throw new ApplicationException("Nowhere to place clue monster " + newMonster.SingleDescription);
                 }
 
-                if (!placedItem)
-                    throw new ApplicationException("Nowhere to place monster");
+                var pointToPlaceClue = pointsForClues.First();
+                mapInfo.RoomInfo(pointToPlaceClue.roomId).AddMonster(newMonster, pointToPlaceClue.ToLocation());
 
                 placedClues.Add(clue);
             }
@@ -1950,6 +1985,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 this.level = level;
                 this.roomId = roomId;
                 this.mapLocation = mapLocation;
+            }
+
+            public Location ToLocation() {
+                return new Location(level, mapLocation);
             }
         }
 

@@ -17,6 +17,11 @@ namespace RogueBasin
 
         public int Level { get { return Item1; } }
         public Point MapCoord { get { return Item2; } }
+
+        public override string ToString()
+        {
+            return "level: " + Level + " " + MapCoord.ToString();
+        }
     }
 
     /** Immutable Point class */
