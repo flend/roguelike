@@ -3112,7 +3112,7 @@ namespace RogueBasin
         {
             Player player = Player;
 
-            var itemToPickUp = ItemsAtSpace(player.LocationLevel, player.LocationMap).ToList();
+            var itemToPickUp = ItemsAtLocation(player.Location).ToList();
 
             if (!itemToPickUp.Any())
                 return false;
@@ -3631,16 +3631,9 @@ namespace RogueBasin
             return null;
         }
 
-        public bool IsItemAtSpace(int locationLevel, Point locationMap)
+        public IEnumerable<Item> ItemsAtLocation(Location loc)
         {
-            return ItemAtSpace(locationLevel, locationMap) != null ? true : false;
-        }
-
-        internal IEnumerable<Item> ItemsAtSpace(int locationLevel, Point locationMap)
-        {
-            return items.Where(i => i.IsLocatedAt(locationLevel, locationMap) && !i.InInventory);
-
-
+            return items.Where(i => i.IsLocatedAt(loc.Level, loc.MapCoord) && !i.InInventory);
         }
 
         internal List<Lock> LocksAtLocation(int level, Point mapLocation)

@@ -130,8 +130,8 @@ namespace TraumaRL
 
         private void RandomSetup() {
                         int seedToUse = 153;
-            Game.Random = new Random(seedToUse);
-            //Game.Random = new Random();
+            //Game.Random = new Random(seedToUse);
+            Game.Random = new Random();
         }
 
         GameDifficulty difficulty;

@@ -594,7 +594,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 AddElevatorFeatures(mapInfo, levelInfo);
             
             //Attach debugger at this point
-            //MessageBox.Show("Attach debugger now for any generation post slow pathing setup");
+            MessageBox.Show("Attach debugger now for any generation post slow pathing setup");
 
             //Generate quests at mapmodel level
             GenerateQuests(mapInfo, levelInfo);
@@ -636,7 +636,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             if (!quickLevelGen && !RoutabilityUtilities.CheckFeatureRouteability())
             {
-                throw new ApplicationException("Feature is not connected to elevator, aborting.");
+                //throw new ApplicationException("Feature is not connected to elevator, aborting.");
             }
 
             if (retry)
@@ -1357,7 +1357,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument3])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.GetRoom(reactorSelfDestructVault), 20, reactorDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.GetRoom(reactorSelfDestructVault), 100, reactorDecorations, false);
 
         }
 
@@ -3104,7 +3104,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //This is probably rather slow
             var roomFiller = new RoomFilling(positionedRoom.Room);
 
-            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
+            InitialiseRoomFillerWithRoomState(level, positionedRoom, roomFiller);
 
             var floorPoints = new List<RogueBasin.Point>();
             if(!useBoundary)
@@ -3146,7 +3146,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var roomFiller = new RoomFilling(positionedRoom.Room);
 
             //Need to account for all current blocking features in room
-            AddExistingBlockingFeaturesToRoomFiller(level, positionedRoom, roomFiller);
+            InitialiseRoomFillerWithRoomState(level, positionedRoom, roomFiller);
 
             var floorPoints = RoomTemplateUtilities.GetGridFromRoom(positionedRoom.Room, 2, 1, 0.5);
 
@@ -3179,18 +3179,38 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private static void AddExistingBlockingFeaturesToRoomFiller(int level, TemplatePositioned positionedRoom, RoomFilling bridgeRouter)
+        private static void InitialiseRoomFillerWithRoomState(int level, TemplatePositioned positionedRoom, RoomFilling bridgeRouter)
         {
             var floorPointsInRoom = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor).Select(p => p + positionedRoom.Location);
             foreach (var roomPoint in floorPointsInRoom)
             {
-                if (Game.Dungeon.BlockingFeatureAtLocation(level, roomPoint))
+                var itemsAtLocation = Game.Dungeon.ItemsAtLocation(new Location(level, roomPoint));
+                
+                //Don't place blocking features on items
+                if (itemsAtLocation.Any())
                 {
-                    var stillWalkable = bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint - positionedRoom.Location);
+                    bridgeRouter.SetSquareAsUnfillableMustBeConnected(roomPoint - positionedRoom.Location);
+                }
+                else
+                {
+                    var featuresAtLocation = Game.Dungeon.GetFeaturesAtLocation(new Location(level, roomPoint));
 
-                    if (!stillWalkable)
+                    //If there is an interactive feature here, it mustn't be blocked
+                    if (featuresAtLocation.Where(f => !f.IsBlocking).Any())
                     {
-                        LogFile.Log.LogEntryDebug("Room " + positionedRoom.RoomIndex + " appears unconnected.", LogDebugLevel.High);
+                        bridgeRouter.SetSquareAsUnfillableMustBeConnected(roomPoint - positionedRoom.Location);
+                    }
+                    else if (featuresAtLocation.Where(f => f.IsBlocking).Any())
+                    {
+
+                        //Otherwise If there is a blocking feature here, block it out
+
+                        var stillWalkable = bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint - positionedRoom.Location);
+
+                        if (!stillWalkable)
+                        {
+                            LogFile.Log.LogEntryDebug("Room " + positionedRoom.RoomIndex + " appears unconnected.", LogDebugLevel.High);
+                        }
                     }
                 }
             }

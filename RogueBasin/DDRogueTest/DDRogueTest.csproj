@@ -76,6 +76,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testrouting.room" />
     <EmbeddedResource Include="testdata\vaults\testsolid1.room" />
   </ItemGroup>
   <ItemGroup>
@@ -178,9 +179,6 @@
     <EmbeddedResource Include="testdata\vaults\testoverlap3.room" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="testdata\vaults\testrouting.room" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\testfilling_walkable.room" />
   </ItemGroup>
   <ItemGroup>
@@ -197,6 +195,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="testdata\vaults\testfilling_dividedgap_vert.room" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="testdata\vaults\testroutinglarge.room" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -148,6 +148,32 @@ namespace DDRogueTest
         }
 
 
+        [TestMethod]
+        public void FillingCannotBeFilledSquareFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testroutinglarge.room"); //8x6
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareAsUnfillableMustBeConnected(new Point(6, 1));
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(6, 1)));
+        }
+
+        [TestMethod]
+        public void BlockingOffCannotBeFilledSquareFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testroutinglarge.room"); //8x6
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareAsUnfillableMustBeConnected(new Point(6, 1));
+            filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(5, 1));
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(6, 2)));
+        }
+
+
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();
