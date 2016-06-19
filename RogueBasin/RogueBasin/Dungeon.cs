@@ -1814,7 +1814,7 @@ namespace RogueBasin
             //These are duplicates that use different code, so should be obsoleted
 
             //A wall - should be caught above
-            if (!Dungeon.IsTerrainWalkable(levels[level].mapSquares[location.x, location.y].Terrain))
+            if (!MapUtils.IsTerrainWalkable(levels[level].mapSquares[location.x, location.y].Terrain))
             {
                 //LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: not walkable by terrain type", LogDebugLevel.High);
                 return false;
@@ -3725,7 +3725,7 @@ namespace RogueBasin
                 int x = Game.Random.Next(map.width);
                 int y = Game.Random.Next(map.height);
 
-                if (Dungeon.IsTerrainWalkable(map.mapSquares[x, y].Terrain))
+                if (MapUtils.IsTerrainWalkable(map.mapSquares[x, y].Terrain))
                 {
                     return new Point(x, y);
                 }
@@ -3733,54 +3733,6 @@ namespace RogueBasin
             while (true);
         }
 
-        /// <summary>
-        /// Master is terrain walkable from MapTerrain type (not universally used yet) - defaults false
-        /// </summary>
-        /// <param name="terrain"></param>
-        /// <returns></returns>
-        public static bool IsTerrainWalkable(MapTerrain terrain)
-        {
-            if (terrain == MapTerrain.Empty ||
-                terrain == MapTerrain.Flooded ||
-                terrain == MapTerrain.OpenDoor ||
-                terrain == MapTerrain.Corridor ||
-                terrain == MapTerrain.Grass ||
-                terrain == MapTerrain.Road ||
-                terrain == MapTerrain.Gravestone ||
-                terrain == MapTerrain.Trees ||
-                terrain == MapTerrain.Rubble ||
-                terrain == MapTerrain.OpenLock)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Master is terrain light blocking from MapTerrain type (not universally used yet) - defaults true
-        /// </summary>
-        /// <param name="terrain"></param>
-        /// <returns></returns>
-        public static bool IsTerrainLightBlocking(MapTerrain terrain)
-        {
-            if (terrain == MapTerrain.Empty ||
-                terrain == MapTerrain.Flooded ||
-                terrain == MapTerrain.OpenDoor ||
-                terrain == MapTerrain.Corridor ||
-                terrain == MapTerrain.Grass ||
-                terrain == MapTerrain.Road ||
-                terrain == MapTerrain.Gravestone ||
-                terrain == MapTerrain.Trees ||
-                terrain == MapTerrain.Rubble ||
-                terrain == MapTerrain.OpenLock ||
-                terrain == MapTerrain.NonWalkableFeature)
-            {
-                return false;
-            }
-
-            return true;
-        }
 
         /// <summary>
         /// Removes an item from the game entirely.
@@ -3842,11 +3794,11 @@ namespace RogueBasin
 
             levels[level].mapSquares[location.x, location.y].Terrain = newTerrain;
 
-            levels[level].mapSquares[location.x, location.y].Walkable = IsTerrainWalkable(newTerrain) ? true : false;
-            levels[level].mapSquares[location.x, location.y].BlocksLight = IsTerrainLightBlocking(newTerrain) ? true : false;
+            levels[level].mapSquares[location.x, location.y].Walkable = MapUtils.IsTerrainWalkable(newTerrain) ? true : false;
+            levels[level].mapSquares[location.x, location.y].BlocksLight = MapUtils.IsTerrainLightBlocking(newTerrain) ? true : false;
 
             //Update pathing and fov
-            fov.updateFovMap(level, location, IsTerrainLightBlocking(newTerrain) ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
+            fov.updateFovMap(level, location, MapUtils.IsTerrainLightBlocking(newTerrain) ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
 
             PathingTerrain pathingTerrain;
             if (newTerrain == MapTerrain.ClosedDoor)
@@ -3854,7 +3806,7 @@ namespace RogueBasin
             else if (newTerrain == MapTerrain.ClosedLock)
                 pathingTerrain = PathingTerrain.ClosedLock;
             else
-                pathingTerrain = IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable;
+                pathingTerrain = MapUtils.IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable;
             Pathing.PathFindingInternal.updateMap(level, location, pathingTerrain);
         }
 
@@ -4954,7 +4906,7 @@ namespace RogueBasin
             Map levelMap = levels[locationLevel];
 
             List<Point> adjacentSqFree = new List<Point>();
-            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
 
             foreach (Point p in adjacentSq)
             {
@@ -5058,7 +5010,7 @@ namespace RogueBasin
             Map levelMap = levels[locationLevel];
 
             List<Point> adjacentSqFree = new List<Point>();
-            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
 
             foreach (Point p in adjacentSq)
             {
@@ -5083,7 +5035,7 @@ namespace RogueBasin
             Map levelMap = levels[locationLevel];
 
             List<Point> adjacentSqFree = new List<Point>();
-            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
 
             foreach (Point p in adjacentSq)
             {
@@ -5125,7 +5077,7 @@ namespace RogueBasin
             Map levelMap = levels[locationLevel];
 
             List<Point> adjacentSqFree = new List<Point>();
-            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
 
             foreach (Point p in adjacentSq)
             {
@@ -5159,21 +5111,6 @@ namespace RogueBasin
             return adjacentSqFree;
         }
 
-        private static List<Point> GetAdjacentSquares(Point locationMap)
-        {
-            List<Point> adjacentSq = new List<Point>();
-
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y - 1));
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y));
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y - 1));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x, locationMap.y - 1));
-            return adjacentSq;
-        }
-
         public IEnumerable<Point> GetWalkablePointsFromSet(int level, IEnumerable<Point> allPossiblePoints)
         {
             return allPossiblePoints.SelectMany(p => MapSquareIsWalkable(level, p) ? new List<Point> { p } : new List<Point>());
@@ -5202,7 +5139,7 @@ namespace RogueBasin
             {
                 var terrain = GetTerrainAtPoint(sourceLevel, p);
 
-                if (!IsTerrainWalkable(terrain))
+                if (!MapUtils.IsTerrainWalkable(terrain))
                     hardCover++;
             }
 

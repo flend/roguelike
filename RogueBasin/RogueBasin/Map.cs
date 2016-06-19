@@ -551,7 +551,7 @@ namespace RogueBasin
 
                         if (terrainHere == MapTerrain.ClosedDoor)
                             pathRepresentation.setCell(j, k, PathingTerrain.ClosedDoor);
-                        else if (Dungeon.IsTerrainWalkable(terrainHere))
+                        else if (MapUtils.IsTerrainWalkable(terrainHere))
                             pathRepresentation.setCell(j, k, PathingTerrain.Walkable);
                     }
                 }
@@ -594,7 +594,7 @@ namespace RogueBasin
 
                     //Use new function
 
-                    if (!Dungeon.IsTerrainWalkable(mapSquares[j, k].Terrain))
+                    if (!MapUtils.IsTerrainWalkable(mapSquares[j, k].Terrain))
                         walkable = false;
 
                     mapSquares[j, k].Walkable = walkable;
@@ -617,7 +617,7 @@ namespace RogueBasin
 
                     //Use new function
 
-                    if (!Dungeon.IsTerrainLightBlocking(mapSquares[j, k].Terrain))
+                    if (!MapUtils.IsTerrainLightBlocking(mapSquares[j, k].Terrain))
                         blocking = false;
 
                     mapSquares[j, k].BlocksLight = blocking;

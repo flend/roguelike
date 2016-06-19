@@ -23,7 +23,7 @@ namespace TraumaRL
         List<int> allReplaceableVaults;
 
         //For development, skip making most of the levels
-        bool quickLevelGen = false;
+        bool quickLevelGen = true;
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
@@ -453,7 +453,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         public MapInfo GenerateTraumaLevels(bool retry)
         {
             //We catch exceptions on generation and keep looping
-            MapInfo mapInfo;
 
             //Reset shared state
             placedClues = new HashSet<Clue>();
@@ -514,54 +513,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 levelInfo[level] = thisLevelInfo;
             }
 
-            //Build the room graph containing all levels
-
-            //Build and add the start level
-
-            var mapInfoBuilder = new MapInfoBuilder();
-            var startRoom = 0;
-            var startLevelInfo = levelInfo[medicalLevel];
-            mapInfoBuilder.AddConstructedLevel(medicalLevel, startLevelInfo.LevelGenerator.ConnectivityMap, startLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
-
-            //Build and add each connected level
-            //Needs to be done in DFS fashion so we don't add the same level twice
-
-            var levelsAdded = new HashSet<int> { medicalLevel };
-
-            MapModel levelModel = new MapModel(levelLinks, medicalLevel);
-            var vertexDFSOrder = levelModel.GraphNoCycles.mapMST.verticesInDFSOrder;
-
-            foreach (var level in vertexDFSOrder)
-            {
-                var thisLevel = level;
-                var thisLevelInfo = levelInfo[level];
-
-                //Since links to other levels are bidirectional, ensure we only add each level once
-                foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
-                {
-                    var otherLevel = connectionToOtherLevel.Key;
-                    var otherLevelInfo = levelInfo[otherLevel];
-
-                    var thisLevelElevator = connectionToOtherLevel.Value.Target;
-                    var otherLevelElevator = otherLevelInfo.ConnectionsToOtherLevels[thisLevel].Target;
-
-                    var levelConnection = new Connection(thisLevelElevator, otherLevelElevator);
-
-                    if (!levelsAdded.Contains(otherLevel))
-                    {
-                        mapInfoBuilder.AddConstructedLevel(otherLevel, otherLevelInfo.LevelGenerator.ConnectivityMap, otherLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                        otherLevelInfo.LevelGenerator.GetDoorsInMapCoords(), levelConnection);
-
-                        LogFile.Log.LogEntryDebug("Adding level connection " + thisLevelInfo.LevelNo + ":" + connectionToOtherLevel.Key + " via nodes" +
-                            thisLevelElevator + "->" + otherLevelElevator, LogDebugLevel.Medium);
-
-                        levelsAdded.Add(otherLevel);
-                    }
-                }
-            }
-
-            mapInfo = new MapInfo(mapInfoBuilder);
+            MapInfo mapInfo = BuildConnectedMapModel(levelInfo);
 
             //Add maps to the dungeon (must be ordered)
             foreach (var kv in levelInfo.OrderBy(kv => kv.Key))
@@ -598,6 +550,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Generate quests at mapmodel level
             GenerateQuests(mapInfo, levelInfo);
+
+            //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
+            //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
 
             //Place loot
             CalculateLevelDifficulty();
@@ -645,6 +600,57 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
 
             return mapInfo;
+        }
+
+        private MapInfo BuildConnectedMapModel(Dictionary<int, LevelInfo> levelInfo)
+        {
+            //Build the room graph containing all levels
+
+            //Build and add the start level
+
+            var mapInfoBuilder = new MapInfoBuilder();
+            var startRoom = 0;
+            var startLevelInfo = levelInfo[medicalLevel];
+            mapInfoBuilder.AddConstructedLevel(medicalLevel, startLevelInfo.LevelGenerator.ConnectivityMap, startLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
+                startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
+
+            //Build and add each connected level
+            //Needs to be done in DFS fashion so we don't add the same level twice
+
+            var levelsAdded = new HashSet<int> { medicalLevel };
+
+            MapModel levelModel = new MapModel(levelLinks, medicalLevel);
+            var vertexDFSOrder = levelModel.GraphNoCycles.mapMST.verticesInDFSOrder;
+
+            foreach (var level in vertexDFSOrder)
+            {
+                var thisLevel = level;
+                var thisLevelInfo = levelInfo[level];
+
+                //Since links to other levels are bidirectional, ensure we only add each level once
+                foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
+                {
+                    var otherLevel = connectionToOtherLevel.Key;
+                    var otherLevelInfo = levelInfo[otherLevel];
+
+                    var thisLevelElevator = connectionToOtherLevel.Value.Target;
+                    var otherLevelElevator = otherLevelInfo.ConnectionsToOtherLevels[thisLevel].Target;
+
+                    var levelConnection = new Connection(thisLevelElevator, otherLevelElevator);
+
+                    if (!levelsAdded.Contains(otherLevel))
+                    {
+                        mapInfoBuilder.AddConstructedLevel(otherLevel, otherLevelInfo.LevelGenerator.ConnectivityMap, otherLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
+                        otherLevelInfo.LevelGenerator.GetDoorsInMapCoords(), levelConnection);
+
+                        LogFile.Log.LogEntryDebug("Adding level connection " + thisLevelInfo.LevelNo + ":" + connectionToOtherLevel.Key + " via nodes" +
+                            thisLevelElevator + "->" + otherLevelElevator, LogDebugLevel.Medium);
+
+                        levelsAdded.Add(otherLevel);
+                    }
+                }
+            }
+            return new MapInfo(mapInfoBuilder);
         }
 
         private void AddDebugItems(MapInfo mapInfo)
@@ -976,21 +982,22 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;
 
-            Game.Dungeon.AddLock(lockedDoor);
+            mapInfo.DoorInfo(door.Id).AddLock(lockedDoor);
+
+            //Game.Dungeon.AddLock(lockedDoor);
 
             placedDoors.Add(door);
 
-            //Place monsters (not in corridors)
-            
             //This will be restricted to the medical level since we cut off the door
             var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
-            var roomsToPlaceMonsters = new List<int>();
+            var roomsToPlaceCameras = new List<int>();
 
             var roomsForMonsters = GetRandomRoomsForClues(mapInfo, objectsToPlace, allowedRoomsForClues);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
             PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, clues, true, false);
+            //This has now be converted to store the creatures in RoomInfo, rather than write them directly to the map
 
             //Place log entries explaining the puzzle
             //These will not be turned into in-engine clue items, so they can't be used to open the door
@@ -1824,13 +1831,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 if (placedClues.Contains(clue))
                     continue;
 
-                var roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, true, includeVaults);
+                var pointsForClues = GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(mapInfo, clue, true, includeVaults);
 
-                if (!roomsForClue.Item2.Any())
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, true, includeVaults);
-
-                var levelForClue = roomsForClue.Item1;
-                var allWalkablePoints = roomsForClue.Item2;
+                if (!pointsForClues.Any())
+                    pointsForClues = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, true, includeVaults);
 
                 bool placedItem = false;
 
@@ -1843,9 +1847,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 newMonster.PickUpItem(clueItem);
 
-                foreach (RogueBasin.Point p in allWalkablePoints)
+                foreach (RoomPoint p in pointsForClues)
                 {
-                    placedItem = Game.Dungeon.AddMonster(newMonster, levelForClue, p);
+                    mapInfo.RoomInfo(p.roomId).AddCreature(newMonster);
 
                     if (placedItem)
                         break;
@@ -1935,6 +1939,52 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
+        private class RoomPoint
+        {
+            public readonly int level;
+            public readonly RogueBasin.Point mapLocation;
+            public readonly int roomId;
+
+            public RoomPoint(int level, int roomId, RogueBasin.Point mapLocation)
+            {
+                this.level = level;
+                this.roomId = roomId;
+                this.mapLocation = mapLocation;
+            }
+        }
+
+        private IEnumerable<RoomPoint> GetAllWalkableRoomPointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        {
+            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+
+            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
+            if (!includeVaults)
+                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
+
+            IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = possibleRoomMinusVaults;
+
+            //Must be on the same level
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
+
+            var allWalkablePoints = new List<RoomPoint>();
+
+            //Hmm, could be quite expensive
+            foreach (var room in candidateRooms)
+            {
+                var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
+                var allPossibleRoomPoints = allPossiblePoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
+                //Note: we need a function on mapInfo to tell us which points are walkable, even after we have added in blocking features
+                //currently this could put clues on top of existing features
+                
+                allWalkablePoints.AddRange(allPossibleRoomPoints);
+            }
+
+            return allWalkablePoints.Shuffle();
+        }
 
         private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
@@ -2030,13 +2080,43 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
             {
-                var allPossiblePoints = mapInfo.GetBoundaryPointsInRoomOfTerrain(room);
+                var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
 
             return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
         }
 
+        private IEnumerable<RoomPoint> GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        {
+            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+            IEnumerable<int> initialRooms = possibleRooms;
+            if (!includeVaults)
+                initialRooms = possibleRooms.Except(allReplaceableVaults);
+            var candidateRooms = initialRooms;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(initialRooms);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = initialRooms;
+
+            //Must be on the same level
+            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
+
+            var allWalkablePoints = new List<RoomPoint>();
+
+            //Hmm, could be quite expensive
+            foreach (var room in candidateRooms)
+            {
+                var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
+                var allPossibleRoomPoints = allPossiblePoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
+                //Note: we need a function on mapInfo to tell us which points are walkable, even after we have added in blocking features
+                //currently this could put clues on top of existing features
+                
+                allWalkablePoints.AddRange(allPossibleRoomPoints);
+            }
+
+            return allWalkablePoints.Shuffle();
+        }
 
         private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
@@ -2058,7 +2138,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
             {
-                var allPossiblePoints = mapInfo.GetBoundaryPointsInRoomOfTerrain(room);
+                var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
 

@@ -208,6 +208,7 @@
     <Compile Include="Items\Pole.cs" />
     <Compile Include="Items\Mine.cs" />
     <Compile Include="Items\RocketLauncher.cs" />
+    <Compile Include="MapUtils.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="Movie.cs" />
     <Compile Include="PlayerEffects\Aim.cs" />

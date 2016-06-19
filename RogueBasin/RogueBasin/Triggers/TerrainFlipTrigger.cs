@@ -38,7 +38,7 @@ namespace RogueBasin.Triggers
         public void FlipTerrain() {
             try {
                 Game.Dungeon.Levels[this.Level].mapSquares[this.mapPosition.x, this.mapPosition.y].Terrain = flipToTerrain;
-                if (Dungeon.IsTerrainWalkable(flipToTerrain))
+                if (MapUtils.IsTerrainWalkable(flipToTerrain))
                 {
                     Game.Dungeon.Levels[this.Level].mapSquares[this.mapPosition.x, this.mapPosition.y].Walkable = true;
                     Game.Dungeon.Levels[this.Level].mapSquares[this.mapPosition.x, this.mapPosition.y].BlocksLight = false;

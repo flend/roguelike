@@ -132,6 +132,79 @@ namespace RogueBasin
         }
     }
 
+    public class RoomInfo {
+
+        private int id;
+        private List<Feature> features = new List<Feature>();
+        private List<Creature> creatures = new List<Creature>();
+        private List<Item> items = new List<Item>();
+        
+        public RoomInfo(int roomId) {
+            this.id = roomId;
+        }
+
+        public void AddFeature(Feature feature) {
+            features.Add(feature);
+        }
+
+        public IEnumerable<Feature> Features {
+            get {
+                return features;
+            }
+        }
+
+        public void AddCreature(Creature creature)
+        {
+            creatures.Add(creature);
+        }
+
+        public IEnumerable<Creature> Creatures
+        {
+            get
+            {
+                return creatures;
+            }
+        }
+
+        public void AddItem(Item item)
+        {
+            items.Add(item);
+        }
+
+        public IEnumerable<Item> Items
+        {
+            get
+            {
+                return items;
+            }
+        }
+    }
+
+    public class DoorContentsInfo
+    {
+
+        private string id;
+        private List<Lock> locks = new List<Lock>();
+
+        public DoorContentsInfo(string doorId)
+        {
+            this.id = doorId;
+        }
+
+        public void AddLock(Lock newLock)
+        {
+            locks.Add(newLock);
+        }
+
+        public IEnumerable<Lock> Locks
+        {
+            get
+            {
+                return locks;
+            }
+        }
+    }
+
     /// <summary>
     /// Holds state about the multi-level map
     /// </summary>
@@ -140,6 +213,8 @@ namespace RogueBasin
         Dictionary<int, TemplatePositioned> rooms;
         Dictionary<int, int> roomToLevelMapping;
         Dictionary<int, List<int>> roomListForLevel;
+        Dictionary<int, RoomInfo> roomInfo;
+        Dictionary<string, DoorContentsInfo> doorInfo;
 
         ConnectivityMap map;
         int startRoom;
@@ -158,6 +233,9 @@ namespace RogueBasin
             doors = builder.Doors;
 
             model = new MapModel(map, startRoom);
+
+            roomInfo = new Dictionary<int, RoomInfo>();
+            doorInfo = new Dictionary<string, DoorContentsInfo>();
 
             BuildRoomIndices();
         }
@@ -194,7 +272,7 @@ namespace RogueBasin
             return roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
         }
 
-        public IEnumerable<Point> GetBoundaryPointsInRoomOfTerrain(int roomIndex)
+        public IEnumerable<Point> GetBoundaryFloorPointsInRoom(int roomIndex)
         {
             var roomRelativePoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(rooms[roomIndex].Room);
 
@@ -219,6 +297,32 @@ namespace RogueBasin
         public int GetLevelForRoomIndex(int roomIndex)
         {
             return roomToLevelMapping[roomIndex];
+        }
+
+        public RoomInfo RoomInfo(int roomIndex)
+        {
+            RoomInfo thisRoomInfo;
+            roomInfo.TryGetValue(roomIndex, out thisRoomInfo);
+
+            if (thisRoomInfo == null)
+            {
+                roomInfo[roomIndex] = new RoomInfo(roomIndex);
+            }
+
+            return roomInfo[roomIndex];
+        }
+
+        public DoorContentsInfo DoorInfo(string doorIndex)
+        {
+            DoorContentsInfo thisDoorInfo;
+            doorInfo.TryGetValue(doorIndex, out thisDoorInfo);
+
+            if (thisDoorInfo == null)
+            {
+                doorInfo[doorIndex] = new DoorContentsInfo(doorIndex);
+            }
+
+            return doorInfo[doorIndex];
         }
 
         public IEnumerable<int> RoomsInDescendingDistanceFromSource(int sourceRoom, IEnumerable<int> testRooms)
