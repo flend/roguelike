@@ -52,7 +52,7 @@ namespace RogueBasin
 
             int height;
             List<string> preamble = new List<string>();
-            preamble.Add("Welcome to TraumaRL v" + Game.Version + "! post-7DRL 2014");
+            preamble.Add("Welcome to TraumaRL v" + Game.Version + "! post-7DRL 2014 (fix 1)");
             preamble.Add("flend & shroomarts");
             preamble.Add("");
             preamble.AddRange(Utility.LoadTextFile("introPreamble", Screen.Instance.Width - 2 * preambleTL.x, out height));
