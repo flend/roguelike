@@ -30,7 +30,7 @@ namespace RogueBasin.PlayerEffects
             {
                 player.SightRadius -= sightUpAmount;
             }*/
-            Game.MessageQueue.AddMessage("The world slow back down.");
+            Game.MessageQueue.AddMessage("The world slows back down.");
         }
 
         public override int SightModifier()

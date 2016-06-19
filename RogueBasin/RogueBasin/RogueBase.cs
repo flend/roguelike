@@ -17,9 +17,6 @@ namespace RogueBasin
 {
     public class RogueBase : IDisposable
     {
-        DungeonMaker dungeonMaker = null;
-        
-
         //Are we running or have we exited?
         //public bool runMapLoop = true;
 
@@ -719,6 +716,21 @@ namespace RogueBasin
                                     centreOnPC = true;
                                     break;
 
+                                case Key.A:
+                                    Game.Dungeon.Player.SelectNextWetwareInventoryItem(-1);
+                                    centreOnPC = true;
+                                    break;
+
+                                case Key.S:
+                                    Game.Dungeon.Player.SelectNextWetwareInventoryItem(1);
+                                    centreOnPC = true;
+                                    break;
+
+                                case Key.W:
+                                    Game.Dungeon.Player.EquipSelectedWetware();
+                                    centreOnPC = true;
+                                    break;
+
                                 case Key.X:
                                     //Examine
                                     timeAdvances = Examine(false);
@@ -818,15 +830,12 @@ namespace RogueBasin
                                         Game.Dungeon.Player.HealCompletely();
                                         Game.Dungeon.Player.RefillWeapons();
                                         break;
-
-                                    case Key.Z:
-                                        Game.Dungeon.ExitLevel();
-                                        break;
                                         
                                     case Key.T:
                                         Game.MessageQueue.AddMessage("Giving all low level weapons & wetware.");
                                         Game.Dungeon.Player.GiveAllWeapons(1);
                                         Game.Dungeon.Player.GiveAllWetware(2);
+                                        Game.Dungeon.Player.EquipNextUtility();
                                         break;
 
                                     case Key.U:
@@ -1195,14 +1204,9 @@ namespace RogueBasin
                                 if (changeWorks)
                                 {
                                     //We changed wetware, counts as an action
-                                    Game.Dungeon.ResetPCTurnCountersOnActionStatonary();
-                                    Game.Dungeon.Player.DisableEnergyRecharge();
                                     centreOnPC = true;
                                 }
-
-                                //If we don't set time advances, changing wetware still resets bonuses but the enemies don't get a move
-                                //timeAdvances = changeWorks;
-
+                                
                                 break;
                             }
                         }

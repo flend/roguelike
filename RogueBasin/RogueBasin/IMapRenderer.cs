@@ -30,10 +30,10 @@ namespace RogueBasin
         
         Size TextSize(string msg, int size);
 
-        void DrawUISprite(string id, int x, int y, double scaling);
+        void DrawUISprite(string id, int x, int y, double scaling, double alpha);
         Size GetUISpriteDimensions(string id);
 
-        void DrawTraumaUISprite(int id, int x, int y, LibtcodColorFlags flags, double scaling);
+        void DrawTraumaUISprite(int id, int x, int y, LibtcodColorFlags flags, double scaling, double alpha);
         Size GetTraumaSpriteDimensions(int id);
 
         void DrawLine(Point p1, Point p2, Color color);

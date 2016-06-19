@@ -22,8 +22,8 @@ namespace RogueBasin
         public static readonly Dictionary<char, Type> WetwareMapping = new Dictionary<char, Type> {
             
             { 'd', typeof(Items.StealthWare) },
-            { 's', typeof(Items.ShieldWare) },
-            { 'a', typeof(Items.AimWare) },
+            { 'v', typeof(Items.ShieldWare) },
+            { 'x', typeof(Items.AimWare) },
             { 'z', typeof(Items.BoostWare) },
             { 'c', typeof(Items.BioWare) }
         };

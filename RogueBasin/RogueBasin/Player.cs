@@ -184,6 +184,42 @@ namespace RogueBasin
         public int HitModifierAccess { get { return hitModifier; } set { hitModifier = value; } }
 
 
+        public int MagicPoints
+        {
+            get
+            {
+                return magicPoints;
+            }
+            set
+            {
+                magicPoints = value;
+            }
+        }
+
+        public int MaxMagicPoints
+        {
+            get
+            {
+                return maxMagicPoints;
+            }
+            set
+            {
+                maxMagicPoints = value;
+            }
+        }
+
+        private int UtilityInventoryPosition
+        {
+            get;
+            set;
+        }
+
+        private int WetwareInventoryPosition
+        {
+            get;
+            set;
+        }
+
         public Player()
         {
             //Set unique ID to 0 (player)
@@ -283,11 +319,6 @@ namespace RogueBasin
             return true;
         }
 
-        internal int InventoryQuantityAvailable(Type wetWareType)
-        {
-            return Inventory.GetItemsOfType(wetWareType).Count();
-        }
-
         internal bool IsWetwareTypeDisabled(Type wetwareType)
         {
             var wetwareInInventory = Inventory.GetItemsOfType(wetwareType);
@@ -339,35 +370,6 @@ namespace RogueBasin
             CurrentEquippedItems = 0;
         }
 
-        public int MagicPoints
-        {
-            get
-            {
-                return magicPoints;
-            }
-            set
-            {
-                magicPoints = value;
-            }
-        }
-
-        public int MaxMagicPoints
-        {
-            get
-            {
-                return maxMagicPoints;
-            }
-            set
-            {
-                maxMagicPoints = value;
-            }
-        }
-
-        private int InventoryPosition
-        {
-            get;
-            set;
-        }
 
         public int GetNoItemsOfSameType(Item itemType)
         {
@@ -384,26 +386,122 @@ namespace RogueBasin
             
             if (orderedUtilityItemsTypes.Count() == 0)
             {
-                InventoryPosition = 0;
+                UtilityInventoryPosition = 0;
                 LogFile.Log.LogEntryDebug("No next utility item to equip", LogDebugLevel.Medium);
                 return;
             }
 
             if (inventoryPositionChange > 0)
-                InventoryPosition++;
+                UtilityInventoryPosition++;
             else if(inventoryPositionChange < 0)
-                InventoryPosition--;
+                UtilityInventoryPosition--;
 
-            if (InventoryPosition >= orderedUtilityItemsTypes.Count())
+            if (UtilityInventoryPosition >= orderedUtilityItemsTypes.Count())
             {
-                InventoryPosition = 0;
+                UtilityInventoryPosition = 0;
             }
-            if (InventoryPosition < 0)
+            if (UtilityInventoryPosition < 0)
             {
-                InventoryPosition = orderedUtilityItemsTypes.Count() - 1;
+                UtilityInventoryPosition = orderedUtilityItemsTypes.Count() - 1;
             }
 
-            EquipAndReplaceItem(orderedUtilityItemsTypes.ElementAt(InventoryPosition));
+            EquipAndReplaceItem(orderedUtilityItemsTypes.ElementAt(UtilityInventoryPosition));
+        }
+
+        public void SelectNextWetware()
+        {
+            SelectNextWetwareInventoryItem(0);
+        }
+
+        public void SelectNextWetwareInventoryItem(int inventoryPositionChange)
+        {
+            var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Wetware));
+            var orderedUtilityItemsTypes = allUtilityItems.DistinctBy(i => i.SingleItemDescription).OrderBy(i => i.SingleItemDescription);
+
+            var originalSelectedWetware = GetSelectedWetware();
+
+            if (orderedUtilityItemsTypes.Count() == 0)
+            {
+                WetwareInventoryPosition = 0;
+                LogFile.Log.LogEntryDebug("No next wetware item to equip", LogDebugLevel.Medium);
+                return;
+            }
+
+            if (inventoryPositionChange > 0)
+                WetwareInventoryPosition++;
+            else if (inventoryPositionChange < 0)
+                WetwareInventoryPosition--;
+
+            if (WetwareInventoryPosition >= orderedUtilityItemsTypes.Count())
+            {
+                WetwareInventoryPosition = 0;
+            }
+            if (WetwareInventoryPosition < 0)
+            {
+                WetwareInventoryPosition = orderedUtilityItemsTypes.Count() - 1;
+            }
+
+            if (originalSelectedWetware != GetSelectedWetware())
+            {
+                //Changing the selected wetware while it is active will unequip
+                UnequipWetware();
+            }
+        }
+
+        public Item GetSelectedWetware()
+        {
+            var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Wetware));
+            var orderedUtilityItemsTypes = allUtilityItems.DistinctBy(i => i.SingleItemDescription).OrderBy(i => i.SingleItemDescription);
+
+            if (orderedUtilityItemsTypes.Count() == 0)
+            {
+                return null;
+            }
+
+            if (WetwareInventoryPosition >= orderedUtilityItemsTypes.Count())
+            {
+                LogFile.Log.LogEntryDebug("Wetware inventory position " + WetwareInventoryPosition + " higher than item count", LogDebugLevel.Medium);
+                return null;
+            }
+
+            return orderedUtilityItemsTypes.ElementAt(WetwareInventoryPosition);
+        }
+
+        public int GetTurnsDisabledForSelectedWetware()
+        {
+            var selectedWetware = GetSelectedWetware();
+
+            if (GetSelectedWetware() == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return GetDisabledTurnsForWetware(selectedWetware);
+            }
+
+        }
+
+        private int GetDisabledTurnsForWetware(Item wetware) {
+            if (wetwareDisabledTurns.ContainsKey(wetware))
+            {
+                return wetwareDisabledTurns[wetware];
+            }
+            return 0;
+        }
+         
+        public void EquipSelectedWetware()
+        {
+            var selectedWetware = GetSelectedWetware();
+
+            if (selectedWetware != null)
+            {
+                ToggleEquipWetware(selectedWetware.GetType());
+            }
+            else 
+            {
+                LogFile.Log.LogEntryDebug("No selected wetware to equip", LogDebugLevel.Medium);
+            }
         }
 
         public void EquipNextUtility()
@@ -724,10 +822,6 @@ namespace RogueBasin
         /// <param name="damMod"></param>
         /// <param name="ACmod"></param>
         /// <returns></returns>
-
-
-        //int toHitRoll; //just so we can use it in debug
-
         private int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
         {
             //Flatline has a rather simple combat system
@@ -1441,7 +1535,7 @@ namespace RogueBasin
 
             return '@';
         }
-        
+
         public bool ToggleEquipWetware(Type wetwareTypeToEquip)
         {
             if(!IsWetwareTypeAvailable(wetwareTypeToEquip)) {
@@ -1455,18 +1549,11 @@ namespace RogueBasin
             {
                 justUnequip = true;
             }
-            
+
             UnequipWetware();
-
-            if (currentlyEquippedWetware is Items.StealthWare)
-                CancelStealthDueToUnequip();
-
-            if (currentlyEquippedWetware is Items.BoostWare)
-                CancelBoostDueToUnequip();
 
             if (justUnequip)
                 return true;
-                //return false;
 
             var equipTime = EquipWetware(wetwareTypeToEquip);
             return equipTime;
@@ -1521,13 +1608,12 @@ namespace RogueBasin
 
             //Check if it is disabled
 
-            if (wetwareDisabledTurns.ContainsKey(wetwareToEquip))
+            var disabledTurnsForWetware = GetDisabledTurnsForWetware(wetwareToEquip);
+            if (disabledTurnsForWetware > 0)
             {
-                if (wetwareDisabledTurns[wetwareToEquip] > 0)
-                {
-                    LogFile.Log.LogEntryDebug("Can't enable wetware, is disabled for " + wetwareDisabledTurns[wetwareToEquip] + "turns", LogDebugLevel.Medium);
-                    return false;
-                }
+                Game.MessageQueue.AddMessage("Can't enable wetware - it's disabled for " + disabledTurnsForWetware + " turns");
+                LogFile.Log.LogEntryDebug("Can't enable wetware, is disabled for " + disabledTurnsForWetware + " turns", LogDebugLevel.Medium);
+                return false;
             }
 
             //Equip the new wetware
@@ -1567,6 +1653,14 @@ namespace RogueBasin
                 wetwareSlot.equippedItem = null;
 
             }
+
+            DisableEnergyRecharge();
+
+            if (currentlyEquippedWetware is Items.StealthWare)
+                CancelStealthDueToUnequip();
+
+            if (currentlyEquippedWetware is Items.BoostWare)
+                CancelBoostDueToUnequip();
 
             CalculateCombatStats();
         }
@@ -1916,6 +2010,11 @@ namespace RogueBasin
         /// <returns></returns>
         public IEquippableItem GetEquippedWetware()
         {
+            return GetEquippedWetwareAsItem() as IEquippableItem;
+        }
+
+        public Item GetEquippedWetwareAsItem()
+        {
             EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Wetware);
 
             if (weaponSlot == null)
@@ -1924,7 +2023,7 @@ namespace RogueBasin
                 return null;
             }
 
-            return weaponSlot.equippedItem as IEquippableItem;
+            return weaponSlot.equippedItem;
         }
 
         public bool IsWetwareTypeEquipped(Type wetwareType)
@@ -1939,27 +2038,12 @@ namespace RogueBasin
 
         public IEquippableItem GetEquippedRangedWeapon() 
         {
-            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Weapon);
-
-            if(weaponSlot == null) {
-                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
-                return null;
-            }
-
-            return weaponSlot.equippedItem as IEquippableItem;
+            return GetEquippedRangedWeaponAsItem() as IEquippableItem;
         }
 
         public IEquippableItem GetEquippedMeleeWeapon()
         {
-            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Melee);
-
-            if (weaponSlot == null)
-            {
-                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
-                return null;
-            }
-
-            return weaponSlot.equippedItem as IEquippableItem;
+            return GetEquippedMeleeWeaponAsItem() as IEquippableItem;
         }
 
         public bool HasMeleeWeaponEquipped()

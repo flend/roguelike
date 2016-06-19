@@ -300,51 +300,7 @@ namespace RogueBasin
 
             return spriteSurface;
         }
-
-        private Surface GetTraumaUISprite(SurfaceCacheEntry entry)
-        {
-            var spriteLoc = tileIDToSpriteLocation(entry.Id);
-
-            Surface spriteSurface;
-            surfaceUICache.TryGetValue(entry, out spriteSurface);
-            if (spriteSurface == null)
-            {
-                Surface tempSpriteSurface = new Surface(spriteSheetWidth, spriteSheetHeight);
-
-                tempSpriteSurface.Blit(spriteSheet,
-                    new System.Drawing.Point(0, 0),
-                    new Rectangle(spriteLoc, new Size(spriteSheetWidth, spriteSheetHeight)));
-
-                if (entry.ForegroundColor != Color.White)
-                    tempSpriteSurface.ReplaceColor(Color.White, entry.ForegroundColor);
-                if (entry.BackgroundColor != transparentColor)
-                    tempSpriteSurface.ReplaceColor(transparentColor, entry.BackgroundColor);
-
-                spriteSurface = tempSpriteSurface;
-
-                if (traumaUISpriteScaling > 1)
-                {
-                    if (traumaUISpriteScaling == 2)
-                    {
-                        spriteSurface = tempSpriteSurface.CreateScaleDoubleSurface(false);
-                    }
-                    else
-                    {
-                        spriteSurface = tempSpriteSurface.CreateScaledSurface(traumaUISpriteScaling, false);
-                    }
-                }
-
-                //Set this after doing background replacement
-                spriteSurface.Transparent = true;
-                spriteSurface.TransparentColor = transparentColor;
-
-                surfaceUICache.Add(entry, spriteSurface);
-
-                LogFile.Log.LogEntryDebug("Rendering ui sprite" + entry.Id, LogDebugLevel.Profiling);
-            }
-            return spriteSurface;
-        }
-
+        
         private string TileSpritePath(string spriteId)
         {
             return "tiles." + spriteId + ".png";
@@ -356,9 +312,9 @@ namespace RogueBasin
             return "ui." + id + ".png";
         }
 
-        public void DrawUISprite(string id, int x, int y, double scaling)
+        public void DrawUISprite(string id, int x, int y, double scaling, double alpha)
         {
-            DrawScaledSprite(UISpritePath(id), x, y, scaling, 1.0);
+            DrawScaledSprite(UISpritePath(id), x, y, scaling, alpha);
         }
 
 
@@ -387,9 +343,9 @@ namespace RogueBasin
         }
 
 
-        public void DrawTraumaUISprite(int id, int x, int y, LibtcodColorFlags flags, double scaling = 1.0)
+        public void DrawTraumaUISprite(int id, int x, int y, LibtcodColorFlags flags, double scaling = 1.0, double alpha = 1.0)
         {
-            DrawScaledSprite(id, new Point(x, y), flags, scaling);     
+            DrawScaledSprite(id, new Point(x, y), flags, scaling, alpha);     
         }
 
         public Size GetTileSpriteDimensions(TileEngine.TileCell cell)

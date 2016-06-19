@@ -1568,21 +1568,32 @@ namespace RogueBasin {
             DrawUISprite(id, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2));
         }
 
-        private void DrawUISpriteByCentre(MapObject mapObject, Point point)
+        private void DrawUISpriteByCentre(MapObject mapObject, Point point, double alpha = 1.0)
         {
             
             if (mapObject.UISprite != null)
             {
                 Size spriteDim = UISpriteSize(mapObject.UISprite);
-                DrawUISprite(mapObject.UISprite, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2));
+                DrawUISprite(mapObject.UISprite, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), alpha);
             }
             else
             {
                 Size spriteDim = TraumaUISpriteSize(mapObject.Representation);
-                DrawTraumaUISprite(mapObject.Representation, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), new LibtcodColorFlags(mapObject.RepresentationColor()));
-            }
+                LibtcodColorFlags colors = new LibtcodColorFlags(mapObject.RepresentationColor());
+                
+                //Apply an alphaing effect to the colors, since alphaing on Trauma sprites doesn't seem to work now
+                if(alpha < 0.99) {
+                   colors = new LibtcodColorFlags(ColorInterpolate(mapObject.RepresentationColor(), System.Drawing.Color.Black, alpha));
+                }
 
-            
+                DrawTraumaUISprite(mapObject.Representation, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), colors, alpha);
+            }
+        }
+
+        private void DrawColourizedTraumaUISpriteByCentre(MapObject mapObject, Point point, LibtcodColorFlags colorOverride)
+        {
+            Size spriteDim = TraumaUISpriteSize(mapObject.Representation);
+            DrawTraumaUISprite(mapObject.Representation, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), colorOverride);
         }
 
 
@@ -1649,6 +1660,7 @@ namespace RogueBasin {
             Point rangedWeaponUICenter = UIScale(new Point(160, 92));
             Point meleeWeaponUICenter = UIScale(new Point(38, 92));
             Point utilityUICenter = UIScale(new Point(300, 92));
+            Point wetwareUICenter = UIScale(new Point(390, 92));
 
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left_extended");
@@ -1659,8 +1671,8 @@ namespace RogueBasin {
             if (ExtraUI)
             {
                 Size uiMidDim = UISpriteSize("ui_mid");
-                playerTextUI_TL = playerUI_TL + new Point(uiLeftDim.Width, 0);
-                playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 30));
+                playerTextUI_TL = playerUI_TL + new Point(uiLeftDim.Width, -60);
+                playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 90));
                 
                 DrawUISprite("ui_mid", playerTextUI_TL);
                 Size uiRightDim = UISpriteSize("ui_right");
@@ -1684,7 +1696,7 @@ namespace RogueBasin {
                 //Draw bullets
                 double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
                 var ammoBarTL = playerUI_TL + UIScale(new Point(86, 67));
-                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.5);
+                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
 
                 //Ranged Damage base
                 var playerRangedTextOffset = UIScale(new Point(210, 117));
@@ -1722,19 +1734,50 @@ namespace RogueBasin {
                 DrawUISpriteByCentre(utility, playerUI_TL + utilityUICenter);
 
                 //Draw no of items
-                double itemNoRatio = Math.Min(player.GetNoItemsOfSameType(utility) / (double)7.0, 1.0);
+                double itemNoRatio = Math.Min(player.GetNoItemsOfSameType(utility) / (double)10.0, 1.0);
                 var itemNoBarTL = playerUI_TL + UIScale(new Point(255, 67));
-                DrawGraduatedBarVertical("ui_bullet", itemNoRatio, new Rectangle(itemNoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.5);
+                DrawGraduatedBarVertical("ui_bullet", itemNoRatio, new Rectangle(itemNoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
             }
 
-            
-
-            //Help
             var utilityHelpOffset = UIScale(new Point(316, 74));
             var utilityHelp = "(T)";
             DrawUIText(utilityHelp, playerUI_TL + utilityHelpOffset, LineAlignment.Center, statsColor);
             DrawSmallUIText("(E)", playerUI_TL + UIScale(new Point(280, 117)), LineAlignment.Center, statsColor);
             DrawSmallUIText("(R)", playerUI_TL + UIScale(new Point(316, 117)), LineAlignment.Center, statsColor);
+
+            //Draw equipped wetware
+            Item wetware = player.GetSelectedWetware();
+
+            if (wetware != null)
+            {
+                //This only works for trauma sprites and needs refactoring for normal sprites
+
+                LibtcodColorFlags wetwareRenderColor = new LibtcodColorFlags(wetware.RepresentationColor());
+                
+                if (player.GetTurnsDisabledForSelectedWetware() > 0)
+                {
+                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), System.Drawing.Color.Black, 0.5));
+                }
+                else if (player.GetEquippedWetware() != null)
+                {
+                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), System.Drawing.Color.Red, 0.5));
+                }
+
+                DrawColourizedTraumaUISpriteByCentre(wetware, playerUI_TL + wetwareUICenter, wetwareRenderColor);
+            }
+
+            //Draw energy
+            double energyRatio = player.Energy / (double)player.MaxEnergy;
+            var energyBarTL = playerUI_TL + UIScale(new Point(345, 67));
+            DrawGraduatedBarVertical("ui_bullet", energyRatio, new Rectangle(energyBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
+
+            //Draw wetware help
+            var wetwareHelpOffset = UIScale(new Point(406, 74));
+            var wetwareHelp = "(W)";
+            DrawUIText(wetwareHelp, playerUI_TL + wetwareHelpOffset, LineAlignment.Center, statsColor);
+            DrawSmallUIText("(A)", playerUI_TL + UIScale(new Point(370, 117)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(S)", playerUI_TL + UIScale(new Point(406, 117)), LineAlignment.Center, statsColor);
+
 
             //Draw Shield
             double playerShieldRatio = player.Shield / (double)player.MaxShield;
@@ -1990,19 +2033,19 @@ namespace RogueBasin {
             return mapRenderer.GetUISpriteDimensions(name);
         }
 
-        private void DrawUISprite(string name, Point p)
+        private void DrawUISprite(string name, Point p, double alpha = 1.0)
         {
-            mapRenderer.DrawUISprite(name, p.x, p.y, UIScaling);
+            mapRenderer.DrawUISprite(name, p.x, p.y, UIScaling, alpha);
         }
 
-        private void DrawTraumaUISprite(int id, Point p, LibtcodColorFlags flags)
+        private void DrawTraumaUISprite(int id, Point p, LibtcodColorFlags flags, double alpha = 1.0)
         {
-            mapRenderer.DrawTraumaUISprite(id, p.x, p.y, flags, UIScaling);
+            mapRenderer.DrawTraumaUISprite(id, p.x, p.y, flags, UIScaling, alpha);
         }
 
-        private void DrawSprite(string name, Point p)
+        private void DrawSprite(string name, Point p, double alpha = 1.0)
         {
-            mapRenderer.DrawUISprite(name, p.x, p.y, 1.0);
+            mapRenderer.DrawUISprite(name, p.x, p.y, 1.0, alpha);
         }
 
         private char GetCharIconForNumber(int no)
