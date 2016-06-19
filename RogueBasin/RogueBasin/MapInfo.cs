@@ -146,6 +146,8 @@ namespace RogueBasin
         Dictionary<Connection, DoorLocationInfo> doors;
 
         MapModel model;
+        private const int corridorHeight = 3;
+        private const int corridorWidth = 3;
         
         public MapInfo(MapInfoBuilder builder) {
 
@@ -201,7 +203,7 @@ namespace RogueBasin
 
         public IEnumerable<int> FilterOutCorridors(IEnumerable<int> roomIndices)
         {
-            return roomIndices.Where(r => (rooms[r].Room.Height > 3 && rooms[r].Room.Width > 3) && !rooms[r].Room.IsCorridor);
+            return roomIndices.Where(r => (rooms[r].Room.Height > corridorHeight && rooms[r].Room.Width > corridorWidth) && !rooms[r].Room.IsCorridor);
         }
 
         public IEnumerable<int> FilterRoomsByLevel(IEnumerable<int> roomIndices, IEnumerable<int> levels)
@@ -217,6 +219,14 @@ namespace RogueBasin
         public int GetLevelForRoomIndex(int roomIndex)
         {
             return roomToLevelMapping[roomIndex];
+        }
+
+        public IEnumerable<int> RoomsInDescendingDistanceFromSource(int sourceRoom, IEnumerable<int> testRooms)
+        {
+            var deadEndDistancesFromStartRoom = Model.GetDistanceOfVerticesFromParticularVertexInFullMap(sourceRoom, testRooms);
+            var verticesByDistance = deadEndDistancesFromStartRoom.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key).Select(kv => kv.Key);
+
+            return verticesByDistance;
         }
 
         /// <summary>

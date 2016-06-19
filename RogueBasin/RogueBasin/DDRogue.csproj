@@ -328,6 +328,7 @@
     <Compile Include="LogGenerator.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="RecurringAnimation.cs" />
+    <Compile Include="RoutabilityUtilities.cs" />
     <Compile Include="RoyaleDungeonLevelMaker.cs" />
     <Compile Include="RoyaleMonsterPlacement.cs" />
     <Compile Include="MusicPlayer.cs" />

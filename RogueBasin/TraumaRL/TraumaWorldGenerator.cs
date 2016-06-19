@@ -23,7 +23,7 @@ namespace TraumaRL
         List<int> allReplaceableVaults;
 
         //For development, skip making most of the levels
-        bool quickLevelGen = true;
+        bool quickLevelGen = false;
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
@@ -629,9 +629,14 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 LogFile.Log.LogEntryDebug("Phew - map can be solved", LogDebugLevel.High);
             }
 
-            if (!quickLevelGen && !CheckItemRouteability())
+            if (!quickLevelGen && !RoutabilityUtilities.CheckItemRouteability())
             {
                 throw new ApplicationException("Item is not connected to elevator, aborting.");
+            }
+
+            if (!quickLevelGen && !RoutabilityUtilities.CheckFeatureRouteability())
+            {
+                throw new ApplicationException("Feature is not connected to elevator, aborting.");
             }
 
             if (retry)
@@ -662,81 +667,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 if (placedItem)
                     break;
             }
-        }
-
-        private bool CheckItemRouteability()
-        {
-            var items = Game.Dungeon.Items;
-            var features = Game.Dungeon.Features;
-
-            var elevators = features.Where(f => f.GetType() == typeof(RogueBasin.Features.Elevator)).Select(f => f as RogueBasin.Features.Elevator).ToList();
-
-            foreach (var item in items)
-            {
-                if (item.InInventory)
-                    continue;
-
-                var destElevator = elevators.Where(e => e.DestLevel == item.LocationLevel);
-                var destElevatorLocations = destElevator.Select(e => (e as RogueBasin.Features.Elevator).DestLocation);
-
-                var srcElevator = features.Where(e => e.LocationLevel == item.LocationLevel);
-                var srcElevatorLocations = srcElevator.Select(e => (e as RogueBasin.Features.Elevator).LocationMap);
-
-                var elevatorLocations = destElevatorLocations.Union(srcElevatorLocations);
-
-                if (!elevatorLocations.Any())
-                {
-                    LogFile.Log.LogEntryDebug("Item " + item.SingleItemDescription + " has no elevator on the same level, map cannot be solved!", LogDebugLevel.High);
-                    return false;
-                }
-
-                var elevatorToRouteTo = elevatorLocations.First();
-
-                //Check routing between elevator and item
-                if (!Game.Dungeon.Pathing.ArePointsConnected(item.LocationLevel, item.LocationMap, elevatorToRouteTo, Pathing.PathingPermission.IgnoreDoorsAndLocks))
-                {
-                    LogFile.Log.LogEntryDebug("Item " + item.SingleItemDescription + " at " + item.LocationMap + "(" + item.LocationLevel +")" + "is not connected to elevator at " + elevatorToRouteTo + ", map cannot be solved!", LogDebugLevel.High);
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private bool CheckFeatureRouteability()
-        {
-            var features = Game.Dungeon.Features;
-
-            var elevators = features.Where(f => f.GetType() == typeof(RogueBasin.Features.Elevator)).Select(f => f as RogueBasin.Features.Elevator).ToList();
-            var nonDecorationFeature = features.Where(f => f.GetType() != typeof(RogueBasin.Features.StandardDecorativeFeature));
-
-            foreach (var feature in nonDecorationFeature)
-            {
-                var destElevator = elevators.Where(e => e.DestLevel == feature.LocationLevel);
-                var destElevatorLocations = destElevator.Select(e => (e as RogueBasin.Features.Elevator).DestLocation);
-
-                var srcElevator = features.Where(e => e.LocationLevel == feature.LocationLevel);
-                var srcElevatorLocations = srcElevator.Select(e => (e as RogueBasin.Features.Elevator).LocationMap);
-
-                var elevatorLocations = destElevatorLocations.Union(srcElevatorLocations);
-
-                if (!elevatorLocations.Any())
-                {
-                    LogFile.Log.LogEntryDebug("Feature " + feature.Description + " has no elevator on the same level, map cannot be solved!", LogDebugLevel.High);
-                    return false;
-                }
-
-                var elevatorToRouteTo = elevatorLocations.First();
-
-                //Check routing between elevator and item
-                if (!Game.Dungeon.Pathing.ArePointsConnected(feature.LocationLevel, feature.LocationMap, elevatorToRouteTo, Pathing.PathingPermission.IgnoreDoorsAndLocks))
-                {
-                    LogFile.Log.LogEntryDebug("Feature " + feature.Description + " at " + feature.LocationMap + "(" + feature.LocationLevel + ")" + "is not connected to elevator at " + elevatorToRouteTo + ", map cannot be solved!", LogDebugLevel.High);
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private void SetupMapsInEngine()
@@ -805,13 +735,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return connectionSet.Where(c => testRooms.Contains(c.Source) && testRooms.Contains(c.Target));
         }
 
-        private IEnumerable<int> RoomsInDescendingDistanceFromSource(MapInfo mapInfo, int sourceRoom, IEnumerable<int> testRooms)
-        {
-            var deadEndDistancesFromStartRoom = mapInfo.Model.GetDistanceOfVerticesFromParticularVertexInFullMap(sourceRoom, testRooms);
-            var verticesByDistance = deadEndDistancesFromStartRoom.OrderByDescending(kv => kv.Value).Select(kv => kv.Key);
-
-            return verticesByDistance;
-        }
 
         private void GenerateQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
@@ -1395,7 +1318,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         {
             int selfDestructLevel = bridgeLevel;
             var replaceableVaultsInBridge = levelInfo[selfDestructLevel].ReplaceableVaultConnections.Except(levelInfo[selfDestructLevel].ReplaceableVaultConnectionsUsed);
-            var bridgeRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, levelInfo[bridgeLevel].ConnectionsToOtherLevels.First().Value.Target, replaceableVaultsInBridge.Select(c => c.Target));
+            var bridgeRoomsInDistanceOrderFromStart = mapInfo.RoomsInDescendingDistanceFromSource(levelInfo[bridgeLevel].ConnectionsToOtherLevels.First().Value.Target, replaceableVaultsInBridge.Select(c => c.Target));
             selfDestructRoom = bridgeRoomsInDistanceOrderFromStart.ElementAt(0);
             var selfDestructConnection = replaceableVaultsInBridge.Where(c => c.Target == selfDestructRoom).First();
 
@@ -1681,7 +1604,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var levelsForAntennae = new List<int> { scienceLevel, storageLevel };
             var unusedVaultsInAntennaeLevel = GetAllAvailableVaults(levelInfo).Where(c => levelsForAntennae.Contains(mapInfo.GetLevelForRoomIndex(c.Target)));
 
-            var unusedVaultsInnAntennaeLevelOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, unusedVaultsInAntennaeLevel.Select(c => c.Target));
+            var unusedVaultsInnAntennaeLevelOrderFromStart = mapInfo.RoomsInDescendingDistanceFromSource(mapInfo.StartRoom, unusedVaultsInAntennaeLevel.Select(c => c.Target));
             var antennaeRoom = unusedVaultsInnAntennaeLevelOrderFromStart.ElementAt(0);
             var antennaeVaultConnection = GetAllVaults(levelInfo).Where(c => c.Target == antennaeRoom).First();
 
