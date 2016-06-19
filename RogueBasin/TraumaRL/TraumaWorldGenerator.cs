@@ -623,6 +623,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                         throw new ApplicationException("Item is not connected to elevator, aborting.");
                     }
 
+                    if (!CheckFeatureRouteability())
+                    {
+                        throw new ApplicationException("Feature is not connected to elevator, aborting.");
+                    }
+
                     if (retry)
                     {
                         throw new ApplicationException("It happened!");
