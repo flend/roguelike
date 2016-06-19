@@ -39,12 +39,12 @@ namespace RogueBasin
             centreX = s.ScreenWidth / 2;
 
             var titleY = centreYOffset;
-            s.DrawText("RoyaLe!", new Point(centreX, titleY), LineAlignment.Center, 40, titleColor);
+            s.DrawText("TraumaRL!", new Point(centreX, titleY), LineAlignment.Center, 40, titleColor);
 
             var introTextY = centreYOffset + centreYOffset / 2;
             var titleLineOffset = s.ScreenHeight / 32;
 
-            s.DrawLargeText("Welcome to the RoyaLe!", new Point(centreX, introTextY + titleLineOffset), LineAlignment.Center, textColor);
+            s.DrawLargeText("Welcome to TraumaRL!", new Point(centreX, introTextY + titleLineOffset), LineAlignment.Center, textColor);
             s.DrawLargeText("Choose your fate:", new Point(centreX, introTextY + 2 * titleLineOffset), LineAlignment.Center, textColor);
 
             optionsTextY = (centreYOffset * 2);

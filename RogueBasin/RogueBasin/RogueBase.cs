@@ -342,7 +342,10 @@ namespace RogueBasin
                 }
 
                 //Some events affect FoV but don't advance time, so recalculate here
-                RecalculatePlayerFOV();
+                if (GameStarted)
+                {
+                    RecalculatePlayerFOV();
+                }
 
                 //Currently update on all keypresses
                 Screen.Instance.NeedsUpdate = true;
