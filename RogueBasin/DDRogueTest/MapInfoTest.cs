@@ -3,7 +3,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RogueBasin;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -54,6 +56,14 @@ namespace DDRogueTest
 
         [TestMethod]
         public void CorridorsCanBeFilteredOut()
+        {
+            var mapInfo = GetStandardMapInfoForTemplates();
+            var filteredRooms = mapInfo.FilterOutCorridors(new List<int> { 0, 1, 2 }).ToList();
+            CollectionAssert.AreEqual(new List<int> { 2 }, filteredRooms);
+        }
+
+        [TestMethod]
+        public void GetFreePointsToPlaceCreatureInRoomCorrectlyRemovesFeatureAndCreatureOccupiedPoints()
         {
             var mapInfo = GetStandardMapInfoForTemplates();
             var filteredRooms = mapInfo.FilterOutCorridors(new List<int> { 0, 1, 2 }).ToList();
@@ -195,6 +205,31 @@ namespace DDRogueTest
             builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, l2DoorDict, new Connection(3, 5));
 
             return new MapInfo(builder);
+        }
+
+        private MapInfo StandardTwoRoomOneLevelMapInfo()
+        {
+            var builder = new MapInfoBuilder();
+            
+            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+            
+            var startRoomId = mapGen.PlaceRoomTemplateAtPosition(baseRoomTemplate, new Point(0, 0));
+            mapGen.PlaceRoomTemplateAlignedWithExistingDoor(toAlignRoomTemplate, null, mapGen.PotentialDoors[0], 0, 0);
+
+            builder.AddConstructedLevel(0, mapGen.ConnectivityMap, mapGen.GetRoomTemplatesInWorldCoords(), mapGen.GetDoorsInMapCoords(), startRoomId);
+
+            return new MapInfo(builder);
+        }
+
+        private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
+        {
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+            Stream roomFileStream = _assembly.GetManifestResourceStream(filePath);
+            return RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
         }
     }
 }

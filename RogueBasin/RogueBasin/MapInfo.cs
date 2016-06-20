@@ -144,10 +144,22 @@ namespace RogueBasin
         }
     }
 
+    public class FeatureRoomPlacement
+    {
+        public readonly Feature feature;
+        public readonly Location location;
+
+        public FeatureRoomPlacement(Feature f, Location loc)
+        {
+            feature = f;
+            location = loc;
+        }
+    }
+
     public class RoomInfo {
 
         private int id;
-        private List<Feature> features = new List<Feature>();
+        private List<FeatureRoomPlacement> features = new List<FeatureRoomPlacement>();
         private List<MonsterRoomPlacement> monsters = new List<MonsterRoomPlacement>();
         private List<Item> items = new List<Item>();
         
@@ -155,11 +167,13 @@ namespace RogueBasin
             this.id = roomId;
         }
 
-        public void AddFeature(Feature feature) {
+        public void AddFeature(FeatureRoomPlacement feature)
+        {
             features.Add(feature);
         }
 
-        public IEnumerable<Feature> Features {
+        public IEnumerable<FeatureRoomPlacement> Features
+        {
             get {
                 return features;
             }
@@ -282,6 +296,26 @@ namespace RogueBasin
             var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, terrainToFind);
 
             return roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
+        }
+
+        public IEnumerable<Point> GetFreePointsToPlaceCreatureInRoom(int roomIndex)
+        {
+            var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, RoomTemplateTerrain.Floor);
+            var roomAbsolutePoints = roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
+
+            var unoccupiedAbsolutePoints = roomAbsolutePoints.Except(GetOccupiedRoomPoints(roomIndex));
+
+            return unoccupiedAbsolutePoints;
+        }
+
+        private IEnumerable<Point> GetOccupiedRoomPoints(int roomIndex)
+        {
+            var roomInfo = RoomInfo(roomIndex);
+
+            var occupiedFeaturePoints = roomInfo.Features.Where(f => f.feature.IsBlocking).Select(f => f.location.MapCoord);
+            var occupiedMonsterPoints = roomInfo.Monsters.Select(m => m.location.MapCoord);
+
+            return occupiedFeaturePoints.Concat(occupiedMonsterPoints);
         }
 
         public IEnumerable<Point> GetBoundaryFloorPointsInRoom(int roomIndex)

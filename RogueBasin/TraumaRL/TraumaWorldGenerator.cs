@@ -2007,13 +2007,13 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 candidateRooms = possibleRoomMinusVaults;
 
             //Must be on the same level
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
 
             var allWalkablePoints = new List<RoomPoint>();
 
             //Hmm, could be quite expensive
             foreach (var room in candidateRooms)
             {
+                var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(room);
                 var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
                 var allPossibleRoomPoints = allPossiblePoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
                 //Note: we need a function on mapInfo to tell us which points are walkable, even after we have added in blocking features
