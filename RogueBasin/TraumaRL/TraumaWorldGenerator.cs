@@ -563,7 +563,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private static void SetPlayerStartLocation(MapInfo mapInfo)
         {
-            var firstRoom = mapInfo.GetRoom(0);
+            var firstRoom = mapInfo.Room(0);
             Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
         }
 
@@ -753,7 +753,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     //Bias rooms towards one or two types
                     var featuresAndWeights = featuresByLevel[thisLevel].Select(f => new Tuple<int, DecorationFeatureDetails.Decoration>((int)Math.Abs(Gaussian.BoxMuller(featureAv, featureStd)), DecorationFeatureDetails.decorationFeatures[f]));
 
-                    var thisRoom = mapInfo.GetRoom(room);
+                    var thisRoom = mapInfo.Room(room);
                     var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;
 
                     var numberOfFeatures = (int)Math.Abs(Gaussian.BoxMuller(thisRoomArea * avConcentration, thisRoomArea * stdConcentration));
@@ -1344,7 +1344,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Pillar1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Pillar2])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(escapePodRoom), mapInfo.GetRoom(escapePodRoom), 20, escapePodDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(escapePodRoom), mapInfo.Room(escapePodRoom), 20, escapePodDecorations, false);
 
             //Escape pod door
             //Requires enabling self-destruct
@@ -1380,7 +1380,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Screen1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HighTechBench])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(selfDestructRoom), mapInfo.GetRoom(selfDestructRoom), 20, bridgeDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(selfDestructRoom), mapInfo.Room(selfDestructRoom), 20, bridgeDecorations, false);
 
             LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
 
@@ -1402,7 +1402,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument3])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.GetRoom(reactorSelfDestructVault), 100, reactorDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.Room(reactorSelfDestructVault), 100, reactorDecorations, false);
 
         }
 
@@ -1501,7 +1501,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),
                 new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant3])};
-            AddStandardDecorativeFeaturesToRoom(captainsIdLevel, mapInfo.GetRoom(captainsIdRoom), 10, decorations, false);
+            AddStandardDecorativeFeaturesToRoom(captainsIdLevel, mapInfo.Room(captainsIdRoom), 10, decorations, false);
 
             //Logs
 
@@ -1556,7 +1556,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton])
             };
-            AddStandardDecorativeFeaturesToRoom(techIdLevel, mapInfo.GetRoom(techIdRoom), 20, bioDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(techIdLevel, mapInfo.Room(techIdRoom), 20, bioDecorations, false);
         }
 
         private void ArcologyLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -1596,7 +1596,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.CorpseinGoo]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.EggChair])
             };
-            AddStandardDecorativeFeaturesToRoom(biowareLevel, mapInfo.GetRoom(biowareRoom), 10, bioDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(biowareLevel, mapInfo.Room(biowareRoom), 10, bioDecorations, false);
 
             //Logs
 
@@ -1669,7 +1669,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             Game.Dungeon.MonsterPlacement.AddMonstersToRoom(mapInfo, antennaeLevel, antennaeVault, monstersToPlace);
 
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Antennae]) };
-            AddStandardDecorativeFeaturesToRoom(antennaeLevel, mapInfo.GetRoom(antennaeVault), 10, decorations, false);
+            AddStandardDecorativeFeaturesToRoom(antennaeLevel, mapInfo.Room(antennaeVault), 10, decorations, false);
 
             //Servo motor
 
@@ -1681,7 +1681,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart3])
             };
-            AddStandardDecorativeFeaturesToRoom(servoLevel, mapInfo.GetRoom(servoRoom), 10, servoDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(servoLevel, mapInfo.Room(servoRoom), 10, servoDecorations, false);
 
             //Logs
 
@@ -1891,7 +1891,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 }
 
                 var pointToPlaceClue = pointsForClues.First();
-                mapInfo.RoomInfo(pointToPlaceClue.roomId).AddMonster(newMonster, pointToPlaceClue.ToLocation());
+                mapInfo.RoomInfo(pointToPlaceClue.roomId).AddMonster(new MonsterRoomPlacement(newMonster, pointToPlaceClue.ToLocation()));
 
                 placedClues.Add(clue);
             }
@@ -3556,7 +3556,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Set PC start location
 
-            var firstRoom = mapInfo.GetRoom(0);
+            var firstRoom = mapInfo.Room(0);
             masterMap.PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             //Add items

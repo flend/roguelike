@@ -310,7 +310,7 @@ namespace RogueBasin
 
             //Set player's start location (must be done before adding items)
 
-            var firstRoom = mapInfo.GetRoom(0);
+            var firstRoom = mapInfo.Room(0);
             masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             //Add terrain and randomize walls
@@ -506,7 +506,7 @@ namespace RogueBasin
 
                 //Set player's start location (must be done before adding items)
 
-                var firstRoom = mapInfo.GetRoom(0);
+                var firstRoom = mapInfo.Room(0);
                 masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
                 //Add terrain and randomize walls
@@ -536,9 +536,9 @@ namespace RogueBasin
                 Game.Dungeon.AddFeature(new Features.Elevator(0, elevator1Loc), 1, elevator2Loc);
 
                 //Add non-interactable features
-                var bridgeRoomOnMap = mapInfo.GetRoom(bridgeMainBridgeConnection.Target);
+                var bridgeRoomOnMap = mapInfo.Room(bridgeMainBridgeConnection.Target);
                 AddStandardDecorativeFeaturesToRoom(1, bridgeRoomOnMap, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
-                var escapePodsRoom = mapInfo.GetRoom(escapePodsConnection.Target);
+                var escapePodsRoom = mapInfo.Room(escapePodsConnection.Target);
                 AddStandardDecorativeFeaturesToRoom(0, escapePodsRoom, 50, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Machine]);
 
                 //Add clues
@@ -858,7 +858,7 @@ namespace RogueBasin
 
             //Set PC start location
 
-            var firstRoom = mapInfo.GetRoom(0);
+            var firstRoom = mapInfo.Room(0);
             masterMap.PCStartLocation = new Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
 
             //Add items

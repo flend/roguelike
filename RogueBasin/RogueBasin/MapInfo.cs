@@ -179,9 +179,9 @@ namespace RogueBasin
             }
         }
 
-        public void AddMonster(Monster creature, Location loc)
+        public void AddMonster(MonsterRoomPlacement monster)
         {
-            monsters.Add(new MonsterRoomPlacement(creature, loc));
+            monsters.Add(monster);
         }
 
         public IEnumerable<MonsterRoomPlacement> Monsters
@@ -301,11 +301,11 @@ namespace RogueBasin
         public IEnumerable<Point> GetFreePointsToPlaceCreatureInRoom(int roomIndex)
         {
             var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, RoomTemplateTerrain.Floor);
-            var roomAbsolutePoints = roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
+            var unoccupiedAbsolutePoints = roomRelativePoints.Except(GetOccupiedRoomPoints(roomIndex));
 
-            var unoccupiedAbsolutePoints = roomAbsolutePoints.Except(GetOccupiedRoomPoints(roomIndex));
+            var roomAbsolutePoints = unoccupiedAbsolutePoints.Select(p => new Point(rooms[roomIndex].Location + p));
 
-            return unoccupiedAbsolutePoints;
+            return roomAbsolutePoints;
         }
 
         private IEnumerable<Point> GetOccupiedRoomPoints(int roomIndex)
@@ -414,7 +414,7 @@ namespace RogueBasin
             }
         }
 
-        public TemplatePositioned GetRoom(int roomIndex)
+        public TemplatePositioned Room(int roomIndex)
         {
             return rooms[roomIndex];
         }

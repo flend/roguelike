@@ -558,8 +558,8 @@ namespace RogueBasin
                 var longDivision = Math.Sqrt(longShortRatio * monsterSetsToPlaceInRoom);
                 var shortDivison = longDivision / longShortRatio;
 
-                var regularGridOfCentres = RoyaleDungeonLevelMaker.DivideRoomIntoCentres(mapInfo.GetRoom(rooms.ElementAt(r)).Room, (int)Math.Ceiling(longDivision), (int)Math.Ceiling(shortDivison), 0.3, new Point(2,2));
-                var regularGridOfCentresMapCoordsUnsafe = regularGridOfCentres.Select(p => mapInfo.GetRoom(rooms.ElementAt(r)).Location + p);
+                var regularGridOfCentres = RoyaleDungeonLevelMaker.DivideRoomIntoCentres(mapInfo.Room(rooms.ElementAt(r)).Room, (int)Math.Ceiling(longDivision), (int)Math.Ceiling(shortDivison), 0.3, new Point(2,2));
+                var regularGridOfCentresMapCoordsUnsafe = regularGridOfCentres.Select(p => mapInfo.Room(rooms.ElementAt(r)).Location + p);
                 var regularGridOfCentresMapCoords = regularGridOfCentresMapCoordsUnsafe.Except(pointsCloseToPlayer).Shuffle();
 
 

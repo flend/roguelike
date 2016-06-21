@@ -121,7 +121,7 @@ namespace RogueBasin
 
         private void SetEntryLocation(LevelInfo levelInfo)
         {
-            var entryRoom = mapInfo.GetRoom(levelInfo.EntryBoothConnection.Target);
+            var entryRoom = mapInfo.Room(levelInfo.EntryBoothConnection.Target);
             levelInfo.EntryLocation = new RogueBasin.Point(entryRoom.X + entryRoom.Room.Width / 2, entryRoom.Y + entryRoom.Room.Height / 2);
         }
 
@@ -660,7 +660,7 @@ namespace RogueBasin
 
             foreach (var room in roomsInThisLevel)
             {
-                var thisRoom = mapInfo.GetRoom(room);
+                var thisRoom = mapInfo.Room(room);
                 var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;
 
                 var numberOfFeatures = (int)Math.Abs(Gaussian.BoxMuller(thisRoomArea * avConcentration, thisRoomArea * stdConcentration));

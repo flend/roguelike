@@ -100,7 +100,9 @@ namespace RogueBasin
             effects = new List<MonsterEffect>();
 
             //Set up attributes from class start values
-            maxHitpoints = Game.Dungeon.LevelScalingCalculation(ClassMaxHitpoints(), Level);
+            //maxHitpoints = Game.Dungeon.LevelScalingCalculation(ClassMaxHitpoints(), Level);
+
+            maxHitpoints = ClassMaxHitpoints();
 
             hitpoints = maxHitpoints;
             //LogFile.Log.LogEntryDebug("Setting monster " + SingleDescription + " HP to " + hitpoints + " on construction", LogDebugLevel.Medium);

@@ -63,6 +63,8 @@
     <Compile Include="MapInfoBuilderTest.cs" />
     <Compile Include="ConnectionTest.cs" />
     <Compile Include="RoomRoutingTest.cs" />
+    <Compile Include="TestEntities.cs" />
+    <Compile Include="TestUtilities.cs" />
     <Compile Include="UtilityTest.cs" />
   </ItemGroup>
   <ItemGroup>

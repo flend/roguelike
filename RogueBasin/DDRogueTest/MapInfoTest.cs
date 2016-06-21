@@ -65,9 +65,25 @@ namespace DDRogueTest
         [TestMethod]
         public void GetFreePointsToPlaceCreatureInRoomCorrectlyRemovesFeatureAndCreatureOccupiedPoints()
         {
-            var mapInfo = GetStandardMapInfoForTemplates();
-            var filteredRooms = mapInfo.FilterOutCorridors(new List<int> { 0, 1, 2 }).ToList();
-            CollectionAssert.AreEqual(new List<int> { 2 }, filteredRooms);
+            var mapInfo = StandardTwoRoomOneLevelMapInfo();
+            var room0Info = mapInfo.RoomInfo(0);
+
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 1)));
+            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 2)));
+            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Location(0, new Point(3, 3)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            room0Info.AddFeature(nonBlockingFeatureToPlace);
+            room0Info.AddMonster(monsterToPlace);
+
+            var roomLevelLocation = mapInfo.Room(0).Location;
+
+            var freeSpacesAbsolute = mapInfo.GetFreePointsToPlaceCreatureInRoom(0);
+            var freeSpacesRelative = freeSpacesAbsolute.Select(p => p - roomLevelLocation);
+
+            Assert.IsFalse(freeSpacesRelative.Contains(new Point(1, 1)));
+            Assert.IsFalse(freeSpacesRelative.Contains(new Point(3, 3)));
+
+            Assert.IsTrue(freeSpacesRelative.Contains(new Point(2, 2)));
         }
 
 
@@ -87,7 +103,7 @@ namespace DDRogueTest
 
             var mapInfo = new MapInfo(mapInfoBuilder);
 
-            Assert.AreEqual(new Point(9, 9), mapInfo.GetRoom(100).Location);
+            Assert.AreEqual(new Point(9, 9), mapInfo.Room(100).Location);
         }
 
         [TestMethod]
@@ -211,8 +227,8 @@ namespace DDRogueTest
         {
             var builder = new MapInfoBuilder();
             
-            RoomTemplate baseRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
-            RoomTemplate toAlignRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
+            RoomTemplate baseRoomTemplate = TestUtilities.LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom3.room");
+            RoomTemplate toAlignRoomTemplate = TestUtilities.LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testalignmentroom1.room");
 
             TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
             TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
@@ -225,11 +241,5 @@ namespace DDRogueTest
             return new MapInfo(builder);
         }
 
-        private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
-        {
-            Assembly _assembly = Assembly.GetExecutingAssembly();
-            Stream roomFileStream = _assembly.GetManifestResourceStream(filePath);
-            return RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
-        }
     }
 }
