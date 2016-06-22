@@ -1874,8 +1874,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 if (!pointsForClues.Any())
                     pointsForClues = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, true, includeVaults);
 
-                bool placedItem = false;
-
                 var newMonster = new T();
                 Item clueItem;
                 if (autoPickup)
@@ -1890,7 +1888,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     throw new ApplicationException("Nowhere to place clue monster " + newMonster.SingleDescription);
                 }
 
-                var pointToPlaceClue = pointsForClues.First();
+                var pointToPlaceClue = pointsForClues.Shuffle().First();
                 mapInfo.RoomInfo(pointToPlaceClue.roomId).AddMonster(new MonsterRoomPlacement(newMonster, pointToPlaceClue.ToLocation()));
 
                 placedClues.Add(clue);
@@ -1994,19 +1992,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private IEnumerable<RoomPoint> GetAllWalkableRoomPointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
-            var possibleRooms = clue.PossibleClueRoomsInFullMap;
-
-            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
-            if (!includeVaults)
-                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
-
-            IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
-            if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
-            if (candidateRooms.Count() == 0)
-                candidateRooms = possibleRoomMinusVaults;
-
-            //Must be on the same level
+            var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
 
             var allWalkablePoints = new List<RoomPoint>();
 
@@ -2015,11 +2001,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             {
                 var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(room);
                 var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
-                var allPossibleRoomPoints = allPossiblePoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
-                //Note: we need a function on mapInfo to tell us which points are walkable, even after we have added in blocking features
-                //currently this could put clues on top of existing features
+                var allUnoccupiedPoints = allPossiblePoints.Except(mapInfo.GetOccupiedPointsInRoom(room));
+                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
                 
-                allWalkablePoints.AddRange(allPossibleRoomPoints);
+                allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
             }
 
             return allWalkablePoints.Shuffle();
@@ -2027,17 +2012,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
-            var possibleRooms = clue.PossibleClueRoomsInFullMap;
-
-            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
-            if(!includeVaults)
-                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
-
-            IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
-            if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
-            if (candidateRooms.Count() == 0)
-                candidateRooms = possibleRoomMinusVaults;
+            var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
 
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
@@ -2128,15 +2103,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private IEnumerable<RoomPoint> GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
-            var possibleRooms = clue.PossibleClueRoomsInFullMap;
-            IEnumerable<int> initialRooms = possibleRooms;
-            if (!includeVaults)
-                initialRooms = possibleRooms.Except(allReplaceableVaults);
-            var candidateRooms = initialRooms;
-            if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(initialRooms);
-            if (candidateRooms.Count() == 0)
-                candidateRooms = initialRooms;
+            var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
 
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
@@ -2147,27 +2114,32 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             foreach (var room in candidateRooms)
             {
                 var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
-                var allPossibleRoomPoints = allPossiblePoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
-                //Note: we need a function on mapInfo to tell us which points are walkable, even after we have added in blocking features
-                //currently this could put clues on top of existing features
+                var allUnoccupiedPoints = allPossiblePoints.Except(mapInfo.GetOccupiedPointsInRoom(room));
+                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
                 
-                allWalkablePoints.AddRange(allPossibleRoomPoints);
+                allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
             }
 
             return allWalkablePoints.Shuffle();
         }
 
-        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        private IEnumerable<int> GetPossibleRoomsForClues(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
             IEnumerable<int> initialRooms = possibleRooms;
-            if(!includeVaults)
+            if (!includeVaults)
                 initialRooms = possibleRooms.Except(allReplaceableVaults);
             var candidateRooms = initialRooms;
             if (filterCorridors)
                 candidateRooms = mapInfo.FilterOutCorridors(initialRooms);
             if (candidateRooms.Count() == 0)
                 candidateRooms = initialRooms;
+            return candidateRooms;
+        }
+
+        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        {
+            var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
 
             //Must be on the same level
             var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
@@ -2178,6 +2150,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             foreach (var room in candidateRooms)
             {
                 var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
+                var allUnoccupiedPoints = allPossiblePoints.Except(mapInfo.GetOccupiedPointsInRoom(room));
                 allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
             }
 

@@ -301,14 +301,14 @@ namespace RogueBasin
         public IEnumerable<Point> GetFreePointsToPlaceCreatureInRoom(int roomIndex)
         {
             var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, RoomTemplateTerrain.Floor);
-            var unoccupiedAbsolutePoints = roomRelativePoints.Except(GetOccupiedRoomPoints(roomIndex));
+            var unoccupiedAbsolutePoints = roomRelativePoints.Except(GetOccupiedRoomPointsInRelativeCoords(roomIndex));
 
             var roomAbsolutePoints = unoccupiedAbsolutePoints.Select(p => new Point(rooms[roomIndex].Location + p));
 
             return roomAbsolutePoints;
         }
 
-        private IEnumerable<Point> GetOccupiedRoomPoints(int roomIndex)
+        private IEnumerable<Point> GetOccupiedRoomPointsInRelativeCoords(int roomIndex)
         {
             var roomInfo = RoomInfo(roomIndex);
 
@@ -328,6 +328,12 @@ namespace RogueBasin
         public IEnumerable<int> FilterOutCorridors(IEnumerable<int> roomIndices)
         {
             return roomIndices.Where(r => (rooms[r].Room.Height > corridorHeight && rooms[r].Room.Width > corridorWidth) && !rooms[r].Room.IsCorridor);
+        }
+
+        public IEnumerable<Point> GetOccupiedPointsInRoom(int roomIndex)
+        {
+            var relativeOccupiedPoints = GetOccupiedRoomPointsInRelativeCoords(roomIndex);
+            return relativeOccupiedPoints.Select(p => new Point(rooms[roomIndex].Location + p));
         }
 
         public IEnumerable<int> FilterRoomsByLevel(IEnumerable<int> roomIndices, IEnumerable<int> levels)

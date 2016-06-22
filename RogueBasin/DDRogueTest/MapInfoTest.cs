@@ -86,6 +86,30 @@ namespace DDRogueTest
             Assert.IsTrue(freeSpacesRelative.Contains(new Point(2, 2)));
         }
 
+        [TestMethod]
+        public void GetOccupiedPointsInRoomRemovesFeatureAndCreatureOccupiedPoints()
+        {
+            var mapInfo = StandardTwoRoomOneLevelMapInfo();
+            var room0Info = mapInfo.RoomInfo(0);
+
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 2)));
+            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 1)));
+            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Location(0, new Point(3, 4)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            room0Info.AddFeature(nonBlockingFeatureToPlace);
+            room0Info.AddMonster(monsterToPlace);
+
+            var roomLevelLocation = mapInfo.Room(0).Location;
+
+            var occupiedSpacesAbsolute = mapInfo.GetOccupiedPointsInRoom(0);
+            var occupiedSpacesRelative = occupiedSpacesAbsolute.Select(p => p - roomLevelLocation);
+
+            Assert.IsTrue(occupiedSpacesRelative.Contains(new Point(1, 2)));
+            Assert.IsTrue(occupiedSpacesRelative.Contains(new Point(3, 4)));
+
+            Assert.IsFalse(occupiedSpacesRelative.Contains(new Point(2, 1)));
+        }
+
 
         [TestMethod]
         public void RoomsCanBeRetrievedByIndex()
