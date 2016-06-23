@@ -291,6 +291,17 @@ namespace RogueBasin
             return new Point(rooms[roomIndex].Location + roomRelativePoint);
         }
 
+        /// <summary>
+        /// To have an event distribution of items in rooms, we need to place items based on the number of actual rooms that
+        /// make up a room in the no-cycles map.
+        /// </summary>
+        /// <param name="roomNodes"></param>
+        /// <returns></returns>
+        public IEnumerable<int> RepeatRoomNodesByNumberOfRoomsInCollapsedCycles(IEnumerable<int> roomNodes)
+        {
+            return roomNodes.SelectMany(r => Enumerable.Repeat(r, Model.GraphNoCycles.roomMappingNoCycleToFullMap[r].Count()));
+        }
+
         public IEnumerable<Point> GetAllPointsInRoomOfTerrain(int roomIndex, RoomTemplateTerrain terrainToFind)
         {
             var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, terrainToFind);

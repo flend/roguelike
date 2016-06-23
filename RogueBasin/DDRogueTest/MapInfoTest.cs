@@ -131,6 +131,17 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void RoomsInCollapsedCyclesAreRepeatedToEquateObjectDistribution()
+        {
+            var mapInfo = MapInfoWithCycle();
+
+            var roomsWithRepeatsForCycles = mapInfo.RepeatRoomNodesByNumberOfRoomsInCollapsedCycles(new List<int> { 1, 2 }).ToList();
+            var expectedRoomsWithRepeats = new List<int> { 1, 2, 2, 2 };
+
+            CollectionAssert.AreEquivalent(expectedRoomsWithRepeats, roomsWithRepeatsForCycles);
+        }
+
+        [TestMethod]
         public void CyclesOnSeparateLevelsCanBeReturned()
         {
             var builder = new MapInfoBuilder();
@@ -210,6 +221,19 @@ namespace DDRogueTest
             return new MapInfo(builder);
         }
 
+        private MapInfo MapInfoWithCycle()
+        {
+            var builder = new MapInfoBuilder();
+            var l1ConnectivityMap = new ConnectivityMap();
+            l1ConnectivityMap.AddRoomConnection(1, 2);
+            l1ConnectivityMap.AddRoomConnection(2, 3);
+            l1ConnectivityMap.AddRoomConnection(3, 4);
+            l1ConnectivityMap.AddRoomConnection(4, 2);
+
+            builder.AddConstructedLevel(0, l1ConnectivityMap, new List<TemplatePositioned>(), new Dictionary<Connection, Point>(), 1);
+
+            return new MapInfo(builder);
+        }
 
         private MapInfo GetStandardMapInfo()
         {

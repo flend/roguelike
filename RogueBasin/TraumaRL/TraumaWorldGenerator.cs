@@ -1239,31 +1239,26 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return preferredRoomsIncludingType;
         }
 
-        private List<int> GetRandomRoomsForClues(MapInfo info, int objectsToPlace, IEnumerable<int> allowedRoomsForClues)
+        private List<int> GetRandomRoomsForClues(MapInfo info, int cluesToPlace, IEnumerable<int> allowedRoomsForClues)
         {
             if (allowedRoomsForClues.Count() == 0)
                 throw new ApplicationException("Not enough rooms to place clues");
 
             //To get an even distribution we need to take into account how many nodes are in each group node
-            var expandedAllowedRoomForClues = allowedRoomsForClues.Except(allReplaceableVaults).SelectMany(r => Enumerable.Repeat(r, info.Model.GraphNoCycles.roomMappingNoCycleToFullMap[r].Count()));
+            var expandedAllowedRoomForClues = info.RepeatRoomNodesByNumberOfRoomsInCollapsedCycles(allowedRoomsForClues.Except(allReplaceableVaults));
 
             if (expandedAllowedRoomForClues.Count() == 0)
                 throw new ApplicationException("No allowed rooms for clues.");
 
-            var roomsToPlaceMonsters = new List<int>();
+            var roomsToPlaceClues = new List<int>();
 
-            while (roomsToPlaceMonsters.Count() < objectsToPlace)
+            //Can reuse rooms if number of rooms < cluesToPlace
+            while (roomsToPlaceClues.Count() < cluesToPlace)
             {
-                var shuffledRooms = expandedAllowedRoomForClues.Shuffle();
-                foreach (var room in shuffledRooms)
-                {
-                    roomsToPlaceMonsters.Add(room);
-                    if (roomsToPlaceMonsters.Count() == objectsToPlace)
-                        break;
-                }
+                roomsToPlaceClues.AddRange(expandedAllowedRoomForClues.Shuffle());
             }
 
-            return roomsToPlaceMonsters;
+            return roomsToPlaceClues.GetRange(0, cluesToPlace);
         }
 
         int selfDestructRoom;
