@@ -23,7 +23,7 @@ namespace TraumaRL
         List<int> allReplaceableVaults;
 
         //For development, skip making most of the levels
-        bool quickLevelGen = true;
+        bool quickLevelGen = false;
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
@@ -545,6 +545,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     }
                 }
             }
+
+            foreach (var doorInfo in mapInfo.DoorInfo)
+            {
+                var door = doorInfo.Value;
+
+                foreach(var doorLock in door.Locks) {
+                    Game.Dungeon.AddLock(doorLock);
+                }
+            }
         }
 
         private void AssertMapIsSolveable(MapInfo mapInfo)
@@ -934,21 +943,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 //Place door
                 var doorReadableId = Game.Dungeon.DungeonInfo.LevelNaming[thisLevel] + " armory";
                 var doorId = doorReadableId;
-                manager.PlaceDoor(new DoorRequirements(thisConnection, doorId, 1));
-                var door = manager.GetDoorById(doorId);
-
+                
                 var unusedColor = GetUnusedColor();
                 var clueName = unusedColor.Item2 + " key card";
 
-
-                var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, clueName, unusedColor.Item1);
-                var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-                lockedDoor.LocationLevel = doorInfo.LevelNo;
-                lockedDoor.LocationMap = doorInfo.MapLocation;
-
-                Game.Dungeon.AddLock(lockedDoor);
-
-                placedDoors.Add(door);
+                PlaceDoorOnMap(mapInfo, doorId, clueName, 1, unusedColor.Item1, thisConnection);
 
                 goodyRooms[thisLevel] = thisRoom;
 
@@ -1017,35 +1016,23 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Lock the door to the elevator and require a certain number of monsters to be killed
             var elevatorConnection = levelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
 
-            var manager = mapInfo.Model.DoorAndClueManager;
-
             var doorId = "medical-security";
             int objectsToPlace = 15;
             int objectsToDestroy = 10;
 
             //Place door
-            manager.PlaceDoor(new DoorRequirements(elevatorConnection, doorId, objectsToDestroy));
-            var door = manager.GetDoorById(doorId);
-
-            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", doorId, System.Drawing.Color.Red);
-            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-            lockedDoor.LocationLevel = doorInfo.LevelNo;
-            lockedDoor.LocationMap = doorInfo.MapLocation;
-
-            mapInfo.DoorInfo(door.Id).AddLock(lockedDoor);
-
-            placedDoors.Add(door);
+            PlaceMovieDoorOnMap(mapInfo, doorId, doorId, objectsToDestroy, System.Drawing.Color.Red, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", elevatorConnection);
 
             //This will be restricted to the medical level since we cut off the door
+            var manager = mapInfo.Model.DoorAndClueManager;
+
             var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
-            var roomsToPlaceCameras = new List<int>();
 
             var roomsForMonsters = GetRandomRoomsForClues(mapInfo, objectsToPlace, allowedRoomsForClues);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
             PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapInfo, clues, true, false);
-            //This has now be converted to store the creatures in RoomInfo, rather than write them directly to the map
 
             //Place log entries explaining the puzzle
             //These will not be turned into in-engine clue items, so they can't be used to open the door
@@ -1059,18 +1046,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
         }
 
-        /*
-        private void BlockPathBetweenElevatorsWithSimpleDoor(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap, 
-            string doorId, int cluesForDoor, int sourceRoom, int endRoom, 
-            double distanceFromSourceRatio, bool enforceClueOnDestLevel, CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
-            bool hasLogClue, CluePath logOnCriticalPath, bool logNotInCorridors)
-        {
-            BlockPathBetweenRoomsWithSimpleDoor(mapInfo, levelInfo, roomConnectivityMap,
-            doorId, cluesForDoor, sourceRoom, endRoom,
-            distanceFromSourceRatio, enforceClueOnDestLevel, clueNotOnCriticalPath, clueNotInCorridors,
-            hasLogClue, logOnCriticalPath, logNotInCorridors);
-        }*/
-
         private void BlockPathBetweenRoomsWithSimpleDoor(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap,
             string doorId, string doorName, System.Drawing.Color colorToUse, int cluesForDoor, int sourceRoom, int endRoom, 
             double distanceFromSourceRatio, bool enforceClueOnDestLevel, CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
@@ -1081,7 +1056,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(sourceRoom, endRoom);
             var criticalConnectionForDoor = criticalPath.ElementAt((int)Math.Min(criticalPath.Count() * distanceFromSourceRatio, criticalPath.Count() - 1));
 
-            criticalConnectionForDoor = CheckAndReplaceConnectionIfOccupied(manager, criticalPath, criticalConnectionForDoor);
+            criticalConnectionForDoor = FindFreeConnectionOnPath(manager, criticalPath, criticalConnectionForDoor);
 
             //Place door
 
@@ -1115,56 +1090,42 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var roomsForLogsNonCritical = GetRandomRoomsForClues(mapInfo, 1, preferredRoomsForLogsNonCritical);
                 var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
 
-                //try
-                //{
                 var coupledLogs = logGen.GenerateCoupledDoorLogEntry(doorName, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
                     clueLocations.First().Item1);
                 var log1 = new Tuple<LogEntry, Clue>(coupledLogs[0], logClues[0]);
                 var log2 = new Tuple<LogEntry, Clue>(coupledLogs[1], logCluesNonCritical[0]);
                 PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
-                //}
-                // catch (Exception)
-                //{
-                //Ignore log problems
-                //}
             }
         }
 
         private Door PlaceDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, System.Drawing.Color colorToUse, Connection criticalConnectionForDoor)
         {
-            var manager = mapInfo.Model.DoorAndClueManager;
-
-            manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, numberOfCluesForDoor));
-            var door = manager.GetDoorById(doorId);
+            var door = PlaceDoorInManager(mapInfo, doorId, numberOfCluesForDoor, criticalConnectionForDoor);
 
             var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, doorName, colorToUse);
-            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-            lockedDoor.LocationLevel = doorInfo.LevelNo;
-            lockedDoor.LocationMap = doorInfo.MapLocation;
-
-            Game.Dungeon.AddLock(lockedDoor);
-
-            placedDoors.Add(door);
+            
+            PlaceDoorOnMap(mapInfo, lockedDoor, door);
 
             return door;
         }
 
         private Door PlaceMovieDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, System.Drawing.Color colorToUse, string openMovie, string cantOpenMovie, Connection criticalConnectionForDoor)
         {
+            var door = PlaceDoorInManager(mapInfo, doorId, numberOfCluesForDoor, criticalConnectionForDoor);
+
+            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, openMovie, cantOpenMovie, doorName, colorToUse);
+
+            PlaceDoorOnMap(mapInfo, lockedDoor, door);
+
+            return door;
+        }
+
+        private static Door PlaceDoorInManager(MapInfo mapInfo, string doorId, int numberOfCluesForDoor, Connection criticalConnectionForDoor)
+        {
             var manager = mapInfo.Model.DoorAndClueManager;
 
             manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, numberOfCluesForDoor));
             var door = manager.GetDoorById(doorId);
-
-            var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, openMovie, cantOpenMovie, doorName, colorToUse);
-            var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-            lockedDoor.LocationLevel = doorInfo.LevelNo;
-            lockedDoor.LocationMap = doorInfo.MapLocation;
-
-            Game.Dungeon.AddLock(lockedDoor);
-
-            placedDoors.Add(door);
-
             return door;
         }
 
@@ -1174,21 +1135,21 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;
 
-            Game.Dungeon.AddLock(lockedDoor);
+            mapInfo.GetDoorInfo(door.Id).AddLock(lockedDoor);
 
             placedDoors.Add(door);
         }
 
-        private Connection CheckAndReplaceConnectionIfOccupied(DoorAndClueManager manager, IEnumerable<Connection> criticalPath, Connection connectionCandidate)
+        private Connection FindFreeConnectionOnPath(DoorAndClueManager manager, IEnumerable<Connection> path, Connection preferredConnectionCandidate)
         {
-            if (manager.GetDoorsForEdge(connectionCandidate).Count() > 0)
+            if (manager.GetDoorsForEdge(preferredConnectionCandidate).Count() > 0)
             {
                 //Try another edge
-                var possibleEdges = criticalPath.Shuffle();
+                var possibleEdges = path.Shuffle();
                 Connection foundEdge = null;
                 foreach (var edge in possibleEdges)
                 {
-                    if (manager.GetDoorsForEdge(connectionCandidate).Count() == 0)
+                    if (manager.GetDoorsForEdge(preferredConnectionCandidate).Count() == 0)
                     {
                         foundEdge = edge;
                         break;
@@ -1203,7 +1164,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 return foundEdge;
             }
 
-            return connectionCandidate;
+            return preferredConnectionCandidate;
         }
 
         private enum CluePath

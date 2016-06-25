@@ -220,7 +220,6 @@ namespace RogueBasin
 
     public class DoorContentsInfo
     {
-
         private string id;
         private List<Lock> locks = new List<Lock>();
 
@@ -392,7 +391,7 @@ namespace RogueBasin
             return roomInfo.Select(r => r.Value);
         }
 
-        public DoorContentsInfo DoorInfo(string doorIndex)
+        public DoorContentsInfo GetDoorInfo(string doorIndex)
         {
             DoorContentsInfo thisDoorInfo;
             doorInfo.TryGetValue(doorIndex, out thisDoorInfo);
@@ -403,6 +402,14 @@ namespace RogueBasin
             }
 
             return doorInfo[doorIndex];
+        }
+
+        public Dictionary<string, DoorContentsInfo> DoorInfo
+        {
+            get
+            {
+                return doorInfo;
+            }
         }
 
         public IEnumerable<int> RoomsInDescendingDistanceFromSource(int sourceRoom, IEnumerable<int> testRooms)
