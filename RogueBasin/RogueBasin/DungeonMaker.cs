@@ -2055,17 +2055,17 @@ namespace RogueBasin
 
             
             
-            Game.Dungeon.AddItemNoChecks(new Items.HealingPotion(), 0, new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y + 2));
+            Game.Dungeon.AddItem(new Items.HealingPotion(), 0, new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y + 2));
   
 
             //Spawn all the potions / berries
              
-            Game.Dungeon.AddItemNoChecks(new Items.Potion(), 0, new Point(Game.Dungeon.Player.LocationMap.x - 2, Game.Dungeon.Player.LocationMap.y + 3));
-            Game.Dungeon.AddItemNoChecks(new Items.PotionDamUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x - 1, Game.Dungeon.Player.LocationMap.y + 3));
-            Game.Dungeon.AddItemNoChecks(new Items.PotionToHitUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y + 3));
-            Game.Dungeon.AddItemNoChecks(new Items.PotionSightUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y -1));
-            Game.Dungeon.AddItemNoChecks(new Items.PotionSpeedUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x+1, Game.Dungeon.Player.LocationMap.y -1));
-            Game.Dungeon.AddItemNoChecks(new Items.PotionMPRestore(), 0, new Point(Game.Dungeon.Player.LocationMap.x + 2, Game.Dungeon.Player.LocationMap.y - 1));
+            Game.Dungeon.AddItem(new Items.Potion(), 0, new Point(Game.Dungeon.Player.LocationMap.x - 2, Game.Dungeon.Player.LocationMap.y + 3));
+            Game.Dungeon.AddItem(new Items.PotionDamUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x - 1, Game.Dungeon.Player.LocationMap.y + 3));
+            Game.Dungeon.AddItem(new Items.PotionToHitUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y + 3));
+            Game.Dungeon.AddItem(new Items.PotionSightUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y -1));
+            Game.Dungeon.AddItem(new Items.PotionSpeedUp(), 0, new Point(Game.Dungeon.Player.LocationMap.x+1, Game.Dungeon.Player.LocationMap.y -1));
+            Game.Dungeon.AddItem(new Items.PotionMPRestore(), 0, new Point(Game.Dungeon.Player.LocationMap.x + 2, Game.Dungeon.Player.LocationMap.y - 1));
             
         }
 

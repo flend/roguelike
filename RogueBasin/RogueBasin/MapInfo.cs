@@ -156,12 +156,24 @@ namespace RogueBasin
         }
     }
 
+    public class ItemRoomPlacement
+    {
+        public readonly Item item;
+        public readonly Location location;
+
+        public ItemRoomPlacement(Item i, Location loc)
+        {
+            item = i;
+            location = loc;
+        }
+    }
+
     public class RoomInfo {
 
         private int id;
         private List<FeatureRoomPlacement> features = new List<FeatureRoomPlacement>();
         private List<MonsterRoomPlacement> monsters = new List<MonsterRoomPlacement>();
-        private List<Item> items = new List<Item>();
+        private List<ItemRoomPlacement> items = new List<ItemRoomPlacement>();
         
         public RoomInfo(int roomId) {
             this.id = roomId;
@@ -192,12 +204,12 @@ namespace RogueBasin
             }
         }
 
-        public void AddItem(Item item)
+        public void AddItem(ItemRoomPlacement item)
         {
             items.Add(item);
         }
 
-        public IEnumerable<Item> Items
+        public IEnumerable<ItemRoomPlacement> Items
         {
             get
             {

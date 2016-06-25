@@ -531,7 +531,17 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     bool monsterResult = Game.Dungeon.AddMonster(monsterPlacement.monster, monsterPlacement.location);
 
                     if (!monsterResult) {
-                        LogFile.Log.LogEntryDebug("Cannot add monster " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
+                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+
+                foreach (ItemRoomPlacement itemPlacement in roomInfo.Items)
+                {
+                    bool monsterResult = Game.Dungeon.AddItem(itemPlacement.item, itemPlacement.location);
+
+                    if (!monsterResult)
+                    {
+                        LogFile.Log.LogEntryDebug("Cannot add item to dungeon: " + itemPlacement.item.SingleItemDescription + " at: " + itemPlacement.location, LogDebugLevel.Medium);
                     }
                 }
             }
@@ -1044,16 +1054,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var roomsForLogs = GetRandomRoomsForClues(mapInfo, 2, allowedRoomsForClues);
             var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
 
-            //try
-            //{
-                var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateElevatorLogEntry(medicalLevel, lowerAtriumLevel), logClues[0]);
-                var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateArbitaryLogEntry("qe_medicalsecurity"), logClues[1]);
-                PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
-            //}
-           // catch (Exception)
-            //{
-                //Ignore log problems
-            //}
+            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateElevatorLogEntry(medicalLevel, lowerAtriumLevel), logClues[0]);
+            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateArbitaryLogEntry("qe_medicalsecurity"), logClues[1]);
+            PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
         }
 
         /*
@@ -1892,44 +1895,34 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void PlaceLogClues(MapInfo mapInfo, List<Tuple<LogEntry, Clue>> logCluesToPlace, bool boundariesPreferred, bool cluesNotInCorridors)
         {
-            foreach (var t in logCluesToPlace)
+            foreach (var logClue in logCluesToPlace)
             {
-                var clue = t.Item2;
-                var logEntry = t.Item1;
+                var logEntry = logClue.Item1;
+                var clue = logClue.Item2;
 
                 if (placedClues.Contains(clue))
                     continue;
 
-                Tuple<int, IEnumerable<RogueBasin.Point>> roomsForClue;
+                IEnumerable<RoomPoint> pointsForClue;
                 if (boundariesPreferred)
                 {
-                    roomsForClue = GetAllWalkablePointsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors, false);
+                    pointsForClue = GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors, false);
 
-                    if (!roomsForClue.Item2.Any())
-                        roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors, false);
+                    if (!pointsForClue.Any())
+                        pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, cluesNotInCorridors, false);
                 }
                 else
-                    roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, cluesNotInCorridors,false);
+                    pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, cluesNotInCorridors, false);
 
-                var levelForClue = roomsForClue.Item1;
-                var allWalkablePoints = roomsForClue.Item2;
-
-                bool placedItem = false;
+                if (!pointsForClue.Any())
+                {
+                    throw new ApplicationException("Nowhere to place clue item: " + logEntry.title);
+                }
 
                 var logItem = new RogueBasin.Items.Log(logEntry);
 
-                foreach (RogueBasin.Point p in allWalkablePoints)
-                {
-                    placedItem = Game.Dungeon.AddItem(logItem, levelForClue, p);
-
-                    if (placedItem)
-                        break;
-                }
-
-                if (!placedItem)
-                    throw new ApplicationException("Nowhere to place item");
-
-                placedClues.Add(clue);
+                var pointToPlaceClue = pointsForClue.Shuffle().First();
+                mapInfo.RoomInfo(pointToPlaceClue.roomId).AddItem(new ItemRoomPlacement(logItem, pointToPlaceClue.ToLocation()));
             }
         }
 

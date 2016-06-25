@@ -1408,6 +1408,11 @@ namespace RogueBasin
         }
 
 
+        public bool AddItem(Item item, Location loc)
+        {
+            return AddItem(item, loc.Level, loc.MapCoord);
+        }
+
         /// <summary>
         /// Add an item to the dungeon. May fail if location is invalid or unwalkable
         /// </summary>
@@ -1416,54 +1421,6 @@ namespace RogueBasin
         /// <param name="location"></param>
         /// <returns></returns>
         public bool AddItem(Item item, int level, Point location)
-        {
-            //Try to add a item at the requested location
-            //This may fail due to the square being inaccessable
-            try
-            {
-                Map creatureLevel = levels[level];
-
-                //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
-                {
-                    return false;
-                }
-
-                /*
-                //DON'T PLACE UNDER MONSTER FOR FLATLINE
-
-                //Check square has nothing else on it
-                SquareContents contents = MapSquareContents(level, location);
-
-                if (contents.monster != null)
-                {
-                    LogFile.Log.LogEntryDebug("AddItem failure: Monster at this square", LogDebugLevel.Low);
-                    return false;
-                }*/
-
-                //Otherwise OK
-                item.LocationLevel = level;
-                item.LocationMap = location;
-
-                items.Add(item);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntry(String.Format("AddItem: ") + ex.Message);
-                return false;
-            }
-
-        }
-
-        /// <summary>
-        /// Debug. Add an item to the dungeon. May fail if location is invalid or unwalkable
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        public bool AddItemNoChecks(Item item, int level, Point location)
         {
             //Try to add a item at the requested location
             //This may fail due to the square being inaccessable
