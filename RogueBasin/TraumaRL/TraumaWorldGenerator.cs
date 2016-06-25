@@ -968,7 +968,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 
                 goodyRoomKeyNames[thisLevel] = clueName;
                 var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, unusedColor.Item1, clueName));
-                var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, true, false);
+                PlaceSimpleClueItems(mapInfo, cluesAndColors, true, false);
 
                 //Vault is used
                 levelInfo[thisLevel].ReplaceableVaultConnectionsUsed.Add(thisConnection);
@@ -1072,7 +1072,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, colorToUse, doorName));
 
-            var clueLocations = PlaceClueItem(mapInfo, cluesAndColors, clueNotInCorridors, false);
+            var clueLocations = PlaceSimpleClueItems(mapInfo, cluesAndColors, clueNotInCorridors, false);
 
             //Place log entries explaining the puzzle
 
@@ -1091,7 +1091,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
 
                 var coupledLogs = logGen.GenerateCoupledDoorLogEntry(doorName, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
-                    clueLocations.First().Item1);
+                    clueLocations.First().level);
                 var log1 = new Tuple<LogEntry, Clue>(coupledLogs[0], logClues[0]);
                 var log2 = new Tuple<LogEntry, Clue>(coupledLogs[1], logCluesNonCritical[0]);
                 PlaceLogClues(mapInfo, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
@@ -1690,7 +1690,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             UseVault(levelInfo, captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
-            PlaceClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
+            PlaceSimpleClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
@@ -1751,7 +1751,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             UseVault(levelInfo, captainsIdConnection);
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(doorId, new List<int> { captainIdRoom }).First();
-            PlaceClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
+            PlaceSimpleClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
@@ -1782,7 +1782,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(objectiveId, new List<int> { captainIdRoom }).First();
             Item clueItemToPlace = new RogueBasin.Items.MovieClue(captainIdClue, representation, pickupMovie, description);
-            PlaceClueItem(mapInfo, new List<Tuple<Clue,Item>>{new Tuple<Clue, Item>(captainIdClue, clueItemToPlace)}, true, true);
+            PlaceClueItems(mapInfo, new List<Tuple<Clue,Item>>{new Tuple<Clue, Item>(captainIdClue, clueItemToPlace)}, false, true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueItemToPlace.SingleItemDescription + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
@@ -1856,10 +1856,18 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void PlaceLogClues(MapInfo mapInfo, List<Tuple<LogEntry, Clue>> logCluesToPlace, bool boundariesPreferred, bool cluesNotInCorridors)
         {
-            foreach (var logClue in logCluesToPlace)
+            var clueItems = logCluesToPlace.Select(t => new Tuple<Clue, Item>(t.Item2, new RogueBasin.Items.Log(t.Item1)));
+            PlaceClueItems(mapInfo, clueItems, boundariesPreferred, cluesNotInCorridors, false);
+        }
+        
+        private IEnumerable<RoomPoint> PlaceClueItems(MapInfo mapInfo, IEnumerable<Tuple<Clue, Item>> clueItems, bool boundariesPreferred, bool avoidCorridors, bool includeVaults)
+        {
+            List<RoomPoint> pointsPlaced = new List<RoomPoint>();
+
+            foreach (var clueItem in clueItems)
             {
-                var logEntry = logClue.Item1;
-                var clue = logClue.Item2;
+                var clue = clueItem.Item1;
+                var itemToPlace = clueItem.Item2;
 
                 if (placedClues.Contains(clue))
                     continue;
@@ -1867,24 +1875,25 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 IEnumerable<RoomPoint> pointsForClue;
                 if (boundariesPreferred)
                 {
-                    pointsForClue = GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(mapInfo, clue, cluesNotInCorridors, false);
+                    pointsForClue = GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(mapInfo, clue, avoidCorridors, includeVaults);
 
                     if (!pointsForClue.Any())
-                        pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, cluesNotInCorridors, false);
+                        pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
                 }
                 else
-                    pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, cluesNotInCorridors, false);
+                    pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
 
                 if (!pointsForClue.Any())
                 {
-                    throw new ApplicationException("Nowhere to place clue item: " + logEntry.title);
+                    throw new ApplicationException("Nowhere to place clue item: " + itemToPlace.SingleItemDescription);
                 }
 
-                var logItem = new RogueBasin.Items.Log(logEntry);
-
                 var pointToPlaceClue = pointsForClue.Shuffle().First();
-                mapInfo.RoomInfo(pointToPlaceClue.roomId).AddItem(new ItemRoomPlacement(logItem, pointToPlaceClue.ToLocation()));
+                mapInfo.RoomInfo(pointToPlaceClue.roomId).AddItem(new ItemRoomPlacement(itemToPlace, pointToPlaceClue.ToLocation()));
+                pointsPlaced.Add(pointToPlaceClue);
             }
+
+            return pointsPlaced;
         }
 
         private void PlaceItems(MapInfo mapInfo, IEnumerable<Item> items, IEnumerable<int> rooms, bool boundariesPreferred, bool notInCorridors, bool includeVaults)
@@ -2150,7 +2159,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                         continue;
 
                     bool avoidCorridors = false;
-                    PlaceClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(clue, System.Drawing.Color.Magenta, ""), avoidCorridors, false);
+                    PlaceSimpleClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(clue, System.Drawing.Color.Magenta, ""), avoidCorridors, false);
 
                     placedClues.Add(clue);
                 }
@@ -2215,86 +2224,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private List<Tuple<int, RogueBasin.Point>> PlaceClueItem(MapInfo mapInfo, Tuple<Clue, System.Drawing.Color, string> clues, bool avoidCorridors, bool includeVaults)
+        private IEnumerable<RoomPoint> PlaceSimpleClueItem(MapInfo mapInfo, Tuple<Clue, System.Drawing.Color, string> clues, bool avoidCorridors, bool includeVaults)
         {
-            return PlaceClueItem(mapInfo, new List<Tuple<Clue, System.Drawing.Color, string>> { clues }, avoidCorridors, includeVaults);
+            return PlaceSimpleClueItems(mapInfo, new List<Tuple<Clue, System.Drawing.Color, string>> { clues }, avoidCorridors, includeVaults);
         }
 
-        private List<Tuple<int, RogueBasin.Point>> PlaceClueItem(MapInfo mapInfo, IEnumerable<Tuple<Clue, System.Drawing.Color, string>> clues, bool avoidCorridors, bool includeVaults)
+        private IEnumerable<RoomPoint> PlaceSimpleClueItems(MapInfo mapInfo, IEnumerable<Tuple<Clue, System.Drawing.Color, string>> clues, bool avoidCorridors, bool includeVaults)
         {
-            var toRet = new List<Tuple<int, RogueBasin.Point>>();
-
-            foreach (var tp in clues)
-            {
-                var clue = tp.Item1;
-
-                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
-                var levelForRandomRoom = roomsForClue.Item1;
-                var allWalkablePoints = roomsForClue.Item2;
-
-                bool placedItem = false;
-                RogueBasin.Point pointToPlace = null;
-                foreach (RogueBasin.Point p in allWalkablePoints)
-                {
-                    placedItem = Game.Dungeon.AddItem(new RogueBasin.Items.Clue(clue, tp.Item2, tp.Item3), levelForRandomRoom, p);
-                    pointToPlace = p;
-
-                    if (placedItem)
-                        break;
-                }
-
-                placedClues.Add(clue);
-
-                if (!placedItem)
-                {
-                    var str = "Can't place clue " + clue.OpenLockIndex;
-                    LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
-                    throw new ApplicationException(str);
-                }
-
-                toRet.Add(new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace));
-            }
-
-            return toRet;
-        }
-
-        private List<Tuple<int, RogueBasin.Point>> PlaceClueItem(MapInfo mapInfo, List<Tuple<Clue, Item>> clueItem, bool avoidCorridors, bool includeVaults)
-        {
-            var toRet = new List<Tuple<int, RogueBasin.Point>>();
-
-            foreach (var tp in clueItem)
-            {
-                var clue = tp.Item1;
-                var item = tp.Item2;
-
-                var roomsForClue = GetAllWalkablePointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
-                var levelForRandomRoom = roomsForClue.Item1;
-                var allWalkablePoints = roomsForClue.Item2;
-
-                bool placedItem = false;
-                RogueBasin.Point pointToPlace = null;
-                foreach (RogueBasin.Point p in allWalkablePoints)
-                {
-                    placedItem = Game.Dungeon.AddItem(item, levelForRandomRoom, p);
-                    pointToPlace = p;
-
-                    if (placedItem)
-                        break;
-                }
-
-                placedClues.Add(clue);
-
-                if (!placedItem)
-                {
-                    var str = "Can't place clue " + clue.OpenLockIndex;
-                    LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
-                    throw new ApplicationException(str);
-                }
-
-                toRet.Add(new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace));
-            }
-
-            return toRet;
+            var simpleClueItems = clues.Select(c => new Tuple<Clue, Item>(c.Item1, new RogueBasin.Items.Clue(c.Item1, c.Item2, c.Item3)));
+            return PlaceClueItems(mapInfo, simpleClueItems, false, avoidCorridors, includeVaults);
         }
 
         private Tuple<int, RogueBasin.Point> PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults)
