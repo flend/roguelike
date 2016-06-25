@@ -947,7 +947,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var unusedColor = GetUnusedColor();
                 var clueName = unusedColor.Item2 + " key card";
 
-                PlaceDoorOnMap(mapInfo, doorId, clueName, 1, unusedColor.Item1, thisConnection);
+                PlaceLockedDoorOnMap(mapInfo, doorId, clueName, 1, unusedColor.Item1, thisConnection);
 
                 goodyRooms[thisLevel] = thisRoom;
 
@@ -1060,7 +1060,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Place door
 
-            PlaceDoorOnMap(mapInfo, doorId, doorName, cluesForDoor, colorToUse, criticalConnectionForDoor);
+            PlaceLockedDoorOnMap(mapInfo, doorId, doorName, cluesForDoor, colorToUse, criticalConnectionForDoor);
 
             //Place clues
 
@@ -1098,29 +1098,29 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private Door PlaceDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, System.Drawing.Color colorToUse, Connection criticalConnectionForDoor)
+        private Door PlaceLockedDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, System.Drawing.Color colorToUse, Connection criticalConnectionForDoor)
         {
-            var door = PlaceDoorInManager(mapInfo, doorId, numberOfCluesForDoor, criticalConnectionForDoor);
+            var door = PlaceLockedDoorInManager(mapInfo, doorId, numberOfCluesForDoor, criticalConnectionForDoor);
 
             var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door, doorName, colorToUse);
             
-            PlaceDoorOnMap(mapInfo, lockedDoor, door);
+            PlaceLockedDoorOnMap(mapInfo, lockedDoor, door);
 
             return door;
         }
 
         private Door PlaceMovieDoorOnMap(MapInfo mapInfo, string doorId, string doorName, int numberOfCluesForDoor, System.Drawing.Color colorToUse, string openMovie, string cantOpenMovie, Connection criticalConnectionForDoor)
         {
-            var door = PlaceDoorInManager(mapInfo, doorId, numberOfCluesForDoor, criticalConnectionForDoor);
+            var door = PlaceLockedDoorInManager(mapInfo, doorId, numberOfCluesForDoor, criticalConnectionForDoor);
 
             var lockedDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door, openMovie, cantOpenMovie, doorName, colorToUse);
 
-            PlaceDoorOnMap(mapInfo, lockedDoor, door);
+            PlaceLockedDoorOnMap(mapInfo, lockedDoor, door);
 
             return door;
         }
 
-        private static Door PlaceDoorInManager(MapInfo mapInfo, string doorId, int numberOfCluesForDoor, Connection criticalConnectionForDoor)
+        private static Door PlaceLockedDoorInManager(MapInfo mapInfo, string doorId, int numberOfCluesForDoor, Connection criticalConnectionForDoor)
         {
             var manager = mapInfo.Model.DoorAndClueManager;
 
@@ -1129,7 +1129,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return door;
         }
 
-        private void PlaceDoorOnMap(MapInfo mapInfo, Lock lockedDoor, Door door)
+        private void PlaceLockedDoorOnMap(MapInfo mapInfo, Lock lockedDoor, Door door)
         {
             var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
             lockedDoor.LocationLevel = doorInfo.LevelNo;
@@ -1543,7 +1543,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             
             var arcologyDoor = new RogueBasin.Locks.SimpleOptionalLockedDoorWithMovie(door, "arcologyunlocked", "arcologylocked", "Override the security and go in anyway?", arcologyDoorName, arcologyDoorColor);
 
-            PlaceDoorOnMap(mapInfo, arcologyDoor, door);
+            PlaceLockedDoorOnMap(mapInfo, arcologyDoor, door);
 
             //Bioware
             var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel, flightDeck };
@@ -1598,7 +1598,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var arcologyAntDoor = new RogueBasin.Locks.SimpleLockedDoorWithMovie(door2, "arcologyantunlocked", "arcologyantlocked", arcologyAntDoorId, arcologyAntDoorColor);
 
-            PlaceDoorOnMap(mapInfo, arcologyAntDoor, door2);
+            PlaceLockedDoorOnMap(mapInfo, arcologyAntDoor, door2);
         }
 
         string arcologyAntDoorId;
