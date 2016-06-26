@@ -413,11 +413,12 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Feels like there will be a more dynamic way of getting this state in future
             escapePodsConnection = levelBuilder.EscapePodsConnection;
 
-            mapState = new MapState();
+            //Create the state object which will hold the map state in the generation phase
 
             var startVertex = 0;
             var startLevel = 0;
-            mapState.BuildConnectedMapModel(levelLinks, levelInfo, startLevel);
+            mapState = new MapState();
+            mapState.UpdateMapInfoWithNewLevelMaps(levelLinks, levelInfo, startLevel);
             mapState.InitialiseDoorAndClueManager(startVertex);
 
             MapInfo mapInfo = mapState.MapInfo;
@@ -481,7 +482,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         /// <param name="mapInfo"></param>
         private void AddMapObjectsToDungeon(MapInfo mapInfo)
         {
-            var rooms = mapInfo.AllRoomsInfo();
+            var rooms = mapInfo.Populator.AllRoomsInfo();
 
             foreach (RoomInfo roomInfo in rooms)
             {
@@ -527,7 +528,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 }
             }
 
-            foreach (var doorInfo in mapInfo.DoorInfo)
+            foreach (var doorInfo in mapInfo.Populator.DoorInfo)
             {
                 var door = doorInfo.Value;
 
@@ -973,7 +974,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             lockedDoor.LocationLevel = doorInfo.LevelNo;
             lockedDoor.LocationMap = doorInfo.MapLocation;
 
-            mapInfo.GetDoorInfo(door.Id).AddLock(lockedDoor);
+            mapInfo.Populator.GetDoorInfo(door.Id).AddLock(lockedDoor);
         }
 
 
@@ -1948,7 +1949,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var featureObjectsToPlace = featuresObjectsDetails.Select(dt => new Tuple<RogueBasin.Point, Feature>
                 (dt.Item1, new RogueBasin.Features.StandardDecorativeFeature(dt.Item2.representation, dt.Item2.colour, dt.Item2.isBlocking)));
 
-            var featuresPlaced = mapInfo.Populator.AddFeaturesToRoom(roomId, featureObjectsToPlace);
+            var featuresPlaced = mapInfo.Populator.AddFeaturesToRoom(mapInfo, roomId, featureObjectsToPlace);
             LogFile.Log.LogEntryDebug("Placed " + featuresPlaced + " standard decorative features in room " + roomId, LogDebugLevel.Medium);
         }
         

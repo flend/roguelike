@@ -250,10 +250,6 @@ namespace RogueBasin
         Dictionary<int, TemplatePositioned> rooms;
         Dictionary<int, int> roomToLevelMapping;
         Dictionary<int, List<int>> roomListForLevel;
-        
-        //TODO: break these out so they can persisted when MapInfo is regenerated
-        Dictionary<int, RoomInfo> roomInfo;
-        Dictionary<string, DoorContentsInfo> doorInfo;
 
         ConnectivityMap map;
         int startRoom;
@@ -262,8 +258,10 @@ namespace RogueBasin
         MapModel model;
         private const int corridorHeight = 3;
         private const int corridorWidth = 3;
-        
-        public MapInfo(MapInfoBuilder builder) {
+
+        MapPopulator populator;
+
+        public MapInfo(MapInfoBuilder builder, MapPopulator populator) {
 
             rooms = builder.Rooms;
             roomToLevelMapping = builder.RoomLevelMapping;
@@ -273,8 +271,7 @@ namespace RogueBasin
 
             model = new MapModel(map, startRoom);
 
-            roomInfo = new Dictionary<int, RoomInfo>();
-            doorInfo = new Dictionary<string, DoorContentsInfo>();
+            this.populator = populator;
 
             BuildRoomIndices();
         }
@@ -334,7 +331,7 @@ namespace RogueBasin
 
         private IEnumerable<Point> GetOccupiedRoomPointsInRelativeCoords(int roomIndex)
         {
-            var roomInfo = RoomInfo(roomIndex);
+            var roomInfo = Populator.RoomInfo(roomIndex);
 
             var occupiedFeaturePoints = roomInfo.Features.Where(f => f.feature.IsBlocking).Select(f => f.location.MapCoord);
             var occupiedMonsterPoints = roomInfo.Monsters.Select(m => m.location.MapCoord);
@@ -373,45 +370,6 @@ namespace RogueBasin
         public int GetLevelForRoomIndex(int roomIndex)
         {
             return roomToLevelMapping[roomIndex];
-        }
-
-        public RoomInfo RoomInfo(int roomIndex)
-        {
-            RoomInfo thisRoomInfo;
-            roomInfo.TryGetValue(roomIndex, out thisRoomInfo);
-
-            if (thisRoomInfo == null)
-            {
-                roomInfo[roomIndex] = new RoomInfo(roomIndex);
-            }
-
-            return roomInfo[roomIndex];
-        }
-
-        public IEnumerable<RoomInfo> AllRoomsInfo()
-        {
-            return roomInfo.Select(r => r.Value);
-        }
-
-        public DoorContentsInfo GetDoorInfo(string doorIndex)
-        {
-            DoorContentsInfo thisDoorInfo;
-            doorInfo.TryGetValue(doorIndex, out thisDoorInfo);
-
-            if (thisDoorInfo == null)
-            {
-                doorInfo[doorIndex] = new DoorContentsInfo(doorIndex);
-            }
-
-            return doorInfo[doorIndex];
-        }
-
-        public Dictionary<string, DoorContentsInfo> DoorInfo
-        {
-            get
-            {
-                return doorInfo;
-            }
         }
 
         public IEnumerable<int> RoomsInDescendingDistanceFromSource(int sourceRoom, IEnumerable<int> testRooms)
@@ -466,7 +424,7 @@ namespace RogueBasin
         {
             get
             {
-                return new MapPopulator(this);
+                return populator;
             }
         }
     }

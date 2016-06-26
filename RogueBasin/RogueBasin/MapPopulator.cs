@@ -7,16 +7,16 @@ namespace RogueBasin
 {
     public class MapPopulator
     {
-        MapInfo mapInfo;
+        Dictionary<int, RoomInfo> roomInfo = new Dictionary<int,RoomInfo>();
+        Dictionary<string, DoorContentsInfo> doorInfo = new Dictionary<string,DoorContentsInfo>();
 
-        public MapPopulator(MapInfo mapInfo)
+        public MapPopulator()
         {
-            this.mapInfo = mapInfo;
         }
 
         public bool AddFeatureToRoom(MapInfo mapInfo, int roomId, RogueBasin.Point roomPoint, Feature feature)
         {
-            var featuresPlaced = mapInfo.Populator.AddFeaturesToRoom(roomId, new List<Tuple<RogueBasin.Point, Feature>>() { new Tuple<RogueBasin.Point, Feature>(roomPoint, feature) });
+            var featuresPlaced = AddFeaturesToRoom(mapInfo, roomId, new List<Tuple<RogueBasin.Point, Feature>>() { new Tuple<RogueBasin.Point, Feature>(roomPoint, feature) });
 
             if (featuresPlaced > 0)
             {
@@ -28,17 +28,57 @@ namespace RogueBasin
             }
         }
 
+
+        public RoomInfo RoomInfo(int roomIndex)
+        {
+            RoomInfo thisRoomInfo;
+            roomInfo.TryGetValue(roomIndex, out thisRoomInfo);
+
+            if (thisRoomInfo == null)
+            {
+                roomInfo[roomIndex] = new RoomInfo(roomIndex);
+            }
+
+            return roomInfo[roomIndex];
+        }
+
+        public IEnumerable<RoomInfo> AllRoomsInfo()
+        {
+            return roomInfo.Select(r => r.Value);
+        }
+
+        public DoorContentsInfo GetDoorInfo(string doorIndex)
+        {
+            DoorContentsInfo thisDoorInfo;
+            doorInfo.TryGetValue(doorIndex, out thisDoorInfo);
+
+            if (thisDoorInfo == null)
+            {
+                doorInfo[doorIndex] = new DoorContentsInfo(doorIndex);
+            }
+
+            return doorInfo[doorIndex];
+        }
+
+        public Dictionary<string, DoorContentsInfo> DoorInfo
+        {
+            get
+            {
+                return doorInfo;
+            }
+        }
+
         public void AddMonsterToRoom(Monster monster, int roomId, Location absoluteLocation)
         {
-            mapInfo.RoomInfo(roomId).AddMonster(new MonsterRoomPlacement(monster, absoluteLocation));
+            RoomInfo(roomId).AddMonster(new MonsterRoomPlacement(monster, absoluteLocation));
         }
 
         public void AddItemToRoom(Item item, int roomId, Location absoluteLocation)
         {
-            mapInfo.RoomInfo(roomId).AddItem(new ItemRoomPlacement(item, absoluteLocation));
+            RoomInfo(roomId).AddItem(new ItemRoomPlacement(item, absoluteLocation));
         }
 
-        public int AddFeaturesToRoom(int roomId, IEnumerable<Tuple<RogueBasin.Point, Feature>> featurePoints)
+        public int AddFeaturesToRoom(MapInfo mapInfo, int roomId, IEnumerable<Tuple<RogueBasin.Point, Feature>> featurePoints)
         {
             var thisRoom = mapInfo.Room(roomId);
             var roomFiller = new RoomFilling(thisRoom.Room);
@@ -58,7 +98,7 @@ namespace RogueBasin
                 if (!featureToPlace.IsBlocking ||
                     featureToPlace.IsBlocking && roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(pointInRoom))
                 {
-                    mapInfo.RoomInfo(roomId).AddFeature(new FeatureRoomPlacement(featureToPlace, new Location(mapInfo.GetLevelForRoomIndex(roomId), p)));
+                    RoomInfo(roomId).AddFeature(new FeatureRoomPlacement(featureToPlace, new Location(mapInfo.GetLevelForRoomIndex(roomId), p)));
                     featuresPlaced++;
                 }
             }
@@ -71,7 +111,7 @@ namespace RogueBasin
             var room = mapInfo.Room(roomId);
 
             var floorPointsInRoom = RoomTemplateUtilities.GetPointsInRoomWithTerrain(room.Room, RoomTemplateTerrain.Floor);
-            var roomInfo = mapInfo.RoomInfo(roomId);
+            var roomInfo = RoomInfo(roomId);
 
             //Items squares must be connected
             foreach (var item in roomInfo.Items)

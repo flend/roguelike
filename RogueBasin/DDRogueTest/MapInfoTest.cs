@@ -66,7 +66,7 @@ namespace DDRogueTest
         public void GetFreePointsToPlaceCreatureInRoomCorrectlyRemovesFeatureAndCreatureOccupiedPoints()
         {
             var mapInfo = StandardTwoRoomOneLevelMapInfo();
-            var room0Info = mapInfo.RoomInfo(0);
+            var room0Info = mapInfo.Populator.RoomInfo(0);
 
             var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 1)));
             var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 2)));
@@ -90,7 +90,7 @@ namespace DDRogueTest
         public void GetOccupiedPointsInRoomRemovesFeatureAndCreatureOccupiedPoints()
         {
             var mapInfo = StandardTwoRoomOneLevelMapInfo();
-            var room0Info = mapInfo.RoomInfo(0);
+            var room0Info = mapInfo.Populator.RoomInfo(0);
 
             var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 2)));
             var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 1)));
@@ -125,7 +125,7 @@ namespace DDRogueTest
 
             mapInfoBuilder.AddConstructedLevel(0, map, templateList, new Dictionary<Connection, Point>(), 100);
 
-            var mapInfo = new MapInfo(mapInfoBuilder);
+            var mapInfo = new MapInfo(mapInfoBuilder, new MapPopulator());
 
             Assert.AreEqual(new Point(9, 9), mapInfo.Room(100).Location);
         }
@@ -175,7 +175,7 @@ namespace DDRogueTest
             builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, new Dictionary<Connection, Point>(), 1);
             builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, new Dictionary<Connection, Point>(), new Connection(3, 5));
 
-            var mapInfo = new MapInfo(builder);
+            var mapInfo = new MapInfo(builder, new MapPopulator());
 
             var cyclesOnLevel0 = mapInfo.GetCyclesOnLevel(0).ToList();
             Assert.AreEqual(1, cyclesOnLevel0.Count());
@@ -218,7 +218,7 @@ namespace DDRogueTest
 
             builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, l1DoorDict, 1);
 
-            return new MapInfo(builder);
+            return new MapInfo(builder, new MapPopulator());
         }
 
         private MapInfo MapInfoWithCycle()
@@ -232,7 +232,7 @@ namespace DDRogueTest
 
             builder.AddConstructedLevel(0, l1ConnectivityMap, new List<TemplatePositioned>(), new Dictionary<Connection, Point>(), 1);
 
-            return new MapInfo(builder);
+            return new MapInfo(builder, new MapPopulator());
         }
 
         private MapInfo GetStandardMapInfo()
@@ -268,7 +268,7 @@ namespace DDRogueTest
             builder.AddConstructedLevel(0, l1ConnectivityMap, l1RoomList, l1DoorDict, 1);
             builder.AddConstructedLevel(1, l2ConnectivityMap, l2RoomList, l2DoorDict, new Connection(3, 5));
 
-            return new MapInfo(builder);
+            return new MapInfo(builder, new MapPopulator());
         }
 
         private MapInfo StandardTwoRoomOneLevelMapInfo()
@@ -286,7 +286,7 @@ namespace DDRogueTest
 
             builder.AddConstructedLevel(0, mapGen.ConnectivityMap, mapGen.GetRoomTemplatesInWorldCoords(), mapGen.GetDoorsInMapCoords(), startRoomId);
 
-            return new MapInfo(builder);
+            return new MapInfo(builder, new MapPopulator());
         }
 
     }
