@@ -39,7 +39,7 @@ namespace TraumaRL
                 catch (Exception ex)
                 {
                     retry = false;
-                    LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
+                    LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message + "\n" + ex.StackTrace, LogDebugLevel.High);
                     if (failFast)
                     {
                         throw ex;

@@ -459,5 +459,13 @@ namespace RogueBasin
         {
             return doors[connection];
         }
+
+        public MapPopulator Populator
+        {
+            get
+            {
+                return new MapPopulator(this);
+            }
+        }
     }
 }
