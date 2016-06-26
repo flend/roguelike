@@ -628,14 +628,14 @@ namespace RogueBasin
 
                     if (!featureToPlace.isBlocking)
                     {
-                        bool result = Game.Dungeon.AddFeature(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
+                        bool result = Game.Dungeon.AddFeature(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour, false), level, featureLocationInMapCoords);
 
                         if (result)
                             LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
                     }
                     else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint))
                     {
-                        bool result = Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, blocksLight);
+                        bool result = Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour, true), level, featureLocationInMapCoords, blocksLight);
 
                         if (result)
                         {

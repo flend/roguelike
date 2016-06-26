@@ -23,7 +23,7 @@ namespace TraumaRL
         List<int> allReplaceableVaults;
 
         //For development, skip making most of the levels
-        bool quickLevelGen = false;
+        bool quickLevelGen = true;
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
@@ -487,10 +487,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Generate quests at mapmodel level
             GenerateQuests(mapInfo, levelInfo);
 
-            //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
-            //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
-            AddMapObjectsToDungeon(mapInfo);
-
             //Place loot
             CalculateLevelDifficulty();
 
@@ -502,7 +498,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Add non-interactable features
             AddDecorationFeatures(mapInfo, levelInfo);
-
+            
+            //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
+            //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
+            AddMapObjectsToDungeon(mapInfo);
+            
             //Add monsters
             Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
 
@@ -520,6 +520,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return mapInfo;
         }
 
+        /// <summary>
+        /// RoomPlacements currently contain absolute co-ordinates. I would prefer them to have relative coordinates, and those to get
+        /// mapped to absolute coordinates here
+        /// </summary>
+        /// <param name="mapInfo"></param>
         private void AddMapObjectsToDungeon(MapInfo mapInfo)
         {
             var rooms = mapInfo.AllRoomsInfo();
@@ -542,6 +547,28 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     if (!monsterResult)
                     {
                         LogFile.Log.LogEntryDebug("Cannot add item to dungeon: " + itemPlacement.item.SingleItemDescription + " at: " + itemPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+
+                foreach (FeatureRoomPlacement featurePlacement in roomInfo.Features)
+                {
+                    if (featurePlacement.feature.IsBlocking)
+                    {
+                        bool featureResult = Game.Dungeon.AddFeatureBlocking(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord, featurePlacement.feature.BlocksLight);
+
+                        if (!featureResult)
+                        {
+                            LogFile.Log.LogEntryDebug("Cannot add blocking feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
+                        }
+                    }
+                    else
+                    {
+                        bool featureResult = Game.Dungeon.AddFeature(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord);
+
+                        if (!featureResult)
+                        {
+                            LogFile.Log.LogEntryDebug("Cannot add feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
+                        }
                     }
                 }
             }
@@ -776,9 +803,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;
 
                     var numberOfFeatures = (int)Math.Abs(Gaussian.BoxMuller(thisRoomArea * avConcentration, thisRoomArea * stdConcentration));
-                    //LogFile.Log.LogEntryDebug("bm " + numberOfFeatures, LogDebugLevel.Low);
 
-                    AddStandardDecorativeFeaturesToRoomUsingGrid(thisLevel, thisRoom, numberOfFeatures, featuresAndWeights);
+                    AddStandardDecorativeFeaturesToRoomUsingGrid(mapInfo, room, numberOfFeatures, featuresAndWeights);
                 }
             }
         }
@@ -1229,17 +1255,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
-            var deadEndRooms = roomConnectivityMap[0];
-            
             //MAIN QUEST
-
-
-            //escapePodsConnection = levelInfo[flightDeck].ReplaceableVaultConnections.Except(levelInfo[flightDeck].ReplaceableVaultConnectionsUsed).RandomElement();
-            //escapePodsLevel = flightDeck;
-            //levelInfo[flightDeck].ReplaceableVaultConnectionsUsed.Add(escapePodsConnection);
-
-            //TODO: replace vault in map
-
             var manager = mapInfo.Model.DoorAndClueManager;
 
             //Escape pod end game
@@ -1247,47 +1263,26 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             
             //Self destruct
             //Requires priming the reactor
-
             SelfDestruct(mapInfo, levelInfo, manager);
 
             //Computer core to destroy
             ComputerCore(mapInfo, levelInfo, manager);
 
-
-            /*
-             * //standard clue placing
-            var reactorColor = GetUnusedColor();
-            var allowedRoomsForClue = manager.GetValidRoomsToPlaceClueForObjective("self-destruct");
-            var reactorClue = manager.AddCluesToExistingObjective("self-destruct", new List<int> { allowedRoomsForClue.RandomElement() }).First();
-            PlaceClueItem(mapInfo, new Tuple<Clue, Color, string>(reactorClue, reactorColor.Item1, "self-destruct-" + reactorColor.Item2), false, false);
-            */
             //Bridge lock
             //Requires captain's id
             BridgeLock(mapInfo, levelInfo);
 
-
             //Computer core lock
             //Requires computer tech's id
-
             ComputerCoreId(mapInfo, levelInfo);
 
             //Archology lock
             //Requires bioprotect wetware
-
             ArcologyLock(mapInfo, levelInfo);
 
             //Antanae
             //Requires servo motor
             AntennaeQuest(mapInfo, levelInfo, manager);
-
-
-
-            //Fueling system
-            //int fuelingLevel = lowerAtriumLevel;
-            //var fuelingLevelIndices = mapInfo.GetRoomIndicesForLevel(fuelingLevel);
-            //var randomRoomForFueling = fuelingLevelIndices.Except(allReplaceableVaults).RandomElement();
-
-            //mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor("escape", new List<int> { randomRoomForFueling });
         }
 
         private void EscapePod(MapInfo mapInfo)
@@ -1303,7 +1298,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Pillar1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Pillar2])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(escapePodRoom), mapInfo.Room(escapePodRoom), 20, escapePodDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, escapePodRoom, 20, escapePodDecorations, false);
 
             //Escape pod door
             //Requires enabling self-destruct
@@ -1339,7 +1334,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Screen1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HighTechBench])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(selfDestructRoom), mapInfo.Room(selfDestructRoom), 20, bridgeDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, selfDestructRoom, 20, bridgeDecorations, false);
 
             LogFile.Log.LogEntryDebug("Placing self-destruct on level " + selfDestructLevel + " in room " + selfDestructRoom + " off connection " + selfDestructConnection, LogDebugLevel.Medium);
 
@@ -1361,7 +1356,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Instrument3])
             };
-            AddStandardDecorativeFeaturesToRoom(mapInfo.GetLevelForRoomIndex(reactorSelfDestructVault), mapInfo.Room(reactorSelfDestructVault), 100, reactorDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, reactorSelfDestructVault, 100, reactorDecorations, false);
 
         }
 
@@ -1460,7 +1455,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),
                 new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant3])};
-            AddStandardDecorativeFeaturesToRoom(captainsIdLevel, mapInfo.Room(captainsIdRoom), 10, decorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, captainsIdRoom, 10, decorations, false);
 
             //Logs
 
@@ -1515,7 +1510,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton])
             };
-            AddStandardDecorativeFeaturesToRoom(techIdLevel, mapInfo.Room(techIdRoom), 20, bioDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, techIdRoom, 20, bioDecorations, false);
         }
 
         private void ArcologyLock(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
@@ -1555,7 +1550,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.CorpseinGoo]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.EggChair])
             };
-            AddStandardDecorativeFeaturesToRoom(biowareLevel, mapInfo.Room(biowareRoom), 10, bioDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, biowareRoom, 10, bioDecorations, false);
 
             //Logs
 
@@ -1628,7 +1623,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             Game.Dungeon.MonsterPlacement.AddMonstersToRoom(mapInfo, antennaeLevel, antennaeVault, monstersToPlace);
 
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Antennae]) };
-            AddStandardDecorativeFeaturesToRoom(antennaeLevel, mapInfo.Room(antennaeVault), 10, decorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, antennaeVault, 10, decorations, false);
 
             //Servo motor
 
@@ -1640,7 +1635,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart2]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.MachinePart3])
             };
-            AddStandardDecorativeFeaturesToRoom(servoLevel, mapInfo.Room(servoRoom), 10, servoDecorations, false);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, servoRoom, 10, servoDecorations, false);
 
             //Logs
 
@@ -3078,120 +3073,111 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private void AddStandardDecorativeFeaturesToRoom(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
+        private void AddStandardDecorativeFeaturesToRoom(MapInfo mapInfo, int roomId, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
         {
-            //This is probably rather slow
-            var roomFiller = new RoomFilling(positionedRoom.Room);
-
-            InitialiseRoomFillerWithRoomState(level, positionedRoom, roomFiller);
-
             var floorPoints = new List<RogueBasin.Point>();
-            if(!useBoundary)
-                floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
+            var thisRoom = mapInfo.Room(roomId);
+
+            if (!useBoundary)
+                floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(thisRoom.Room, RoomTemplateTerrain.Floor);
             else
-                floorPoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(positionedRoom.Room);
+                floorPoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(thisRoom.Room);
 
-            if (floorPoints.Count() == 0)
-                return;
+            var floorPointsToUse = floorPoints.Shuffle().Take(featuresToPlace);
 
-            for (int i = 0; i < featuresToPlace; i++)
-            {
-                var randomPoint = floorPoints.RandomElement();
-                floorPoints.Remove(randomPoint);
-
-                var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
-                var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
-
-                if (!featureToPlace.isBlocking)
-                {
-                    Game.Dungeon.AddFeature(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
-
-                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
-                }
-                else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
-                {
-                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
-
-                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " size: w:" + positionedRoom.Room.Width + " h:" + positionedRoom.Room.Height + " at location " + featureLocationInMapCoords + " (rel " + randomPoint + ")", LogDebugLevel.Medium);
-                }
-
-                if (floorPoints.Count() == 0)
-                    break;
-            }
+            AddStandardDecorativeFeaturesToRoom(mapInfo, roomId, floorPointsToUse, decorationDetails);
         }
 
-        private void AddStandardDecorativeFeaturesToRoomUsingGrid(int level, TemplatePositioned positionedRoom, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
+        private void AddStandardDecorativeFeaturesToRoomUsingGrid(MapInfo mapInfo, int roomId, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
         {
-            var roomFiller = new RoomFilling(positionedRoom.Room);
+            var thisRoom = mapInfo.Room(roomId);
+            var floorPoints = RoomTemplateUtilities.GetGridFromRoom(thisRoom.Room, 2, 1, 0.5);
+            var floorPointsToUse = floorPoints.Shuffle().Take(featuresToPlace);
+            AddStandardDecorativeFeaturesToRoom(mapInfo, roomId, floorPointsToUse, decorationDetails);
+        }
+
+        private void AddStandardDecorativeFeaturesToRoom(MapInfo mapInfo, int roomId, IEnumerable<RogueBasin.Point> points, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails)
+        {
+            if (points.Count() == 0)
+                return;
+
+            var featuresObjectsDetails = points.Select(p => new Tuple<RogueBasin.Point, DecorationFeatureDetails.Decoration>
+                (p + mapInfo.Room(roomId).Location, ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
+            var featureObjectsToPlace = featuresObjectsDetails.Select(dt => new Tuple<RogueBasin.Point, Feature>
+                (dt.Item1, new RogueBasin.Features.StandardDecorativeFeature(dt.Item2.representation, dt.Item2.colour, dt.Item2.isBlocking)));
+
+            var featuresPlaced = AddFeaturesToRoom(mapInfo, roomId, featureObjectsToPlace);
+            LogFile.Log.LogEntryDebug("Placed " + featuresPlaced + " standard decorative features in room " + roomId, LogDebugLevel.Medium);
+        }
+
+        private int AddFeatureToRoom(MapInfo mapInfo, int roomId, RogueBasin.Point roomPoint, Feature feature)
+        {
+            return AddFeaturesToRoom(mapInfo, roomId, new List<Tuple<RogueBasin.Point, Feature>>() { new Tuple<RogueBasin.Point, Feature>(roomPoint, feature) });
+        }
+
+        /// <summary>
+        /// Note: absolute level co-ordinates (for now)
+        /// </summary>
+        /// <param name="mapInfo"></param>
+        /// <param name="roomId"></param>
+        /// <param name="featurePoints"></param>
+        private int AddFeaturesToRoom(MapInfo mapInfo, int roomId, IEnumerable<Tuple<RogueBasin.Point, Feature>> featurePoints)
+        {
+            var thisRoom = mapInfo.Room(roomId);
+            var roomFiller = new RoomFilling(thisRoom.Room);
 
             //Need to account for all current blocking features in room
-            InitialiseRoomFillerWithRoomState(level, positionedRoom, roomFiller);
+            InitialiseRoomFillerWithRoomState(mapInfo, roomFiller, roomId);
 
-            var floorPoints = RoomTemplateUtilities.GetGridFromRoom(positionedRoom.Room, 2, 1, 0.5);
+            int featuresPlaced = 0;
 
-            if (floorPoints.Count() == 0)
-                return;
-
-            for (int i = 0; i < featuresToPlace; i++)
+            foreach (var featurePoint in featurePoints)
             {
-                var randomPoint = floorPoints.RandomElement();
-                floorPoints.Remove(randomPoint);
+                var p = featurePoint.Item1;
+                var featureToPlace = featurePoint.Item2;
 
-                var featureToPlace = ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails);
-                var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
+                var pointInRoom = p - thisRoom.Location;
 
-                if (!featureToPlace.isBlocking)
+                if (!featureToPlace.IsBlocking ||
+                    featureToPlace.IsBlocking && roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(pointInRoom))
                 {
-                    Game.Dungeon.AddFeature(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords);
-
-                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
+                    mapInfo.RoomInfo(roomId).AddFeature(new FeatureRoomPlacement(featureToPlace, new Location(mapInfo.GetLevelForRoomIndex(roomId), p)));
+                    featuresPlaced++;
                 }
-                else if (roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
-                {
-                    Game.Dungeon.AddFeatureBlocking(new RogueBasin.Features.StandardDecorativeFeature(featureToPlace.representation, featureToPlace.colour), level, featureLocationInMapCoords, false);
-
-                    LogFile.Log.LogEntryDebug("Placing blocking feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
-                }
-
-                if (floorPoints.Count() == 0)
-                    break;
             }
+
+            return featuresPlaced;
         }
 
-        private static void InitialiseRoomFillerWithRoomState(int level, TemplatePositioned positionedRoom, RoomFilling bridgeRouter)
+        private static void InitialiseRoomFillerWithRoomState(MapInfo mapInfo, RoomFilling roomFiller, int roomId)
         {
-            var floorPointsInRoom = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor).Select(p => p + positionedRoom.Location);
-            foreach (var roomPoint in floorPointsInRoom)
+            var room = mapInfo.Room(roomId);
+
+            var floorPointsInRoom = RoomTemplateUtilities.GetPointsInRoomWithTerrain(room.Room, RoomTemplateTerrain.Floor);
+            var roomInfo = mapInfo.RoomInfo(roomId);
+
+            //Items squares must be connected
+            foreach(var item in roomInfo.Items) {
+                roomFiller.SetSquareAsUnfillableMustBeConnected(item.location.MapCoord - room.Location);
+            }
+
+            //Non-blocking features must be connected
+            foreach (var feature in roomInfo.Features)
             {
-                var itemsAtLocation = Game.Dungeon.ItemsAtLocation(new Location(level, roomPoint));
-                
-                //Don't place blocking features on items
-                if (itemsAtLocation.Any())
+                if (feature.feature.IsBlocking)
                 {
-                    bridgeRouter.SetSquareAsUnfillableMustBeConnected(roomPoint - positionedRoom.Location);
+                    roomFiller.SetSquareUnwalkable(feature.location.MapCoord);
                 }
                 else
                 {
-                    var featuresAtLocation = Game.Dungeon.GetFeaturesAtLocation(new Location(level, roomPoint));
-
-                    //If there is an interactive feature here, it mustn't be blocked
-                    if (featuresAtLocation.Where(f => !f.IsBlocking).Any())
-                    {
-                        bridgeRouter.SetSquareAsUnfillableMustBeConnected(roomPoint - positionedRoom.Location);
-                    }
-                    else if (featuresAtLocation.Where(f => f.IsBlocking).Any())
-                    {
-
-                        //Otherwise If there is a blocking feature here, block it out
-
-                        var stillWalkable = bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(roomPoint - positionedRoom.Location);
-
-                        if (!stillWalkable)
-                        {
-                            LogFile.Log.LogEntryDebug("Room " + positionedRoom.RoomIndex + " appears unconnected.", LogDebugLevel.High);
-                        }
-                    }
+                    roomFiller.SetSquareAsUnfillableMustBeConnected(feature.location.MapCoord - room.Location);
                 }
+            }
+
+            //Monsters must be connected
+            foreach (var monster in roomInfo.Monsters)
+            {
+                roomFiller.SetSquareAsUnfillableMustBeConnected(monster.location.MapCoord - room.Location);
             }
         }
 

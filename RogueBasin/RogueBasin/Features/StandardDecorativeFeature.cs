@@ -10,10 +10,11 @@ namespace RogueBasin.Features
     {
         System.Drawing.Color representationColour;
 
-        public StandardDecorativeFeature(char representation, System.Drawing.Color representationColour)
+        public StandardDecorativeFeature(char representation, System.Drawing.Color representationColour, bool isBlocking)
         {
             Representation = representation;
             this.representationColour = representationColour;
+            this.IsBlocking = isBlocking;
         }
 
         public override System.Drawing.Color RepresentationColor()
