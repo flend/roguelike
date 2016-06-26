@@ -60,5 +60,20 @@ namespace RogueBasin
         {
             return Shuffle(source, Game.Random);
         }
+
+        public static IEnumerable<T> RepeatToLength<T>(this IEnumerable<T> source, int length)
+        {
+            int noCopies = length / source.Count() + 1;
+
+            IEnumerable<T> concatted = source;
+
+            do {
+                concatted = concatted.Concat(source);
+            } while(concatted.Count() < length);
+
+            return concatted.Take(length);
+
+            return Shuffle(source, Game.Random);
+        }
     }
 }

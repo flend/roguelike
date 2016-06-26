@@ -429,9 +429,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Set player's start location (must be done before adding items)
             SetPlayerStartLocation(mapInfo);
 
-            //Set maps in engine (needs to be done before placing items and monsters)
-            SetupMapsInEngine();
-
             //Add elevator features to link the maps
             if (!quickLevelGen)
                 AddElevatorFeatures(mapInfo, levelInfo);
@@ -450,6 +447,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             if (!quickLevelGen)
                 AddGoodyQuestLogClues(mapInfo, levelInfo);
+
+            //Set maps in engine (needs to be done before placing items and monsters)
+            SetupMapsInEngine();
 
             //Add non-interactable features
             AddDecorationFeatures(mapInfo, levelInfo);
@@ -723,7 +723,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var colorToUse = GetUnusedColor();
 
                 var doorName = colorToUse.Item2 + " key card";
-                var doorId = Game.Dungeon.DungeonInfo.LevelNaming[levelForBlocks] + "-" + doorName + Game.Random.Next();
+                var doorId = levelNaming[levelForBlocks] + "-" + doorName + Game.Random.Next();
                 var doorColor = colorToUse.Item1;
 
                 LogFile.Log.LogEntryDebug("Blocking elevators " + pairToTry.ElementAt(0) + " to " + pairToTry.ElementAt(1) + " with " + doorId, LogDebugLevel.High);
@@ -780,7 +780,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 LogFile.Log.LogEntryDebug("Placing goody room at: level: " + thisLevel + " room: " + thisRoom, LogDebugLevel.Medium);
 
                 //Place door
-                var doorReadableId = Game.Dungeon.DungeonInfo.LevelNaming[thisLevel] + " armory";
+                var doorReadableId = levelNaming[thisLevel] + " armory";
                 var doorId = doorReadableId;
                 
                 var unusedColor = GetUnusedColor();
@@ -825,7 +825,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var thisLevel = kv.Key;
                 var thisRoom = kv.Value;
                 
-                var doorId = Game.Dungeon.DungeonInfo.LevelNaming[thisLevel] + " armory";
+                var doorId = levelNaming[thisLevel] + " armory";
 
                 //Clue
                 var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
@@ -1684,32 +1684,28 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void PlaceItems(MapInfo mapInfo, IEnumerable<Item> items, IEnumerable<int> rooms, bool boundariesPreferred)
         {
-            foreach (var item in items)
+            IEnumerable<RoomPoint> pointsToPlace;
+            if (boundariesPreferred)
             {
+                pointsToPlace = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms);
 
-                IEnumerable<RoomPoint> roomsForClue;
-                if (boundariesPreferred)
-                {
-                    roomsForClue = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms);
+                if (!pointsToPlace.Any())
+                    pointsToPlace = GetAllWalkableRoomPoints(mapInfo, rooms);
+            }
+            else
+                pointsToPlace = GetAllWalkableRoomPoints(mapInfo, rooms);
 
-                    if (!roomsForClue.Any())
-                        roomsForClue = GetAllWalkableRoomPoints(mapInfo, rooms);
-                }
-                else
-                    roomsForClue = GetAllWalkableRoomPoints(mapInfo, rooms);
+            if (!pointsToPlace.Any())
+            {
+                throw new ApplicationException("Nowhere to place item");
+            }
 
-                bool placedItem = false;
+            var pointsForItems = pointsToPlace.RepeatToLength(items.Count());
+            var pointsAndItems = pointsForItems.Zip(items, (p, i) => new Tuple<Item, RoomPoint>(i, p));
 
-                foreach (var p in roomsForClue)
-                {
-                    placedItem = Game.Dungeon.AddItem(item, p.level, p.mapLocation);
-
-                    if (placedItem)
-                        break;
-                }
-
-                if (!placedItem)
-                    throw new ApplicationException("Nowhere to place item");
+            foreach (var pi in pointsAndItems)
+            {
+                mapInfo.Populator.AddItemToRoom(pi.Item1, pi.Item2.roomId, pi.Item2.ToLocation());
             }
         }
 

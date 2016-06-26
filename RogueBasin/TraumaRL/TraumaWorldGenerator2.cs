@@ -9,30 +9,7 @@ namespace TraumaRL
 {
     public partial class TraumaWorldGenerator
     {
-        public class MonsterSet
-        {
-            public List<Tuple<int, Monster>> monsterSet;
-            public int difficulty;
-            public double scaling;
         
-            public MonsterSet(int difficulty, double scaling) {
-                this.difficulty = difficulty;
-                this.scaling = scaling;
-                monsterSet = new List<Tuple<int,Monster>>();
-            }
-
-            public MonsterSet(int difficulty)
-            {
-                this.difficulty = difficulty;
-                this.scaling = 1.0;
-                monsterSet = new List<Tuple<int, Monster>>();
-            }
-            public void AddMonsterType(int weighting, Monster monsterType) {
-                monsterSet.Add(new Tuple<int, Monster>(weighting, monsterType));
-            }
-        }
-
-
         Dictionary<int, int> levelDifficulty;
 
         private void CalculateLevelDifficulty()
