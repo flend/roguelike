@@ -1073,7 +1073,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         private void EscapePod(MapInfo mapInfo)
         {
             var escapePodRoom = escapePodsConnection.Target;
-            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> () { escapePodRoom });
+            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> () { escapePodRoom }, true);
 
             LogFile.Log.LogEntryDebug("Adding features to escape pod room", LogDebugLevel.Medium);
             var escapePodDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
@@ -1109,7 +1109,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             manager.PlaceObjective(new ObjectiveRequirements(selfDestructRoom, "self-destruct", 1, new List<string> { "escape" }));
             var selfDestructObjective = manager.GetObjectiveById("self-destruct");
             //PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
-            var bridgeLocation = PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+            var bridgeLocation = PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true, true);
             
             UseVault(levelInfo, selfDestructConnection);
 
@@ -1133,7 +1133,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", computerCoresToDestroy, new List<string> { "self-destruct" }));
             var selfDestructPrimeObjective = manager.GetObjectiveById("prime-self-destruct");
             //PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
-            var reactorLocation = PlaceObjective(mapInfo, selfDestructPrimeObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructPrimeObjective, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructPrimeObjective)), true, true);
+            var reactorLocation = PlaceObjective(mapInfo, selfDestructPrimeObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructPrimeObjective, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructPrimeObjective)), true, true, true);
 
             var reactorDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer2]),
@@ -1403,7 +1403,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var antennaeObjName = "antennae";
             manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, antennaeObjName, 1, new List<string> { arcologyAntDoorId }));
             var antennaeObj = manager.GetObjectiveById(antennaeObjName);
-            PlaceObjective(mapInfo, antennaeObj, new RogueBasin.Features.AntennaeObjective(antennaeObj, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(antennaeObj)), true, true);
+            PlaceObjective(mapInfo, antennaeObj, new RogueBasin.Features.AntennaeObjective(antennaeObj, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(antennaeObj)), true, true, true);
 
             UseVault(levelInfo, antennaeVaultConnection);
 
@@ -1617,11 +1617,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         {
             foreach (var clue in monsterCluesToPlace)
             {
-
-                var pointsForClues = GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(mapInfo, clue, true, includeVaults);
-
-                if (!pointsForClues.Any())
-                    pointsForClues = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, true, includeVaults);
+                var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, true, includeVaults);
+                var pointsForClues = mapInfo.GetAllUnoccupiedRoomPoints(candidateRooms, true);
 
                 var newMonster = new T();
                 Item clueItem;
@@ -1658,23 +1655,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var clue = clueItem.Item1;
                 var itemToPlace = clueItem.Item2;
 
-                IEnumerable<RoomPoint> pointsForClue;
-                if (boundariesPreferred)
-                {
-                    pointsForClue = GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(mapInfo, clue, avoidCorridors, includeVaults);
+                var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, true, includeVaults);
+                var pointsForClues = mapInfo.GetAllUnoccupiedRoomPoints(candidateRooms, boundariesPreferred);
 
-                    if (!pointsForClue.Any())
-                        pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
-                }
-                else
-                    pointsForClue = GetAllWalkableRoomPointsToPlaceClue(mapInfo, clue, avoidCorridors, includeVaults);
-
-                if (!pointsForClue.Any())
+                if (!pointsForClues.Any())
                 {
                     throw new ApplicationException("Nowhere to place clue item: " + itemToPlace.SingleItemDescription);
                 }
 
-                var pointToPlaceClue = pointsForClue.Shuffle().First();
+                var pointToPlaceClue = pointsForClues.Shuffle().First();
                 mapInfo.Populator.AddItemToRoom(itemToPlace, pointToPlaceClue.roomId, pointToPlaceClue.ToLocation());
                 pointsPlaced.Add(pointToPlaceClue);
             }
@@ -1684,17 +1673,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void PlaceItems(MapInfo mapInfo, IEnumerable<Item> items, IEnumerable<int> rooms, bool boundariesPreferred)
         {
-            IEnumerable<RoomPoint> pointsToPlace;
-            if (boundariesPreferred)
-            {
-                pointsToPlace = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms);
-
-                if (!pointsToPlace.Any())
-                    pointsToPlace = GetAllWalkableRoomPoints(mapInfo, rooms);
-            }
-            else
-                pointsToPlace = GetAllWalkableRoomPoints(mapInfo, rooms);
-
+            IEnumerable<RoomPoint> pointsToPlace = mapInfo.GetAllUnoccupiedRoomPoints(rooms, boundariesPreferred);
+            
             if (!pointsToPlace.Any())
             {
                 throw new ApplicationException("Nowhere to place item");
@@ -1707,74 +1687,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             {
                 mapInfo.Populator.AddItemToRoom(pi.Item1, pi.Item2.roomId, pi.Item2.ToLocation());
             }
-        }
-
-        private class RoomPoint
-        {
-            public readonly int level;
-            public readonly RogueBasin.Point mapLocation;
-            public readonly int roomId;
-
-            public RoomPoint(int level, int roomId, RogueBasin.Point mapLocation)
-            {
-                this.level = level;
-                this.roomId = roomId;
-                this.mapLocation = mapLocation;
-            }
-
-            public Location ToLocation() {
-                return new Location(level, mapLocation);
-            }
-        }
-
-        private IEnumerable<RoomPoint> GetAllWalkableRoomPointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
-        {
-            var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
-
-            return GetAllWalkableRoomPoints(mapInfo, candidateRooms);
-        }
-        
-        private IEnumerable<RoomPoint> GetAllWalkableRoomPoints(MapInfo mapInfo, IEnumerable<int> rooms)
-        {
-            var allWalkablePoints = new List<RoomPoint>();
-
-            //Hmm, could be quite expensive
-            foreach (var room in rooms)
-            {
-                var level = mapInfo.GetLevelForRoomIndex(room);
-                var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
-                var allUnoccupiedPoints = allPossiblePoints.Except(mapInfo.GetOccupiedPointsInRoom(room));
-                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(level, room, p));
-                
-                allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
-            }
-
-            return allWalkablePoints.Shuffle();
-        }
-
-        private IEnumerable<RoomPoint> GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
-        {
-            var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
-
-            return GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, candidateRooms);
-        }
-
-        private IEnumerable<RoomPoint> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, IEnumerable<int> rooms) {
-
-            var allWalkablePoints = new List<RoomPoint>();
-
-            //Hmm, could be quite expensive
-            foreach (var room in rooms)
-            {
-                var level = mapInfo.GetLevelForRoomIndex(room);
-                var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
-                var allUnoccupiedPoints = allPossiblePoints.Except(mapInfo.GetOccupiedPointsInRoom(room));
-                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(level, room, p));
-                
-                allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
-            }
-
-            return allWalkablePoints.Shuffle();
         }
 
         private IEnumerable<int> GetPossibleRoomsForClues(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
@@ -1863,18 +1775,18 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return PlaceClueItems(mapInfo, simpleClueItems, false, avoidCorridors, includeVaults);
         }
 
-        private RoomPoint PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults)
+        private RoomPoint PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults, bool preferBoundaries)
         {
             var candidateRooms = GetPossibleRoomsForObjective(mapInfo, obj, avoidCorridors, includeVaults);
-            return PlaceFeatureInRoom(mapInfo, objectiveFeature, candidateRooms);
+            return PlaceFeatureInRoom(mapInfo, objectiveFeature, candidateRooms, preferBoundaries);
         }
 
         /// <summary>
         /// This is a bit fragile for blocking features, since it only tries one square
         /// </summary>
-        private RoomPoint PlaceFeatureInRoom(MapInfo mapInfo, Feature objectiveFeature, IEnumerable<int> candidateRooms)
+        private RoomPoint PlaceFeatureInRoom(MapInfo mapInfo, Feature objectiveFeature, IEnumerable<int> candidateRooms, bool preferBoundaries)
         {
-            var roomPoints = GetAllWalkableRoomPoints(mapInfo, candidateRooms);
+            var roomPoints = mapInfo.GetAllUnoccupiedRoomPoints(candidateRooms, preferBoundaries);
 
             if (!roomPoints.Any())
             {

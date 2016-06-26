@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RogueBasin;
 using System.Reflection;
 using System.IO;
+using System.Collections.Generic;
 
 namespace DDRogueTest
 {
@@ -1025,6 +1026,16 @@ namespace DDRogueTest
 
             Assert.AreEqual(new Point(-8, -8), corridorPoints.Item1);
             Assert.AreEqual(new Point(0, 1), corridorPoints.Item2);
+        }
+
+        [TestMethod]
+        public void GetBoundaryFloorPointsInRoomReturnsCorrectBoundaries()
+        {
+            RoomTemplate smallRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.smallroom.room");
+            var boundaryPoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(smallRoomTemplate);
+            var expectedPoints = new List<Point>() { new Point(1, 1), new Point(2, 1), new Point(3, 1), new Point(3, 2), new Point(3, 3), new Point(2, 3), new Point(1, 3) };
+
+            CollectionAssert.AreEquivalent(expectedPoints, boundaryPoints);
         }
 
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)

@@ -23,6 +23,28 @@ namespace RogueBasin
         }
     }
 
+    /// <summary>
+    /// Contains absolute (per-level) mapCoords and the roomId
+    /// </summary>
+    public class RoomPoint
+    {
+        public readonly int level;
+        public readonly RogueBasin.Point mapLocation;
+        public readonly int roomId;
+
+        public RoomPoint(int level, int roomId, RogueBasin.Point mapLocation)
+        {
+            this.level = level;
+            this.roomId = roomId;
+            this.mapLocation = mapLocation;
+        }
+
+        public Location ToLocation()
+        {
+            return new Location(level, mapLocation);
+        }
+    }
+
 
     /// <summary>
     /// Class that constructs the full map out of discrete level graphs and room sets
@@ -344,6 +366,57 @@ namespace RogueBasin
             var roomRelativePoints = RoomTemplateUtilities.GetBoundaryFloorPointsInRoom(rooms[roomIndex].Room);
 
             return roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
+        }
+
+        public IEnumerable<RoomPoint> GetAllUnoccupiedRoomPoints(IEnumerable<int> rooms)
+        {
+            var allWalkablePoints = new List<RoomPoint>();
+
+            foreach (var room in rooms)
+            {
+                var level = GetLevelForRoomIndex(room);
+                var allPossiblePoints = GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
+                var allUnoccupiedPoints = allPossiblePoints.Except(GetOccupiedPointsInRoom(room));
+                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(level, room, p));
+
+                allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
+            }
+
+            return allWalkablePoints.Shuffle();
+        }
+
+        public IEnumerable<RoomPoint> GetAllUnoccupiedRoomPointsBoundariesOnly(IEnumerable<int> rooms)
+        {
+            var allWalkablePoints = new List<RoomPoint>();
+
+            foreach (var room in rooms)
+            {
+                var level = GetLevelForRoomIndex(room);
+                var allPossiblePoints = GetBoundaryFloorPointsInRoom(room);
+                var allUnoccupiedPoints = allPossiblePoints.Except(GetOccupiedPointsInRoom(room));
+                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(level, room, p));
+
+                allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
+            }
+
+            return allWalkablePoints.Shuffle();
+        }
+
+        public IEnumerable<RoomPoint> GetAllUnoccupiedRoomPoints(IEnumerable<int> rooms, bool preferBoundaries)
+        {
+            if (!preferBoundaries)
+            {
+                return GetAllUnoccupiedRoomPoints(rooms);
+            }
+
+            var pointsAtBoundaries = GetAllUnoccupiedRoomPointsBoundariesOnly(rooms);
+
+            if (!pointsAtBoundaries.Any())
+            {
+                return GetAllUnoccupiedRoomPoints(rooms);
+            }
+
+            return pointsAtBoundaries;
         }
 
         public IEnumerable<int> FilterOutCorridors(IEnumerable<int> roomIndices)

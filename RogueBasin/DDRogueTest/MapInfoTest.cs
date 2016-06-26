@@ -63,6 +63,86 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void GetWalkablePointsInRoomCorrectlyRemovesFeatureAndCreatureOccupiedPoints()
+        {
+            var mapInfo = StandardTwoRoomOneLevelMapInfo();
+            var room0Info = mapInfo.Populator.RoomInfo(0);
+
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 2)));
+            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 3)));
+            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Location(0, new Point(4, 4)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            room0Info.AddFeature(nonBlockingFeatureToPlace);
+            room0Info.AddMonster(monsterToPlace);
+
+            var roomLevelLocation = mapInfo.Room(0).Location;
+
+            var freeSpacesAbsolute = mapInfo.GetAllUnoccupiedRoomPoints(new List<int>(){0}, false);
+            var freeSpacesRelative = freeSpacesAbsolute.Select(p => p.mapLocation - roomLevelLocation);
+
+            Assert.IsFalse(freeSpacesRelative.Contains(new Point(0, 1)));
+
+            Assert.IsFalse(freeSpacesRelative.Contains(new Point(1, 2)));
+            Assert.IsFalse(freeSpacesRelative.Contains(new Point(4, 4)));
+
+            Assert.IsTrue(freeSpacesRelative.Contains(new Point(2, 3)));
+            Assert.IsTrue(freeSpacesRelative.Contains(new Point(1, 1)));
+
+        }
+
+        [TestMethod]
+        public void GetWalkablePointsInRoomReturnsBoundariesIfAvailable()
+        {
+            var mapInfo = StandardTwoRoomOneLevelMapInfo();
+            var room0Info = mapInfo.Populator.RoomInfo(0);
+
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 1)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+
+            var roomLevelLocation = mapInfo.Room(0).Location;
+
+            var freeSpacesAbsolute = mapInfo.GetAllUnoccupiedRoomPoints(new List<int>() { 0 }, true);
+            var freeSpacesRelative = freeSpacesAbsolute.Select(p => p.mapLocation - roomLevelLocation);
+
+            Assert.AreEqual(12, freeSpacesRelative.Count());
+
+            Assert.IsFalse(freeSpacesRelative.Contains(new Point(1, 1)));
+
+            Assert.IsTrue(freeSpacesRelative.Contains(new Point(1, 3)));
+        }
+
+        [TestMethod]
+        public void GetWalkablePointsInRoomReturnsAllWalkableSquareIfNoBoundariesAvailable()
+        {
+            var mapInfo = SmallTwoRoomOneLevelMapInfo();
+            var room0Info = mapInfo.Populator.RoomInfo(0);
+
+            FeatureRoomPlacement blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 1)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(2, 1)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(3, 1)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(3, 2)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 3)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(2, 3)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(3, 3)));
+            room0Info.AddFeature(blockingFeatureToPlace);
+
+            var roomLevelLocation = mapInfo.Room(0).Location;
+
+            var freeSpacesAbsolute = mapInfo.GetAllUnoccupiedRoomPoints(new List<int>() { 0 }, true);
+            var freeSpacesRelative = freeSpacesAbsolute.Select(p => p.mapLocation - roomLevelLocation).ToList();
+
+            CollectionAssert.AreEquivalent(new List<Point>() { new Point(1,2), new Point(2,2)}, freeSpacesRelative);
+        }
+
+        [TestMethod]
         public void GetFreePointsToPlaceCreatureInRoomCorrectlyRemovesFeatureAndCreatureOccupiedPoints()
         {
             var mapInfo = StandardTwoRoomOneLevelMapInfo();
@@ -283,6 +363,23 @@ namespace DDRogueTest
             
             var startRoomId = mapGen.PlaceRoomTemplateAtPosition(baseRoomTemplate, new Point(0, 0));
             mapGen.PlaceRoomTemplateAlignedWithExistingDoor(toAlignRoomTemplate, null, mapGen.PotentialDoors[0], 0, 0);
+
+            builder.AddConstructedLevel(0, mapGen.ConnectivityMap, mapGen.GetRoomTemplatesInWorldCoords(), mapGen.GetDoorsInMapCoords(), startRoomId);
+
+            return new MapInfo(builder, new MapPopulator());
+        }
+
+        private MapInfo SmallTwoRoomOneLevelMapInfo()
+        {
+            var builder = new MapInfoBuilder();
+
+            RoomTemplate baseRoomTemplate = TestUtilities.LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.smallroom.room");
+
+            TemplatedMapBuilder mapBuilder = new TemplatedMapBuilder();
+            TemplatedMapGenerator mapGen = new TemplatedMapGenerator(mapBuilder);
+
+            var startRoomId = mapGen.PlaceRoomTemplateAtPosition(baseRoomTemplate, new Point(0, 0));
+            mapGen.PlaceRoomTemplateAlignedWithExistingDoor(baseRoomTemplate, null, mapGen.PotentialDoors[0], 0, 0);
 
             builder.AddConstructedLevel(0, mapGen.ConnectivityMap, mapGen.GetRoomTemplatesInWorldCoords(), mapGen.GetDoorsInMapCoords(), startRoomId);
 
