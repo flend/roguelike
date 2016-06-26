@@ -31,10 +31,6 @@ namespace TraumaRL
         List<int> gameLevels;
         static Dictionary<int, string> levelNaming;
 
-        HashSet<Clue> placedClues;
-        HashSet<Objective> placedObjectives;
-        HashSet<Door> placedDoors;
-
         LogGenerator logGen = new LogGenerator();
 
         static List<Tuple<System.Drawing.Color, string>> availableColors;
@@ -398,9 +394,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //We catch exceptions on generation and keep looping
 
             //Reset shared state
-            placedClues = new HashSet<Clue>();
-            placedDoors = new HashSet<Door>();
-            placedObjectives = new HashSet<Objective>();
             usedColors = new List<Tuple<System.Drawing.Color, string>>();
 
             //Generate the overall level structure
@@ -685,24 +678,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        /*private IEnumerable<Connection> GetCriticalRouteBetweenElevators(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, int startLevel, int endLevel)
-        {
-            var 
-
-            return mapInfo.Model.GetPathBetweenVerticesInReducedMap(bridgeTransitConnection.Target, bridgeMainBridgeConnection.Target);
-        }*/
-
-        private IEnumerable<int> RoomsInConnectionSet(IEnumerable<int> testRooms, IEnumerable<Connection> connectionSet)
-        {
-            return connectionSet.Where(c => testRooms.Contains(c.Source) && testRooms.Contains(c.Target)).SelectMany(c => new List<int>{c.Source, c.Target}).Distinct();
-        }
-
-        private IEnumerable<Connection> ConnectionsWithinRoomSet(IEnumerable<int> testRooms, IEnumerable<Connection> connectionSet)
-        {
-            return connectionSet.Where(c => testRooms.Contains(c.Source) && testRooms.Contains(c.Target));
-        }
-
-
         private void GenerateQuests(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
@@ -958,7 +933,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(sourceRoom, endRoom);
             var criticalConnectionForDoor = criticalPath.ElementAt((int)Math.Min(criticalPath.Count() * distanceFromSourceRatio, criticalPath.Count() - 1));
 
-            criticalConnectionForDoor = FindFreeConnectionOnPath(manager, criticalPath, criticalConnectionForDoor);
+            criticalConnectionForDoor = MapAnalysisUtilities.FindFreeConnectionOnPath(manager, criticalPath, criticalConnectionForDoor);
 
             //Place door
 
@@ -1038,36 +1013,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             lockedDoor.LocationMap = doorInfo.MapLocation;
 
             mapInfo.GetDoorInfo(door.Id).AddLock(lockedDoor);
-
-            placedDoors.Add(door);
         }
 
-        private Connection FindFreeConnectionOnPath(DoorAndClueManager manager, IEnumerable<Connection> path, Connection preferredConnectionCandidate)
-        {
-            if (manager.GetDoorsForEdge(preferredConnectionCandidate).Count() > 0)
-            {
-                //Try another edge
-                var possibleEdges = path.Shuffle();
-                Connection foundEdge = null;
-                foreach (var edge in possibleEdges)
-                {
-                    if (manager.GetDoorsForEdge(preferredConnectionCandidate).Count() == 0)
-                    {
-                        foundEdge = edge;
-                        break;
-                    }
-                }
-
-                if (foundEdge == null)
-                {
-                    throw new ApplicationException("No free doors to place lock.");
-                }
-
-                return foundEdge;
-            }
-
-            return preferredConnectionCandidate;
-        }
 
         private enum CluePath
         {
@@ -1708,8 +1655,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         {
             foreach (var clue in monsterCluesToPlace)
             {
-                if (placedClues.Contains(clue))
-                    continue;
 
                 var pointsForClues = GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(mapInfo, clue, true, includeVaults);
 
@@ -1733,8 +1678,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var pointToPlaceClue = pointsForClues.Shuffle().First();
 
                 mapInfo.Populator.AddMonsterToRoom(newMonster, pointToPlaceClue.roomId, pointToPlaceClue.ToLocation());
-
-                placedClues.Add(clue);
             }
         }
 
@@ -1752,9 +1695,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             {
                 var clue = clueItem.Item1;
                 var itemToPlace = clueItem.Item2;
-
-                if (placedClues.Contains(clue))
-                    continue;
 
                 IEnumerable<RoomPoint> pointsForClue;
                 if (boundariesPreferred)

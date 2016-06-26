@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MapAnalysisUtilities.cs" />
     <Compile Include="RoyaleRunner.cs" />
     <Compile Include="TraumaLevelBuilder.cs" />
     <Compile Include="TraumaWorldGenerator.cs" />
