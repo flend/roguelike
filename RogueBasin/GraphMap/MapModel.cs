@@ -373,15 +373,9 @@ namespace GraphMap
 
         MapCycleReducer graphNoCycles;
 
-        DoorAndClueManager doorAndClueManager;
-
-        Random random;
-
         public MapCycleReducer GraphNoCycles { get { return graphNoCycles; } }
 
         public UndirectedGraph<int, TaggedEdge<int, string>> BaseGraph { get { return baseGraph; } }
-
-        public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
 
         public ConnectivityMap FullMap { get { return inputMap;  } }
 
@@ -403,35 +397,6 @@ namespace GraphMap
             //Build cycle-free map
             graphNoCycles = new MapCycleReducer(baseGraph.Edges);
 
-            //Build Door and Clue Manager
-            //Ensure we pass on the mapped (to no cycles) version of the start vertex
-            doorAndClueManager = new DoorAndClueManager(graphNoCycles, graphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
-
-            //Build a random generator (don't keep instantiating them, because they all give the same number if during the same tick!
-            random = new Random();
-        }
-     
-        /// <summary>
-        /// Return a random edge in the reduced graph
-        /// </summary>
-        /// <returns></returns>
-        public TaggedEdge<int, string> GetRandomUnlockedEdgeInReducedGraph()
-        {
-            var gReduced = graphNoCycles.mapNoCycles;
-
-            int edgeToGet;
-
-            //Check if all edges are locked, if so just return a random locked edge
-            if (gReduced.EdgeCount <= doorAndClueManager.DoorMap.Count)
-                return gReduced.Edges.ElementAt(random.Next(gReduced.EdgeCount));
-
-            //If there are unlocked edges, return one of these
-            do
-            {
-                edgeToGet = random.Next(gReduced.EdgeCount);
-            } while (doorAndClueManager.GetDoorsForEdge(gReduced.Edges.ElementAt(edgeToGet)).Count() > 1);
-
-            return gReduced.Edges.ElementAt(edgeToGet);
         }
 
         public IEnumerable<Connection> GetPathBetweenVerticesInReducedMap(int startVertex, int endVertex)
@@ -476,35 +441,6 @@ namespace GraphMap
             var vertexDistances = verticesToCheck.Select(v => GetPathBetweenVerticesInFullMap(startVertex, v).Count());
             return verticesToCheck.Zip(vertexDistances, (v, d) => new { Key = v, Value = d })
                 .ToDictionary(x => x.Key, x => x.Value);
-        }
-
-        /** Lock an edge and place a random clue */
-
-        public void LockEdgeRandomClue(DoorRequirements doorReq)
-        {    
-            //Check that edge is in reduced map
-            if (!graphNoCycles.IsEdgeInRoomsNoCycles(doorReq.Location.Source, doorReq.Location.Target))
-                throw new ApplicationException("Edge not in non-cycle map");
-
-            var validRoomsForClue = doorAndClueManager.GetValidRoomsToPlaceClueForDoor(doorReq.Location);
-
-            //Place the clue in a random valid room
-            int clueVertex = validRoomsForClue.ElementAt(random.Next(validRoomsForClue.Count()));
-
-            Console.WriteLine(String.Format("LockEdgeRandomClue. Candidate rooms: {0}, placing at: {1}", validRoomsForClue.Count(), clueVertex));
-
-            doorAndClueManager.PlaceDoorAndClue(doorReq, clueVertex);
-        }
-
-        /** Lock a random edge and place a random clue */
-
-        public void LockRandomEdgeRandomClue(string doorId)
-        {
-            //Generate a random edge
-            var edgeToLock = graphNoCycles.NoCycleEdges.ElementAt(random.Next(graphNoCycles.NoCycleEdges.Count()));
-
-            //Lock with a random clue
-            LockEdgeRandomClue(new DoorRequirements(new Connection(edgeToLock.Source, edgeToLock.Target), doorId));
         }
 
         /// <summary>

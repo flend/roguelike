@@ -334,6 +334,7 @@
     <Compile Include="RoyaleDungeonLevelMaker.cs" />
     <Compile Include="RoyaleMonsterPlacement.cs" />
     <Compile Include="MusicPlayer.cs" />
+    <Compile Include="ShuffleExtension.cs" />
     <Compile Include="SoundPlayer.cs" />
     <Compile Include="TerrainSets\CrossPiece.cs" />
     <Compile Include="TerrainSets\Pond.cs" />
@@ -357,7 +358,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MapGeneratorRogue.cs" />
-    <Compile Include="MapGeneratorTemplated.cs" />
     <Compile Include="MapInfo.cs" />
     <Compile Include="MapObject.cs" />
     <Compile Include="MapTerrainRandomizer.cs" />

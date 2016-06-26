@@ -33,6 +33,8 @@ namespace TraumaRL
 
         LogGenerator logGen = new LogGenerator();
 
+        MapState mapState;
+
         static List<Tuple<System.Drawing.Color, string>> availableColors;
         static Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>> featuresByLevel;
         List<Tuple<System.Drawing.Color, string>> usedColors = new List<Tuple<System.Drawing.Color, string>>();
@@ -387,6 +389,8 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return levelLinks;
         }
 
+        public MapState MapState { get { return mapState; } }
+
         
         /** Build a map using templated rooms */
         public MapInfo GenerateTraumaLevels(bool retry)
@@ -408,8 +412,15 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Feels like there will be a more dynamic way of getting this state in future
             escapePodsConnection = levelBuilder.EscapePodsConnection;
-            
-            MapInfo mapInfo = BuildConnectedMapModel(levelLinks, levelInfo, 0);
+
+            mapState = new MapState();
+
+            var startVertex = 0;
+            var startLevel = 0;
+            mapState.BuildConnectedMapModel(levelLinks, levelInfo, startLevel);
+            mapState.InitialiseDoorAndClueManager(startVertex);
+
+            MapInfo mapInfo = mapState.MapInfo;
             
             //Add maps to the dungeon (must be ordered)
             AddLevelMapsToDungeon(levelInfo);
@@ -453,7 +464,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             AddDebugItems(mapInfo);
 
             //Check we are solvable
-            AssertMapIsSolveable(mapInfo);
+            AssertMapIsSolveable(mapInfo, mapState.DoorAndClueManager);
 
             if (retry)
             {
@@ -526,9 +537,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private void AssertMapIsSolveable(MapInfo mapInfo)
+        private void AssertMapIsSolveable(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)
         {
-            var graphSolver = new GraphSolver(mapInfo.Model);
+            var graphSolver = new GraphSolver(mapInfo.Model, doorAndClueManager);
             if (!graphSolver.MapCanBeSolved())
             {
                 LogFile.Log.LogEntryDebug("MAP CAN'T BE SOLVED!", LogDebugLevel.High);
@@ -574,56 +585,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             }
         }
 
-        private static MapInfo BuildConnectedMapModel(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
-        {
-            //Build the room graph containing all levels
-
-            //Build and add the start level
-
-            var mapInfoBuilder = new MapInfoBuilder();
-            var startRoom = 0;
-            var startLevelInfo = levelInfo[startLevel];
-            mapInfoBuilder.AddConstructedLevel(startLevel, startLevelInfo.LevelGenerator.ConnectivityMap, startLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
-
-            //Build and add each connected level
-            //Needs to be done in DFS fashion so we don't add the same level twice
-
-            var levelsAdded = new HashSet<int> { medicalLevel };
-
-            MapModel levelModel = new MapModel(levelLinks, medicalLevel);
-            var vertexDFSOrder = levelModel.GraphNoCycles.mapMST.verticesInDFSOrder;
-
-            foreach (var level in vertexDFSOrder)
-            {
-                var thisLevel = level;
-                var thisLevelInfo = levelInfo[level];
-
-                //Since links to other levels are bidirectional, ensure we only add each level once
-                foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
-                {
-                    var otherLevel = connectionToOtherLevel.Key;
-                    var otherLevelInfo = levelInfo[otherLevel];
-
-                    var thisLevelElevator = connectionToOtherLevel.Value.Target;
-                    var otherLevelElevator = otherLevelInfo.ConnectionsToOtherLevels[thisLevel].Target;
-
-                    var levelConnection = new Connection(thisLevelElevator, otherLevelElevator);
-
-                    if (!levelsAdded.Contains(otherLevel))
-                    {
-                        mapInfoBuilder.AddConstructedLevel(otherLevel, otherLevelInfo.LevelGenerator.ConnectivityMap, otherLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                        otherLevelInfo.LevelGenerator.GetDoorsInMapCoords(), levelConnection);
-
-                        LogFile.Log.LogEntryDebug("Adding level connection " + thisLevelInfo.LevelNo + ":" + connectionToOtherLevel.Key + " via nodes" +
-                            thisLevelElevator + "->" + otherLevelElevator, LogDebugLevel.Medium);
-
-                        levelsAdded.Add(otherLevel);
-                    }
-                }
-            }
-            return new MapInfo(mapInfoBuilder);
-        }
 
         private void AddDebugItems(MapInfo mapInfo)
         {
@@ -801,7 +762,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             goodyRooms = new Dictionary<int,int>();
             goodyRoomKeyNames = new Dictionary<int, string>();
 
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             foreach (var kv in replaceableVaultsForLevels)
             {
@@ -856,7 +817,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         private void AddGoodyQuestLogClues(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
             //Ensure that we have a goody room on every level that will support it
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             foreach (var kv in goodyRooms)
             {
@@ -901,7 +862,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             PlaceMovieDoorOnMap(mapInfo, doorId, doorId, objectsToDestroy, System.Drawing.Color.Red, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", elevatorConnection);
 
             //This will be restricted to the medical level since we cut off the door
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
@@ -928,7 +889,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             double distanceFromSourceRatio, bool enforceClueOnDestLevel, CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
             bool hasLogClue, CluePath logOnCriticalPath, bool logNotInCorridors)
         {
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(sourceRoom, endRoom);
             var criticalConnectionForDoor = criticalPath.ElementAt((int)Math.Min(criticalPath.Count() * distanceFromSourceRatio, criticalPath.Count() - 1));
@@ -997,9 +958,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return door;
         }
 
-        private static Door PlaceLockedDoorInManager(MapInfo mapInfo, string doorId, int numberOfCluesForDoor, Connection criticalConnectionForDoor)
+        private Door PlaceLockedDoorInManager(MapInfo mapInfo, string doorId, int numberOfCluesForDoor, Connection criticalConnectionForDoor)
         {
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             manager.PlaceDoor(new DoorRequirements(criticalConnectionForDoor, doorId, numberOfCluesForDoor));
             var door = manager.GetDoorById(doorId);
@@ -1079,7 +1040,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         private void BuildMainQuest(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
             //MAIN QUEST
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             //Escape pod end game
             EscapePod(mapInfo);
@@ -1147,7 +1108,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             manager.PlaceObjective(new ObjectiveRequirements(selfDestructRoom, "self-destruct", 1, new List<string> { "escape" }));
             var selfDestructObjective = manager.GetObjectiveById("self-destruct");
             //PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
-            var bridgeLocation = PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
+            var bridgeLocation = PlaceObjective(mapInfo, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true);
             
             UseVault(levelInfo, selfDestructConnection);
 
@@ -1171,7 +1132,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             manager.PlaceObjective(new ObjectiveRequirements(reactorSelfDestructVault, "prime-self-destruct", computerCoresToDestroy, new List<string> { "self-destruct" }));
             var selfDestructPrimeObjective = manager.GetObjectiveById("prime-self-destruct");
             //PlaceObjective(mapInfo, selfDestructPrimeObjective, null, true, true);
-            var reactorLocation = PlaceObjective(mapInfo, selfDestructPrimeObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructPrimeObjective, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructPrimeObjective)), true, true);
+            var reactorLocation = PlaceObjective(mapInfo, selfDestructPrimeObjective, new RogueBasin.Features.SelfDestructPrimeObjective(selfDestructPrimeObjective, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructPrimeObjective)), true, true);
 
             var reactorDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer2]),
@@ -1289,7 +1250,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Logs
 
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForDoor(doorId);
 
@@ -1361,7 +1322,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var arcologyDoorColor = colorForArcologyLock.Item1;
 
             //Place the arcology door
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             manager.PlaceDoor(new DoorRequirements(elevatorToArcology, arcologyDoorId, 1));
             var door = manager.GetDoorById(arcologyDoorId);
@@ -1441,7 +1402,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var antennaeObjName = "antennae";
             manager.PlaceObjective(new ObjectiveRequirements(antennaeVault, antennaeObjName, 1, new List<string> { arcologyAntDoorId }));
             var antennaeObj = manager.GetObjectiveById(antennaeObjName);
-            PlaceObjective(mapInfo, antennaeObj, new RogueBasin.Features.AntennaeObjective(antennaeObj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(antennaeObj)), true, true);
+            PlaceObjective(mapInfo, antennaeObj, new RogueBasin.Features.AntennaeObjective(antennaeObj, mapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(antennaeObj)), true, true);
 
             UseVault(levelInfo, antennaeVaultConnection);
 
@@ -1494,7 +1455,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private int PlaceClueForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, System.Drawing.Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
         {
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
@@ -1514,7 +1475,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             UseVault(levelInfo, captainsIdConnection);
 
-            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
+            var captainIdClue = mapState.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
             PlaceSimpleClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName +" on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
@@ -1524,7 +1485,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private int PlaceClueItemForDoorInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, Item itemToPlace, string clueName, IEnumerable<int> idealLevelsForClue)
         {
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
@@ -1544,7 +1505,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             UseVault(levelInfo, captainsIdConnection);
 
-            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
+            var captainIdClue = mapState.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
 
             PlaceItems(mapInfo, new List<Item> { itemToPlace }, new List<int> {captainIdRoom}, true);
 
@@ -1555,7 +1516,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private int PlaceClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string doorId, System.Drawing.Color clueColour, string clueName, IEnumerable<int> idealLevelsForClue)
         {
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForObjective(doorId);
             var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
@@ -1575,7 +1536,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             UseVault(levelInfo, captainsIdConnection);
 
-            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(doorId, new List<int> { captainIdRoom }).First();
+            var captainIdClue = mapState.DoorAndClueManager.AddCluesToExistingObjective(doorId, new List<int> { captainIdRoom }).First();
             PlaceSimpleClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(captainIdClue, clueColour, clueName), true, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
@@ -1585,7 +1546,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private int PlaceMovieClueForObjectiveInVault(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo, string objectiveId, char representation, string pickupMovie, string description, IEnumerable<int> idealLevelsForClue)
         {
-            var manager = mapInfo.Model.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForObjective(objectiveId);
             var possibleVaultsForCaptainsId = possibleRoomsForCaptainsId.Intersect(GetAllAvailableVaults(levelInfo).Select(c => c.Target));
@@ -1604,7 +1565,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             UseVault(levelInfo, captainsIdConnection);
 
-            var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingObjective(objectiveId, new List<int> { captainIdRoom }).First();
+            var captainIdClue = mapState.DoorAndClueManager.AddCluesToExistingObjective(objectiveId, new List<int> { captainIdRoom }).First();
             Item clueItemToPlace = new RogueBasin.Items.MovieClue(captainIdClue, representation, pickupMovie, description);
             PlaceClueItems(mapInfo, new List<Tuple<Clue,Item>>{new Tuple<Clue, Item>(captainIdClue, clueItemToPlace)}, false, true, true);
 

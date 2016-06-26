@@ -71,56 +71,6 @@ namespace TraumaRL
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
         }
 
-        private void VisualiseConnectivityGraph(MapModel graphModel)
-        {
-            var visualiser = new DoorClueGraphvizExport(graphModel);
-            visualiser.OutputFullGraph("bsptree-full");
-            visualiser.OutputClueDoorGraph("bsptree-door");
-            visualiser.OutputDoorDependencyGraph("bsptree-dep");
-
-            if (Game.Config.DisplayGraphs) {
-                try
-                {
-                    var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
-
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-full");
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-door");
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-dep");
-
-                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
-                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
-                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
-                }
-                catch (Exception)
-                {
-                    LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
-                }
-            }   
-        }
-
-        private void VisualiseLevelConnectivityGraph(MapModel graphModel, Dictionary<int, string> levelNaming)
-        {
-            var visualiser = new DoorClueGraphvizExport(graphModel, levelNaming);
-            visualiser.OutputClueDoorGraph("levellinks-full");
-            if (Game.Config.DebugMode)
-            {
-                if (Game.Config.DisplayGraphs)
-                {
-                    try
-                    {
-                        var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
-
-                        GraphVizUtils.RunGraphVizPNG(graphVizLocation, "levellinks-full");
-                        GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
-                    }
-                    catch (Exception)
-                    {
-                        LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
-                    }
-                }
-            }
-        }
-
         private void RandomSetup() {
             int seedToUse = 155;
             Game.Random = new Random(seedToUse);

@@ -30,46 +30,46 @@ namespace GraphMap
          *  
          *  vertex number <int> = door index
         */
-        private AdjacencyGraph<int, Edge<int>> lockDependencyGraph;
+        private AdjacencyGraph<int, Edge<int>> lockDependencyGraph = new AdjacencyGraph<int,Edge<int>>();
 
         /** Door map
          * 
          *  key = lock index, unique between doors & objectives
          *  Door = information, including Edge. Only 1 door per edge.
          */
-        private Dictionary<int, Door> doorMap;
+        private Dictionary<int, Door> doorMap = new Dictionary<int,Door>();
 
         /** Objective map
          * 
          *  key = lock index, unique between doors & objectives
          *  Objective = information
          */
-        private Dictionary<int, Objective> objectiveMap;
+        private Dictionary<int, Objective> objectiveMap = new Dictionary<int,Objective>();
 
         /** Objective room map
          * 
          *  key = vertex where objective is located
          *  List<Objective> = all Objectives at this vertex
          */
-        private Dictionary<int, List<Objective>> objectiveRoomMap;
+        private Dictionary<int, List<Objective>> objectiveRoomMap = new Dictionary<int,List<Objective>>();
 
         /** Clue map
           * 
           *  key = vertex where clue is located
           *  List<Clue> = all Clues at this vertex
           */
-        private Dictionary<int, List<Clue>> clueMap;
+        private Dictionary<int, List<Clue>> clueMap = new Dictionary<int,List<Clue>>();
 
         public DoorAndClueManager(MapCycleReducer reducedMap, int startVertex)
         {
             this.mapNoCycles = reducedMap;
             this.startVertex = startVertex;
+        }
 
-            lockDependencyGraph = new AdjacencyGraph<int, Edge<int>>();
-            doorMap = new Dictionary<int, Door>();
-            clueMap = new Dictionary<int, List<Clue>>();
-            objectiveMap = new Dictionary<int, Objective>();
-            objectiveRoomMap = new Dictionary<int, List<Objective>>();
+        public DoorAndClueManager(MapModel model)
+        {
+            this.mapNoCycles = model.GraphNoCycles;
+            this.startVertex = model.StartVertex;
         }
 
         public Dictionary<int, List<Clue>> ClueMap

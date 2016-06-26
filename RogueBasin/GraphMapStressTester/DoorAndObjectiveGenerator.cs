@@ -11,15 +11,22 @@ namespace GraphMapStressTester
     class DoorAndObjectiveGenerator
     {
         Random random;
+        private MapModel model;
+        private DoorAndClueManager doorAndClueManager;
 
-        public DoorAndObjectiveGenerator(Random rand)
+        public DoorAndObjectiveGenerator(MapModel mapModel, DoorAndClueManager doorAndClueManager, Random rand)
         {
             this.random = rand;
+            this.doorAndClueManager = doorAndClueManager;
+            this.model = mapModel;
         }
+
+        public MapModel Model { get { return model; } }
+        public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
 
         public MapModel AddDoorsAndObjectives(MapModel mapModel, int numberDoorsToAdd, int cluesPerDoorMax)
         {
-            var manager = mapModel.DoorAndClueManager;
+            var manager = doorAndClueManager;
             var numberDoors = 0;
 
             while (numberDoors < numberDoorsToAdd)

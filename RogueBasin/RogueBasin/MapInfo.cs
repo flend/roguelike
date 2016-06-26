@@ -250,6 +250,8 @@ namespace RogueBasin
         Dictionary<int, TemplatePositioned> rooms;
         Dictionary<int, int> roomToLevelMapping;
         Dictionary<int, List<int>> roomListForLevel;
+        
+        //TODO: break these out so they can persisted when MapInfo is regenerated
         Dictionary<int, RoomInfo> roomInfo;
         Dictionary<string, DoorContentsInfo> doorInfo;
 
