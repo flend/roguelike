@@ -12,14 +12,17 @@ namespace TraumaRL
         MapInfo mapInfo;
         DoorAndClueManager doorAndClueManager;
         MapPopulator populator;
+        Dictionary<int, LevelInfo> levelInfo;
 
         public MapState()
         {
             populator = new MapPopulator();
         }
 
-        public void UpdateMapInfoWithNewLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
+        public void UpdateWithNewLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
         {
+            this.levelInfo = levelInfo;
+            
             //Build the room graph containing all levels
 
             //Build and add the start level
@@ -71,7 +74,7 @@ namespace TraumaRL
 
         public void InitialiseDoorAndClueManager(int startVertex)
         {
-            //This must be done after BuildConnectedMapModel() called
+            //This must be done after UpdateMapInfoWithNewLevelMaps() called [the first time]
             doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
         }
 
@@ -85,6 +88,6 @@ namespace TraumaRL
             }
         }
 
-
+        public Dictionary<int, LevelInfo> LevelInfo { get { return levelInfo;  } }
     }
 }

@@ -418,7 +418,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             var startVertex = 0;
             var startLevel = 0;
             mapState = new MapState();
-            mapState.UpdateMapInfoWithNewLevelMaps(levelLinks, levelInfo, startLevel);
+            mapState.UpdateWithNewLevelMaps(levelLinks, levelInfo, startLevel);
             mapState.InitialiseDoorAndClueManager(startVertex);
 
             MapInfo mapInfo = mapState.MapInfo;
