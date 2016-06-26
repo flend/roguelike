@@ -482,5 +482,25 @@ namespace RogueBasin
             return new Point(px, py);
         }
 
+        public static T ChooseItemFromWeights<T>(IEnumerable<Tuple<int, T>> itemsWithWeights)
+        {
+            var totalWeight = itemsWithWeights.Select(t => t.Item1).Sum();
+            var randomNumber = Game.Random.Next(totalWeight);
+
+            int weightSoFar = 0;
+            T roomToPlace = itemsWithWeights.First().Item2;
+            foreach (var t in itemsWithWeights)
+            {
+                weightSoFar += t.Item1;
+                if (weightSoFar > randomNumber)
+                {
+                    roomToPlace = t.Item2;
+                    break;
+                }
+            }
+
+            return roomToPlace;
+        }
+
     }
 }

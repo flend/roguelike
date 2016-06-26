@@ -2839,13 +2839,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return vaultsToReturn;
         }
 
-        private LevelInfo GenerateLowerAtriumLevel(int levelNo)
-        {
-            var medicalInfo = new LevelInfo(levelNo);
-
-            return medicalInfo;
-        }
-
         private void AddStandardDecorativeFeaturesToRoom(MapInfo mapInfo, int roomId, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
         {
             var floorPoints = new List<RogueBasin.Point>();
@@ -2875,7 +2868,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 return;
 
             var featuresObjectsDetails = points.Select(p => new Tuple<RogueBasin.Point, DecorationFeatureDetails.Decoration>
-                (p + mapInfo.Room(roomId).Location, ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
+                (p + mapInfo.Room(roomId).Location, Utility.ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
             var featureObjectsToPlace = featuresObjectsDetails.Select(dt => new Tuple<RogueBasin.Point, Feature>
                 (dt.Item1, new RogueBasin.Features.StandardDecorativeFeature(dt.Item2.representation, dt.Item2.colour, dt.Item2.isBlocking)));
 
@@ -2961,15 +2954,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             {
                 roomFiller.SetSquareAsUnfillableMustBeConnected(monster.location.MapCoord - room.Location);
             }
-        }
-
-        T RandomItem<T>(IEnumerable<T> items)
-        {
-            var totalItems = items.Count();
-            if (totalItems == 0)
-                throw new ApplicationException("Empty list for randomization");
-
-            return items.ElementAt(Game.Random.Next(totalItems));
         }
 
         Connection AddRoomToRandomOpenDoor(TemplatedMapGenerator gen, RoomTemplate templateToPlace, RoomTemplate corridorTemplate, int distanceFromDoor)
@@ -3063,42 +3047,16 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, roomToPlace, corridorToPlace, minCorridorLength, maxCorridorLength, null);
         }
         
-        private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, List<RoomTemplate> roomToPlaces, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
-        {
-            var tuples = roomToPlaces.Select(r => new Tuple<int, RoomTemplate>(1, r));
-            return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, tuples, corridorToPlace, minCorridorLength, maxCorridorLength, null);
-        }
-
         private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, List<Tuple<int,RoomTemplate>> roomToPlaceWithWeights, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength)
         {
             return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, roomToPlaceWithWeights, corridorToPlace, minCorridorLength, maxCorridorLength, null);
         }
-
 
         private int PlaceRandomConnectedRooms(TemplatedMapGenerator templatedGenerator, int roomsToPlace, RoomTemplate roomToPlace, RoomTemplate corridorToPlace, int minCorridorLength, int maxCorridorLength, Func<int> doorPicker)
         {
             return PlaceRandomConnectedRooms(templatedGenerator, roomsToPlace, new List<Tuple<int,RoomTemplate>> { new Tuple<int, RoomTemplate>(1, roomToPlace) }, corridorToPlace, minCorridorLength, maxCorridorLength, doorPicker);
         }
 
-        private T ChooseItemFromWeights<T>(IEnumerable<Tuple<int, T>> itemsWithWeights)
-        {
-            var totalWeight = itemsWithWeights.Select(t => t.Item1).Sum();
-            var randomNumber = Game.Random.Next(totalWeight);
-
-            int weightSoFar = 0;
-            T roomToPlace = itemsWithWeights.First().Item2;
-            foreach (var t in itemsWithWeights)
-            {
-                weightSoFar += t.Item1;
-                if (weightSoFar > randomNumber)
-                {
-                    roomToPlace = t.Item2;
-                    break;
-                }
-            }
-
-            return roomToPlace;
-        }
 
         /// <summary>
         /// Failure mode is placing fewer rooms than requested
@@ -3117,7 +3075,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 //Find a random potential door and try to grow a random room off this
                 
                 //Find room using weights
-                var roomToPlace = ChooseItemFromWeights<RoomTemplate>(roomsToPlaceWithWeights);
+                var roomToPlace = Utility.ChooseItemFromWeights<RoomTemplate>(roomsToPlaceWithWeights);
 
                 //Use a random door, or the function passed in
                 int randomNewDoorIndex;
@@ -3144,64 +3102,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             } while (roomsPlaced < roomsToPlace && attempts < maxAttempts && templatedGenerator.HaveRemainingPotentialDoors());
             return roomsPlaced;
-        }
-
-        /** Build a map using templated rooms */
-        public MapInfo GenerateTestGraphicsDungeon()
-        {
-
-            //Load standard room types
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largetestvault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
-
-            //Build level 1
-
-            var l1mapBuilder = new TemplatedMapBuilder(100, 100);
-            var l1templateGenerator = new TemplatedMapGenerator(l1mapBuilder);
-
-            PlaceOriginRoom(l1templateGenerator, room1);
-            PlaceRandomConnectedRooms(l1templateGenerator, 1, room1, corridor1, 0, 0, () => 0);
-
-            //Build the graph containing all the levels
-
-            //Build and add the l1 map
-
-            var mapInfoBuilder = new MapInfoBuilder();
-            var startRoom = 0;
-            mapInfoBuilder.AddConstructedLevel(0, l1templateGenerator.ConnectivityMap, l1templateGenerator.GetRoomTemplatesInWorldCoords(), l1templateGenerator.GetDoorsInMapCoords(), startRoom);
-
-            MapInfo mapInfo = new MapInfo(mapInfoBuilder);
-
-            //Add maps to the dungeon
-
-            Map masterMap = l1mapBuilder.MergeTemplatesIntoMap(terrainMapping);
-            Game.Dungeon.AddMap(masterMap);
-
-            //Recalculate walkable to allow placing objects
-            Game.Dungeon.RefreshAllLevelPathingAndFOV();
-
-            //Set player's start location (must be done before adding items)
-
-            //Set PC start location
-
-            var firstRoom = mapInfo.Room(0);
-            masterMap.PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
-
-            //Add items
-            var dungeon = Game.Dungeon;
-
-            dungeon.AddItem(new RogueBasin.Items.Pistol(), 0, new RogueBasin.Point(1, 1));
-            dungeon.AddItem(new RogueBasin.Items.Shotgun(), 0, new RogueBasin.Point(2, 1));
-            dungeon.AddItem(new RogueBasin.Items.Laser(), 0, new RogueBasin.Point(3, 1));
-            dungeon.AddItem(new RogueBasin.Items.Vibroblade(), 0, new RogueBasin.Point(4, 1));
-
-            //Set map for visualisation
-            return mapInfo;
-        }
-
-        public static KeyValuePair<int, int> MaxEntry(Dictionary<int, int> dict)
-        {
-            return dict.Aggregate((a, b) => a.Value > b.Value ? a : b);
         }
     }
 }
