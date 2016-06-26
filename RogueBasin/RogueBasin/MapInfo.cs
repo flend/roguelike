@@ -320,7 +320,7 @@ namespace RogueBasin
             return roomRelativePoints.Select(p => new Point(rooms[roomIndex].Location + p));
         }
 
-        public IEnumerable<Point> GetFreePointsToPlaceCreatureInRoom(int roomIndex)
+        public IEnumerable<Point> GetUnoccupiedPointsInRoom(int roomIndex)
         {
             var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, RoomTemplateTerrain.Floor);
             var unoccupiedAbsolutePoints = roomRelativePoints.Except(GetOccupiedRoomPointsInRelativeCoords(roomIndex));

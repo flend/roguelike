@@ -77,7 +77,7 @@ namespace DDRogueTest
 
             var roomLevelLocation = mapInfo.Room(0).Location;
 
-            var freeSpacesAbsolute = mapInfo.GetFreePointsToPlaceCreatureInRoom(0);
+            var freeSpacesAbsolute = mapInfo.GetUnoccupiedPointsInRoom(0);
             var freeSpacesRelative = freeSpacesAbsolute.Select(p => p - roomLevelLocation);
 
             Assert.IsFalse(freeSpacesRelative.Contains(new Point(1, 1)));

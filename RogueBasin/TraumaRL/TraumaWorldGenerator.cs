@@ -23,7 +23,7 @@ namespace TraumaRL
         List<int> allReplaceableVaults;
 
         //For development, skip making most of the levels
-        bool quickLevelGen = true;
+        bool quickLevelGen = false;
 
         ConnectivityMap levelLinks;
         List<int> gameLevels;
@@ -741,24 +741,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void AddDebugItems(MapInfo mapInfo)
         {
-            var startRoom = mapInfo.StartRoom;
-
-            var allWalkablePointsAndLevel = GetAllWalkablePointsInRooms(mapInfo, Enumerable.Repeat(startRoom, 1), true, true);
-            var allWalkablePoints = allWalkablePointsAndLevel.Item2;
-            var level = allWalkablePointsAndLevel.Item1;
-
             
-
-            var logItem = new RogueBasin.Items.Log(logGen.GenerateArbitaryLogEntry("qe_medicalsecurity"));
-
-
-            foreach (RogueBasin.Point p in allWalkablePoints)
-            {
-                var placedItem = Game.Dungeon.AddItem(logItem, level, p);
-
-                if (placedItem)
-                    break;
-            }
         }
 
         private void SetupMapsInEngine()
@@ -1288,7 +1271,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         private void EscapePod(MapInfo mapInfo)
         {
             var escapePodRoom = escapePodsConnection.Target;
-            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> { escapePodRoom }, true, false);
+            PlaceFeatureInRoom(mapInfo, new RogueBasin.Features.EscapePod(), new List<int> () { escapePodRoom });
 
             LogFile.Log.LogEntryDebug("Adding features to escape pod room", LogDebugLevel.Medium);
             var escapePodDecorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Computer1]),
@@ -1716,7 +1699,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             var captainIdClue = mapInfo.Model.DoorAndClueManager.AddCluesToExistingDoor(doorId, new List<int> { captainIdRoom }).First();
 
-            PlaceItems(mapInfo, new List<Item> { itemToPlace }, new List<int> {captainIdRoom}, true, true, true);
+            PlaceItems(mapInfo, new List<Item> { itemToPlace }, new List<int> {captainIdRoom}, true);
 
             LogFile.Log.LogEntryDebug("Placing " + clueName + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
@@ -1766,8 +1749,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 roomsOnRequestedLevels = possibleVaultsForCaptainsId;
 
             // var captainIdRoomsInDistanceOrderFromStart = RoomsInDescendingDistanceFromSource(mapInfo, mapInfo.StartRoom, roomsOnRequestedLevels);
-            // var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);
-            //above is not performing, since it always sticks everything in level 8 as far away from everything as it can
+            // var captainIdRoom = captainIdRoomsInDistanceOrderFromStart.ElementAt(0);            //above is not performing, since it always sticks everything in level 8 as far away from everything as it can
             var captainIdRoom = roomsOnRequestedLevels.RandomElement();
 
             var captainsIdConnection = GetAllVaults(levelInfo).Where(c => c.Target == captainIdRoom).First();
@@ -1785,9 +1767,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         }
 
 
-        private static void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        private void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
-            var elevatorLocations = new Dictionary<Tuple<int, int>, RogueBasin.Point>();
+            var elevatorLocations = new Dictionary<Tuple<int, int>, Tuple<int, RogueBasin.Point>>();
 
             foreach (var kv in levelInfo)
             {
@@ -1796,8 +1778,9 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
                 foreach (var connectionToOtherLevel in thisLevelInfo.ConnectionsToOtherLevels)
                 {
-                    var elevatorLoc = mapInfo.GetRandomPointInRoomOfTerrain(connectionToOtherLevel.Value.Target, RoomTemplateTerrain.Floor);
-                    elevatorLocations[new Tuple<int, int>(thisLevelNo, connectionToOtherLevel.Key)] = elevatorLoc;
+                    var elevatorLoc = mapInfo.GetUnoccupiedPointsInRoom(connectionToOtherLevel.Value.Target).Shuffle().First();
+                    elevatorLocations[new Tuple<int, int>(thisLevelNo, connectionToOtherLevel.Key)] =
+                        new Tuple<int, RogueBasin.Point>(connectionToOtherLevel.Value.Target, elevatorLoc);
                 }
             }
 
@@ -1809,8 +1792,13 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                 var sourceToTargetElevator = kv.Value;
                 var targetToSourceElevator = elevatorLocations[new Tuple<int, int>(targetLevel, sourceLevel)];
 
-                Game.Dungeon.AddFeature(new RogueBasin.Features.Elevator(targetLevel, targetToSourceElevator), sourceLevel, sourceToTargetElevator);
+                var sourceToTargetElevatorRoomId = kv.Value.Item1;
+                var sourceToTargetElevatorPoint = kv.Value.Item2;
 
+                var elevatorFeature = new RogueBasin.Features.Elevator(targetLevel, targetToSourceElevator.Item2);
+
+                AddFeatureToRoom(mapInfo, sourceToTargetElevatorRoomId, sourceToTargetElevatorPoint, elevatorFeature);
+                
                 LogFile.Log.LogEntryDebug("Adding elevator connection " + sourceLevel + ":" + targetLevel + " via points" +
                     sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);
             }
@@ -1891,30 +1879,27 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return pointsPlaced;
         }
 
-        private void PlaceItems(MapInfo mapInfo, IEnumerable<Item> items, IEnumerable<int> rooms, bool boundariesPreferred, bool notInCorridors, bool includeVaults)
+        private void PlaceItems(MapInfo mapInfo, IEnumerable<Item> items, IEnumerable<int> rooms, bool boundariesPreferred)
         {
             foreach (var item in items)
             {
 
-                Tuple<int, IEnumerable<RogueBasin.Point>> roomsForClue;
+                IEnumerable<RoomPoint> roomsForClue;
                 if (boundariesPreferred)
                 {
-                    roomsForClue = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms, notInCorridors, includeVaults);
+                    roomsForClue = GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, rooms);
 
-                    if (!roomsForClue.Item2.Any())
-                        roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, notInCorridors, includeVaults);
+                    if (!roomsForClue.Any())
+                        roomsForClue = GetAllWalkableRoomPoints(mapInfo, rooms);
                 }
                 else
-                    roomsForClue = GetAllWalkablePointsInRooms(mapInfo, rooms, notInCorridors, includeVaults);
-
-                var levelForClue = roomsForClue.Item1;
-                var allWalkablePoints = roomsForClue.Item2;
+                    roomsForClue = GetAllWalkableRoomPoints(mapInfo, rooms);
 
                 bool placedItem = false;
 
-                foreach (RogueBasin.Point p in allWalkablePoints)
+                foreach (var p in roomsForClue)
                 {
-                    placedItem = Game.Dungeon.AddItem(item, levelForClue, p);
+                    placedItem = Game.Dungeon.AddItem(item, p.level, p.mapLocation);
 
                     if (placedItem)
                         break;
@@ -1947,15 +1932,20 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         {
             var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
 
+            return GetAllWalkableRoomPoints(mapInfo, candidateRooms);
+        }
+        
+        private IEnumerable<RoomPoint> GetAllWalkableRoomPoints(MapInfo mapInfo, IEnumerable<int> rooms)
+        {
             var allWalkablePoints = new List<RoomPoint>();
 
             //Hmm, could be quite expensive
-            foreach (var room in candidateRooms)
+            foreach (var room in rooms)
             {
-                var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(room);
+                var level = mapInfo.GetLevelForRoomIndex(room);
                 var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
                 var allUnoccupiedPoints = allPossiblePoints.Except(mapInfo.GetOccupiedPointsInRoom(room));
-                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
+                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(level, room, p));
                 
                 allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
             }
@@ -1963,112 +1953,24 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return allWalkablePoints.Shuffle();
         }
 
-        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
-        {
-            var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
-
-            //Must be on the same level
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
-
-            var allWalkablePoints = new List<RogueBasin.Point>();
-
-            //Hmm, could be quite expensive
-            foreach (var room in candidateRooms)
-            {
-                var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
-                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
-            }
-
-            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
-        }
-
-        private IEnumerable<int> GetAllRoomsToPlaceClue(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
-        {
-            var possibleRooms = clue.PossibleClueRoomsInFullMap;
-
-            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
-            if (!includeVaults)
-                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
-
-            IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
-            if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
-            if (candidateRooms.Count() == 0)
-                candidateRooms = possibleRoomMinusVaults;
-
-            return candidateRooms;
-        }
-
-        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsInRooms(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
-        {
-            var possibleRooms = rooms;
-
-            IEnumerable<int> possibleRoomMinusVaults = possibleRooms;
-            if (!includeVaults)
-                possibleRoomMinusVaults = possibleRooms.Except(allReplaceableVaults);
-
-            IEnumerable<int> candidateRooms = possibleRoomMinusVaults;
-            if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(possibleRoomMinusVaults);
-            if (candidateRooms.Count() == 0)
-                candidateRooms = possibleRoomMinusVaults;
-
-            //Must be on the same level
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
-
-            var allWalkablePoints = new List<RogueBasin.Point>();
-
-            //Hmm, could be quite expensive
-            foreach (var room in candidateRooms)
-            {
-                var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(room, RoomTemplateTerrain.Floor);
-                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
-            }
-
-            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
-        }
-
-        private Tuple<int, IEnumerable<RogueBasin.Point>> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, IEnumerable<int> rooms, bool filterCorridors, bool includeVaults)
-        {
-            var possibleRooms = rooms;
-            if(!includeVaults)
-                possibleRooms = possibleRooms.Except(allReplaceableVaults);
-            var candidateRooms = possibleRooms;
-            if (filterCorridors)
-                candidateRooms = mapInfo.FilterOutCorridors(candidateRooms);
-            if (candidateRooms.Count() == 0)
-                candidateRooms = possibleRooms;
-
-            //Must be on the same level
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
-
-            var allWalkablePoints = new List<RogueBasin.Point>();
-
-            //Hmm, could be quite expensive
-            foreach (var room in candidateRooms)
-            {
-                var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
-                allWalkablePoints.AddRange(Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints));
-            }
-
-            return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints.Shuffle());
-        }
-
         private IEnumerable<RoomPoint> GetAllWalkablePointsInRoomsToPlaceClueBoundariesOnly(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
         {
             var candidateRooms = GetPossibleRoomsForClues(mapInfo, clue, filterCorridors, includeVaults);
 
-            //Must be on the same level
-            var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(candidateRooms.First());
+            return GetAllWalkablePointsInRoomsBoundariesOnly(mapInfo, candidateRooms);
+        }
+
+        private IEnumerable<RoomPoint> GetAllWalkablePointsInRoomsBoundariesOnly(MapInfo mapInfo, IEnumerable<int> rooms) {
 
             var allWalkablePoints = new List<RoomPoint>();
 
             //Hmm, could be quite expensive
-            foreach (var room in candidateRooms)
+            foreach (var room in rooms)
             {
+                var level = mapInfo.GetLevelForRoomIndex(room);
                 var allPossiblePoints = mapInfo.GetBoundaryFloorPointsInRoom(room);
                 var allUnoccupiedPoints = allPossiblePoints.Except(mapInfo.GetOccupiedPointsInRoom(room));
-                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(levelForRandomRoom, room, p));
+                var allUnoccupiedRoomPoints = allUnoccupiedPoints.Select(p => new RoomPoint(level, room, p));
                 
                 allWalkablePoints.AddRange(allUnoccupiedRoomPoints);
             }
@@ -2077,6 +1979,20 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         }
 
         private IEnumerable<int> GetPossibleRoomsForClues(MapInfo mapInfo, Clue clue, bool filterCorridors, bool includeVaults)
+        {
+            var possibleRooms = clue.PossibleClueRoomsInFullMap;
+            IEnumerable<int> initialRooms = possibleRooms;
+            if (!includeVaults)
+                initialRooms = possibleRooms.Except(allReplaceableVaults);
+            var candidateRooms = initialRooms;
+            if (filterCorridors)
+                candidateRooms = mapInfo.FilterOutCorridors(initialRooms);
+            if (candidateRooms.Count() == 0)
+                candidateRooms = initialRooms;
+            return candidateRooms;
+        }
+
+        private IEnumerable<int> GetPossibleRoomsForObjective(MapInfo mapInfo, Objective clue, bool filterCorridors, bool includeVaults)
         {
             var possibleRooms = clue.PossibleClueRoomsInFullMap;
             IEnumerable<int> initialRooms = possibleRooms;
@@ -2137,88 +2053,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return new Tuple<int, IEnumerable<RogueBasin.Point>>(levelForRandomRoom, allWalkablePoints);
         }
 
-        /// <summary>
-        /// Add any remaining clues, locks and objectives as simple types (to ensure we don't miss anything)
-        /// </summary>
-        /// <param name="mapInfo"></param>
-        private void AddSimpleCluesAndLocks(MapInfo mapInfo)
-        {
-            //Add clues
-
-            //Find a random room corresponding to a vertex with a clue and place a clue there
-            foreach (var cluesAtVertex in mapInfo.Model.DoorAndClueManager.ClueMap)
-            {
-                foreach (var clue in cluesAtVertex.Value)
-                {
-                    if (placedClues.Contains(clue))
-                        continue;
-
-                    bool avoidCorridors = false;
-                    PlaceSimpleClueItem(mapInfo, new Tuple<Clue, System.Drawing.Color, string>(clue, System.Drawing.Color.Magenta, ""), avoidCorridors, false);
-
-                    placedClues.Add(clue);
-                }
-
-            }
-
-            //Add locks to dungeon as simple doors
-
-            foreach (var door in mapInfo.Model.DoorAndClueManager.DoorMap.Values)
-            {
-                if (placedDoors.Contains(door))
-                    continue;
-
-                var lockedDoor = new RogueBasin.Locks.SimpleLockedDoor(door);
-                var doorInfo = mapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-                lockedDoor.LocationLevel = doorInfo.LevelNo;
-                lockedDoor.LocationMap = doorInfo.MapLocation;
-
-                LogFile.Log.LogEntryDebug("Lock door level " + lockedDoor.LocationLevel + " loc: " + doorInfo.MapLocation, LogDebugLevel.High);
-
-                Game.Dungeon.AddLock(lockedDoor);
-
-                placedDoors.Add(door);
-            }
-
-            //Add objectives to dungeon as simple objectives
-
-            foreach (var objAtVertex in mapInfo.Model.DoorAndClueManager.ObjectiveRoomMap)
-            {
-                foreach (var obj in objAtVertex.Value)
-                {
-
-                    if (placedObjectives.Contains(obj))
-                        continue;
-
-                    var possibleRooms = obj.PossibleClueRoomsInFullMap;
-                    var randomRoom = possibleRooms.RandomElement();
-                    var levelForRandomRoom = mapInfo.GetLevelForRoomIndex(randomRoom);
-
-                    var allPossiblePoints = mapInfo.GetAllPointsInRoomOfTerrain(randomRoom, RoomTemplateTerrain.Floor);
-                    var allWalkablePoints = Game.Dungeon.GetWalkablePointsFromSet(levelForRandomRoom, allPossiblePoints);
-
-                    bool placedItem = false;
-                    foreach (RogueBasin.Point p in allWalkablePoints)
-                    {
-                        var objectiveFeature = new RogueBasin.Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
-                        placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
-
-                        if (placedItem)
-                            break;
-                    }
-
-                    if (!placedItem)
-                    {
-                        var str = "Can't place objective " + obj.Id;
-                        LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
-                        throw new ApplicationException(str);
-                    }
-
-                    placedObjectives.Add(obj);
-                }
-            }
-        }
-
         private IEnumerable<RoomPoint> PlaceSimpleClueItem(MapInfo mapInfo, Tuple<Clue, System.Drawing.Color, string> clues, bool avoidCorridors, bool includeVaults)
         {
             return PlaceSimpleClueItems(mapInfo, new List<Tuple<Clue, System.Drawing.Color, string>> { clues }, avoidCorridors, includeVaults);
@@ -2230,68 +2064,34 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return PlaceClueItems(mapInfo, simpleClueItems, false, avoidCorridors, includeVaults);
         }
 
-        private Tuple<int, RogueBasin.Point> PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults)
+        private RoomPoint PlaceObjective(MapInfo mapInfo, Objective obj, Feature objectiveFeature, bool avoidCorridors, bool includeVaults)
         {
-            var toRet = new List<Tuple<int, RogueBasin.Point>>();
-
-            var roomsForClue = GetAllWalkablePointsToPlaceObjective(mapInfo, obj, avoidCorridors, includeVaults);
-            var levelForRandomRoom = roomsForClue.Item1;
-            var allWalkablePoints = roomsForClue.Item2;
-
-            bool placedItem = false;
-            RogueBasin.Point pointToPlace = null;
-            foreach (RogueBasin.Point p in allWalkablePoints)
-            {
-                if (objectiveFeature == null)
-                    objectiveFeature = new RogueBasin.Features.SimpleObjective(obj, mapInfo.Model.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(obj));
-                placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
-
-                pointToPlace = p;
-
-                if (placedItem)
-                    break;
-            }
-
-            placedObjectives.Add(obj);
-
-            if (!placedItem)
-            {
-                var str = "Can't place obj " + obj.Id;
-                LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
-                throw new ApplicationException(str);
-            }
-
-            return new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace);
+            var candidateRooms = GetPossibleRoomsForObjective(mapInfo, obj, avoidCorridors, includeVaults);
+            return PlaceFeatureInRoom(mapInfo, objectiveFeature, candidateRooms);
         }
 
-        private Tuple<int, RogueBasin.Point> PlaceFeatureInRoom(MapInfo mapInfo, Feature objectiveFeature, List<int> candidateRooms, bool avoidCorridors, bool includeVaults)
+        /// <summary>
+        /// This is a bit fragile for blocking features, since it only tries one square
+        /// </summary>
+        private RoomPoint PlaceFeatureInRoom(MapInfo mapInfo, Feature objectiveFeature, IEnumerable<int> candidateRooms)
         {
-            var toRet = new List<Tuple<int, RogueBasin.Point>>();
+            var roomPoints = GetAllWalkableRoomPoints(mapInfo, candidateRooms);
 
-            var roomsForClue = GetAllWalkablePointsInRooms(mapInfo, candidateRooms, avoidCorridors, includeVaults);
-            var levelForRandomRoom = roomsForClue.Item1;
-            var allWalkablePoints = roomsForClue.Item2;
-
-            bool placedItem = false;
-            RogueBasin.Point pointToPlace = null;
-            foreach (RogueBasin.Point p in allWalkablePoints)
+            if (!roomPoints.Any())
             {
-                placedItem = Game.Dungeon.AddFeature(objectiveFeature, levelForRandomRoom, p);
-
-                pointToPlace = p;
-
-                if (placedItem)
-                    break;
+                throw new ApplicationException("Unable to place feature " + objectiveFeature.Description);
             }
 
-            if (!placedItem)
+            var roomPoint = roomPoints.First();
+
+            bool success = AddFeatureToRoom(mapInfo, roomPoint.roomId, roomPoint.mapLocation, objectiveFeature);
+
+            if (!success)
             {
-                var str = "Can't place obj ";
-                LogFile.Log.LogEntryDebug(str, LogDebugLevel.High);
-                throw new ApplicationException(str);
+                throw new ApplicationException("Unable to place feature " + objectiveFeature.Description + " in room " + roomPoint.roomId);
             }
 
-            return new Tuple<int, RogueBasin.Point>(levelForRandomRoom, pointToPlace);
+            return roomPoint;
         }
 
         private LevelInfo GenerateMedicalLevel(int levelNo)
@@ -3046,33 +2846,6 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             return medicalInfo;
         }
 
-        private static void AddFeaturesToRoom<T>(int level, TemplatePositioned positionedRoom, int featuresToPlace) where T: Feature, new()
-        {
-            var bridgeRouter = new RoomFilling(positionedRoom.Room);
-
-            var floorPoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(positionedRoom.Room, RoomTemplateTerrain.Floor);
-
-            if (floorPoints.Count() == 0)
-                return;
-
-            for (int i = 0; i < featuresToPlace; i++)
-            {
-                var randomPoint = floorPoints.RandomElement();
-                floorPoints.Remove(randomPoint);
-
-                if (bridgeRouter.SetSquareUnWalkableIfMaintainsConnectivity(randomPoint))
-                {
-                    var featureLocationInMapCoords = positionedRoom.Location + randomPoint;
-                    Game.Dungeon.AddFeatureBlocking(new T(), level, featureLocationInMapCoords, false);
-
-                    LogFile.Log.LogEntryDebug("Placing feature in room " + positionedRoom.RoomIndex + " at location " + featureLocationInMapCoords, LogDebugLevel.Medium);
-                }
-
-                if (floorPoints.Count() == 0)
-                    break;
-            }
-        }
-
         private void AddStandardDecorativeFeaturesToRoom(MapInfo mapInfo, int roomId, int featuresToPlace, IEnumerable<Tuple<int, DecorationFeatureDetails.Decoration>> decorationDetails, bool useBoundary)
         {
             var floorPoints = new List<RogueBasin.Point>();
@@ -3110,9 +2883,18 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             LogFile.Log.LogEntryDebug("Placed " + featuresPlaced + " standard decorative features in room " + roomId, LogDebugLevel.Medium);
         }
 
-        private int AddFeatureToRoom(MapInfo mapInfo, int roomId, RogueBasin.Point roomPoint, Feature feature)
+        private bool AddFeatureToRoom(MapInfo mapInfo, int roomId, RogueBasin.Point roomPoint, Feature feature)
         {
-            return AddFeaturesToRoom(mapInfo, roomId, new List<Tuple<RogueBasin.Point, Feature>>() { new Tuple<RogueBasin.Point, Feature>(roomPoint, feature) });
+            var featuresPlaced = AddFeaturesToRoom(mapInfo, roomId, new List<Tuple<RogueBasin.Point, Feature>>() { new Tuple<RogueBasin.Point, Feature>(roomPoint, feature) });
+
+            if (featuresPlaced > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -3166,7 +2948,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             {
                 if (feature.feature.IsBlocking)
                 {
-                    roomFiller.SetSquareUnwalkable(feature.location.MapCoord);
+                    roomFiller.SetSquareUnwalkable(feature.location.MapCoord - room.Location);
                 }
                 else
                 {
