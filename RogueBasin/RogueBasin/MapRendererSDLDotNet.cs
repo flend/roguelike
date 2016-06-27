@@ -198,7 +198,7 @@ namespace RogueBasin
                             {
                                 offsetY = 25;
                             }
-                            else
+                            else if (thisCell.TileSprite == "shotgun" || thisCell.TileSprite == "laser" || thisCell.TileSprite == "rifle")
                             {
                                 offsetY = 15;
                             }

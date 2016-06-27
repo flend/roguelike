@@ -62,7 +62,7 @@ namespace RogueBasin.Creatures
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Triangular;
+            return CreatureFOV.CreatureFOVType.Base;
         }
 
 
