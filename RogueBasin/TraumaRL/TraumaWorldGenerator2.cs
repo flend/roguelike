@@ -43,7 +43,7 @@ namespace TraumaRL
 
             itemsInArmory = new Dictionary<int, List<Item>>();
 
-            foreach(var l in gameLevels) {
+            foreach(var l in mapState.GameLevels) {
                 itemsInArmory[l] = new List<Item>();
             }
             

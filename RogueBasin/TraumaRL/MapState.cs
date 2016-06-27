@@ -13,6 +13,7 @@ namespace TraumaRL
         DoorAndClueManager doorAndClueManager;
         MapPopulator populator;
         Dictionary<int, LevelInfo> levelInfo;
+        List<int> gameLevels;
 
         public MapState()
         {
@@ -70,6 +71,8 @@ namespace TraumaRL
                 }
             }
             mapInfo = new MapInfo(mapInfoBuilder, populator);
+
+            gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
         }
 
         public void InitialiseDoorAndClueManager(int startVertex)
@@ -89,5 +92,7 @@ namespace TraumaRL
         }
 
         public Dictionary<int, LevelInfo> LevelInfo { get { return levelInfo;  } }
+
+        public List<int> GameLevels { get { return gameLevels;  } }
     }
 }

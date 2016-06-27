@@ -28,7 +28,6 @@ namespace TraumaRL
         //For development, skip making most of the levels
         bool quickLevelGen = false;
 
-        List<int> gameLevels;
         static Dictionary<int, string> levelNaming;
 
         LogGenerator logGen = new LogGenerator();
@@ -376,10 +375,11 @@ DecorationFeatureDetails.DecorationFeatures.Bin
                     levelLinks.AddRoomConnection(allLaterLevels.RandomElement(), level);
                 }
             }
-            gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
 
             //Calculate some data about the levels
             levelMap = new MapModel(levelLinks, medicalLevel);
+            var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
+
             levelDepths = levelMap.GetDistanceOfVerticesFromParticularVertexInFullMap(medicalLevel, gameLevels);
             foreach (var kv in levelDepths)
             {
@@ -402,6 +402,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
             //Generate the overall level structure
             levelLinks = GenerateLevelLinks();
+            var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
 
             //Build each level individually
             TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(gameLevels, levelLinks, quickLevelGen);
@@ -426,16 +427,10 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Add maps to the dungeon (must be ordered)
             AddLevelMapsToDungeon(levelInfo);
 
-            //Set player's start location (must be done before adding items)
-            SetPlayerStartLocation(mapInfo);
-
             //Add elevator features to link the maps
             if (!quickLevelGen)
                 AddElevatorFeatures(mapInfo, levelInfo);
             
-            //Attach debugger at this point
-            MessageBox.Show("Attach debugger now for any generation post slow pathing setup");
-
             //Generate quests at mapmodel level
             GenerateQuests(mapInfo, levelInfo);
 
@@ -448,21 +443,24 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             if (!quickLevelGen)
                 AddGoodyQuestLogClues(mapInfo, levelInfo);
 
+            //Add non-interactable features
+            AddDecorationFeatures(mapInfo, levelInfo);
+
+            //Add debug stuff in the first room
+            AddDebugItems(mapInfo);
+
+            //Set player's start location (must be done before adding items)
+            SetPlayerStartLocation(mapInfo);
+
             //Set maps in engine (needs to be done before placing items and monsters)
             SetupMapsInEngine();
 
-            //Add non-interactable features
-            AddDecorationFeatures(mapInfo, levelInfo);
-            
             //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
             //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
             AddMapObjectsToDungeon(mapInfo);
             
             //Add monsters
-            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, gameLevels, levelDifficulty);
-
-            //Add debug stuff in the first room
-            AddDebugItems(mapInfo);
+            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, mapState.GameLevels, levelDifficulty);
 
             //Check we are solvable
             AssertMapIsSolveable(mapInfo, mapState.DoorAndClueManager);
@@ -597,7 +595,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
             //Comment for faster UI check
             Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
-            foreach (var level in gameLevels)
+            foreach (var level in mapState.GameLevels)
             {
                 Game.Dungeon.Levels[level].LightLevel = 0;
             }
@@ -665,7 +663,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
         {
             var noLevelsToBlock = 1 + Game.Random.Next(1);
 
-            var candidateLevels = gameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => levelInfo[l].ConnectionsToOtherLevels.Count() > 1);
+            var candidateLevels = mapState.GameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => levelInfo[l].ConnectionsToOtherLevels.Count() > 1);
             LogFile.Log.LogEntryDebug("Candidates for elevator quests: " + candidateLevels, LogDebugLevel.Medium);
             var chosenLevels = candidateLevels.RandomElements(noLevelsToBlock);
 
@@ -1215,7 +1213,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private void UseVault(Dictionary<int, LevelInfo> levelInfo, Connection vaultConnection)
         {
-            var levelForVault = gameLevels.Where(l => levelInfo[l].ReplaceableVaultConnections.Contains(vaultConnection)).First();
+            var levelForVault = mapState.GameLevels.Where(l => levelInfo[l].ReplaceableVaultConnections.Contains(vaultConnection)).First();
 
             levelInfo[levelForVault].ReplaceableVaultConnectionsUsed.Add(vaultConnection);
         }
@@ -1762,7 +1760,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private IEnumerable<Connection> GetAllUsedVaults(Dictionary<int, LevelInfo> levelInfo)
         {
-            return gameLevels.SelectMany(l => levelInfo[l].ReplaceableVaultConnectionsUsed);
+            return mapState.GameLevels.SelectMany(l => levelInfo[l].ReplaceableVaultConnectionsUsed);
         }
 
         private IEnumerable<Connection> GetAllAvailableVaults(Dictionary<int, LevelInfo> levelInfo)
@@ -1772,7 +1770,7 @@ DecorationFeatureDetails.DecorationFeatures.Bin
 
         private IEnumerable<Connection> GetAllVaults(Dictionary<int, LevelInfo> levelInfo)
         {
-            return gameLevels.SelectMany(l => levelInfo[l].ReplaceableVaultConnections);
+            return mapState.GameLevels.SelectMany(l => levelInfo[l].ReplaceableVaultConnections);
         }
 
 
