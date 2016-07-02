@@ -146,11 +146,6 @@ namespace RogueBasin
 
             Map masterMap = newLevel.LevelBuilder.MergeTemplatesIntoMap(terrainMapping);
             Game.Dungeon.AddMap(masterMap);
-
-            //It's not clear if we need this with unconnected levels
-            //Rebuild each time
-            mapInfo = new MapInfo(mapInfoBuilder, new MapPopulator());
-            Game.Dungeon.MapInfo = mapInfo;
         }
 
         private void SetupNewMapsInEngine()

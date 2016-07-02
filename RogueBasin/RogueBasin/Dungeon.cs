@@ -5106,7 +5106,7 @@ namespace RogueBasin
 
         public bool AllLocksOpen { get; set; }
 
-        public MapInfo MapInfo { get; set; }
+        public MapState MapState { get; set; }
 
         public MonsterPlacement MonsterPlacement { get; private set; }
 

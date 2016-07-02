@@ -208,6 +208,7 @@
     <Compile Include="Items\Pole.cs" />
     <Compile Include="Items\Mine.cs" />
     <Compile Include="Items\RocketLauncher.cs" />
+    <Compile Include="MapAnalysisUtilities.cs" />
     <Compile Include="MapPopulator.cs" />
     <Compile Include="MapState.cs" />
     <Compile Include="MapUtils.cs" />
@@ -290,6 +291,7 @@
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
     <Compile Include="PlayerEffects\BioProtect.cs" />
     <Compile Include="PlayerEffects\StealthBoost.cs" />
+    <Compile Include="QuestMapBuilder.cs" />
     <Compile Include="RangedWeapon.cs" />
     <Compile Include="Items\Pistol.cs" />
     <Compile Include="Items\ShieldPack.cs" />

@@ -210,8 +210,10 @@ namespace RogueBasin
 
 
 
-        public void CreateMonstersForLevels(MapInfo mapInfo, int level, int levelDifficulty)
+        public void CreateMonstersForLevels(MapState mapState, int level, int levelDifficulty)
         {
+            var mapInfo = mapState.MapInfo;
+
             SetupMonsterWeightings();
 
             var monsterSetsUsed = new List<MonsterSet>();
@@ -238,7 +240,7 @@ namespace RogueBasin
 
                 var setToUse = setsToPick.RandomElement();
 
-                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelNames[level], LogDebugLevel.Medium);
 
                 monsterSetsUsed.Add(setToUse);
 

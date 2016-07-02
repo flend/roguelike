@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TraumaRL
+namespace RogueBasin
 {
-    class QuestMapBuilder
+    public class QuestMapBuilder
     {
         private static List<Tuple<System.Drawing.Color, string>> availableColors = new List<Tuple<System.Drawing.Color, string>> {
                 new Tuple<System.Drawing.Color, string>(System.Drawing.Color.Red, "red"),
