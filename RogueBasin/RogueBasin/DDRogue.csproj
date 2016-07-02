@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RogueBasin</RootNamespace>
     <AssemblyName>RogueBasin</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -209,6 +209,7 @@
     <Compile Include="Items\Mine.cs" />
     <Compile Include="Items\RocketLauncher.cs" />
     <Compile Include="MapPopulator.cs" />
+    <Compile Include="MapState.cs" />
     <Compile Include="MapUtils.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="Movie.cs" />
@@ -338,6 +339,7 @@
     <Compile Include="SoundPlayer.cs" />
     <Compile Include="TerrainSets\CrossPiece.cs" />
     <Compile Include="TerrainSets\Pond.cs" />
+    <Compile Include="TraumaLevelBuilder.cs" />
     <Compile Include="Triggers\ArenaEntry.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
@@ -531,6 +533,10 @@
       <HintPath>..\TraumaRL\bin\Debug\SdlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Collections.Immutable.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -978,6 +984,7 @@
     <EmbeddedResource Include="bin\Debug\vaults\oval_vault_small1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\basic_large_arena.room" />
     <EmbeddedResource Include="bin\Debug\movies\fun_mode_failure0.amf" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />

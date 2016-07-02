@@ -2,6 +2,7 @@
 using RogueBasin;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,11 +71,12 @@ namespace TraumaRL
             worldGen.GenerateTraumaLevels(retry);
 
             Game.Dungeon.MapInfo = worldGen.MapState.MapInfo;
-
+            Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelNames.ToDictionary(kv => kv.Key, kv => kv.Value);
+            
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             VisualiseConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager);
-            VisualiseLevelConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager, TraumaWorldGenerator.LevelNaming);
+            VisualiseLevelConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager, worldGen.MapState.LevelNames);
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel, DoorAndClueManager doorAndClueManager)
@@ -104,7 +106,7 @@ namespace TraumaRL
             }   
         }
 
-        private void VisualiseLevelConnectivityGraph(MapModel graphModel, DoorAndClueManager manager, Dictionary<int, string> levelNaming)
+        private void VisualiseLevelConnectivityGraph(MapModel graphModel, DoorAndClueManager manager, ImmutableDictionary<int, string> levelNaming)
         {
             var visualiser = new DoorClueGraphvizExport(graphModel, manager, levelNaming);
             visualiser.OutputClueDoorGraph("levellinks-full");
@@ -171,7 +173,6 @@ namespace TraumaRL
         private void StandardDungeonSetup()
         {
             var dungeonInfo = new DungeonInfo();
-            dungeonInfo.LevelNaming = TraumaWorldGenerator.LevelNaming;
             Game.Dungeon = new Dungeon(dungeonInfo);
 
             Game.Dungeon.Player.StartGameSetup();

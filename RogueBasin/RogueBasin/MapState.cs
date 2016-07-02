@@ -2,10 +2,11 @@
 using RogueBasin;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
-namespace TraumaRL
+namespace RogueBasin
 {
     public class MapState
     {
@@ -14,7 +15,9 @@ namespace TraumaRL
         MapPopulator populator;
         Dictionary<int, LevelInfo> levelInfo;
         List<int> gameLevels;
-        Dictionary<string, int> levelNames = new Dictionary<string,int>();
+        ImmutableDictionary<string, int> levelIds;
+        ImmutableDictionary<int, string> levelNames;
+
         Dictionary<int, int> levelDifficulty = new Dictionary<int,int>();
         IEnumerable<int> allReplaceableVaults;
         Dictionary<int, int> levelDepths;
@@ -91,18 +94,9 @@ namespace TraumaRL
                 LogFile.Log.LogEntryDebug("Level " + kv.Key + " depth " + kv.Value, LogDebugLevel.Medium);
             }
 
-            //Hard coded for now
-            levelNames = new Dictionary<string, int>() {
-                { "medical", 0 },
-                { "lowerAtrium", 1 },
-                { "science", 2 },
-                { "storage", 3 },
-                { "flightDeck", 4 },
-                { "reactor", 5 },
-                { "arcology", 6 },
-                { "commercial", 7 },
-                { "computerCore", 8 },
-                { "bridge", 9 }};
+            //Level name and id lookup
+            levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
+            levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
         }
 
         public void InitialiseDoorAndClueManager(int startVertex)
@@ -129,7 +123,8 @@ namespace TraumaRL
 
         public List<int> GameLevels { get { return gameLevels;  } }
 
-        public Dictionary<string, int> LevelIds { get { return levelNames; } }
+        public ImmutableDictionary<string, int> LevelIds { get { return levelIds; } }
+        public ImmutableDictionary<int, string> LevelNames { get { return levelNames; } }
 
         public IEnumerable<int> AllReplaceableVaults { get { return allReplaceableVaults; } set { allReplaceableVaults = value; } }
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Immutable;
 
 namespace GraphMap
 {
@@ -12,15 +13,16 @@ namespace GraphMap
     {
         private MapModel model;
         private DoorAndClueManager doorAndClueManager;
-        private Dictionary<int, string> vertexMapping = new Dictionary<int,string>();
+        private ImmutableDictionary<int, string> vertexMapping;
 
         public DoorClueGraphvizExport(MapModel m, DoorAndClueManager doorAndClueManager)
         {
             this.model = m;
             this.doorAndClueManager = doorAndClueManager;
+            vertexMapping = new Dictionary<int, String>().ToImmutableDictionary();
         }
 
-        public DoorClueGraphvizExport(MapModel m, DoorAndClueManager doorAndClueManager, Dictionary<int, string> vertexMapping)
+        public DoorClueGraphvizExport(MapModel m, DoorAndClueManager doorAndClueManager, ImmutableDictionary<int, string> vertexMapping)
         {
             this.model = m;
             this.doorAndClueManager = doorAndClueManager;

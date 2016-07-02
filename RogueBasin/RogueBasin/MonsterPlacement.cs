@@ -39,8 +39,10 @@ namespace RogueBasin
 
         List<MonsterSet> monsterSets;
 
-        public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<int> levelsToProcess, Dictionary<int, int> levelDifficulty)
+        public void CreateMonstersForLevels(MapState mapState, IEnumerable<int> levelsToProcess, Dictionary<int, int> levelDifficulty)
         {
+            var mapInfo = mapState.MapInfo;
+
             SetupMonsterWeightings();
 
             var monsterSetsUsed = new List<MonsterSet>();
@@ -78,7 +80,7 @@ namespace RogueBasin
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Hard)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.2);
 
-                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelNames[level], LogDebugLevel.Medium);
 
                 monsterSetsUsed.Add(setToUse);
 

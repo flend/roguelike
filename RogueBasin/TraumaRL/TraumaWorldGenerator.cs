@@ -26,16 +26,11 @@ namespace TraumaRL
         //For development, skip making most of the levels
         bool quickLevelGen = false;
 
-        static Dictionary<int, string> levelNaming;
-
         LogGenerator logGen = new LogGenerator();
 
         MapState mapState;
 
         public ConnectivityMap LevelLinks { get { return levelLinks; } }
-
-        public static Dictionary<int, string> LevelNaming { get { return levelNaming; } }
-
 
         public const int medicalLevel = 0;
         public const int lowerAtriumLevel = 1;
@@ -70,26 +65,7 @@ namespace TraumaRL
 
         static TraumaWorldGenerator() { 
             
-            BuildLevelNaming();
         }
-
-        
-        
-        private static void BuildLevelNaming()
-        {
-            levelNaming = new Dictionary<int, string>();
-            levelNaming[medicalLevel] = "Medical";
-            levelNaming[lowerAtriumLevel] = "Lower Atrium";
-            levelNaming[scienceLevel] = "Science";
-            levelNaming[storageLevel] = "Storage";
-            levelNaming[flightDeck] = "Flight deck";
-            levelNaming[reactorLevel] = "Reactor";
-            levelNaming[arcologyLevel] = "Arcology";
-            levelNaming[commercialLevel] = "Commercial";
-            levelNaming[bridgeLevel] = "Bridge";
-            levelNaming[computerCoreLevel] = "Computer Core";
-        }
-
 
         /// <summary>
         /// Build a level->level map showing how the levels are connected
@@ -206,7 +182,7 @@ namespace TraumaRL
             AddMapObjectsToDungeon(mapInfo);
             
             //Add monsters
-            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapInfo, mapState.GameLevels, mapState.LevelDifficulty);
+            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapState, mapState.GameLevels, mapState.LevelDifficulty);
 
             //Check we are solvable
             AssertMapIsSolveable(mapInfo, mapState.DoorAndClueManager);
@@ -433,7 +409,7 @@ namespace TraumaRL
                 var colorToUse = builder.GetUnusedColor();
 
                 var doorName = colorToUse.Item2 + " key card";
-                var doorId = levelNaming[levelForBlocks] + "-" + doorName + Game.Random.Next();
+                var doorId = mapState.LevelNames[levelForBlocks] + "-" + doorName + Game.Random.Next();
                 var doorColor = colorToUse.Item1;
 
                 LogFile.Log.LogEntryDebug("Blocking elevators " + pairToTry.ElementAt(0) + " to " + pairToTry.ElementAt(1) + " with " + doorId, LogDebugLevel.High);
@@ -478,7 +454,7 @@ namespace TraumaRL
                 LogFile.Log.LogEntryDebug("Placing goody room at: level: " + thisLevel + " room: " + thisRoom, LogDebugLevel.Medium);
 
                 //Place door
-                var doorReadableId = levelNaming[thisLevel] + " armory";
+                var doorReadableId = mapState.LevelNames[thisLevel] + " armory";
                 var doorId = doorReadableId;
                 
                 var unusedColor = builder.GetUnusedColor();
@@ -525,7 +501,7 @@ namespace TraumaRL
                 var thisLevel = kv.Key;
                 var thisRoom = kv.Value;
                 
-                var doorId = levelNaming[thisLevel] + " armory";
+                var doorId = mapState.LevelNames[thisLevel] + " armory";
 
                 //Clue
                 var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);

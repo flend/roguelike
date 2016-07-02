@@ -114,7 +114,6 @@ namespace TraumaRL
         private void StandardDungeonSetup()
         {
             var dungeonInfo = new DungeonInfo();
-            dungeonInfo.LevelNaming = TraumaWorldGenerator.LevelNaming;
             Game.Dungeon = new Dungeon(dungeonInfo);
 
             Game.Dungeon.Player.StartGameSetup();

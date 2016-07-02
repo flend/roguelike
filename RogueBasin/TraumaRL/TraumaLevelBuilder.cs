@@ -4,33 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TraumaRL
 {
-    public class LevelInfo
-    {
-        public LevelInfo(int levelNo)
-        {
-            LevelNo = levelNo;
-
-            ConnectionsToOtherLevels = new Dictionary<int, Connection>();
-            ReplaceableVaultConnections = new List<Connection>();
-            ReplaceableVaultConnectionsUsed = new List<Connection>();
-        }
-
-        public int LevelNo { get; private set; }
-
-        public Dictionary<int, Connection> ConnectionsToOtherLevels { get; set; }
-
-        public TemplatedMapGenerator LevelGenerator { get; set; }
-        public TemplatedMapBuilder LevelBuilder { get; set; }
-
-        //Replaceable vault at target
-        public List<Connection> ReplaceableVaultConnections { get; set; }
-        public List<Connection> ReplaceableVaultConnectionsUsed { get; set; }
-
-        public Dictionary<MapTerrain, List<MapTerrain>> TerrainMapping { get; set; }
-    }
 
     public class TraumaLevelBuilder
     {
@@ -48,10 +25,10 @@ namespace TraumaRL
         private IEnumerable<int> gameLevels;
         private bool quickLevelGen;
         private ConnectivityMap levelLinks;
-        
+
         List<int> allReplaceableVaults;
         Dictionary<int, LevelInfo> levelInfo;
-        
+
         //Quest important rooms / vaults
         Connection escapePodsConnection;
 
@@ -129,12 +106,15 @@ namespace TraumaRL
 
         public void GenerateLevels()
         {
-            levelInfo = new Dictionary<int, TraumaRL.LevelInfo>();
+            levelInfo = new Dictionary<int, LevelInfo>();
 
             var medicalInfo = GenerateMedicalLevel(medicalLevel);
             levelInfo[medicalLevel] = medicalInfo;
             if (!quickLevelGen)
             {
+                var lowerAtriumInfo = GenerateStandardLevel(lowerAtriumLevel, lowerAtriumLevel * 100, "lowerAtrium");
+                levelInfo[lowerAtriumLevel] = lowerAtriumInfo;
+
                 var scienceInfo = GenerateScienceLevel(scienceLevel, scienceLevel * 100);
                 levelInfo[scienceLevel] = scienceInfo;
 
@@ -169,12 +149,12 @@ namespace TraumaRL
             }
             else
             {
-                standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel });
+                standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel, lowerAtriumLevel });
             }
 
             foreach (var level in standardGameLevels)
             {
-                var thisLevelInfo = GenerateStandardLevel(level, level * 100);
+                var thisLevelInfo = GenerateStandardLevel(level, level * 100, "standard" + level);
                 levelInfo[level] = thisLevelInfo;
             }
 
@@ -184,7 +164,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateMedicalLevel(int levelNo)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, "medical");
 
             //Load standard room types
 
@@ -233,7 +213,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateScienceLevel(int levelNo, int startVertexIndex)
         {
-            var levelInfo = new LevelInfo(levelNo);
+            var levelInfo = new LevelInfo(levelNo, "science");
 
             //Load standard room types
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
@@ -305,7 +285,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateBridgeLevel(int levelNo, int startVertexIndex)
         {
-            var levelInfo = new LevelInfo(levelNo);
+            var levelInfo = new LevelInfo(levelNo, "bridge");
 
             //Load standard room types
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
@@ -377,7 +357,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateStorageLevel(int levelNo, int startVertexIndex)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, "storage");
 
             //Load standard room types
 
@@ -422,7 +402,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateFlightDeckLevel(int levelNo, int startVertexIndex)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, "flightDeck");
 
             //Load standard room types
 
@@ -486,7 +466,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateReactorLevel(int levelNo, int startVertexIndex)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, "reactor");
 
             //Load standard room types
 
@@ -542,7 +522,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateComputerCoreLevel(int levelNo, int startVertexIndex)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, "computerCore");
 
             //Load standard room types
 
@@ -619,7 +599,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateArcologyLevel(int levelNo, int startVertexIndex)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, "arcology");
 
             //Load standard room types
 
@@ -684,7 +664,7 @@ namespace TraumaRL
 
         private LevelInfo GenerateCommercialLevel(int levelNo, int startVertexIndex)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, "commercial");
 
             //Load standard room types
 
@@ -850,9 +830,9 @@ namespace TraumaRL
             PlaceRandomConnectedRooms(templateGenerator, numberOfRandomRooms, allRoomsToPlace, corridor1, 4, 6);
         }
 
-        private LevelInfo GenerateStandardLevel(int levelNo, int startVertexIndex)
+        private LevelInfo GenerateStandardLevel(int levelNo, int startVertexIndex, string levelName)
         {
-            var medicalInfo = new LevelInfo(levelNo);
+            var medicalInfo = new LevelInfo(levelNo, levelName);
 
             //Load standard room types
 
