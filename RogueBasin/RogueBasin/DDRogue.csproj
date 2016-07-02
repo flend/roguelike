@@ -291,6 +291,7 @@
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
     <Compile Include="PlayerEffects\BioProtect.cs" />
     <Compile Include="PlayerEffects\StealthBoost.cs" />
+    <Compile Include="Quest.cs" />
     <Compile Include="QuestMapBuilder.cs" />
     <Compile Include="RangedWeapon.cs" />
     <Compile Include="Items\Pistol.cs" />

@@ -358,7 +358,9 @@ namespace TraumaRL
             {
                 try
                 {
-                    BlockElevatorPaths(mapState, builder, roomConnectivityMap, level, 1, Game.Random.Next(2) > 0);
+                    var blockElevatorQuest = new BlockElevatorQuest(mapState, builder, logGen, level, roomConnectivityMap);
+                    blockElevatorQuest.ClueOnElevatorLevel = Game.Random.Next(2) > 0;
+                    blockElevatorQuest.SetupQuest();
                 }
                 catch (Exception ex)
                 {
@@ -371,59 +373,13 @@ namespace TraumaRL
         {
             try
             {
-                BlockElevatorPaths(mapState, builder, roomConnectivityMap, lowerAtriumLevel, 1, false);
+                var blockElevatorQuest = new BlockElevatorQuest(mapState, builder, logGen, lowerAtriumLevel, roomConnectivityMap);
+                blockElevatorQuest.SetupQuest();
             }
             catch (Exception ex)
             {
                 LogFile.Log.LogEntryDebug("Atrium Elevator Exception: " + ex, LogDebugLevel.High);
             }
-        }
-
-        private bool BlockElevatorPaths(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap,
-            int levelForBlocks, int maxDoorsToMake, bool clueOnElevatorLevel)
-        {
-            var levelInfo = mapState.LevelInfo;
-            var connectionsFromThisLevel = levelInfo[levelForBlocks].ConnectionsToOtherLevels;
-
-            var pairs = Utility.GetPermutations<int>(connectionsFromThisLevel.Keys, 2);
-
-            if (pairs.Count() == 0)
-            {
-                LogFile.Log.LogEntryDebug("Can't find pair of elevators to connection", LogDebugLevel.High);
-                return false;
-            }
-
-            var pairsLeft = pairs.Select(s => s);
-
-            int doorsMade = 0;
-            while (doorsMade < maxDoorsToMake && pairsLeft.Count() > 0)
-            {
-                var pairToTry = pairsLeft.RandomElement();
-
-                var sourceElevatorConnection = levelInfo[levelForBlocks].ConnectionsToOtherLevels[pairToTry.ElementAt(0)];
-                var targetElevatorConnection = levelInfo[levelForBlocks].ConnectionsToOtherLevels[pairToTry.ElementAt(1)];
-
-                var startDoor = sourceElevatorConnection.Source;
-                var endDoor = targetElevatorConnection.Source;
-
-                var colorToUse = builder.GetUnusedColor();
-
-                var doorName = colorToUse.Item2 + " key card";
-                var doorId = mapState.LevelNames[levelForBlocks] + "-" + doorName + Game.Random.Next();
-                var doorColor = colorToUse.Item1;
-
-                LogFile.Log.LogEntryDebug("Blocking elevators " + pairToTry.ElementAt(0) + " to " + pairToTry.ElementAt(1) + " with " + doorId, LogDebugLevel.High);
-
-                BlockPathBetweenRoomsWithSimpleDoor(mapState, builder, roomConnectivityMap,
-                    doorId, doorName, doorColor, 1, startDoor, endDoor,
-                    0.5, clueOnElevatorLevel, QuestMapBuilder.CluePath.NotOnCriticalPath, true,
-                    true, QuestMapBuilder.CluePath.OnCriticalPath, true);
-
-                doorsMade++;
-                pairsLeft = pairsLeft.Except(Enumerable.Repeat(pairToTry, 1));
-            }
-
-            return true;
         }
 
         Dictionary<int, int> goodyRooms;
@@ -528,92 +484,8 @@ namespace TraumaRL
         
         private void BuildMedicalLevelQuests(MapState mapState, QuestMapBuilder builder)
         {
-            var mapInfo = mapState.MapInfo;
-
-            //Lock the door to the elevator and require a certain number of monsters to be killed
-            var elevatorConnection = mapState.LevelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
-
-            var doorId = "medical-security";
-            int objectsToPlace = 15;
-            int objectsToDestroy = 10;
-
-            //Place door
-            builder.PlaceMovieDoorOnMap(mapState, doorId, doorId, objectsToDestroy, System.Drawing.Color.Red, "t_medicalsecurityunlocked", "t_medicalsecuritylocked", elevatorConnection);
-
-            //This will be restricted to the medical level since we cut off the door
-            var manager = mapState.DoorAndClueManager;
-
-            var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
-            allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
-
-            var roomsForMonsters = builder.GetRandomRoomsForClues(mapState, objectsToPlace, allowedRoomsForClues);
-            var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
-
-            builder.PlaceCreatureClues<RogueBasin.Creatures.Camera>(mapState, clues, true, false);
-
-            //Place log entries explaining the puzzle
-            //These will not be turned into in-engine clue items, so they can't be used to open the door
-            //They are added though, to ensure that they are readable before the door is opened
-
-            var roomsForLogs = builder.GetRandomRoomsForClues(mapState, 2, allowedRoomsForClues);
-            var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
-
-            var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateElevatorLogEntry(medicalLevel, lowerAtriumLevel), logClues[0]);
-            var log2 = new Tuple<LogEntry, Clue>(logGen.GenerateArbitaryLogEntry("qe_medicalsecurity"), logClues[1]);
-            builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
-        }
-
-        private void BlockPathBetweenRoomsWithSimpleDoor(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap,
-            string doorId, string doorName, System.Drawing.Color colorToUse, int cluesForDoor, int sourceRoom, int endRoom,
-            double distanceFromSourceRatio, bool enforceClueOnDestLevel, QuestMapBuilder.CluePath clueNotOnCriticalPath, bool clueNotInCorridors,
-            bool hasLogClue, QuestMapBuilder.CluePath logOnCriticalPath, bool logNotInCorridors)
-        {
-            var manager = mapState.DoorAndClueManager;
-            var mapInfo = mapState.MapInfo;
-
-            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(sourceRoom, endRoom);
-            var criticalConnectionForDoor = criticalPath.ElementAt((int)Math.Min(criticalPath.Count() * distanceFromSourceRatio, criticalPath.Count() - 1));
-
-            criticalConnectionForDoor = MapAnalysisUtilities.FindFreeConnectionOnPath(manager, criticalPath, criticalConnectionForDoor);
-
-            //Place door
-
-            builder.PlaceLockedDoorOnMap(mapState, doorId, doorName, cluesForDoor, colorToUse, criticalConnectionForDoor);
-
-            //Place clues
-
-            var allRoomsForClue = manager.GetValidRoomsToPlaceClueForDoor(doorId);
-            var preferredRooms = builder.FilterClueRooms(mapState, allRoomsForClue, criticalPath, enforceClueOnDestLevel, clueNotOnCriticalPath, clueNotInCorridors);
-
-            var roomsForClues = builder.GetRandomRoomsForClues(mapState, cluesForDoor, preferredRooms);
-            var clues = manager.AddCluesToExistingDoor(doorId, roomsForClues);
-
-            var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, colorToUse, doorName));
-
-            var clueLocations = builder.PlaceSimpleClueItems(mapState, cluesAndColors, clueNotInCorridors, false);
-
-            //Place log entries explaining the puzzle
-
-            if (hasLogClue)
-            {
-                //Put major clue on the critical path
-
-                var preferredRoomsForLogs = builder.FilterClueRooms(mapState, allRoomsForClue, criticalPath, false, logOnCriticalPath, logNotInCorridors);
-                var roomsForLogs = builder.GetRandomRoomsForClues(mapState, 1, preferredRoomsForLogs);
-                var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
-
-                //Put minor clue somewhere else
-                var preferredRoomsForLogsNonCritical = builder.FilterClueRooms(mapState, allRoomsForClue, criticalPath, false, QuestMapBuilder.CluePath.Any, logNotInCorridors);
-
-                var roomsForLogsNonCritical = builder.GetRandomRoomsForClues(mapState, 1, preferredRoomsForLogsNonCritical);
-                var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
-
-                var coupledLogs = logGen.GenerateCoupledDoorLogEntry(doorName, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
-                    clueLocations.First().level);
-                var log1 = new Tuple<LogEntry, Clue>(coupledLogs[0], logClues[0]);
-                var log2 = new Tuple<LogEntry, Clue>(coupledLogs[1], logCluesNonCritical[0]);
-                builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
-            }
+            var cameraQuest = new MedicalCameraQuest(mapState, builder, logGen);
+            cameraQuest.SetupQuest();
         }
 
         private void BuildMainQuest(MapState mapState, QuestMapBuilder questMapBuilder)
