@@ -25,5 +25,10 @@ namespace RogueBasin
         public override bool OnPickup(Creature pickupCreature) {
             return Use(pickupCreature);
         }
+
+        public override bool DestroyedOnPickup()
+        {
+            return true;
+        }
     }
 }

@@ -34,6 +34,16 @@ namespace RogueBasin.Items
             }
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         public bool Equip(Creature user)
         {
             LogFile.Log.LogEntryDebug("BoostWare equipped", LogDebugLevel.Medium);
@@ -80,9 +90,9 @@ namespace RogueBasin.Items
             return (char)583;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return System.Drawing.Color.Silver;
         }
 
         public int ArmourClassModifier()
@@ -96,7 +106,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

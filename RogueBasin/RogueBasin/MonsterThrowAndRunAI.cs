@@ -5,8 +5,27 @@ using libtcodWrapper;
 
 namespace RogueBasin
 {
-    public abstract class MonsterThrowAndRunAI : MonsterSimpleThrowingAI
+    public abstract class MonsterThrowAndRunAI : MonsterFightAndRunAI
     {
+        /// <summary>
+        /// Color of the projectile
+        /// </summary>
+        /// <returns></returns>
+        protected virtual System.Drawing.Color GetWeaponColor()
+        {
+            return System.Drawing.Color.DarkGray;
+        }
+
+        public abstract double GetMissileRange();
+
+        protected abstract string GetWeaponName();
+
+        public MonsterThrowAndRunAI() { }
+        public MonsterThrowAndRunAI(int level)
+            : base(level)
+        {
+
+        }
 
         /// <summary>
         /// Override the following code from the simple throwing AI to include backing away
@@ -74,7 +93,7 @@ namespace RogueBasin
                     if (CanOpenDoors())
                         permission = Pathing.PathingPermission.IgnoreDoors;
 
-                    nextStep = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, new Point(fleeX, fleeY), PathingType(), permission).MonsterFinalLocation;
+                    nextStep = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, new Point(fleeX, fleeY), PathingType(), permission, IgnoreDangerousTerrain).MonsterFinalLocation;
 
                     //Check the square is pathable to
                     if (nextStep.x == LocationMap.x && nextStep.y == LocationMap.y)
@@ -171,12 +190,12 @@ namespace RogueBasin
 
                     if (newTarget == Game.Dungeon.Player)
                     {
-                        result = AttackPlayer(newTarget as Player);
+                        result = AttackPlayer(newTarget as Player, true);
                     }
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, true);
                     }
 
                     //Missile animation
@@ -210,7 +229,13 @@ namespace RogueBasin
 
                 bool usingSpecial = UseSpecialAbility();
 
-                if (!usingSpecial)
+                if (usingSpecial)
+                {
+                    CheckReload();
+                }
+
+                //Stop guy we don't want to fire from having to
+                if (!usingSpecial && DamageBase() > 0)
                 {
                     //In FOV - fire at the player
                     CombatResults result;
@@ -221,12 +246,12 @@ namespace RogueBasin
 
                     if (newTarget == Game.Dungeon.Player)
                     {
-                        result = AttackPlayer(newTarget as Player);
+                        result = AttackPlayer(newTarget as Player, true);
                     }
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, true);
                     }
 
                     //Missile animation
@@ -238,6 +263,15 @@ namespace RogueBasin
             else
             {
                 ContinueChasing(newTarget);
+            }
+        }
+
+        private void CheckReload() {
+
+            //We only use this for special abilities for now - otherwise handled in attackplayer / attackmonster
+            if (this.ReloadTurnsRequired() > 0)
+            {
+                ReloadingTurns = ReloadTurnsRequired();
             }
         }
 
@@ -281,7 +315,7 @@ namespace RogueBasin
             if (CanOpenDoors())
                 permission = Pathing.PathingPermission.IgnoreDoors;
 
-            pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType(), permission);
+            pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType(), permission, IgnoreDangerousTerrain);
 
             //If this is the same as the target creature's location, we are adjacent. TODO: change our FOV instead of moving. 
             //We are allowed to attack in this case. TODO: more fun if not?
@@ -299,12 +333,12 @@ namespace RogueBasin
 
                     if (newTarget == Game.Dungeon.Player)
                     {
-                        result = AttackPlayer(newTarget as Player);
+                        result = AttackPlayer(newTarget as Player, true);
                     }
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, true);
                     }
 
                     //Missile animation

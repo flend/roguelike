@@ -72,7 +72,7 @@ namespace RogueBasin.Spells
                 }
             }
 
-            //Screen.Instance.DrawFlashSquares(splashSquares, ColorPresets.Red);
+            //Screen.Instance.DrawFlashSquares(splashSquares, System.Drawing.Color.Red);
             
             return true;
         }
@@ -129,7 +129,7 @@ namespace RogueBasin.Spells
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Apply damage
-            player.ApplyDamageToMonster(monster, damage, true, false);
+            player.ApplyDamageToMonsterFromPlayer(monster, damage, true, false);
         }
 
         private void HitPlayer()

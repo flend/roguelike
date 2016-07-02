@@ -24,14 +24,15 @@ namespace GraphMapStressTester
             var randomMap = graphGenerator.GenerateConnectivityMapNoCycles(numberOfNodes, branchingRatio);
 
             var mapModel = new MapModel(randomMap, 0);
+            var doorManager = new DoorAndClueManager(mapModel);
 
             if (visualise)
-                VisualiseConnectivityGraph(mapModel);
+                VisualiseConnectivityGraph(mapModel, doorManager);
         }
 
-        private void VisualiseConnectivityGraph(MapModel graphModel)
+        private void VisualiseConnectivityGraph(MapModel graphModel, DoorAndClueManager doorAndClueManager)
         {
-            var visualiser = new DoorClueGraphvizExport(graphModel);
+            var visualiser = new DoorClueGraphvizExport(graphModel, doorAndClueManager);
             visualiser.OutputFullGraph("bsptree-full");
             try
             {

@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -30,26 +30,36 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effectsf
             //Game.Dungeon.Player.Speed += 10;
 
             return true;
+        }
+
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("explosion");
         }
 
         /// <summary>
@@ -62,7 +72,7 @@ namespace RogueBasin.Items
         {
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
-            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4.0, 50);
+            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 2.0, Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase()));
             
             return dest;
         }
@@ -103,9 +113,19 @@ namespace RogueBasin.Items
             return (char)297;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        protected override string GetGameSprite()
         {
-            return ColorPresets.Red;
+            return "grenade";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-grenade";
+        }
+
+        public override System.Drawing.Color GetColour()
+        {
+            return System.Drawing.Color.Red;
         }
 
         public int ArmourClassModifier()
@@ -116,10 +136,10 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 0;
+            return 30;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -217,7 +237,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 10;
+            return 6;
         }
 
         /// <summary>
@@ -244,7 +264,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public double ThrowSoundMagnitude()
         {
-            return 1;
+            return 0.8;
         }
 
         /// <summary>

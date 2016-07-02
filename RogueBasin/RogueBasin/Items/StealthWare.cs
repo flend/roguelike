@@ -73,9 +73,9 @@ namespace RogueBasin.Items
             return (char)582;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return System.Drawing.Color.Silver;
         }
 
         public int ArmourClassModifier()
@@ -89,7 +89,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -263,7 +263,17 @@ namespace RogueBasin.Items
 
         public int GetEnergyDrain()
         {
-            return 10;
+            return 0;
+        }
+
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
         }
     }
 }

@@ -20,26 +20,36 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
 
             return true;
+        }
+
+        public void FireAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("gunshot");
+        }
+
+        public void ThrowAudio()
+        {
+            return;
         }
 
         public List<EquipmentSlot> EquipmentSlots
@@ -106,9 +116,9 @@ namespace RogueBasin.Items
             return (char)275;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.HotPink;
+            return System.Drawing.Color.HotPink;
         }
 
         public int ArmourClassModifier()
@@ -119,10 +129,10 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 0;
+            return 40;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -139,7 +149,7 @@ namespace RogueBasin.Items
 
         public override int MaxAmmo()
         {
-            return 5;
+            return 3;
         }
 
         public bool HasMeleeAction()
@@ -160,7 +170,8 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            return Game.Dungeon.FirePistolLineWeapon(target, this, 60);
+            Ammo--;
+            return Game.Dungeon.FirePistolLineWeapon(target, this, DamageBase());
         }
 
         /// <summary>
@@ -218,12 +229,12 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeFire()
         {
-            return 7;
+            return 5;
         }
 
         public override double FireSoundMagnitude()
         {
-            return 0.4;
+            return 0.6;
         }
 
         /// <summary>
@@ -259,6 +270,16 @@ namespace RogueBasin.Items
         public virtual double ShotgunSpreadAngle()
         {
             return 0.0;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "rifle";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-rifle";
         }
 
         /// <summary>

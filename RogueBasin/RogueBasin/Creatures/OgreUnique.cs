@@ -61,7 +61,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 1;
         }
@@ -117,9 +117,9 @@ namespace RogueBasin.Creatures
             return new Ogre();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Brown;
+            return System.Drawing.Color.Brown;
         }
 
         public override int GetCombatXP()

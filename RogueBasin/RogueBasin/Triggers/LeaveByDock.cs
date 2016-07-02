@@ -33,7 +33,7 @@ namespace RogueBasin.Triggers
             //Not finished yet
             if (Game.Dungeon.DungeonInfo.Dungeons[level].LevelObjectiveComplete == false)
             {
-                bool decision = Screen.Instance.YesNoQuestion("ABORT the mission, soldier?");
+                bool decision = false;//Screen.Instance.YesNoQuestion("ABORT the mission, soldier?");
 
                 if (decision == false)
                 {
@@ -53,7 +53,7 @@ namespace RogueBasin.Triggers
             {
                 //All done
 
-                bool decision = Screen.Instance.YesNoQuestion("Job well DONE, Soldier! COMPLETE the mission?");
+                bool decision = false;// Screen.Instance.YesNoQuestion("Job well DONE, Soldier! COMPLETE the mission?");
 
                 if (decision == false)
                 {
@@ -64,7 +64,7 @@ namespace RogueBasin.Triggers
                 //Go back to town
                 LogFile.Log.LogEntryDebug("Player Completing level: " + level, LogDebugLevel.Medium);
 
-                Game.Dungeon.MissionComplete();
+                //Game.Dungeon.MissionComplete();
 
                 return true;
             }

@@ -54,7 +54,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
 
             doorManager.PlaceDoorAndClue(new DoorRequirements(new Connection(2, 10), "lock0"), 2);
             var door = doorManager.GetDoorById("lock0");

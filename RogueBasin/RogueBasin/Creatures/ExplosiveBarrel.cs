@@ -5,18 +5,17 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Swarmer. Light melee with wide FOV. Responds to sounds.
-    /// </summary>
+
     public class ExplosiveBarrel : MonsterNullAI
     {
+        int level;
 
-        public ExplosiveBarrel()
+        public ExplosiveBarrel(int level)
         {
-            //Add a default right hand slot
-            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
-
+            this.level = level;
             this.Passive = true;
+            this.UnpassifyOnAttacked = false;
+            this.WakesOnAttacked = false;
         }
 
         /// <summary>
@@ -24,30 +23,19 @@ namespace RogueBasin.Creatures
         /// </summary>
         protected void Explode()
         {
-            double size = 4.0;
-            int damage = 50;
+            Game.Dungeon.AddSoundEffect(0.5, LocationLevel, LocationMap);
 
-            if (this.LocationLevel >= 6)
-                damage *= 2;
-
-            //Make explosion sound AT target location
-            Game.Dungeon.AddSoundEffect(1, LocationLevel, LocationMap);
-
-            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, size, damage, this);
-        }
-
-
-
-        public override void InventoryDrop()
-        {
-            //Nothing to drop
-
-            //Hmm, could use this corpses
+            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 2.5, this.ScaleRangedDamage(DamageBase()), this);
         }
 
         public override Monster NewCreatureOfThisType()
         {
-            return new ExplosiveBarrel();
+            return new ExplosiveBarrel(Level);
+        }
+
+        public override Feature GenerateCorpse()
+        {
+            return null;
         }
 
         protected override int ClassMaxHitpoints()
@@ -57,12 +45,12 @@ namespace RogueBasin.Creatures
 
         public override int DamageBase()
         {
-            return 4;
+            return 20;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Triangular;
+            return CreatureFOV.CreatureFOVType.Base;
         }
 
 
@@ -87,9 +75,9 @@ namespace RogueBasin.Creatures
             return (char)569;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
 
@@ -103,57 +91,14 @@ namespace RogueBasin.Creatures
             return 3;
         }
 
-
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Gold;
+            return System.Drawing.Color.Gold;
         }
 
         public override int GetCombatXP()
         {
-            return 40;
-        }
-
-        public override int GetMagicXP()
-        {
-            return 40;
-        }
-
-        public override int GetMagicRes()
-        {
             return 0;
-        }
-
-        public override int GetCharmRes()
-        {
-            return 30;
-        }
-
-        public override bool CanBeCharmed()
-        {
-            return true;
-        }
-
-
-        /// <summary>
-        /// Creature AC. Set by type of creature.
-        /// </summary>
-        public override int ArmourClass()
-        {
-            return 12;
-        }
-
-        /// <summary>
-        /// Creature damage modifier.  Set by type of creature.
-        /// </summary>
-        public override int DamageModifier()
-        {
-            return 1;
-        }
-
-        public override int HitModifier()
-        {
-            return 3;
         }
 
         internal override void OnKilledSpecialEffects()
@@ -164,6 +109,21 @@ namespace RogueBasin.Creatures
         public override int DropChance()
         {
             return 0;
+        }
+
+        public override bool CanMove()
+        {
+            return false;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "barrel";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "barrel";
         }
 
     }

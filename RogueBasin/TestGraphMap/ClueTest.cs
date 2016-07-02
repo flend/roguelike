@@ -15,8 +15,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
-
+            var doorManager = new DoorAndClueManager(mapModel);
             var clue = doorManager.PlaceDoorAndClue(new DoorRequirements(new Connection(2, 10), "lock0"), 2);
 
             CollectionAssert.AreEquivalent(new List<int>(new int []{2, 7, 8, 9}), clue.PossibleClueRoomsInFullMap);

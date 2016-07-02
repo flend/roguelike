@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Melee);
 
                 return retList;
             }
@@ -24,32 +24,42 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Fists equipped", LogDebugLevel.Medium);
+            LogFile.Log.LogEntryDebug("Knife equipped", LogDebugLevel.Medium);
 
             //Give player story. Mention level up if one will occur.
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("Vibro-blade.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
 
             return true;
+        }
+
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
         }
 
         /// <summary>
@@ -72,7 +82,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            LogFile.Log.LogEntryDebug("Fists 'unequipped'", LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("Knife 'unequipped'", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -85,7 +95,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Fists"; }
+            get { return "Knife"; }
         }
 
         /// <summary>
@@ -93,7 +103,7 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Fists"; }
+            get { return "Knives"; }
         }
 
         protected override char GetRepresentation()
@@ -101,9 +111,9 @@ namespace RogueBasin.Items
             return (char)598;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.LawnGreen;
+            return System.Drawing.Color.LawnGreen;
         }
 
         public int ArmourClassModifier()
@@ -117,7 +127,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -289,6 +299,16 @@ namespace RogueBasin.Items
         public int GetEnergyDrain()
         {
             return 0;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "knife";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-knife";
         }
 
     }

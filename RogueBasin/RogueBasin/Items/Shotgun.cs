@@ -21,7 +21,8 @@ namespace RogueBasin.Items
         {
             //Should be guaranteed in range by caller
 
-            Game.Dungeon.FireShotgunWeapon(target, this, 100, 10, 10);
+            var scaledDamage = Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase());
+            Game.Dungeon.FireShotgunWeapon(target, this, scaledDamage, scaledDamage / 10, scaledDamage / 10);
 
             //Remove 1 ammo
             Ammo--;
@@ -105,9 +106,19 @@ namespace RogueBasin.Items
             return (char)274;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        protected override string GetGameSprite()
         {
-            return ColorPresets.Cyan;
+            return "shotgun";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-shotgun";
+        }
+
+        public override System.Drawing.Color GetColour()
+        {
+            return System.Drawing.Color.Cyan;
         }
 
         public int ArmourClassModifier()
@@ -118,10 +129,10 @@ namespace RogueBasin.Items
         public int DamageBase()
         {
             //1d6
-            return 0;
+            return 40;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -189,7 +200,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public override double FireSoundMagnitude()
         {
-            return 1.0;
+            return 0.5;
         }
 
         /// <summary>
@@ -250,6 +261,16 @@ namespace RogueBasin.Items
         public int GetEnergyDrain()
         {
             return 0;
+        }
+
+        public void FireAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("shotgun");
+        }
+
+        public void ThrowAudio()
+        {
+            return;
         }
     }
 }

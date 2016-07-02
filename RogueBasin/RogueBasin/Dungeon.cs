@@ -63,6 +63,16 @@ namespace RogueBasin
         }
     }
 
+    public enum MoveResults
+    {
+        StoppedByObstacle,
+        InteractedWithObstacle,
+        AttackedMonster,
+        SwappedWithMonster,
+        InteractedWithFeature,
+        NormalMove
+    }
+
     public class DungeonProfile {
         public int dungeonStartLevel;
         public int dungeonEndLevel;
@@ -366,7 +376,7 @@ namespace RogueBasin
 
         List<Monster> monsters;
         List<Item> items;
-        List<Feature> features;
+        Dictionary<Location, List<Feature>> features;
         Dictionary<Location, List<Lock>> locks;
         public List<HiddenNameInfo> HiddenNameInfo { get; set; } //for serialization
         public List<DungeonSquareTrigger> Triggers { get; set; }
@@ -450,7 +460,7 @@ namespace RogueBasin
         List<SoundEffect> effects;
 
 
-        Color defaultPCColor = ColorPresets.White;
+        System.Drawing.Color defaultPCColor = System.Drawing.Color.White;
 
         public DungeonMaker DungeonMaker { get; set; }
 
@@ -464,7 +474,7 @@ namespace RogueBasin
             levels = new List<Map>();
             monsters = new List<Monster>();
             items = new List<Item>();
-            features = new List<Feature>();
+            features = new Dictionary<Location, List<Feature>>();
             locks = new Dictionary<Location, List<Lock>>();
 
             pathFinding = new Pathing(this, new LibTCOD.TCODPathFindingWrapper());
@@ -571,23 +581,106 @@ namespace RogueBasin
 
         public bool FireShotgunWeapon(Point target, Items.ShotgunTypeWeapon item, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
         {
+            IEquippableItem equipItem = item as IEquippableItem;
+            return FireShotgunWeapon(Game.Dungeon.player, target, damageBase, item.FireSoundMagnitude(), item.ShotgunSpreadAngle(), damageDropWithRange, damageDropWithInterveningMonster);
+        }
+
+        public bool FireShotgunWeapon(Creature gunner, Point target, int damageBase, double fireSoundMagnitude, double spreadAngle, int damageDropWithRange, int damageDropWithInterveningMonster)
+        {
             //The shotgun fires towards its target and does less damage with range
+
+            LogFile.Log.LogEntryDebug("---SHOTGUN FIRE---", LogDebugLevel.Medium);
 
             //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
 
-            IEquippableItem equipItem = item as IEquippableItem;
-
-            if (equipItem == null)
-            {
-                LogFile.Log.LogEntryDebug("Shotgun is not equippable", LogDebugLevel.High);
-                return false;
-            }
-
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(player);
-            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, target, PCMap, equipItem.RangeFire(), item.ShotgunSpreadAngle());
+            CreatureFOV currentFOV = Game.Dungeon.CalculateNoRangeCreatureFOV(gunner);
+            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(gunner.LocationMap, target, PCMap, 10, spreadAngle);
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Chocolate);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, Screen.AttackType.Bullet);
+
+            //Make firing sound
+            if(gunner is Player)
+                Game.Dungeon.AddSoundEffect(fireSoundMagnitude, player.LocationLevel, player.LocationMap);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in targetSquares)
+            {
+                SquareContents squareContents = MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    int damage = ShotgunDamage(gunner, m, damageBase, damageDropWithRange, damageDropWithInterveningMonster);
+
+                    string combatMessage = "MvM";
+                    if (gunner is Player)
+                        combatMessage = "PvM";
+                    
+                    string combatResultsMsg = combatMessage + " (" + m.Representation + ") Shotgun: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage to monsters
+                    if (damage > 0)
+                    {
+                        if(gunner is Player)
+                            //Cancels some player statuses
+                            player.AttackMonsterRanged(squareContents.monster, damage);
+                        else
+                            m.ApplyDamageToMonster(gunner, m, damage);
+                    }
+                }
+
+                if (squareContents.player != null && !(gunner is Player))
+                {
+
+                    int damage = ShotgunDamage(gunner, player, damageBase, damageDropWithRange, damageDropWithInterveningMonster);
+
+                    string combatResultsMsg = "MvP (" + gunner.Representation + ") Shotgun: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage to player
+                    if (damage > 0)
+                    {
+                        player.ApplyCombatDamageToPlayer(gunner as Monster, damage, true); 
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private int ShotgunDamage(Creature gunner, Creature target, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
+        {
+            //Calculate range
+            int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(gunner.LocationMap, target.LocationMap));
+
+            //How many monsters between monster and gunner
+            var pointsFromPlayerToMonster = Utility.GetPointsOnLine(gunner.LocationMap, target.LocationMap);
+            //(exclude player and monster itself)
+            var numInterveningMonsters = Math.Max(pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(gunner.LocationLevel, p).monster != null).Count() - 1, 0);
+
+            LogFile.Log.LogEntryDebug("Shotgun. Gunner: " + gunner.Representation + " Target at " + target.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
+
+            int damage = damageBase - rangeToMonster * damageDropWithRange;
+            damage = Math.Max(damage - numInterveningMonsters * damageDropWithInterveningMonster, 0);
+            return damage;
+        }
+
+
+        public bool FireLaserLineWeapon(Point target, RangedWeapon item, int damage)
+        {
+            Point lineEnd = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
+
+            WrappedFOV fovForWeapon = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
+            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, lineEnd, fovForWeapon);
+
+            //Draw attack
+            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) : targetSquares;
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Laser);
 
             //Make firing sound
             Game.Dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
@@ -603,27 +696,16 @@ namespace RogueBasin
                 //Hit the monster if it's there
                 if (m != null)
                 {
-                    //Calculate range
-                    int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(player.LocationMap, m.LocationMap));
-
-                    //How many monsters between monster and player
-                    var pointsFromPlayerToMonster = Utility.GetPointsOnLine(player.LocationMap, m.LocationMap);
-                    //(exclude player and monster itself)
-                    var numInterveningMonsters = pointsFromPlayerToMonster.Skip(1).Where(p => MapSquareContents(player.LocationLevel, p).monster != null).Count() - 1;
-
-                    LogFile.Log.LogEntryDebug("Shotgun. Monster at " + m.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
-
-                    int damage = damageBase - rangeToMonster * damageDropWithRange;
-                    damage = damage - numInterveningMonsters * damageDropWithInterveningMonster;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Shotgun: Dam: " + damage;
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    if(damage > 0)
-                        player.AttackMonsterRanged(squareContents.monster, damage);
+                    player.AttackMonsterRanged(squareContents.monster, damage);
                 }
             }
+
+            //Remove 1 ammo
+            item.Ammo--;
 
             return true;
         }
@@ -631,9 +713,6 @@ namespace RogueBasin
         public bool FirePistolLineWeapon(Point target, RangedWeapon item, int damageBase)
         {
             Player player = Player;
-
-            //Remove 1 ammo
-            item.Ammo--;
 
             //Make firing sound
             AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
@@ -649,12 +728,11 @@ namespace RogueBasin
                 return true;
             }
 
-            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) :
-                targetSquares;
+            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) : targetSquares;
 
             //Draw attack
 
-            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, ColorPresets.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Bullet, true);
 
             //Apply damage
             player.AttackMonsterRanged(monster, damageBase);
@@ -843,6 +921,9 @@ namespace RogueBasin
                 if (creature.Charmed || creature.Passive)
                     continue;
 
+                if (IgnoreHostileCreaturesOfType(creature.GetType()))
+                    continue;
+
                 distance = Utility.GetDistanceBetween(origin, creature);
 
                 if (distance > 0 && distance < closestDistance && origin != creature)
@@ -859,6 +940,14 @@ namespace RogueBasin
             }
 
             return closestCreature;
+        }
+
+        private bool IgnoreHostileCreaturesOfType(Type monsterType)
+        {
+            if (monsterType is Creatures.Grenade || monsterType is Creatures.Mine)
+                return true;
+
+            return false;
         }
 
 
@@ -1002,7 +1091,6 @@ namespace RogueBasin
                 SaveGameInfo saveGameInfo = new SaveGameInfo();
 
                 saveGameInfo.effects = this.effects;
-                saveGameInfo.features = this.features;
                 saveGameInfo.items = this.items;
                 saveGameInfo.monsters = this.monsters;
                 saveGameInfo.player = this.player;
@@ -1112,7 +1200,7 @@ namespace RogueBasin
             //Play movie
             foreach (SpecialMove m1 in specialMoves)
             {
-                Screen.Instance.PlayMovie(m1.MovieRoot(), false);
+                Game.Base.PlayMovie(m1.MovieRoot(), false);
             }
         }
 
@@ -1140,39 +1228,35 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Add monster. In addition to normal checks, check connectivity between monster and down stairs. This will ensure the monster is not placed in an unaccessible place
-        /// </summary>
-        /// <param name="creature"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
+        public bool AddMonster(Monster monster, Location loc)
+        {
+            return AddMonster(monster, loc.Level, loc.MapCoord);
+        }
 
-        public bool AddMonster(Monster creature, int level, Point location)
+        public bool AddMonster(Monster monster, int level, Point location)
         {
             //Try to add a creature at the requested location
             //This may fail due to something else being there or being non-walkable
             try
             {
-                if (creature == null)
+                if (monster == null)
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Tried to add null", LogDebugLevel.High);
                     return false;
                 }
 
-                if (creature.UniqueID != 0)
+                if (monster.UniqueID != 0)
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Tried to add monster which already had ID", LogDebugLevel.High);
                     return false;
                 }
-
 
                 Map creatureLevel = levels[level];
 
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1181,23 +1265,30 @@ namespace RogueBasin
 
                 if (contents.monster != null)
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Medium);
                     return false;
                 }
 
-                if (contents.player != null)
+                //horrible exception
+                if (contents.player != null && !(monster is Creatures.Mine))
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Medium);
+                    return false;
+                }
+
+                if (DangerousFeatureAtLocation(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonster failure: Dangerous terrain at square", LogDebugLevel.Medium);
                     return false;
                 }
 
                 //Otherwise OK
-                creature.LocationLevel = level;
-                creature.LocationMap = location;
+                monster.LocationLevel = level;
+                monster.LocationMap = location;
 
-                creature.CalculateSightRadius();
+                monster.CalculateSightRadius();
 
-                AddMonsterToList(creature);
+                AddMonsterToList(monster);
                 return true;
             }
             catch (Exception ex)
@@ -1219,6 +1310,18 @@ namespace RogueBasin
             nextUniqueID++;
 
             monsters.Add(monster);
+        }
+
+
+        public static double LevelScalingFactor = 0.5;
+        /// <summary>
+        /// Scale anything for monster level
+        /// </summary>
+        /// <param name="input"></param>
+        /// 
+
+        public int LevelScalingCalculation(int input, int level) {
+            return (int)Math.Ceiling(input * (1 + LevelScalingFactor * (level - 1)));
         }
 
         /// <summary>
@@ -1251,7 +1354,7 @@ namespace RogueBasin
         /// <param name="level"></param>
         /// <param name="location"></param>
         /// <returns></returns>
-        public bool AddMonsterDynamic(Monster creature, int level, Point location)
+        public bool AddMonsterDynamic(Monster creature, int level, Point location, bool allowPlayer=false)
         {
             //Try to add a creature at the requested location
             //This may fail due to something else being there or being non-walkable
@@ -1262,7 +1365,7 @@ namespace RogueBasin
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Square not enterable", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Square not enterable", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1271,13 +1374,19 @@ namespace RogueBasin
 
                 if (contents.monster != null)
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Monster at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Monster at this square", LogDebugLevel.Medium);
                     return false;
                 }
 
-                if (contents.player != null)
+                if (contents.player != null && !allowPlayer)
                 {
-                    LogFile.Log.LogEntryDebug("AddMonster failure: Player at this square", LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Player at this square", LogDebugLevel.Medium);
+                    return false;
+                }
+
+                if (DangerousFeatureAtLocation(level, location))
+                {
+                    LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Dangerous terrain at square", LogDebugLevel.Medium);
                     return false;
                 }
 
@@ -1292,12 +1401,17 @@ namespace RogueBasin
             }
             catch (Exception ex)
             {
-                LogFile.Log.LogEntry(String.Format("AddCreatureDynamic: ") + ex.Message);
+                LogFile.Log.LogEntry(String.Format("AddMonsterDynamic: ") + ex.Message);
                 return false;
             }
 
         }
 
+
+        public bool AddItem(Item item, Location loc)
+        {
+            return AddItem(item, loc.Level, loc.MapCoord);
+        }
 
         /// <summary>
         /// Add an item to the dungeon. May fail if location is invalid or unwalkable
@@ -1307,53 +1421,6 @@ namespace RogueBasin
         /// <param name="location"></param>
         /// <returns></returns>
         public bool AddItem(Item item, int level, Point location)
-        {
-            //Try to add a item at the requested location
-            //This may fail due to the square being inaccessable
-            try
-            {
-                Map creatureLevel = levels[level];
-
-                //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
-                {
-                    return false;
-                }
-
-                //DON'T PLACE UNDER MONSTER FOR FLATLINE
-
-                //Check square has nothing else on it
-                SquareContents contents = MapSquareContents(level, location);
-
-                if (contents.monster != null)
-                {
-                    LogFile.Log.LogEntryDebug("AddItem failure: Monster at this square", LogDebugLevel.Low);
-                    return false;
-                }
-
-                //Otherwise OK
-                item.LocationLevel = level;
-                item.LocationMap = location;
-
-                items.Add(item);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntry(String.Format("AddItem: ") + ex.Message);
-                return false;
-            }
-
-        }
-
-        /// <summary>
-        /// Debug. Add an item to the dungeon. May fail if location is invalid or unwalkable
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        public bool AddItemNoChecks(Item item, int level, Point location)
         {
             //Try to add a item at the requested location
             //This may fail due to the square being inaccessable
@@ -1396,8 +1463,9 @@ namespace RogueBasin
                 return false;
 
             feature.IsBlocking = true;
+            var willBlockLight = feature.BlocksLight || blocksLight;
 
-            SetTerrainAtPoint(level, location, blocksLight ? MapTerrain.NonWalkableFeatureLightBlocking : MapTerrain.NonWalkableFeature);
+            SetTerrainAtPoint(level, location, willBlockLight ? MapTerrain.NonWalkableFeatureLightBlocking : MapTerrain.NonWalkableFeature);
 
             return true;
         }
@@ -1424,6 +1492,7 @@ namespace RogueBasin
             try
             {
                 Map featureLevel = levels[level];
+                var thisLocation = new Location(level, location);
 
                 //Check square is accessable
                 if (!MapSquareIsWalkable(level, location))
@@ -1433,14 +1502,11 @@ namespace RogueBasin
                 }
 
                 //Check another feature isn't there
-                foreach (Feature otherFeature in features)
+                var featuresAtLocation = GetFeaturesAtLocation(thisLocation);
+                if (featuresAtLocation.Count() > 0)
                 {
-                    if (otherFeature.LocationLevel == level &&
-                        otherFeature.LocationMap == location)
-                    {
-                        LogFile.Log.LogEntry("AddFeature: other feature already there");
-                        return false;
-                    }
+                    LogFile.Log.LogEntry("AddFeature: other feature already there");
+                    return false;
                 }
 
                 //DON'T PLACE UNDER MONSTERS OR ITEMS - may make the square unroutable
@@ -1464,7 +1530,14 @@ namespace RogueBasin
                 feature.LocationLevel = level;
                 feature.LocationMap = location;
 
-                features.Add(feature);
+                AddFeatureAtLocation(thisLocation, feature);
+
+                //Update routing
+                if (feature is DangerousActiveFeature)
+                {
+                    Pathing.PathFindingInternal.updateMapWithDangerousTerrain(level, location, true);
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -1473,6 +1546,43 @@ namespace RogueBasin
                 return false;
             }
 
+        }
+
+        private void AddFeatureAtLocation(Location loc, Feature feature)
+        {
+            feature.LocationLevel = loc.Level;
+            feature.LocationMap = loc.MapCoord;
+
+            List<Feature> featureListAtLocation;
+            features.TryGetValue(loc, out featureListAtLocation);
+
+            if (featureListAtLocation == null)
+            {
+                features[loc] = new List<Feature>();
+                features[loc].Add(feature);
+            }
+            else
+            {
+                featureListAtLocation.Add(feature);
+            }
+        }
+
+        /// <summary>
+        /// Returns features at location, or empty list if none
+        /// </summary>
+        /// <param name="loc"></param>
+        /// <returns></returns>
+        public IEnumerable<Feature> GetFeaturesAtLocation(Location loc)
+        {
+            List<Feature> featureListAtLocation;
+            features.TryGetValue(loc, out featureListAtLocation);
+
+            if (featureListAtLocation == null)
+            {
+                return new List<Feature>();
+            }
+
+            return featureListAtLocation;
         }
 
         /// <summary>
@@ -1514,29 +1624,29 @@ namespace RogueBasin
         public bool AddDecorationFeature(Feature feature, int level, Point location)
         {
             //Try to add a feature at the requested location
-            //This may fail due to something else being there or being non-walkable
             try
             {
                 Map featureLevel = levels[level];
+                Location thisLocation = new Location(level, location);
 
-                //Check another non-decoration feature isn't there
-                foreach (Feature otherFeature in features)
+                //Check square is accessable
+                if (!MapSquareIsWalkable(level, location))
                 {
-                    if (otherFeature.LocationLevel == level &&
-                        otherFeature.LocationMap == location)
-                    {
-                        if (otherFeature as UseableFeature != null)
-                        {
-                            LogFile.Log.LogEntry("AddDecorationFeature: non-decoration feature already there");
-                            return false;
-                        }
-                    }
+                    LogFile.Log.LogEntry("AddDecorationFeature: map square can't be entered");
+                    return false;
+                }
+
+                //Don't obscure dangerous terrain
+                if (DangerousFeatureAtLocation(level, location))
+                {
+                    LogFile.Log.LogEntry("AddDecorationFeature: dangerous terrain, not adding");
+                    return false;
                 }
 
                 feature.LocationLevel = level;
                 feature.LocationMap = location;
-
-                features.Add(feature);
+                
+                AddFeatureAtLocation(thisLocation, feature);
                 return true;
             }
             catch (Exception ex)
@@ -1587,16 +1697,9 @@ namespace RogueBasin
             }
 
             //Check features
-            foreach (Feature feature in features)
-            {
-                if (feature.LocationLevel == level &&
-                    feature.LocationMap.x == location.x && feature.LocationMap.y == location.y)
-                {
-                    contents.feature = feature;
-                    break;
-                }
-            }
-
+            var features = GetFeaturesAtLocation(new Location(level, location));
+            contents.feature = features.Count() > 0 ? features.First() : null;
+                
             //Check for PC blocking
             //Allow this to work before having the player placed (at beginning of game)
             if (player != null && player.LocationMap != null)
@@ -1664,7 +1767,7 @@ namespace RogueBasin
             //These are duplicates that use different code, so should be obsoleted
 
             //A wall - should be caught above
-            if (!Dungeon.IsTerrainWalkable(levels[level].mapSquares[location.x, location.y].Terrain))
+            if (!MapUtils.IsTerrainWalkable(levels[level].mapSquares[location.x, location.y].Terrain))
             {
                 //LogFile.Log.LogEntryDebug("MapSquareCanBeEntered failure: not walkable by terrain type", LogDebugLevel.High);
                 return false;
@@ -1805,18 +1908,13 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// List of all the features in the game
+        /// List of all the features in the game - doesn't use index, so avoid use where possible
         /// </summary>
         public List<Feature> Features
         {
             get
             {
-                return features;
-            }
-            //For serialization
-            set
-            {
-                features = value;
+                return GetAllFeatures().ToList();
             }
         }
 
@@ -1996,22 +2094,55 @@ namespace RogueBasin
             return specialMoves.Find(x => x.GetType() == specialMove);
         }
 
-        private bool InteractWithFeature()
+        private bool InteractWithUseableFeature()
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
-            Feature featureAtSpace = dungeon.FeatureAtSpace(player.LocationLevel, player.LocationMap);
+            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(player.LocationLevel, player.LocationMap));
 
-            UseableFeature useableFeature = featureAtSpace as UseableFeature;
-            if (useableFeature == null)
-            {
-                //Game.MessageQueue.AddMessage("Nothing to interact with here");
-                return false;
-            }
+            var useableFeatures = featuresAtSpace.Where(f => f as UseableFeature != null);
+            
+            //Interact with feature - these will normally put success / failure messages in queue
+            var successes = useableFeatures.Select(f => (f as UseableFeature).PlayerInteraction(player)).ToList();
+
+            //Watch out for the short circuit
+            return successes.Any();
+        }
+
+        /// <summary>
+        /// Active features are typically triggered automatically
+        /// </summary>
+        /// <returns></returns>
+        private bool InteractWithActiveFeature()
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = dungeon.Player;
+
+            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(player.LocationLevel, player.LocationMap));
+
+            var useableFeatures = featuresAtSpace.Where(f => f as ActiveFeature != null);
 
             //Interact with feature - these will normally put success / failure messages in queue
-            return useableFeature.PlayerInteraction(player);
+            var successes = useableFeatures.Select(f => (f as ActiveFeature).PlayerInteraction(player)).ToList();
+
+            //Watch out for the short circuit
+            return successes.Any();
+        }
+
+        public bool MonsterInteractWithActiveFeature(Monster monster, int level, Point mapLocation)
+        {
+            Dungeon dungeon = Game.Dungeon;
+
+            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(level, mapLocation));
+
+            var useableFeatures = featuresAtSpace.Where(f => f as ActiveFeature != null);
+
+            //Interact with feature - these will normally put success / failure messages in queue
+            var successes = useableFeatures.Select(f => (f as ActiveFeature).MonsterInteraction(monster)).ToList();
+
+            //Watch out for the short circuit
+            return successes.Any();
         }
 
         /// <summary>
@@ -2020,7 +2151,7 @@ namespace RogueBasin
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        internal bool PCMove(int x, int y)
+        internal MoveResults PCMove(int x, int y)
         {
             return PCMove(x, y, false);
         }
@@ -2031,21 +2162,22 @@ namespace RogueBasin
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        internal bool PCMove(int x, int y, bool runTriggersAlways)
+        internal MoveResults PCMove(int x, int y, bool runTriggersAlways)
         {
             Point newPCLocation = new Point(Player.LocationMap.x + x, Player.LocationMap.y + y);
             Point deltaMove = newPCLocation - Player.LocationMap;
+            MoveResults moveResults = MoveResults.NormalMove;
 
             //Moves off the map don't work
 
             if (newPCLocation.x < 0 || newPCLocation.x >= levels[player.LocationLevel].width)
             {
-                return false;
+                return MoveResults.StoppedByObstacle;
             }
 
             if (newPCLocation.y < 0 || newPCLocation.y >= levels[player.LocationLevel].height)
             {
-                return false;
+                return MoveResults.StoppedByObstacle;
             }
 
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
@@ -2054,15 +2186,17 @@ namespace RogueBasin
             bool okToMoveIntoSquare = true;
 
             //Apply environmental effects
-            if (Game.Dungeon.DungeonInfo.LevelNaming[player.LocationLevel] == "Arcology")
+            /*
+            if (player.LocationLevel < dungeonInfo.LevelNaming.Count && dungeonInfo.LevelNaming[player.LocationLevel] == "Arcology")
             {
                 if (!player.IsEffectActive(typeof(PlayerEffects.BioProtect)))
                 {
                     player.ApplyDamageToPlayerHitpoints(5);
                 }
-            }
+            }*/
 
             bool stationaryAction = false;
+            bool attackAction = false;
 
             //If there's no special move, do a conventional move
             if (moveDone == null)
@@ -2076,6 +2210,7 @@ namespace RogueBasin
                         OpenDoor(player.LocationLevel, newPCLocation);
                         stationaryAction = true;
                         okToMoveIntoSquare = false;
+                        moveResults = MoveResults.InteractedWithObstacle;
                     }
                     else if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedLock)
                     {
@@ -2096,8 +2231,10 @@ namespace RogueBasin
 
                         stationaryAction = true;
                         okToMoveIntoSquare = false;
+                        moveResults = MoveResults.InteractedWithObstacle;
                     }
                     okToMoveIntoSquare = false;
+                    moveResults = MoveResults.StoppedByObstacle;
                 }
 
                 //Check for monsters in the square
@@ -2115,40 +2252,76 @@ namespace RogueBasin
 
                         //PC will move to monster's old location
                         okToMoveIntoSquare = true;
+                        moveResults = MoveResults.SwappedWithMonster;
 
                     }
                     else if (monster.Passive)
                     {
                         //Attack the passive creature.
-                        CombatResults results = player.AttackMonsterMelee(contents.monster);
-                        Screen.Instance.CreatureToView = contents.monster;
-
-                        Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
+                        DoMeleeAttackOnMonster(deltaMove, newPCLocation);
                         okToMoveIntoSquare = false;
 
+                        attackAction = true;
                         stationaryAction = true;
+                        moveResults = MoveResults.AttackedMonster;
                     }
                     else
                     {
                         //Monster hostile 
 
-                        CombatResults results = player.AttackMonsterMelee(contents.monster);
-                        Screen.Instance.DrawMeleeAttack(player, contents.monster, results);
-                        Screen.Instance.CreatureToView = contents.monster;
+                        DoMeleeAttackOnMonster(deltaMove, newPCLocation);
 
                         okToMoveIntoSquare = false;
 
                         stationaryAction = true;
+                        attackAction = true;
+                        moveResults = MoveResults.AttackedMonster;
+                    }
+                }
+
+                //Ranged melee weapons
+                if (player.GetEquippedMeleeWeapon() is Items.Pole)
+                {
+                    //Check 2 squares ahead
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Point p = newPCLocation + deltaMove * (i + 1);
+
+                        SquareContents poleContents = MapSquareContents(player.LocationLevel, p);
+                        if (poleContents.monster != null && !poleContents.monster.Charmed)
+                        {
+                            //Pole will start from the origin anyway
+                            DoMeleeAttackOnMonster(deltaMove, newPCLocation);
+
+                            stationaryAction = true;
+                            attackAction = true;
+                            moveResults = MoveResults.AttackedMonster;
+                            break;
+                        }
                     }
                 }
 
                 //Apply movement effects to counters
                 if (stationaryAction)
                 {
-                    ResetPCTurnCountersOnActionStatonary();
+                    if (attackAction && !player.LastMoveWasMeleeAttack)
+                    {
+                        
+                    }
+                    else
+                    {
+                        player.ResetTurnsMoving();
+                    }
+
+                    player.ResetTurnsSinceAction();
+                    player.AddTurnsInactive();
+
+                    if (attackAction)
+                        player.LastMoveWasMeleeAttack = true;
                 }
                 else
                 {
+                    player.LastMoveWasMeleeAttack = false;
                     player.AddTurnsSinceAction();
                     if (deltaMove == new Point(0, 0))
                     {
@@ -2164,7 +2337,7 @@ namespace RogueBasin
 
                 //If not OK to move, return here
                 if (!okToMoveIntoSquare)
-                    return true;
+                    return moveResults;
 
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y, runTriggersAlways);
 
@@ -2176,8 +2349,16 @@ namespace RogueBasin
                     PickUpItemInSpace();
                 }
 
-                //If there is a feature, auto interact
-                InteractWithFeature();
+                //If there is an active feature, auto interact
+                bool activeFeatureInteract = InteractWithActiveFeature();
+                
+                //If there is a useable feature, auto interact
+                bool useableFeatureInteract = InteractWithUseableFeature();
+
+                if (activeFeatureInteract || useableFeatureInteract)
+                {
+                    moveResults = MoveResults.InteractedWithFeature;
+                }
             }
 
             //Run any entering square messages
@@ -2198,14 +2379,114 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage("There are multiple items here.");
             }
 
-            //If there is a feature and an item (feature will be hidden)
-            if (FeatureAtSpace(player.LocationLevel, player.LocationMap) != null &&
-                ItemAtSpace(player.LocationLevel, player.LocationMap) != null)
+            return moveResults;
+        }
+
+        /// <summary>
+        /// From PCMove, where we do our melee attack on the monster in the square entered
+        /// </summary>
+        /// <param name="monster"></param>
+        private void DoMeleeAttackOnMonster(Point moveDelta, Point newPCLocation)
+        {
+            //Attack at pc's direct move location
+
+            var monstersToAttack = new List<Monster>();
+            SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
+
+            if (contents.monster != null)
             {
-                Game.MessageQueue.AddMessage("There is something behind it.");
+                if (!contents.monster.Charmed)
+                {
+                    monstersToAttack.Add(contents.monster);
+                }
+            }
+            
+            if (player.GetEquippedMeleeWeapon() is Items.Axe)
+            {
+                //Also attack the neighbours
+                var neighbours = GetNeighbourPointsToDelta(moveDelta).Select(p => newPCLocation - moveDelta + p);
+
+                foreach (var point in neighbours)
+                {
+                    contents = MapSquareContents(player.LocationLevel, point);
+
+                    if (contents.monster != null)
+                    {
+                        if (!contents.monster.Charmed)
+                        {
+                            monstersToAttack.Add(contents.monster);
+                        }
+                    }
+                }
             }
 
-            return true;
+            if (player.GetEquippedMeleeWeapon() is Items.Pole)
+            {
+                //Also attack the points behind
+                var neighbours = new List<Point> { new Point(newPCLocation + moveDelta), new Point(newPCLocation + moveDelta + moveDelta) };
+
+                foreach (var point in neighbours)
+                {
+                    contents = MapSquareContents(player.LocationLevel, point);
+
+                    if (contents.monster != null)
+                    {
+                        if (!contents.monster.Charmed)
+                        {
+                            monstersToAttack.Add(contents.monster);
+                        }
+                    }
+                }
+            }
+
+            foreach (Monster m in monstersToAttack)
+            {
+                CombatResults results = player.AttackMonsterMelee(m);
+                Screen.Instance.DrawMeleeAttack(player, m, results);
+                Screen.Instance.CreatureToView = m;
+            }
+        }
+
+        public List<Point> GetNeighbourPointsToDelta(Point delta)
+        {
+            if (delta == new Point(0, -1))
+            {
+                return new List<Point> { new Point(-1, -1), new Point(1, -1) };
+            }
+            if (delta == new Point(1, -1))
+            {
+                return new List<Point> { new Point(0, -1), new Point(1, 0) };
+            }
+            if (delta == new Point(1, 0))
+            {
+                return new List<Point> { new Point(1, -1), new Point(1, 1) };
+            }
+            if (delta == new Point(1, 1))
+            {
+                return new List<Point> { new Point(1, 0), new Point(0, 1) };
+            }
+            if (delta == new Point(0, 1))
+            {
+                return new List<Point> { new Point(1, 1), new Point(-1, 1) };
+            }
+            if (delta == new Point(-1, 1))
+            {
+                return new List<Point> { new Point(0, 1), new Point(-1, 0) };
+            }
+            if (delta == new Point(-1, 0))
+            {
+                return new List<Point> { new Point(-1, 1), new Point(1, 1) };
+            }
+            else// (delta == new Point(-1, -1))
+            {
+                return new List<Point> { new Point(-1, 0), new Point(0, 1) };
+            }
+
+        }
+
+        private void ResetPCTurnCountersOnActionStatonary(bool attackAction)
+        {
+            throw new NotImplementedException();
         }
 
         private SpecialMove DoSpecialMove(Point newPCLocation)
@@ -2402,32 +2683,31 @@ namespace RogueBasin
             {
                 List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(m.LocationMap, Game.Dungeon.Player.LocationLevel, 4 + Game.Random.Next(3));
 
-                Color randColor = ColorPresets.Red;
+                System.Drawing.Color randColor = System.Drawing.Color.Red;
                 int randInt = Game.Random.Next(5);
 
                 switch (randInt)
                 {
                     case 0:
-                        randColor = ColorPresets.Red;
+                        randColor = System.Drawing.Color.Red;
                         break;
                     case 1:
-                        randColor = ColorPresets.Orange;
+                        randColor = System.Drawing.Color.Orange;
                         break;
                     case 2:
-                        randColor = ColorPresets.Yellow;
+                        randColor = System.Drawing.Color.Yellow;
                         break;
                     case 3:
-                        randColor = ColorPresets.OrangeRed;
+                        randColor = System.Drawing.Color.OrangeRed;
                         break;
                     case 4:
-                        randColor = ColorPresets.DarkRed;
+                        randColor = System.Drawing.Color.DarkRed;
                         break;
                 }
 
                 KillMonster(m, false);
 
-                Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, randColor);
-                Screen.Instance.Update();
+                Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Explosion);
             }
         }
         /// <summary>
@@ -2437,7 +2717,7 @@ namespace RogueBasin
         /// <param name="item"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, double size, int damage)
+        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, double size, int damage, bool stunning = false)
         {
             Item itemAsItem = item as Item;
 
@@ -2470,25 +2750,31 @@ namespace RogueBasin
             //Make throwing sound AT target location
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), Game.Dungeon.Player.LocationLevel, destination);
 
-            if (Player.LocationLevel >= 6)
-                damage *= 2;
+            //if (Player.LocationLevel >= 6)
+            //    damage *= 2;
 
             //Work out grenade splash and damage
-            DoGrenadeExplosion(level, target, size, damage, null);
+            if (stunning)
+            {
+                DoGrenadeExplosionStun(level, target, size, damage, Game.Dungeon.Player);
+            }
+            else
+            {
+                DoGrenadeExplosion(level, target, size, damage, Game.Dungeon.Player);
+            }
 
-            return (destination);
-
+            return destination;
         }
 
         /// <summary>
-        /// Do a grenade explosion. If this originated on a monster pass that in
+        /// Do a grenade explosion. If this originated on a monster then the monster will be the origin of the attack
         /// </summary>
         /// <param name="level"></param>
         /// <param name="p"></param>
         /// <param name="size"></param>
         /// <param name="damage"></param>
         /// <param name="originMonster"></param>
-        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Monster originMonster)
+        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Creature originMonster, int animationDelay = 0)
         {
             //Work out grenade splash and damage
             List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
@@ -2499,7 +2785,7 @@ namespace RogueBasin
             var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
 
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, ColorPresets.Chocolate);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion, false, animationDelay);
            
             foreach (Point sq in grenadeAffectsFiltered)
             {
@@ -2507,22 +2793,73 @@ namespace RogueBasin
 
                 Monster m = squareContents.monster;
 
-                //Don't attack ourself -will loop
-                if (m == originMonster)
-                    continue;
-
-                if (m != null && !m.Alive)
-                    continue;
-
                 //Hit the monster if it's there
-                if (m != null)
+                if (m != null && m.Alive)
                 {
                     string combatResultsMsg = "PvM (" + m.Representation + ") Grenade: Dam: " + damage;
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    //make this a player attack to avoid AI being confused by monster attack that disappears
-                    Game.Dungeon.Player.AttackMonsterRanged(squareContents.monster, damage);
+                    if (originMonster != null && originMonster != Game.Dungeon.Player)
+                    {
+                        (originMonster as Monster).ApplyDamageToMonster(originMonster, m, damage);
+                    }
+                    else
+                    {
+                        Game.Dungeon.Player.AttackMonsterRanged(squareContents.monster, damage);
+                    }
+                }
+
+                Game.Dungeon.AddDecorationFeature(new Features.Scorch(), level, sq);
+            }
+
+            //And the player
+
+            if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
+            {
+                if (originMonster != null)
+                {
+                    string combatResultsMsg = "MvP (" + originMonster.Representation + ") Grenade: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                }
+                //Apply damage (uses damage base)
+                if (originMonster != null && originMonster != Game.Dungeon.Player)
+                    player.ApplyCombatDamageToPlayer((originMonster as Monster), damage, true);
+                else
+                    player.ApplyCombatDamageToPlayer(damage);
+            }
+        }
+
+        public void DoGrenadeExplosionStun(int level, Point locationMap, double size, int stunDamage, Creature originMonster)
+        {
+            //Work out grenade splash and damage
+            List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
+
+            //Use FOV from point of explosion (this means grenades don't go round corners or through walls)
+            WrappedFOV grenadeFOV = Game.Dungeon.CalculateAbstractFOV(level, locationMap, 0);
+
+            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Stun);
+
+            foreach (Point sq in grenadeAffectsFiltered)
+            {
+                SquareContents squareContents = Game.Dungeon.MapSquareContents(level, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null && m.Alive)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Stun Grenade: Dam: " + stunDamage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    if (originMonster != null)
+                    {
+                        m.ApplyStunDamageToMonster(originMonster, stunDamage);
+                    }
                 }
             }
 
@@ -2530,11 +2867,28 @@ namespace RogueBasin
 
             if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
             {
-                //Apply damage (uses damage base)
                 if (originMonster != null)
-                    originMonster.AttackPlayer(Game.Dungeon.Player, damage);
-                else
-                    player.AttackPlayer(damage);
+                {
+                    string combatResultsMsg = "MvP (" + originMonster.Representation + ") Stun Grenade: Dam: " + stunDamage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                }
+
+                //No stun damage for players right now
+            }
+        }
+
+        /// <summary>
+        /// For debug :) purposes
+        /// </summary>
+        /// <param name="level"></param>
+        public void KillAllMonstersOnLevel(int level)
+        {
+            foreach (var monster in Monsters)
+            {
+                if (monster.LocationLevel == level)
+                {
+                    KillMonster(monster, true);
+                }
             }
         }
 
@@ -2567,14 +2921,17 @@ namespace RogueBasin
             if (monster.Charmed)
                 Game.Dungeon.Player.RemoveCharmedCreature();
 
-            //Leave a corpse
-            if (!autoKill)
-                AddDecorationFeature(new Features.Corpse(monster.GetCorpseRepresentation(), monster.GetCorpseRepresentationColour()), monster.LocationLevel, monster.LocationMap);
+            if (!autoKill) { 
+                //Leave a corpse
+                AddMonsterCorpse(monster);
 
-            //Deal with special death effects, but not on an autokill
-            if (!autoKill)
-            {
+                //Add experience
+                AddXPForMonster(monster);
+
                 monster.OnKilledSpecialEffects();
+
+                SoundPlayer.Instance().EnqueueSound("death");
+            }
                 /*
                 if (monster.Unique)
                 {
@@ -2590,7 +2947,7 @@ namespace RogueBasin
 
                         if (player.LocationLevel == 0)
                         {
-                            Screen.Instance.PlayMovie("mission0done", true);
+                            Game.Base.PlayMovie("mission0done", true);
                         }
 
                         if (player.LocationLevel == 14)
@@ -2648,11 +3005,49 @@ namespace RogueBasin
                         }
                     }
 
-                    Screen.Instance.PlayMovie("dragondead", true);
+                    Game.Base.PlayMovie("dragondead", true);
 
                     dungeonInfo.DragonDead = true;
                 }*/
+        }
+
+        private void AddMonsterCorpse(Monster monster)
+        {
+            var corpseToAdd = monster.GenerateCorpse();
+
+            if (corpseToAdd != null)
+            {
+                AddDecorationFeature(corpseToAdd, monster.LocationLevel, monster.LocationMap);
             }
+        }
+
+
+        private void AddXPForMonster(Monster monster)
+        {
+            
+            var baseXP = monster.GetCombatXP();
+            int modifiedXP = baseXP;
+            if (player.Level < monster.Level)
+            {
+                modifiedXP = (int)Math.Floor((monster.Level - player.Level) * 0.5 * baseXP);
+            }
+            else if (player.Level > monster.Level)
+            {
+                modifiedXP = (int) Math.Ceiling(Math.Pow(2.0, (monster.Level - player.Level)) * baseXP);
+            }
+
+            player.CombatXP += modifiedXP;
+            
+            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (from base: " + baseXP + ")", LogDebugLevel.Medium);
+            /*
+            //Simpler system
+
+            var baseXP = monster.GetCombatXP();
+            var modifiedXP = (int)Math.Floor(baseXP * (1 + 0.5 * (monster.Level - 1)));
+            player.CombatXP += modifiedXP;
+
+            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (mon level: " + monster.Level + ")", LogDebugLevel.Medium);
+             */
         }
 
         /// <summary>
@@ -2685,7 +3080,7 @@ namespace RogueBasin
         {
             Player player = Player;
 
-            var itemToPickUp = ItemsAtSpace(player.LocationLevel, player.LocationMap).ToList();
+            var itemToPickUp = ItemsAtLocation(player.Location).ToList();
 
             if (!itemToPickUp.Any())
                 return false;
@@ -2695,10 +3090,36 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage(item.SingleItemDescription + " picked up.");
 
                 item.OnPickup(player);
-                player.PickUpItem(item);
+                
+                if (item.DestroyedOnPickup())
+                {
+                    Game.Dungeon.RemoveItemFromDungeon(item);
+                }
+                else
+                {
+                    player.PickUpItem(item);
+                }
 
             }
             return true;
+        }
+
+        /// <summary>
+        /// This is used in two scenarios - actually destroying an item (e.g. a use-once)
+        /// Moving an item from dungeon tracking into an inventory where it is tracked on the creature
+        /// (yeah, that's kinda yuck)
+        /// </summary>
+        /// <param name="item"></param>
+        public bool RemoveItemFromDungeon(Item item)
+        {
+            if (Game.Dungeon.Items.Contains(item))
+            {
+                Game.Dungeon.RemoveItem(item);
+                return true;
+            }
+            else {
+                return false;
+            }
         }
 
         /// <summary>
@@ -2728,33 +3149,34 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Refresh the TCOD maps used for FOV and pathfinding
-        /// Unoptimised at present
+        /// Refresh the all TCOD maps used for FOV and pathfinding
         /// </summary>
         public void RefreshAllLevelPathingAndFOV()
         {
-            //Set the walkable flag based on the terrain
             for (int i = 0; i < levels.Count; i++)
             {
-                levels[i].RecalculateWalkable();
+                RefreshLevelPathingAndFOV(i);
             }
+        }
+
+        /// <summary>
+        /// Refresh the TCOD maps used for FOV and pathfinding
+        /// Unoptimised at present
+        /// </summary>
+        public void RefreshLevelPathingAndFOV(int levelNo)
+        {
+            //Set the walkable flag based on the terrain
+            levels[levelNo].RecalculateWalkable();
 
             //Set the light blocking flag based on the terrain
-            for (int i = 0; i < levels.Count; i++)
-            {
-                levels[i].RecalculateLightBlocking();
-            }
+            levels[levelNo].RecalculateLightBlocking();
 
             //Set the properties on the TCODMaps from our Maps
-            for (int i = 0; i < levels.Count; i++)
-            {
+            //New fov representation
+            fov.updateFovMap(levelNo, levels[levelNo].FovRepresentaton);
 
-                //New fov representation
-                fov.updateFovMap(i, levels[i].FovRepresentaton);
-
-                //Notify abstract path finding lib
-                pathFinding.PathFindingInternal.updateMap(i, levels[i].PathRepresentation);
-            }
+            //Notify abstract path finding lib
+            pathFinding.PathFindingInternal.updateMap(levelNo, levels[levelNo].PathRepresentation);
         }
 
 
@@ -2768,6 +3190,7 @@ namespace RogueBasin
             foreach (MapSquare sq in level.mapSquares)
             {
                 sq.InMonsterFOV = false;
+                sq.InMonsterStealthRadius = false;
             }
         }
 
@@ -2798,7 +3221,30 @@ namespace RogueBasin
             return wrappedFOV;
         }
 
+        /// <summary>
+        /// Calculates the FOV for a creature
+        /// </summary>
+        /// <param name="creature"></param>
+        public CreatureFOV CalculateNoRangeCreatureFOV(Creature creature)
+        {
+            Map currentMap = levels[creature.LocationLevel];
 
+            //Update FOV
+            fov.CalculateFOV(creature.LocationLevel, creature.LocationMap, 0);
+
+            //Wrapper with game-specific FOV layer
+            CreatureFOV wrappedFOV = new CreatureFOV(creature, new WrappedFOV(fov), creature.FOVType());
+
+            return wrappedFOV;
+        }
+
+        /// <summary>
+        /// Project a line until the maximum extent of the level
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="midPoint"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
         public Point GetEndOfLine(Point start, Point midPoint, int level)
         {
             int deltaX = midPoint.x - start.x;
@@ -2846,6 +3292,18 @@ namespace RogueBasin
                 {
                     pointsToRet.Add(p);
                 }
+            }
+
+            return pointsToRet;
+        }
+
+        public List<Point> GetPathLinePoints(Point start, Point end)
+        {
+            List<Point> pointsToRet = new List<Point>();
+
+            foreach (Point p in Utility.GetPointsOnLine(start, end))
+            {
+                    pointsToRet.Add(p);
             }
 
             return pointsToRet;
@@ -2935,27 +3393,27 @@ namespace RogueBasin
         /// <summary>
         /// Displays the creature FOV on the map. Note that this clobbers the FOV map
         /// </summary>
-        /// <param name="creature"></param>
-        public void ShowCreatureFOVOnMap(Creature creature)
+        /// <param name="monster"></param>
+        public void ShowCreatureFOVOnMap(Monster monster)
         {
 
             //Only do this if the creature is on a visible level
-            if (creature.LocationLevel != Player.LocationLevel)
+            if (monster.LocationLevel != Player.LocationLevel)
                 return;
 
-            Map currentMap = levels[creature.LocationLevel];
+            Map currentMap = levels[monster.LocationLevel];
 
             //Calculate FOV
-            CreatureFOV creatureFov = Game.Dungeon.CalculateCreatureFOV(creature);
+            CreatureFOV creatureFov = Game.Dungeon.CalculateCreatureFOV(monster);
 
             //Only check sightRadius around the creature
 
             int sightRangeMax = 20;
-            int xl = creature.LocationMap.x - sightRangeMax;
-            int xr = creature.LocationMap.x + sightRangeMax;
+            int xl = Math.Max(0, monster.LocationMap.x - sightRangeMax);
+            int xr = Math.Min(monster.LocationMap.x + sightRangeMax, currentMap.width - 1);
 
-            int yt = creature.LocationMap.y - sightRangeMax;
-            int yb = creature.LocationMap.y + sightRangeMax;
+            int yt = Math.Max(0, monster.LocationMap.y - sightRangeMax);
+            int yb = Math.Min(monster.LocationMap.y + sightRangeMax, currentMap.height - 1);
 
             //If sight is infinite, check all the map
             //if (creature.SightRadius == 0)
@@ -2966,13 +3424,8 @@ namespace RogueBasin
             // (may not be necessary) [and is certainly slow]
 
             //According to profiling this is *BY FAR* the slowest thing in the game
-
+            
             /*
-            int xl = 0;
-            int xr = currentMap.width;
-            int yt = 0;
-            int yb = currentMap.height;*/
-
             if (xl < 0)
                 xl = 0;
             if (xr >= currentMap.width)
@@ -2981,6 +3434,7 @@ namespace RogueBasin
                 yt = 0;
             if (yb >= currentMap.height)
                 yb = currentMap.height - 1;
+             * */
 
             for (int i = xl; i <= xr; i++)
             {
@@ -2990,6 +3444,13 @@ namespace RogueBasin
                     bool inFOV = creatureFov.CheckTileFOV(i, j);
                     if (inFOV)
                         thisSquare.InMonsterFOV = true;
+
+                    //Show stealth radii too
+                    bool inMonsterStealthRadius = monster.InStealthRadius(new Point(i, j));
+                    if (inMonsterStealthRadius)
+                    {
+                        thisSquare.InMonsterStealthRadius = true;
+                    }
                 }
             }
         }
@@ -3092,7 +3553,8 @@ namespace RogueBasin
 
             foreach (SoundEffect soundPair in effects)
             {
-                if (soundPair.SoundTime > soundAfterThisTime)
+                // >= in case the monster and player go on the same tick
+                if (soundPair.SoundTime >= soundAfterThisTime)
                     newSounds.Add(soundPair);
             }
 
@@ -3116,26 +3578,7 @@ namespace RogueBasin
             return newSounds;
         }
 
-
-        /// <summary>
-        /// Return a (the first) feature at this location or null. Ignores decorativefeatures
-        /// </summary>
-        /// <param name="locationLevel"></param>
-        /// <param name="locationMap"></param>
-        /// <returns></returns>
-        internal Feature FeatureAtSpace(int locationLevel, Point locationMap)
-        {
-            foreach (Feature feature in features)
-            {
-                if (feature.IsLocatedAt(locationLevel, locationMap) && feature is UseableFeature)
-                {
-                    return feature;
-                }
-            }
-
-            return null;
-        }
-
+        
         /// <summary>
         /// Return an item if there is one at the requested square, or return null if not
         /// </summary>
@@ -3156,16 +3599,9 @@ namespace RogueBasin
             return null;
         }
 
-        public bool IsItemAtSpace(int locationLevel, Point locationMap)
+        public IEnumerable<Item> ItemsAtLocation(Location loc)
         {
-            return ItemAtSpace(locationLevel, locationMap) != null ? true : false;
-        }
-
-        internal IEnumerable<Item> ItemsAtSpace(int locationLevel, Point locationMap)
-        {
-            return items.Where(i => i.IsLocatedAt(locationLevel, locationMap) && !i.InInventory);
-
-
+            return items.Where(i => i.IsLocatedAt(loc.Level, loc.MapCoord) && !i.InInventory);
         }
 
         internal List<Lock> LocksAtLocation(int level, Point mapLocation)
@@ -3257,7 +3693,7 @@ namespace RogueBasin
                 int x = Game.Random.Next(map.width);
                 int y = Game.Random.Next(map.height);
 
-                if (Dungeon.IsTerrainWalkable(map.mapSquares[x, y].Terrain))
+                if (MapUtils.IsTerrainWalkable(map.mapSquares[x, y].Terrain))
                 {
                     return new Point(x, y);
                 }
@@ -3265,54 +3701,6 @@ namespace RogueBasin
             while (true);
         }
 
-        /// <summary>
-        /// Master is terrain walkable from MapTerrain type (not universally used yet) - defaults false
-        /// </summary>
-        /// <param name="terrain"></param>
-        /// <returns></returns>
-        public static bool IsTerrainWalkable(MapTerrain terrain)
-        {
-            if (terrain == MapTerrain.Empty ||
-                terrain == MapTerrain.Flooded ||
-                terrain == MapTerrain.OpenDoor ||
-                terrain == MapTerrain.Corridor ||
-                terrain == MapTerrain.Grass ||
-                terrain == MapTerrain.Road ||
-                terrain == MapTerrain.Gravestone ||
-                terrain == MapTerrain.Trees ||
-                terrain == MapTerrain.Rubble ||
-                terrain == MapTerrain.OpenLock)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Master is terrain light blocking from MapTerrain type (not universally used yet) - defaults true
-        /// </summary>
-        /// <param name="terrain"></param>
-        /// <returns></returns>
-        public static bool IsTerrainLightBlocking(MapTerrain terrain)
-        {
-            if (terrain == MapTerrain.Empty ||
-                terrain == MapTerrain.Flooded ||
-                terrain == MapTerrain.OpenDoor ||
-                terrain == MapTerrain.Corridor ||
-                terrain == MapTerrain.Grass ||
-                terrain == MapTerrain.Road ||
-                terrain == MapTerrain.Gravestone ||
-                terrain == MapTerrain.Trees ||
-                terrain == MapTerrain.Rubble ||
-                terrain == MapTerrain.OpenLock ||
-                terrain == MapTerrain.NonWalkableFeature)
-            {
-                return false;
-            }
-
-            return true;
-        }
 
         /// <summary>
         /// Removes an item from the game entirely.
@@ -3374,11 +3762,11 @@ namespace RogueBasin
 
             levels[level].mapSquares[location.x, location.y].Terrain = newTerrain;
 
-            levels[level].mapSquares[location.x, location.y].Walkable = IsTerrainWalkable(newTerrain) ? true : false;
-            levels[level].mapSquares[location.x, location.y].BlocksLight = IsTerrainLightBlocking(newTerrain) ? true : false;
+            levels[level].mapSquares[location.x, location.y].Walkable = MapUtils.IsTerrainWalkable(newTerrain) ? true : false;
+            levels[level].mapSquares[location.x, location.y].BlocksLight = MapUtils.IsTerrainLightBlocking(newTerrain) ? true : false;
 
             //Update pathing and fov
-            fov.updateFovMap(level, location, IsTerrainLightBlocking(newTerrain) ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
+            fov.updateFovMap(level, location, MapUtils.IsTerrainLightBlocking(newTerrain) ? FOVTerrain.Blocking : FOVTerrain.NonBlocking);
 
             PathingTerrain pathingTerrain;
             if (newTerrain == MapTerrain.ClosedDoor)
@@ -3386,7 +3774,7 @@ namespace RogueBasin
             else if (newTerrain == MapTerrain.ClosedLock)
                 pathingTerrain = PathingTerrain.ClosedLock;
             else
-                pathingTerrain = IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable;
+                pathingTerrain = MapUtils.IsTerrainWalkable(newTerrain) ? PathingTerrain.Walkable : PathingTerrain.Unwalkable;
             Pathing.PathFindingInternal.updateMap(level, location, pathingTerrain);
         }
 
@@ -3472,6 +3860,7 @@ namespace RogueBasin
             player.ResetTurnsSinceAction();
         }
 
+
         public String PlayerDeathString { get; set; }
         public bool PlayerDeathOccured { get; set; }
 
@@ -3485,6 +3874,8 @@ namespace RogueBasin
             PlayerDeathString = deathString;
         }
 
+        public bool FunMode { get; set; }
+
         /// <summary>
         /// It's all gone wrong!
         /// </summary>
@@ -3497,11 +3888,17 @@ namespace RogueBasin
                 return;
             }
 
-            //In FlatlineRL death is not permanent, but quitting is!
+            if (FunMode && !verb.Contains("quit"))
+            {
+                //Restart the level with 0 fame
+                RestartLevelOnFailure();
+                NumberOfFunModeDeaths++;
+                PlayerDeathOccured = false;
+                return;
+            }
 
             if (!verb.Contains("quit"))
             {
-
                 //Reset vars
                 PlayerDeathString = "";
                 PlayerDeathOccured = false;
@@ -3509,49 +3906,12 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Player killed", LogDebugLevel.Medium);
 
                 DungeonInfo.NoDeaths++;
-                EndOfGame(false, false);
-
-                //For now, we just healup the player
-                //Game.Dungeon.Player.HealCompletely();
-                //return;
-                /*
-                if (DungeonInfo.NoDeaths == DungeonInfo.MaxDeaths)
-                {
-                    //This is true death
-                    EndOfGame(false);
-                    return;
-                }
-                else
-                {
-
-                    //We get another try
-                    
-                    //Is level complete? Move onto next
-                    if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete)
-                    {
-                        if(Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeathButCompleted) {
-                            //Screen.Instance.PlayMovie("deadbutnextmission", true);
-                            PlayedMissionFailedDeathButCompleted = true;
-                        }
-                        MoveToNextMission();
-                        return;
-                    }
-
-                    //If not, reset mission with different seed
-                    if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionFailedDeath)
-                    {
-                        //Screen.Instance.PlayMovie("deadretrymission", true);
-                        PlayedMissionFailedDeath = true;
-                    }
-                    ResetCurrentMission(true);
-
-                    return;
-                }*/
-
+                Game.Base.DoEndOfGame(false, false, false);
+                //EndOfGame(false, false);
             }
             else
             {
-                EndOfGame(false, true);
+                Game.Base.DoEndOfGame(false, false, true);
             }
 
 
@@ -3640,6 +4000,19 @@ namespace RogueBasin
             RunMainLoop = false;
             */
 
+        }
+
+
+        public int NumberOfFunModeDeaths { get; private set; }
+
+        private void RestartLevelOnFailure()
+        {
+            TeleportToArena(player.LocationLevel);
+            player.CombatXP = 0;
+            Game.Dungeon.Player.HealCompletely();
+            Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
+            Screen.Instance.NeedsUpdate = true;
+            Game.Base.SetupFunModeDeath();
         }
 
         public struct KillRecord
@@ -3834,7 +4207,7 @@ namespace RogueBasin
             }
         }
 
-        private void SaveObituary(List<string> deathPreamble, List<string> killRecord)
+        public void SaveObituary(List<string> deathPreamble, List<string> killRecord)
         {
             try
             {
@@ -4157,54 +4530,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Exit a dungeon and go back to town
-        /// Do all cleanup here
-        /// </summary>
-
-        public void PlayerLeavesDungeon()
-        {
-
-            //TODO
-
-            //Check if this is the end of the game
-            if (!DungeonInfo.LastMission)
-            {
-                //Respawn the last dungeon the player was in
-                RespawnDungeon(Player.CurrentDungeon, false);
-
-                //End any events on any remaining monsters
-                RemoveAllMonsterEffects();
-
-                //Wipe the player's FOV of the last dungeon
-                WipeThisRunFOV(Player.CurrentDungeon);
-
-                //Cancel any effect
-                player.RemoveAllEffects();
-
-                //Recharge all items
-                RechargeEquippableItems();
-
-                //Put found items that were too much for inventory in store
-                //PutItemsNotInInventoryInStore();
-
-                //Remove all inventory items
-                RemoveInventoryItems();
-
-                LogFile.Log.LogEntryDebug("Player back to town. Date moved on.", LogDebugLevel.Medium);
-                //Game.Dungeon.MoveToNextDate();
-                //Game.Dungeon.PlayerBackToTown();
-                //SyncStatsWithTraining();
-
-                Player.CurrentDungeon = 0;
-            }
-            else
-            {
-                //OK, it's the end, they're back from the prince mission one way or the other
-                EndOfGame(false, false);
-            }
-        }
-
-        /// <summary>
         /// Wipe the this-adventure fov for the dungeon
         /// </summary>
         /// <param name="dungeonID"></param>
@@ -4291,107 +4616,6 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Run the end of game. Produce and save the obituary.
-        /// </summary>
-        public void EndOfGame(bool playerWon, bool playerQuit)
-        {
-            //Work out which ending the player gets
-
-            if (playerWon)
-                Screen.Instance.PlayMovie("traumawin", true);
-            else
-            {
-                if (!playerQuit)
-                    Screen.Instance.PlayMovie("traumalose", true);
-                else
-                    Screen.Instance.PlayMovie("traumaquit", true);
-            }
-
-            //RunMainLoop = false;
-            EndOfGameMechanics(playerWon, playerQuit);
-        }
-
-        private void EndOfGameMechanics(bool wonGame, bool quit)
-        {
-            //Check intrinsics
-
-            Player player = Game.Dungeon.Player;
-            Dungeon dungeon = Game.Dungeon;
-            
-            //The last screen to display
-            List<string> finalScreen = new List<string>();
-            
-            //A long list of stuff to put in the obituary
-            List<string> fullObit = new List<string>();
-
-            //Final stats
-
-            List<string> finalStats = new List<string>();
-
-            if (wonGame)
-            {
-                finalScreen.Add("Private " + Game.Dungeon.player.Name + " finished what he started and defeated the invasion ");
-                finalScreen.Add("of the machines from Space Hulk OE1x1!");
-            }
-            else
-            {
-                if (quit)
-                    finalScreen.Add("Private " + Game.Dungeon.player.Name + " had pressing business elsewhere.");
-                else
-                    finalScreen.Add("Private " + Game.Dungeon.player.Name + " fought bravely but was finally overcome.");
-            }
-            finalScreen.Add("");
-
-            //Total kills
-            KillRecord killRecord = GetKillRecord();
-
-            finalScreen.Add("");
-
-            finalScreen.Add("Robots destroyed: " + killRecord.killCount + " (" + killRecord.killScore + " pts)");
-            finalScreen.Add("");
-
-            //finalScreen.Add("Total: " + (primaryObjectiveScore + secondaryObjectiveScore + killScore).ToString("0000") +" pts");
-
-            var itemInfo = ItemsUsedSummary();
-
-            finalScreen.AddRange(itemInfo.Item2);
-
-            finalScreen.Add("");
-
-            //finalScreen.Add("Aborted Missions: " + noAborts);
-            finalScreen.Add("");
-
-            //finalScreen.Add("R. E. E. D.s lost: " + noDeaths);
-
-            finalScreen.Add("");
-            finalScreen.Add("Thanks for playing! -flend & shroomarts");
-
-            Screen.Instance.DrawEndOfGameInfo(finalScreen);
-
-            //Compose the obituary
-
-            List<string> obString = new List<string>();
-
-            obString.AddRange(finalScreen);
-            obString.Add("");
-            obString.Add("Robots destroyed:");
-            obString.Add("");
-
-            SaveObituary(obString, killRecord.killStrings);
-
-            if (!Game.Dungeon.SaveScumming)
-            {
-                DeleteSaveFile();
-            }
-
-            //Wait for a keypress
-            //KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-            //Stop the main loop
-            RunMainLoop = false;
-        }
-
         private Tuple<int, List<string>> ItemsUsedSummary()
         {
             var shieldsUsed = Player.Inventory.GetItemsOfType<Items.ShieldPack>().Count();
@@ -4428,30 +4652,6 @@ namespace RogueBasin
             return Cleared.Count;
         }
 
-        public void MissionComplete()
-        {
-            if (DungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete)
-            {
-                //With secondary
-                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionCompleteWithSecondary)
-                {
-                    //Screen.Instance.PlayMovie("missioncompletewithsecondary", true);
-                    PlayedMissionCompleteWithSecondary = true;
-                }
-                Game.MessageQueue.AddMessage("Mission COMPLETE (primary + secondary objectives)!");
-            }
-            else
-            {
-                //Primary only
-                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionComplete)
-                {
-                    //Screen.Instance.PlayMovie("missioncomplete", true);
-                    PlayedMissionComplete = true;
-                }
-                Game.MessageQueue.AddMessage("Mission COMPLETE (primary objectives)!");
-            }
-            MoveToNextMission();
-        }
 
         public bool PlayedMissionAborted { get; set; }
         public bool PlayedMissionNoMoreAborts { get; set; }
@@ -4469,7 +4669,7 @@ namespace RogueBasin
                 //No more aborts allowed
                 if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionNoMoreAborts)
                 {
-                    //Screen.Instance.PlayMovie("nomoreaborts", true);
+                    //Game.Base.PlayMovie("nomoreaborts", true);
                     PlayedMissionNoMoreAborts = true;
                 }
                 Game.MessageQueue.AddMessage("No more aborts permitted.");
@@ -4484,7 +4684,7 @@ namespace RogueBasin
 
             if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionAborted)
             {
-                // Screen.Instance.PlayMovie("missionaborted", true);
+                // Game.Base.PlayMovie("missionaborted", true);
                 PlayedMissionAborted = true;
             }
             Game.MessageQueue.AddMessage("Mission ABORTED.");
@@ -4493,45 +4693,9 @@ namespace RogueBasin
             return true;
         }
 
-        /// <summary>
-        /// Move player to next mission
-        /// </summary>
-        public void MoveToNextMission()
+        public IEnumerable<Feature> GetAllFeatures()
         {
-            int newMissionLevel = Game.Dungeon.player.LocationLevel + 1;
-
-            if (newMissionLevel == Levels.Count)
-            {
-                //Completed the game
-                EndOfGame(false, false);
-                return;
-            }
-
-            //Reset no of aborts
-            DungeonInfo.NoAborts = 0;
-
-            PlayerActionsBetweenMissions();
-            DungeonActionsBetweenMissions();
-
-            SelectTilesetForMission(newMissionLevel);
-
-            //Specials
-            if (newMissionLevel == 11)
-            {
-                //Bonus units
-                DungeonInfo.MaxDeaths += 5;
-            }
-
-            //Move player to new level
-
-            player.LocationLevel = newMissionLevel;
-            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
-
-            string fmt = "00";
-            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + Game.Dungeon.DungeonInfo.LookupMissionName(newMissionLevel) + ".");
-
-            //Run a normal turn to set off any triggers
-            Game.Dungeon.PCMove(0, 0, true);
+            return features.SelectMany(f => f.Value);
         }
 
         /// <summary>
@@ -4543,7 +4707,7 @@ namespace RogueBasin
                 return;
 
             //Find any elevator that goes here
-            var elevator = features.Where(f => f.GetType() == typeof(Features.Elevator) && (f as Features.Elevator).DestLevel == levelNo);
+            var elevator = GetAllFeatures().Where(f => f.GetType() == typeof(Features.Elevator) && (f as Features.Elevator).DestLevel == levelNo);
             if (elevator.Count() == 0)
             {
                 LogFile.Log.LogEntryDebug("Failed to find elevator to get to on level " + levelNo, LogDebugLevel.Medium);
@@ -4710,7 +4874,7 @@ namespace RogueBasin
             Map levelMap = levels[locationLevel];
 
             List<Point> adjacentSqFree = new List<Point>();
-            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
 
             foreach (Point p in adjacentSq)
             {
@@ -4741,12 +4905,147 @@ namespace RogueBasin
             return adjacentSqFree;
         }
 
+        public List<Point> GetValidMapSquaresWithinRange(int locationLevel, Point locationMap, int range)
+        {
+            List<Point> pointsToReturn = new List<Point>();
+            Map currentMap = levels[locationLevel];
+
+            int xl = locationMap.x - range;
+            int xr = locationMap.x + range;
+
+            int yt = locationMap.y - range;
+            int yb = locationMap.y + range;
+
+            if (xl < 0)
+                xl = 0;
+            if (xr >= currentMap.width)
+                xr = currentMap.width - 1;
+            if (yt < 0)
+                yt = 0;
+            if (yb >= currentMap.height)
+                yb = currentMap.height - 1;
+
+            for (int i = xl; i <= xr; i++)
+            {
+                for (int j = yt; j <= yb; j++)
+                {
+                    pointsToReturn.Add(new Point(i, j));
+                }
+            }
+
+            return pointsToReturn;
+        }
+
+        public List<Point> GetWalkableSquaresFreeOfCreaturesWithinRange(int locationLevel, Point locationMap, int minRange, int maxRange)
+        {
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSqFree = new List<Point>();
+            List<Point> maxRangeSq = GetValidMapSquaresWithinRange(locationLevel, locationMap, maxRange);
+            List<Point> minRangeSq = GetValidMapSquaresWithinRange(locationLevel, locationMap, minRange);
+
+            var adjacentSq = maxRangeSq.Except(minRangeSq);
+            
+            foreach (Point p in adjacentSq)
+            {
+
+                if (!MapSquareIsWalkable(locationLevel, p))
+                {
+                    continue;
+                }
+
+                //Check square has nothing else on it
+                SquareContents contents = MapSquareContents(locationLevel, p);
+
+                if (contents.monster != null)
+                {
+                    continue;
+                }
+
+                if (contents.player != null)
+                    continue;
+
+                //Empty and walkable
+                adjacentSqFree.Add(p);
+
+            }
+
+            return adjacentSqFree;
+        }
+
+        public List<Point> GetWalkableAdjacentSquares(int locationLevel, Point locationMap)
+        {
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSqFree = new List<Point>();
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
+
+            foreach (Point p in adjacentSq)
+            {
+                if (p.x >= 0 && p.x < levelMap.width
+                    && p.y >= 0 && p.y < levelMap.height)
+                {
+                    if (!MapSquareIsWalkable(locationLevel, p))
+                    {
+                        continue;
+                    }
+                    
+                    //Empty and walkable
+                    adjacentSqFree.Add(p);
+                }
+            }
+
+            return adjacentSqFree;
+        }
+
+        public List<Point> GetWalkableAdjacentSquaresFreeOfCreaturesAndDangerousTerrain(int locationLevel, Point locationMap)
+        {
+            Map levelMap = levels[locationLevel];
+
+            List<Point> adjacentSqFree = new List<Point>();
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
+
+            foreach (Point p in adjacentSq)
+            {
+                if (p.x >= 0 && p.x < levelMap.width
+                    && p.y >= 0 && p.y < levelMap.height)
+                {
+                    if (!MapSquareIsWalkable(locationLevel, p))
+                    {
+                        continue;
+                    }
+
+                    //Check square has nothing else on it
+                    SquareContents contents = MapSquareContents(locationLevel, p);
+
+                    if (contents.monster != null)
+                    {
+                        continue;
+                    }
+
+                    if (contents.player != null)
+                        continue;
+
+                    //Check for dangerous features
+
+                    var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(locationLevel, p)).Where(f => f is DangerousActiveFeature);
+                    if (dangeousTerrainAtPoint.Count() > 0)
+                        continue;
+
+                    //Empty and walkable
+                    adjacentSqFree.Add(p);
+                }
+            }
+
+            return adjacentSqFree;
+        }
+
         public List<Point> GetWalkableAdjacentSquaresFreeOfCreaturesAndItems(int locationLevel, Point locationMap)
         {
             Map levelMap = levels[locationLevel];
 
             List<Point> adjacentSqFree = new List<Point>();
-            List<Point> adjacentSq = GetAdjacentSquares(locationMap);
+            List<Point> adjacentSq = MapUtils.GetAdjacentCoords(locationMap);
 
             foreach (Point p in adjacentSq)
             {
@@ -4780,21 +5079,6 @@ namespace RogueBasin
             return adjacentSqFree;
         }
 
-        private static List<Point> GetAdjacentSquares(Point locationMap)
-        {
-            List<Point> adjacentSq = new List<Point>();
-
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y - 1));
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y));
-            adjacentSq.Add(new Point(locationMap.x + 1, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y - 1));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y));
-            adjacentSq.Add(new Point(locationMap.x - 1, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x, locationMap.y + 1));
-            adjacentSq.Add(new Point(locationMap.x, locationMap.y - 1));
-            return adjacentSq;
-        }
-
         public IEnumerable<Point> GetWalkablePointsFromSet(int level, IEnumerable<Point> allPossiblePoints)
         {
             return allPossiblePoints.SelectMany(p => MapSquareIsWalkable(level, p) ? new List<Point> { p } : new List<Point>());
@@ -4823,32 +5107,184 @@ namespace RogueBasin
             {
                 var terrain = GetTerrainAtPoint(sourceLevel, p);
 
-                if (!IsTerrainWalkable(terrain))
+                if (!MapUtils.IsTerrainWalkable(terrain))
                     hardCover++;
             }
 
-            //Check for any blocking features
-            //Is checked by terrain above
+            //Blocking features affect the terrain flags and are counted above
+
+            //Each non-blocking feature counts as soft cover
+            softCover += pointsOnLine.Select(p => GetFeaturesAtLocation(new Location(sourceLevel, p)).Where(f => !f.IsBlocking).Count()).Sum();
             
-            foreach (var f in features)
-            {
-                if (f.LocationLevel != sourceLevel)
-                    continue;
-
-                if (pointsOnLine.Contains(f.LocationMap))
-                {
-                    if (!f.IsBlocking)
-                        softCover += 1;                        
-                }
-            }
-
             return new Tuple<int, int>(hardCover, softCover);
         }
 
         public bool AllLocksOpen { get; set; }
 
-        public MapInfo MapInfo { get; set; }
+        public MapState MapState { get; set; }
 
         public MonsterPlacement MonsterPlacement { get; private set; }
+
+        private RoyaleDungeonLevelMaker royaleDungeonMaker; 
+
+        public void SetupRoyaleEntryLevels()
+        {
+            royaleDungeonMaker = new RoyaleDungeonLevelMaker();
+
+            royaleDungeonMaker.CreateNextDungeonChoices(1);
+            royaleDungeonMaker.SetPlayerStartLocation();
+        }
+
+        public void GenerateNextRoyaleLevels()
+        {
+            var minLevel = (int)Math.Max(player.Level, ArenaLevelNumber() + 2);
+            royaleDungeonMaker.CreateNextDungeonChoices(minLevel);
+        }
+
+        /// <summary>
+        /// The player moves to view a new arena
+        /// </summary>
+        /// <param name="p"></param>
+        internal bool TeleportToAdjacentArena(bool arenaHigher)
+        {
+            int newLevel = player.LocationLevel + (arenaHigher ? 1 : -1);
+
+            if (newLevel < royaleDungeonMaker.NextDungeonLevelChoice)
+                return false;
+
+            if (newLevel >= royaleDungeonMaker.NextDungeonLevelChoice + royaleDungeonMaker.NumberDungeonLevelChoices)
+                return false;
+
+            LogFile.Log.LogEntryDebug("Moving to arena level " + newLevel, LogDebugLevel.Medium);
+
+            TeleportToArena(newLevel);
+            return true;
+        }
+
+        private void TeleportToArena(int newLevel)
+        {
+            var entryPoint = royaleDungeonMaker.GetEntryLocationOnLevel(newLevel);
+            MovePCAbsolute(newLevel, entryPoint);
+        }
+
+        /// <summary>
+        /// First is 0
+        /// </summary>
+        /// <returns></returns>
+        internal int ArenaLevelNumber()
+        {
+            return player.LocationLevel / 3;
+        }
+
+        public static int TotalArenas = 6;
+
+        internal void ExitLevel()
+        {
+            if (ArenaLevelNumber() == TotalArenas - 1)
+            {
+                //Game over folks
+                Game.Base.DoEndOfGame(true, true, false);
+            }
+            else
+            {
+
+                //Generate a new set of levels
+                Game.Dungeon.GenerateNextRoyaleLevels();
+
+                //Teleport to the first new level
+                TeleportToArena(royaleDungeonMaker.NextDungeonLevelChoice);
+
+                //Offer the user the choice of arenas
+                Game.Base.DoArenaSelection();
+            }
+        }
+
+        internal bool DangerousFeatureAtLocation(int LocationLevel, Point newLocation)
+        {
+            var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(LocationLevel, newLocation)).Where(f => f is DangerousActiveFeature);
+            if (dangeousTerrainAtPoint.Count() > 0)
+                return true;
+            return false;
+        }
+
+        Dictionary<int, bool> DoorStatus = new Dictionary<int, bool>();
+
+        internal void ShutDoor(int level)
+        {
+            DoorStatus[level] = true;
+        }
+
+        internal bool CheckDoor(int level)
+        {
+            bool status = false;
+            DoorStatus.TryGetValue(level, out status);
+
+            return status;
+        }
+
+        /// <summary>
+        /// RoomPlacements currently contain absolute co-ordinates. I would prefer them to have relative coordinates, and those to get
+        /// mapped to absolute coordinates here
+        /// </summary>
+        /// <param name="mapInfo"></param>
+        public void AddMapObjectsToDungeon(MapInfo mapInfo)
+        {
+            var rooms = mapInfo.Populator.AllRoomsInfo();
+
+            foreach (RoomInfo roomInfo in rooms)
+            {
+                foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
+                {
+                    bool monsterResult = AddMonster(monsterPlacement.monster, monsterPlacement.location);
+
+                    if (!monsterResult)
+                    {
+                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+
+                foreach (ItemRoomPlacement itemPlacement in roomInfo.Items)
+                {
+                    bool monsterResult = AddItem(itemPlacement.item, itemPlacement.location);
+
+                    if (!monsterResult)
+                    {
+                        LogFile.Log.LogEntryDebug("Cannot add item to dungeon: " + itemPlacement.item.SingleItemDescription + " at: " + itemPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+
+                foreach (FeatureRoomPlacement featurePlacement in roomInfo.Features)
+                {
+                    if (featurePlacement.feature.IsBlocking)
+                    {
+                        bool featureResult = AddFeatureBlocking(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord, featurePlacement.feature.BlocksLight);
+
+                        if (!featureResult)
+                        {
+                            LogFile.Log.LogEntryDebug("Cannot add blocking feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
+                        }
+                    }
+                    else
+                    {
+                        bool featureResult = AddFeature(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord);
+
+                        if (!featureResult)
+                        {
+                            LogFile.Log.LogEntryDebug("Cannot add feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
+                        }
+                    }
+                }
+            }
+
+            foreach (var doorInfo in mapInfo.Populator.DoorInfo)
+            {
+                var door = doorInfo.Value;
+
+                foreach (var doorLock in door.Locks)
+                {
+                    AddLock(doorLock);
+                }
+            }
+        }
     }
 }

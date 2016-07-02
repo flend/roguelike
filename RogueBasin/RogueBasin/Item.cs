@@ -43,7 +43,7 @@ namespace RogueBasin
     [System.Xml.Serialization.XmlInclude(typeof(Items.StealthCloak))]
     public abstract class Item : MapObject
     {
-        Color defaultItemColor = ColorPresets.Red;
+        System.Drawing.Color defaultItemColor = System.Drawing.Color.Red;
 
         public Item()
         {
@@ -122,7 +122,7 @@ namespace RogueBasin
 
         public virtual string HiddenSuffix { get { return ""; } }
 
-        public virtual Color GetColour() { return defaultItemColor; }
+        public virtual System.Drawing.Color GetColour() { return defaultItemColor; }
 
         ///Cost of item to level gen
         public virtual int ItemCost()
@@ -144,7 +144,21 @@ namespace RogueBasin
             return false;
         }
 
+        /// <summary>
+        /// Item is destroyed on pickup and doesn't reach inventory
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool DestroyedOnPickup()
+        {
+            return false;
+        }
+
         public virtual bool OnDrop(Creature droppingCreature)
+        {
+            return false;
+        }
+
+        public virtual bool DoNotPickupDuplicates()
         {
             return false;
         }

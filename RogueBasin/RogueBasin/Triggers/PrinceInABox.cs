@@ -26,14 +26,14 @@ namespace RogueBasin.Triggers
 
             if (!Game.Dungeon.DungeonInfo.DragonDead)
             {
-                Screen.Instance.PlayMovie("princeincage", true);
+                Game.Base.PlayMovie("princeincage", true);
                 return false;
             }
             else
             {
-                Screen.Instance.PlayMovie("letoutprince", true);
+                Game.Base.PlayMovie("letoutprince", true);
                 //End of the game
-                Game.Dungeon.PlayerLeavesDungeon();
+                //Game.Dungeon.PlayerLeavesDungeon();
             }
             
             return true;

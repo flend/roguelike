@@ -4,9 +4,7 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Swarmer. Light melee with wide FOV. Responds to sounds.
-    /// </summary>
+
     public class RollingBomb : MonsterThrowAndRunAI
     {
 
@@ -42,7 +40,7 @@ namespace RogueBasin.Creatures
         /// Only explodes when next to you
         /// </summary>
         /// <returns></returns>
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             //Can explode diagonally!
             return 1.9;
@@ -135,9 +133,9 @@ namespace RogueBasin.Creatures
             return (char)503;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
         protected override int GetChanceToRecover()
@@ -170,9 +168,9 @@ namespace RogueBasin.Creatures
         }
 
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Gold;
+            return System.Drawing.Color.Gold;
         }
 
         public override int GetCombatXP()
@@ -212,7 +210,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 1;
         }

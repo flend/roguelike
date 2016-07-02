@@ -30,21 +30,21 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -88,9 +88,9 @@ namespace RogueBasin.Items
             return '[';
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.BlanchedAlmond;
+            return System.Drawing.Color.BlanchedAlmond;
         }
 
         public int ArmourClassModifier()
@@ -104,7 +104,17 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
+        public double DamageModifier()
         {
             return 0;
         }

@@ -28,48 +28,7 @@ namespace RogueBasin.Items
 
             LogFile.Log.LogEntryDebug("Firing heavy laser", LogDebugLevel.Medium);
 
-            //The shotgun fires towards its target and does same damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
-            //Calculate a huge FOV
-
-            Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
-
-            WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
-            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
-
-            //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Magenta);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    int damage = 150;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
-
-            //Remove 1 ammo
-            Ammo--;
-
-            return true;
+            return Game.Dungeon.FireLaserLineWeapon(target, this, 150);
         }
 
         public List<EquipmentSlot> EquipmentSlots
@@ -91,21 +50,21 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -120,6 +79,15 @@ namespace RogueBasin.Items
             return false;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
         /// <summary>
         /// Can be operated
         /// </summary>
@@ -187,9 +155,9 @@ namespace RogueBasin.Items
             return (char)316;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Magenta;
+            return System.Drawing.Color.Magenta;
         }
 
         public int ArmourClassModifier()
@@ -203,7 +171,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

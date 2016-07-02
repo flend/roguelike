@@ -127,6 +127,52 @@ namespace DDRogueTest
             Assert.IsFalse(filler.Connected);
         }
 
+        [TestMethod]
+        public void BlockingOffADoorByReplacementFailsHorizontal()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(3, 4)));
+        }
+
+        [TestMethod]
+        public void BlockingOffADoorByReplacementFailsVertical()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrouting.room"); //8x4
+
+            var filler = new RoomFilling(roomTemplate);
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(0, 2)));
+        }
+
+
+        [TestMethod]
+        public void FillingCannotBeFilledSquareFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testroutinglarge.room"); //8x6
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareAsUnfillableMustBeConnected(new Point(6, 1));
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(6, 1)));
+        }
+
+        [TestMethod]
+        public void BlockingOffCannotBeFilledSquareFails()
+        {
+            RoomTemplate roomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testroutinglarge.room"); //8x6
+
+            var filler = new RoomFilling(roomTemplate);
+
+            filler.SetSquareAsUnfillableMustBeConnected(new Point(6, 1));
+            filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(5, 1));
+
+            Assert.IsFalse(filler.SetSquareUnWalkableIfMaintainsConnectivity(new Point(6, 2)));
+        }
+
 
         private RoomTemplate LoadTemplateFromAssemblyFile(string filePath)
         {

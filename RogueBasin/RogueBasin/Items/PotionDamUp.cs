@@ -70,9 +70,9 @@ namespace RogueBasin.Items
             return (char)236;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.RoyalBlue;
+            return System.Drawing.Color.RoyalBlue;
         }
 
         public override bool UseHiddenName { get { return false; } }

@@ -59,7 +59,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 0;
         }
@@ -144,9 +144,9 @@ namespace RogueBasin.Creatures
             return new AlertBot();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.GreenYellow;
+            return System.Drawing.Color.GreenYellow;
         }
 
         public override int GetCombatXP()
@@ -178,7 +178,7 @@ namespace RogueBasin.Creatures
         /// Alert bot has a long range to use its alerting ability
         /// </summary>
         /// <returns></returns>
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             return 10.0;
         }
@@ -193,9 +193,9 @@ namespace RogueBasin.Creatures
             return (char)504;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
         protected override bool UseSpecialAbility()
@@ -216,7 +216,7 @@ namespace RogueBasin.Creatures
             LogFile.Log.LogEntryDebug("Alert bot makes sound: " + effect + " at time: " + Game.Dungeon.WorldClock, LogDebugLevel.Medium);
 
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(Game.Dungeon.Player.LocationMap, Game.Dungeon.Player.LocationLevel, 4);
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, ColorPresets.Yellow);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Bullet);
 
             return true;
         }

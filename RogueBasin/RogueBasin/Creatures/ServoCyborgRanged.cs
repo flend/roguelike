@@ -46,7 +46,7 @@ namespace RogueBasin.Creatures
             return true;
         }
 
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             return 7.0;
         }
@@ -87,9 +87,9 @@ namespace RogueBasin.Creatures
             return (char)504;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
         protected override int GetChanceToRecover()
@@ -122,9 +122,9 @@ namespace RogueBasin.Creatures
             return new ServoCyborgRanged();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Chartreuse;
+            return System.Drawing.Color.Chartreuse;
         }
 
         public override int GetCombatXP()
@@ -173,7 +173,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 0;
         }

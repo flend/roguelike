@@ -275,6 +275,7 @@ namespace RogueBasin
             return false;
         }
 
+        //Includes start and end points
         public static IEnumerable<Point> GetPointsOnLine(Point start, Point end)
         {
             var startV = new Vector3(start.x, start.y, 0);
@@ -317,6 +318,43 @@ namespace RogueBasin
             n |= n >> 8;
             n |= n >> 16;
             return ++n;        
+        }
+
+        /// <summary>
+        /// Get the distance in terms of how many steps required
+        /// </summary>
+        /// <param name="obj1"></param>
+        /// <param name="obj2"></param>
+        /// <returns></returns>
+        public static int GetPathDistanceBetween(MapObject obj1, MapObject obj2)
+        {
+            return GetPathDistanceBetween(obj1.LocationMap, obj2.LocationMap);
+        }
+
+        public static int GetPathDistanceBetween(Point p1, Point p2)
+        {
+            List<Point> pts = Utility.GetPointsOnLine(p1, p2).ToList();
+            return pts.Count;
+        }
+
+        public static int GetPathDistanceBetween(MapObject obj1, Point p2)
+        {
+            return GetPathDistanceBetween(obj1.LocationMap, p2);
+        }
+
+        public static int GetManhattenPathDistanceBetween(Point p1, Point p2)
+        {
+            return Math.Abs(p1.x - p2.x) + Math.Abs(p1.y - p2.y);
+        }
+
+        public static int GetManhattenPathDistanceBetween(MapObject obj1, MapObject obj2)
+        {
+            return GetManhattenPathDistanceBetween(obj1.LocationMap, obj2.LocationMap);
+        }
+
+        public static int GetManhattenPathDistanceBetween(MapObject obj1, Point p2)
+        {
+            return GetManhattenPathDistanceBetween(obj1.LocationMap, p2);
         }
 
         /// <summary>
@@ -434,6 +472,34 @@ namespace RogueBasin
             //Check FOV
             return fov.CheckTileFOV(target.x, target.y);
 
+        }
+
+        internal static Point RotatePoint(Point toRotate, Point origin, double radians)
+        {
+            int px = (int)Math.Round(Math.Cos(radians) * (toRotate.x-origin.x) - Math.Sin(radians) * (toRotate.y-origin.y) + origin.x);
+            int py = (int)Math.Round(Math.Sin(radians) * (toRotate.x - origin.x) + Math.Cos(radians) * (toRotate.y - origin.y) + origin.y);
+
+            return new Point(px, py);
+        }
+
+        public static T ChooseItemFromWeights<T>(IEnumerable<Tuple<int, T>> itemsWithWeights)
+        {
+            var totalWeight = itemsWithWeights.Select(t => t.Item1).Sum();
+            var randomNumber = Game.Random.Next(totalWeight);
+
+            int weightSoFar = 0;
+            T roomToPlace = itemsWithWeights.First().Item2;
+            foreach (var t in itemsWithWeights)
+            {
+                weightSoFar += t.Item1;
+                if (weightSoFar > randomNumber)
+                {
+                    roomToPlace = t.Item2;
+                    break;
+                }
+            }
+
+            return roomToPlace;
         }
 
     }

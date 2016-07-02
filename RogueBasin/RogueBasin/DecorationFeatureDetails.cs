@@ -25,10 +25,10 @@ namespace RogueBasin
         
         public class Decoration {
             public char representation;
-            public Color colour;
+            public System.Drawing.Color colour;
             public bool isBlocking;
 
-            public Decoration(char representation, Color colour, bool isBlocking) {
+            public Decoration(char representation, System.Drawing.Color colour, bool isBlocking) {
                 this.representation = representation;
                 this.colour = colour;
                 this.isBlocking = isBlocking;
@@ -39,11 +39,11 @@ namespace RogueBasin
 
         static DecorationFeatureDetails()
         {
-            var boneColor = ColorPresets.Khaki;
-            var blockingColor = ColorPresets.SandyBrown;
-            var nonBlockingColor = ColorPresets.DarkSlateGray;
-            var corpseColor = ColorPresets.Firebrick;
-            var featureColor = ColorPresets.Gold;
+            var boneColor = System.Drawing.Color.Khaki;
+            var blockingColor = System.Drawing.Color.SandyBrown;
+            var nonBlockingColor = System.Drawing.Color.DarkSlateGray;
+            var corpseColor = System.Drawing.Color.Firebrick;
+            var featureColor = System.Drawing.Color.Gold;
 
             decorationFeatures.Add(DecorationFeatures.Bone, new Decoration((char)314, boneColor, false));
             decorationFeatures.Add(DecorationFeatures.Skeleton, new Decoration((char)315, boneColor, false));

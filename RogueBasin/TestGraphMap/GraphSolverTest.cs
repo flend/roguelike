@@ -17,7 +17,7 @@ namespace TestGraphMap
 
             var mapModel = new MapModel(map, startVertex);
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, new DoorAndClueManager(mapModel));
 
             Assert.IsTrue(solver.MapCanBeSolved());
         }
@@ -29,11 +29,11 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>());
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
@@ -45,11 +45,11 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>());
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
@@ -61,7 +61,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
 
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>(new int[] { 6 }));
@@ -69,7 +69,7 @@ namespace TestGraphMap
             Assert.IsTrue(doorManager.ClueMap.Count > 0);
             //Assert.IsTrue(doorManager.DoorMap.Count > 0);
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             //Assert.IsTrue(solver.MapCanBeSolved());
         }
@@ -81,11 +81,11 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
             doorManager.PlaceDoorAndCluesNoChecks(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>(new int[] { 12 }));
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
@@ -97,7 +97,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
 
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>(new int[] { 6 }));
@@ -105,7 +105,7 @@ namespace TestGraphMap
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "lock1"),
                 new List<int>(new int[] { 4 }));
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsTrue(solver.MapCanBeSolved());
         }
@@ -117,7 +117,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
 
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(10, 11), "lock0"),
                 new List<int>(new int[] { 6 }));
@@ -125,7 +125,7 @@ namespace TestGraphMap
             doorManager.PlaceDoorAndCluesNoChecks(new DoorRequirements(new Connection(5, 6), "lock1"),
                 new List<int>(new int[] { 13 }));
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
@@ -137,12 +137,12 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
             doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 1));
             doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
             doorManager.AddCluesToExistingObjective("obj0", new List<int> { 1 });
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsTrue(solver.MapCanBeSolved());
         }
@@ -154,12 +154,12 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
             doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 1));
             doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
             //missing clue for objective
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
@@ -171,7 +171,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
 
             doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 2));
             doorManager.PlaceObjective(new ObjectiveRequirements(2, "obj0", 1, new List<string> { "lock0" }));
@@ -180,7 +180,7 @@ namespace TestGraphMap
             //One clue before and one after the door (not enough to unlock it)
             var clues = doorManager.AddCluesToExistingObjective("obj0", new List<int> { 2 });
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsFalse(solver.MapCanBeSolved());
         }
@@ -192,13 +192,13 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
             doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 1));
             doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
             doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj1", 1, new List<string> { "obj0" }));
             doorManager.AddCluesToExistingObjective("obj1", new List<int> { 1 });
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsTrue(solver.MapCanBeSolved());
         }
@@ -210,14 +210,14 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
             doorManager.PlaceDoor(new DoorRequirements(new Connection(10, 11), "lock0", 2));
             doorManager.PlaceObjective(new ObjectiveRequirements(4, "obj0", 1, new List<string> { "lock0" }));
             doorManager.PlaceObjective(new ObjectiveRequirements(5, "obj1", 1, new List<string> { "lock0" }));
             doorManager.AddCluesToExistingObjective("obj0", new List<int> { 1 });
             doorManager.AddCluesToExistingObjective("obj1", new List<int> { 1 });
 
-            GraphSolver solver = new GraphSolver(mapModel);
+            GraphSolver solver = new GraphSolver(mapModel, doorManager);
 
             Assert.IsTrue(solver.MapCanBeSolved());
         }

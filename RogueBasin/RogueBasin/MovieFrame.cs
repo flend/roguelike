@@ -6,15 +6,23 @@ namespace RogueBasin
 {
     public class MovieFrame
     {
-        public List<string> scanLines;
+        private List<string> scanLines;
 
-        public int width;
-        public int height;
+        public List<string> ScanLines
+        {
+            get
+            {
+                return scanLines;
+            }
+            set
+            {
+                scanLines = value;
+            }
+        }
 
         public MovieFrame()
         {
-            width = 60;
-            height = 25;
+            scanLines = new List<string>();
         }
 
         public void AddLine(string line)

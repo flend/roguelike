@@ -80,9 +80,18 @@ namespace RogueBasin.Items
             return (char)577;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public void FireAudio()
         {
-            return ColorPresets.Gold;
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+        public override System.Drawing.Color GetColour()
+        {
+            return System.Drawing.Color.Gold;
         }
 
         public int ArmourClassModifier()
@@ -96,7 +105,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

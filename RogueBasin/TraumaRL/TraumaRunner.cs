@@ -2,6 +2,7 @@
 using RogueBasin;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace TraumaRL
                 catch (Exception ex)
                 {
                     retry = false;
-                    LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message, LogDebugLevel.High);
+                    LogFile.Log.LogEntryDebug("Failed to create dungeon : " + ex.Message + "\n" + ex.StackTrace, LogDebugLevel.High);
                     if (failFast)
                     {
                         throw ex;
@@ -53,38 +54,39 @@ namespace TraumaRL
 
         private void ShowIntroMovies()
         {
-            Screen.Instance.PlayMovie("qe_start", true);
+            Game.Base.PlayMovie("qe_start", true);
+            Game.Base.PlayMovie("helpkeys", true);
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                Screen.Instance.PlayMovie("helpkeys", true);
+                Game.Base.PlayMovie("helpkeys", true);
             }
         }
    
         private void GenerateStoryDungeon(bool retry)
         {
             //Setup a single test level
-            TraumaWorldGenerator templateGen = new TraumaWorldGenerator();
+            TraumaWorldGenerator worldGen = new TraumaWorldGenerator();
 
-            var mapInfo = templateGen.GenerateTraumaLevels(retry);
+            worldGen.GenerateTraumaLevels(retry);
 
-            Game.Dungeon.MapInfo = mapInfo;
-
+            Game.Dungeon.MapState = worldGen.MapState;
+            Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelReadableNames.ToDictionary(kv => kv.Key, kv => kv.Value);
+            
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
-            VisualiseConnectivityGraph(mapInfo.Model);
-
-            VisualiseLevelConnectivityGraph(new MapModel(templateGen.LevelLinks, 0), TraumaWorldGenerator.LevelNaming);
+            VisualiseConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager);
+            VisualiseLevelConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager, worldGen.MapState.LevelNames);
         }
 
-        private void VisualiseConnectivityGraph(MapModel graphModel)
+        private void VisualiseConnectivityGraph(MapModel graphModel, DoorAndClueManager doorAndClueManager)
         {
-            var visualiser = new DoorClueGraphvizExport(graphModel);
+            var visualiser = new DoorClueGraphvizExport(graphModel, doorAndClueManager);
             visualiser.OutputFullGraph("bsptree-full");
             visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
 
-            if (Game.Config.DebugMode) {
+            if (Game.Config.DisplayGraphs) {
                 try
                 {
                     var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
@@ -104,30 +106,34 @@ namespace TraumaRL
             }   
         }
 
-        private void VisualiseLevelConnectivityGraph(MapModel graphModel, Dictionary<int, string> levelNaming)
+        private void VisualiseLevelConnectivityGraph(MapModel graphModel, DoorAndClueManager manager, ImmutableDictionary<int, string> levelNaming)
         {
-            var visualiser = new DoorClueGraphvizExport(graphModel, levelNaming);
+            var visualiser = new DoorClueGraphvizExport(graphModel, manager, levelNaming);
             visualiser.OutputClueDoorGraph("levellinks-full");
             if (Game.Config.DebugMode)
             {
-                try
+                if (Game.Config.DisplayGraphs)
                 {
-                    var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
+                    try
+                    {
+                        var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
 
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "levellinks-full");
-                    GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
-                }
-                catch (Exception)
-                {
-                    LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+                        GraphVizUtils.RunGraphVizPNG(graphVizLocation, "levellinks-full");
+                        GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
+                    }
+                    catch (Exception)
+                    {
+                        LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+                    }
                 }
             }
         }
 
         private void RandomSetup() {
-                        //int seedToUse = 150;
-            //Game.Random = new Random(seedToUse);
-            Game.Random = new Random();
+            int seedToUse = new Random().Next();
+            //int seedToUse = 153;
+            LogFile.Log.LogEntry("Random seed: " + seedToUse);
+            Game.Random = new Random(seedToUse);
         }
 
         GameDifficulty difficulty;
@@ -136,22 +142,25 @@ namespace TraumaRL
 
         private void IntroScreen()
         {
-            var gameInfo = new RogueBasin.GameIntro();
+            //live
+            //var gameInfo = new RogueBasin.GameIntro();
 
-            gameInfo.ShowIntroScreen();
+            //gameInfo.ShowIntroScreen();
 
-            difficulty = gameInfo.Difficulty;
-            playerName = gameInfo.PlayerName;
-            playItemMovies = gameInfo.ShowMovies;
+            //difficulty = gameInfo.Difficulty;
+            //playerName = gameInfo.PlayerName;
+            //playItemMovies = gameInfo.ShowMovies;
 
-          //  Game.Dungeon.Difficulty = GameDifficulty.Medium;
-           //  Game.Dungeon.Player.Name = "Dave";
-           //  Game.Dungeon.Player.PlayItemMovies = true;
+            //dev
+            difficulty = GameDifficulty.Medium;
+            playerName = "Dave";
+            playItemMovies = true;
         }
     
         private void StandardSystemSetup()
         {
             rb = new RogueBase();
+            Game.Base = rb;
             rb.SetupSystem();
 
             //Minimum debug
@@ -164,7 +173,6 @@ namespace TraumaRL
         private void StandardDungeonSetup()
         {
             var dungeonInfo = new DungeonInfo();
-            dungeonInfo.LevelNaming = TraumaWorldGenerator.LevelNaming;
             Game.Dungeon = new Dungeon(dungeonInfo);
 
             Game.Dungeon.Player.StartGameSetup();
@@ -184,9 +192,13 @@ namespace TraumaRL
             Game.Dungeon.Player.LocationLevel = 0;
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
 
-            ShowIntroMovies();
+            Game.Base.StartGame();
 
-            rb.MainLoop(false);
+            rb.StartEventLoop();
+
+            //Movies can only be shown after event loop started
+            ShowIntroMovies();
+            
         }
     }
 }

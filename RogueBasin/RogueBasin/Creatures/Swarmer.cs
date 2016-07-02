@@ -11,7 +11,7 @@ namespace RogueBasin.Creatures
     public class Swarmer : MonsterFightAndRunAI
     {
 
-        public Swarmer()
+        public Swarmer(int level) : base(level)
         {
             //Add a default right hand slot
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
@@ -29,17 +29,17 @@ namespace RogueBasin.Creatures
 
         public override Monster NewCreatureOfThisType()
         {
-            return new Swarmer();
+            return new Swarmer(Level);
         }
 
         protected override int ClassMaxHitpoints()
         {
-            return 20; //Not a 1-hit kill
+            return 10; 
         }
 
         public override int DamageBase()
         {
-            return 10;
+            return 5;
         }
 
         public override CreatureFOV.CreatureFOVType FOVType()
@@ -107,9 +107,9 @@ namespace RogueBasin.Creatures
             return (char)498;
         }
 
-        internal override Color GetCorpseRepresentationColour()
+        internal override System.Drawing.Color GetCorpseRepresentationColour()
         {
-            return ColorPresets.DarkRed;
+            return System.Drawing.Color.DarkRed;
         }
 
         protected override int GetChanceToRecover()
@@ -142,14 +142,9 @@ namespace RogueBasin.Creatures
         }
 
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Cyan;
-        }
-
-        public override int GetCombatXP()
-        {
-            return 40;
+            return System.Drawing.Color.Cyan;
         }
 
         public override int GetMagicXP()
@@ -184,7 +179,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 1;
         }
@@ -197,6 +192,21 @@ namespace RogueBasin.Creatures
         public override int DropChance()
         {
             return 5;
+        }
+
+        public override int GetCombatXP()
+        {
+            return 10;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "rat";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "rat";
         }
 
     }

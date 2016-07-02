@@ -19,9 +19,11 @@ namespace RogueBasin
         public Feature()
         {
             IsBlocking = false;
+            BlocksLight = false;
         }
 
         public bool IsBlocking { get; set; }
+        public bool BlocksLight { get; set; }
 
         public virtual string Description
         {

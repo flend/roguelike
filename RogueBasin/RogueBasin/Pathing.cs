@@ -61,7 +61,7 @@ namespace RogueBasin
         /// <param name="allDoorsAsOpen"></param>
         /// <param name="attackDestination"></param>
         /// <returns></returns>
-        private PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingPermission permission)
+        private PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             //Try to walk the path
             //If we fail, check if this square occupied by a creature
@@ -72,6 +72,8 @@ namespace RogueBasin
             bool pathBlockedByCreatureOrLock = false;
             Point nextStep = new Point(-1, -1);
             bool interaction = false;
+            bool tryBackupRoute = false;
+            bool terminalFailure = false;
 
             //Check for pathing to own square - return blocked but not terminally
             if (origin == dest)
@@ -84,21 +86,24 @@ namespace RogueBasin
             {
                 //Generate path object
                 //We actually only need the next point here
-                List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission);
+                List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission, ignoreDangerousTerrain);
 
                 //No path
                 if (pathNodes.Count == 1)
                 {
-                    //If there was no blocking creature then there is no possible route (hopefully impossible in a fully connected dungeon)
+                    //If there was no blocking creature then there is no possible route, this may be due to dangerous terrain
                     if (!pathBlockedByCreatureOrLock)
                     {
-                        //This gets thrown a lot mainly when you cheat
-                        LogFile.Log.LogEntryDebug("Path blocked by terrain!", LogDebugLevel.High);
-                        return new PathingResult(origin, false, false);
+                        LogFile.Log.LogEntryDebug("Path blocked by dangerous terrain!", LogDebugLevel.High);
+                        terminalFailure = true;
+                        nextStep = origin;
+                        interaction = false;
+                        tryBackupRoute = true;
+                        break;
                     }
                     else
                     {
-                        //All paths are blocked by creatures, we will return the origin creature's location
+                        //Wait for blocking creatures
                         nextStep = origin;
                         //Exits loop and allows cleanup
                         break;
@@ -151,7 +156,7 @@ namespace RogueBasin
 
                     blockingCreature = dungeon.Player;
                 }
-                
+
                 //If no blocking creature, the path is good
                 if (blockingCreature == null)
                 {
@@ -163,10 +168,15 @@ namespace RogueBasin
                     //Otherwise, there's a blocking creature. Make his square unwalkable temporarily and try to reroute
                     pathBlockedByCreatureOrLock = true;
 
-                    pathFinding.updateMap(level, theNextStep, PathingTerrain.Unwalkable);
+                    bool isSquarePathable = pathFinding.getPathable(level, theNextStep, permission, ignoreDangerousTerrain);
+                    //Only block out squares which were not pathable already (so we don't make them pathable accidentally)
+                    if (isSquarePathable)
+                    {
+                        pathFinding.updateMap(level, theNextStep, PathingTerrain.Unwalkable, permission, ignoreDangerousTerrain);
 
-                    //Add this square to a list of squares to put back
-                    blockedSquares.Add(theNextStep);
+                        //Add this square to a list of squares to put back
+                        blockedSquares.Add(theNextStep);
+                    }
 
                     //We will try again
                 }
@@ -175,10 +185,10 @@ namespace RogueBasin
             //Put back any squares we made unwalkable
             foreach (Point sq in blockedSquares)
             {
-                pathFinding.updateMap(level, sq, PathingTerrain.Walkable);
+                pathFinding.updateMap(level, sq, PathingTerrain.Walkable, permission, ignoreDangerousTerrain);
             }
 
-            return new PathingResult(nextStep, interaction, false);
+            return new PathingResult(nextStep, interaction, false, tryBackupRoute);
         }
 
         public class PathingResult {
@@ -186,15 +196,24 @@ namespace RogueBasin
             public Point MonsterFinalLocation { get; private set; }
             public bool MoveIsInteractionWithTarget { get; private set; }
             public bool TerminallyBlocked { get; private set; }
+            public bool TryBackupRoute { get; private set; }
 
             public PathingResult(Point monsterFinalLocation, bool moveIsInteractionWithMonsterAtDest, bool terminallyBlocked) {
                 MonsterFinalLocation = monsterFinalLocation;
                 MoveIsInteractionWithTarget = moveIsInteractionWithMonsterAtDest;
                 TerminallyBlocked = terminallyBlocked;
             }
+
+            public PathingResult(Point monsterFinalLocation, bool moveIsInteractionWithMonsterAtDest, bool terminallyBlocked, bool tryBackupRoute)
+            {
+                MonsterFinalLocation = monsterFinalLocation;
+                MoveIsInteractionWithTarget = moveIsInteractionWithMonsterAtDest;
+                TerminallyBlocked = terminallyBlocked;
+                TryBackupRoute = tryBackupRoute;
+            }
         }
 
-        private PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission)
+        private PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             //Check for pathing to own square
             if (origin == dest)
@@ -204,16 +223,19 @@ namespace RogueBasin
             }
 
             //Generate path object
-            List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission);
+            List<Point> pathNodes = pathFinding.pathNodes(level, origin, dest, permission, ignoreDangerousTerrain);
             //Remove last node if repeated (happens sometimes)
-            if(pathNodes[pathNodes.Count - 1] == pathNodes[pathNodes.Count - 2])
-                pathNodes.RemoveAt(pathNodes.Count - 1);
+            if (pathNodes.Count > 1)
+            {
+                if (pathNodes[pathNodes.Count - 1] == pathNodes[pathNodes.Count - 2])
+                    pathNodes.RemoveAt(pathNodes.Count - 1);
+            }
 
             //No possible path
             if (pathNodes.Count == 1)
             {
                 LogFile.Log.LogEntryDebug("Monster Path Passing blocked by terrain!", LogDebugLevel.High);
-                return new PathingResult(origin, false, true);
+                return new PathingResult(origin, false, true, true);
             }
 
             //Run through the path.
@@ -233,7 +255,7 @@ namespace RogueBasin
 
                 //Check if that square is occupied
                 Creature blockingCreature = Game.Dungeon.CreatureAtSpaceIncludingPlayer(level, theNextStep);
-
+                
                 if (blockingCreature == null)
                 {
                     //Free space on the path, stop here
@@ -264,7 +286,18 @@ namespace RogueBasin
             {
                 Point thisPathPoint = pathNodes[pathPoint];
 
-                var possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint);
+                List<Point> possibleRestSquares;
+                
+                LogFile.Log.LogEntryDebug("No of non-terrain squares: " +  Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint).Count(), LogDebugLevel.High);
+                LogFile.Log.LogEntryDebug("No of terrain squares: " + Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreaturesAndDangerousTerrain(level, thisPathPoint).Count(), LogDebugLevel.High);
+                if (ignoreDangerousTerrain)
+                {
+                    possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreatures(level, thisPathPoint);
+                }
+                else
+                {
+                    possibleRestSquares = Game.Dungeon.GetWalkableAdjacentSquaresFreeOfCreaturesAndDangerousTerrain(level, thisPathPoint);
+                }
 
                 if (possibleRestSquares.Any())
                 {
@@ -279,7 +312,7 @@ namespace RogueBasin
             return new PathingResult(origin, false, false);
         }
 
-        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature, PathingType type, PathingPermission permission)
+        internal PathingResult GetPathToCreature(Creature originCreature, Creature destCreature, PathingType type, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             //If on different levels it's an error
             if (originCreature.LocationLevel != destCreature.LocationLevel)
@@ -289,20 +322,40 @@ namespace RogueBasin
                 throw new ApplicationException(msg);
             }
 
-            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, permission);
+            return GetPathToPoint(originCreature.LocationLevel, originCreature.LocationMap, destCreature.LocationMap, type, permission, ignoreDangerousTerrain);
         }
 
-        public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, PathingPermission permission)
+        public PathingResult GetPathToPoint(int level, Point origin, Point dest, PathingType pathingType, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             switch (pathingType)
             {
                 case PathingType.CreaturePass:
 
-                    return GetPathToPointPassThroughMonsters(level, origin, dest, permission);
+                    PathingResult result = GetPathToPointPassThroughMonsters(level, origin, dest, permission, ignoreDangerousTerrain);
+                    if (result.TryBackupRoute)
+                    {
+                        LogFile.Log.LogEntryDebug("GetPathToPoint: CreaturePass falling back to normal routing", LogDebugLevel.Medium);
+                        return GetPathToPointDefault(level, origin, dest, permission, ignoreDangerousTerrain);
+                    }
+                    return result;
 
                 default:
-                    return GetPathToPoint(level, origin, dest, permission);
+                    return GetPathToPointDefault(level, origin, dest, permission, ignoreDangerousTerrain);
             }
+        }
+
+        private PathingResult GetPathToPointDefault(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
+        {
+            var result = GetPathToPoint(level, origin, dest, permission, ignoreDangerousTerrain);
+
+            if (result.TryBackupRoute)
+            {
+                LogFile.Log.LogEntryDebug("GetPathToPoint: DangerousTerrain falling back to normal routing", LogDebugLevel.Medium);
+                //Just ignore dangerous terrain if it didn't work out being careful
+                return GetPathToPoint(level, origin, dest, permission, true);
+            }
+
+            return result;
         }
 
     }

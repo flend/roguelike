@@ -26,13 +26,14 @@ namespace RogueBasin.Features
             Dungeon dungeon = Game.Dungeon;
 
             //Check they really do want to leave
+            /*
             bool decision = Screen.Instance.YesNoQuestion("Really leave the dungeon?");
 
             if (decision == false)
             {
                 LogFile.Log.LogEntryDebug("Player chose not to leave dungeon at level " + Game.Dungeon.Player.LocationLevel, LogDebugLevel.Low);
                 return false;
-            }
+            }*/
 
             //Go back to town
             LogFile.Log.LogEntry("Player leaving dungeon");
@@ -40,7 +41,7 @@ namespace RogueBasin.Features
 
             Game.MessageQueue.AddMessage("You make it safely back to school without being discovered!");
 
-            Game.Dungeon.PlayerLeavesDungeon();
+            //Game.Dungeon.PlayerLeavesDungeon();
 
             return true;
         }

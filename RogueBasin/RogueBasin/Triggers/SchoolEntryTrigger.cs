@@ -25,11 +25,11 @@ namespace RogueBasin.Triggers
 
             if (!Triggered)
             {
-                Screen.Instance.PlayMovie("enterschool", true);
+                Game.Base.PlayMovie("enterschool", true);
 
                 if (Game.Dungeon.Player.PlayItemMovies)
                 {
-                    Screen.Instance.PlayMovie("helpkeys", true);
+                    Game.Base.PlayMovie("helpkeys", true);
                 }
                 Triggered = true;
             }

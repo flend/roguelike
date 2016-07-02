@@ -54,8 +54,8 @@ namespace RogueBasin.Items
             //Play movies if set
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotglove", true);
-                //Screen.Instance.PlayMovie("vaultbackstab", false);
+                //Game.Base.PlayMovie("plotglove", true);
+                //Game.Base.PlayMovie("vaultbackstab", false);
             }
 
             //Messages
@@ -146,9 +146,9 @@ namespace RogueBasin.Items
             get { return "healing potion"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.SkyBlue;
+            return System.Drawing.Color.SkyBlue;
         }
 
 
@@ -168,7 +168,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

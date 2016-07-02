@@ -39,8 +39,10 @@ namespace RogueBasin
 
         List<MonsterSet> monsterSets;
 
-        public void CreateMonstersForLevels(MapInfo mapInfo, IEnumerable<int> levelsToProcess, Dictionary<int, int> levelDifficulty)
+        public void CreateMonstersForLevels(MapState mapState, IEnumerable<int> levelsToProcess, Dictionary<int, int> levelDifficulty)
         {
+            var mapInfo = mapState.MapInfo;
+
             SetupMonsterWeightings();
 
             var monsterSetsUsed = new List<MonsterSet>();
@@ -78,7 +80,7 @@ namespace RogueBasin
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Hard)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.2);
 
-                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelNames[level], LogDebugLevel.Medium);
 
                 monsterSetsUsed.Add(setToUse);
 
@@ -88,7 +90,7 @@ namespace RogueBasin
 
                 if (monsterSetContainsBarrels.Any())
                 {
-                    AddMonstersToLevelGaussianDistribution(mapInfo, level, new List<Tuple<int, Monster>> { new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel()) }, monstersForLevel / 3);
+                    AddMonstersToLevelGaussianDistribution(mapInfo, level, new List<Tuple<int, Monster>> { new Tuple<int, Monster>(1, new RogueBasin.Creatures.ExplosiveBarrel(1)) }, monstersForLevel / 3);
                 }
 
                 //Not working for the time being - maybe check tomorrow morning 
@@ -109,7 +111,7 @@ namespace RogueBasin
 
             var zeroDifficultySet = new MonsterSet(0, 0.6);
 
-            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.Swarmer());
+            zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.Swarmer(1));
             zeroDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.MaintBot());
             zeroDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.RotatingTurret());
 
@@ -117,9 +119,9 @@ namespace RogueBasin
 
             var oneDifficultySet = new MonsterSet(1);
 
-            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            oneDifficultySet.AddMonsterType(20, new RogueBasin.Creatures.Swarmer(1));
             oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
-            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+            oneDifficultySet.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(oneDifficultySet);
 
@@ -141,9 +143,9 @@ namespace RogueBasin
 
             var twoDifficultySet3 = new MonsterSet(2, 2.0);
 
-            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer());
+            twoDifficultySet3.AddMonsterType(20, new RogueBasin.Creatures.Swarmer(1));
             twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.MaintBot());
-            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel());
+            twoDifficultySet3.AddMonsterType(5, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(twoDifficultySet3);
 
@@ -159,7 +161,7 @@ namespace RogueBasin
 
             threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.UberSwarmer());
             threeDiffSet3.AddMonsterType(10, new RogueBasin.Creatures.AlertBot());
-            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.ExplosiveBarrel());
+            threeDiffSet3.AddMonsterType(20, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(threeDiffSet3);
 
@@ -167,7 +169,7 @@ namespace RogueBasin
 
             fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgRanged());
             fourDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.WarriorCyborgMelee());
-            fourDifficultySet.AddMonsterType(30, new RogueBasin.Creatures.ExplosiveBarrel());
+            fourDifficultySet.AddMonsterType(30, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             monsterSets.Add(fourDifficultySet);
 
@@ -175,7 +177,7 @@ namespace RogueBasin
 
             fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgRanged());
             fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.AssaultCyborgMelee());
-            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.ExplosiveBarrel());
+            fiveDifficultySet.AddMonsterType(50, new RogueBasin.Creatures.ExplosiveBarrel(1));
 
             var fiveDifficultySet2 = new MonsterSet(5);
 
@@ -196,7 +198,7 @@ namespace RogueBasin
             /*
             var monsterTypesToPlace = new List<Tuple<int, Monster>> {
                //new Tuple<int, Monster>(1, new RogueBasin.Creatures.AlertBot()),
-               new Tuple<int, Monster>(1, new RogueBasin.Creatures.Swarmer()),
+               new Tuple<int, Monster>(1, new RogueBasin.Creatures.Swarmer(1)),
                new Tuple<int, Monster>(1, new RogueBasin.Creatures.MaintBot()),
                new Tuple<int, Monster>(1, new RogueBasin.Creatures.RotatingTurret()),
                new Tuple<int, Monster>(50, new RogueBasin.Creatures.WarriorCyborgRanged()),
@@ -208,8 +210,10 @@ namespace RogueBasin
 
 
 
-        public void CreateMonstersForLevels(MapInfo mapInfo, int level, int levelDifficulty)
+        public void CreateMonstersForLevels(MapState mapState, int level, int levelDifficulty)
         {
+            var mapInfo = mapState.MapInfo;
+
             SetupMonsterWeightings();
 
             var monsterSetsUsed = new List<MonsterSet>();
@@ -236,7 +240,7 @@ namespace RogueBasin
 
                 var setToUse = setsToPick.RandomElement();
 
-                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelNames[level], LogDebugLevel.Medium);
 
                 monsterSetsUsed.Add(setToUse);
 

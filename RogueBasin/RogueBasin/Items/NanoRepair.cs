@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -24,31 +24,6 @@ namespace RogueBasin.Items
 
         public bool Equip(Creature user)
         {
-            //LogFile.Log.LogEntryDebug( "", LogDebugLevel.Medium);
-
-            //Give player story. Mention level up if one will occur.
-
-            if (Game.Dungeon.Player.PlayItemMovies)
-            {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
-            }
-
-            //Messages
-            //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
-
-            //Screen.Instance.PlayMovie("plotbadge", true);
-
-            //Level up?
-            //Game.Dungeon.Player.LevelUp();
-
-            //Add move?
-            //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
-
-            //Add any equipped (actually permanent) effects
-            //Game.Dungeon.Player.Speed += 10;
-
             return true;
         }
 
@@ -59,7 +34,6 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool UnEquip(Creature user)
         {
-            //LogFile.Log.LogEntryDebug("Stealth cloak unequipped", LogDebugLevel.Low);
             return true;
         }
         /// <summary>
@@ -83,14 +57,24 @@ namespace RogueBasin.Items
             get { return "Nano-repair kits"; }
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         protected override char GetRepresentation()
         {
             return (char)309;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Lime;
+            return System.Drawing.Color.Lime;
         }
 
         public int ArmourClassModifier()
@@ -104,7 +88,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -186,22 +170,6 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool OperateItem()
         {
-            //Repair some damage
-            /*
-            if (Game.Dungeon.Player.Hitpoints < Game.Dungeon.Player.MaxHitpoints)
-            {
-                LogFile.Log.LogEntryDebug("Using nano-repair", LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("The nano-bots swarm over your droid, repairing damage.");
-                Game.Dungeon.Player.HealPlayer(10);
-                return true;
-            }
-            else
-            {
-                LogFile.Log.LogEntryDebug("Not using nano-repair", LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("No damage to repair. The nano-bots return to the kit.");
-                return false;
-            }*/
-
             if (Game.Dungeon.Player.NeedsHealing())
             {
                 Game.MessageQueue.AddMessage("The nano-repair kit restores your health, shields and energy.");

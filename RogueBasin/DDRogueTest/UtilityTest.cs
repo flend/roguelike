@@ -118,5 +118,32 @@ namespace DDRogueTest
 
             CollectionAssert.AreEqual(expectedPath, path);
         }
+
+        [TestMethod]
+        public void RepeatToLengthHandlesMultipleRepeats()
+        {
+            List<int> initialList = new List<int>() { 1, 2 };
+            var repeatedList = initialList.RepeatToLength(6).ToList();
+
+            CollectionAssert.AreEqual(new List<int>() { 1, 2, 1, 2, 1, 2 }, repeatedList);
+        }
+
+        [TestMethod]
+        public void RepeatToLengthHandlesPartialRepeats()
+        {
+            List<int> initialList = new List<int>() { 1, 2 };
+            var repeatedList = initialList.RepeatToLength(7).ToList();
+
+            CollectionAssert.AreEqual(new List<int>() { 1, 2, 1, 2, 1, 2, 1 }, repeatedList);
+        }
+
+        [TestMethod]
+        public void RepeatToLengthHandlesShorteningLists()
+        {
+            List<int> initialList = new List<int>() { 1, 2 };
+            var repeatedList = initialList.RepeatToLength(1).ToList();
+
+            CollectionAssert.AreEqual(new List<int>() { 1 }, repeatedList);
+        }
     }
 }

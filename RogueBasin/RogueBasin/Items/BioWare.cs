@@ -55,6 +55,16 @@ namespace RogueBasin.Items
             return 50;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
+        }
+
         public override string SingleItemDescription
         {
             get { return "BioWare v1"; }
@@ -73,9 +83,9 @@ namespace RogueBasin.Items
             return (char)595;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Silver;
+            return System.Drawing.Color.Silver;
         }
 
         public int ArmourClassModifier()
@@ -89,7 +99,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }

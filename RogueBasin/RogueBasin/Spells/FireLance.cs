@@ -225,7 +225,7 @@ namespace RogueBasin.Spells
             //Cast the ray from here
 
 
-            Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(lastX, lastY), ColorPresets.Yellow);
+            Screen.Instance.DrawFlashLine(new Point(player.LocationMap.x, player.LocationMap.y), new Point(lastX, lastY), System.Drawing.Color.Yellow);
             */
             return true;
             
@@ -284,7 +284,7 @@ namespace RogueBasin.Spells
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Apply damage
-            player.ApplyDamageToMonster(monster, damage, true, false);
+            player.ApplyDamageToMonsterFromPlayer(monster, damage, true, false);
         }
 
         public override int GetRange()

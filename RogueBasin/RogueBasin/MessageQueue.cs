@@ -24,7 +24,7 @@ namespace RogueBasin
         public int CachedMsgTurnCount{ get; set; }
         bool showCachedMsg = false;
         string cachedMsg = "";
-        Color cachedMsgColor = ColorPresets.Gray;
+        System.Drawing.Color cachedMsgColor = System.Drawing.Color.Gray;
         
         /// <summary>
         /// Require a keypress at the end of the message display
@@ -133,7 +133,9 @@ namespace RogueBasin
         {
             List<string> messages = Game.MessageQueue.GetMessages();
 
-            Screen.Instance.ClearMessageLine();
+            int msgDisplayTopLeftX = 50;
+            int msgDisplayTopLeftY = 50;
+            int msgDisplayWidth = 800;
 
             //Increment no of turns we have shown cached msg. Turn it off if too many
             IncrementCachedMsgCounter();
@@ -144,16 +146,20 @@ namespace RogueBasin
             {
                 //If we have a cached msg, show it
                 if (showCachedMsg)
-                    Screen.Instance.PrintMessage(cachedMsg, cachedMsgColor);
+                {
+                    Screen.Instance.ClearMessageLine();
+                    Screen.Instance.ShowMessageLine(cachedMsg, cachedMsgColor);
+                }
 
-                Screen.Instance.FlushConsole();
+                //Don't clear if we don't have anything to display (for prompts etc.)
+
                 return;
             }
 
             if (messages.Count == 1)
             {
                 //Single message just print it
-                Screen.Instance.PrintMessage(messages[0]);
+                Screen.Instance.ShowMessageLine(messages[0]);
 
                 //Add to history
                 AddToHistory(messages[0]);
@@ -163,7 +169,6 @@ namespace RogueBasin
 
                 Game.MessageQueue.ClearList();
 
-                Screen.Instance.FlushConsole();
                 return;
             }
 
@@ -218,12 +223,12 @@ namespace RogueBasin
 
                     //Show on screen
 
-                    Screen.Instance.PrintMessage(outputMsg + " <more>");
-                    Screen.Instance.FlushConsole();
+                    Screen.Instance.ShowMessageLine(outputMsg + " <more>");
 
                     //Block for this keypress - may want to listen for exit too
-                    KeyPress userKey;
-                    userKey = Keyboard.WaitForKeyPress(true);
+                    //KeyPress userKey;
+                    //userKey = Keyboard.WaitForKeyPress(true);
+                    //This doesn't work right now
                 }
                 else
                 {
@@ -254,16 +259,18 @@ namespace RogueBasin
 
                     //Show on screen
 
-                    Screen.Instance.PrintMessage(outputMsg);
-                    Screen.Instance.FlushConsole();
+                    Screen.Instance.ShowMessageLine(outputMsg);
+                   
                 }
             } while (i < wrappedMsgs.Count);
 
+
+            /*
             //Require a keypress if requested
             if (Game.MessageQueue.RequireKeypress)
             {
                 Keyboard.WaitForKeyPress(true);
-            }
+            }*/
 
             Game.MessageQueue.ClearList();
 

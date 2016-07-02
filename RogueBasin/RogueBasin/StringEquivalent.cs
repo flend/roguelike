@@ -20,7 +20,9 @@ namespace RogueBasin
         /// </summary>
         public static Dictionary<MapTerrain, char> TerrainChars { get; private set; }
 
-        public static Dictionary<MapTerrain, Color> TerrainColors { get; private set; }
+        public static Dictionary<MapTerrain, string> TerrainSprites { get; private set; }
+
+        public static Dictionary<MapTerrain, System.Drawing.Color> TerrainColors { get; private set; }
 
         public static Dictionary<GameDifficulty, string> GameDifficultyString { get; private set; }
 
@@ -34,13 +36,28 @@ namespace RogueBasin
             TerrainChars = new Dictionary<MapTerrain, char>();
             SetupTerrainChars();
 
-            TerrainColors = new Dictionary<MapTerrain, Color>();
+            TerrainSprites = new Dictionary<MapTerrain, string>();
+            SetupTerrainSprites();
+
+            TerrainColors = new Dictionary<MapTerrain, System.Drawing.Color>();
             SetupTerrainColors();
 
             GameDifficultyString = new Dictionary<GameDifficulty, string>();
             GameDifficultyString.Add(GameDifficulty.Easy, "Easy");
             GameDifficultyString.Add(GameDifficulty.Medium, "Medium");
             GameDifficultyString.Add(GameDifficulty.Hard, "Hard");
+        }
+
+        private static void SetupTerrainSprites()
+        {
+            TerrainSprites.Add(MapTerrain.Empty, "ground");
+            TerrainSprites.Add(MapTerrain.NonWalkableFeature, "ground");
+            TerrainSprites.Add(MapTerrain.NonWalkableFeatureLightBlocking, "ground");
+            TerrainSprites.Add(MapTerrain.OpenDoor, "opendoor");
+            TerrainSprites.Add(MapTerrain.ClosedDoor, "closeddoor");
+            TerrainSprites.Add(MapTerrain.OpenLock, "opendoor");
+            TerrainSprites.Add(MapTerrain.ClosedLock, "closeddoor");
+            TerrainSprites.Add(MapTerrain.Wall, "wall");
         }
 
         public static void OverrideTerrainChar(MapTerrain terrain, char c)
@@ -129,42 +146,42 @@ namespace RogueBasin
 
         private static void SetupTerrainColors()
         {
-            TerrainColors.Add(MapTerrain.Empty, ColorPresets.Gray);
-            TerrainColors.Add(MapTerrain.Wall, ColorPresets.DarkSlateGray);
+            TerrainColors.Add(MapTerrain.Empty, System.Drawing.Color.Gray);
+            TerrainColors.Add(MapTerrain.Wall, System.Drawing.Color.DarkSlateGray);
 
-            TerrainColors.Add(MapTerrain.NonWalkableFeature, ColorPresets.White);
-            TerrainColors.Add(MapTerrain.NonWalkableFeatureLightBlocking, ColorPresets.White);
+            TerrainColors.Add(MapTerrain.NonWalkableFeature, System.Drawing.Color.White);
+            TerrainColors.Add(MapTerrain.NonWalkableFeatureLightBlocking, System.Drawing.Color.White);
 
-            TerrainColors.Add(MapTerrain.HellWall, ColorPresets.Crimson);
-            TerrainColors.Add(MapTerrain.Corridor, ColorPresets.Gray);
-            TerrainColors.Add(MapTerrain.SkeletonWall, ColorPresets.BlanchedAlmond);
-            TerrainColors.Add(MapTerrain.SkeletonWallWhite, ColorPresets.GhostWhite);
-            TerrainColors.Add(MapTerrain.ClosedDoor, ColorPresets.DarkGoldenrod);
-            TerrainColors.Add(MapTerrain.OpenDoor, ColorPresets.DarkGoldenrod);
-            TerrainColors.Add(MapTerrain.ClosedLock, ColorPresets.DarkGoldenrod);
-            TerrainColors.Add(MapTerrain.OpenLock, ColorPresets.DarkGoldenrod);
-            TerrainColors.Add(MapTerrain.Flooded, ColorPresets.Blue);
-            TerrainColors.Add(MapTerrain.Grass, ColorPresets.Green);
-            TerrainColors.Add(MapTerrain.River, ColorPresets.Blue);
-            TerrainColors.Add(MapTerrain.Trees, ColorPresets.DarkGreen);
-            TerrainColors.Add(MapTerrain.Road, ColorPresets.DarkGoldenrod);
-            TerrainColors.Add(MapTerrain.Rubble, ColorPresets.Gray);
-            TerrainColors.Add(MapTerrain.Mountains, ColorPresets.Gray);
-            TerrainColors.Add(MapTerrain.Volcano, ColorPresets.Red);
-            TerrainColors.Add(MapTerrain.Forest, ColorPresets.DarkSeaGreen);
-            TerrainColors.Add(MapTerrain.Gravestone, ColorPresets.Gray);
-            TerrainColors.Add(MapTerrain.BarDoor, ColorPresets.Gray);
-            TerrainColors.Add(MapTerrain.DockWall, ColorPresets.DarkSlateGray);
-            TerrainColors.Add(MapTerrain.Void, ColorPresets.Gray);
+            TerrainColors.Add(MapTerrain.HellWall, System.Drawing.Color.Crimson);
+            TerrainColors.Add(MapTerrain.Corridor, System.Drawing.Color.Gray);
+            TerrainColors.Add(MapTerrain.SkeletonWall, System.Drawing.Color.BlanchedAlmond);
+            TerrainColors.Add(MapTerrain.SkeletonWallWhite, System.Drawing.Color.GhostWhite);
+            TerrainColors.Add(MapTerrain.ClosedDoor, System.Drawing.Color.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.OpenDoor, System.Drawing.Color.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.ClosedLock, System.Drawing.Color.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.OpenLock, System.Drawing.Color.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.Flooded, System.Drawing.Color.Blue);
+            TerrainColors.Add(MapTerrain.Grass, System.Drawing.Color.Green);
+            TerrainColors.Add(MapTerrain.River, System.Drawing.Color.Blue);
+            TerrainColors.Add(MapTerrain.Trees, System.Drawing.Color.DarkGreen);
+            TerrainColors.Add(MapTerrain.Road, System.Drawing.Color.DarkGoldenrod);
+            TerrainColors.Add(MapTerrain.Rubble, System.Drawing.Color.Gray);
+            TerrainColors.Add(MapTerrain.Mountains, System.Drawing.Color.Gray);
+            TerrainColors.Add(MapTerrain.Volcano, System.Drawing.Color.Red);
+            TerrainColors.Add(MapTerrain.Forest, System.Drawing.Color.DarkSeaGreen);
+            TerrainColors.Add(MapTerrain.Gravestone, System.Drawing.Color.Gray);
+            TerrainColors.Add(MapTerrain.BarDoor, System.Drawing.Color.Gray);
+            TerrainColors.Add(MapTerrain.DockWall, System.Drawing.Color.DarkSlateGray);
+            TerrainColors.Add(MapTerrain.Void, System.Drawing.Color.Gray);
 
-            var brickWallColor = ColorPresets.DarkSlateBlue;
-            var panelWallColor = ColorPresets.Teal;
-            var irisWallColor = ColorPresets.SlateGray;
-            var lineWallColor = ColorPresets.MediumSeaGreen;
-            var securityWallColor = ColorPresets.SteelBlue;
-            var bioWallColor = ColorPresets.Firebrick;
-            var DipWallColor = ColorPresets.DarkOliveGreen;
-            var CutWallColor = ColorPresets.Sienna;
+            var brickWallColor = System.Drawing.Color.DarkSlateBlue;
+            var panelWallColor = System.Drawing.Color.Teal;
+            var irisWallColor = System.Drawing.Color.SlateGray;
+            var lineWallColor = System.Drawing.Color.MediumSeaGreen;
+            var securityWallColor = System.Drawing.Color.SteelBlue;
+            var bioWallColor = System.Drawing.Color.Firebrick;
+            var DipWallColor = System.Drawing.Color.DarkOliveGreen;
+            var CutWallColor = System.Drawing.Color.Sienna;
 
             TerrainColors.Add(MapTerrain.BrickWall1, brickWallColor);
             TerrainColors.Add(MapTerrain.BrickWall2, brickWallColor);

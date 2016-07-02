@@ -28,48 +28,7 @@ namespace RogueBasin.Items
 
             LogFile.Log.LogEntryDebug("Firing laser", LogDebugLevel.Medium);
 
-            //The shotgun fires towards its target and does same damage with range
-
-            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
-
-            //Calculate a huge FOV
-
-            Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
-
-            WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
-            List<Point> targetSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
-
-            //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Chartreuse);
-
-            //Make firing sound
-            Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in targetSquares)
-            {
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    int damage = 75;
-
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    player.AttackMonsterRanged(squareContents.monster, damage);
-                }
-            }
-
-            //Remove 1 ammo
-            Ammo--;
-
-            return true;
+            return Game.Dungeon.FireLaserLineWeapon(target, this, Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase()));
         }
 
         public List<EquipmentSlot> EquipmentSlots
@@ -91,21 +50,21 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -187,9 +146,9 @@ namespace RogueBasin.Items
             return (char)277;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Chartreuse;
+            return System.Drawing.Color.Chartreuse;
         }
 
         public int ArmourClassModifier()
@@ -199,11 +158,10 @@ namespace RogueBasin.Items
 
         public int DamageBase()
         {
-            //1d6
-            return 0;
+            return 30;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -276,7 +234,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public override double FireSoundMagnitude()
         {
-            return 0.66;
+            return 0.6;
         }
 
         /// <summary>
@@ -322,6 +280,26 @@ namespace RogueBasin.Items
         public int GetEnergyDrain()
         {
             return 0;
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "laser";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-laser";
+        }
+
+        public void FireAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("laser");
+        }
+
+        public void ThrowAudio()
+        {
+            return;
         }
     }
 }

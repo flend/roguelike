@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -30,21 +30,21 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effectsf
             //Game.Dungeon.Player.Speed += 10;
@@ -62,8 +62,8 @@ namespace RogueBasin.Items
         {
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The stun grenade explodes!");
-           
-            Point dest = StunGrenade.ThrowItemGrenadeLikeStun(this, target, 4, 6);
+
+            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4, 6, true);
             
             return dest;
         }
@@ -114,7 +114,7 @@ namespace RogueBasin.Items
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, size);
             
             //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, ColorPresets.DodgerBlue);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Stun);
 
             //Attack all monsters in the area
 
@@ -131,7 +131,7 @@ namespace RogueBasin.Items
                     LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                     //Apply damage
-                    player.ApplyStunDamageToMonster(m, damage);
+                    m.ApplyStunDamageToMonster(Game.Dungeon.Player, damage);
                 }
             }
 
@@ -163,7 +163,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "EMP grenade"; }
+            get { return "Stun grenade"; }
         }
 
         /// <summary>
@@ -171,7 +171,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "EMP grenades"; }
+            get { return "Stun grenades"; }
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "stun_grenade";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-stun_grenade";
         }
 
         protected override char GetRepresentation()
@@ -179,9 +189,9 @@ namespace RogueBasin.Items
             return (char)298;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.DodgerBlue;
+            return System.Drawing.Color.DodgerBlue;
         }
 
         public int ArmourClassModifier()
@@ -195,7 +205,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -293,7 +303,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 10;
+            return 6;
         }
 
         /// <summary>
@@ -368,6 +378,16 @@ namespace RogueBasin.Items
         public int GetEnergyDrain()
         {
             return 0;
+        }
+
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("explosion");
         }
     }
 }

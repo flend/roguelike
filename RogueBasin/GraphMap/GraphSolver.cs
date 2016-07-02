@@ -9,16 +9,18 @@ namespace GraphMap
     public class GraphSolver
     {
         MapModel model;
+        DoorAndClueManager doorAndClueManager;
 
-        public GraphSolver(MapModel model)
+        public GraphSolver(MapModel model, DoorAndClueManager doorAndClueManager)
         {
             this.model = model;
+            this.doorAndClueManager = doorAndClueManager;
         }
 
         public bool MapCanBeSolved()
         {
             var cluesFound = new HashSet<Clue>();
-            var doorManager = model.DoorAndClueManager;
+            var doorManager = doorAndClueManager;
             //Door & Clue manager works on the reduced map, so we use this here
             //Potentially could be problematic if something is wrong with map reduction
             var totalVerticesReducedMap = model.GraphNoCycles.mapNoCycles.VertexCount;

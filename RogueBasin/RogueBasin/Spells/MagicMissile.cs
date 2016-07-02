@@ -47,7 +47,7 @@ namespace RogueBasin.Spells
                     results = CombatResults.DefenderUnhurt;
                 }
 
-                Screen.Instance.DrawMissileAttack(player, monster, results, ColorPresets.Violet);
+                Screen.Instance.DrawMissileAttack(player, monster, results, System.Drawing.Color.Violet);
 
                 //If monster resisted no damage                
                 if (monsterResisted)
@@ -80,7 +80,7 @@ namespace RogueBasin.Spells
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                 //Apply damage
-                player.ApplyDamageToMonster(squareContents.monster, damage, true, false);
+                player.ApplyDamageToMonsterFromPlayer(squareContents.monster, damage, true, false);
                 
 
                 //Graphical effect

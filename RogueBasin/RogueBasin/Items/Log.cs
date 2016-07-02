@@ -24,7 +24,7 @@ namespace RogueBasin.Items
         public bool Use(Creature user)
         {
             if(Game.Dungeon.Player.PlayItemMovies)
-                Screen.Instance.PlayLog(logEntry);
+                Game.Base.PlayLog(logEntry);
             return true;
         }
 
@@ -48,9 +48,9 @@ namespace RogueBasin.Items
             get { return "Logs"; }
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.LimeGreen;
+            return System.Drawing.Color.LimeGreen;
         }
 
         protected override char GetRepresentation()

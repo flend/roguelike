@@ -36,7 +36,7 @@ namespace RogueBasin.Triggers
             //The player shouldn't want to go back, but let them if they must
 
             //Check they really do want to leave
-            bool decision = Screen.Instance.YesNoQuestion("Really go back to school?");
+            bool decision = false;// Screen.Instance.YesNoQuestion("Really go back to school?");
 
             if (decision == false)
             {

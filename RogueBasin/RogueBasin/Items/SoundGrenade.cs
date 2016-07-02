@@ -16,7 +16,7 @@ namespace RogueBasin.Items
             get
             {
                 List<EquipmentSlot> retList = new List<EquipmentSlot>();
-                retList.Add(EquipmentSlot.Weapon);
+                retList.Add(EquipmentSlot.Utility);
 
                 return retList;
             }
@@ -30,21 +30,21 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Screen.Instance.PlayMovie("plotbadge", true);
-                //Screen.Instance.PlayMovie("multiattack", false);
+                //Game.Base.PlayMovie("plotbadge", true);
+                //Game.Base.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("A fine short sword - good for slicing and dicing.");
 
-            //Screen.Instance.PlayMovie("plotbadge", true);
+            //Game.Base.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Screen.Instance.PlayMovie("multiattack", false);
+            //Game.Base.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;
@@ -66,11 +66,20 @@ namespace RogueBasin.Items
 
             //Draw attack
             List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(target, Game.Dungeon.Player.LocationLevel, 4);
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, ColorPresets.Yellow);
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Bullet);
 
             return dest;
         }
 
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            SoundPlayer.Instance().EnqueueSound("explosion");
+        }
 
         /// <summary>
         /// not used in this game
@@ -92,7 +101,7 @@ namespace RogueBasin.Items
 
         public override string SingleItemDescription
         {
-            get { return "Siren grenade"; }
+            get { return "Screamer"; }
         }
 
         /// <summary>
@@ -100,7 +109,17 @@ namespace RogueBasin.Items
         /// </summary>
         public override string GroupItemDescription
         {
-            get { return "Siren grenades"; }
+            get { return "Screamers"; }
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "screamer";
+        }
+
+        protected override string GetUISprite()
+        {
+            return "ui-screamer";
         }
 
         protected override char GetRepresentation()
@@ -108,9 +127,9 @@ namespace RogueBasin.Items
             return (char)296;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.MediumSpringGreen;
+            return System.Drawing.Color.MediumSpringGreen;
         }
 
         public int ArmourClassModifier()
@@ -124,7 +143,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -222,7 +241,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public int RangeThrow()
         {
-            return 15;
+            return 8;
         }
 
         /// <summary>

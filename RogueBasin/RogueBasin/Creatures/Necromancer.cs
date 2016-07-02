@@ -56,7 +56,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 1;
         }
@@ -102,7 +102,7 @@ namespace RogueBasin.Creatures
             return 100;
         }
 
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             return 4.5;
         }
@@ -137,9 +137,9 @@ namespace RogueBasin.Creatures
         }
 
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.Gray;
+            return System.Drawing.Color.Gray;
         }
 
         public override int GetMagicXP()

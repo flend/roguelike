@@ -25,6 +25,11 @@ namespace RogueBasin
         /// </summary>
         Point locationMap;
 
+        public MapObject()
+        {
+            SetupAnimationForObject();
+        }
+
         /// <summary>
         /// Level the object is on
         /// </summary>
@@ -85,6 +90,43 @@ namespace RogueBasin
             }
         }
 
+        public String UISprite
+        {
+            get
+            {
+                if (GetUISprite() == null)
+                {
+                    return null; //better to return a default
+                }
+                return GetUISprite();
+            }
+        }
+
+        private String gameSprite = null;
+
+        public String GameSprite
+        {
+            get
+            {
+                if (gameSprite != null)
+                    return gameSprite;
+                else return GetGameSprite();
+            }
+            protected set { gameSprite = value;  }
+        }
+
+        public String GameOverlaySprite
+        {
+            get
+            {
+                if (GetGameOverlaySprite() == null)
+                {
+                    return null; //better to return a default
+                }
+                return GetGameOverlaySprite();
+            }
+        }
+
         /// <summary>
         /// Character for the monster's heading. Can be overriden in derived classes.
         /// </summary>
@@ -100,18 +142,18 @@ namespace RogueBasin
         /// Colour for representation. Override in derived classes.
         /// </summary>
         /// <returns></returns>
-        virtual public Color RepresentationColor()
+        virtual public System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.White;
+            return System.Drawing.Color.White;
         }
 
         /// <summary>
         /// Colour for representation. Override in derived classes.
         /// </summary>
         /// <returns></returns>
-        virtual public Color RepresentationBackgroundColor()
+        virtual public System.Drawing.Color RepresentationBackgroundColor()
         {
-            return ColorPresets.Black;
+            return System.Drawing.Color.Transparent;
         }
 
         /// <summary>
@@ -120,7 +162,34 @@ namespace RogueBasin
         /// <returns></returns>
         protected virtual char GetRepresentation()
         {
-            return 'X';
+            return representation;
+        }
+
+        /// <summary>
+        /// Name of the UI sprite, without path or .png
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetUISprite()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Name of the game sprite, without path or .png
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetGameSprite()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Name of the game sprite, without path or .png
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetGameOverlaySprite()
+        {
+            return null;
         }
 
         /// <summary>
@@ -156,5 +225,40 @@ namespace RogueBasin
                 return false;
             }
         }
+
+        public bool HasAnimation { get; protected set; }
+        public int AnimationDelayMS { get; protected set; }
+        public int NumberOfFrames { get; protected set; }
+        public int CurrentFrame { get; protected set; }
+        public int CurrentTick { get; protected set; }
+
+        protected virtual void SetupAnimationForObject() { HasAnimation = false; }
+        
+        public bool IncrementAnimation(int inc)
+        {
+            if (!HasAnimation)
+                return false;
+
+            CurrentTick += inc;
+            if (CurrentTick > AnimationDelayMS)
+            {
+                CurrentTick -= AnimationDelayMS;
+                CurrentFrame++;
+                if (CurrentFrame >= NumberOfFrames)
+                    CurrentFrame = 0;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public RecurringAnimation GetAnimation()
+        {
+            var anim = new RecurringAnimation();
+            anim.FrameNo = CurrentFrame;
+            return anim;
+        }
+
     }
 }

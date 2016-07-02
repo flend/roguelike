@@ -17,6 +17,11 @@ namespace RogueBasin
 
         public int Level { get { return Item1; } }
         public Point MapCoord { get { return Item2; } }
+
+        public override string ToString()
+        {
+            return "level: " + Level + " " + MapCoord.ToString();
+        }
     }
 
     /** Immutable Point class */
@@ -92,9 +97,19 @@ namespace RogueBasin
             return new Point(i.x * magnitude, i.y * magnitude);
         }
 
+        public static Point operator *(Point i, double magnitude)
+        {
+            return new Point((int)Math.Round(i.x * magnitude), (int)Math.Round(i.y * magnitude));
+        }
+
         public override string ToString()
         {
             return "(x: " + this.x + ", y: " + this.y + ")";
+        }
+
+        public System.Drawing.Point ToPoint()
+        {
+            return new System.Drawing.Point(this.x, this.y);
         }
     }
     
@@ -176,7 +191,6 @@ namespace RogueBasin
         ClosedLock,
         Unwalkable
     }
-
 
     public enum FOVTerrain
     {
@@ -329,6 +343,12 @@ namespace RogueBasin
             }
         }
 
+        public bool InMonsterStealthRadius
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Sound magnitude at this square (debug only)
         /// </summary>
@@ -384,6 +404,20 @@ namespace RogueBasin
         public void setCell(Point p, T terrain)
         {
             pathingMap[p.x, p.y] = terrain;
+        }
+
+        public IEnumerable<Point> getAllCells(T terrain, Func<T, T, bool> equality)
+        {
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    if (equality(pathingMap[i, j], terrain))
+                    {
+                        yield return new Point(i, j); 
+                    }
+                }
+            }
         }
 
     }
@@ -522,7 +556,7 @@ namespace RogueBasin
 
                         if (terrainHere == MapTerrain.ClosedDoor)
                             pathRepresentation.setCell(j, k, PathingTerrain.ClosedDoor);
-                        else if (Dungeon.IsTerrainWalkable(terrainHere))
+                        else if (MapUtils.IsTerrainWalkable(terrainHere))
                             pathRepresentation.setCell(j, k, PathingTerrain.Walkable);
                     }
                 }
@@ -565,7 +599,7 @@ namespace RogueBasin
 
                     //Use new function
 
-                    if (!Dungeon.IsTerrainWalkable(mapSquares[j, k].Terrain))
+                    if (!MapUtils.IsTerrainWalkable(mapSquares[j, k].Terrain))
                         walkable = false;
 
                     mapSquares[j, k].Walkable = walkable;
@@ -588,7 +622,7 @@ namespace RogueBasin
 
                     //Use new function
 
-                    if (!Dungeon.IsTerrainLightBlocking(mapSquares[j, k].Terrain))
+                    if (!MapUtils.IsTerrainLightBlocking(mapSquares[j, k].Terrain))
                         blocking = false;
 
                     mapSquares[j, k].BlocksLight = blocking;

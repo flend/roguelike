@@ -54,7 +54,7 @@ namespace RogueBasin
 
         public virtual int DamageBase() { return 0; }
 
-        public virtual int DamageModifier() { return 0; }
+        public virtual double DamageModifier() { return 0; }
 
         public virtual int HitModifier() { return 0; }
 
@@ -69,9 +69,9 @@ namespace RogueBasin
         public virtual string GetName() { return ""; }
 
 
-        internal virtual libtcodWrapper.Color GetColor()
+        internal virtual System.Drawing.Color GetColor()
         {
-            return ColorPresets.White;
+            return System.Drawing.Color.White;
         }
     }
 }

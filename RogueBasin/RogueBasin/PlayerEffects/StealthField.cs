@@ -65,9 +65,9 @@ namespace RogueBasin.PlayerEffects
             return "Stealth";
         }
 
-        internal override libtcodWrapper.Color GetColor()
+        internal override System.Drawing.Color GetColor()
         {
-            return ColorPresets.BlanchedAlmond;
+            return System.Drawing.Color.BlanchedAlmond;
         }
     }
 }

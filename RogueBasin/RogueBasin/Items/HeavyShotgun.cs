@@ -103,9 +103,9 @@ namespace RogueBasin.Items
             return (char)276;
         }
 
-        public override libtcodWrapper.Color GetColour()
+        public override System.Drawing.Color GetColour()
         {
-            return ColorPresets.Gold;
+            return System.Drawing.Color.Gold;
         }
 
         public int ArmourClassModifier()
@@ -119,7 +119,7 @@ namespace RogueBasin.Items
             return 0;
         }
 
-        public int DamageModifier()
+        public double DamageModifier()
         {
             return 0;
         }
@@ -153,6 +153,7 @@ namespace RogueBasin.Items
         {
             return TargettingType.Line;
         }
+
 
         /// <summary>
         /// What type of targetting reticle is needed? [for firing]
@@ -253,6 +254,16 @@ namespace RogueBasin.Items
         public int GetEnergyDrain()
         {
             return 0;
+        }
+
+        public void FireAudio()
+        {
+            return;
+        }
+
+        public void ThrowAudio()
+        {
+            return;
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RogueBasin</RootNamespace>
     <AssemblyName>RogueBasin</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -51,6 +51,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="ActiveFeature.cs" />
     <Compile Include="Algorithms\IFieldOfView.cs" />
     <Compile Include="Algorithms\IPathFinder.cs" />
     <Compile Include="ArrayCache.cs" />
@@ -61,6 +62,16 @@
     <Compile Include="Creatures\Camera.cs" />
     <Compile Include="Creatures\ComputerNode.cs" />
     <Compile Include="Creatures\Drone.cs" />
+    <Compile Include="Creatures\ArenaMaster.cs" />
+    <Compile Include="Creatures\Junkborg.cs" />
+    <Compile Include="Creatures\Grenadier.cs" />
+    <Compile Include="Creatures\Mine.cs" />
+    <Compile Include="Creatures\Psycho.cs" />
+    <Compile Include="Creatures\Grenade.cs" />
+    <Compile Include="Creatures\Hunter.cs" />
+    <Compile Include="Creatures\Zomborg.cs" />
+    <Compile Include="Creatures\Thug.cs" />
+    <Compile Include="Creatures\Punk.cs" />
     <Compile Include="Creatures\Ferret.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -97,6 +108,7 @@
     <Compile Include="Creatures\Swarmer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DangerousActiveFeature.cs" />
     <Compile Include="DecorationFeatureDetails.cs" />
     <Compile Include="DirectionUtil.cs" />
     <Compile Include="CreatureFOV.cs" />
@@ -191,6 +203,19 @@
     <Compile Include="Creatures\Whipper.cs" />
     <Compile Include="Creatures\Zombie.cs" />
     <Compile Include="DecorationFeature.cs" />
+    <Compile Include="Features\Scorch.cs" />
+    <Compile Include="Items\AcidGrenade.cs" />
+    <Compile Include="Items\Pole.cs" />
+    <Compile Include="Items\Mine.cs" />
+    <Compile Include="Items\RocketLauncher.cs" />
+    <Compile Include="MapAnalysisUtilities.cs" />
+    <Compile Include="MapPopulator.cs" />
+    <Compile Include="MapState.cs" />
+    <Compile Include="MapUtils.cs" />
+    <Compile Include="MenuScreen.cs" />
+    <Compile Include="Movie.cs" />
+    <Compile Include="PlayerEffects\Aim.cs" />
+    <Compile Include="Dodge.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="DungeonEffect.cs" />
     <Compile Include="DungeonMaker.cs" />
@@ -198,6 +223,7 @@
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
     <Compile Include="EquipmentSlotInfo.cs" />
+    <Compile Include="Features\Acid.cs" />
     <Compile Include="Features\SelfDestructPrimeObjective.cs" />
     <Compile Include="Features\SelfDestructObjective.cs" />
     <Compile Include="Features\AntennaeObjective.cs" />
@@ -217,7 +243,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FOV\MRPAS.cs" />
-    <Compile Include="GameIntro.cs" />
     <Compile Include="Gaussian.cs" />
     <Compile Include="GraphVizUtils.cs" />
     <Compile Include="IEquippableItem.cs" />
@@ -256,11 +281,18 @@
     <Compile Include="Items\AmmoPack.cs" />
     <Compile Include="Items\BioWare.cs" />
     <Compile Include="Items\ShotgunTypeWeapon.cs" />
+    <Compile Include="Items\Axe.cs" />
+    <Compile Include="Locks\EntryLock.cs" />
+    <Compile Include="Locks\ExitLock.cs" />
     <Compile Include="Locks\SimpleOptionalLockedDoorWithMovie.cs" />
+    <Compile Include="IMapRenderer.cs" />
+    <Compile Include="MapRendererSDLDotNet.cs" />
     <Compile Include="MonsterPlacement.cs" />
     <Compile Include="PlayerEffects\SpeedBoost.cs" />
     <Compile Include="PlayerEffects\BioProtect.cs" />
     <Compile Include="PlayerEffects\StealthBoost.cs" />
+    <Compile Include="Quest.cs" />
+    <Compile Include="QuestMapBuilder.cs" />
     <Compile Include="RangedWeapon.cs" />
     <Compile Include="Items\Pistol.cs" />
     <Compile Include="Items\ShieldPack.cs" />
@@ -301,6 +333,17 @@
     <Compile Include="Locks\SimpleLockedDoorWithMovie.cs" />
     <Compile Include="LogGenerator.cs" />
     <Compile Include="PlayerEffects\AimEnhance.cs" />
+    <Compile Include="RecurringAnimation.cs" />
+    <Compile Include="RoutabilityUtilities.cs" />
+    <Compile Include="RoyaleDungeonLevelMaker.cs" />
+    <Compile Include="RoyaleMonsterPlacement.cs" />
+    <Compile Include="MusicPlayer.cs" />
+    <Compile Include="ShuffleExtension.cs" />
+    <Compile Include="SoundPlayer.cs" />
+    <Compile Include="TerrainSets\CrossPiece.cs" />
+    <Compile Include="TerrainSets\Pond.cs" />
+    <Compile Include="TraumaLevelBuilder.cs" />
+    <Compile Include="Triggers\ArenaEntry.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />
@@ -320,10 +363,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MapGeneratorRogue.cs" />
-    <Compile Include="MapGeneratorTemplated.cs" />
     <Compile Include="MapInfo.cs" />
     <Compile Include="MapObject.cs" />
-    <Compile Include="MapRendererLibTCod.cs" />
     <Compile Include="MapTerrainRandomizer.cs" />
     <Compile Include="MessageQueue.cs" />
     <Compile Include="Monster.cs" />
@@ -335,7 +376,6 @@
     <Compile Include="MonsterSimpleAI.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MonsterSimpleThrowingAI.cs" />
     <Compile Include="MonsterSpecialAI.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -372,7 +412,6 @@
     </Compile>
     <Compile Include="PlayerEffects\StealthField.cs" />
     <Compile Include="PlayerEffects\ToHitUp.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -484,17 +523,31 @@
     <Compile Include="Vector3.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="MoreLinq">
+      <HintPath>..\packages\morelinq.1.4.0\lib\net35\MoreLinq.dll</HintPath>
+    </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
     </Reference>
+    <Reference Include="SdlDotNet">
+      <HintPath>..\TraumaRL\bin\Debug\SdlDotNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Collections.Immutable.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tao.Sdl, Version=1.2.13.0, Culture=neutral, PublicKeyToken=9c7a200e36c0094e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\TraumaRL\bin\Debug\Tao.Sdl.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphMap\GraphMap.csproj">
@@ -930,10 +983,174 @@
     <EmbeddedResource Include="bin\Debug\movies\qe_start2.amf" />
     <EmbeddedResource Include="bin\Debug\movies\qe_start3.amf" />
     <EmbeddedResource Include="bin\Debug\movies\traumaquit0.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\oval_vault1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\oval_vault_small1.room" />
+    <EmbeddedResource Include="bin\Debug\vaults\basic_large_arena.room" />
+    <EmbeddedResource Include="bin\Debug\movies\fun_mode_failure0.amf" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />
     <EmbeddedResource Include="bin\Debug\logdata\female_first.txt" />
     <EmbeddedResource Include="bin\Debug\logdata\male_first.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\acid.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\acidgrenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\aiming.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\axe.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\barrel.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\bluetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\boss.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\bullet.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\chainsaw.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\closeddoor.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\corpse.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\cover.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\crack.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\dwarf.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\explosion.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\flame.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\goo.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\greentarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\grenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\ground.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\hardcover.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\heal.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\hunter.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\investigating.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\junkborg.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\knife.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\lance.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\laser.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\launcher.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\laz.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\levelup.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\livegrenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\mine.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monsters_barrel.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monsters_punk.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_0.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_1.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_2.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_3.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_4.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_5.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_6.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_7.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_8.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\monster_level_9.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\nerd.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\oil.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\oilexp.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\opendoor.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\orangetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\paralexp.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\plasma.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\pole.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\psycho.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\punk.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\pyro.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\rat.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\redtarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\ref-laser.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\reloading.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\rifle.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\rock.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\rocket.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\running.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\scorch.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\screamer.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\shadow.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\shotgun.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\softcover.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\sound.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\stealth.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\stun.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\stun_grenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\thug.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\wall.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\water.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\zomboid.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\zzoverlay.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\barrel.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\corpse.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\crack.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\dwarf.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\frame.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\healthbar.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\hunter.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\junkborg.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\lance.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\livegrenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_1.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_2.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_3.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_4.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_5.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_6.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_7.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_8.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\monster_level_9.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\nerd.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\psycho.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\punk.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\pyro.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\rat.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\shieldbar.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\thug.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-acid_grenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-axe.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-grenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-knife.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-laser.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-launcher.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-mine.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-pistol.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-pole.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-rifle.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-screamer.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-shotgun.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui-stun_grenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_bar.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_bullet.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_left.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_mid.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_right.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_triangle.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\zomboid.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\blacktarget.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\acidgrenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\axe.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\chainsaw.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\flame.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\grenade.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\knife.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\laser.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\launcher.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\mine.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\plasma.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\pole.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ref-laser.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\rifle.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\rock.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\screamer.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\shotgun.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\ui\stun_grenade.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\trauma_tiles.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\ui_left_extended.png" />
   </ItemGroup>
 </Project>

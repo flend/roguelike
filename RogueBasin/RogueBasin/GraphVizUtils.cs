@@ -33,9 +33,9 @@ namespace RogueBasin
                     exeProcess.WaitForExit();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Log error.
+                LogFile.Log.LogEntry("Failed to run graphviz: " + ex.Message);
             }
         }
 

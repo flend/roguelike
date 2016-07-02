@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using System.Text;
 using libtcodWrapper;
 using System.Linq;
+using MoreLinq;
 
 namespace RogueBasin
 {
+    public enum PlayerClass
+    {
+        Athlete, Gunner, Sneaker
+    }
+
     public class Player : Creature
     {
         /// <summary>
@@ -65,6 +71,8 @@ namespace RogueBasin
         public bool EnergyRechargeIsDisabled { get; private set; }
 
         public bool DoesShieldRecharge { get; private set; }
+
+        public bool DoHitpointsRecharge { get; private set; }
 
         private int TurnsSinceShieldDisabled { get; set; }
 
@@ -129,6 +137,7 @@ namespace RogueBasin
         /// </summary>
         int maxMagicPoints;
 
+        public PlayerClass PlayerClass { get; private set; }
 
         /// <summary>
         /// Number of times we get knocked out
@@ -175,6 +184,42 @@ namespace RogueBasin
         public int HitModifierAccess { get { return hitModifier; } set { hitModifier = value; } }
 
 
+        public int MagicPoints
+        {
+            get
+            {
+                return magicPoints;
+            }
+            set
+            {
+                magicPoints = value;
+            }
+        }
+
+        public int MaxMagicPoints
+        {
+            get
+            {
+                return maxMagicPoints;
+            }
+            set
+            {
+                maxMagicPoints = value;
+            }
+        }
+
+        private int UtilityInventoryPosition
+        {
+            get;
+            set;
+        }
+
+        private int WetwareInventoryPosition
+        {
+            get;
+            set;
+        }
+
         public Player()
         {
             //Set unique ID to 0 (player)
@@ -200,6 +245,7 @@ namespace RogueBasin
 
             //Add default equipment slots
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Utility));
+            EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Melee));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Wetware));
 
@@ -223,7 +269,31 @@ namespace RogueBasin
             MaxEnergy = 200;
             Energy = MaxEnergy;
 
-            DoesShieldRecharge = false;
+            DoesShieldRecharge = true;
+            DoHitpointsRecharge = false;
+        }
+
+        public void SetPlayerClass(PlayerClass thisClass)
+        {
+            PlayerClass = thisClass;
+
+            switch (PlayerClass)
+            {
+                case RogueBasin.PlayerClass.Athlete:
+                    GameSprite = "lance";
+                    //Perma dodge
+                    AddEffect(new PlayerEffects.Dodge());
+                    break;
+                case RogueBasin.PlayerClass.Gunner:
+                    GameSprite = "crack";
+                    //Perma aim
+                    AddEffect(new PlayerEffects.Aim());
+                    break;
+                case RogueBasin.PlayerClass.Sneaker:
+                    GameSprite = "nerd";
+                    Inventory.AddItemNotFromDungeon(new Items.StealthWare());
+                    break;
+            }
         }
 
         internal bool IsWeaponTypeAvailable(Type weaponType)
@@ -247,11 +317,6 @@ namespace RogueBasin
             }
 
             return true;
-        }
-
-        internal int InventoryQuantityAvailable(Type wetWareType)
-        {
-            return Inventory.GetItemsOfType(wetWareType).Count();
         }
 
         internal bool IsWetwareTypeDisabled(Type wetwareType)
@@ -305,28 +370,143 @@ namespace RogueBasin
             CurrentEquippedItems = 0;
         }
 
-        public int MagicPoints
+
+        public int GetNoItemsOfSameType(Item itemType)
         {
-            get
+            if (itemType == null)
+                return 0;
+
+            return Inventory.Items.Where(i => i.GetType() == itemType.GetType()).Count();
+        }
+
+        public void EquipNextUtilityInventoryItem(int inventoryPositionChange)
+        {
+            var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Utility));
+            var orderedUtilityItemsTypes = allUtilityItems.DistinctBy(i => i.SingleItemDescription).OrderBy(i => i.SingleItemDescription);
+            
+            if (orderedUtilityItemsTypes.Count() == 0)
             {
-                return magicPoints;
+                UtilityInventoryPosition = 0;
+                LogFile.Log.LogEntryDebug("No next utility item to equip", LogDebugLevel.Medium);
+                return;
             }
-            set
+
+            if (inventoryPositionChange > 0)
+                UtilityInventoryPosition++;
+            else if(inventoryPositionChange < 0)
+                UtilityInventoryPosition--;
+
+            if (UtilityInventoryPosition >= orderedUtilityItemsTypes.Count())
             {
-                magicPoints = value;
+                UtilityInventoryPosition = 0;
+            }
+            if (UtilityInventoryPosition < 0)
+            {
+                UtilityInventoryPosition = orderedUtilityItemsTypes.Count() - 1;
+            }
+
+            EquipAndReplaceItem(orderedUtilityItemsTypes.ElementAt(UtilityInventoryPosition));
+        }
+
+        public void SelectNextWetware()
+        {
+            SelectNextWetwareInventoryItem(0);
+        }
+
+        public void SelectNextWetwareInventoryItem(int inventoryPositionChange)
+        {
+            var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Wetware));
+            var orderedUtilityItemsTypes = allUtilityItems.DistinctBy(i => i.SingleItemDescription).OrderBy(i => i.SingleItemDescription);
+
+            var originalSelectedWetware = GetSelectedWetware();
+
+            if (orderedUtilityItemsTypes.Count() == 0)
+            {
+                WetwareInventoryPosition = 0;
+                LogFile.Log.LogEntryDebug("No next wetware item to equip", LogDebugLevel.Medium);
+                return;
+            }
+
+            if (inventoryPositionChange > 0)
+                WetwareInventoryPosition++;
+            else if (inventoryPositionChange < 0)
+                WetwareInventoryPosition--;
+
+            if (WetwareInventoryPosition >= orderedUtilityItemsTypes.Count())
+            {
+                WetwareInventoryPosition = 0;
+            }
+            if (WetwareInventoryPosition < 0)
+            {
+                WetwareInventoryPosition = orderedUtilityItemsTypes.Count() - 1;
+            }
+
+            if (originalSelectedWetware != GetSelectedWetware())
+            {
+                //Changing the selected wetware while it is active will unequip
+                UnequipWetware();
             }
         }
 
-        public int MaxMagicPoints
+        public Item GetSelectedWetware()
         {
-            get
+            var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Wetware));
+            var orderedUtilityItemsTypes = allUtilityItems.DistinctBy(i => i.SingleItemDescription).OrderBy(i => i.SingleItemDescription);
+
+            if (orderedUtilityItemsTypes.Count() == 0)
             {
-                return maxMagicPoints;
+                return null;
             }
-            set
+
+            if (WetwareInventoryPosition >= orderedUtilityItemsTypes.Count())
             {
-                maxMagicPoints = value;
+                LogFile.Log.LogEntryDebug("Wetware inventory position " + WetwareInventoryPosition + " higher than item count", LogDebugLevel.Medium);
+                return null;
             }
+
+            return orderedUtilityItemsTypes.ElementAt(WetwareInventoryPosition);
+        }
+
+        public int GetTurnsDisabledForSelectedWetware()
+        {
+            var selectedWetware = GetSelectedWetware();
+
+            if (GetSelectedWetware() == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return GetDisabledTurnsForWetware(selectedWetware);
+            }
+
+        }
+
+        private int GetDisabledTurnsForWetware(Item wetware) {
+            if (wetwareDisabledTurns.ContainsKey(wetware))
+            {
+                return wetwareDisabledTurns[wetware];
+            }
+            return 0;
+        }
+         
+        public void EquipSelectedWetware()
+        {
+            var selectedWetware = GetSelectedWetware();
+
+            if (selectedWetware != null)
+            {
+                ToggleEquipWetware(selectedWetware.GetType());
+            }
+            else 
+            {
+                LogFile.Log.LogEntryDebug("No selected wetware to equip", LogDebugLevel.Medium);
+            }
+        }
+
+        public void EquipNextUtility()
+        {
+            EquipNextUtilityInventoryItem(0);
         }
 
         /// <summary>
@@ -355,7 +535,7 @@ namespace RogueBasin
             */
             //Sight
 
-            NormalSightRadius = 0;
+            //NormalSightRadius = 0;
 
             /*
             if(inv.ContainsItem(new Items.Lantern()))
@@ -410,29 +590,29 @@ namespace RogueBasin
 
             //Armour
 
-            Screen.Instance.PCColor = ColorPresets.White;
+            Screen.Instance.PCColor = System.Drawing.Color.White;
             /*
             if (inv.ContainsItem(new Items.MetalArmour()) && AttackStat > 50)
             {
                 ArmourClassAccess += 6;
-                Screen.Instance.PCColor = ColorPresets.SteelBlue;
+                Screen.Instance.PCColor = System.Drawing.Color.SteelBlue;
             }
             else if (inv.ContainsItem(new Items.LeatherArmour()) && AttackStat > 25)
             {
                 ArmourClassAccess += 3;
-                Screen.Instance.PCColor = ColorPresets.BurlyWood;
+                Screen.Instance.PCColor = System.Drawing.Color.BurlyWood;
             }
             else if (inv.ContainsItem(new Items.KnockoutDress()))
             {
                 CharmPoints += 40;
                 ArmourClassAccess += 3;
-                Screen.Instance.PCColor = ColorPresets.Yellow;
+                Screen.Instance.PCColor = System.Drawing.Color.Yellow;
             }
             else if (inv.ContainsItem(new Items.PrettyDress()))
             {
                 CharmPoints += 20;
                 ArmourClassAccess += 1;
-                Screen.Instance.PCColor = ColorPresets.BlueViolet;
+                Screen.Instance.PCColor = System.Drawing.Color.BlueViolet;
             }*/
 
             //Consider equipped weapons (only 1 will work)
@@ -519,10 +699,10 @@ namespace RogueBasin
                     minSpeed = effect.SpeedModifier();
 
                 if(effect.DamageModifier() > maxDamage)
-                    maxDamage = effect.DamageModifier();
+                    maxDamage = (int)effect.DamageModifier();
 
                 if(effect.DamageModifier() < minDamage)
-                    minDamage = effect.DamageModifier();
+                    minDamage = (int)effect.DamageModifier();
 
                 if (effect.SightModifier() < minSight)
                     minSight = effect.SightModifier();
@@ -610,7 +790,7 @@ namespace RogueBasin
         /// <summary>
         /// Used as accessors only for Player
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return damageModifier;
         }
@@ -642,14 +822,10 @@ namespace RogueBasin
         /// <param name="damMod"></param>
         /// <param name="ACmod"></param>
         /// <returns></returns>
-
-
-        //int toHitRoll; //just so we can use it in debug
-
         private int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
         {
             //Flatline has a rather simple combat system
-            IEquippableItem item = GetEquippedWeapon();
+            IEquippableItem item = GetEquippedRangedWeapon();
 
             int baseDamage = 2;
 
@@ -739,6 +915,7 @@ namespace RogueBasin
 
         public double CalculateAimBonus()
         {
+            /*
             var aimBonus = 0.1;
 
             var aimEffect = GetActiveEffects(typeof(PlayerEffects.AimEnhance));
@@ -753,6 +930,14 @@ namespace RogueBasin
             var nonFireBonus = Math.Min(TurnsSinceAction, 3) * aimBonus / 2;
 
             return stationaryBonus + nonFireBonus;
+             * */
+
+            if (IsAimActive())
+            {
+                return 0.5;
+            }
+
+            return 0.0;
         }
 
         public double CalculateRangedAttackModifiersOnMonster(Monster target)
@@ -785,10 +970,10 @@ namespace RogueBasin
             return meleeMultiplier;
         }
 
-        public double CalculateDamageModifierForAttacksOnPlayer(Monster target)
+        public double CalculateDamageModifierForAttacksOnPlayer(Monster target, bool ranged)
         {
             var damageModifier = 1.0;
-
+            /*
             var speedEffect = GetActiveEffects(typeof(PlayerEffects.SpeedBoost));
 
             var speedModifier = 1.0;
@@ -796,14 +981,21 @@ namespace RogueBasin
             if (speedEffect.Count() > 0)
             {
                 speedModifier += ((PlayerEffects.SpeedBoost)speedEffect.First()).Level;
-            }
+            }*/
 
-            if(TurnsMoving > 0)
+            if (IsDodgeActive() && ranged)
             {
-                damageModifier -= 0.2 * speedModifier;
+                //Straight 50% damage reduction for moving
+                damageModifier -= 0.5;
             }
 
-            if (target != null)
+            if (IsAimActive() && ranged)
+            {
+                //Straight 50% damage reduction for not moving
+                damageModifier -= 0.5;
+            }
+
+            if (target != null && ranged)
             {
                 //Test cover
                 var coverItems = GetPlayerCover(target);
@@ -813,10 +1005,10 @@ namespace RogueBasin
                 if (hardCover > 0)
                     damageModifier -= 0.5;
                 if (softCover > 0)
-                    damageModifier -= 0.1;
+                    damageModifier -= 0.25;
             }
 
-            return Math.Max(0.0, damageModifier);
+            return Math.Max(0.1, damageModifier);
         }
 
         public Tuple<int, int> GetPlayerCover()
@@ -868,7 +1060,7 @@ namespace RogueBasin
 
             int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
 
-            return ApplyDamageToMonster(monster, damage, false, specialMoveUsed);
+            return ApplyDamageToMonsterFromPlayer(monster, damage, false, specialMoveUsed);
         }
 
         public CombatResults AttackMonsterRanged(Monster monster, int damage)
@@ -880,7 +1072,7 @@ namespace RogueBasin
             CancelStealthDueToAttack();
             CancelBoostDueToAttack();
 
-            return ApplyDamageToMonster(monster, modifiedDamage, false, false);
+            return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
         }
 
         public CombatResults AttackMonsterThrown(Monster monster, int damage)
@@ -891,14 +1083,14 @@ namespace RogueBasin
             CancelStealthDueToAttack();
             CancelBoostDueToAttack();
 
-            return ApplyDamageToMonster(monster, damage, false, false);
+            return ApplyDamageToMonsterFromPlayer(monster, damage, false, false);
         }
 
         public CombatResults AttackMonsterMelee(Monster monster)
         {
 
             //Flatline has a rather simple combat system
-            IEquippableItem item = GetBestMeleeWeapon();
+            IEquippableItem item = GetEquippedMeleeWeapon();
 
             int baseDamage = 2;
 
@@ -907,15 +1099,19 @@ namespace RogueBasin
                 baseDamage = item.MeleeDamage();
             }
 
-            var modifiedDamage = (int)Math.Ceiling(CalculateMeleeAttackModifiersOnMonster(monster) * baseDamage);
+            var modifiedDamage = ScaleMeleeDamage(GetEquippedMeleeWeapon() as Item, baseDamage);
+                //(int)Math.Ceiling(CalculateMeleeAttackModifiersOnMonster(monster) * baseDamage);
 
             string combatResultsMsg = "PvM (melee) " + monster.Representation + " base " + baseDamage + " mod " + modifiedDamage;
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             CancelStealthDueToAttack();
-            ResetTurnsMoving();
+            //ResetTurnsMoving();
 
-            return ApplyDamageToMonster(monster, modifiedDamage, false, false);
+            //Play sound
+            SoundPlayer.Instance().EnqueueSound("punch");
+
+            return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
         }
 
         public void CancelStealthDueToAttack()
@@ -957,154 +1153,13 @@ namespace RogueBasin
 
         }
 
-        /// <summary>
-        /// Apply stun damage (miss n-turns) to monster. All stun attacks are routed through here
-        /// </summary>
-        /// <param name="monster"></param>
-        /// <param name="stunTurns"></param>
-        /// <returns></returns>
-        public CombatResults ApplyStunDamageToMonster(Monster monster, int stunTurns)
+        
+
+        public CombatResults ApplyDamageToMonsterFromPlayer(Monster monster, int damage, bool magicUse, bool specialMove)
         {
-            //Wake monster up etc.
-            AIForMonsterIsAttacked(monster);
-
-            int monsterOrigStunTurns = monster.StunnedTurns;
-
-            //Do we hit the monster?
-            if (stunTurns > 0)
-            {
-                monster.StunnedTurns += stunTurns;
-
-                //Notify the creature that it has taken damage
-                //It may activate a special ability or stop running away etc.
-                monster.NotifyHitByCreature(this, 0);
-
-                //Message string
-                string playerMsg2 = "";
-                if (!monster.Unique)
-                    playerMsg2 += "The ";
-                playerMsg2 += monster.SingleDescription + " is stunned!";
-                Game.MessageQueue.AddMessage(playerMsg2);
-
-                string debugMsg2 = "MStun: " + monsterOrigStunTurns + "->" + monster.StunnedTurns;
-                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
-
-                return CombatResults.NeitherDied;
-            }
-
-            //Miss
-
-            string playerMsg3 = "";
-            if (!monster.Unique)
-                playerMsg3 += "The ";
-            playerMsg3 += monster.SingleDescription + " shrugs off the attack.";
-            Game.MessageQueue.AddMessage(playerMsg3);
-            string debugMsg3 = "MStun: " + monsterOrigStunTurns + "->" + monster.StunnedTurns;
-            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
-
-            return CombatResults.NeitherDied;
-
+            return monster.ApplyDamageToMonster(this, monster, damage);
         }
-
-        /// <summary>
-        /// Apply damage to monster and deal with death. All player attacks are routed through here.
-        /// </summary>
-        /// <param name="monster"></param>
-        /// <param name="damage"></param>
-        /// <returns></returns>
-        public CombatResults ApplyDamageToMonster(Monster monster, int damage, bool magicUse, bool specialMove)
-        {
-            //Wake monster up etc.
-            AIForMonsterIsAttacked(monster);
-
-            //Do we hit the monster?
-            if (damage > 0)
-            {
-                int monsterOrigHP = monster.Hitpoints;
-
-                monster.Hitpoints -= damage;
-
-                bool monsterDead = monster.Hitpoints <= 0;
-
-                //Add HP from the glove if wielded
-                SpecialCombatEffectsOnMonster(monster, damage, monsterDead, specialMove);
-
-                //Notify the creature that it has taken damage
-                //It may activate a special ability or stop running away etc.
-                monster.NotifyHitByCreature(this, damage);
-
-                //Is the monster dead, if so kill it?
-                if (monsterDead)
-                {
-                    //Add it to our list of kills (simply adding the whole object here)
-                    KillCount++;
-                    Kills.Add(monster);
-
-                    //Message string
-                    string playerMsg = "You destroyed ";
-                    playerMsg += "the ";
-                    playerMsg += monster.SingleDescription + ".";
-                    Game.MessageQueue.AddMessage(playerMsg);
-
-                    string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
-
-                    Game.Dungeon.KillMonster(monster, false);
-
-                    //No XP in flatline
-                    
-                    return CombatResults.DefenderDied;
-                }
-
-                //Message string
-                string playerMsg2 = "You hit ";
-                playerMsg2 += "the ";
-                playerMsg2 += monster.SingleDescription + ".";
-                Game.MessageQueue.AddMessage(playerMsg2);
-                
-                string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
-                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
-
-                return CombatResults.DefenderDamaged;
-            }
-
-            //Miss
-
-            string playerMsg3 = "You missed the " + monster.SingleDescription + ".";
-            Game.MessageQueue.AddMessage(playerMsg3);
-            string debugMsg3 = "MHP: " + monster.Hitpoints + "->" + monster.Hitpoints + " missed";
-            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
-
-            return CombatResults.NeitherDied;
-        }
-
-        /// <summary>
-        /// Monster has been attacked. Wake it up etc.
-        /// </summary>
-        /// <param name="monster"></param>
-        private void AIForMonsterIsAttacked(Monster monster)
-        {
-            //Set the attacked by marker
-            monster.LastAttackedBy = this;
-            monster.LastAttackedByID = this.UniqueID;
-
-            //Was this a passive creature? It loses that flag
-            if (monster.Passive)
-                monster.UnpassifyCreature();
-
-            //Was this a sleeping creature? It loses that flag
-            if (monster.Sleeping)
-            {
-                monster.WakeCreature();
-
-                //All wake on sight creatures should be awake at this point. If it's a non-wake-on-sight tell the player it wakes
-                Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " wakes up!");
-                LogFile.Log.LogEntryDebug(monster.Representation + " wakes on attack by player", LogDebugLevel.Low);
-            }
-
-            //Notify the creature that it has been hit
-            monster.NotifyAttackByCreature(this);
-        }
+        
 
         /// <summary>
         /// A monster has been killed by magic or combat. Add XP
@@ -1165,7 +1220,7 @@ namespace RogueBasin
         /// List of special combat effects that might happen to a HIT monster
         /// </summary>
         /// <param name="monster"></param>
-        private void SpecialCombatEffectsOnMonster(Monster monster, int damage, bool isDead, bool specialMove)
+        public void SpecialCombatEffectsOnMonster(Monster monster, int damage, bool isDead, bool specialMove)
         {
             //If short sword is equipped, do a slow down effect (EXAMPLE)
             /*
@@ -1435,7 +1490,8 @@ namespace RogueBasin
 
         protected override char GetRepresentation()
         {
-            var weapon = GetEquippedWeapon();
+            /*
+            var weapon = GetEquippedRangedWeapon();
 
             if (weapon != null)
             {
@@ -1475,92 +1531,9 @@ namespace RogueBasin
                 if (weapon.GetType() == typeof(Items.SoundGrenade))
                     return (char)520;
             }
-            return (char)257;
-        }
+            return (char)257;*/
 
-        /// <summary>
-        /// Equip an item. Item is removed from the main inventory.
-        /// Returns true if item was used successfully.
-        /// </summary>
-        /// <param name="selectedGroup"></param>
-        /// <returns></returns>
-        public bool EquipItem(InventoryListing selectedGroup)
-        {
-            //Select the first item in the stack
-            int itemIndex = selectedGroup.ItemIndex[0];
-            Item itemToUse = Inventory.Items[itemIndex];
-
-            //Check if this item is equippable
-            IEquippableItem equippableItem = itemToUse as IEquippableItem;
-
-            if (equippableItem == null)
-            {
-                LogFile.Log.LogEntryDebug("Can't equip item, not equippable: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
-                return false;
-            }
-
-            //Find all matching slots available on the player
-
-            List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
-            List<EquipmentSlotInfo> matchingEquipSlots = new List<EquipmentSlotInfo>();
-
-            foreach (EquipmentSlot slotType in itemPossibleSlots)
-            {
-                matchingEquipSlots.AddRange(this.EquipmentSlots.FindAll(x => x.slotType == slotType));
-            }
-
-            //No suitable slots
-            if (matchingEquipSlots.Count == 0)
-            {
-                LogFile.Log.LogEntryDebug("Can't equip item, no valid slots: " + itemToUse.SingleItemDescription, LogDebugLevel.Medium);
-                Game.MessageQueue.AddMessage("Can't equip " + itemToUse.SingleItemDescription);
-
-                return false;
-            }
-
-            //Look for first empty slot
-
-            EquipmentSlotInfo freeSlot = matchingEquipSlots.Find(x => x.equippedItem == null);
-
-            if (freeSlot == null)
-            {
-                //Not slots free, unequip first slot
-                Item oldItem = matchingEquipSlots[0].equippedItem;
-                IEquippableItem oldItemEquippable = oldItem as IEquippableItem;
-
-                //Sanity check
-                if (oldItemEquippable == null)
-                {
-                    LogFile.Log.LogEntry("Currently equipped item is not equippable!: " + oldItem.SingleItemDescription);
-                    return false;
-                }
-
-                //Run unequip routine
-                oldItemEquippable.UnEquip(this);
-                oldItem.IsEquipped = false;
-                
-                //Can't do this right now, since not in inventory items appear on the floor
-
-                //This slot is now free
-                freeSlot = matchingEquipSlots[0];
-            }
-
-            //We now have a free slot to equip in
-
-            //Put new item in first relevant slot and run equipping routine
-            matchingEquipSlots[0].equippedItem = itemToUse;
-            equippableItem.Equip(this);
-            itemToUse.IsEquipped = true;
-
-            //Update the inventory listing since equipping an item changes its stackability
-            Inventory.RefreshInventoryListing();
-
-            //Message the user
-            LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
-            Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped.");
-
-            return true;
+            return '@';
         }
 
         public bool ToggleEquipWetware(Type wetwareTypeToEquip)
@@ -1576,18 +1549,11 @@ namespace RogueBasin
             {
                 justUnequip = true;
             }
-            
+
             UnequipWetware();
-
-            if (currentlyEquippedWetware is Items.StealthWare)
-                CancelStealthDueToUnequip();
-
-            if (currentlyEquippedWetware is Items.BoostWare)
-                CancelBoostDueToUnequip();
 
             if (justUnequip)
                 return true;
-                //return false;
 
             var equipTime = EquipWetware(wetwareTypeToEquip);
             return equipTime;
@@ -1642,13 +1608,12 @@ namespace RogueBasin
 
             //Check if it is disabled
 
-            if (wetwareDisabledTurns.ContainsKey(wetwareToEquip))
+            var disabledTurnsForWetware = GetDisabledTurnsForWetware(wetwareToEquip);
+            if (disabledTurnsForWetware > 0)
             {
-                if (wetwareDisabledTurns[wetwareToEquip] > 0)
-                {
-                    LogFile.Log.LogEntryDebug("Can't enable wetware, is disabled for " + wetwareDisabledTurns[wetwareToEquip] + "turns", LogDebugLevel.Medium);
-                    return false;
-                }
+                Game.MessageQueue.AddMessage("Can't enable wetware - it's disabled for " + disabledTurnsForWetware + " turns");
+                LogFile.Log.LogEntryDebug("Can't enable wetware, is disabled for " + disabledTurnsForWetware + " turns", LogDebugLevel.Medium);
+                return false;
             }
 
             //Equip the new wetware
@@ -1688,6 +1653,14 @@ namespace RogueBasin
                 wetwareSlot.equippedItem = null;
 
             }
+
+            DisableEnergyRecharge();
+
+            if (currentlyEquippedWetware is Items.StealthWare)
+                CancelStealthDueToUnequip();
+
+            if (currentlyEquippedWetware is Items.BoostWare)
+                CancelBoostDueToUnequip();
 
             CalculateCombatStats();
         }
@@ -1759,16 +1732,16 @@ namespace RogueBasin
             if (equipSuccess == false && reequip == false)
             {
                 //Try to reequip melee
-                EquipBestMeleeWeapon();
+                //EquipBestMeleeWeapon();
             }
             return false;
         }
         
         public virtual bool PickUpItem(Item itemToPickUp)
         {
-            base.PickUpItem(itemToPickUp);
+            bool pickedUp = base.PickUpItem(itemToPickUp);
 
-            if (AutoequipItem(itemToPickUp))
+            if (pickedUp && AutoequipItem(itemToPickUp))
             {
                 EquipAndReplaceItem(itemToPickUp);
             }
@@ -1805,6 +1778,7 @@ namespace RogueBasin
             if (itemToPickUp is Items.HeavyLaser)
                 return true;
 
+            //Just equip everything
             return false;
         }
 
@@ -1838,9 +1812,6 @@ namespace RogueBasin
             //Find all matching slots available on the player
 
             List<EquipmentSlot> itemPossibleSlots = equippableItem.EquipmentSlots;
-            //Is always only 1 slot in FlatlineRL
-
-            EquipmentSlot itemSlot = itemPossibleSlots[0];
             
             //We always have 2 equipment slots, 1 of each type on a player in FlatlineRL
             //So we should match exactly on 1 free slot
@@ -1882,13 +1853,34 @@ namespace RogueBasin
                 if (IsObselete(oldItem))
                 {
                     LogFile.Log.LogEntryDebug("Item discarded: " + oldItem.SingleItemDescription, LogDebugLevel.Low);
-                    Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription + ".");
+                    //Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription + ".");
 
                     UnequipAndDestroyItem(oldItem);
                 }
                 else
-                    UnequipItem(oldItem);
+                {
 
+                    //Drop old item
+                    bool dropPreviousItem = false;
+
+                    if (dropPreviousItem)
+                    {
+                        if (oldItemEquippable.EquipmentSlots.Where(x => x == EquipmentSlot.Utility).Any())
+                        {
+                            //Don't drop utilities
+                            UnequipItem(oldItem);
+                        }
+                        else
+                        {
+                            UnequipAndDropItem(oldItem);
+                        }
+                    }
+                    else
+                    {
+                        UnequipItem(oldItem);
+                    }
+                }
+                    
                 //This slot is now free
                 freeSlot = matchingEquipSlots[0];
             }
@@ -1911,6 +1903,13 @@ namespace RogueBasin
 
         private bool IsObselete(Item oldItem)
         {
+            //Pistol is never dropped
+            if (oldItem is Items.Pistol)
+                return true;
+
+            if (oldItem is Items.Fists)
+                return true;
+                     /*   
             if (oldItem is Items.Pistol && IsWeaponTypeAvailable(typeof(Items.HeavyPistol)))
                 return true;
 
@@ -1918,7 +1917,7 @@ namespace RogueBasin
                 return true;
 
             if (oldItem is Items.Laser && IsWeaponTypeAvailable(typeof(Items.HeavyLaser)))
-                return true;
+                return true;*/
             return false;
         }
 
@@ -2011,6 +2010,11 @@ namespace RogueBasin
         /// <returns></returns>
         public IEquippableItem GetEquippedWetware()
         {
+            return GetEquippedWetwareAsItem() as IEquippableItem;
+        }
+
+        public Item GetEquippedWetwareAsItem()
+        {
             EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Wetware);
 
             if (weaponSlot == null)
@@ -2019,7 +2023,7 @@ namespace RogueBasin
                 return null;
             }
 
-            return weaponSlot.equippedItem as IEquippableItem;
+            return weaponSlot.equippedItem;
         }
 
         public bool IsWetwareTypeEquipped(Type wetwareType)
@@ -2032,25 +2036,19 @@ namespace RogueBasin
             return false;
         }
 
-        /// <summary>
-        /// FlatlineRL - return equipped weapon or null
-        /// </summary>
-        /// <returns></returns>
-        public IEquippableItem GetEquippedWeapon() 
+        public IEquippableItem GetEquippedRangedWeapon() 
         {
-            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Weapon);
+            return GetEquippedRangedWeaponAsItem() as IEquippableItem;
+        }
 
-            if(weaponSlot == null) {
-                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
-                return null;
-            }
-
-            return weaponSlot.equippedItem as IEquippableItem;
+        public IEquippableItem GetEquippedMeleeWeapon()
+        {
+            return GetEquippedMeleeWeaponAsItem() as IEquippableItem;
         }
 
         public bool HasMeleeWeaponEquipped()
         {
-            var currentWeapon = GetEquippedWeapon();
+            var currentWeapon = GetEquippedRangedWeapon();
 
             if (currentWeapon == null)
                 return false;
@@ -2063,7 +2061,7 @@ namespace RogueBasin
 
         public bool HasThrownWeaponEquipped()
         {
-            var currentWeapon = GetEquippedWeapon();
+            var currentWeapon = GetEquippedRangedWeapon();
 
             if (currentWeapon == null)
                 return false;
@@ -2075,16 +2073,24 @@ namespace RogueBasin
         }
 
 
-
-        /// <summary>
-        /// FlatlineRL - return equipped weapon as item reference (always works)
-        /// </summary>
-        /// <returns></returns>
-        public Item GetEquippedWeaponAsItem()
+        public Item GetEquippedRangedWeaponAsItem()
         {
             EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Weapon);
 
             if(weaponSlot == null) {
+                LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
+                return null;
+            }
+
+            return weaponSlot.equippedItem;
+        }
+
+        public Item GetEquippedMeleeWeaponAsItem()
+        {
+            EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Melee);
+
+            if (weaponSlot == null)
+            {
                 LogFile.Log.LogEntryDebug("Can't find weapon slot - bug ", LogDebugLevel.High);
                 return null;
             }
@@ -2167,7 +2173,8 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.Pistol());
                 Inventory.AddItemNotFromDungeon(new Items.Shotgun());
                 Inventory.AddItemNotFromDungeon(new Items.Laser());
-            
+
+                EquipInventoryItemType(typeof(Items.Vibroblade));
                 
             }
 
@@ -2186,18 +2193,17 @@ namespace RogueBasin
                 Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
                 Inventory.AddItemNotFromDungeon(new Items.NanoRepair());
             }
-
-            //Inventory.AddItemNotFromDungeon(new Items.Pistol());
-            //Inventory.AddItemNotFromDungeon(new Items.Shotgun());
-            //Inventory.AddItemNotFromDungeon(new Items.Laser());
-
-            
+                        
         }
         public void EquipStartupWeapons() {
-            //Non debug from here
-            //Start with fists equipped
+
+            //Melee - Start with fists equipped
             Inventory.AddItemNotFromDungeon(new Items.Fists());
-            Game.Dungeon.Player.EquipInventoryItemType(ItemMapping.WeaponMapping[1]);
+            Game.Dungeon.Player.EquipInventoryItemType(typeof(Items.Fists));
+
+            //Ranged - Start with pistol equipped
+            Inventory.AddItemNotFromDungeon(new Items.Pistol());
+            Game.Dungeon.Player.EquipInventoryItemType(typeof(Items.Pistol));
         }
 
         /// <summary>
@@ -2278,7 +2284,7 @@ namespace RogueBasin
             //Play help movie
             if (Game.Dungeon.Player.PlayItemMovies && ItemHelpMovieSeen == false)
             {
-                //Screen.Instance.PlayMovie("helpitems", true);
+                //Game.Base.PlayMovie("helpitems", true);
                 ItemHelpMovieSeen = true;
             }
 
@@ -2344,15 +2350,15 @@ namespace RogueBasin
             //Level up!
             Level++;
 
-            int lastMaxHP = maxHitpoints;
+            //int lastMaxHP = maxHitpoints;
 
             //Recalculate combat stats
             CalculateCombatStats();
 
-            hitpoints += maxHitpoints - lastMaxHP;
+            //hitpoints += maxHitpoints - lastMaxHP;
 
             //Calculate HP etc
-            //HPOnLevelUP();
+            HPOnLevelUP();
 
             LogFile.Log.LogEntry("Player levels up to: " + Level);
         }
@@ -2362,8 +2368,7 @@ namespace RogueBasin
         /// </summary>
         private void HPOnLevelUP()
         {
-            hitpoints += 10;
-            maxHitpoints += 10;
+            MaxHitpoints = Game.Dungeon.LevelScalingCalculation(100, Level);
         }
 
         /// <summary>
@@ -2449,6 +2454,7 @@ namespace RogueBasin
             EquipStartupWeapons();
         }
 
+        /*
         /// <summary>
         /// Important to keep this the only place where the player injures themselves
         /// </summary>
@@ -2502,7 +2508,7 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug(combatResultsMsg2, LogDebugLevel.Medium);
 
             return CombatResults.DefenderUnhurt;
-        }
+        }*/
 
         public IEquippableItem GetBestMeleeWeapon()
         {
@@ -2512,12 +2518,7 @@ namespace RogueBasin
 
             return meleeWeapon;
         }
-
-        public void EquipBestMeleeWeapon()
-        {
-            EquipInventoryItemType(typeof(Items.Fists), true);
-        }
-
+        
         /// <summary>
         /// Heal the player by a quantity. Won't exceed max HP.
         /// </summary>
@@ -2594,13 +2595,13 @@ namespace RogueBasin
             Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), LocationLevel, destination);
 
             //Draw throw
-            Screen.Instance.DrawAreaAttackAnimation(targetSquares, ColorPresets.Gray);
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, Screen.AttackType.Bullet);
 
             if (stunDamage)
             {
                 if (monster != null && damageOrStunTurns > 0)
                 {
-                    ApplyStunDamageToMonster(monster, damageOrStunTurns);
+                    monster.ApplyStunDamageToMonster(this, damageOrStunTurns);
                 }
             }
             else
@@ -2614,11 +2615,33 @@ namespace RogueBasin
             return destination;
         }
 
-        public void ApplyDamageToPlayer(int damage)
+        /// <summary>
+        /// All combat attacks go through here, since we apply modifiers
+        /// </summary>
+        /// <param name="damage"></param>
+        public CombatResults ApplyCombatDamageToPlayer(Monster attacker, int damage, bool ranged)
+        {
+            NotifyAttack(attacker);
+
+            var modifiedDamaged = (int)Math.Floor(CalculateDamageModifierForAttacksOnPlayer(attacker, ranged) * damage);
+            return ApplyDamageToPlayer(modifiedDamaged);
+        }
+
+        /// <summary>
+        /// All combat attacks go through here, since we apply modifiers
+        /// </summary>
+        /// <param name="damage"></param>
+        public CombatResults ApplyCombatDamageToPlayer(int damage)
+        {
+            return ApplyDamageToPlayer(damage);
+        }
+
+        public CombatResults ApplyDamageToPlayer(int damage)
         {
             var remainingDamage = damage;
             int shieldAbsorbs = 0;
             int hpAbsorbs = 0;
+            int origHP = Hitpoints;
 
             //Shield absorbs damage first
             if (Shield > 0)
@@ -2651,6 +2674,14 @@ namespace RogueBasin
             }
 
             LogFile.Log.LogEntryDebug("Player takes " + shieldAbsorbs + " damage " + hpAbsorbs + " hitpoint damage.", LogDebugLevel.Medium);
+            string hpMessage = "HP: " + origHP + "->" + Hitpoints;
+
+            LogFile.Log.LogEntryDebug(hpMessage, LogDebugLevel.Medium);
+
+            if (Hitpoints <= 0)
+                return CombatResults.DefenderDied;
+            else
+                return CombatResults.NeitherDied;
         }
 
         public int ApplyDamageToPlayerHitpoints(int damage)
@@ -2755,7 +2786,7 @@ namespace RogueBasin
                     Shield = MaxShield;
             }
 
-            if (!HitpointsWasDamagedThisTurn)
+            if (!HitpointsWasDamagedThisTurn && DoHitpointsRecharge)
             {
                 double hpRegenRate = MaxHitpoints / (double)TurnsToRegenerateHP;
                 Hitpoints += (int)Math.Ceiling(hpRegenRate);
@@ -2798,21 +2829,10 @@ namespace RogueBasin
                 Shield = MaxShield;
         }
 
-        internal void FullAmmo()
-        {
-            foreach (var i in Inventory.Items)
-            {
-                var item = i as RangedWeapon;
-
-                if (item != null)
-                    item.Ammo = item.MaxAmmo();
-
-            }
-        }
 
         internal void AddAmmoToCurrentWeapon()
         {
-            var equippedWeapon = GetEquippedWeaponAsItem() as RangedWeapon;
+            var equippedWeapon = GetEquippedRangedWeaponAsItem() as RangedWeapon;
 
             if (equippedWeapon != null && equippedWeapon.RemainingAmmo() < equippedWeapon.MaxAmmo())
             {
@@ -2845,6 +2865,8 @@ namespace RogueBasin
             {
                 Screen.Instance.CreatureToView = monster;
             }
+
+            Game.Base.StopRunning();
         }
 
         internal void RefillWeapons()
@@ -2860,6 +2882,86 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug("Giving ammo to " + item.SingleItemDescription, LogDebugLevel.Medium);
                 }
             }
+        }
+
+        protected override string GetGameSprite()
+        {
+            return "lance";
+        }
+
+        internal void AddKill(Monster monster)
+        {
+            KillCount++;
+            Kills.Add(monster);
+        }
+
+        internal int GetHealXPCost()
+        {
+            return 75;//(int)Math.Floor(75 * (1 + 0.5 * (Level - 1)));
+        }
+
+        internal int GetLevelXPCost()
+        {
+            return 150;//(int)Math.Floor(150 * (1 + 0.5 * (Level - 1)));
+        }
+
+        internal void LevelUpWithXP()
+        {
+
+            var levelUpCost = GetLevelXPCost();
+            if (CombatXP >= levelUpCost)
+            {
+               
+                LevelUp();
+                CombatXP -= levelUpCost;
+                LogFile.Log.LogEntryDebug("Levelled up at cost of  " + GetLevelXPCost() + " XP", LogDebugLevel.Medium);
+            }
+        }
+
+        internal void HealWithXP()
+        {
+            var healCost = GetHealXPCost();
+            if (CombatXP >= healCost)
+            {
+                HealCompletely();
+                CombatXP -= healCost;
+                LogFile.Log.LogEntryDebug("Healed completely at cost of " + GetHealXPCost() + " XP", LogDebugLevel.Medium);
+            }
+        }
+
+        internal int ScaleRangedDamage(IEquippableItem item, int damageBase)
+        {
+            return Game.Dungeon.LevelScalingCalculation(damageBase, Level);
+        }
+
+        internal int ScaleMeleeDamage(Item item, int damageBase)
+        {
+            var scaledDamage = Game.Dungeon.LevelScalingCalculation(damageBase, Level);
+            //Get a boost for dodge
+            if(IsDodgeActive())
+                return scaledDamage * 2;
+            else
+                return scaledDamage;
+        }
+
+        public bool LastMoveWasMeleeAttack { get; set; }
+
+        internal bool IsDodgeActive()
+        {
+            return TurnsMoving > 0 && IsEffectActive(typeof(PlayerEffects.Dodge));
+        }
+
+        internal bool IsAimActive()
+        {
+            return TurnsMoving == 0 && TurnsInactive > 0 && IsEffectActive(typeof(PlayerEffects.Aim));
+        }
+
+        internal void GivePistol()
+        {
+            LogFile.Log.LogEntryDebug("Giving player default pistol", LogDebugLevel.Medium);
+            var pistol = new Items.Pistol();
+            Inventory.AddItemNotFromDungeon(pistol);
+            EquipAndReplaceItem(pistol);
         }
     }
 }

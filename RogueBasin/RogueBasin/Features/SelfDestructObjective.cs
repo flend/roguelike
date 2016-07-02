@@ -31,19 +31,19 @@ namespace RogueBasin.Features
 
             if (!canDoorBeOpened)
             {
-                Screen.Instance.PlayMovie("selfdestructlocked", true);
+                Game.Base.PlayMovie("selfdestructlocked", true);
                 return false;
             }
             else
             {
-                Screen.Instance.PlayMovie("selfdestructunlocked", true);
+                Game.Base.PlayMovie("selfdestructunlocked", true);
 
                 //Add clues directly into player's inventory
                 GivePlayerObjectiveClues(player);
 
                 //Restock the flight deck and lower atrium levels
-                Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(Game.Dungeon.MapInfo, 2, 6);
-                Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(Game.Dungeon.MapInfo, 4, 6);
+                Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(Game.Dungeon.MapState, 2, 6);
+                Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(Game.Dungeon.MapState, 4, 6);
 
                 isComplete = true;
                 return true;

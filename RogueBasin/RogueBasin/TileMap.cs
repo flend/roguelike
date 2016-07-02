@@ -182,5 +182,10 @@ namespace TileEngine
         {
             layers[layerIndex] = new TileLayer(numRows, numColumns);
         }
+
+        public void ClearLayer(RogueBasin.Screen.TileLevel level)
+        {
+            layers[(int)level] = new TileLayer(numRows, numColumns);
+        }
     }
 }

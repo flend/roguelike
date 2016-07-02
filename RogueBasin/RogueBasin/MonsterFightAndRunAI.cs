@@ -93,7 +93,17 @@ namespace RogueBasin
         /// </summary>
         protected bool headingSetToSound = false;
 
+        public MonsterFightAndRunAI(int level) : base (level)
+        {
+            Initialise();
+        }
+
         public MonsterFightAndRunAI()
+        {
+            Initialise();
+        }
+
+        private void Initialise()
         {
             AIState = SimpleAIStates.Patrol;
             currentTarget = null;
@@ -176,6 +186,19 @@ namespace RogueBasin
                 return;
             }
 
+            //Reloading creatures miss turns
+            if (ReloadingTurns > 0)
+            {
+                LogFile.Log.LogEntryDebug(this.Representation + " is reloading for " + ReloadingTurns + " more turns", LogDebugLevel.Low);
+                ReloadingTurns--;
+
+                ResetTurnsMoving();
+                return;
+            }
+
+            //Calculate current FOV
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+
             //TEST SLEEPING CREATURES
             //Sleeping is a Creature state that is used like an AI state
             //This is OK since we exit immediately
@@ -184,12 +207,10 @@ namespace RogueBasin
             if (Sleeping && WakesOnBeingSeen())
             {
                 //Check to see if we should wake by looking for woken creatures in POV
-                //(when we drop through currentFOV may be unnecessarily recalculated)
-
-                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+                CreatureFOV playerFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
                 //Player sees monster, wake up
-                if (currentFOV.CheckTileFOV(LocationMap.x, LocationMap.y))
+                if (playerFOV.CheckTileFOV(LocationMap.x, LocationMap.y))
                 {
                     Sleeping = false;
                     AIState = SimpleAIStates.Patrol;
@@ -201,10 +222,6 @@ namespace RogueBasin
             if (Sleeping && WakesOnSight())
             {
                 //Check to see if we should wake by looking for woken creatures in POV
-                //(when we drop through currentFOV may be unnecessarily recalculated)
-
-                CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
-
                 foreach (Monster monster in Game.Dungeon.Monsters)
                 {
                     //Same monster
@@ -221,6 +238,7 @@ namespace RogueBasin
 
                     //Otherwise in FOV
                     //Check if it's awake. If so, wake up and stop
+                    //For RRL, they need to be seen within the stealth radius when sleeping
                     if (!monster.Sleeping)
                     {
                         Sleeping = false;
@@ -231,8 +249,7 @@ namespace RogueBasin
                 }
 
                 //Check if we can see the player
-                if (Game.Dungeon.Player.LocationLevel == this.LocationLevel &&
-                    currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y) && !Game.Dungeon.Player.isStealthed())
+                if (PlayerCanBeSeen(currentFOV))
                 {
                     //In FOV wake
                     Sleeping = false;
@@ -241,15 +258,51 @@ namespace RogueBasin
                 }
             }
 
-            //If we're still sleeping then skip this go
-            if (Sleeping)
+            //Sleeping creatures wake if a monster wakes within their monster stealth radius
+            if (Sleeping && WakesOnMonsterStealth())
             {
-                ResetTurnsMoving();
-                return;
+                //Check to see if we should wake by looking for woken creatures in POV
+                foreach (Monster monster in Game.Dungeon.Monsters)
+                {
+                    //Same monster
+                    if (monster == this)
+                        continue;
+
+                    //Not on the same level
+                    if (monster.LocationLevel != this.LocationLevel)
+                        continue;
+
+                    //Not in FOV
+                    if (!currentFOV.CheckTileFOV(monster.LocationMap.x, monster.LocationMap.y))
+                        continue;
+
+                    //Otherwise in FOV
+                    //Check if it's awake. If so, wake up and stop
+                    //For RRL, they need to be seen within the stealth radius when sleeping
+                    if (!monster.Sleeping && InMonsterStealthRadius(monster.LocationMap))
+                    {
+                        Sleeping = false;
+                        AIState = SimpleAIStates.Patrol;
+                        LogFile.Log.LogEntryDebug(this.Representation + " spots awake " + monster.Representation + " within stealth radius and wakes", LogDebugLevel.Low);
+                        break;
+                    }
+                }
             }
+
+            //Sleeping creatures who are activated by player proximity (within FOV)
+            if (Sleeping && StealthRadius() > 0)
+            {
+                if (InStealthRadius(Game.Dungeon.Player.LocationMap) && PlayerCanBeSeen(currentFOV))
+                {
+                    Sleeping = false;
+                    AIState = SimpleAIStates.Patrol;
+                    LogFile.Log.LogEntryDebug(this.Representation + " spots player within stealth radius", LogDebugLevel.Low);
+                }
+            }
+
             //RETURNING - used when a charmed creature gets a long way from the PC
 
-            if (AIState == SimpleAIStates.Returning)
+            if (AIState == SimpleAIStates.Returning && !Sleeping)
             {
                 //Don't stop on an attack otherwise charmed creatures will be frozen in front of missile troops
 
@@ -278,7 +331,7 @@ namespace RogueBasin
 
             //PURSUIT MODES - Pursuit [active] and Fleeing [temporarily fleeing, will return to target]
 
-            if (AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit)
+            if ((AIState == SimpleAIStates.Fleeing || AIState == SimpleAIStates.Pursuit) && !Sleeping)
             {
                 Monster targetMonster = currentTarget as Monster;
 
@@ -340,7 +393,8 @@ namespace RogueBasin
 
             //Check states which override patrol or investigate (e.g being attacked, charmed, seeing the PC)
 
-            if(AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) {
+            if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && !Sleeping)
+            {
      
                 Map currentMap = Game.Dungeon.Levels[LocationLevel];
                 
@@ -350,9 +404,6 @@ namespace RogueBasin
                 {
                     //Charmed - will fight for the PC
                     //Won't attack passive creatures (otherwise will de-passify them and it would be annoying)
-
-                    //Look for creatures in FOV
-                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
 
                     //List will contain monsters & player
                     List<Monster> monstersInFOV = new List<Monster>();
@@ -441,8 +492,6 @@ namespace RogueBasin
                     }*/
 
                     //Find creatures & PC in FOV
-                    CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
-
                     List<Creature> monstersInFOV = new List<Creature>();
 
                     foreach (Creature monster in Game.Dungeon.Monsters)
@@ -534,6 +583,8 @@ namespace RogueBasin
 
             //Monster that don't pursue still have a chance to direct their FOVs at sounds
 
+            //Sleeping monsters will still investigate large sounds - but they will sleep again if they get to the source and nothing else happens
+
             bool moveFollowingSound = false;
 
             if ((AIState == SimpleAIStates.Patrol || AIState == SimpleAIStates.InvestigateSound) && WillInvestigateSounds() )
@@ -578,6 +629,7 @@ namespace RogueBasin
                 if (newSoundToFollowID != -1)
                 {
                     LogFile.Log.LogEntryDebug(this.Representation + " new sound target: " + newSoundToFollow + "[ int: " + newSoundInterest + "] (old: " + currentSound + " [ int: " + currentSoundInterest + "])", LogDebugLevel.Medium);
+                    Sleeping = false;
 
                     //Change sound
                     
@@ -609,7 +661,7 @@ namespace RogueBasin
 
             //If nothing else happened, do the Patrol action
             //Don't if we moved in response to a sound
-            if ((AIState == SimpleAIStates.Patrol && !moveFollowingSound) || (WillAlwaysPatrol() && !headingSetToSound))
+            if (((AIState == SimpleAIStates.Patrol && !moveFollowingSound) || (WillAlwaysPatrol() && !headingSetToSound)) && !Sleeping)
             {
                 //We haven't got anything to do and we can't see the PC
                 //Do normal movement
@@ -654,7 +706,7 @@ namespace RogueBasin
             if (CanOpenDoors())
                 permission = Pathing.PathingPermission.IgnoreDoors;
 
-            pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, currentSound.MapLocation, PathingType(), permission);
+            pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, currentSound.MapLocation, PathingType(), permission, IgnoreDangerousTerrain);
 
             if (pathingResult.TerminallyBlocked)
             {
@@ -689,6 +741,16 @@ namespace RogueBasin
             //Only creatures that pursue actually move
             if (WillPursue() && CanMove())
             {
+                //For some reason they are ignoring dangerous terrain so hack here
+                if (Game.Dungeon.DangerousFeatureAtLocation(this.LocationLevel, pathingResult.MonsterFinalLocation))
+                {
+                    ResetFollowingSound();
+                    headingSetToSound = true;
+                    AIState = SimpleAIStates.Patrol;
+                    return true;
+                }
+
+
                 SetHeadingToMapSquare(pathingResult.MonsterFinalLocation);
                 MoveIntoSquare(pathingResult.MonsterFinalLocation);
             }
@@ -714,6 +776,11 @@ namespace RogueBasin
             }
 
             return true;
+        }
+
+        private bool PlayerCanBeSeen(CreatureFOV currentFOV) {
+            return Game.Dungeon.Player.LocationLevel == this.LocationLevel &&
+                    currentFOV.CheckTileFOV(Game.Dungeon.Player.LocationMap.x, Game.Dungeon.Player.LocationMap.y) && !Game.Dungeon.Player.isStealthed();
         }
 
         protected void DoPatrol()
@@ -773,7 +840,7 @@ namespace RogueBasin
                         bool validMove = false;
                         Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
 
-                        validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation);
+                        validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation) && !Game.Dungeon.DangerousFeatureAtLocation(LocationLevel, newLocation);
 
                         //Give up if this is not a valid move
                         if (!validMove)
@@ -813,7 +880,7 @@ namespace RogueBasin
                         if(CanOpenDoors())
                             permission = Pathing.PathingPermission.IgnoreDoors;
 
-                        pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, Waypoints[CurrentWaypoint], PathingType(), permission);
+                        pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, Waypoints[CurrentWaypoint], PathingType(), permission, IgnoreDangerousTerrain);
 
                         if (pathingResult.TerminallyBlocked)
                         {
@@ -1004,7 +1071,7 @@ namespace RogueBasin
                     if(CanOpenDoors())
                         permission = Pathing.PathingPermission.IgnoreDoors;
 
-                    pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, new Point(fleeX, fleeY), PathingType(), permission);
+                    pathingResult = Game.Dungeon.Pathing.GetPathToPoint(this.LocationLevel, this.LocationMap, new Point(fleeX, fleeY), PathingType(), permission, IgnoreDangerousTerrain);
 
                     if (pathingResult.TerminallyBlocked)
                     {
@@ -1090,7 +1157,7 @@ namespace RogueBasin
             if(CanOpenDoors())
                 permission = Pathing.PathingPermission.IgnoreDoors;
 
-            pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType(), permission);
+            pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, newTarget, PathingType(), permission, IgnoreDangerousTerrain);
 
             Point nextStep = pathingResult.MonsterFinalLocation;
 
@@ -1104,12 +1171,12 @@ namespace RogueBasin
 
                     if (newTarget == Game.Dungeon.Player)
                     {
-                        result = AttackPlayer(newTarget as Player);
+                        result = AttackPlayer(newTarget as Player, false);
                     }
                     else
                     {
                         //It's a normal creature
-                        result = AttackMonster(newTarget as Monster);
+                        result = AttackMonster(newTarget as Monster, false);
                     }
 
                     Screen.Instance.DrawMeleeAttack(this, newTarget, result);
@@ -1165,7 +1232,7 @@ namespace RogueBasin
             if (CanOpenDoors())
                 permission = Pathing.PathingPermission.IgnoreDoors;
 
-            var pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, player, PathingType(), permission);
+            var pathingResult = Game.Dungeon.Pathing.GetPathToCreature(this, player, PathingType(), permission, IgnoreDangerousTerrain);
 
             if (pathingResult.TerminallyBlocked)
             {
@@ -1191,6 +1258,9 @@ namespace RogueBasin
                 Game.Dungeon.OpenDoor(this.LocationLevel, nextStep);
                 LogFile.Log.LogEntryDebug(this.Representation + " opened door", LogDebugLevel.Medium);
             }
+
+            //Apply any dangerous terrain effects
+            Game.Dungeon.MonsterInteractWithActiveFeature(this, this.LocationLevel, nextStep);
 
             LocationMap = nextStep;
         }
@@ -1310,6 +1380,10 @@ namespace RogueBasin
         /// </summary>
         public override void NotifyAttackByCreature(Creature creature)
         {
+            if (currentTarget != null && creature != currentTarget)
+            {
+                LogFile.Log.LogEntryDebug(this.Representation + " changes target from " + currentTarget.Representation + " to " + creature.Representation, LogDebugLevel.Low);
+            }
             AIState = SimpleAIStates.Pursuit;
             currentTarget = creature;
             currentTargetID = creature.UniqueID;

@@ -27,7 +27,7 @@ namespace RogueBasin
                     {
                         string[] words = line.Split('=');
                         Entries.Add(words[0], words[1]);
-                        LogFile.Log.LogEntryDebug("Adding config property: " + words[0] + ":" + words[1], LogDebugLevel.Low);
+                        LogFile.Log.LogEntryDebug("Adding config property: " + words[0] + ":" + words[1], LogDebugLevel.Medium);
                     }
                 }
             }
@@ -42,6 +42,30 @@ namespace RogueBasin
             get
             {
                 return Game.Config.Entries.ContainsKey("debug") && Game.Config.Entries["debug"] == "true";
+            }
+        }
+
+        public bool DisplayGraphs
+        {
+            get
+            {
+                return Game.Config.Entries.ContainsKey("displayGraphs") && Game.Config.Entries["displayGraphs"] == "true";
+            }
+        }
+
+        public bool Sound
+        {
+            get
+            {
+                return Game.Config.Entries.ContainsKey("sound") && Game.Config.Entries["sound"] == "true";
+            }
+        }
+
+        public bool Music
+        {
+            get
+            {
+                return Game.Config.Entries.ContainsKey("music") && Game.Config.Entries["music"] == "true";
             }
         }
     }

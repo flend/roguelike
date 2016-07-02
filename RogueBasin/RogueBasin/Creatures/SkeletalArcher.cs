@@ -19,7 +19,7 @@ namespace RogueBasin.Creatures
             return new SkeletalArcher();
         }
 
-        protected override double GetMissileRange()
+        public override double GetMissileRange()
         {
             return 3;
         }
@@ -60,7 +60,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 1;
         }

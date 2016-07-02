@@ -7,6 +7,8 @@ using System.IO;
 using System.Windows.Forms;
 using System.Reflection;
 using System.Linq;
+using System.Drawing;
+using RogueBasin.LibTCOD;
 
 namespace RogueBasin {
 
@@ -19,19 +21,33 @@ namespace RogueBasin {
     {
         public enum TileLevel {
             Terrain = 0,
-            Features = 1,
-            Items = 2,
-            CreatureDecoration = 3,
+            TerrainEffects = 1,
+            Features = 2,
+            Items = 3,
             Creatures = 4,
-            Animations = 5,
-            TargettingUI = 6
+            CreatureDecoration = 5,
+            CreatureStatus = 6,
+            CreatureCover = 7,
+            CreatureTarget = 8,
+            CreatureLevel = 9,
+            TargettingUI = 10,
+            Animations = 11
         }
 
         static Screen instance = null;
 
-        //Console/screen size
-        public int Width { get; set; }
-        public int Height { get; set; }
+        IMapRenderer mapRenderer;
+        public bool NeedsUpdate { get; set; }
+
+        //A prompt for the user to respond to
+        string Prompt { get; set; }
+
+        //Screen size
+        public int ScreenWidth { get; set; }
+        public int ScreenHeight { get; set; }
+
+        //UI size
+        public double UIScaling { get; set; }
 
         public bool DebugMode { get; set; }
 
@@ -48,10 +64,7 @@ namespace RogueBasin {
 
         public bool SetTargetInRange = false;
 
-        //Top left coord to start drawing the map at
-        //Set by DrawMap
-        Point mapTopLeft;
-
+        //Viewport in tile coordinates
         Point mapTopLeftBase;
         Point mapBotRightBase;
 
@@ -62,55 +75,56 @@ namespace RogueBasin {
         Point msgDisplayBotRight;
         public int msgDisplayNumLines;
 
-        Point statsDisplayTopLeft;
-        Point statsDisplayBotRight;
-
         Point hitpointsOffset;     
 
-        Color inFOVTerrainColor = ColorPresets.White;
-        Color seenNotInFOVTerrainColor = ColorPresets.Gray;
-        Color neverSeenFOVTerrainColor;
-        Color inMonsterFOVTerrainColor = ColorPresets.Blue;
+        System.Drawing.Color inFOVTerrainColor = System.Drawing.Color.White;
+        System.Drawing.Color seenNotInFOVTerrainColor = System.Drawing.Color.Gray;
+        System.Drawing.Color neverSeenFOVTerrainColor;
+        System.Drawing.Color inMonsterFOVTerrainColor = System.Drawing.Color.Blue;
 
-        Color statsColor = ColorPresets.Khaki;
-        Color nothingColor = ColorPresets.Gray;
+        System.Drawing.Color statsColor = System.Drawing.Color.FromArgb(255, 108, 215, 224);
+        System.Drawing.Color nothingColor = System.Drawing.Color.Gray;
 
-        Color creatureColor = ColorPresets.White;
-        Color itemColor = ColorPresets.Red;
-        Color featureColor = ColorPresets.White;
+        System.Drawing.Color creatureColor = System.Drawing.Color.White;
+        System.Drawing.Color itemColor = System.Drawing.Color.Red;
+        System.Drawing.Color featureColor = System.Drawing.Color.White;
 
-        Color hiddenColor = ColorPresets.Black;
+        System.Drawing.Color hiddenColor = System.Drawing.Color.Black;
 
-        Color charmBackground = ColorPresets.DarkKhaki;
-        Color passiveBackground = ColorPresets.DarkMagenta;
-        Color uniqueBackground = ColorPresets.DarkCyan;
-        Color inRangeBackground = ColorPresets.DeepSkyBlue;
-        Color inRangeAndAggressiveBackground = ColorPresets.Purple;
-        Color stunnedBackground = ColorPresets.DarkCyan;
-        Color investigateBackground = ColorPresets.DarkGreen;
-        Color pursuitBackground = ColorPresets.DarkRed;
-        Color normalBackground = ColorPresets.Black;
-        Color normalForeground = ColorPresets.White;
-        Color targettedBackground = ColorPresets.DarkSlateGray;
+        System.Drawing.Color charmBackground = System.Drawing.Color.DarkKhaki;
+        System.Drawing.Color passiveBackground = System.Drawing.Color.DarkMagenta;
+        System.Drawing.Color uniqueBackground = System.Drawing.Color.DarkCyan;
+        System.Drawing.Color inRangeBackground = System.Drawing.Color.DeepSkyBlue;
+        System.Drawing.Color inRangeAndAggressiveBackground = System.Drawing.Color.Purple;
+        System.Drawing.Color stunnedBackground = System.Drawing.Color.DarkCyan;
+        System.Drawing.Color investigateBackground = System.Drawing.Color.DarkGreen;
+        System.Drawing.Color pursuitBackground = System.Drawing.Color.DarkRed;
+        System.Drawing.Color normalBackground = System.Drawing.Color.Black;
+        System.Drawing.Color normalForeground = System.Drawing.Color.White;
+        System.Drawing.Color targettedBackground = System.Drawing.Color.DarkSlateGray;
 
-        Color statsFrameColor = ColorPresets.MediumSeaGreen;
-        Color mapFrameColor = ColorPresets.Khaki;
+        System.Drawing.Color statsFrameColor = System.Drawing.Color.MediumSeaGreen;
+        System.Drawing.Color mapFrameColor = System.Drawing.Color.Khaki;
 
-        Color targetBackground = ColorPresets.White;
-        Color targetForeground = ColorPresets.Black;
+        System.Drawing.Color targetBackground = System.Drawing.Color.White;
+        System.Drawing.Color targetForeground = System.Drawing.Color.Black;
 
-        Color literalColor = ColorPresets.BurlyWood;
-        Color literalTextColor = ColorPresets.White;
+        System.Drawing.Color literalColor = System.Drawing.Color.BurlyWood;
+        System.Drawing.Color literalTextColor = System.Drawing.Color.White;
 
-        Color headingColor = ColorPresets.Yellow;
+        System.Drawing.Color headingColor = System.Drawing.Color.Yellow;
 
-        Color messageColor = ColorPresets.CadetBlue;
-        Color titleColor = ColorPresets.CadetBlue;
+        System.Drawing.Color messageColor = System.Drawing.Color.CadetBlue;
+        System.Drawing.Color titleColor = System.Drawing.Color.CadetBlue;
 
-        Color soundColor = ColorPresets.Yellow;
+        System.Drawing.Color soundColor = System.Drawing.Color.Yellow;
 
-        Color normalMovieColor = ColorPresets.MediumSeaGreen;
-        Color flashMovieColor = ColorPresets.Red;
+        System.Drawing.Color normalMovieColor = System.Drawing.Color.MediumSeaGreen;
+        System.Drawing.Color flashMovieColor = System.Drawing.Color.Red;
+
+        System.Drawing.Color promptColor = System.Drawing.Color.Orange;
+
+        int movieFrameWidth = 4;
 
         const char heartChar = (char)567;
         const char shieldChar = (char)561;
@@ -118,26 +132,16 @@ namespace RogueBasin {
         const char grenadeChar = (char)297;
         const char batteryChar = (char)308;
 
-        Color orangeActivatedColor = ColorPresets.DarkOrange;
-        Color batteryActivatedColor = ColorPresets.SlateBlue;
-        Color orangeHighlightedColor = ColorPresets.Gold;
-        Color orangeDisactivatedColor = ColorPresets.SaddleBrown;
-        Color disabledColor = ColorPresets.DimGray;
-        Color weaponColor = ColorPresets.LightSteelBlue;
-        Color heartColor = ColorPresets.Crimson;
+        System.Drawing.Color orangeActivatedColor = System.Drawing.Color.DarkOrange;
+        System.Drawing.Color batteryActivatedColor = System.Drawing.Color.SlateBlue;
+        System.Drawing.Color orangeHighlightedColor = System.Drawing.Color.Gold;
+        System.Drawing.Color orangeDisactivatedColor = System.Drawing.Color.SaddleBrown;
+        System.Drawing.Color disabledColor = System.Drawing.Color.DimGray;
+        System.Drawing.Color weaponColor = System.Drawing.Color.LightSteelBlue;
+        System.Drawing.Color heartColor = System.Drawing.Color.Crimson;
         
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
-
-        //Inventory
-        Point inventoryTL;
-        Point inventoryTR;
-        Point inventoryBL;
-
-        //Training
-        Point trainingTL;
-        Point trainingTR;
-        Point trainingBL;
 
         //For examining
         public Monster CreatureToView { get; set; }
@@ -160,6 +164,13 @@ namespace RogueBasin {
         Point movieTL = new Point(0, 0);
         uint movieMSBetweenFrames = 500;
 
+        public static int combationAnimationFrameDuration = 300; //ms
+        public static int combatFastAnimationFrameDuration = 150;
+
+        int smallTextSize = 12;
+        int largeTextSize = 22;
+        int largeTextSizeLineOffset = 11;
+
         /// <summary>
         /// Targetting mode
         /// </summary>
@@ -171,14 +182,12 @@ namespace RogueBasin {
         public Point Target { get; set; }
 
         public TargettingType TargetType { get; set; }
+        public RogueBase.TargettingAction TargetAction { get; set; }
 
         public int TargetRange { get; set; }
         public double TargetPermissiveAngle { get; set; }
 
-        //Current movie
-        List <MovieFrame> movieFrames;
-
-        public Color PCColor { get; set;}
+        public System.Drawing.Color PCColor { get; set;}
 
         public bool SeeAllMonsters { get; set; }
         public bool SeeAllMap { get; set; }
@@ -187,12 +196,17 @@ namespace RogueBasin {
 
         public uint MessageQueueWidth { get; private set; }
 
+        public bool ExtraUI { get; set; }
+
         public static Screen Instance
         {
             get
             {
                 if (instance == null)
-                    instance = new Screen();
+                {
+                    //instance = new Screen(new MapRendererLibTCod());
+                    instance = new Screen(new MapRendererSDLDotNet());
+                }
                 return instance;
             }
         }
@@ -213,18 +227,43 @@ namespace RogueBasin {
 
         char explosionIcon = (char)505;
 
+        static readonly string blueTargetTile = "bluetarget";
+        static readonly string greenTargetTile = "greentarget";
+        static readonly string redTargetTile = "redtarget";
+        static readonly string blackTargetTile = "blacktarget";
+
         public int LevelToDisplay
         {
             get; set;
         }
 
-        Screen()
+        Screen(IMapRenderer renderer)
         {
-            Width = 60;
-            Height = 35;
+            mapRenderer = renderer;
 
-            ViewableWidth = 37;
-            ViewableHeight = 27;
+            ScreenWidth = 1285;
+            ScreenHeight = 965;
+
+            int nativeSpriteDim = 64;
+            
+            //Try these
+
+            //int scaledSpriteDim = 64;
+            int scaledSpriteDim = 32; 
+            //int scaledSpriteDim = 128;
+            //int scaledSpriteDim = 8;  //this appears to fail spectacularly but isn't very useful anyway
+            
+
+            //These control the map 
+            ViewableWidth = ScreenWidth / scaledSpriteDim;
+            ViewableHeight = ScreenHeight / scaledSpriteDim;
+
+            if (nativeSpriteDim != scaledSpriteDim)
+            {
+                mapRenderer.SetSpriteVideoSize(scaledSpriteDim, scaledSpriteDim);
+            }
+
+            UIScaling = 1;
 
             ViewportScrollSpeed = 1;
 
@@ -236,85 +275,47 @@ namespace RogueBasin {
             DebugMode = false;
             CombatAnimations = true;
 
-            msgDisplayTopLeft = new Point(2, 1);
-            msgDisplayBotRight = new Point(57, 3);
+            msgDisplayTopLeft = new Point(50, 50);
+            msgDisplayBotRight = new Point(850, 100);
 
             MessageQueueWidth = (uint)(msgDisplayBotRight.y - msgDisplayBotRight.x);
 
             msgDisplayNumLines = 3;
 
-            mapTopLeftBase = new Point(2, 6);
-            mapBotRightBase = new Point(38, 32);
+            mapTopLeftBase = new Point(0, 0);
+            mapBotRightBase = new Point(ViewableWidth, ViewableHeight);
 
-            statsDisplayTopLeft = new Point(40, 6);
-            statsDisplayBotRight = new Point(57, 32);
-
-            inventoryTL = new Point(5, 5);
-            inventoryTR = new Point(55, 5);
-            inventoryBL = new Point(5, 30);
-
-            trainingTL = new Point(15, 10);
-            trainingTR = new Point(45, 10);
-            trainingBL = new Point(15, 25);
-
-            MsgLogWrapWidth = inventoryTR.x - inventoryTL.x - 4;
+            MsgLogWrapWidth = 80;
 
             //Colors
-            neverSeenFOVTerrainColor = Color.FromRGB(90, 90, 90);
+            neverSeenFOVTerrainColor = System.Drawing.Color.Gray;// Color.FromRGB(90, 90, 90);
 
             TotalKills = null;
 
-            DeathTL = new Point(1, 1);
-            DeathWidth = 59;
-            DeathHeight = 34;
-
-            PCColor = ColorPresets.White;
+            PCColor = System.Drawing.Color.White;
 
             SeeAllMonsters = false;
             SeeAllMap = false;
+
+            NeedsUpdate = true;
+
+            ExtraUI = true;
         }
 
         //Setup the screen
         public void InitialSetup()
         {
-            int tileSize = 16;
+            mapRenderer.Setup(ScreenWidth, ScreenHeight);
+        }
 
-            try
-            {
-                tileSize = Convert.ToInt16(Game.Config.Entries["tilesize"]);
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Error getting tilesize from config file", LogDebugLevel.High);
-            }
+        public void ShowMessageLine(string msg, System.Drawing.Color color)
+        {
+            DrawTextWidth(msg, msgDisplayTopLeft, msgDisplayBotRight.x - msgDisplayTopLeft.x, color);
+        }
 
-            string tileMapFilename = "FileSupport.dll";
-            if(tileSize == 32)
-                tileMapFilename = "StreamSupport.dll";
-
-            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
-            CustomFontRequest fontReq = new CustomFontRequest(tileMapFilename, tileSize, tileSize, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
-            //CustomFontRequest fontReq = new CustomFontRequest("tallfont.png", 8, 16, CustomFontRequestFontTypes.LayoutAsciiInColumn);
-            //CustomFontRequest fontReq = new CustomFontRequest("shroom_moved_big.png", 32, 32, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("shroom_moved.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("Anikki_square_20x20.bmp", 20, 20, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("Markvii.png", 12, 12, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("Tahin_16x16_rounded.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            //CustomFontRequest fontReq = new CustomFontRequest("msgothic.png", 16, 16, CustomFontRequestFontTypes.LayoutAsciiInRow);
-            RootConsole.Width = Width;
-            RootConsole.Height = Height;
-            RootConsole.WindowTitle = "TraumaRL";
-            RootConsole.Fullscreen = false;
-            RootConsole.Font = fontReq;
-            /*
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.PrintLine("Hello world!", 30, 30, LineAlignment.Left);
-            rootConsole.Flush();
-            */
-            Console.WriteLine("debug test message.");
-
+        public void ShowMessageLine(string msg)
+        {
+            DrawTextWidth(msg, msgDisplayTopLeft, msgDisplayBotRight.x - msgDisplayTopLeft.x, messageColor);
         }
 
         public bool TargetSelected()
@@ -340,34 +341,6 @@ namespace RogueBasin {
                 ShowRoomNumbering = 0;
         }
 
-        /// <summary>
-        /// Returns the points in a triangular target from origin to target
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        public List<Point> GetPointsForTriangularTarget(Point origin, Point target, int range, double fovAngle)
-        {
-            List<Point> triangularPoints = new List<Point>();
-
-            double angle = DirectionUtil.AngleFromOriginToTarget(origin, target);
-
-            for (int i = origin.x - range; i < origin.x + range; i++)
-            {
-                for (int j = origin.y - range; j < origin.y + range; j++)
-                {
-                    if (i >= 0 && i < this.Width && j >= 0 && j < this.Height)
-                    {
-                        if (CreatureFOV.TriangularFOV(origin, angle, range, i, j, fovAngle))
-                        {
-                            triangularPoints.Add(new Point(i, j));
-                        }
-                    }
-                }
-            }
-
-            return triangularPoints;
-        }
 
         /// <summary>
         /// Centre the view on a point
@@ -397,34 +370,6 @@ namespace RogueBasin {
         private void SetViewBRFromTL()
         {
             viewBR = new Point(viewTL.x + ViewableWidth - 1, viewTL.y + ViewableHeight - 1);
-        }
-
-        /// <summary>
-        /// Returns the points in a circular target
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        public List<Point> GetPointsForCircularTarget(Point location, int size)
-        {
-            List<Point> splashSquares = new List<Point>();
-
-            for (int i = location.x - size; i < location.x + size; i++)
-            {
-                for (int j = location.y - size; j < location.y + size; j++)
-                {
-                    if (i >= 0 && i < Width && j >= 0 && j < Height)
-                    {
-
-                        if (Math.Pow(i - location.x, 2) + Math.Pow(j - location.y, 2) < Math.Pow(size, 2))
-                        {
-                            splashSquares.Add(new Point(i, j));
-                        }
-                    }
-                }
-            }
-
-            return splashSquares;
         }
 
         /// <summary>
@@ -459,7 +404,7 @@ namespace RogueBasin {
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
             DrawPathLine(layerNo, start, end, foregroundColor, backgroundColor, (char)0);
         }
@@ -470,7 +415,7 @@ namespace RogueBasin {
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor, char drawChar)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor, char drawChar)
         {
             //Draw the line overlay
 
@@ -499,6 +444,10 @@ namespace RogueBasin {
 
                 tileMapLayer(layerNo)[ViewRelative(p)] = new TileEngine.TileCell(c);
                 tileMapLayer(layerNo)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+                if (layerNo == TileLevel.Animations)
+                {
+                    tileMapLayer(layerNo)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
+                }
             }           
         }
 
@@ -509,10 +458,7 @@ namespace RogueBasin {
         /// </summary>
         public void FlushConsole()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.Flush();
+            mapRenderer.Flush();
         }
 
         /// <summary>
@@ -562,213 +508,125 @@ namespace RogueBasin {
             targettingMode = false;
         }
 
-        /// <summary>
-        /// Get the text from a movie
-        /// </summary>
-        /// <param name="movieRoot"></param>
-        /// <returns></returns>
-        public List<string> GetMovieText(string movieRoot)
-        {
-            bool loadSuccess = Screen.Instance.LoadMovie(movieRoot);
 
-            if (!loadSuccess)
-            {
-                LogFile.Log.LogEntryDebug("Failed to load movie file: " + movieRoot, LogDebugLevel.High);
-                return new List<string>();
-            }
+        List<Movie> moviesToPlay = new List<Movie>();
 
-            List<string> outputText = new List<string>();
-
-            //Concatenate the movie into a string list
-            foreach (MovieFrame frame in movieFrames)
-            {
-                if (outputText.Count > 0)
-                    outputText.Add("\n");
-
-                outputText.AddRange(frame.scanLines);
-            }
-
-            return outputText;
-
-        }
-
-        /// <summary>
-        /// Play the movie indicated by the filename root.
-        /// </summary>
-        /// <param name="root"></param>
-        /// 
-
-        public void PlayMovie(List<MovieFrame> frames, bool keypressBetweenFrames)
+        public void EnqueueMovie(string filenameRoot)
         {
             try
             {
-                movieFrames = frames;
-
-                PlayMovieFrames(keypressBetweenFrames);
+                moviesToPlay.Add(LoadMovie(filenameRoot));
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to play movie from frames " + ex.Message);
+                LogFile.Log.LogEntry("Failed to load movie " + filenameRoot);
             }
         }
 
-        private Tuple<int, int> CalculateWidthHeightFromLines(List<string> lines)
+        public void EnqueueMovie(Movie movie)
         {
-            int width = 0;
-
-            foreach (string row in lines)
-            {
-                if (row.Length > width)
-                    width = row.Length;
-            }
-
-            var height = lines.Count;
-
-            return new Tuple<int, int>(width, height);
+            moviesToPlay.Add(movie);
         }
 
-        public void PlayLog(LogEntry logEntry)
+        public void DequeueFirstMovie()
         {
-            try
-            {
-                movieFrames = new List<MovieFrame>();
-                var logFrame = new MovieFrame();
-                var allLines = new List<string>();
-                allLines.Add(logEntry.title);
-                allLines.AddRange(logEntry.lines);
-                logFrame.scanLines = allLines;
-                var dimensions = CalculateWidthHeightFromLines(allLines);
-                logFrame.width = dimensions.Item1;
-                logFrame.height = dimensions.Item2;
+            if (moviesToPlay.Count == 0)
+                return;
 
-                movieFrames.Add(logFrame);
-
-                PlayMovieFrames(false);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to play movie from frames " + ex.Message);
-            }
+            moviesToPlay.RemoveAt(0);
         }
 
-        public void PlayMovie(string filenameRoot, bool keypressBetweenFrames)
+        public bool MoviesToPlay()
         {
-            if (filenameRoot == "" || filenameRoot.Length == 0)
+            return moviesToPlay.Count > 0;
+        }
+
+        private void PlayFirstMovieInQueue() {
+
+            if (moviesToPlay.Count == 0)
             {
-                LogFile.Log.LogEntryDebug("Not playing movie with no name", LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("No movies in queue", LogDebugLevel.High);
                 return;
             }
-
-            try
-            {
-
-                //Draw the basis of the screen
-                Draw();
-
-                //Load whole movie
-                bool loadSuccess = LoadMovie(filenameRoot);
-
-                if (!loadSuccess)
-                {
-                    LogFile.Log.LogEntryDebug("Failed to load movie file: " + filenameRoot, LogDebugLevel.High);
-                    return;
-                }
-
-                PlayMovieFrames(keypressBetweenFrames);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to play movie: " + filenameRoot + " : " + ex.Message);
-            }
+                
+            RenderMovie(moviesToPlay[0]);
         }
 
-        private void PlayMovieFrames(bool keypressBetweenFrames)
+        private void RenderMovie(Movie movie)
         {
             int frameNo = 0;
 
-            int width = Width - movieTL.x;
-            int height = Height - movieTL.y - 5;
-            Point frameTL = new Point(5, 5);
+            int frameBufferX = ScreenWidth / 8;
+            int frameBufferY = ScreenHeight / 8;
+
+            //Calculate dimensions
+            int maxWidth = 0;
+            int totalHeight = 0;
+
+            int textHeight = 0;
+            int textHeightWithSpacing = 0;
+
+            foreach (MovieFrame frame in movie.Frames)
+            {
+                foreach (String scanLine in frame.ScanLines)
+                {
+                    Size textSize = mapRenderer.TextSize(scanLine, largeTextSize);
+                    textHeight = textSize.Height;
+                    textHeightWithSpacing = textHeight + largeTextSizeLineOffset;
+
+                    if (textSize.Width > maxWidth)
+                    {
+                        maxWidth = textSize.Width;
+                    }
+
+                    totalHeight += textHeightWithSpacing;
+                }
+            }
+
+            int bufferedWidth = maxWidth + frameBufferX;
+            int bufferedHeight = totalHeight + frameBufferY;
+
+            int widthOffset = Math.Max(0, (ScreenWidth - bufferedWidth) / 2);
+            int heightOffset = Math.Max(0, (ScreenHeight - bufferedHeight) / 2);
+
+            Point frameTL = new Point(widthOffset, heightOffset);
+            Point movieTL = new Point(widthOffset + frameBufferX / 2, heightOffset + frameBufferY / 2);
 
             //Draw each frame of the movie
-            foreach (MovieFrame frame in movieFrames)
+            foreach (MovieFrame frame in movie.Frames)
             {
-                //Flatline - centre on each frame
-                 width = frame.width;
-                 height = frame.height;
-
-                int xOffset = (Width - movieTL.x * 2 - width) / 2;
-                int yOffset = (Height - movieTL.y * 2 - height) / 2;
-
-                frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset);
-                int frameOffset = 2;
-
                 //Draw frame
-                DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, mapFrameColor);
+                DrawFramePixel(frameTL.x, frameTL.y, bufferedWidth, bufferedHeight, true, System.Drawing.Color.White, movieFrameWidth);
 
                 //Draw content
-                List<string> scanLines = frame.scanLines;
+                List<string> scanLines = frame.ScanLines;
+                DrawMovieFrame(frame.ScanLines, movieTL, maxWidth, textHeightWithSpacing);
 
-                bool hasFlashingChars = DrawMovieFrame(frame.scanLines, frameTL, width, true);
+                DrawText("Press ENTER to continue", new Point(frameTL.x + bufferedWidth / 2, frameTL.y + bufferedHeight - textHeightWithSpacing), LineAlignment.Center, titleColor);
 
-                if (hasFlashingChars)
-                {
-                    //Wait and then redraw without the highlight to make a flash effect
-                    Screen.Instance.FlushConsole();
-                    TCODSystem.Sleep(movieMSBetweenFrames);
-                    DrawMovieFrame(frame.scanLines, frameTL, width, false);
-                }
-
-
-                if (keypressBetweenFrames == true)
-                {
-                    //Don't ask for a key press if it's the last frame, one will happen below automatically
-                    if (frameNo != movieFrames.Count - 1)
-                    {
-                        PrintLineRect("Press any key to continue", frameTL.x + width / 2, frameTL.y + height + 2, width, 1, LineAlignment.Center, titleColor);
-                        Screen.Instance.FlushConsole();
-                        KeyPress userKey = Keyboard.WaitForKeyPress(true);
-                        Screen.Instance.Update();
-                    }
-                }
-                else
-                {
-                    //Wait for the specified time
-
-                    Screen.Instance.FlushConsole();
-                    TCODSystem.Sleep(movieMSBetweenFrames);
-                }
-
+                Screen.Instance.FlushConsole();
                 frameNo++;
+                
+                //Multi-frame unsupported for now, enqueue multiple movies instead
+                break;
             }
-
-            //Print press any key
-            PrintLineRect("Press ENTER to continue", frameTL.x + width / 2, frameTL.y + height + 1, width, 1, LineAlignment.Center, titleColor);
-
-            Screen.Instance.FlushConsole();
-
-            //Await keypress then redraw normal screen
-            WaitForEnterKey();
-
-            UpdateNoMsgQueue();
         }
 
-        /// <summary>
-        /// Wait for ENTER
-        /// </summary>
-        private void WaitForEnterKey()
+        public void DrawFramePixel(int x, int y, int width, int height, bool clear, System.Drawing.Color color, int lineWidth)
         {
-            while (true)
+            if (clear)
             {
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
+                mapRenderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
+            }
 
-                if (userKey.KeyCode == KeyCode.TCODK_ENTER
-                    || userKey.KeyCode == KeyCode.TCODK_KPENTER)
-                {
-                    break;
-                }
+            for (int j = 0; j < lineWidth; j++) {
+                mapRenderer.DrawLine(new Point(x, y + j), new Point(x + width, y + j), color);
+                mapRenderer.DrawLine(new Point(x + width - j, y), new Point(x + width - j, y + height), color);
+                mapRenderer.DrawLine(new Point(x + j, y), new Point(x + j, y + height), color);
+                mapRenderer.DrawLine(new Point(x, y + height - j), new Point(x + width, y + height - j), color);
             }
         }
+
 
         /// <summary>
         /// Draw a frame. If flashOn then highlight flashing squares in red
@@ -777,144 +635,77 @@ namespace RogueBasin {
         /// <param name="frameTL"></param>
         /// <param name="width"></param>
         /// <param name="flashOn"></param>
-        private bool DrawMovieFrame(List<string> scanLines, Point frameTL, int width, bool flashOn)
+        private void DrawMovieFrame(List<string> scanLines, Point frameTL, int width, int lineOffset)
         {
             int offset = 0;
 
-            bool flashingChars = false;
-            char flashChar = '£';
-
             foreach (string line in scanLines)
             {
-                //Check for special characters
-                if (line.Contains(flashChar.ToString()))
-                {
-                    //We will return this, so that the caller knows to call us again with flashOn = false
-                    flashingChars = true;
-
-                    //Print char by char
-                    int coffset = 0;
-                    bool nextCharFlash = false;
-                    Color flashColor = normalMovieColor;
-
-                    foreach (char c in line)
-                    {
-                        if (c == flashChar)
-                        {
-                            if (flashOn)
-                            {
-                                nextCharFlash = true;
-                            }
-                            //Skip this char
-                            continue;
-                        }
-
-                        if (nextCharFlash)
-                        {
-                            flashColor = flashMovieColor;
-                            nextCharFlash = false;
-                        }
-                        else
-                        {
-                            flashColor = normalMovieColor;
-                        }
-
-                        PutChar(frameTL.x + coffset, frameTL.y + offset, c, flashColor);
-                        coffset++;
-                    }
-
-                }
-                else
-                {
-                    //Print whole line
-                    PrintLineRect(line, frameTL.x, frameTL.y + offset, width, 1, LineAlignment.Left, normalMovieColor);
-                }
+                DrawText(line, new Point(frameTL.x + width / 2, frameTL.y + offset * lineOffset), LineAlignment.Center, normalMovieColor);
                 offset++;
             }
-
-            return flashingChars;
         }
 
-        public bool LoadMovie(string filenameRoot)
+        public Movie LoadMovie(string filenameRoot)
         {
-            try
+
+            LogFile.Log.LogEntry("Loading movie: " + filenameRoot);
+
+            int frameNo = 0;
+
+            var thisMovieFrames = new List<MovieFrame>();
+
+            Assembly _assembly = Assembly.GetExecutingAssembly();
+
+            //MessageBox.Show("Showing all embedded resource names");
+
+            //string[] names = _assembly.GetManifestResourceNames();
+            //foreach (string name in names)
+            //    MessageBox.Show(name);
+
+            do
             {
-                LogFile.Log.LogEntry("Loading movie: " + filenameRoot);
+                string filename = "RogueBasin.bin.Debug.movies." + filenameRoot + frameNo.ToString() + ".amf";
+                Stream _fileStream = _assembly.GetManifestResourceStream(filename);
 
-                int frameNo = 0;
-
-                movieFrames = new List<MovieFrame>();
-
-                Assembly _assembly = Assembly.GetExecutingAssembly();
-
-                //MessageBox.Show("Showing all embedded resource names");
-
-                //string[] names = _assembly.GetManifestResourceNames();
-                //foreach (string name in names)
-                //    MessageBox.Show(name);
-
-                do
+                //If this is the first frame check if there is at least one frame
+                if (frameNo == 0)
                 {
-                    string filename = "RogueBasin.bin.Debug.movies." + filenameRoot + frameNo.ToString() + ".amf";
-                    Stream _fileStream = _assembly.GetManifestResourceStream(filename);
-
-                    //If this is the first frame check if there is at least one frame
-                    if (frameNo == 0)
-                    {
-                        if (_fileStream == null)
-                        {
-                            throw new ApplicationException("Can't find file: " + filename);
-                        }
-                    }
-                    //Otherwise, not finding a file just means the end of a movie
-
                     if (_fileStream == null)
                     {
-                        break;
+                        throw new ApplicationException("Can't find file: " + filename);
                     }
+                }
+                //Otherwise, not finding a file just means the end of a movie
 
-                    //File exists, load the frame
-                    MovieFrame frame = new MovieFrame();
+                if (_fileStream == null)
+                {
+                    break;
+                }
 
-                    using (StreamReader reader = new StreamReader(_fileStream))
+                //File exists, load the frame
+                MovieFrame frame = new MovieFrame();
+
+                using (StreamReader reader = new StreamReader(_fileStream))
+                {
+                    string thisLine;
+
+                    frame.ScanLines = new List<string>();
+
+                    while ((thisLine = reader.ReadLine()) != null)
                     {
-                        string thisLine;
-
-                        frame.scanLines = new List<string>();
-
-                        while ((thisLine = reader.ReadLine()) != null)
-                        {
-                            frame.scanLines.Add(thisLine);
-                        }
-
-                        //Set width and height
-
-                        //Calculate dimensions
-                        frame.width = 0;
-
-                        foreach (string row in frame.scanLines)
-                        {
-                            if (row.Length > frame.width)
-                                frame.width = row.Length;
-                        }
-
-                        frame.height = frame.scanLines.Count;
-
-                        //Add the frame
-                        movieFrames.Add(frame);
-
-                        //Increment the frame no
-                        frameNo++;
+                        frame.ScanLines.Add(thisLine);
                     }
-                } while (true);
 
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogFile.Log.LogEntry("Failed to load movie: " + e.Message);
-                return false;
-            }
+                    //Add the frame
+                    thisMovieFrames.Add(frame);
+
+                    //Increment the frame no
+                    frameNo++;
+                }
+            } while (true);
+
+            return new Movie(thisMovieFrames);
         }
 
         /// <summary>
@@ -952,13 +743,19 @@ namespace RogueBasin {
             return false;
         }
 
+        private System.Drawing.Color ColorInterpolate(System.Drawing.Color from, System.Drawing.Color to, double degree)
+        {
+            libtcodWrapper.Color interpolated = libtcodWrapper.Color.Interpolate(libtcodWrapper.Color.FromRGB(from.R, from.G, from.B), libtcodWrapper.Color.FromRGB(to.R, to.G, to.B), degree);
+            return System.Drawing.Color.FromArgb(interpolated.Red, interpolated.Blue, interpolated.Green);
+        }
+
         private void DrawPC(int levelToDraw, Player player)
         {
             if (player.LocationLevel != levelToDraw)
                 return;
          
             Point PClocation = player.LocationMap;
-            Color PCDrawColor = PCColor;
+            System.Drawing.Color PCDrawColor = PCColor;
 
             if (DebugMode)
             {
@@ -966,7 +763,7 @@ namespace RogueBasin {
 
                 if (pcSquare.InMonsterFOV)
                 {
-                    PCDrawColor = Color.Interpolate(PCDrawColor, ColorPresets.Red, 0.4);
+                    PCDrawColor = ColorInterpolate(PCDrawColor, System.Drawing.Color.Red, 0.4);
                 }
             }
 
@@ -981,7 +778,7 @@ namespace RogueBasin {
 
             if (hasActiveWetware != null)
             {
-                colorToUse = ColorPresets.LightSkyBlue;
+                colorToUse = System.Drawing.Color.LightSkyBlue;
 
                 if (hasActiveWetware.GetType() == typeof(Items.StealthWare))
                     pcRepresentation = (char)256;
@@ -989,6 +786,40 @@ namespace RogueBasin {
 
             tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)] = new TileEngine.TileCell(pcRepresentation);
             tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileFlag = new LibtcodColorFlags(colorToUse);
+            tileMapLayer(TileLevel.Creatures)[ViewRelative(PClocation)].TileSprite = player.GameSprite;
+
+            tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(player.LocationMap)] = new TileEngine.TileCell("monster_level_" + player.Level);
+
+            //Draw equipped weapons
+
+            //Draw equipped ranged weapon
+            Item weapon = player.GetEquippedRangedWeaponAsItem();
+            
+            //Draw equipped melee weapon
+            Item meleeWeapon = player.GetEquippedMeleeWeaponAsItem();
+
+            if(weapon != null && !(weapon is Items.Pistol)) {
+                tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(PClocation)].TileSprite = weapon.GameSprite;
+            }
+            else if (meleeWeapon != null)
+            {
+                tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(PClocation)].TileSprite = meleeWeapon.GameSprite;
+            }
+
+            if (player.IsDodgeActive())
+            {
+                tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(PClocation)].TileSprite = "running";
+            }
+
+            if (player.IsAimActive())
+            {
+                tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(PClocation)].TileSprite = "aiming";
+            }
+
+            if (player.IsEffectActive(typeof(PlayerEffects.StealthBoost)))
+            {
+                tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(PClocation)].TileSprite = "stealth";
+            }
         }
 
 
@@ -1000,7 +831,22 @@ namespace RogueBasin {
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
-            tileMap = new TileEngine.TileMap(7, ViewableHeight, ViewableWidth);
+            if(tileMap == null)
+                tileMap = new TileEngine.TileMap((int)TileLevel.Animations + 1, ViewableHeight, ViewableWidth);
+
+            tileMap.ClearLayer(TileLevel.Terrain);
+            tileMap.ClearLayer(TileLevel.TerrainEffects);
+            tileMap.ClearLayer(TileLevel.Features);
+            tileMap.ClearLayer(TileLevel.Creatures);
+            tileMap.ClearLayer(TileLevel.CreatureDecoration);
+            tileMap.ClearLayer(TileLevel.CreatureStatus);
+            tileMap.ClearLayer(TileLevel.CreatureCover);
+            tileMap.ClearLayer(TileLevel.CreatureTarget);
+            tileMap.ClearLayer(TileLevel.CreatureLevel);
+            tileMap.ClearLayer(TileLevel.Items);
+            tileMap.ClearLayer(TileLevel.TargettingUI);
+
+            //Don't clear the animations layer
 
             int levelToDisplay = LevelToDisplay;
 
@@ -1034,7 +880,6 @@ namespace RogueBasin {
         //Draw the current dungeon map and objects
         private void Draw()
         {
-
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
 
@@ -1048,32 +893,446 @@ namespace RogueBasin {
             //E.g. an animation only changes anim, targetting only changes targetting
 
             //Build the full tiled map representation
-            BuildTiledMap();
-            
-            //Render tiled map to screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
-            //Draw Stats
-            DrawStats(dungeon.Player);
+            if (Game.Base.GameStarted)
+            {
+                BuildTiledMap();
 
-            if (ShowMsgHistory)
-                DrawMsgHistory();
+                //Render tiled map to screen
+                mapRenderer.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeftBase.x, mapTopLeftBase.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
 
-            if (ShowClueList)
-                DrawCluesList();
+                DrawUI();
+            }
 
-            if (ShowLogList)
-                DrawLogList();
+            if(MoviesToPlay())
+                PlayFirstMovieInQueue();
+
+            if (SpecialScreen != null)
+            {
+                SpecialScreen();
+            }
+
+            //Prompt for user
+            if (Prompt != null)
+            {
+                DrawPrompt();
+            }
+            else if (ShowMessageQueue && SpecialScreen == null) {
+                Game.MessageQueue.RunMessageQueue();
+            }
+            NeedsUpdate = false;
 
         }
 
+
+        public Action SpecialScreen {
+            get; set;
+        }
+
+        private System.Drawing.Color textColor = System.Drawing.Color.Khaki;
+
+        public void CharacterSelectionScreen()
+        {
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
+
+            var titleColor = System.Drawing.Color.Khaki;
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 4;
+
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
+
+            var centreX = ScreenWidth / 2;
+
+            var lanceCentre = new Point(centreXOffset, graphicsY);
+            var crackCentre = new Point(centreXOffset * 2, graphicsY);
+            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
+
+            var titleLineOffset = ScreenHeight / 32;
+
+            DrawLargeText("Congratulations!", new Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("You VOLUNTEERed for the RoyaLe!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("VERY LITTLE (6 arenas)", new Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("now stands between you and victory!", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+
+            DrawLargeText("State your name and history:", new Point(centreX, topY + titleLineOffset * 5), LineAlignment.Center, textColor);
+            
+            var characterOffset = ScreenHeight / 19;
+
+            DrawText("[1] Lance", lanceCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
+            DrawSpriteByCentre("lance", lanceCentre);
+
+            DrawText("[2] Crack", crackCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
+            DrawSpriteByCentre("crack", crackCentre);
+
+            DrawText("[3] N3rd", nerdCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
+            DrawSpriteByCentre("nerd", nerdCentre);
+
+            var textY = ScreenHeight / 11;
+            var textWidth = (int)Math.Floor(ScreenWidth / 5.0);
+            var textXOffset = (int)Math.Floor(-ScreenWidth / 10.0);
+
+            var lanceText = "A disgraced athlete who was dismissed for his violent conduct in track and field. Ideal for the Arena.";
+            DrawTextWidth(lanceText, lanceCentre + new Point(textXOffset, textY), textWidth, statsColor);
+
+            var crackText = "In 2072 a commando was sent to prison by a military court for a crime he absolutely did commit. Now fighting for the pleasure of TV viewers everywhere!";
+            DrawTextWidth(crackText, crackCentre + new Point(textXOffset, textY), textWidth, statsColor);
+
+            var nerdText = "Having finally won GrandMaster league in popular video game 'Running Hunger Royale' the nerd was completely unprepared for his 'prize'!";
+            DrawTextWidth(nerdText, nerdCentre + new Point(textXOffset, textY), textWidth, statsColor);
+
+            var specialY = (int)Math.Floor(ScreenHeight / 3.2);
+
+            var lanceSpecial = "Special: Keep moving for a melee and defence bonus!";
+            DrawTextWidth(lanceSpecial, lanceCentre + new Point(textXOffset, specialY), textWidth, textColor);
+
+            var crackSpecial = "Special: Halt in place for a ranged and defence bonus!";
+            DrawTextWidth(crackSpecial, crackCentre + new Point(textXOffset, specialY), textWidth, textColor);
+
+            var nerdSpecial = "Special: Sneak around and cause mayhem!";
+            DrawTextWidth(nerdSpecial, nerdCentre + new Point(textXOffset, specialY), textWidth, textColor);
+
+            var styleY = (int)Math.Floor(ScreenHeight / 2.1);
+
+            if (Game.Dungeon.FunMode)
+            {
+                var funText1 = "FUN MODE!: Life's a laugh and death's a joke, it's true.";
+                var funText2 = "[R]: For roguelike mode!";
+
+                DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
+                DrawText(funText2, new Point(centreX, graphicsY + styleY + titleLineOffset), LineAlignment.Center, textColor);
+            }
+            else
+            {
+                var funText1 = "ROGUELIKE MODE!: I learnt to Crawl before I could walk.";
+                var funText2 = "[F]: For FUN mode!";
+
+                DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
+                DrawText(funText2, new Point(centreX, graphicsY + styleY + titleLineOffset), LineAlignment.Center, textColor);
+            }
+        }
+
+        public void FunModeDeathScreen()
+        {
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
+
+            var titleColor = System.Drawing.Color.Khaki;
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 4;
+
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
+
+            var centreX = ScreenWidth / 2;
+
+            var lanceCentre = new Point(centreXOffset, graphicsY);
+            var crackCentre = new Point(centreXOffset * 2, graphicsY);
+            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
+
+            var titleLineOffset = 30;
+
+            DrawLargeText("Congratulations!", new Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("You DIED in the service of PRIME TIME TV!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("But...", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("But...", new Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, textColor);
+
+            DrawLargeText("You think the TV execs let you off that easy?", new Point(centreX, topY + titleLineOffset * 6), LineAlignment.Center, textColor);
+
+            string deathStr = "After just " + Game.Dungeon.NumberOfFunModeDeaths + " stupid deaths?";
+            if (Game.Dungeon.NumberOfFunModeDeaths == 1)
+            {
+                deathStr = "After just one stupid death?";
+            }
+            DrawLargeText(deathStr, new Point(centreX, topY + titleLineOffset * 7), LineAlignment.Center, textColor);
+
+            DrawLargeText("Press [F] to restart the area", new Point(centreX, topY + titleLineOffset * 9), LineAlignment.Center, statsColor);
+
+            DrawLargeText("Oh yeah, you lose any fame you had...", new Point(centreX, topY + titleLineOffset * 10), LineAlignment.Center, textColor);
+        }
+
+        public int ArenaSelected { get; set; }
+        public IEnumerable<Monster> ArenaMonsters { get; set; }
+        public IEnumerable<Item> ArenaItems { get; set; }
+        
+        public void ArenaSelectionScreen()
+        {
+            var titleColor = System.Drawing.Color.Khaki;
+
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 4;
+
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
+
+            var centreX = ScreenWidth / 2;
+
+            var lanceCentre = new Point(centreXOffset, graphicsY);
+            var crackCentre = new Point(centreXOffset * 2, graphicsY);
+            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
+
+            var titleLineOffset = 30;
+
+            DrawLargeText("Entering arena: " + (Game.Dungeon.ArenaLevelNumber() + 1), new Point(centreX, topY), LineAlignment.Center, statsColor);
+            DrawLargeText("Pick your poison!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("[Left] and [Right] to choose difficulty", new Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
+            DrawLargeText("[F] to begin", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
+
+            string difficultyText = null;
+            if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 3)
+            {
+                difficultyText = "Easy (?)";
+            }
+            else if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 2)
+            {
+                difficultyText = "Hard (!)";
+            }
+            else
+            {
+                difficultyText = "You must be joking (!!!)";
+            }
+
+            DrawLargeText("Difficulty: " + difficultyText, new Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, statsColor);
+
+            var monsterStr = "Arena denizens:";
+            DrawLargeText(monsterStr, new Point(centreX, topY + 6 * titleLineOffset), LineAlignment.Center, titleColor);
+
+            var monsterTL = new Point(ScreenWidth / 8, topY + 7 * titleLineOffset + 30);
+            var maxWidth = 3 * ScreenWidth / 4;
+            var maxIcons = maxWidth / 64;
+
+            for (int i = 0; i < ArenaMonsters.Count(); i++)
+            {
+                var monster = ArenaMonsters.ElementAt(i);
+                var columnNo = i % maxIcons;
+                var rowNo = (int)Math.Floor(i / (double)maxIcons);
+                var thisPoint = new Point(columnNo * 64, rowNo * 96);
+                Point offset = new Point(0, 0);
+                if (monster.GameSprite == "boss")
+                {
+                    offset = new Point(-32, 32);
+                    DrawSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
+
+                }
+                else
+                {
+                    DrawSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
+                    DrawSpriteByCentre("monster_level_" + monster.Level, monsterTL + thisPoint + new Point(0, 32) + offset);
+                }
+            }
+
+            var itemTL = new Point(ScreenWidth / 8, centreYOffset + 500);
+
+            var equipStr = "Equipment:";
+            DrawLargeText(equipStr, new Point(centreX, itemTL.y - (int)Math.Ceiling(titleLineOffset * 1.5)), LineAlignment.Center, titleColor);
+
+            for (int i = 0; i < ArenaItems.Count(); i++)
+            {
+                var item = ArenaItems.ElementAt(i);
+                var columnNo = i % maxIcons;
+                var rowNo = (int)Math.Floor(i / (double)maxIcons);
+                var thisPoint = new Point(columnNo * 64, rowNo * 96);
+                DrawSpriteByCentre(item.GameSprite, itemTL + thisPoint);
+            }
+
+        }
+
+        int textLineNumber;
+
+        internal void EndOfGameScreen()
+        {
+            textLineNumber = 0;
+
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
+
+            var titleColor = System.Drawing.Color.Khaki;
+
+            var centreXOffset = ScreenWidth / 4;
+            var centreYOffset = ScreenHeight / 8;
+
+            var topY = centreYOffset / 2;
+            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
+
+            var centreX = ScreenWidth / 2;
+
+            Point centrePoint = new Point(centreX, centreYOffset);
+            string headingText = "It's all over!";
+            string statusText = "";
+
+            if (EndOfGameQuit)
+            {
+                statusText = "You fell on your own pole and ended it all!";
+            }
+            else if (EndOfGameWon)
+            {
+                statusText = "You lived to your next TV contract!";
+            }
+            else
+            {
+                statusText = "Easy come, easy go.";
+            }
+
+            DrawNextLine(headingText, centrePoint, titleColor);
+
+            DrawNextLine(statusText, centrePoint, titleColor);
+
+            var totalFame = Game.Dungeon.Player.CombatXP + 150 * Game.Dungeon.Player.Level;
+
+            string fameText = "Final fame: " + totalFame;
+
+            DrawNextLine(fameText, centrePoint, titleColor);
+
+            var viewingFigures = (int)Math.Round(100 * totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 * 2));
+
+            string fameStr = "Slime Mold";
+
+            if (viewingFigures > 10)
+            {
+                fameStr = "Chance Boudreaux";
+            }
+            if (viewingFigures > 20)
+            {
+                fameStr = "Korben Dallas";
+            }
+            if (viewingFigures > 30)
+            {
+                fameStr = "Patrick Mason";
+            }
+            if (viewingFigures > 40)
+            {
+                fameStr = "John Spartan";
+            }
+            if (viewingFigures > 50)
+            {
+                fameStr = "Snake Plisken";
+            }
+            if (viewingFigures > 60)
+            {
+                fameStr = "Riddick";
+            }
+            if (viewingFigures > 70)
+            {
+                fameStr = "Mad Max";
+            }
+            if (viewingFigures > 80)
+            {
+                fameStr = "Jason Bourne";
+            }
+            if (viewingFigures > 90)
+            {
+                fameStr = "Ripley";
+            }
+            
+            DrawNextLine("Your viewing figures: ", centrePoint, titleColor);
+            DrawNextLine(viewingFigures.ToString() + "%!", centrePoint, statsColor);
+
+            DrawNextLine("Your exploits grant you an honourable place in history as the new:", centrePoint, titleColor);
+            DrawNextLine(fameStr, centrePoint, statsColor);
+
+            DrawNextLine("Stats", centrePoint, titleColor);
+
+            //Deaths
+
+            if(Game.Dungeon.FunMode) {
+                if (Game.Dungeon.NumberOfFunModeDeaths > 0)
+                {
+                    var deathStr = "You died: " + Game.Dungeon.NumberOfFunModeDeaths + " times (it's just for fun, right?)";
+                    DrawNextLine(deathStr, centrePoint, statsColor);
+                }
+
+                if (EndOfGameWon)
+                {
+                    var deathStr = "Well, you won. Congrats and all that. Wanna play properly now?";
+                    DrawNextLine(deathStr, centrePoint, statsColor);
+
+                    if (Game.Dungeon.NumberOfFunModeDeaths == 0)
+                    {
+                        var deathStr2 = "And you didn't die? Bet you wish you'd pressed [R] now!";
+                        DrawNextLine(deathStr2, centrePoint, statsColor);
+                    }
+                }
+            }
+
+            //Total kills
+            var killRecord = Game.Dungeon.GetKillRecord();
+
+            var killCount = "Opponents massacred: " + killRecord.killCount;
+            DrawNextLine(killCount, centrePoint, statsColor);
+
+            textLineNumber++;
+            var thanks = "Thanks for playing another of our 7DRLs! -flend and ShroomArts";
+            DrawNextLine(thanks, centrePoint, titleColor);
+
+            textLineNumber+= 4;
+
+            var nextGame = "Press RETURN to play again!";
+            DrawNextLine(nextGame, centrePoint, titleColor);
+
+            //Compose the obituary
+            /*
+            List<string> obString = new List<string>();
+
+            obString.Add(fameStr);
+
+            Game.Dungeon.SaveObituary(obString, killRecord.killStrings);
+             */
+        }
+
+        private void DrawNextLine(string msg, Point centreOrigin, System.Drawing.Color color) {
+            var pt = centreOrigin + new Point(0, textLineNumber * 40);
+            DrawLargeText(msg, new Point(pt.x, pt.y), LineAlignment.Center, color);
+            textLineNumber++;
+        }
+
+        public enum AttackType
+        {
+            Explosion, Bullet, Laser,
+            Stun, Acid
+        }
+
         /// <summary>
-        /// Draws an animated attack. This a top level function which is used instead of Draw() as an entry to screen
+        /// Draws an animated attack.
         /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="target"></param>
-        /// <param name="size"></param>
-        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, Color color)
+        public void DrawAreaAttackAnimation(IEnumerable <Point> targetSquares, AttackType attackType, bool progressive = false, int animationDelay = 0)
+        {
+            string explosionSprite = "explosion";
+
+            switch (attackType)
+            {
+                case AttackType.Bullet:
+                    explosionSprite = "bullet";
+                    break;
+
+                case AttackType.Laser:
+                    explosionSprite = "laz";
+                    break;
+
+                case AttackType.Stun:
+                    explosionSprite = "paralexp";
+                    break;
+
+                case AttackType.Acid:
+                    explosionSprite = "acidexp";
+                    break;
+            }
+
+            if (!progressive)
+                DrawAreaAttackAnimation(targetSquares, explosionSprite, animationDelay);
+            else
+                DrawAreaAttackAnimationProgressive(targetSquares, explosionSprite, animationDelay);
+        }
+
+        /// <summary>
+        /// Draws an animated attack.
+        /// </summary>
+        public void DrawAreaAttackAnimation(IEnumerable<Point> targetSquares, string spriteName, int animationDelay = 0)
         {
             //Clone the list since we mangle it
             List<Point> mangledPoints = new List<Point>();
@@ -1081,11 +1340,6 @@ namespace RogueBasin {
             {
                 mangledPoints.Add(new Point(p));
             }
-
-            //Don't rebuild the static map (items, creatures etc.) since it hasn't changed
-            
-            //Clear targetting
-            tileMap.ClearLayer((int)TileLevel.TargettingUI);
 
             //Add animation points into the animation layer
 
@@ -1095,24 +1349,41 @@ namespace RogueBasin {
                     continue;
 
                 tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
-                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(color, ColorPresets.Black);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileSprite = spriteName;
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(combationAnimationFrameDuration, animationDelay);
+
             }
-
-            //Render the full layered map (with these animations) on screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
-
-            //Wait
-            TCODSystem.Sleep(missileDelay);
-
-            //Wipe the animation layer
-            tileMap.ClearLayer((int)TileLevel.Animations);
-
-            //Draw again without animations
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
         }
 
+        /// <summary>
+        /// Draws an animated attack.
+        /// </summary>
+        public void DrawAreaAttackAnimationProgressive(IEnumerable<Point> targetSquares, string spriteName, int animationDelay = 0)
+        {
+            //Clone the list since we mangle it
+            List<Point> mangledPoints = new List<Point>();
+            foreach (Point p in targetSquares)
+            {
+                mangledPoints.Add(new Point(p));
+            }
+
+            //Add animation points into the animation layer
+
+            var frameTime = (int)Math.Round(combatFastAnimationFrameDuration / (double)mangledPoints.Count());
+
+            int counter = 0;
+            foreach (Point p in mangledPoints)
+            {
+                if (!isViewVisible(p))
+                    continue;
+
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)] = new TileEngine.TileCell(explosionIcon);
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].TileSprite = spriteName;
+                tileMapLayer(TileLevel.Animations)[ViewRelative(p)].Animation = new TileEngine.Animation(frameTime, animationDelay + counter * frameTime);
+                counter++;
+
+            }
+        }
 
         private void DrawTargettingCursor()
         {
@@ -1128,6 +1399,8 @@ namespace RogueBasin {
                     DrawPathLine(TileLevel.TargettingUI, player.LocationMap, Target, targetForeground, targetBackground);
                     //Should improve the getlinesquare function to give nicer output so we could use it here too
 
+                    List<Point> thisLineSquares = Game.Dungeon.GetPathLinePoints(Game.Dungeon.Player.LocationMap, Target);
+                    DrawTargettingOverSquaresAndCreatures(thisLineSquares);    
                     break;
 
                 case TargettingType.LineThrough:
@@ -1139,21 +1412,13 @@ namespace RogueBasin {
                     WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
                     List<Point> lineSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
 
-                    DrawExplosionOverSquaresAndCreatures(lineSquares);      
+                    DrawTargettingOverSquaresAndCreatures(lineSquares);      
 
                     break;
                     
                 case TargettingType.Rocket:
                     {
-                        //Get potention explosion points
-                        int size = 2;
-
-                        List<Point> splashSquares = GetPointsForCircularTarget(Target, size);
-
-                        //Draw a line up to the target square
-                        DrawPathLine(TileLevel.TargettingUI, player.LocationMap, Target, targetForeground, targetBackground);
-
-                        DrawExplosionOverSquaresAndCreatures(splashSquares); 
+                        //Todo
 
                     }
                     break;
@@ -1166,7 +1431,7 @@ namespace RogueBasin {
                         CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
                         List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, Game.Dungeon.Levels[player.LocationLevel], size, spreadAngle);
 
-                        DrawExplosionOverSquaresAndCreatures(splashSquares);
+                        DrawTargettingOverSquaresAndCreatures(splashSquares);
                     }
                     break;
             }
@@ -1175,12 +1440,26 @@ namespace RogueBasin {
             if (!isViewVisible(Target))
                 return;
 
-            Color backgroundColor = targetBackground;
-            Color foregroundColor = targetForeground;
+            //Draw actual target point
+            if (SetTargetInRange)
+            {
+                var targetSprite = TargetAction == RogueBase.TargettingAction.Examine ? greenTargetTile : redTargetTile;
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+            }
+            else
+            {
+                var targetSprite = blackTargetTile;
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+            }
+                       
+
+            /*
+            System.Drawing.Color backgroundColor = targetBackground;
+            System.Drawing.Color foregroundColor = targetForeground;
 
             if (SetTargetInRange)
             {
-                backgroundColor = ColorPresets.Red;
+                backgroundColor = System.Drawing.Color.Red;
             }
 
             char toDraw = '.';
@@ -1202,10 +1481,11 @@ namespace RogueBasin {
 
             tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(toDraw);
             if(monsterColorInSquare != null)
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(monsterColorInSquare.BackgroundColor, monsterColorInSquare.ForegroundColor);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+             */
             
         }
-
+        /*
         private void DrawExplosionOverSquaresAndCreatures(List<Point> splashSquares)
         {
             //Draw each point as targetted
@@ -1222,80 +1502,26 @@ namespace RogueBasin {
                     toDraw = (char)monsterIdInSquare;
 
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(toDraw);
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
             }
-        }
+        }*/
 
-
-        /// <summary>
-        /// Screen for end of game info
-        /// </summary>
-        public void DrawEndOfGameInfo(List<string> stuffToDisplay)
+        private void DrawTargettingOverSquaresAndCreatures(List<Point> splashSquares)
         {
-            //Clear screen
-            ClearScreen();
-
-            //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
-
-            //Draw title
-            PrintLineRect("End of game summary", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
-
-            //Draw preamble
-            int count = 0;
-            foreach (string s in stuffToDisplay)
+            //Draw each point as targetted
+            foreach (Point p in splashSquares)
             {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left, normalMovieColor);
-                count++;
+                if (!isViewVisible(p))
+                    continue;
+
+                //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
+
+                var targetSprite = "orangetarget";
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(targetSprite);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
             }
-
-            //Draw instructions
-
-            PrintLineRect("Press ENTER to continue...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center, normalMovieColor);
-            FlushConsole();
-
-            WaitForEnterKey();
         }
 
-
-
-        /// <summary>
-        /// Screen for player victory
-        /// </summary>
-        public void DrawVictoryScreen()
-        {
-         
-            //Clear screen
-            ClearScreen();
-
-            //Draw frame
-            DrawFrame(DeathTL.x, DeathTL.y, DeathWidth, DeathHeight, true);
-
-            //Draw title
-            PrintLineRect("VICTORY!", DeathTL.x + DeathWidth / 2, DeathTL.y, DeathWidth, 1, LineAlignment.Center);
-
-            //Draw preamble
-            int count = 0;
-            foreach (string s in DeathPreamble)
-            {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count, DeathWidth - 4, 1, LineAlignment.Left);
-                count++;
-            }
-
-            //Draw kills
-
-            PrintLineRect("Total Kills", DeathTL.x + DeathWidth / 2, DeathTL.y + 2 + count + 2, DeathWidth, 1, LineAlignment.Center);
-
-            foreach (string s in TotalKills)
-            {
-                PrintLineRect(s, DeathTL.x + 2, DeathTL.y + 2 + count + 4, DeathWidth - 4, 1, LineAlignment.Left);
-                count++;
-            }
-
-            //Draw instructions
-
-            PrintLineRect("Press any key to exit...", DeathTL.x + DeathWidth / 2, DeathTL.y + DeathHeight - 1, DeathWidth, 1, LineAlignment.Center);
-        }
 
 
         public bool ShowMsgHistory { get; set; }
@@ -1308,818 +1534,501 @@ namespace RogueBasin {
 
         void ClearScreen()
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.Clear();
-        }
-
-        /// <summary>
-        /// Draws a frame on the screen
-        /// </summary>
-        void DrawFrame(int x, int y, int width, int height, bool clear)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(x, y, width, height, clear);
-        }
-
-        /// <summary>
-        /// Draws a frame on the screen in a particular color
-        /// </summary>
-        void DrawFrame(int x, int y, int width, int height, bool clear, Color color)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.ForegroundColor = color;
-
-            //Draw frame - same as inventory
-            rootConsole.DrawFrame(x, y, width, height, clear);
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-        }
-
-        /// <summary>
-        /// Character-based drawing. Kept only for stats etc. in transitional period. All map stuff now works in the tile layer
-        /// </summary>
-        void PutChar(int x, int y, char c, Color color)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-            rootConsole.ForegroundColor = color;
-
-            rootConsole.PutChar(x, y, c);
-
-            rootConsole.ForegroundColor = ColorPresets.White;
-        }
-
-        /// <summary>
-        /// Print a string in a rectangle
-        /// </summary>
-        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
-        }
-
-        /// <summary>
-        /// Print a string in a rectangle
-        /// </summary>
-        void PrintLineRect(string msg, int x, int y, int width, int height, LineAlignment alignment, Color color)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.ForegroundColor = color;
-            rootConsole.PrintLineRect(msg, x, y, width, height, alignment);
-            rootConsole.ForegroundColor = ColorPresets.White;
-        }
-
-        /// <summary>
-        /// Print a string at a location
-        /// </summary>
-        void PrintLine(string msg, int x, int y, LineAlignment alignment)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.PrintLine(msg, x, y, alignment);
-        }
-
-        /// <summary>
-        /// Print a string at a location
-        /// </summary>
-        void PrintLine(string msg, int x, int y, LineAlignment alignment, Color color)
-        {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-            rootConsole.ForegroundColor = color;
-
-            rootConsole.PrintLine(msg, x, y, alignment);
-            rootConsole.ForegroundColor = ColorPresets.White;
+            mapRenderer.Clear(); 
         }
 
         /// <summary>
         /// Draw rectangle
         /// </summary>
-        void DrawRect(int x, int y, int width, int height, bool clear)
+        void ClearRect(int x, int y, int width, int height)
         {
-            //Get screen handle
-            RootConsole rootConsole = RootConsole.GetInstance();
-
-            rootConsole.DrawRect(x, y, width, height, clear);
+            mapRenderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
         }
 
-        /// <summary>
-        /// Draw the msg history and allow the player to scroll
-        /// </summary>
-        private void DrawMsgHistory()
+        private void DrawUISpriteByCentre(string id, Point point)
         {
-            //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
-
-            //Draw title
-            PrintLineRect("Message History", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            LinkedList<string> msgHistory = Game.MessageQueue.messageHistory;
-
-            //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, msgHistory, normalMovieColor);
+            Size spriteDim = UISpriteSize(id);
+            DrawUISprite(id, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2));
         }
 
-        /// <summary>
-        /// Draw the msg history and allow the player to scroll
-        /// </summary>
-        private void DrawCluesList()
+        private void DrawUISpriteByCentre(MapObject mapObject, Point point, double alpha = 1.0)
         {
-            //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
-
-            //Draw title
-            PrintLineRect("Clue List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            var allPlayerClueItems = Game.Dungeon.Player.Inventory.GetItemsOfType<Items.Clue>();
-            var allPlayerClues = allPlayerClueItems.Select(i => i.ClueDescription);
-            var noCluesForDoors = allPlayerClues.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
-
-            var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ") " + kv.Key);
-            //var cluesForDoorsAsStrings = noCluesForDoors.Select(kv => "(" + kv.Value + ")");
             
-            //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(cluesForDoorsAsStrings), normalMovieColor);
-        }
-
-        /// <summary>
-        /// Draw the msg history and allow the player to scroll
-        /// </summary>
-        private void DrawLogList()
-        {
-            //Draw frame - same as inventory
-            DrawFrame(inventoryTL.x, inventoryTL.y, inventoryTR.x - inventoryTL.x + 1, inventoryBL.y - inventoryTL.y + 1, true, mapFrameColor);
-
-            //Draw title
-            PrintLineRect("Log List", (inventoryTL.x + inventoryTR.x) / 2, inventoryTL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Draw instructions
-            PrintLineRect("Press (up) or (down) to scroll or (x) to exit", (inventoryTL.x + inventoryTR.x) / 2, inventoryBL.y, inventoryTR.x - inventoryTL.x, 1, LineAlignment.Center, titleColor);
-
-            //Active area is slightly reduced from frame
-            int inventoryListX = inventoryTL.x + 2;
-            int inventoryListW = inventoryTR.x - inventoryTL.x - 4;
-            int inventoryListY = inventoryTL.y + 2;
-            int inventoryListH = inventoryBL.y - inventoryTL.y - 4;
-
-            var allPlayerLogItems = Game.Dungeon.Player.Inventory.GetItemsOfType<Items.Log>();
-            var allPlayerLogEntriesSortedByLevel = allPlayerLogItems.GroupBy(i => i.LocationLevel).ToDictionary(gr => gr.Key, gr => gr.Select(i => i.LogEntry));
-            
-            List<string> clueLines = new List<string>();
-            foreach (var kv in allPlayerLogEntriesSortedByLevel)
+            if (mapObject.UISprite != null)
             {
-                var level = kv.Key;
-                clueLines.Add("-+-+-+-" + Game.Dungeon.DungeonInfo.LevelNaming[level].ToUpper() + "-+-+-+-");
-                clueLines.Add("");
-
-                foreach (var logEntry in kv.Value)
-                {
-                    clueLines.Add(logEntry.title);
-                    clueLines.AddRange(logEntry.lines);
-                    clueLines.Add("");
+                Size spriteDim = UISpriteSize(mapObject.UISprite);
+                DrawUISprite(mapObject.UISprite, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), alpha);
+            }
+            else
+            {
+                Size spriteDim = TraumaUISpriteSize(mapObject.Representation);
+                LibtcodColorFlags colors = new LibtcodColorFlags(mapObject.RepresentationColor());
+                
+                //Apply an alphaing effect to the colors, since alphaing on Trauma sprites doesn't seem to work now
+                if(alpha < 0.99) {
+                   colors = new LibtcodColorFlags(ColorInterpolate(mapObject.RepresentationColor(), System.Drawing.Color.Black, alpha));
                 }
+
+                DrawTraumaUISprite(mapObject.Representation, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), colors, alpha);
+            }
+        }
+
+        private void DrawColourizedTraumaUISpriteByCentre(MapObject mapObject, Point point, LibtcodColorFlags colorOverride)
+        {
+            Size spriteDim = TraumaUISpriteSize(mapObject.Representation);
+            DrawTraumaUISprite(mapObject.Representation, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), colorOverride);
+        }
+
+
+        private void DrawSpriteByCentre(string id, Point point)
+        {
+            Size spriteDim = SpriteSize(id);
+            DrawSprite(id, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2));
+        }
+        
+        private void DrawGraduatedBar(string id, double fullness, Rectangle barArea, double spacing)
+        {
+            //This isn't quite right since it ends with a gap
+            Size barSize = UISpriteSize(id);
+            double barSpacing = (barSize.Width * (1.0 + spacing));
+            double oneBarProportion = barSpacing / barArea.Width;
+            int barsToDraw = (int)Math.Floor(fullness / oneBarProportion);
+
+            for (int i = 0; i < barsToDraw; i++)
+            {
+                int x = barArea.X + (int)Math.Floor(i * barSpacing);
+                DrawUISprite(id, new Point(x, barArea.Y));
+            }
+        }
+
+        private void DrawGraduatedBarVertical(string id, double fullness, Rectangle barArea, double spacing)
+        {
+            Size barSize = UISpriteSize(id);
+            double barSpacing = (barSize.Height * (spacing));
+            double totalBarsThatFit = (barArea.Height - barSpacing) / (barSize.Height + barSpacing);
+            int barsToDraw = (int)Math.Ceiling(totalBarsThatFit * fullness);
+
+            for (int i = 0; i < barsToDraw; i++)
+            {
+                int y = barArea.Y + (int)Math.Floor(i * (barSpacing + barSize.Height));
+                DrawUISprite(id, new Point(barArea.X, y));
+            }
+        }
+
+        Point playerUI_TL = new Point(0, 0);
+        Point playerTextUI_TL = new Point(0, 0);
+        Point playerTextUI_UsefulTL = new Point(0, 0);
+        Point monsterTextUI_TL = new Point(0, 0);
+
+        private Point UIScale(Point p)
+        {
+            return p * UIScaling;
+        }
+
+        private int UIScale(int coord)
+        {
+            return (int)Math.Round(coord * UIScaling);
+        }
+
+        private Size UIScale(Size size)
+        {
+            return new Size(UIScale(size.Width), UIScale(size.Height));
+        }
+
+        private void DrawUI()
+        {
+            Player player = Game.Dungeon.Player;
+
+            //Calculate some point offsets
+            Point rangedWeaponUICenter = UIScale(new Point(160, 92));
+            Point meleeWeaponUICenter = UIScale(new Point(38, 92));
+            Point utilityUICenter = UIScale(new Point(300, 92));
+            Point wetwareUICenter = UIScale(new Point(390, 92));
+
+            //Draw the UI background
+            Size uiLeftDim = UISpriteSize("ui_left_extended");
+            playerUI_TL = new Point(0, ScreenHeight - uiLeftDim.Height);
+
+            DrawUISprite("ui_left_extended", new Point(playerUI_TL.x, playerUI_TL.y));
+
+            if (ExtraUI)
+            {
+                Size uiMidDim = UISpriteSize("ui_mid");
+                playerTextUI_TL = playerUI_TL + new Point(uiLeftDim.Width, -60);
+                playerTextUI_UsefulTL = playerTextUI_TL + UIScale(new Point(0, 90));
+                
+                DrawUISprite("ui_mid", playerTextUI_TL);
+                Size uiRightDim = UISpriteSize("ui_right");
+
+                monsterTextUI_TL = new Point(ScreenWidth - uiRightDim.Width - uiMidDim.Width, ScreenHeight - uiMidDim.Height);
+                DrawUISprite("ui_mid", monsterTextUI_TL);
             }
 
-            //Display list
-            DisplayStringList(inventoryListX, inventoryListW, inventoryListY, inventoryListH, new LinkedList<string>(clueLines), normalMovieColor);
-        }
-
-        private void DisplayStringList(int inventoryListX, int inventoryListW, int inventoryListY, int inventoryListH, LinkedList<string> msgHistory, Color textColor)
-        {
-            LinkedListNode<string> displayedMsg;
-            LinkedListNode<string> topLineDisplayed = null;
-
-            LinkedListNode<string> bottomTopLineDisplayed = msgHistory.Last;
-
-            if (msgHistory.Count > 0)
-            {
-                //Find the line at the top of the screen when the list is fully scrolled down
-                for (int i = 0; i < inventoryListH - 1; i++)
-                {
-                    if (bottomTopLineDisplayed.Previous != null)
-                        bottomTopLineDisplayed = bottomTopLineDisplayed.Previous;
-                }
-                topLineDisplayed = bottomTopLineDisplayed;
-
-                //Display the message log
-                displayedMsg = topLineDisplayed;
-                for (int i = 0; i < inventoryListH; i++)
-                {
-                    PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, textColor);
-                    displayedMsg = displayedMsg.Next;
-                    if (displayedMsg == null)
-                        break;
-                }
-            }
-
-            Screen.Instance.FlushConsole();
-
-            bool keepLooping = true;
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-                Direction dir = Direction.none;
-                bool page = false;
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-                    char keyCode = (char)userKey.Character;
-
-                    if (keyCode == 'x')
-                        keepLooping = false;
-
-                    if (keyCode == 'j')
-                    {
-                        dir = Direction.up;
-                    }
-
-                    if (keyCode == 'k')
-                    {
-                        dir = Direction.down;
-                    }
-                }
-
-                else
-                {
-                    //Special keys
-                    switch (userKey.KeyCode)
-                    {
-                        case KeyCode.TCODK_UP:
-                        case KeyCode.TCODK_KP8:
-                            dir = Direction.up;
-                            break;
-
-                        case KeyCode.TCODK_KP2:
-                        case KeyCode.TCODK_DOWN:
-                            dir = Direction.down;
-                            break;
-
-                        case KeyCode.TCODK_PAGEUP:
-                            dir = Direction.up;
-                            page = true;
-                            break;
-
-                        case KeyCode.TCODK_PAGEDOWN:
-                            dir = Direction.down;
-                            page = true;
-                            break;
-                    }
-                }
-
-                if (msgHistory.Count > 0)
-                {
-                    if (dir == Direction.up)
-                    {
-                        var iterations = 1;
-                        if (page)
-                            iterations = 20;
-
-                        for (int i = 0; i < iterations;i++)
-                            if (topLineDisplayed.Previous != null)
-                                topLineDisplayed = topLineDisplayed.Previous;
-                    }
-                    else if (dir == Direction.down)
-                    {
-                        var iterations = 1;
-                        if (page)
-                            iterations = 20;
-
-                        for (int i = 0; i < iterations; i++)
-                            if (topLineDisplayed != bottomTopLineDisplayed)
-                                topLineDisplayed = topLineDisplayed.Next;
-                    }
-
-                    //Clear the rectangle
-                    DrawRect(inventoryTL.x + 1, inventoryTL.y + 1, inventoryTR.x - inventoryTL.x - 1, inventoryBL.y - inventoryTL.y - 1, true);
-
-                    //Display the message log
-                    displayedMsg = topLineDisplayed;
-                    for (int i = 0; i < inventoryListH; i++)
-                    {
-                        PrintLineRect(displayedMsg.Value, inventoryListX, inventoryListY + i, inventoryListW, 1, LineAlignment.Left, textColor);
-                        displayedMsg = displayedMsg.Next;
-                        if (displayedMsg == null)
-                            break;
-                    }
-                }
-                Screen.Instance.FlushConsole();
-
-            } while (keepLooping);
-        }
-
-        private void DrawStats(Player player)
-        {
-
-            //Blank stats area
-            //rootConsole.DrawRect(statsDisplayTopLeft.x, statsDisplayTopLeft.y, Width - statsDisplayTopLeft.x, Height - statsDisplayTopLeft.y, true);
-            DrawFrame(statsDisplayTopLeft.x, statsDisplayTopLeft.y - 1, statsDisplayBotRight.x - statsDisplayTopLeft.x + 2, statsDisplayBotRight.y - statsDisplayTopLeft.y + 3, false, statsFrameColor);
-
-            int baseOffset = 2;
-
-            //Mission
-            Point missionOffset = new Point(baseOffset, 0);
-            hitpointsOffset = new Point(baseOffset, 4);
-            Point shieldOffset = new Point(baseOffset, 5);
-            Point weaponOffset = new Point(baseOffset, 8);
-            Point utilityOffset = new Point(baseOffset, 14);
-            Point viewOffset = new Point(baseOffset, 20);
-            Point cmbtOffset = new Point(baseOffset, 18);
-            Point gameDataOffset = new Point(baseOffset, 25);
-
-            var zoneName = "[" + (LevelToDisplay).ToString("00") + "] ";
-            var zoneName2 = Game.Dungeon.DungeonInfo.LookupMissionName(LevelToDisplay);
-            PrintLine(zoneName, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 1, LineAlignment.Left, statsColor);
-            PrintLine(zoneName2, statsDisplayTopLeft.x + missionOffset.x, statsDisplayTopLeft.y + missionOffset.y + 2, LineAlignment.Left, statsColor);
-            
-            //Draw HP Status
-
-            int hpBarLength = 10;
-            double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
-            int hpBarEntries = (int)Math.Ceiling(hpBarLength * playerHPRatio);
-
-            PrintLine("HP: ", statsDisplayTopLeft.x + hitpointsOffset.x, statsDisplayTopLeft.y + hitpointsOffset.y, LineAlignment.Left, statsColor);
-
-            for (int i = 0; i < hpBarLength; i++)
-            {
-                if (i < hpBarEntries)
-                {
-                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, heartChar, heartColor);
-                }
-                else
-                {
-                    PutChar(statsDisplayTopLeft.x + hitpointsOffset.x + 5 + i, statsDisplayTopLeft.y + hitpointsOffset.y, heartChar, disabledColor);
-                }
-            }
-
-            //Draw shield
-
-            int shieldBarLength = 20;
-            double playerShieldRatio = player.Shield / (double)player.MaxShield;
-            int shieldBarEntries = (int)Math.Ceiling(shieldBarLength * playerShieldRatio);
-
-            PrintLine("SD: ", statsDisplayTopLeft.x + shieldOffset.x, statsDisplayTopLeft.y + shieldOffset.y, LineAlignment.Left, statsColor);
-
-            DrawShieldBar(player, shieldOffset, shieldBarEntries - 10);
-            DrawShieldBar(player, shieldOffset + new Point(0, 1), Math.Min(shieldBarEntries, 10));
-
-            //Draw equipped weapon
-
-            Item weapon = Game.Dungeon.Player.GetEquippedWeaponAsItem();
-
-            //string weaponStr = "Weapon: ";
-
-            //PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left);
+            //Draw equipped ranged weapon
+            Item weapon = player.GetEquippedRangedWeaponAsItem();
 
             if (weapon != null)
             {
                 IEquippableItem weaponE = weapon as IEquippableItem;
+                RangedWeapon weaponR = weapon as RangedWeapon;
 
-                PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, weapon.Representation, weaponColor);
+                DrawUISpriteByCentre(weapon, new Point(playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y));
 
-                string weaponStr = weapon.SingleItemDescription;
-                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x + 2, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left, weaponColor);
-
-                //Ammo
-                if (weaponE.HasFireAction())
-                {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
-        
-                    //TODO infinite ammo?
-                    int ammoBarLength = 10;
-                    double weaponAmmoRatio = weaponE.RemainingAmmo() / (double) weaponE.MaxAmmo();
-                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
-
-                    for (int i = 0; i < ammoBarLength; i++)
-                    {
-                        if (i < ammoBarEntries)
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, ammoChar, orangeActivatedColor);
-                        }
-                        else
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, ammoChar, orangeDisactivatedColor);
-                        }
-                    }
-                }
-                else if (weaponE.HasThrowAction() || weaponE.HasOperateAction())
-                {
-                    PrintLine("Am: ", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left, statsColor);
-
-                    //TODO infinite ammo?
-                    int ammoBarLength = 10;
-                    int ammoBarEntries = Math.Min(player.InventoryQuantityAvailable(weapon.GetType()), 10);
-                    //int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
-
-                    for (int i = 0; i < ammoBarLength; i++)
-                    {
-                        if (i < ammoBarEntries)
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, weapon.Representation, orangeActivatedColor);
-                        }
-                        else
-                        {
-                            PutChar(statsDisplayTopLeft.x + weaponOffset.x + 5 + i, statsDisplayTopLeft.y + weaponOffset.y + 4, weapon.Representation, orangeDisactivatedColor);
-                        }
-                    }
-                }
+                var rangedDamage = player.ScaleRangedDamage(weaponE, weaponE.DamageBase());
                 
-                /*
-                //Uses
-                int useYOffset = 3;
+                //Draw bullets
+                double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
+                var ammoBarTL = playerUI_TL + UIScale(new Point(86, 67));
+                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
 
-                string uses = "";
-                if (weaponE.HasMeleeAction())
-                {
-                    PrintLine("Melee", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left); 
-                }
-                else if (weaponE.HasFireAction() && weaponE.HasThrowAction())
-                {
-                    PrintLine("fire   throw", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), ColorPresets.White);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x + 7, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), ColorPresets.White);
-                }
+                //Ranged Damage base
+                var playerRangedTextOffset = UIScale(new Point(210, 117));
+                var rangedStr = "DMG: " + rangedDamage;
+                DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
-                else if (weaponE.HasFireAction())
-                {
-                    PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("F"), ColorPresets.White);
-                }
-
-                else if (weaponE.HasThrowAction())
-                {
-                    PrintLine("fire", statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, LineAlignment.Left);
-                    PutChar(statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + useYOffset, GetCharIconForLetter("T"), ColorPresets.White);
-                }*/
-
-                //if (weaponE.HasOperateAction())
-                //{
-                //    uses += "(u)se";
-                //}
-
-               // PrintLine(uses, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y + 4, LineAlignment.Left);
+                //Help
+                var rangedHelpOffset = UIScale(new Point(218, 74));
+                var rangedHelp = "(F)";
+                DrawText(rangedHelp, playerUI_TL + rangedHelpOffset, LineAlignment.Center, statsColor);
             }
-            else
+
+            //Draw equipped melee weapon
+            Item meleeWeapon = player.GetEquippedMeleeWeaponAsItem();
+
+            if (meleeWeapon != null)
             {
-                var weaponStr = "None";
-                PrintLine(weaponStr, statsDisplayTopLeft.x + weaponOffset.x, statsDisplayTopLeft.y + weaponOffset.y, LineAlignment.Left, weaponColor);
+                IEquippableItem weaponE = meleeWeapon as IEquippableItem;
+
+                DrawUISpriteByCentre(meleeWeapon, new Point(playerUI_TL.x + meleeWeaponUICenter.x, playerUI_TL.y + meleeWeaponUICenter.y));
+
+                var meleeDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
+
+                var playerRangedTextOffset = UIScale(new Point(40, 117));
+                var rangedStr = "DMG: " + meleeDamage;
+                DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
+
             }
 
-            //Draw weapon choices
-            var weaponOptionRow = 1;
-            var weaponIconXOffset = -3;
-            foreach (var kv in ItemMapping.WeaponMapping)
-            {
-                DrawWeaponChar(weaponOffset + new Point(weaponIconXOffset + (kv.Key) * 3, weaponOptionRow), kv.Value, kv.Key);
-            }
-            
-            //Draw energy bar and use keys
-
-            int energyBarLength = 20;
-            double playerEnergyRatio = player.Energy / (double)player.MaxEnergy;
-            int energyBarEntries = (int)Math.Ceiling(energyBarLength * playerEnergyRatio);
-
-            PrintLine("EN: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left, statsColor);
-
-            DrawEnergyBar(player, utilityOffset + new Point(0, 2), energyBarEntries - 10);
-            DrawEnergyBar(player, utilityOffset + new Point(0, 3), Math.Min(energyBarEntries, 10));
-
-            //Enable wetware name
-            var equippedWetware = player.GetEquippedWetware();
-
-            if (equippedWetware != null)
-            {
-                var equippedWetwareItem = (equippedWetware as Item);
-
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, equippedWetwareItem.Representation, weaponColor);
-
-                var wetwareStr = equippedWetwareItem.SingleItemDescription;
-                PrintLine(wetwareStr, statsDisplayTopLeft.x + utilityOffset.x + 2, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, weaponColor);
-            }
-            else
-            {
-                PrintLine("None", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left, weaponColor);
-            }
-
-            //Draw all available wetware
-            var wetwareOptionRow = 1;
-            int offset = 0;
-            foreach (var kv in ItemMapping.WetwareMapping)
-            {
-                DrawWetwareChar(utilityOffset + new Point(offset * 3, wetwareOptionRow), kv.Value, kv.Key.ToString());
-                offset++;
-            }
-
-            //
-
-            /*
-            //Draw equipped utility
-
-            Item utility = Game.Dungeon.Player.GetEquippedUtilityAsItem();
-
-            string utilityStr = "Utility: ";
-            PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, LineAlignment.Left);
+            //Draw equipped utility weapon
+            Item utility = player.GetEquippedUtilityAsItem();
 
             if (utility != null)
             {
-                utilityStr = utility.SingleItemDescription;
-                PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left, utility.GetColour());
-                IEquippableItem utilityE = utility as IEquippableItem;
+                DrawUISpriteByCentre(utility, playerUI_TL + utilityUICenter);
 
-                string uses = "";
+                //Draw no of items
+                double itemNoRatio = Math.Min(player.GetNoItemsOfSameType(utility) / (double)10.0, 1.0);
+                var itemNoBarTL = playerUI_TL + UIScale(new Point(255, 67));
+                DrawGraduatedBarVertical("ui_bullet", itemNoRatio, new Rectangle(itemNoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
+            }
+
+            var utilityHelpOffset = UIScale(new Point(316, 74));
+            var utilityHelp = "(T)";
+            DrawUIText(utilityHelp, playerUI_TL + utilityHelpOffset, LineAlignment.Center, statsColor);
+            DrawSmallUIText("(E)", playerUI_TL + UIScale(new Point(280, 117)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(R)", playerUI_TL + UIScale(new Point(316, 117)), LineAlignment.Center, statsColor);
+
+            //Draw equipped wetware
+            Item wetware = player.GetSelectedWetware();
+
+            if (wetware != null)
+            {
+                //This only works for trauma sprites and needs refactoring for normal sprites
+
+                LibtcodColorFlags wetwareRenderColor = new LibtcodColorFlags(wetware.RepresentationColor());
                 
-                if (utilityE.HasOperateAction())
+                if (player.GetTurnsDisabledForSelectedWetware() > 0)
                 {
-                    uses += "(U)se";
+                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), System.Drawing.Color.Black, 0.5));
+                }
+                else if (player.GetEquippedWetware() != null)
+                {
+                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), System.Drawing.Color.Red, 0.5));
                 }
 
-                if (utilityE.HasThrowAction())
-                {
-                    uses += "(T)hrow ";
-                }
-
-                PrintLine(uses, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 2, LineAlignment.Left);
-            }
-             
-            else
-            {
-                utilityStr = "Nothing";
-                PrintLine(utilityStr, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 1, LineAlignment.Left, nothingColor);
+                DrawColourizedTraumaUISpriteByCentre(wetware, playerUI_TL + wetwareUICenter, wetwareRenderColor);
             }
 
-            //Effect active (add ors)
-            if (player.effects.Count > 0)
+            //Draw energy
+            double energyRatio = player.Energy / (double)player.MaxEnergy;
+            var energyBarTL = playerUI_TL + UIScale(new Point(345, 67));
+            DrawGraduatedBarVertical("ui_bullet", energyRatio, new Rectangle(energyBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
+
+            //Draw wetware help
+            var wetwareHelpOffset = UIScale(new Point(406, 74));
+            var wetwareHelp = "(W)";
+            DrawUIText(wetwareHelp, playerUI_TL + wetwareHelpOffset, LineAlignment.Center, statsColor);
+            DrawSmallUIText("(A)", playerUI_TL + UIScale(new Point(370, 117)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(S)", playerUI_TL + UIScale(new Point(406, 117)), LineAlignment.Center, statsColor);
+
+
+            //Draw Shield
+            double playerShieldRatio = player.Shield / (double)player.MaxShield;
+            Point shieldOffset = playerUI_TL + UIScale(new Point(57, 34));
+            Size shieldSize = UIScale(new Size(180, 12));
+            DrawGraduatedBar("ui_bar", playerShieldRatio, new Rectangle(shieldOffset.ToPoint(), shieldSize), 0.2);
+
+            //Draw HP
+            double playerHPRatio = player.Hitpoints / (double)player.MaxHitpoints;
+            Point hpOffset = playerUI_TL + UIScale(new Point(57, 13));
+            Size hpSize = UIScale(new Size(180, 12));
+            DrawGraduatedBar("ui_bar", playerHPRatio, new Rectangle(hpOffset.ToPoint(), hpSize), 0.2);
+
+            //Draw HP digits
+            var playerHPNuOffset = UIScale(new Point(25, 33));
+            DrawUIText(player.Hitpoints.ToString(), playerUI_TL + playerHPNuOffset, LineAlignment.Center, statsColor);
+
+            //Draw shield digits
+            var playerFMNuOffset = UIScale(new Point(269, 33));
+            DrawUIText(player.Shield.ToString(), playerUI_TL + playerFMNuOffset, LineAlignment.Center, statsColor);
+
+            //Draw timers
+
+            if (ExtraUI)
             {
-                PlayerEffect thisEffect = player.effects[0];
+                var playerHPTextOffset = UIScale(new Point(10, 0));
+                var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
+                DrawUIText(hpStr, playerTextUI_UsefulTL + playerHPTextOffset);
 
-                if(thisEffect is PlayerEffectSimpleDuration) {
+                //Draw Fame
+                var playerFameTextOffset = UIScale(new Point(10, 60));
+                var fameStr = "Fame: " + player.CombatXP;
+                DrawText(fameStr, playerTextUI_UsefulTL + playerFameTextOffset);
+                var playerExpFameTextOffset = UIScale(new Point(10, 75));
+                //var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
+                //DrawText(fameExpStr, playerUI_TL.Add(playerExpFameTextOffset));
 
-                    PlayerEffectSimpleDuration durationEffect = thisEffect as PlayerEffectSimpleDuration;
+                var playerMoveOffset = UIScale(new Point(170, 0));
+                var moveStr = "Move: " + player.TurnsMoving;
+                DrawText(moveStr, playerTextUI_UsefulTL + playerMoveOffset);
 
-                    string effectName = thisEffect.GetName();
-                    int effectRemainingDuration = durationEffect.GetRemainingDuration();
-                    int effectTotalDuration = durationEffect.GetDuration();
-                    Color effectColor = thisEffect.GetColor();
+                var playerStationaryOffset = UIScale(new Point(170, 15));
+                var actionStr = "No A: " + player.TurnsSinceAction;
+                DrawText(actionStr, playerTextUI_UsefulTL + playerStationaryOffset);
 
-                    //Effect name
+                var playerRestOffset = UIScale(new Point(170, 30));
+                var restStr = "Rest: " + player.TurnsInactive;
+                DrawText(restStr, playerTextUI_UsefulTL + playerRestOffset);
 
-                    PrintLine("Effect: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 3, LineAlignment.Left);
+                var dodgeBonusOffset = UIScale(new Point(170, 45));
+                var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
+                DrawText(dodgeStr, playerTextUI_UsefulTL + dodgeBonusOffset);
+            }
 
-                    PrintLine(effectName, statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 4, LineAlignment.Left, effectColor);
-                    //Duration
+            //Monster stats
+            DrawFocusWindow();
+        }
 
-                    PrintLine("Tm: ", statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y + 5, LineAlignment.Left);
+        public void DrawText(string msg, Point p)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, LineAlignment.Left, statsColor);
+        }
 
-                    int ammoBarLength = 10;
-                    double weaponAmmoRatio = effectRemainingDuration / (double) effectTotalDuration;
-                    int ammoBarEntries = (int)Math.Ceiling(ammoBarLength * weaponAmmoRatio);
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
+        }
 
-                    for (int i = 0; i < ammoBarLength; i++)
-                    {
-                        if (i < ammoBarEntries)
-                        {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, ColorPresets.Gold);
-                        }
-                        else
-                        {
-                            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 5 + i, statsDisplayTopLeft.y + utilityOffset.y + 5, explosionIcon, ColorPresets.Gray);
-                        }
-                    }
-                }
+        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, color);
+        }
 
-            }*/
+        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
+        }
 
-            //Draw what we can see
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, size, lineAlignment, color);
+        }
+
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+        }
+
+        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, foregroundColor, backgroundColor);
+        }
+
+        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+        }
+
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, size, lineAlignment, foregroundColor, backgroundColor);
+        }
+
+        void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
+        {
+            mapRenderer.DrawTextWidth(msg, p.x, p.y, largeTextSize, width, color);
+        }
+
+        private void DrawUIText(string msg, Point p)
+        {
+            DrawUIText(msg, p, LineAlignment.Left, statsColor);
+        }
+
+        private void DrawUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, (int)Math.Round(largeTextSize * UIScaling), lineAlignment, color);
+        }
+
+        private void DrawSmallUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        {
+            mapRenderer.DrawText(msg, p.x, p.y, (int)Math.Round(smallTextSize * UIScaling), lineAlignment, color);
+        }
+
+        private void DrawFocusWindow()
+        {
+            Player player = Game.Dungeon.Player;
+
+
+            //Calculate some point offsets
             
-            //Creature takes precidence
+            Point rightUIIconCentre = UIScale(new Point(118, 152));
+            Size uiRightDim = UISpriteSize("ui_right");
 
+            Point monsterUI_TL = new Point(ScreenWidth - uiRightDim.Width, ScreenHeight - uiRightDim.Height);
+            var monsterTextUI_UsefulTL = monsterTextUI_TL + UIScale(new Point(0, 90));
 
-            //string viewStr = "Target: ";
-            //PrintLine(viewStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y, LineAlignment.Left, statsColor);
+            //Draw UI background
+
+            DrawUISprite("ui_right", new Point(monsterUI_TL.x, monsterUI_TL.y));
+
+            //Creature picture (overwrite with frame)
 
             if (CreatureToView != null && CreatureToView.Alive == true)
             {
+                DrawUISpriteByCentre(CreatureToView, monsterUI_TL + rightUIIconCentre);
+            }
 
-                               //Combat vs player
+            DrawUISprite("frame", monsterUI_TL + UIScale(new Point(79, 107)));
 
-                var cover = player.GetPlayerCover(CreatureToView);
-                if (cover.Item1 > 0)
-                {
-                    PrintLine("(hard cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, ColorPresets.Gold);
-                }
-                else if (cover.Item2 > 0)
-                {
-                    PrintLine("(soft cover)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
-                }
+            if (CreatureToView != null && CreatureToView.Alive == true)
+            {
 
                 //PrintLine("Def: " + player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView), statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, statsColor);
                 //var cover = player.GetPlayerCover(CreatureToView);
                 //PrintLine("C: " + cover.Item1 + "/" + cover.Item2, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 3, LineAlignment.Left, statsColor);
 
                 //Monster hp
+                double enemyHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
+                Point hpLocation = monsterUI_TL + UIScale(new Point(14, 92));
+                Size hpSize = UIScale(new Size(95, 12));
+                DrawGraduatedBar("ui_bar", enemyHPRatio, new Rectangle(hpLocation.ToPoint(), hpSize), 0.2);
 
-                String nameStr = CreatureToView.SingleDescription;// +"(" + CreatureToView.Representation + ")";
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, statsColor);
+                //Damage
+                var monsterLVLTextOffset = UIScale(new Point(47, 142));
+                var lvlStr = "LVL: " + CreatureToView.Level;
+                DrawSmallUIText(lvlStr, monsterUI_TL + monsterLVLTextOffset, LineAlignment.Center, statsColor);
 
+                var monsterDamageTextOffset = UIScale(new Point(47, 162));
+                var dmStr = "DMG: " + CreatureToView.GetScaledDamage();
+                DrawSmallUIText(dmStr, monsterUI_TL + monsterDamageTextOffset, LineAlignment.Center, statsColor);
 
-                int mhpBarLength = 10;
-                double mplayerHPRatio = CreatureToView.Hitpoints / (double)CreatureToView.MaxHitpoints;
-                int mhpBarEntries = (int)Math.Ceiling(mhpBarLength * mplayerHPRatio);
+                var monsterHPNumOffset = UIScale(new Point(134, 93));
+                DrawUIText(CreatureToView.Hitpoints.ToString(), monsterUI_TL + monsterHPNumOffset, LineAlignment.Center, statsColor);
 
-                PrintLine("HP: ", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 4, LineAlignment.Left, statsColor);
-
-                for (int i = 0; i < mhpBarLength; i++)
+                if (ExtraUI)
                 {
-                    if (i < mhpBarEntries)
+                    var lineOffset = 15;
+
+                    var monsterHPTextOffset = UIScale(new Point(10, lineOffset * 0));
+                    var hpStr = "HP: " + CreatureToView.Hitpoints + "/" + CreatureToView.MaxHitpoints;
+                    DrawUIText(hpStr, monsterTextUI_UsefulTL + monsterHPTextOffset);
+
+
+                    var cover = Game.Dungeon.Player.CalculateDamageModifierForAttacksOnPlayer(CreatureToView, true);
+                    var monsterCoverNumberOffset = UIScale(new Point(10, lineOffset * 1));
+                    var cvStr = "CV: " + cover;
+                    DrawUIText(cvStr, monsterTextUI_UsefulTL + monsterCoverNumberOffset);
+
+                    //Combat vs player
+
+                    var coverItem = player.GetPlayerCover(CreatureToView);
+                    string coverStr = "";
+                    if (coverItem.Item1 > 0)
                     {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 4, heartChar, heartColor);
+                        coverStr = "(hard cover)";
+                    }
+                    else if (coverItem.Item2 > 0)
+                    {
+                        coverStr = "(soft cover)";
+                    }
+
+                    var monsterCoverTextOffset = UIScale(new Point(100, lineOffset * 1));
+                    DrawUIText(coverStr, monsterTextUI_UsefulTL + monsterCoverTextOffset);
+
+                    //Behaviour
+
+                    var behaviourTextOffset = UIScale(new Point(10, lineOffset * 2));
+
+                    if (CreatureToView.StunnedTurns > 0)
+                    {
+                        DrawUIText("(Stunned: " + CreatureToView.StunnedTurns + ")", monsterTextUI_UsefulTL + behaviourTextOffset);
+                    }
+                    else if (CreatureToView.InPursuit())
+                    {
+                        DrawUIText("(Hostile)", monsterTextUI_UsefulTL + behaviourTextOffset);
+                    }
+                    else if (!CreatureToView.OnPatrol())
+                    {
+                        DrawUIText("(Investigating)", monsterTextUI_UsefulTL + behaviourTextOffset);
                     }
                     else
                     {
-                        PutChar(statsDisplayTopLeft.x + viewOffset.x + 5 + i, statsDisplayTopLeft.y + viewOffset.y + 4, heartChar, disabledColor);
+                        DrawUIText("(Neutral)", monsterTextUI_UsefulTL + behaviourTextOffset);
+
                     }
                 }
-                
-
-                //Behaviour
-
-                if (CreatureToView.StunnedTurns > 0)
-                {
-                    PrintLine("(Stunned: " + CreatureToView.StunnedTurns + ")", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, stunnedBackground);
-                }
-                else if (CreatureToView.InPursuit())
-                {
-                    PrintLine("(Hostile)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, pursuitBackground);
-                }
-                else if (!CreatureToView.OnPatrol())
-                {
-                    PrintLine("(Investigating)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, investigateBackground);
-                }
-                else {
-                    PrintLine("(Neutral)", statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 5, LineAlignment.Left, statsColor);
-                }
-            }
-            else if (ItemToView != null && !ItemToView.InInventory)
-            {
-                String nameStr = ItemToView.SingleItemDescription;
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, ItemToView.GetColour());
-            }
-            else if(FeatureToView != null)
-            {
-                String nameStr = FeatureToView.Description;
-
-                PrintLine(nameStr, statsDisplayTopLeft.x + viewOffset.x, statsDisplayTopLeft.y + viewOffset.y + 3, LineAlignment.Left, FeatureToView.RepresentationColor());
             }
 
-            //Combat stats
-                string bonusStr = "";
-
-                if (player.HasMeleeWeaponEquipped())
-                {
-                    var meleeBonus = player.CalculateMeleeAttackModifiersOnMonster(null);
-                    bonusStr = meleeBonus.ToString("#.#") + "x";
-                }
-                else if (player.HasThrownWeaponEquipped())
-                {
-                    bonusStr = "";
-                }
-                else
-                {
-                    var rangedBonus = player.CalculateRangedAttackModifiersOnMonster(null);
-                    bonusStr = rangedBonus.ToString("#.#") + "x";
-                }
-
-                PrintLine("Attk: " + bonusStr, statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 1, LineAlignment.Left, statsColor);
-                
-                //Defence
-                var dodgeBonus = player.CalculateDamageModifierForAttacksOnPlayer(null);
-
-                if (dodgeBonus < 0.71)
-                {
-                    PrintLine("(s. dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, ColorPresets.Gold);
-                }
-
-                else if (dodgeBonus < 0.81)
-                {
-                    PrintLine("(dodge)", statsDisplayTopLeft.x + cmbtOffset.x, statsDisplayTopLeft.y + cmbtOffset.y + 2, LineAlignment.Left, statsColor);
-                }
-                
-               
-
-            /*
-            //Game data
-            PrintLine("Droids:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y, LineAlignment.Left);
-
-            int noDroids = Game.Dungeon.DungeonInfo.MaxDeaths - Game.Dungeon.DungeonInfo.NoDeaths;
-
-            for (int i = 0; i < noDroids; i++)
+            else if (ItemToView != null)
             {
-                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y, Game.Dungeon.Player.Representation, Game.Dungeon.Player.RepresentationColor());
+                DrawUISpriteByCentre(ItemToView, monsterUI_TL + rightUIIconCentre);
             }
-
-            PrintLine("Aborts:", statsDisplayTopLeft.x + gameDataOffset.x, statsDisplayTopLeft.y + gameDataOffset.y + 1, LineAlignment.Left);
-
-            int noAborts = Game.Dungeon.DungeonInfo.MaxAborts - Game.Dungeon.DungeonInfo.NoAborts;
-
-            for (int i = 0; i < noAborts; i++)
+            else if (FeatureToView != null)
             {
-                PutChar(statsDisplayTopLeft.x + gameDataOffset.x + 8 + i, statsDisplayTopLeft.y + gameDataOffset.y + 1, 'X',ColorPresets.Red);
-            }*/
-        }
-
-        private void DrawWetwareChar(Point utilityOffset, Type wetWareType, string wetwareChar)
-        {
-            var availableWetware = Game.Dungeon.Player.IsWetwareTypeAvailable(wetWareType);
-            var equippedWetware = Game.Dungeon.Player.GetEquippedWetware();
-            var disabledWetware = Game.Dungeon.Player.IsWetwareTypeDisabled(wetWareType);
-
-            if (availableWetware)
-            {
-                Color colorToUse;
-                if (disabledWetware)
-                {
-                    colorToUse = disabledColor;
-                }
-                else if (equippedWetware != null && equippedWetware.GetType() == wetWareType)
-                {
-                    colorToUse = orangeHighlightedColor;
-                }
-                else
-                {
-                    colorToUse = orangeActivatedColor;
-                }
-
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForLetter(wetwareChar), ColorPresets.White);
-                //+evil points
-                Item instance = (Item)Activator.CreateInstance(wetWareType);
-                PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
+                DrawUISpriteByCentre(FeatureToView, monsterUI_TL + rightUIIconCentre);
             }
         }
 
-        private void DrawWeaponChar(Point utilityOffset, Type weaponType, int weaponNo)
+        private Size UISpriteSize(string name)
         {
-            var heavyWeaponType = Game.Dungeon.Player.HeavyWeaponTranslation(weaponType);
+            var unscaledSize = mapRenderer.GetUISpriteDimensions(name);
+            return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
+        }
 
-            var availableWeapon = Game.Dungeon.Player.IsWeaponTypeAvailable(weaponType) || Game.Dungeon.Player.IsWeaponTypeAvailable(heavyWeaponType);
-            var equippedWeapon = Game.Dungeon.Player.GetEquippedWeapon();
+        private Size TraumaUISpriteSize(int id)
+        {
+            var unscaledSize = mapRenderer.GetTraumaSpriteDimensions(id);
+            return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
+        }
 
-            var thisWeaponEquipped = equippedWeapon != null && (equippedWeapon.GetType() == weaponType || equippedWeapon.GetType() == heavyWeaponType);
+        private Size SpriteSize(string name)
+        {
+            return mapRenderer.GetUISpriteDimensions(name);
+        }
 
-            Color colorToUse;
-            if (!availableWeapon)
-            {
-                colorToUse = disabledColor;
-            }
-            else if (thisWeaponEquipped)
-            {
-                colorToUse = orangeHighlightedColor;
-            }
-            else
-            {
-                colorToUse = orangeActivatedColor;
-            }
+        private void DrawUISprite(string name, Point p, double alpha = 1.0)
+        {
+            mapRenderer.DrawUISprite(name, p.x, p.y, UIScaling, alpha);
+        }
 
-            if (weaponNo > 5)
-                utilityOffset = utilityOffset + new Point(-15, 2);
+        private void DrawTraumaUISprite(int id, Point p, LibtcodColorFlags flags, double alpha = 1.0)
+        {
+            mapRenderer.DrawTraumaUISprite(id, p.x, p.y, flags, UIScaling, alpha);
+        }
 
-            PutChar(statsDisplayTopLeft.x + utilityOffset.x, statsDisplayTopLeft.y + utilityOffset.y, GetCharIconForNumber(weaponNo), ColorPresets.White);
-           
-            //+evil points
-            Item instance = (Item)Activator.CreateInstance(heavyWeaponType);
-            PutChar(statsDisplayTopLeft.x + utilityOffset.x + 1, statsDisplayTopLeft.y + utilityOffset.y, instance.Representation, colorToUse);
+        private void DrawSprite(string name, Point p, double alpha = 1.0)
+        {
+            mapRenderer.DrawUISprite(name, p.x, p.y, 1.0, alpha);
         }
 
         private char GetCharIconForNumber(int no)
@@ -2150,39 +2059,6 @@ namespace RogueBasin {
             }
         }
 
-        private void DrawShieldBar(Player player, Point shieldOffset, int shieldBarFirstBar)
-        {
-            for (int i = 0; i < shieldBarFirstBar; i++)
-            {
-                if (i < shieldBarFirstBar)
-                {
-                    Color shieldColor = player.IsEffectActive(typeof(PlayerEffects.ShieldEnhance)) ? ColorPresets.Yellow : orangeActivatedColor;
-
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
-                }
-                else
-                {
-                    Color shieldColor = player.ShieldIsDisabled ? orangeActivatedColor : orangeDisactivatedColor;
-
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, shieldChar, shieldColor);
-                }
-            }
-        }
-
-        private void DrawEnergyBar(Player player, Point shieldOffset, int shieldBarFirstBar)
-        {
-            for (int i = 0; i < shieldBarFirstBar; i++)
-            {
-                if (i < shieldBarFirstBar)
-                {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, batteryChar, batteryActivatedColor);
-                }
-                else
-                {
-                    PutChar(statsDisplayTopLeft.x + shieldOffset.x + 5 + i, statsDisplayTopLeft.y + shieldOffset.y, batteryChar, disabledColor);
-                }
-            }
-        }
 
         private void DrawItems(int levelToDraw, List<Item> itemList)
         {
@@ -2203,19 +2079,20 @@ namespace RogueBasin {
                 MapSquare itemSquare = Game.Dungeon.Levels[item.LocationLevel].mapSquares[item.LocationMap.x, item.LocationMap.y];
 
                 //Use the item's colour if it has one
-                Color itemColorToUse = item.GetColour();
+                System.Drawing.Color itemColorToUse = item.GetColour();
 
                 IEquippableItem equipItem = item as IEquippableItem;
                 if (equipItem != null)
                 {
                     //Show no ammo items in a neutral colour
                     if (equipItem.HasFireAction() && equipItem.RemainingAmmo() == 0)
-                        itemColorToUse = ColorPresets.Gray;
+                        itemColorToUse = System.Drawing.Color.Gray;
                 }
 
                 //Color itemColorToUse = itemColor;
 
                 bool drawItem = true;
+                double spriteAlpha = 0.0;
 
                 if (itemSquare.InPlayerFOV || SeeAllMap)
                 {
@@ -2225,7 +2102,8 @@ namespace RogueBasin {
                 {
                     //Not in FOV now but seen this adventure
                     //Don't draw items in squares seen in previous adventures (since the items have respawned)
-                    itemColorToUse = Color.Interpolate(item.GetColour(), ColorPresets.Black, 0.5);
+                    itemColorToUse = ColorInterpolate(item.GetColour(), System.Drawing.Color.Black, 0.5);
+                    spriteAlpha = 0.3;
                 }
                 else
                 {
@@ -2247,8 +2125,11 @@ namespace RogueBasin {
                     if (!isViewVisible(item.LocationMap))
                         continue;
 
-                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)] = new TileEngine.TileCell(item.Representation);
+                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)] = new TileEngine.TileCell(item.GameSprite);
+                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileID = item.Representation;
                     tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].TileFlag = new LibtcodColorFlags(itemColorToUse);
+                    tileMapLayer(TileLevel.Items)[ViewRelative(item.LocationMap)].Transparency = spriteAlpha;
+
                 }
                 //rootConsole.Flush();
                 //KeyPress userKey = Keyboard.WaitForKeyPress(true);
@@ -2265,7 +2146,8 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare featureSquare = Game.Dungeon.Levels[thisLock.LocationLevel].mapSquares[thisLock.LocationMap.x, thisLock.LocationMap.y];
 
-                Color featureColor = thisLock.RepresentationColor();
+                System.Drawing.Color featureColor = thisLock.RepresentationColor();
+                double spriteAlpha = 0.0;
 
                 bool drawFeature = true;
 
@@ -2276,7 +2158,8 @@ namespace RogueBasin {
                 else if (featureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    featureColor = Color.Interpolate(featureColor, ColorPresets.Black, 0.3);
+                    featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
+                    spriteAlpha = 0.3;
                 }
                 else
                 {
@@ -2298,6 +2181,7 @@ namespace RogueBasin {
 
                     tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)] = new TileEngine.TileCell(thisLock.Representation);
                     tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor);
+                    tileMapLayer(TileLevel.Features)[ViewRelative(thisLock.LocationMap)].Transparency = spriteAlpha;
                 }
             }
 
@@ -2314,8 +2198,8 @@ namespace RogueBasin {
                 //Colour depending on FOV (for development)
                 MapSquare featureSquare = Game.Dungeon.Levels[feature.LocationLevel].mapSquares[feature.LocationMap.x, feature.LocationMap.y];
 
-                Color featureColor = feature.RepresentationColor();
-
+                System.Drawing.Color featureColor = feature.RepresentationColor();
+                double spriteAlpha = 1.0;
                 bool drawFeature = true;
 
                 if (featureSquare.InPlayerFOV || SeeAllMap)
@@ -2326,7 +2210,8 @@ namespace RogueBasin {
                 else if (featureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    featureColor = Color.Interpolate(featureColor, ColorPresets.Black, 0.3);
+                    featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
+                    spriteAlpha = 0.3;
 
                     //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
                 }
@@ -2349,8 +2234,10 @@ namespace RogueBasin {
                     if (!isViewVisible(feature.LocationMap))
                         continue;
 
-                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.Representation);
+                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.GameSprite);
+                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileID = feature.Representation;
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileFlag = new LibtcodColorFlags(featureColor, feature.RepresentationBackgroundColor());
+                    tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].Transparency = spriteAlpha;
                 }
             }
 
@@ -2367,7 +2254,7 @@ namespace RogueBasin {
                 if (!creature.Alive)
                     continue;
 
-                Color creatureColor = creature.RepresentationColor();
+                System.Drawing.Color creatureColor = creature.RepresentationColor();
 
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
                 bool drawCreature = true;
@@ -2436,31 +2323,7 @@ namespace RogueBasin {
 
                             if (isViewVisible(headingLoc))
                             {
-                                int featureChar = tileMapLayer(TileLevel.Features)[ViewRelative(headingLoc)].TileID;
-
-                                if (featureChar != -1)
-                                {
-                                    char charToOverwrite = (char)featureChar;
-
-                                    tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)] = new TileEngine.TileCell(charToOverwrite);
-                                    tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
-                                }
-                                else
-                                {
-                                    int terrainChar = tileMapLayer(TileLevel.Terrain)[ViewRelative(headingLoc)].TileID;
-
-                                    if (terrainChar != -1)
-                                    {
-                                        char charToOverwrite = (char)terrainChar;
-                                        //Dot is too hard to see
-                                        if (charToOverwrite == StringEquivalent.TerrainChars[MapTerrain.Empty])
-                                            charToOverwrite = (char)7;
-
-
-                                        tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)] = new TileEngine.TileCell(charToOverwrite);
-                                        tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)].TileFlag = new LibtcodColorFlags(creature.RepresentationColor());
-                                    }
-                                }
+                                tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(headingLoc)] = new TileEngine.TileCell(redTargetTile);
                             }
                         }
                     }
@@ -2478,10 +2341,10 @@ namespace RogueBasin {
 
                 //Colour depending on FOV (for development)
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
-                Color creatureColor = creature.RepresentationColor();
+                System.Drawing.Color creatureColor = creature.RepresentationColor();
 
-                Color foregroundColor;
-                Color backgroundColor;
+                System.Drawing.Color foregroundColor;
+                System.Drawing.Color backgroundColor;
 
                 //Shouldn't really do this here but see if we can get away with it
                 CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
@@ -2519,7 +2382,7 @@ namespace RogueBasin {
                 {
                     if (creatureSquare.InMonsterFOV)
                     {
-                        creatureColor = Color.Interpolate(creatureColor, ColorPresets.Red, 0.4);
+                        creatureColor = ColorInterpolate(creatureColor, System.Drawing.Color.Red, 0.4);
                     }
 
                     //Draw waypoints
@@ -2530,8 +2393,8 @@ namespace RogueBasin {
                         int wpNo = 0;
                         foreach (Point wp in monsterWithWP.Waypoints)
                         {
-                            int wpX = mapTopLeft.x + wp.x;
-                            int wpY = mapTopLeft.y + wp.y;
+                            int wpX = mapTopLeftBase.x + wp.x;
+                            int wpY = mapTopLeftBase.y + wp.y;
 
                             if (isViewVisible(wp))
                             {
@@ -2547,88 +2410,122 @@ namespace RogueBasin {
                 if (drawCreature)
                 {
                     foregroundColor = creatureColor;
-                    backgroundColor = ColorPresets.Black;
+                    backgroundColor = System.Drawing.Color.Transparent;
+                    string overlapSprite = null;
 
-                    bool newBackground = false;
-                    //Set background depending on status
-                    if (creature == CreatureToView)
+                    //Overlay depends on status
+
+                    if (creature.Charmed)
                     {
-                        //targetted
-                        backgroundColor = targettedBackground;
-                        newBackground = true;
-                    }
-                    else if (creature.Charmed)
-                    {
-                        //backgroundColor = charmBackground;
-                        newBackground = true;
+
                     }
                     else if (creature.Passive)
                     {
-                        //backgroundColor = passiveBackground;
-                        newBackground = true;
+
                     }
                     else if (creature.StunnedTurns > 0)
                     {
-                        //backgroundColor = stunnedBackground;
-                        newBackground = true;
+                        overlapSprite = "stun";
                     }
-
-                    if (newBackground == false)
+                    else if (creature.Sleeping)
                     {
+                        overlapSprite = "zzoverlay";
+                    }
+                    else if (creature.ReloadingTurns > 0)
+                    {
+                        overlapSprite = "reloading";
+                    }
+                    else
+                    {
+                        MonsterFightAndRunAI monsterWithAI = creature as MonsterFightAndRunAI;
 
-                        IEquippableItem weapon = Game.Dungeon.Player.GetEquippedWeapon();
-
-                        if (weapon != null)
+                        if (monsterWithAI != null && monsterWithAI.AIState == SimpleAIStates.InvestigateSound)
                         {
-
-                            //In range firing
-                            if (weapon.HasFireAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
-                            {
-                                //backgroundColor = inRangeBackground;
-                                newBackground = true;
-                            }
-                            else
-                            {
-                                //In throwing range
-                                if (weapon.HasThrowAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
-                                {
-                                    //backgroundColor = inRangeBackground;
-                                    newBackground = true;
-                                }
-                            }
-
-                            //Also agressive
-                            if (newBackground == true && creature.InPursuit())
-                            {
-                                //backgroundColor = inRangeAndAggressiveBackground;
-                            }
+                            overlapSprite = "investigating";
                         }
                     }
 
-                    if (newBackground == false)
+                    string targetSprite = null;
+                    
+                    IEquippableItem weapon = Game.Dungeon.Player.GetEquippedRangedWeapon();
+
+                    if (weapon != null)
                     {
+
+                        //In range firing
+                        if (weapon.HasFireAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
+                        {
+                            targetSprite = blueTargetTile;
+                        }
+                        else
+                        {
+                            //In throwing range
+                            if (weapon.HasThrowAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
+                            {
+
+                            }
+                        }
+
+                        //Also agressive
                         if (creature.InPursuit())
                         {
-                            //backgroundColor = pursuitBackground;
-                            newBackground = true;
                         }
-                        else if (!creature.OnPatrol())
-                        {
-                            //backgroundColor = investigateBackground;
-                            newBackground = true;
-                        }
-                       // else if (creature.Unique)
-                            //backgroundColor = uniqueBackground;
-                       // else
-                           // backgroundColor = normalBackground;
+                    }
+
+                    if (creature == Screen.Instance.CreatureToView)
+                        targetSprite = greenTargetTile;
+
+                    if (creature.InPursuit())
+                    {
+                        //backgroundColor = pursuitBackground;
+                    }
+                    else if (!creature.OnPatrol())
+                    {
+                        //backgroundColor = investigateBackground;
+                    }
+                    // else if (creature.Unique)
+                    //backgroundColor = uniqueBackground;
+                    // else
+                    // backgroundColor = normalBackground;
+
+
+                    //Cover
+                    var cover = Game.Dungeon.Player.GetPlayerCover(creature);
+                    string coverSprite = null;
+                    double coverTransparency = 1.0;
+                    if (cover.Item1 > 0)
+                    {
+                        coverSprite = "cover";
+                        coverTransparency = 1.0;
+                    }
+                    else if (cover.Item2 > 0)
+                    {
+                        coverSprite = "cover";
+                        coverTransparency = 0.5;
                     }
 
                     //Creature
 
                     if (isViewVisible(creature.LocationMap))
                     {
-                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(creature.Representation);
+                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(creature.GameSprite);
+                        tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileID = creature.Representation;
                         tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
+
+                        tileMapLayer(TileLevel.CreatureDecoration)[ViewRelative(creature.LocationMap)].TileSprite = creature.GameOverlaySprite;
+
+                        tileMapLayer(TileLevel.CreatureStatus)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(overlapSprite);
+
+                        tileMapLayer(TileLevel.CreatureCover)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(coverSprite);
+                        tileMapLayer(TileLevel.CreatureCover)[ViewRelative(creature.LocationMap)].Transparency = coverTransparency;
+
+                        tileMapLayer(TileLevel.CreatureTarget)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell(targetSprite);
+
+                        if(creature.Level != 0 && !(creature is Creatures.ArenaMaster))
+                            tileMapLayer(TileLevel.CreatureLevel)[ViewRelative(creature.LocationMap)] = new TileEngine.TileCell("monster_level_" + creature.Level);
+
+                        if (creature.HasAnimation)
+                            tileMapLayer(TileLevel.Creatures)[ViewRelative(creature.LocationMap)].RecurringAnimation = creature.GetAnimation();
                     }
 
                 }
@@ -2669,29 +2566,35 @@ namespace RogueBasin {
             int heightAvail = mapBotRightBase.y - mapTopLeftBase.y;
 
             //Draw frame
-            DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, mapFrameColor);
+            //DrawFrame(mapTopLeftBase.x - 1, mapTopLeftBase.y - 1, widthAvail + 3, heightAvail + 3, false, mapFrameColor);
 
             //Draw frame for msg here too
-            DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false, statsFrameColor);
+            //DrawFrame(msgDisplayTopLeft.x - 1, msgDisplayTopLeft.y - 1, msgDisplayBotRight.x - msgDisplayTopLeft.x + 3, msgDisplayBotRight.y - msgDisplayTopLeft.y + 3, false, statsFrameColor);
 
             //Put the map in the centre
             //mapTopLeft = new Point(mapTopLeftBase.x + (widthAvail - width) / 2, mapTopLeftBase.y + (heightAvail - height) / 2);
             //not appropriate with viewport approach
-            mapTopLeft = mapTopLeftBase;
 
             for (int i = 0; i < map.width; i++)
             {
                 for (int j = 0; j < map.height; j++)
                 {
-                    int screenX = mapTopLeft.x + i;
-                    int screenY = mapTopLeft.y + j;
+                    int screenX = mapTopLeftBase.x + i;
+                    int screenY = mapTopLeftBase.y + j;
 
                     char screenChar;
-                    Color baseDrawColor;
-                    Color drawColor;
+                    System.Drawing.Color baseDrawColor;
+                    System.Drawing.Color drawColor;
+                    double spriteTransparency = 1.0;
+                    bool drawSquare = true;
+
+                    string effectSprite = null;
+                    double effectTransparency = 1.0;
 
                     //Defaults
                     screenChar = StringEquivalent.TerrainChars[map.mapSquares[i, j].Terrain];
+                    string terrainSprite = null;
+                    StringEquivalent.TerrainSprites.TryGetValue(map.mapSquares[i, j].Terrain, out terrainSprite);
                     baseDrawColor = StringEquivalent.TerrainColors[map.mapSquares[i, j].Terrain];
 
                     //Exception for literals
@@ -2714,7 +2617,7 @@ namespace RogueBasin {
                         {
                             //Draw the room id (in empty areas only for SRN==1)
 
-                            List<Color> colors = new List<Color>(new Color[] { ColorPresets.Yellow, ColorPresets.Gold, ColorPresets.RosyBrown, orangeDisactivatedColor, ColorPresets.LightGray, ColorPresets.Gray });
+                            List<System.Drawing.Color> colors = new List<System.Drawing.Color>(new System.Drawing.Color[] { System.Drawing.Color.Yellow, System.Drawing.Color.Gold, System.Drawing.Color.RosyBrown, orangeDisactivatedColor, System.Drawing.Color.LightGray, System.Drawing.Color.Gray });
 
                             int roomId = map.roomIdMap[i, j];
 
@@ -2724,7 +2627,7 @@ namespace RogueBasin {
                             if (numberToDraw == -1)
                             {
                                 screenChar = 'n';
-                                baseDrawColor = ColorPresets.DarkGray;
+                                baseDrawColor = System.Drawing.Color.DarkGray;
                             }
                             else {
                                 char r = Convert.ToChar(numberToDraw.ToString());
@@ -2746,7 +2649,6 @@ namespace RogueBasin {
 
                     }
  
-                    //In FlatlineRL you can normally see the whole map
                     if (map.mapSquares[i, j].InPlayerFOV || SeeAllMap)
                     {
                         //In FOV or in town
@@ -2755,17 +2657,22 @@ namespace RogueBasin {
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Black, 0.4);
-
-                        //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
+                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.6);
+                        spriteTransparency = 0.5;
                     }
                     else
                     {
                         //Never in FOV
                         if (DebugMode)
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Black, 0.6);
+                        {
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.7);
+                            spriteTransparency = 0.7;
+                        }
                         else
+                        {
                             drawColor = hiddenColor;
+                            drawSquare = false;
+                        }
                     }
 
                     //Monster FOV in debug mode
@@ -2774,34 +2681,53 @@ namespace RogueBasin {
                         //Draw player FOV explicitally
                         if (map.mapSquares[i, j].InPlayerFOV)
                         {
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Blue, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Blue, 0.6);
+                            effectSprite = "greentarget";
+                            effectTransparency = 0.5;
                         }
-
 
                         //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Red, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Red, 0.6);
+                            effectSprite = "redtarget";
+                            effectTransparency = 0.5;
+                        }
+
+                        //Draw monster stealth radius
+                        if (map.mapSquares[i, j].InMonsterStealthRadius)
+                        {
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.OrangeRed, 0.6);
+                            effectSprite = "orangetarget";
+                            effectTransparency = 0.5;
                         }
 
                         //Draw sounds
                         if (map.mapSquares[i, j].SoundMag > 0.0001)
                         {
-                            drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Yellow, map.mapSquares[i, j].SoundMag);
+                            effectSprite = "sound";
+                            effectTransparency = map.mapSquares[i, j].SoundMag;
+                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Yellow, map.mapSquares[i, j].SoundMag);
                         }
                     }
 
                     if (Game.Dungeon.Player.IsEffectActive(typeof(PlayerEffects.SeeFOV)) && map.mapSquares[i, j].InMonsterFOV)
                     {
-                        drawColor = Color.Interpolate(baseDrawColor, ColorPresets.Green, 0.7);
+                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Green, 0.7);
                     }
 
                     Point mapTerrainLoc = new Point(i, j);
 
-                    if (isViewVisible(mapTerrainLoc))
+                    if (isViewVisible(mapTerrainLoc) && drawSquare)
                     {
-                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(screenChar);
+                        
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(terrainSprite);
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileID = screenChar;
                         tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].TileFlag = new LibtcodColorFlags(drawColor);
+                        tileMapLayer(TileLevel.Terrain)[ViewRelative(mapTerrainLoc)].Transparency = spriteTransparency;
+                        
+                        tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)] = new TileEngine.TileCell(effectSprite);
+                        tileMapLayer(TileLevel.TerrainEffects)[ViewRelative(mapTerrainLoc)].Transparency = effectTransparency;
                     }
                 }
             }
@@ -2843,13 +2769,13 @@ namespace RogueBasin {
         /// Print message in message bar
         /// </summary>
         /// <param name="message"></param>
-        internal void PrintMessage(string message, Color color)
+        internal void PrintMessage(string message, System.Drawing.Color color)
         {
             //Update state
             lastMessage = message;
 
             //Display new message
-            PrintLineRect(message, msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x + 1, msgDisplayNumLines, LineAlignment.Left, color);
+            DrawTextWidth(message, msgDisplayTopLeft, 800, color);
         }
 
         /// <summary>
@@ -2862,33 +2788,16 @@ namespace RogueBasin {
             lastMessage = message;
 
             //Clear message bar
-            DrawRect(topLeft.x, topLeft.y, width, 1, true);
+            ClearRect(topLeft.x, topLeft.y, width, 1);
 
             //Display new message
-            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left);
-        }
-
-        /// <summary>
-        /// Print message at any point on screen
-        /// </summary>
-        /// <param name="message"></param>
-        internal void PrintMessage(string message, Point topLeft, int width, Color color)
-        {
-
-            //Update state
-            lastMessage = message;
-
-            //Clear message bar
-            DrawRect(topLeft.x, topLeft.y, width, 1, true);
-
-            //Display new message
-            PrintLineRect(message, topLeft.x, topLeft.y, width, 1, LineAlignment.Left, color);
+            DrawTextWidth(message, topLeft, width, System.Drawing.Color.White);
         }
 
         void ClearMessageBar()
         {
 
-            DrawRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1, true);
+            //ClearRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1);
         }
 
 
@@ -3023,287 +2932,90 @@ namespace RogueBasin {
         }
 
         /// <summary>
-        /// Get a string from the user. One line only.
-        /// maxChars is the max length of the input string (not including the introMessage)
-        /// </summary>
-        /// <returns></returns>
-
-        internal string GetUserString(string introMessage, Point topLeft, int maxChars)
-        {
-
-            ClearMessageLine();
-
-            PrintMessage(introMessage + "", topLeft, introMessage.Length + 2 + maxChars);
-            FlushConsole();
-
-            bool continueInput = true;
-
-            string userString = "";
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-                    char keyCode = (char)userKey.Character;
-                    if (userString.Length < maxChars)
-                    {
-                        userString += keyCode.ToString();
-                    }
-                }
-                else
-                {
-                    //Special keys
-                    switch (userKey.KeyCode)
-                    {
-                        case KeyCode.TCODK_0:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "0";
-                            }
-                            break;
-                        case KeyCode.TCODK_1:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "1";
-                            }
-                            break;
-                        case KeyCode.TCODK_2:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "2";
-                            }
-                            break;
-                        case KeyCode.TCODK_3:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "3";
-                            }
-                            break;
-                        case KeyCode.TCODK_4:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "4";
-                            }
-                            break;
-                        case KeyCode.TCODK_5:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "5";
-                            }
-                            break;
-                        case KeyCode.TCODK_6:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "6";
-                            }
-                            break;
-                        case KeyCode.TCODK_7:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "7";
-                            }
-                            break;
-                        case KeyCode.TCODK_8:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "8";
-                            }
-                            break;
-                        case KeyCode.TCODK_9:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += "9";
-                            }
-                            break;
-                        case KeyCode.TCODK_SPACE:
-                            if (userString.Length < maxChars)
-                            {
-                                userString += " ";
-                            }
-                            break;
-
-
-                        case KeyCode.TCODK_ESCAPE:
-                            //Exit
-                            return null;
-                        case KeyCode.TCODK_BACKSPACE:
-                            if (userString.Length != 0)
-                            {
-                                userString = userString.Substring(0, userString.Length - 1);
-                            }
-                            break;
-                        case KeyCode.TCODK_ENTER:
-                            //Exit with what we have
-                            return userString;
-                    }
-                }
-
-                PrintMessage(introMessage + "" + userString + "_", topLeft, introMessage.Length + 2 + maxChars);
-                FlushConsole();
-
-            } while (continueInput);
-
-            return null;
-        }
-
-        public bool YesNoQuestionWithFrame(string introMessage, int extrayOffset, Color frameColor, Color textColor)
-        {
-            var width = introMessage.Count() + 7;
-            var height = 1;
-
-            int xOffset = (Width - movieTL.x * 2 - width) / 2;
-            int yOffset = (Height - movieTL.y * 2 - height) / 2;
-
-            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset + extrayOffset);
-            int frameOffset = 2;
-
-            //Draw frame
-            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, frameColor);
-
-            FlushConsole();
-
-            return YesNoQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
-        }
-
-        public GameDifficulty DifficultyQuestionWithFrame(string introMessage, int extrayOffset, Color frameColor, Color textColor)
-        {
-            var width = introMessage.Count() + 7;
-            var height = 1;
-
-            int xOffset = (Width - movieTL.x * 2 - width) / 2;
-            int yOffset = (Height - movieTL.y * 2 - height) / 2;
-
-            var frameTL = new Point(movieTL.x + xOffset, movieTL.y + yOffset + extrayOffset);
-            int frameOffset = 2;
-
-            //Draw frame
-            DrawFrame(frameTL.x - frameOffset, frameTL.y - frameOffset, width + 2 * frameOffset + 1, height + 2 * frameOffset, true, frameColor);
-
-            FlushConsole();
-
-            return DifficultyQuestion(introMessage, new Point(frameTL.x, frameTL.y), textColor);
-        }
-
-        internal bool YesNoQuestion(string introMessage, Point topLeft, Color textColor)
-        {
-
-            PrintMessage(introMessage + " (y / n):", topLeft, introMessage.Length + 8, textColor);
-            FlushConsole();
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                   char keyCode = (char)userKey.Character;
-                   switch (keyCode)
-                   {
-                       case 'y':
-                           ClearMessageLine();
-                           return true;
-                           
-                       case 'n':
-                           ClearMessageLine();
-                           return false;
-                           
-                   }
-                }
-            } while(true);
-        }
-
-        internal GameDifficulty DifficultyQuestion(string introMessage, Point topLeft, Color textColor) {
-            
-            PrintMessage(introMessage, topLeft, introMessage.Length + 8, textColor);
-            FlushConsole();
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                    char keyCode = (char)userKey.Character;
-                    switch (keyCode)
-                    {
-                        case 'e':
-                            ClearMessageLine();
-                            return GameDifficulty.Easy;
-
-                        case 'm':
-                            ClearMessageLine();
-                            return GameDifficulty.Medium;
-
-                        case 'h':
-                            ClearMessageLine();
-                            return GameDifficulty.Hard;
-                    }
-                }
-            } while (true);
-
-            return GameDifficulty.Easy;
-        }
-
-        internal bool YesNoQuestion(string introMessage)
-        {
-
-            ClearMessageLine();
-
-            PrintMessage(introMessage + " (y / n):");
-            FlushConsole();
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                {
-
-                    char keyCode = (char)userKey.Character;
-                    switch (keyCode)
-                    {
-                        case 'y':
-                            ClearMessageLine();
-                            return true;
-
-                        case 'n':
-                            ClearMessageLine();
-                            return false;
-
-                    }
-                }
-            } while (true);
-        }
-
-        /// <summary>
         /// Draw the screen and run the message queue
         /// </summary>
-        public void Update()
+        public void Update(int tickIncrement)
         {
-            //Draw screen 
-            Draw();
+            Boolean animationUpdate = false;
 
-            //Message queue - requires keyboard to advance messages - not sure about this yet
-            Game.MessageQueue.RunMessageQueue();
+            //Expire any temporary animations
+            animationUpdate = UpdateAnimations(tickIncrement);
+
+            //Rerender tiles if user events has occurred or an animation has expired
+            if (NeedsUpdate || animationUpdate)
+            {
+                //Draw screen 
+                Draw();
+
+                FlushConsole();
+            }
         }
 
+        public bool UpdateAnimations(int tickIncrement)
+        {
+            //May be called before map made
+            if (tileMap == null)
+                return false;
 
+            var animationChangeOccurred = false;
+            var animationLayer = tileMapLayer(TileLevel.Animations);
+
+            for (int i = 0; i < tileMap.Rows; i++)
+            {
+                for (int j = 0; j < tileMap.Columns; j++)
+                {
+                    TileEngine.TileCell thisCell = animationLayer.Rows[i].Columns[j];
+
+                    if (!thisCell.IsPresent())
+                        continue;
+
+                    TileEngine.Animation cellAnimation = thisCell.Animation;
+
+                    if (cellAnimation == null)
+                    {
+                        LogFile.Log.LogEntryDebug("Cell animation at row: " + i + " column " + j + "is null", LogDebugLevel.High);
+                        continue;
+                    }
+
+                    cellAnimation.CurrentFrame += tickIncrement;
+                    if (cellAnimation.CurrentFrame > cellAnimation.DelayMS)
+                    {
+                        cellAnimation.Displayed = true;
+                        animationChangeOccurred = true;
+                    }
+
+                    if (!cellAnimation.Displayed)
+                        continue;
+
+                    if (cellAnimation.CurrentFrame > cellAnimation.DurationMS + cellAnimation.DelayMS)
+                    {
+                        thisCell.Reset();
+                        animationChangeOccurred = true;
+                    }
+                }
+            }
+
+            foreach (Monster m in Game.Dungeon.Monsters)
+            {
+                var animationChanged = m.IncrementAnimation(tickIncrement);
+                if (animationChanged)
+                    animationChangeOccurred = true;
+            }
+
+            return animationChangeOccurred;
+
+        }
+
+        private void DrawPrompt()
+        {
+            ClearMessageLine();
+            PrintMessage(Prompt, promptColor);
+        }
+
+        public void ClearPrompt()
+        {
+            Prompt = null;
+        }
 
         /// <summary>
         /// Do a missile attack animation. creature firing from start to finish in color.
@@ -3314,7 +3026,7 @@ namespace RogueBasin {
         /// <param name="point"></param>
         /// <param name="point_3"></param>
         /// <param name="color"></param>
-        internal void DrawMissileAttack(Creature originCreature, Creature target, CombatResults result, Color color)
+        internal void DrawMissileAttack(Creature originCreature, Creature target, CombatResults result, System.Drawing.Color color)
         {
             if (!CombatAnimations)
                 return;
@@ -3327,29 +3039,19 @@ namespace RogueBasin {
             if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
                 return;
             
-            //Draw the screen as normal
-            Draw();
-            FlushConsole();
-
-            //Flash the attacker
-            /*
-            if (creatureSquare.InPlayerFOV)
-            {
-                rootConsole.ForegroundColor = ColorPresets.White;
-                rootConsole.PutChar(mapTopLeft.x + originCreature.LocationMap.x, mapTopLeft.y + originCreature.LocationMap.y, originCreature.Representation);
-            }*/
-
             //Draw animation to animation layer
 
             //Calculate and draw the line overlay
-            DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, ColorPresets.Black);
+            List<Point> thisLineSquares = Game.Dungeon.GetPathLinePoints(originCreature.LocationMap, target.LocationMap);
+            DrawAreaAttackAnimation(thisLineSquares, AttackType.Bullet, true);    
+            //DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, System.Drawing.Color.Black);
 
             //Flash the target if they were damaged
             //Draw them in either case so that we overwrite the missile animation on the target square with the creature
 
             if (targetSquare.InPlayerFOV)
             {
-                Color colorToDraw = ColorPresets.Red;
+                System.Drawing.Color colorToDraw = System.Drawing.Color.Red;
 
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
@@ -3359,27 +3061,15 @@ namespace RogueBasin {
                 {
                     colorToDraw = target.RepresentationColor();
                 }
-
+                /*
                 if (isViewVisible(target.LocationMap))
                 {
                     tileMapLayer(TileLevel.Animations)[ViewRelative(target.LocationMap)] = new TileEngine.TileCell(target.Representation);
                     tileMapLayer(TileLevel.Animations)[ViewRelative(target.LocationMap)].TileFlag = new LibtcodColorFlags(colorToDraw);
-                }
+                    tileMapLayer(TileLevel.Animations)[ViewRelative(target.LocationMap)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
+
+                }*/
             }
-
-            //Render the full layered map (with these animations) on screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
-
-            //Wait
-            TCODSystem.Sleep(missileDelay);
-
-            //Wipe the animation layer
-            tileMap.ClearLayer((int)TileLevel.Animations);
-
-            //Draw the map normally
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();  
         }
 
         /// <summary>
@@ -3400,50 +3090,24 @@ namespace RogueBasin {
             if (!creatureSquare.InPlayerFOV && !targetSquare.InPlayerFOV)
                 return;
 
-            //Draw screen normally
-            //Necessary since on a player move, his old position will show unless we do this
-            Draw();
-            FlushConsole();
-
-            //Flash the attacker
-            /*
-            Color creatureColor = creature.RepresentationColor();
-
-            if (creatureSquare.InPlayerFOV)
-            {
-                rootConsole.ForegroundColor = ColorPresets.White;
-                rootConsole.PutChar(mapTopLeft.x + creature.LocationMap.x, mapTopLeft.y + creature.LocationMap.y, creature.Representation);
-            }
-            */
-
             //Flash the attacked creature
             //Add flash to animation layer
 
+            //need to add a melee splash
+
             if (targetSquare.InPlayerFOV)
             {
+                /*
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
                     if (isViewVisible(newTarget.LocationMap))
                     {
-                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.Representation);
-                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(ColorPresets.Red);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.GameSprite);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
                     }
-                }
+                }*/
             }
-
-            //Render the full layered map (with these animations) on screen
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
-
-            //Wait
-            TCODSystem.Sleep(meleeDelay);
-
-            //Wipe the animation layer
-            tileMap.ClearLayer((int)TileLevel.Animations);
-                        
-            //Draw the map normally
-            MapRendererLibTCod.RenderMap(tileMap, new Point(0, 0), new System.Drawing.Rectangle(mapTopLeft.x, mapTopLeft.y, mapBotRightBase.x - mapTopLeftBase.x + 1, mapBotRightBase.y - mapTopLeftBase.y + 1));
-            FlushConsole();
         }
 
 
@@ -3455,6 +3119,32 @@ namespace RogueBasin {
                 Screen.Instance.ItemToView = null;
                 Screen.Instance.FeatureToView = null;
             }
+        }
+
+        internal void SetPrompt(string p)
+        {
+            Prompt = p;
+        }
+
+        internal void UpdateAnimations()
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        public bool EndOfGameQuit { get; set; }
+
+        public bool EndOfGameWon { get; set; }
+
+        public bool ShowMessageQueue { get; set; }
+    }
+
+    static class ScreenExtensionMethods
+    {
+        public static System.Drawing.Point Add(this System.Drawing.Point p1, System.Drawing.Point p2)
+        {
+            return new System.Drawing.Point(p1.X + p2.X, p1.Y + p2.Y);
         }
     }
 }

@@ -5,10 +5,29 @@ using System.Text;
 
 namespace RogueBasin
 {
+
+    enum FillingTerrain
+    {
+        Walkable,
+        Unwalkable,
+        MustBeWalkable,
+        ClosedDoor
+    }
+
+    class FillingMap : FieldMap<FillingTerrain>
+    {
+
+        public FillingMap(int width, int height)
+            : base(width, height)
+        {
+
+        }
+    };
+
     public class RoomFilling
     {
         RoomTemplate template;
-        PathingMap thisMap;
+        FillingMap thisMap;
         HashSet<Point> foundPathablePoints;
         bool result;
 
@@ -21,14 +40,14 @@ namespace RogueBasin
 
         private void BuildPathableMap()
         {
-            thisMap = new PathingMap(template.Width, template.Height);
+            thisMap = new FillingMap(template.Width, template.Height);
 
             for (int i = 0; i < template.Width; i++)
             {
                 for (int j = 0; j < template.Height; j++)
                 {
                     thisMap.setCell(i, j,
-                        RoomTemplateTerrainWalkable.terrainWalkable[template.terrainMap[i, j]] ? PathingTerrain.Walkable : PathingTerrain.Unwalkable);
+                        RoomTemplateTerrainWalkable.terrainWalkable[template.terrainMap[i, j]] ? FillingTerrain.Walkable : FillingTerrain.Unwalkable);
                 }
             }
         }
@@ -38,7 +57,7 @@ namespace RogueBasin
             if (p.x < 0 || p.y < 0 || p.x >= thisMap.Width || p.y >= thisMap.Height)
                 throw new ApplicationException("Point off template.");
 
-            thisMap.setCell(p.x, p.y, PathingTerrain.Unwalkable);
+            thisMap.setCell(p.x, p.y, FillingTerrain.Unwalkable);
         }
 
         public bool SetSquareUnWalkableIfMaintainsConnectivity(Point p)
@@ -46,8 +65,17 @@ namespace RogueBasin
             if (p.x < 0 || p.y < 0 || p.x >= thisMap.Width || p.y >= thisMap.Height)
                 throw new ApplicationException("Point off template.");
 
+            //It's not safe to set the squares at the edge of the template as unwalkable since they may link to other rooms
+            //(and the fill algorithm won't work on them)
+            if (p.x == 0 || p.y == 0 || p.x == thisMap.Width - 1 || p.y == thisMap.Height - 1)
+                return false;
+
+            //Can't fill a cell that we have specified as unfillable
+            if (thisMap.getCell(p) == FillingTerrain.MustBeWalkable)
+                return false;
+
             var oldTerrain = thisMap.getCell(p);
-            thisMap.setCell(p, PathingTerrain.Unwalkable);
+            thisMap.setCell(p, FillingTerrain.Unwalkable);
 
             var isConnected = IsConnected();
 
@@ -55,6 +83,18 @@ namespace RogueBasin
                 thisMap.setCell(p, oldTerrain);
 
             return isConnected;
+        }
+
+        /// <summary>
+        /// For squares that must be accessible (e.g. items or activateable features)
+        /// </summary>
+        /// <param name="p"></param>
+        public void SetSquareAsUnfillableMustBeConnected(Point p)
+        {
+            if (p.x < 0 || p.y < 0 || p.x >= thisMap.Width || p.y >= thisMap.Height)
+                throw new ApplicationException("Point off template.");
+
+            thisMap.setCell(p.x, p.y, FillingTerrain.MustBeWalkable);
         }
 
         public bool Connected
@@ -140,8 +180,9 @@ namespace RogueBasin
             return new List<Point>();
         }
 
-        private bool CountsAsWalkable(PathingTerrain terrain) {
-            return terrain == PathingTerrain.Walkable || terrain == PathingTerrain.ClosedDoor;
+        private bool CountsAsWalkable(FillingTerrain terrain)
+        {
+            return terrain == FillingTerrain.Walkable || terrain == FillingTerrain.MustBeWalkable || terrain == FillingTerrain.ClosedDoor;
         }
 
     }

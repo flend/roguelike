@@ -20,15 +20,12 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 0;
 
-            //Randomize which way we rotate (should be serialized)
-            if (Game.Random.Next(2) > 0)
-            {
-                rotationClockwise = false;
-            }
-
             Unique = true;
 
-            this.Passive = true;
+            //Always passive
+            Passive = true;
+            UnpassifyOnAttacked = false;
+            WakesOnAttacked = false;
         }
 
         protected override int ClassMaxHitpoints()
@@ -44,7 +41,7 @@ namespace RogueBasin.Creatures
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Triangular;
+            return CreatureFOV.CreatureFOVType.Base;
         }
 
 
@@ -80,9 +77,9 @@ namespace RogueBasin.Creatures
             return new ComputerNode();
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.WhiteSmoke;
+            return System.Drawing.Color.WhiteSmoke;
         }
 
         public override int GetCombatXP()
@@ -131,7 +128,7 @@ namespace RogueBasin.Creatures
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public override int DamageModifier()
+        public override double DamageModifier()
         {
             return 0;
         }

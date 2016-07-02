@@ -248,7 +248,7 @@ namespace RogueBasin
                 for (int j = 0; j < room.Height; j++)
                 {
                     if(room.terrainMap[i, j] == RoomTemplateTerrain.Floor &&
-                        HasWallButNoDoorNeighbours(room, new Point(i, j)))
+                        HasWallButNoCardinalDoorNeighbours(room, new Point(i, j)))
                         candidatePoints.Add(new Point(i,j));
                 }
             }
@@ -268,6 +268,39 @@ namespace RogueBasin
             adjacentSq.Add(p + new Point(1, -1));
             adjacentSq.Add(p + new Point(1, 0));
             adjacentSq.Add(p + new Point(1, 1));
+
+            bool foundWall = false;
+
+            foreach (var pt in adjacentSq)
+            {
+                if (pt.x < 0 || pt.y < 0 || pt.x >= room.Width || pt.y >= room.Height)
+                    continue;
+
+                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.Wall)
+                    foundWall = true;
+
+                //This isn't great because it works on the pre-filled in terrain
+                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.WallWithPossibleDoor)
+                    return false;
+
+                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.OpenWithPossibleDoor)
+                    return false;
+            }
+
+            if (foundWall)
+                return true;
+
+            return false;
+        }
+
+        private static bool HasWallButNoCardinalDoorNeighbours(RoomTemplate room, Point p)
+        {
+            List<Point> adjacentSq = new List<Point>();
+
+            adjacentSq.Add(p + new Point(-1, 0));
+            adjacentSq.Add(p + new Point(0, -1));
+            adjacentSq.Add(p + new Point(0, 1));
+            adjacentSq.Add(p + new Point(1, 0));
 
             bool foundWall = false;
 

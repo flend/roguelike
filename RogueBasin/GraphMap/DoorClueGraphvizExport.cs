@@ -5,22 +5,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Immutable;
 
 namespace GraphMap
 {
     public class DoorClueGraphvizExport
     {
         private MapModel model;
-        private Dictionary<int, string> vertexMapping = new Dictionary<int,string>();
+        private DoorAndClueManager doorAndClueManager;
+        private ImmutableDictionary<int, string> vertexMapping;
 
-        public DoorClueGraphvizExport(MapModel m)
+        public DoorClueGraphvizExport(MapModel m, DoorAndClueManager doorAndClueManager)
         {
             this.model = m;
+            this.doorAndClueManager = doorAndClueManager;
+            vertexMapping = new Dictionary<int, String>().ToImmutableDictionary();
         }
 
-        public DoorClueGraphvizExport(MapModel m, Dictionary<int, string> vertexMapping)
+        public DoorClueGraphvizExport(MapModel m, DoorAndClueManager doorAndClueManager, ImmutableDictionary<int, string> vertexMapping)
         {
             this.model = m;
+            this.doorAndClueManager = doorAndClueManager;
             this.vertexMapping = vertexMapping;
         }
 
@@ -67,7 +72,7 @@ namespace GraphMap
         /// <param name="filename"></param>
         public void OutputDoorDependencyGraph(string filename)
         {
-            var graphviz = new GraphvizAlgorithm<int, Edge<int>>(model.DoorAndClueManager.DoorDependencyGraph);
+            var graphviz = new GraphvizAlgorithm<int, Edge<int>>(doorAndClueManager.DoorDependencyGraph);
 
             graphviz.FormatVertex += graphviz_FormatDoorVertex;
 
@@ -84,7 +89,7 @@ namespace GraphMap
             var vertexFormattor = e.VertexFormatter;
             int vertexNo = e.Vertex;
 
-            var door = model.DoorAndClueManager.GetLockIdByIndex(vertexNo);
+            var door = doorAndClueManager.GetLockIdByIndex(vertexNo);
 
             vertexFormattor.Label = door;
         }
@@ -98,7 +103,7 @@ namespace GraphMap
 
             //If there is a door on this edge, override with this tag
 
-            var doorHere = model.DoorAndClueManager.GetDoorsForEdge(edge);
+            var doorHere = doorAndClueManager.GetDoorsForEdge(edge);
 
             string edgeTag = edge.Tag;
 
@@ -124,7 +129,7 @@ namespace GraphMap
 
             //If there is a door on this edge, override with this tag
 
-            var doorHere = model.DoorAndClueManager.GetDoorsForEdge(edge);
+            var doorHere = doorAndClueManager.GetDoorsForEdge(edge);
 
             string edgeTag = edge.Tag;
 
@@ -156,7 +161,7 @@ namespace GraphMap
                 vertexLabel = vertexMapping[vertexNo];
 
             //If there is a clue here, append clue
-            var clues = model.DoorAndClueManager.GetObjectiveAndClueIdsAtVertex(vertexNo);
+            var clues = doorAndClueManager.GetObjectiveAndClueIdsAtVertex(vertexNo);
 
             foreach (var clue in clues)
             {

@@ -12,21 +12,29 @@ namespace GraphMapStressTester
     {
         Random random;
 
-        public DoorAndClueGenerator(Random rand)
+        private MapModel model;
+        private DoorAndClueManager doorAndClueManager;
+
+        public DoorAndClueGenerator(MapModel mapModel, DoorAndClueManager doorAndClueManager, Random rand)
         {
             this.random = rand;
+            this.doorAndClueManager = doorAndClueManager;
+            this.model = mapModel;
         }
 
-        public MapModel AddDoorsAndClues(MapModel mapModel, int numberDoorsToAdd, int cluesPerDoorMax)
+        public MapModel Model { get { return model; } }
+        public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }
+
+        public void AddDoorsAndClues(int numberDoorsToAdd, int cluesPerDoorMax)
         {
-            var manager = mapModel.DoorAndClueManager;
+            var manager = doorAndClueManager;
             var numberDoors = 0;
 
             while (numberDoors < numberDoorsToAdd)
             {
                 var doorName = "door" + numberDoors.ToString();
                 var cluesToPlace = cluesPerDoorMax;
-                var edgeToPlaceDoor = GetRandomEdgeInMap(mapModel.FullMap);
+                var edgeToPlaceDoor = GetRandomEdgeInMap(model.FullMap);
 
                 var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(edgeToPlaceDoor);
                 
@@ -37,8 +45,6 @@ namespace GraphMapStressTester
 
                 numberDoors++;
             }
-
-            return mapModel;
         }
 
         private Connection GetRandomEdgeInMap(ConnectivityMap generatedMap) {

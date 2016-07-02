@@ -6,6 +6,11 @@ using System.Linq;
 
 namespace RogueBasin
 {
+    public enum CreatureAttackType
+    {
+        Normal, Shotgun
+    }
+
     /// <summary>
     /// Base class for Creatures.
     /// </summary>
@@ -197,7 +202,8 @@ namespace RogueBasin
             //Used as a test for re-adding monsters
             UniqueID = 0;
 
-            RandomStartTurnClock();
+            //Don't randomized the turn clock - otherwise sometimes summonded enemies get an attack in before the player
+            //RandomStartTurnClock();
 
             //By default set a random heading. Override from outside
             SetRandomHeading();
@@ -244,7 +250,14 @@ namespace RogueBasin
             //Set the item as found
             itemToPickUp.IsFound = true;
 
-            inventory.AddItem(itemToPickUp);
+            if(Inventory.ContainsItemOfType(itemToPickUp.GetType()) && itemToPickUp.DoNotPickupDuplicates()) {
+                LogFile.Log.LogEntryDebug("Won't pick up duplicate " + itemToPickUp.SingleItemDescription, LogDebugLevel.Medium);
+                Game.MessageQueue.AddMessage("Already have one of those!");
+                return false;
+            }
+            else {
+                inventory.AddItem(itemToPickUp);
+            }
 
             return true;
         }
@@ -335,12 +348,12 @@ namespace RogueBasin
         /// <summary>
         /// Creature AC. Set by type of creature.
         /// </summary>
-        public abstract int ArmourClass();
+        public virtual int ArmourClass() { return 0; }
 
         /// <summary>
         /// Creature 1dn damage.  Set by type of creature.
         /// </summary>
-        public abstract int HitModifier();
+        public virtual int HitModifier() { return 0; }
 
         /// <summary>
         /// Creature 1dn damage.  Set by type of creature.
@@ -350,7 +363,7 @@ namespace RogueBasin
         /// <summary>
         /// Creature damage modifier.  Set by type of creature.
         /// </summary>
-        public abstract int DamageModifier();
+        public virtual double DamageModifier() { return 0; }
 
         /// <summary>
         /// What FOV we have in addition to the tcod
@@ -378,6 +391,19 @@ namespace RogueBasin
         {
             return inventory.Items;
         }
+
+        public CreatureAttackType AttackType
+        {
+            get {
+                return GetCreatureAttackType();
+            }
+        }
+
+        protected virtual CreatureAttackType GetCreatureAttackType()
+        {
+            return CreatureAttackType.Normal;
+        }
+
 
         /// <summary>
         /// Inventory - possibly make this protected at some point?

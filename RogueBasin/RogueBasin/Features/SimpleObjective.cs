@@ -77,16 +77,16 @@ namespace RogueBasin.Features
             return (char)365;
         }
 
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
-            return ColorPresets.LimeGreen;
+            return System.Drawing.Color.LimeGreen;
         }
 
-        public override Color RepresentationBackgroundColor()
+        public override System.Drawing.Color RepresentationBackgroundColor()
         {
             if(!isComplete)
-                return ColorPresets.Aqua;
-            return ColorPresets.Black;
+                return System.Drawing.Color.Aqua;
+            return System.Drawing.Color.Black;
         }
     }
 }

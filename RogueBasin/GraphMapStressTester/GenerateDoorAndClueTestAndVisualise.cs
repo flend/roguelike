@@ -23,25 +23,27 @@ namespace GraphMapStressTester
 
             var randomMap = graphGenerator.GenerateConnectivityMapNoCycles(numberOfNodes, branchingRatio);
 
-            var doorAndClueTester = new DoorAndClueGenerator(random);
-
             var mapModel = new MapModel(randomMap, 0);
+            var doorAndClueManager = new DoorAndClueManager(mapModel);
+
+            var doorAndClueTester = new DoorAndClueGenerator(mapModel, doorAndClueManager, random);
+
             if (visualise)
-                VisualiseConnectivityGraph(mapModel);
+                VisualiseConnectivityGraph(mapModel, doorAndClueManager);
 
-            doorAndClueTester.AddDoorsAndClues(mapModel, numberOfDoors, numberOfCluesPerDoor);
+            doorAndClueTester.AddDoorsAndClues(numberOfDoors, numberOfCluesPerDoor);
 
             if (visualise)
-                VisualiseConnectivityGraphWithDoors(mapModel);
+                VisualiseConnectivityGraphWithDoors(mapModel, doorAndClueManager);
 
-            var mapTester = new GraphSolver(mapModel);
+            var mapTester = new GraphSolver(mapModel, doorAndClueManager);
 
             return mapTester.MapCanBeSolved();
         }
 
-        private void VisualiseConnectivityGraph(MapModel graphModel)
+        private void VisualiseConnectivityGraph(MapModel graphModel, DoorAndClueManager doorAndClueManager)
         {
-            var visualiser = new DoorClueGraphvizExport(graphModel);
+            var visualiser = new DoorClueGraphvizExport(graphModel, doorAndClueManager);
             visualiser.OutputFullGraph("bsptree-full");
             try
             {
@@ -55,9 +57,9 @@ namespace GraphMapStressTester
             }
         }
 
-        private void VisualiseConnectivityGraphWithDoors(MapModel graphModel)
+        private void VisualiseConnectivityGraphWithDoors(MapModel graphModel, DoorAndClueManager doorAndClueManager)
         {
-            var visualiser = new DoorClueGraphvizExport(graphModel);
+            var visualiser = new DoorClueGraphvizExport(graphModel, doorAndClueManager);
             visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
             try

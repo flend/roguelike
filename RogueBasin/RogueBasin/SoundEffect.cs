@@ -24,6 +24,7 @@ namespace RogueBasin
         /// For 1.0 magnitude sounds
         /// </summary>
         public const double soundMaxRadius = 12.0;
+        public const double soundDecayRate = 100;
 
         public SoundEffect(int id, Dungeon eventReceiver, long soundTime, double soundMagnitude, int soundLevel, Point soundLocation)
         {
@@ -49,7 +50,7 @@ namespace RogueBasin
         /// <returns></returns>
         public double DecayedMagnitude(long timeNow)
         {
-            return Math.Max(0, (1000 - (timeNow - this.SoundTime)) / 1000.0);
+            return Math.Max(0, (soundDecayRate - (timeNow - this.SoundTime)) / soundDecayRate);
         }
 
         /// <summary>

@@ -8,21 +8,16 @@ namespace RogueBasin.Features
 {
     public class StandardDecorativeFeature : DecorationFeature
     {
-        char representation;
-        Color representationColour;
+        System.Drawing.Color representationColour;
 
-        public StandardDecorativeFeature(char representation, Color representationColour)
+        public StandardDecorativeFeature(char representation, System.Drawing.Color representationColour, bool isBlocking)
         {
-            this.representation = representation;
+            Representation = representation;
             this.representationColour = representationColour;
+            this.IsBlocking = isBlocking;
         }
 
-        protected override char GetRepresentation()
-        {
-            return representation;
-        }
-
-        public override Color RepresentationColor()
+        public override System.Drawing.Color RepresentationColor()
         {
             return representationColour;
         }
@@ -37,6 +32,5 @@ namespace RogueBasin.Features
                     return "Soft cover";
             }
         }
-
     }
 }

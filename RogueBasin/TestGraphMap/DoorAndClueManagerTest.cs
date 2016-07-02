@@ -741,7 +741,7 @@ namespace TestGraphMap
             var startVertex = 1;
 
             var mapModel = new MapModel(map, startVertex);
-            var doorManager = mapModel.DoorAndClueManager;
+            var doorManager = new DoorAndClueManager(mapModel);
 
             doorManager.PlaceDoorAndClues(new DoorRequirements(new Connection(5, 6), "red"),
                 new List<int>(new int[] { 2 }));
