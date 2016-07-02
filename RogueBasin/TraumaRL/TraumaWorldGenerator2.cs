@@ -9,19 +9,21 @@ namespace TraumaRL
 {
     public partial class TraumaWorldGenerator
     {
-        
-        Dictionary<int, int> levelDifficulty;
-
-        private void CalculateLevelDifficulty()
+        private void CalculateLevelDifficulty(MapState mapState)
         {
             var levelsToHandleSeparately = new List<int> { medicalLevel, arcologyLevel, computerCoreLevel, bridgeLevel };
 
-            levelDifficulty = new Dictionary<int, int>(levelDepths);
+            var levelDifficulty = mapState.LevelDifficulty;
+
+            foreach (var kv in mapState.LevelDepths)
+            {
+                levelDifficulty[kv.Key] = kv.Value;
+            }
+
             levelDifficulty[reactorLevel] = 4;
             levelDifficulty[arcologyLevel] = 4;
             levelDifficulty[computerCoreLevel] = 5;
             levelDifficulty[bridgeLevel] = 5;
-
         }
 
         Dictionary<int, List<Item>> itemsInArmory;
@@ -34,10 +36,12 @@ namespace TraumaRL
             Stealth
         }
 
-        private void PlaceLootInArmory(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
+        private void PlaceLootInArmory(MapState mapState, QuestMapBuilder builder)
         {
+            var levelDifficulty = mapState.LevelDifficulty;
+
             //Add standard loot
-            AddStandardLootToArmory(mapInfo);
+            AddStandardLootToArmory(mapState, builder);
 
             //Weapons and wetware
 
@@ -106,14 +110,14 @@ namespace TraumaRL
 
             //Guarantee on medical, at least 1 ware and a pistol or vibroblade
             var randomWare = level1Ware.Except(itemsPlaced).RandomElement();
-            PlaceItems(mapInfo, new List<Item> { randomWare }, new List<int> { goodyRooms[medicalLevel] }, false);
+            builder.PlaceItems(mapState, new List<Item> { randomWare }, new List<int> { goodyRooms[medicalLevel] }, false);
             itemsPlaced.Add(randomWare);
             itemsInArmory[0].Add(randomWare);
 
-            PlaceItems(mapInfo, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[medicalLevel] }, false);
+            builder.PlaceItems(mapState, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[medicalLevel] }, false);
             itemsPlaced.Add(lootLevels[0][0]);
             itemsInArmory[0].Add(lootLevels[0][0]);
-            PlaceItems(mapInfo, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[medicalLevel] }, false);
+            builder.PlaceItems(mapState, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[medicalLevel] }, false);
             itemsPlaced.Add(lootLevels[0][1]);
             itemsInArmory[0].Add(lootLevels[0][0]);
 
@@ -146,7 +150,7 @@ namespace TraumaRL
 
                     var lootToPlace = possibleLoot.RandomElement();
 
-                    PlaceItems(mapInfo, new List<Item> { lootToPlace }, new List<int> { room }, false);
+                    builder.PlaceItems(mapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
                     LogFile.Log.LogEntryDebug("Placing item: " + lootToPlace.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
@@ -168,7 +172,7 @@ namespace TraumaRL
 
                     var lootToPlace = possibleLoot.RandomElement();
 
-                    PlaceItems(mapInfo, new List<Item> { lootToPlace }, new List<int> { room }, false);
+                    builder.PlaceItems(mapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
                     LogFile.Log.LogEntryDebug("Placing item (catchup): " + lootToPlace.SingleItemDescription + " on level " + Game.Dungeon.DungeonInfo.LevelNaming[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
@@ -188,7 +192,7 @@ namespace TraumaRL
                 foreach (var i in possibleLoot)
                 {
                     var randomRoom = goodyRooms.RandomElement();
-                    PlaceItems(mapInfo, new List<Item> { i }, new List<int> { randomRoom.Value }, false);
+                    builder.PlaceItems(mapState, new List<Item> { i }, new List<int> { randomRoom.Value }, false);
                     itemsPlaced.Add(i);
                     itemsInArmory[randomRoom.Key].Add(i);
                     lootPlaced++;
@@ -201,15 +205,17 @@ namespace TraumaRL
             
         }
 
-        private void AddStandardLootToArmory(MapInfo mapInfo)
+        private void AddStandardLootToArmory(MapState mapState, QuestMapBuilder builder)
         {
+            var levelDifficulty = mapState.LevelDifficulty;
+
             foreach (var kv in goodyRooms.OrderBy(k => k.Key))
             {
                 var level = kv.Key;
                 var room = kv.Value;
 
                 var randomMedKits = ProduceMultipleItems<RogueBasin.Items.NanoRepair>(1);
-                PlaceItems(mapInfo, randomMedKits, new List<int> { room }, false);
+                builder.PlaceItems(mapState, randomMedKits, new List<int> { room }, false);
 
                 var totalGrenades = Game.Random.Next(1, 1 + 2 * levelDifficulty[level]);
 
@@ -222,9 +228,9 @@ namespace TraumaRL
                 var stunGrenades = ProduceMultipleItems<RogueBasin.Items.StunGrenade>(Game.Random.Next(1, maxNadesOfType));
                 var soundGrenades = ProduceMultipleItems<RogueBasin.Items.SoundGrenade>(Game.Random.Next(1, maxNadesOfType));
 
-                PlaceItems(mapInfo, fragGrenades, new List<int> { room }, false);
-                PlaceItems(mapInfo, stunGrenades, new List<int> { room }, false);
-                PlaceItems(mapInfo, soundGrenades, new List<int> { room }, false);
+                builder.PlaceItems(mapState, fragGrenades, new List<int> { room }, false);
+                builder.PlaceItems(mapState, stunGrenades, new List<int> { room }, false);
+                builder.PlaceItems(mapState, soundGrenades, new List<int> { room }, false);
             }
 
         }

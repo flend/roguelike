@@ -57,8 +57,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainQuest.cs" />
     <Compile Include="MapAnalysisUtilities.cs" />
     <Compile Include="MapState.cs" />
+    <Compile Include="QuestMapBuilder.cs" />
     <Compile Include="RoyaleRunner.cs" />
     <Compile Include="TraumaLevelBuilder.cs" />
     <Compile Include="TraumaWorldGenerator.cs" />

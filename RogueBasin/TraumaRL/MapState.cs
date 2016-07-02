@@ -14,6 +14,16 @@ namespace TraumaRL
         MapPopulator populator;
         Dictionary<int, LevelInfo> levelInfo;
         List<int> gameLevels;
+        Dictionary<string, int> levelNames = new Dictionary<string,int>();
+        Dictionary<int, int> levelDifficulty = new Dictionary<int,int>();
+        IEnumerable<int> allReplaceableVaults;
+        Dictionary<int, int> levelDepths;
+
+        /// <summary>
+        /// A way of communicating between the level generation and quest generation.
+        /// Not sure we will keep this in a more dynamic setup
+        /// </summary>
+        Dictionary<string, Connection> connectionStore = new Dictionary<string,Connection>();
 
         public MapState()
         {
@@ -73,6 +83,26 @@ namespace TraumaRL
             mapInfo = new MapInfo(mapInfoBuilder, populator);
 
             gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
+
+            var levelMap = new MapModel(levelLinks, startLevel);
+            levelDepths = levelMap.GetDistanceOfVerticesFromParticularVertexInFullMap(startLevel, gameLevels);
+            foreach (var kv in levelDepths)
+            {
+                LogFile.Log.LogEntryDebug("Level " + kv.Key + " depth " + kv.Value, LogDebugLevel.Medium);
+            }
+
+            //Hard coded for now
+            levelNames = new Dictionary<string, int>() {
+                { "medical", 0 },
+                { "lowerAtrium", 1 },
+                { "science", 2 },
+                { "storage", 3 },
+                { "flightDeck", 4 },
+                { "reactor", 5 },
+                { "arcology", 6 },
+                { "commercial", 7 },
+                { "computerCore", 8 },
+                { "bridge", 9 }};
         }
 
         public void InitialiseDoorAndClueManager(int startVertex)
@@ -93,6 +123,16 @@ namespace TraumaRL
 
         public Dictionary<int, LevelInfo> LevelInfo { get { return levelInfo;  } }
 
+        public Dictionary<int, int> LevelDifficulty { get { return levelDifficulty; } }
+
+        public Dictionary<string, Connection> ConnectionStore { get { return connectionStore; } }
+
         public List<int> GameLevels { get { return gameLevels;  } }
+
+        public Dictionary<string, int> LevelIds { get { return levelNames; } }
+
+        public IEnumerable<int> AllReplaceableVaults { get { return allReplaceableVaults; } set { allReplaceableVaults = value; } }
+
+        public Dictionary<int, int> LevelDepths { get { return levelDepths; } }
     }
 }
