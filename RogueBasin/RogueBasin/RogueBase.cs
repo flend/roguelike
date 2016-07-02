@@ -29,7 +29,7 @@ namespace RogueBasin
 
         public enum TargettingAction
         {
-            Weapon, Examine, Utility
+            Weapon, Examine, Utility, Move
         }
 
         enum ActionState
@@ -64,7 +64,7 @@ namespace RogueBasin
         int currentTargetRange = 0;
 
         Point runningDirection;
-        bool isRunning = false;
+        IEnumerable<Point> runningPath;
 
         public RogueBase()
         {
@@ -163,6 +163,7 @@ namespace RogueBasin
             Events.Tick += new EventHandler<TickEventArgs>(ApplicationTickEventHandler);
             Events.KeyboardUp += new EventHandler<KeyboardEventArgs>(KeyboardEventHandler);
             Events.MusicFinished += new EventHandler<MusicFinishedEventArgs>(MusicFinishedEventHandler);
+            Events.MouseButtonUp += new EventHandler<MouseButtonEventArgs>(MouseButtonHandler);
         }
 
         private void MusicFinishedEventHandler(object sender, MusicFinishedEventArgs e)
@@ -226,6 +227,31 @@ namespace RogueBasin
 
         }
 
+        private void MouseButtonHandler(object sender, MouseButtonEventArgs args)
+        {
+            //Dungeon click must complete before we take more input
+            if (waitingForTurnTick && GameStarted)
+            {
+                return;
+            }
+
+            if (actionState != ActionState.Interactive)
+            {
+                return;
+            }
+
+            bool timeAdvances = DoPlayerNextAction(actionState, null, args);
+
+            if (timeAdvances)
+            {
+                ProfileEntry("After user (mouse)");
+
+                Game.Dungeon.PlayerHadBonusTurn = true;
+
+                waitingForTurnTick = true;
+            }
+        }
+
         private void KeyboardEventHandler(object sender, KeyboardEventArgs args)
         {
 
@@ -240,11 +266,11 @@ namespace RogueBasin
                 return;
             }
 
-            bool timeAdvances = DoPlayerNextAction(actionState, args);
+            bool timeAdvances = DoPlayerNextAction(actionState, args, null);
             
             if (timeAdvances)
             {
-                ProfileEntry("After user");
+                ProfileEntry("After user keyboard");
 
                 Game.Dungeon.PlayerHadBonusTurn = true;
 
@@ -313,7 +339,7 @@ namespace RogueBasin
             if (actionState == ActionState.Running)
             {
                 //If the player is running, take their turn immediately without waiting for input
-                DoPlayerNextAction(actionState, null);
+                DoPlayerNextAction(actionState, null, null);
                 Game.Dungeon.PlayerHadBonusTurn = true;
                 waitingForTurnTick = true;
             }
@@ -336,16 +362,39 @@ namespace RogueBasin
                 SoundPlayer.Instance().PlaySounds();
         }
 
-        private bool DoPlayerNextAction(ActionState action, KeyboardEventArgs args)
+        private bool DoPlayerNextAction(ActionState action, KeyboardEventArgs args, MouseButtonEventArgs mouseArgs)
         {
             var player = Game.Dungeon.Player;
             try
             {
                 //Deal with PCs turn as appropriate
+                Tuple<bool, bool> inputResult;
 
-                var inputResult = PlayerAction(action, args);
-                bool timeAdvances = inputResult.Item1;
-                bool centreOnPC = inputResult.Item2;
+                bool timeAdvances = false;
+                bool centreOnPC = false;
+
+                switch (action)
+                {
+                    case ActionState.Running:
+                        timeAdvances = RunNextStep();
+                        centreOnPC = true;
+                        break;
+
+                    case ActionState.Interactive:
+
+                        if (args != null)
+                        {
+                            inputResult = PlayerAction(action, args);
+                        }
+                        else
+                        {
+                            inputResult = PlayerAction(action, mouseArgs);
+                        }
+
+                        timeAdvances = inputResult.Item1;
+                        centreOnPC = inputResult.Item2;
+                        break;
+                }
 
                 if (centreOnPC)
                 {
@@ -376,7 +425,65 @@ namespace RogueBasin
             return false;
         }
 
-        private bool PlayerPrepareForNextTurn()
+        private Tuple<bool, bool> PlayerAction(ActionState action, MouseButtonEventArgs mouseArgs)
+        {
+            var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
+
+            bool timeAdvances = false;
+            bool centreOnPC = false;
+
+            switch (inputState)
+            {
+                case InputState.Targetting:
+                    timeAdvances = TargettingMouseEvent(clickLocation, mouseArgs.Button);
+                    break;
+                    
+                //Normal movement on the map
+                case InputState.MapMovement:
+
+                    HandleMapMovementClick(clickLocation, mouseArgs.Button);
+                    break;
+            }
+
+            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+        }
+
+        private bool TargettingMouseEvent(Point clickLocation, MouseButton mouseButton)
+        {
+            bool timeAdvances = false;
+
+            //If we clicked where we clicked before, it's confirmation
+
+            //If we clicked elsewhere, it's a retarget
+            if (clickLocation == currentTarget)
+            {
+                timeAdvances = TargettingFireOrEscape(true);
+            }
+            else
+            {
+                GetTargetFromPlayerBasedOnSquareContents(clickLocation, mouseButton);
+            }
+
+            return timeAdvances;
+        }
+
+        private void HandleMapMovementClick(Point clickLocation, MouseButton mouseButtons)
+        {
+            GetTargetFromPlayerBasedOnSquareContents(clickLocation, mouseButtons);
+        }
+
+        private void GetTargetFromPlayerBasedOnSquareContents(Point clickLocation, MouseButton mouseButtons)
+        {
+            targettingAction = TargettingAction.Move;
+            GetTargetFromPlayer(clickLocation, TargettingType.Line, TargettingAction.Move, "ENTER");
+        }
+
+        private void HandleMapMovementClick(ActionState action, Point clickLocation, MouseEventArgs mouseArgs)
+        {
+            throw new NotImplementedException();
+        }
+        
+        bool PlayerPrepareForNextTurn()
         {
             //PC turn
             Player player = Game.Dungeon.Player;
@@ -589,20 +696,9 @@ namespace RogueBasin
             
             try
             {
-                switch (action)
-                {
-                    case ActionState.Running:
-                        timeAdvances = RunNextStep();
-                        centreOnPC = true;
-                        break;
-
-                    case ActionState.Interactive:
-                        var result = ActionOnKeypress(args);
-                        timeAdvances = result.Item1;
-                        centreOnPC = result.Item2;
-                        break;
-
-                }
+                var result = ActionOnKeypress(args);
+                timeAdvances = result.Item1;
+                centreOnPC = result.Item2;
             }
             catch (Exception ex)
             {
@@ -628,7 +724,7 @@ namespace RogueBasin
             switch (inputState)
             {
                 case InputState.Targetting:
-                    TargettingKeyboardEvent(args);
+                    timeAdvances = TargettingKeyboardEvent(args);
                     break;
 
                 case InputState.YesNoPrompt:
@@ -1350,7 +1446,15 @@ namespace RogueBasin
         private bool StartRunning(int directionX, int directionY)
         {
             runningDirection = new Point(directionX, directionY);
-            isRunning = true;
+            actionState = ActionState.Running;
+
+            return RunNextStep();
+        }
+
+        private bool StartRunning(IEnumerable<Point> path)
+        {
+            runningDirection = null;
+            runningPath = path;
             actionState = ActionState.Running;
 
             return RunNextStep();
@@ -1358,13 +1462,41 @@ namespace RogueBasin
 
         public void StopRunning()
         {
-            isRunning = false;
             actionState = ActionState.Interactive;
         }
 
         private bool RunNextStep()
         {
-            MoveResults results = Game.Dungeon.PCMove(runningDirection.x, runningDirection.y);
+            Point relativeNextStep = new Point(0,0);
+
+            if (runningPath != null && runningPath.Any())
+            {
+                relativeNextStep = runningPath.ElementAt(0) - Game.Dungeon.Player.LocationMap;
+                runningPath = runningPath.Skip(1);
+
+                if (!runningPath.Any())
+                {
+                    //Reached end of path
+                    StopRunning();
+                }
+            }
+            else if (runningPath != null && runningPath.Any())
+            {
+                //Empty path
+                StopRunning();
+            }
+            else if (runningPath == null)
+            {
+                relativeNextStep = new Point(runningDirection.x, runningDirection.y);
+            }
+
+            if (relativeNextStep == new Point(0, 0))
+            {
+                LogFile.Log.LogEntryDebug("Can't run onto yourself", LogDebugLevel.High);
+                StopRunning();
+            }
+
+            MoveResults results = Game.Dungeon.PCMove(relativeNextStep.x, relativeNextStep.y);
 
             switch (results) { 
                 case MoveResults.AttackedMonster:
@@ -1658,18 +1790,13 @@ namespace RogueBasin
             }
         }
 
-        private void TargettingKeyboardEvent(KeyboardEventArgs args)
+        private bool TargettingKeyboardEvent(KeyboardEventArgs args)
         {
             Point direction = new Point(9, 9);
             KeyModifier mod = KeyModifier.Arrow;
             bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
             bool validFire = false;
             bool escape = false;
-
-            bool restoreExamine = true;
-            Monster examineCreature = Screen.Instance.CreatureToView;
-            Item examineItem = Screen.Instance.ItemToView;
-            Feature examineFeature = Screen.Instance.FeatureToView;
 
             if (!wasDirection)
             {
@@ -1690,15 +1817,35 @@ namespace RogueBasin
             if (wasDirection)
             {
                 Point newPoint = new Point(currentTarget.x + direction.x, currentTarget.y + direction.y);
+                RetargetSquare(newPoint);
+                
+                return false;
+            }
 
-                int level = Game.Dungeon.Player.LocationLevel;
+            if (validFire || escape)
+            {
+                return TargettingFireOrEscape(validFire);
+            }
 
-                if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
-                    return;
+            return false;
+        }
 
-                //Otherwise OK
-                currentTarget = newPoint;
+        private void RetargetSquare(Point newPoint)
+        {
+            int level = Game.Dungeon.Player.LocationLevel;
 
+            if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
+                return;
+
+            //Otherwise OK
+            currentTarget = newPoint;
+
+            if (targettingAction == TargettingAction.Move)
+            {
+                Screen.Instance.SetTargetInRange = true;
+            }
+            else
+            {
                 CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
 
                 if ((currentTargetRange == -1 && currentFOV.CheckTileFOV(newPoint.x, newPoint.y))
@@ -1709,53 +1856,69 @@ namespace RogueBasin
                 }
                 else
                     Screen.Instance.SetTargetInRange = false;
-
-                //Update screen
-                Screen.Instance.Target = newPoint;
-                Game.MessageQueue.AddMessage("Find a target. " + TargettingConfirmChar + " to confirm. ESC to exit.");
-
-                ExamineTarget(newPoint);
-
-                return;
             }
 
-            //Fire or Escape
+            //Update screen
+            Screen.Instance.Target = newPoint;
+            Game.MessageQueue.AddMessage("Find a target. " + TargettingConfirmChar + " to confirm. ESC to exit.");
 
-            if (validFire == true || escape == true)
+            ExamineTarget(newPoint);
+        }
+
+        private bool TargettingFireOrEscape(bool fire)
+        {
+            bool timeAdvances = false;
+            bool restoreExamine = true;
+            Monster examineCreature = Screen.Instance.CreatureToView;
+            Item examineItem = Screen.Instance.ItemToView;
+            Feature examineFeature = Screen.Instance.FeatureToView;
+
+            var player = Game.Dungeon.Player;
+
+            //Turn targetting mode off
+            inputState = InputState.MapMovement;
+
+            Screen.Instance.TargettingModeOff();
+
+            //Complete actions
+            if (fire)
             {
-                //Turn targetting mode off
-                inputState = InputState.MapMovement;
-
-                Screen.Instance.TargettingModeOff();
-
-                //Complete actions
-                if (validFire)
+                switch (targettingAction)
                 {
-                    switch (targettingAction)
-                    {
-                        case TargettingAction.Weapon:
+                    case TargettingAction.Weapon:
 
-                            //Time advances only on success
-                            waitingForTurnTick = FireTargettedWeapon(currentTarget);
-                            Game.Dungeon.Player.ResetTurnsMoving();
-                            Game.Dungeon.Player.ResetTurnsSinceAction();
+                        //Time advances only on success
+                        timeAdvances = FireTargettedWeapon(currentTarget);
+                        player.ResetTurnsMoving();
+                        player.ResetTurnsSinceAction();
+                        break;
+
+                    case TargettingAction.Utility:
+
+                        //Time advances only on success
+                        timeAdvances = ThrowTargettedUtility(currentTarget);
+                        player.ResetTurnsMoving();
+                        player.ResetTurnsSinceAction();
+                        break;
+
+                    case TargettingAction.Examine:
+
+                        restoreExamine = false;
+                        break;
+
+                    case TargettingAction.Move:
+                        IEnumerable<Point> path = Game.Dungeon.Pathing.GetPathToSquare(player.LocationLevel, player.LocationMap, currentTarget, Pathing.PathingPermission.IgnoreDoors, true);
+                        if (path == null || !path.Skip(1).Any())
+                        {
+                            //Click on yourself
+                            restoreExamine = true;
                             break;
-
-                        case TargettingAction.Utility:
-
-                            //Time advances only on success
-                            waitingForTurnTick = ThrowTargettedUtility(currentTarget);
-                            Game.Dungeon.Player.ResetTurnsMoving();
-                            Game.Dungeon.Player.ResetTurnsSinceAction();
-                            break;
-
-                        case TargettingAction.Examine:
-
-                            restoreExamine = false;
-                            break;
-                    }
+                        }
+                        timeAdvances = StartRunning(path.Skip(1));
+                        break;
                 }
             }
+
 
             if (restoreExamine)
             {
@@ -1764,6 +1927,7 @@ namespace RogueBasin
                 Screen.Instance.FeatureToView = examineFeature;
             }
 
+            return timeAdvances;
         }
 
         private void ExamineTarget(Point currentTarget)
@@ -2767,25 +2931,46 @@ namespace RogueBasin
             Screen.Instance.TargetRange = range;
             Screen.Instance.TargetPermissiveAngle = spreadAngle;
 
-            if ((range == -1 && currentFOV.CheckTileFOV(start.x, start.y))
-                || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
-            {
-                Screen.Instance.SetTargetInRange = true;
-                SquareContents sqC = SetViewPanelToTargetAtSquare(start);
-            }
-            else
-            {
-                Screen.Instance.SetTargetInRange = false;
-            }
+            Screen.Instance.SetTargetInRange = true;
 
+            if(targetAction == TargettingAction.Utility || targetAction == TargettingAction.Weapon || targetAction == TargettingAction.Examine) {
+                if ((range == -1 && currentFOV.CheckTileFOV(start.x, start.y))
+                    || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
+                {
+                    Screen.Instance.SetTargetInRange = true;
+                    SquareContents sqC = SetViewPanelToTargetAtSquare(start);
+                }
+                else {
+                    Screen.Instance.SetTargetInRange = false;
+                }
+            }
+            
             Game.MessageQueue.AddMessage("Find a target. " + confirmChar + " to confirm. ESC to exit.");
 
             inputState = InputState.Targetting;
-            TargettingConfirmChar = confirmChar;
+            TargettingConfirmChar = confirmChar.ToString();
             currentTarget = start;
             currentTargetRange = range;
         }
 
+        private void GetTargetFromPlayer(Point start, TargettingType type, TargettingAction targetAction, string confirmKey)
+        {
+            Screen.Instance.TargettingModeOn();
+            Screen.Instance.Target = start;
+            Screen.Instance.TargetType = type;
+            Screen.Instance.TargetAction = targetAction;
+
+            Screen.Instance.SetTargetInRange = true;
+            SquareContents sqC = SetViewPanelToTargetAtSquare(start);
+
+            Game.MessageQueue.AddMessage("Find a target. " + confirmKey + " to confirm. ESC to exit.");
+
+            inputState = InputState.Targetting;
+            TargettingConfirmChar = confirmKey;
+            currentTarget = start;
+            currentTargetRange = -1;
+        }
+        
         private static SquareContents SetViewPanelToTargetAtSquare(Point start)
         {
             SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, start);
@@ -2927,7 +3112,7 @@ namespace RogueBasin
 
         }
 
-        public char TargettingConfirmChar { get; set; }
+        public string TargettingConfirmChar { get; set; }
 
         internal void DoEndOfGame(bool lived, bool won, bool quit)
         {

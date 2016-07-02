@@ -46,6 +46,8 @@ namespace RogueBasin {
         public int ScreenWidth { get; set; }
         public int ScreenHeight { get; set; }
 
+        public int ScaledSpriteSize { get; set; }
+
         //UI size
         public double UIScaling { get; set; }
 
@@ -257,6 +259,8 @@ namespace RogueBasin {
             //These control the map 
             ViewableWidth = ScreenWidth / scaledSpriteDim;
             ViewableHeight = ScreenHeight / scaledSpriteDim;
+
+            ScaledSpriteSize = scaledSpriteDim;
 
             if (nativeSpriteDim != scaledSpriteDim)
             {
@@ -3138,6 +3142,14 @@ namespace RogueBasin {
         public bool EndOfGameWon { get; set; }
 
         public bool ShowMessageQueue { get; set; }
+
+        public RogueBasin.Point PixelToCoord(System.Drawing.Point point)
+        {
+            var x = point.X / ScaledSpriteSize + viewTL.x;
+            var y = point.Y / ScaledSpriteSize + viewTL.y;
+
+            return new Point(x, y);
+        }
     }
 
     static class ScreenExtensionMethods

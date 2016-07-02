@@ -213,6 +213,11 @@ namespace RogueBasin
             }
         }
 
+        public IEnumerable<Point> GetPathToSquare(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
+        {
+            return pathFinding.pathNodes(level, origin, dest, permission, ignoreDangerousTerrain);
+        }
+
         private PathingResult GetPathToPointPassThroughMonsters(int level, Point origin, Point dest, PathingPermission permission, bool ignoreDangerousTerrain)
         {
             //Check for pathing to own square
