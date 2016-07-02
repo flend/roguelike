@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DungeonDecorator.cs" />
     <Compile Include="MainQuest.cs" />
     <Compile Include="MapAnalysisUtilities.cs" />
     <Compile Include="MapState.cs" />
