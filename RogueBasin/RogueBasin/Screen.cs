@@ -629,23 +629,6 @@ namespace RogueBasin {
 
 
         /// <summary>
-        /// Wait for ENTER
-        /// </summary>
-        private void WaitForEnterKey()
-        {
-            while (true)
-            {
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                if (userKey.KeyCode == KeyCode.TCODK_ENTER
-                    || userKey.KeyCode == KeyCode.TCODK_KPENTER)
-                {
-                    break;
-                }
-            }
-        }
-
-        /// <summary>
         /// Draw a frame. If flashOn then highlight flashing squares in red
         /// </summary>
         /// <param name="scanLines"></param>

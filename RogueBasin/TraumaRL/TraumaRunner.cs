@@ -71,7 +71,7 @@ namespace TraumaRL
             worldGen.GenerateTraumaLevels(retry);
 
             Game.Dungeon.MapState = worldGen.MapState;
-            Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelNames.ToDictionary(kv => kv.Key, kv => kv.Value);
+            Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelReadableNames.ToDictionary(kv => kv.Key, kv => kv.Value);
             
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 

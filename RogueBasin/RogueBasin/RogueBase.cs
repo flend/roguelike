@@ -24,8 +24,7 @@ namespace RogueBasin
         {
             MapMovement, Targetting, InventoryShow, InventorySelect,
             YesNoPrompt, FPrompt,
-            MovieDisplay, PreMapMovement, SpecialScreen,
-            Running
+            MovieDisplay, PreMapMovement, SpecialScreen
         }
 
         public enum TargettingAction
@@ -33,10 +32,17 @@ namespace RogueBasin
             Weapon, Examine, Utility
         }
 
+        enum ActionState
+        {
+            Running,
+            Interactive
+        }
+
         /// <summary>
         /// State determining what functions keys have
         /// </summary>
         InputState inputState = InputState.MapMovement;
+        ActionState actionState = ActionState.Interactive;
 
         Action<bool> promptAction = null;
 
@@ -229,7 +235,13 @@ namespace RogueBasin
                 return;
             }
 
-            bool timeAdvances = ProcessKeypress(args);
+            if (actionState != ActionState.Interactive)
+            {
+                return;
+            }
+
+            bool timeAdvances = DoPlayerNextAction(actionState, args);
+            
             if (timeAdvances)
             {
                 ProfileEntry("After user");
@@ -298,11 +310,10 @@ namespace RogueBasin
 
             waitingForTurnTick = false;
 
-            if (inputState == InputState.Running)
+            if (actionState == ActionState.Running)
             {
                 //If the player is running, take their turn immediately without waiting for input
-                //This needs refactoring
-                ProcessKeypress(new KeyboardEventArgs(Key.Space, false));
+                DoPlayerNextAction(actionState, null);
                 Game.Dungeon.PlayerHadBonusTurn = true;
                 waitingForTurnTick = true;
             }
@@ -325,14 +336,14 @@ namespace RogueBasin
                 SoundPlayer.Instance().PlaySounds();
         }
 
-        private bool ProcessKeypress(KeyboardEventArgs args)
+        private bool DoPlayerNextAction(ActionState action, KeyboardEventArgs args)
         {
             var player = Game.Dungeon.Player;
             try
             {
                 //Deal with PCs turn as appropriate
 
-                var inputResult = UserInput(args);
+                var inputResult = PlayerAction(action, args);
                 bool timeAdvances = inputResult.Item1;
                 bool centreOnPC = inputResult.Item2;
 
@@ -568,714 +579,29 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug(p + " " + DateTime.Now.Millisecond.ToString(), LogDebugLevel.Profiling);
         }
 
-        //Deal with user input
         //Return code is if the command was successful and time increments (i.e. the player has done a time-using command like moving)
-        private Tuple<bool, bool> UserInput(KeyboardEventArgs args)
+        private Tuple<bool, bool> PlayerAction(ActionState action, KeyboardEventArgs args)
         {
             bool timeAdvances = false;
             bool centreOnPC = false;
 
             //Only on key up
-            if (args.Down)
-                return new Tuple<bool, bool>(false, false);
-
+            
             try
             {
-                //Each state has different keys
-
-                switch (inputState)
+                switch (action)
                 {
-                    case InputState.Targetting:
-                        TargettingKeyboardEvent(args);
-                        break;
-
-                    case InputState.YesNoPrompt:
-                        YesNoPromptKeyboardEvent(args);
-                        break;
-
-                    case InputState.FPrompt:
-                        FPromptKeyboardEvent(args);
-                        break;
-
-                    case InputState.MovieDisplay:
-                        MovieDisplayKeyboardEvent(args);
-                        break;
-
-                    case InputState.SpecialScreen:
-                        SpecialScreenKeyboardEvent(args);
-                        break;
-
-                    case InputState.Running:
+                    case ActionState.Running:
                         timeAdvances = RunNextStep();
+                        centreOnPC = true;
                         break;
 
-                    //Normal movement on the map
-                    case InputState.MapMovement:
-
-                        if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
-                        {
-                            switch (args.Key)
-                            {
-                                case Key.F:
-                                    //Full screen switch
-                                    timeAdvances = false;
-                                    
-                                    break;
-
-                                case Key.Q:
-                                    //Exit from game
-                                    timeAdvances = false;
-                                    YesNoQuestion("Really quit?", (result) => {
-                                        if (result)
-                                        {
-                                            Game.Dungeon.PlayerDeath("quit");
-                                            timeAdvances = true;
-                                        }
-                                    });
-                                    
-                                    break;
-
-                                case Key.S:
-                                    //Toggle sounds
-                                    ToggleSounds();
-                                    break;
-
-                                case Key.M:
-                                    ToggleMusic();
-                                    
-                                    break;
-                                    
-                                case Key.N:
-                                    SetMsgHistoryScreen();
-                                    DisableMsgHistoryScreen();
-                                    timeAdvances = false;
-                                    break;
-
-                                case Key.C:
-                                    SetClueScreen();
-                                    DisableClueScreen();
-                                    timeAdvances = false;
-                                    break;
-                                    
-                                case Key.Slash:
-                                    Game.Base.PlayMovie("helpkeys", true);
-                                    Game.Base.PlayMovie("qe_start", true);
-
-                                    timeAdvances = false;
-                                    break;
-                            }
-                        }
-
-                        if (!args.Mod.HasFlag(ModifierKeys.LeftShift) && !args.Mod.HasFlag(ModifierKeys.RightShift))
-                        {
-
-                            switch (args.Key)
-                            {
-                                case Key.F:
-                                    //Fire weapon
-                                    if (Game.Dungeon.Player.GetEquippedRangedWeapon() == null)
-                                        break;
-
-                                    if (Game.Dungeon.Player.GetEquippedRangedWeapon().HasFireAction())
-                                    {
-                                        TargetWeapon();
-                                        timeAdvances = false;
-                                    }
-
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.T:
-                                    //Use utility (throw or operate)
-                                    if (Game.Dungeon.Player.GetEquippedUtility() == null)
-                                        break;
-
-                                    if (Game.Dungeon.Player.GetEquippedUtility().HasThrowAction())
-                                    {
-                                        TargetThrowUtility();
-                                        timeAdvances = false;
-                                    }
-                                    else if (Game.Dungeon.Player.GetEquippedUtility().HasOperateAction())
-                                    {
-                                        timeAdvances = UseUtility();
-                                    }
-
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.E:
-                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(-1);
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.R:
-                                    Game.Dungeon.Player.EquipNextUtilityInventoryItem(1);
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.A:
-                                    Game.Dungeon.Player.SelectNextWetwareInventoryItem(-1);
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.S:
-                                    Game.Dungeon.Player.SelectNextWetwareInventoryItem(1);
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.W:
-                                    Game.Dungeon.Player.EquipSelectedWetware();
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.X:
-                                    //Examine
-                                    timeAdvances = Examine(false);
-
-                                    if (timeAdvances)
-                                        SpecialMoveNonMoveAction();
-
-                                    centreOnPC = true;
-                                    break;
-
-                                case Key.Period:
-                                    // Do nothing
-                                    timeAdvances = DoNothing();
-                                    // Don't recentre - useful for viewing
-                                    centreOnPC = false;
-                                    break;
-                            }
-                        }
-
-
-                        if (Game.Config.DebugMode)
-                        {
-                            if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
-                            {
-                                switch (args.Key)
-                                {
-                                    case Key.R:
-                                        //Reload
-                                        Game.Dungeon.Player.RefillWeapons();
-                                        break;
-                                        
-                                    case Key.K:
-                                        if (!Game.Dungeon.AllLocksOpen)
-                                        {
-                                            Game.Dungeon.AllLocksOpen = true;
-                                            Game.MessageQueue.AddMessage("All locks are now open.");
-                                        }
-                                        else
-                                        {
-                                            Game.Dungeon.AllLocksOpen = false;
-                                            Game.MessageQueue.AddMessage("All locks are now in their normal state.");
-                                        }
-                                        break;
-
-                                    case Key.I:
-                                        Game.MessageQueue.AddMessage("Player levelled up.");
-                                        Game.Dungeon.Player.LevelUp();
-                                        break;
-
-                                        
-                                    case Key.N:
-                                        //screen numbering
-                                        Screen.Instance.CycleRoomNumbering();
-                                        break;
-
-                                    case Key.W:
-                                        //screen debug mode
-                                        Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
-                                        if(Screen.Instance.DebugMode)
-                                            Game.MessageQueue.AddMessage("Screen debug mode on.");
-                                        else
-                                            Game.MessageQueue.AddMessage("Screen debug mode off.");
-                                        timeAdvances = true; //So full FoV is re-rendered
-                                        break;
-
-                                    case Key.B:
-                                        //screen see all mode
-                                        Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
-                                        Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
-                                        Screen.Instance.NeedsUpdate = true;
-                                        break;
-                                        
-                                    case Key.Y:
-                                        //next mission
-                                        Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
-                                        timeAdvances = true;
-                                        break;
-
-                                    case Key.G:
-                                        //last mission
-                                        Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
-                                        timeAdvances = true;
-                                        break;
-
-                                    case Key.J:
-                                        //change debug level
-                                        LogFile.Log.DebugLevel += 1;
-                                        if (LogFile.Log.DebugLevel > 3)
-                                            LogFile.Log.DebugLevel = 1;
-
-                                        LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
-
-                                        break;
-
-                                    case Key.H:
-                                        //Add a healing event on the player
-                                        Game.Dungeon.Player.HealCompletely();
-                                        Game.Dungeon.Player.RefillWeapons();
-                                        break;
-                                        
-                                    case Key.T:
-                                        Game.MessageQueue.AddMessage("Giving all low level weapons & wetware.");
-                                        Game.Dungeon.Player.GiveAllWeapons(1);
-                                        Game.Dungeon.Player.GiveAllWetware(2);
-                                        Game.Dungeon.Player.EquipNextUtility();
-                                        break;
-
-                                    case Key.U:
-                                        Game.Dungeon.Player.GiveAllWeapons(2);
-                                        Game.Dungeon.Player.GiveAllWetware(3);
-                                        break;
-                                        
-                                }
-                            }
-                        }
-
-
-                        //OLD EVENTS
-
-                        /*
-                    case 'K':
-                        //Add a sound at the player's location
-                        Game.Dungeon.AddSoundEffect(1.0, Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
-                        //refresh the sound display
-                        Game.Dungeon.ShowSoundsOnMap();
-
-                        Screen.Instance.Update();
+                    case ActionState.Interactive:
+                        var result = ActionOnKeypress(args);
+                        timeAdvances = result.Item1;
+                        centreOnPC = result.Item2;
                         break;
 
-                    case 'z':
-                        Game.Dungeon.ExplodeAllMonsters();
-         
-                        break;
-                        */
-
-                        /*
-                    case 'x':
-                    case 'X':
-                        //Recast last spells
-                        timeAdvances = RecastSpell();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;*/
-
-                        /*
-                    case 'c':
-                    case 'C':
-                        //Charm creature
-                        timeAdvances = PlayerCharmCreature();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-                        */
-
-                        /*
-                    case ',':
-                    case 'g':
-                        //Pick up item
-                        timeAdvances = PickUpItem();
-                        //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;*/
-                        //No longer needed
-
-                        /*
-                    case 'S':
-                        //Save the game
-                        timeAdvances = true;
-                        Game.MessageQueue.AddMessage("Saving game...");
-                        Screen.Instance.Update();
-                        Game.Dungeon.SaveGame();
-                        Game.MessageQueue.AddMessage("Press any key to exit the game.");
-                        Screen.Instance.Update();
-                        userKey = Keyboard.WaitForKeyPress(true);
-                        Game.Dungeon.RunMainLoop = false;
-
-                        break;
-                        */
-                        /*
-                    case 'o':
-                    case 'O':
-                        //Open door
-                        timeAdvances = PlayerOpenDoor();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-                        */
-                        /*
-                    case 'c':
-                    case 'C':
-                        //Close door
-                        timeAdvances = PlayerCloseDoor();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-                        */
-                        //Repeatidly closing doors and lurking behind them was kind of abusive
-
-                        /*
-                    case 't':
-                        //Throw weapon
-                        timeAdvances = ThrowWeapon();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-
-                    case 'T':
-                        //Throw utility
-                        timeAdvances = ThrowUtility();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-
-                    case 'U':
-                        //Use utility
-                        timeAdvances = UseUtility();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;*/
-                        /*
-                    case 'u':
-                        //Use weapon
-                        timeAdvances = UseWeapon();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;*/
-
-
-
-                        /*
-                    case '>':
-                    case '<':
-                        //Interact with feature
-                        timeAdvances = Game.Dungeon.InteractWithFeature();
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-
-                        break;*/
-
-                        //WETWARE
-                        /*case 'S':
-                            timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.ShieldWare));
-                            break;
-
-                        case 'D':
-                            timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
-                            break;
-
-                        case 'A':
-                            timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.AimWare));
-                            break;
-                            */
-                        /*
-                    case 'd':
-                    case 'D':
-                        //Drop items if in town
-                        //DropItems();
-                        Screen.Instance.Update();
-                        timeAdvances = false;
-                        break;*/
-                        /*
-                    case 'i':
-                    case 'I':
-                        //Use an inventory item
-                        SetPlayerInventorySelectScreen();
-                        Screen.Instance.Update();
-                        //This uses the generic 'select from inventory' input loop
-                        //Time advances if the item was used successfully
-                        timeAdvances = UseItem();
-                        DisablePlayerInventoryScreen();
-                        //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-
-
-                    case 'e':
-                    case 'E':
-                        //Display currently equipped items
-                        SetPlayerEquippedItemsScreen();
-                        Screen.Instance.Update();
-                        timeAdvances = DisplayEquipment();
-                        DisablePlayerEquippedItemsScreen();
-
-                        //Using an item can break a special move sequence
-                        if (!timeAdvances)
-                            Screen.Instance.Update();
-
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-
-
-                    case 'm':
-                                
-                        //Show movies
-                        SetSpecialMoveMovieScreen();
-                        Screen.Instance.Update();
-                        MovieScreenInteraction();
-                        DisableSpecialMoveMovieScreen();
-                        Screen.Instance.Update();
-                        timeAdvances = false;
-                        break;*/
-
-                        /*
-                    case 'k':
-                        //Display the inventory
-                        inputState = InputState.InventoryShow;
-                        SetPlayerInventoryScreen();
-                        UpdateScreen();
-                        timeAdvances = false;
-                        break;
-                                
-                            
-
-                    //case 'c':
-                    //    //Level up
-                    //    Game.Dungeon.Player.LevelUp();
-                    //    UpdateScreen();
-                    //    break;
-
-                            
-
-                    case 'M':
-                        //Learn all moves
-                        Game.Dungeon.LearnMove(new SpecialMoves.CloseQuarters());
-                        Game.Dungeon.LearnMove(new SpecialMoves.ChargeAttack());
-                        Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
-                        Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
-                        Game.Dungeon.LearnMove(new SpecialMoves.WallLeap());
-                        Game.MessageQueue.AddMessage("Learnt all moves.");
-                        //Game.Dungeon.PlayerLearnsAllSpells();
-                        //Game.MessageQueue.AddMessage("Learnt all spells.");
-                        UpdateScreen();
-                        timeAdvances = false;
-                        break;
-                          
-
-                    case 'B':
-                        Screen.Instance.SaveCurrentLevelToDisk();
-                        break;
-                                                                     
-                    case 'U':
-                        //Uncharm creature
-                        timeAdvances = PlayerUnCharmCreature();
-                        if (!timeAdvances)
-                            UpdateScreen();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-
-                    case 'r':
-                        //Name object
-                        SetPlayerInventorySelectScreen();
-                        UpdateScreen();
-                        //This uses the generic 'select from inventory' input loop
-                        NameObject();
-                        DisablePlayerInventoryScreen();
-
-                        UpdateScreen();
-                        break;
-                                    
-                    //Debug events
-                    case 'w':
-                        //Select an item to equip
-                        SetPlayerEquippedItemsSelectScreen();
-                        UpdateScreen();
-                        timeAdvances = EquipItem();
-                        DisablePlayerEquippedItemsSelectScreen();
-                        if (!timeAdvances)
-                            UpdateScreen();
-
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-                    //debug ones
-                    case 'd':
-                        //Drop item
-                        SetPlayerInventorySelectScreen();
-                        UpdateScreen();
-                        timeAdvances = DropItem();
-                        DisablePlayerInventoryScreen();
-                        if (!timeAdvances)
-                            UpdateScreen();
-                        if (timeAdvances)
-                            SpecialMoveNonMoveAction();
-                        break;
-
-                                
-                    case 'l':
-                        timeAdvances = false;
-                        LoadGame(Game.Dungeon.Player.Name);
-                        UpdateScreen();
-                        break;
-
-
-                    case 'y':
-                        //Add a speed up event on the player
-                        PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
-                        Game.Dungeon.Player.AddEffect(speedUp);
-                        UpdateScreen();
-                        break;
-                    case 'v':
-                        //Add a multi damage event on the player
-                        PlayerEffects.MultiDamage multiD = new RogueBasin.PlayerEffects.MultiDamage(Game.Dungeon.Player, 500, 3);
-                        Game.Dungeon.Player.AddEffect(multiD);
-                        UpdateScreen();
-                        break;
-                    case 'h':
-                        //Add a healing event on the player
-                        PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
-                        Game.Dungeon.Player.AddEffect(healing);
-                        UpdateScreen();
-                        break;
-                    case 'x':
-                        //Add a healing event on the player
-                        PlayerEffects.DamageUp healing3 = new RogueBasin.PlayerEffects.DamageUp(Game.Dungeon.Player, 500, 5);
-                        Game.Dungeon.Player.AddEffect(healing3);
-                        PlayerEffects.ToHitUp healing2 = new RogueBasin.PlayerEffects.ToHitUp(Game.Dungeon.Player, 500, 5);
-                        Game.Dungeon.Player.AddEffect(healing2);
-                        UpdateScreen();
-                        break;
-                    case 'z':
-                        //Add an anti-healing event on the player
-                        PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
-                        Game.Dungeon.Player.AddEffect(zhealing);
-                        UpdateScreen();
-                        break;
-                    case 'c':
-                        //Level up
-                        Game.Dungeon.Player.LevelUp();
-                        UpdateScreen();
-                        break;
-                        */
-
-                        //Handle wetware
-
-                        char keyCode = args.KeyboardCharacter[0];
-
-                        foreach (var kv in ItemMapping.WetwareMapping)
-                        {
-                            if (keyCode == kv.Key)
-                            {
-                                bool changeWorks = Game.Dungeon.Player.ToggleEquipWetware(kv.Value);
-
-                                if (changeWorks)
-                                {
-                                    //We changed wetware, counts as an action
-                                    centreOnPC = true;
-                                }
-                                
-                                break;
-                            }
-                        }
-
-
-                        //Handle weapons
-                        
-                        int numberPressed = GetNumberFromNonKeypadKeyPress(args);
-                        if (numberPressed != -1)
-                        {
-                            foreach (var kv in ItemMapping.WeaponMapping)
-                            {
-                                if (numberPressed == kv.Key)
-                                {
-                                    timeAdvances = Game.Dungeon.Player.EquipInventoryItemType(kv.Value);
-                                    centreOnPC = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        //Handle direction keys (both arrows and vi keys)
-
-                        Point direction = new Point(9, 9);
-                        KeyModifier mod = KeyModifier.Arrow;
-                        bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
-
-                        if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift) || args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl) || args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.RightAlt)))
-                        {
-                            timeAdvances = TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
-                            centreOnPC = true;
-                        }
-
-                        if (wasDirection && (mod == KeyModifier.Numeric) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
-                        {
-                            timeAdvances = StartRunning(direction.x, direction.y);
-                            centreOnPC = true;
-                        }
-
-                        if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
-                        {
-                            Screen.Instance.ViewportScrollSpeed = 4;
-                            Screen.Instance.ScrollViewport(direction);
-                            centreOnPC = false;
-                        }
-
-                        if (Game.Config.DebugMode)
-                        {
-                            if (wasDirection && mod == KeyModifier.Arrow && (args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
-                            {
-                                if (direction == new Point(0, -1))
-                                {
-                                    ScreenLevelUp();
-                                    centreOnPC = false;
-                                }
-
-                                if (direction == new Point(0, 1))
-                                {
-                                    ScreenLevelDown();
-                                    centreOnPC = false;
-                                }
-                            }
-                        }
-
-
-                        break;
                 }
             }
             catch (Exception ex)
@@ -1284,6 +610,719 @@ namespace RogueBasin
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
                 LogFile.Log.LogEntryDebug("Exception occurred: " + ex.Message + "\n" + ex.StackTrace, LogDebugLevel.High);
             }
+            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+        }
+
+        private Tuple<bool, bool> ActionOnKeypress(KeyboardEventArgs args)
+        {
+            bool timeAdvances = false;
+            bool centreOnPC = false;
+
+            //Only on key up
+            if (args.Down)
+            {
+                return new Tuple<bool, bool>(false, false);
+            }
+
+            //Each interactive state has different keys
+            switch (inputState)
+            {
+                case InputState.Targetting:
+                    TargettingKeyboardEvent(args);
+                    break;
+
+                case InputState.YesNoPrompt:
+                    YesNoPromptKeyboardEvent(args);
+                    break;
+
+                case InputState.FPrompt:
+                    FPromptKeyboardEvent(args);
+                    break;
+
+                case InputState.MovieDisplay:
+                    MovieDisplayKeyboardEvent(args);
+                    break;
+
+                case InputState.SpecialScreen:
+                    SpecialScreenKeyboardEvent(args);
+                    break;
+
+                //Normal movement on the map
+                case InputState.MapMovement:
+
+                    if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
+                    {
+                        switch (args.Key)
+                        {
+                            case Key.F:
+                                //Full screen switch
+                                timeAdvances = false;
+
+                                break;
+
+                            case Key.Q:
+                                //Exit from game
+                                timeAdvances = false;
+                                YesNoQuestion("Really quit?", (result) =>
+                                {
+                                    if (result)
+                                    {
+                                        Game.Dungeon.PlayerDeath("quit");
+                                        timeAdvances = true;
+                                    }
+                                });
+
+                                break;
+
+                            case Key.S:
+                                //Toggle sounds
+                                ToggleSounds();
+                                break;
+
+                            case Key.M:
+                                ToggleMusic();
+
+                                break;
+
+                            case Key.N:
+                                SetMsgHistoryScreen();
+                                DisableMsgHistoryScreen();
+                                timeAdvances = false;
+                                break;
+
+                            case Key.C:
+                                SetClueScreen();
+                                DisableClueScreen();
+                                timeAdvances = false;
+                                break;
+
+                            case Key.Slash:
+                                Game.Base.PlayMovie("helpkeys", true);
+                                Game.Base.PlayMovie("qe_start", true);
+
+                                timeAdvances = false;
+                                break;
+                        }
+                    }
+
+                    if (!args.Mod.HasFlag(ModifierKeys.LeftShift) && !args.Mod.HasFlag(ModifierKeys.RightShift))
+                    {
+
+                        switch (args.Key)
+                        {
+                            case Key.F:
+                                //Fire weapon
+                                if (Game.Dungeon.Player.GetEquippedRangedWeapon() == null)
+                                    break;
+
+                                if (Game.Dungeon.Player.GetEquippedRangedWeapon().HasFireAction())
+                                {
+                                    TargetWeapon();
+                                    timeAdvances = false;
+                                }
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+
+                                centreOnPC = true;
+                                break;
+
+                            case Key.T:
+                                //Use utility (throw or operate)
+                                if (Game.Dungeon.Player.GetEquippedUtility() == null)
+                                    break;
+
+                                if (Game.Dungeon.Player.GetEquippedUtility().HasThrowAction())
+                                {
+                                    TargetThrowUtility();
+                                    timeAdvances = false;
+                                }
+                                else if (Game.Dungeon.Player.GetEquippedUtility().HasOperateAction())
+                                {
+                                    timeAdvances = UseUtility();
+                                }
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+
+                                centreOnPC = true;
+                                break;
+
+                            case Key.E:
+                                Game.Dungeon.Player.EquipNextUtilityInventoryItem(-1);
+                                centreOnPC = true;
+                                break;
+
+                            case Key.R:
+                                Game.Dungeon.Player.EquipNextUtilityInventoryItem(1);
+                                centreOnPC = true;
+                                break;
+
+                            case Key.A:
+                                Game.Dungeon.Player.SelectNextWetwareInventoryItem(-1);
+                                centreOnPC = true;
+                                break;
+
+                            case Key.S:
+                                Game.Dungeon.Player.SelectNextWetwareInventoryItem(1);
+                                centreOnPC = true;
+                                break;
+
+                            case Key.W:
+                                Game.Dungeon.Player.EquipSelectedWetware();
+                                centreOnPC = true;
+                                break;
+
+                            case Key.X:
+                                //Examine
+                                timeAdvances = Examine(false);
+
+                                if (timeAdvances)
+                                    SpecialMoveNonMoveAction();
+
+                                centreOnPC = true;
+                                break;
+
+                            case Key.Period:
+                                // Do nothing
+                                timeAdvances = DoNothing();
+                                // Don't recentre - useful for viewing
+                                centreOnPC = false;
+                                break;
+                        }
+                    }
+
+
+                    if (Game.Config.DebugMode)
+                    {
+                        if (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift))
+                        {
+                            switch (args.Key)
+                            {
+                                case Key.R:
+                                    //Reload
+                                    Game.Dungeon.Player.RefillWeapons();
+                                    break;
+
+                                case Key.K:
+                                    if (!Game.Dungeon.AllLocksOpen)
+                                    {
+                                        Game.Dungeon.AllLocksOpen = true;
+                                        Game.MessageQueue.AddMessage("All locks are now open.");
+                                    }
+                                    else
+                                    {
+                                        Game.Dungeon.AllLocksOpen = false;
+                                        Game.MessageQueue.AddMessage("All locks are now in their normal state.");
+                                    }
+                                    break;
+
+                                case Key.I:
+                                    Game.MessageQueue.AddMessage("Player levelled up.");
+                                    Game.Dungeon.Player.LevelUp();
+                                    break;
+
+
+                                case Key.N:
+                                    //screen numbering
+                                    Screen.Instance.CycleRoomNumbering();
+                                    break;
+
+                                case Key.W:
+                                    //screen debug mode
+                                    Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
+                                    if (Screen.Instance.DebugMode)
+                                        Game.MessageQueue.AddMessage("Screen debug mode on.");
+                                    else
+                                        Game.MessageQueue.AddMessage("Screen debug mode off.");
+                                    timeAdvances = true; //So full FoV is re-rendered
+                                    break;
+
+                                case Key.B:
+                                    //screen see all mode
+                                    Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
+                                    Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
+                                    Screen.Instance.NeedsUpdate = true;
+                                    break;
+
+                                case Key.Y:
+                                    //next level
+                                    Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel + 1);
+                                    centreOnPC = true;
+                                    timeAdvances = true;
+                                    break;
+
+                                case Key.G:
+                                    //last level
+                                    Game.Dungeon.MoveToLevel(Game.Dungeon.Player.LocationLevel - 1);
+                                    centreOnPC = true;
+                                    timeAdvances = true;
+                                    break;
+
+                                case Key.J:
+                                    //change debug level
+                                    LogFile.Log.DebugLevel += 1;
+                                    if (LogFile.Log.DebugLevel > 3)
+                                        LogFile.Log.DebugLevel = 1;
+
+                                    LogFile.Log.LogEntry("Log Debug level now: " + LogFile.Log.DebugLevel.ToString());
+
+                                    break;
+
+                                case Key.H:
+                                    //Add a healing event on the player
+                                    Game.Dungeon.Player.HealCompletely();
+                                    Game.Dungeon.Player.RefillWeapons();
+                                    break;
+
+                                case Key.T:
+                                    Game.MessageQueue.AddMessage("Giving all low level weapons & wetware.");
+                                    Game.Dungeon.Player.GiveAllWeapons(1);
+                                    Game.Dungeon.Player.GiveAllWetware(2);
+                                    Game.Dungeon.Player.EquipNextUtility();
+                                    break;
+
+                                case Key.U:
+                                    Game.Dungeon.Player.GiveAllWeapons(2);
+                                    Game.Dungeon.Player.GiveAllWetware(3);
+                                    break;
+
+                                case Key.V:
+                                    Game.Dungeon.KillAllMonstersOnLevel(Game.Dungeon.Player.LocationLevel);
+                                    Game.MessageQueue.AddMessage("Boom");
+                                    break;
+                            }
+                        }
+                    }
+
+
+                    //OLD EVENTS
+
+                    /*
+                case 'K':
+                    //Add a sound at the player's location
+                    Game.Dungeon.AddSoundEffect(1.0, Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+                    //refresh the sound display
+                    Game.Dungeon.ShowSoundsOnMap();
+
+                    Screen.Instance.Update();
+                    break;
+
+                case 'z':
+                    Game.Dungeon.ExplodeAllMonsters();
+         
+                    break;
+                    */
+
+                    /*
+                case 'x':
+                case 'X':
+                    //Recast last spells
+                    timeAdvances = RecastSpell();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;*/
+
+                    /*
+                case 'c':
+                case 'C':
+                    //Charm creature
+                    timeAdvances = PlayerCharmCreature();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+                    */
+
+                    /*
+                case ',':
+                case 'g':
+                    //Pick up item
+                    timeAdvances = PickUpItem();
+                    //Only update screen is unsuccessful, otherwise will be updated in main loop (can this be made general)
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;*/
+                    //No longer needed
+
+                    /*
+                case 'S':
+                    //Save the game
+                    timeAdvances = true;
+                    Game.MessageQueue.AddMessage("Saving game...");
+                    Screen.Instance.Update();
+                    Game.Dungeon.SaveGame();
+                    Game.MessageQueue.AddMessage("Press any key to exit the game.");
+                    Screen.Instance.Update();
+                    userKey = Keyboard.WaitForKeyPress(true);
+                    Game.Dungeon.RunMainLoop = false;
+
+                    break;
+                    */
+                    /*
+                case 'o':
+                case 'O':
+                    //Open door
+                    timeAdvances = PlayerOpenDoor();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+                    */
+                    /*
+                case 'c':
+                case 'C':
+                    //Close door
+                    timeAdvances = PlayerCloseDoor();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+                    */
+                    //Repeatidly closing doors and lurking behind them was kind of abusive
+
+                    /*
+                case 't':
+                    //Throw weapon
+                    timeAdvances = ThrowWeapon();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+
+                case 'T':
+                    //Throw utility
+                    timeAdvances = ThrowUtility();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+
+                case 'U':
+                    //Use utility
+                    timeAdvances = UseUtility();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;*/
+                    /*
+                case 'u':
+                    //Use weapon
+                    timeAdvances = UseWeapon();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;*/
+
+
+
+                    /*
+                case '>':
+                case '<':
+                    //Interact with feature
+                    timeAdvances = Game.Dungeon.InteractWithFeature();
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+
+                    break;*/
+
+                    //WETWARE
+                    /*case 'S':
+                        timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.ShieldWare));
+                        break;
+
+                    case 'D':
+                        timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
+                        break;
+
+                    case 'A':
+                        timeAdvances = Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.AimWare));
+                        break;
+                        */
+                    /*
+                case 'd':
+                case 'D':
+                    //Drop items if in town
+                    //DropItems();
+                    Screen.Instance.Update();
+                    timeAdvances = false;
+                    break;*/
+                    /*
+                case 'i':
+                case 'I':
+                    //Use an inventory item
+                    SetPlayerInventorySelectScreen();
+                    Screen.Instance.Update();
+                    //This uses the generic 'select from inventory' input loop
+                    //Time advances if the item was used successfully
+                    timeAdvances = UseItem();
+                    DisablePlayerInventoryScreen();
+                    //Only update the screen if the player has another selection to make, otherwise it will be updated automatically before his next go
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+
+
+                case 'e':
+                case 'E':
+                    //Display currently equipped items
+                    SetPlayerEquippedItemsScreen();
+                    Screen.Instance.Update();
+                    timeAdvances = DisplayEquipment();
+                    DisablePlayerEquippedItemsScreen();
+
+                    //Using an item can break a special move sequence
+                    if (!timeAdvances)
+                        Screen.Instance.Update();
+
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+
+
+                case 'm':
+                                
+                    //Show movies
+                    SetSpecialMoveMovieScreen();
+                    Screen.Instance.Update();
+                    MovieScreenInteraction();
+                    DisableSpecialMoveMovieScreen();
+                    Screen.Instance.Update();
+                    timeAdvances = false;
+                    break;*/
+
+                    /*
+                case 'k':
+                    //Display the inventory
+                    inputState = InputState.InventoryShow;
+                    SetPlayerInventoryScreen();
+                    UpdateScreen();
+                    timeAdvances = false;
+                    break;
+                                
+                            
+
+                //case 'c':
+                //    //Level up
+                //    Game.Dungeon.Player.LevelUp();
+                //    UpdateScreen();
+                //    break;
+
+                            
+
+                case 'M':
+                    //Learn all moves
+                    Game.Dungeon.LearnMove(new SpecialMoves.CloseQuarters());
+                    Game.Dungeon.LearnMove(new SpecialMoves.ChargeAttack());
+                    Game.Dungeon.LearnMove(new SpecialMoves.WallVault());
+                    Game.Dungeon.LearnMove(new SpecialMoves.VaultBackstab());
+                    Game.Dungeon.LearnMove(new SpecialMoves.WallLeap());
+                    Game.MessageQueue.AddMessage("Learnt all moves.");
+                    //Game.Dungeon.PlayerLearnsAllSpells();
+                    //Game.MessageQueue.AddMessage("Learnt all spells.");
+                    UpdateScreen();
+                    timeAdvances = false;
+                    break;
+                          
+
+                case 'B':
+                    Screen.Instance.SaveCurrentLevelToDisk();
+                    break;
+                                                                     
+                case 'U':
+                    //Uncharm creature
+                    timeAdvances = PlayerUnCharmCreature();
+                    if (!timeAdvances)
+                        UpdateScreen();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+
+                case 'r':
+                    //Name object
+                    SetPlayerInventorySelectScreen();
+                    UpdateScreen();
+                    //This uses the generic 'select from inventory' input loop
+                    NameObject();
+                    DisablePlayerInventoryScreen();
+
+                    UpdateScreen();
+                    break;
+                                    
+                //Debug events
+                case 'w':
+                    //Select an item to equip
+                    SetPlayerEquippedItemsSelectScreen();
+                    UpdateScreen();
+                    timeAdvances = EquipItem();
+                    DisablePlayerEquippedItemsSelectScreen();
+                    if (!timeAdvances)
+                        UpdateScreen();
+
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+                //debug ones
+                case 'd':
+                    //Drop item
+                    SetPlayerInventorySelectScreen();
+                    UpdateScreen();
+                    timeAdvances = DropItem();
+                    DisablePlayerInventoryScreen();
+                    if (!timeAdvances)
+                        UpdateScreen();
+                    if (timeAdvances)
+                        SpecialMoveNonMoveAction();
+                    break;
+
+                                
+                case 'l':
+                    timeAdvances = false;
+                    LoadGame(Game.Dungeon.Player.Name);
+                    UpdateScreen();
+                    break;
+
+
+                case 'y':
+                    //Add a speed up event on the player
+                    PlayerEffects.SpeedUp speedUp = new RogueBasin.PlayerEffects.SpeedUp(Game.Dungeon.Player, 500, 100);
+                    Game.Dungeon.Player.AddEffect(speedUp);
+                    UpdateScreen();
+                    break;
+                case 'v':
+                    //Add a multi damage event on the player
+                    PlayerEffects.MultiDamage multiD = new RogueBasin.PlayerEffects.MultiDamage(Game.Dungeon.Player, 500, 3);
+                    Game.Dungeon.Player.AddEffect(multiD);
+                    UpdateScreen();
+                    break;
+                case 'h':
+                    //Add a healing event on the player
+                    PlayerEffects.Healing healing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, 10);
+                    Game.Dungeon.Player.AddEffect(healing);
+                    UpdateScreen();
+                    break;
+                case 'x':
+                    //Add a healing event on the player
+                    PlayerEffects.DamageUp healing3 = new RogueBasin.PlayerEffects.DamageUp(Game.Dungeon.Player, 500, 5);
+                    Game.Dungeon.Player.AddEffect(healing3);
+                    PlayerEffects.ToHitUp healing2 = new RogueBasin.PlayerEffects.ToHitUp(Game.Dungeon.Player, 500, 5);
+                    Game.Dungeon.Player.AddEffect(healing2);
+                    UpdateScreen();
+                    break;
+                case 'z':
+                    //Add an anti-healing event on the player
+                    PlayerEffects.Healing zhealing = new RogueBasin.PlayerEffects.Healing(Game.Dungeon.Player, -10);
+                    Game.Dungeon.Player.AddEffect(zhealing);
+                    UpdateScreen();
+                    break;
+                case 'c':
+                    //Level up
+                    Game.Dungeon.Player.LevelUp();
+                    UpdateScreen();
+                    break;
+                    */
+
+                    //Handle wetware
+
+                    char keyCode = args.KeyboardCharacter[0];
+
+                    foreach (var kv in ItemMapping.WetwareMapping)
+                    {
+                        if (keyCode == kv.Key)
+                        {
+                            bool changeWorks = Game.Dungeon.Player.ToggleEquipWetware(kv.Value);
+
+                            if (changeWorks)
+                            {
+                                //We changed wetware, counts as an action
+                                centreOnPC = true;
+                            }
+
+                            break;
+                        }
+                    }
+
+
+                    //Handle weapons
+
+                    int numberPressed = GetNumberFromNonKeypadKeyPress(args);
+                    if (numberPressed != -1)
+                    {
+                        foreach (var kv in ItemMapping.WeaponMapping)
+                        {
+                            if (numberPressed == kv.Key)
+                            {
+                                timeAdvances = Game.Dungeon.Player.EquipInventoryItemType(kv.Value);
+                                centreOnPC = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    //Handle direction keys (both arrows and vi keys)
+
+                    Point direction = new Point(9, 9);
+                    KeyModifier mod = KeyModifier.Arrow;
+                    bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
+
+                    if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift) || args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl) || args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.RightAlt)))
+                    {
+                        timeAdvances = TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
+                        centreOnPC = true;
+                    }
+
+                    if (wasDirection && (mod == KeyModifier.Numeric) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
+                    {
+                        timeAdvances = StartRunning(direction.x, direction.y);
+                        centreOnPC = true;
+                    }
+
+                    if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
+                    {
+                        Screen.Instance.ViewportScrollSpeed = 4;
+                        Screen.Instance.ScrollViewport(direction);
+                        centreOnPC = false;
+                    }
+
+                    if (Game.Config.DebugMode)
+                    {
+                        if (wasDirection && mod == KeyModifier.Arrow && (args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
+                        {
+                            if (direction == new Point(0, -1))
+                            {
+                                ScreenLevelUp();
+                                centreOnPC = false;
+                            }
+
+                            if (direction == new Point(0, 1))
+                            {
+                                ScreenLevelDown();
+                                centreOnPC = false;
+                            }
+                        }
+                    }
+
+
+                    break;
+            }
+
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
 
@@ -1312,7 +1351,7 @@ namespace RogueBasin
         {
             runningDirection = new Point(directionX, directionY);
             isRunning = true;
-            inputState = InputState.Running;
+            actionState = ActionState.Running;
 
             return RunNextStep();
         }
@@ -1320,7 +1359,7 @@ namespace RogueBasin
         public void StopRunning()
         {
             isRunning = false;
-            inputState = InputState.MapMovement;
+            actionState = ActionState.Interactive;
         }
 
         private bool RunNextStep()
@@ -2788,7 +2827,6 @@ namespace RogueBasin
         {
             try
             {
-
                 var movieFrames = new List<MovieFrame>();
                 
                 var logFrame = new MovieFrame();

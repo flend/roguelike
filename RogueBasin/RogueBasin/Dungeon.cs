@@ -2878,6 +2878,21 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// For debug :) purposes
+        /// </summary>
+        /// <param name="level"></param>
+        public void KillAllMonstersOnLevel(int level)
+        {
+            foreach (var monster in Monsters)
+            {
+                if (monster.LocationLevel == level)
+                {
+                    KillMonster(monster, true);
+                }
+            }
+        }
+
+        /// <summary>
         /// Kill a monster. This monster won't get any further turns.
         /// If autokill is set to true, this is a dungeon respawn or similar. Don't count towards achievements
         /// </summary>
