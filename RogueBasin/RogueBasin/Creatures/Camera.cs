@@ -18,8 +18,10 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 0;
 
-            //Start in the passive state
-            this.Passive = true;
+            //Always passive
+            Passive = true;
+            UnpassifyOnAttacked = false;
+            WakesOnAttacked = false;
         }
 
         protected override int ClassMaxHitpoints()

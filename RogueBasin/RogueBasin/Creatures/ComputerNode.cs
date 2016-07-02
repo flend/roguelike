@@ -20,15 +20,12 @@ namespace RogueBasin.Creatures
             EquipmentSlots.Add(new EquipmentSlotInfo(EquipmentSlot.Weapon));
             NormalSightRadius = 0;
 
-            //Randomize which way we rotate (should be serialized)
-            if (Game.Random.Next(2) > 0)
-            {
-                rotationClockwise = false;
-            }
-
             Unique = true;
 
-            this.Passive = true;
+            //Always passive
+            Passive = true;
+            UnpassifyOnAttacked = false;
+            WakesOnAttacked = false;
         }
 
         protected override int ClassMaxHitpoints()
@@ -44,7 +41,7 @@ namespace RogueBasin.Creatures
 
         public override CreatureFOV.CreatureFOVType FOVType()
         {
-            return CreatureFOV.CreatureFOVType.Triangular;
+            return CreatureFOV.CreatureFOVType.Base;
         }
 
 

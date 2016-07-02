@@ -5,15 +5,17 @@ using libtcodWrapper;
 
 namespace RogueBasin.Creatures
 {
-    /// <summary>
-    /// Swarmer. Light melee with wide FOV. Responds to sounds.
-    /// </summary>
-    public class ExplosiveBarrel : MonsterThrowAndRunAI
-    {
 
-        public ExplosiveBarrel(int level) : base (level)
+    public class ExplosiveBarrel : MonsterNullAI
+    {
+        int level;
+
+        public ExplosiveBarrel(int level)
         {
+            this.level = level;
             this.Passive = true;
+            this.UnpassifyOnAttacked = false;
+            this.WakesOnAttacked = false;
         }
 
         /// <summary>
@@ -24,20 +26,6 @@ namespace RogueBasin.Creatures
             Game.Dungeon.AddSoundEffect(0.5, LocationLevel, LocationMap);
 
             Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 2.5, this.ScaleRangedDamage(DamageBase()), this);
-        }
-        /// <summary>
-        /// Only explodes when next to you
-        /// </summary>
-        /// <returns></returns>
-        public override double GetMissileRange()
-        {
-            //Explodes if anyone is even vaguely nearby
-            return 1000;
-        }
-
-        protected override string GetWeaponName()
-        {
-            return "explodes!";
         }
 
         public override Monster NewCreatureOfThisType()
@@ -124,16 +112,6 @@ namespace RogueBasin.Creatures
         }
 
         public override bool CanMove()
-        {
-            return false;
-        }
-
-        protected override bool WillInvestigateSounds()
-        {
-            return false;
-        }
-
-        protected override bool WillPursue()
         {
             return false;
         }

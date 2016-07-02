@@ -17,7 +17,8 @@ namespace RogueBasin
         List<int> gameLevels;
         ImmutableDictionary<string, int> levelIds;
         ImmutableDictionary<int, string> levelNames;
-
+        ImmutableDictionary<int, string> levelReadableNames;
+        
         Dictionary<int, int> levelDifficulty = new Dictionary<int,int>();
         IEnumerable<int> allReplaceableVaults;
         Dictionary<int, int> levelDepths;
@@ -96,6 +97,7 @@ namespace RogueBasin
 
             //Level name and id lookup
             levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
+            levelReadableNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelReadableName);
             levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
         }
 
@@ -125,7 +127,8 @@ namespace RogueBasin
 
         public ImmutableDictionary<string, int> LevelIds { get { return levelIds; } }
         public ImmutableDictionary<int, string> LevelNames { get { return levelNames; } }
-
+        public ImmutableDictionary<int, string> LevelReadableNames { get { return levelNames; } }
+        
         public IEnumerable<int> AllReplaceableVaults { get { return allReplaceableVaults; } set { allReplaceableVaults = value; } }
 
         public Dictionary<int, int> LevelDepths { get { return levelDepths; } }

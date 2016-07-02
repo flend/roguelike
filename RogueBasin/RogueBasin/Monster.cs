@@ -115,6 +115,8 @@ namespace RogueBasin
 
             Charmed = false;
             Passive = false;
+            UnpassifyOnAttacked = true;
+            WakesOnAttacked = true;
 
             Sleeping = true;
 
@@ -193,9 +195,19 @@ namespace RogueBasin
         public bool Charmed { get; set; }
 
         /// <summary>
-        /// Special effect that means the monster won't fight be player. Could be a real effect in future, and use this as an accessor
+        /// Monster won't attack the player
         /// </summary>
         public bool Passive { get; set; }
+
+        /// <summary>
+        /// Monster will go non-passive if attacked
+        /// </summary>
+        public bool UnpassifyOnAttacked { get; set; }
+
+        /// <summary>
+        /// Monster will wake if attacked when sleeping
+        /// </summary>
+        public bool WakesOnAttacked { get; set; }
 
         /// <summary>
         /// Is the creature currently asleep. Defaults to true to avoid creatures wandering around the dungeon without a player.
@@ -896,11 +908,11 @@ namespace RogueBasin
             }
 
             //Was this a passive creature? It loses that flag
-            if (monster.Passive)
+            if (monster.Passive && monster.UnpassifyOnAttacked)
                 monster.UnpassifyCreature();
 
             //Was this a sleeping creature? It loses that flag
-            if (monster.Sleeping)
+            if (monster.Sleeping && monster.WakesOnAttacked)
             {
                 monster.WakeCreature();
 

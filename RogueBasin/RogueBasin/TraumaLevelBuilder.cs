@@ -10,11 +10,13 @@ namespace RogueBasin
     public class LevelInfo
     {
         private string levelName;
+        private string levelReadableName;
 
-        public LevelInfo(int levelNo, string levelName)
+        public LevelInfo(int levelNo, string levelName, string levelReadableName)
         {
             LevelNo = levelNo;
             LevelName = levelName;
+            LevelReadableName = levelReadableName;
 
             ConnectionsToOtherLevels = new Dictionary<int, Connection>();
             ReplaceableVaultConnections = new List<Connection>();
@@ -23,7 +25,8 @@ namespace RogueBasin
 
         public int LevelNo { get; private set; }
         public string LevelName { get; private set; }
-
+        public string LevelReadableName { get; private set; }
+        
         public Dictionary<int, Connection> ConnectionsToOtherLevels { get; set; }
 
         public TemplatedMapGenerator LevelGenerator { get; set; }

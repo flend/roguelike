@@ -129,7 +129,7 @@ namespace TraumaRL.Quests
                 var roomsForLogsNonCritical = builder.GetRandomRoomsForClues(mapState, 1, preferredRoomsForLogsNonCritical);
                 var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
 
-                var coupledLogs = LogGen.GenerateCoupledDoorLogEntry(doorName, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
+                var coupledLogs = LogGen.GenerateCoupledDoorLogEntry(mapState, doorName, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),
                     clueLocations.First().level);
                 var log1 = new Tuple<LogEntry, Clue>(coupledLogs[0], logClues[0]);
                 var log2 = new Tuple<LogEntry, Clue>(coupledLogs[1], logCluesNonCritical[0]);

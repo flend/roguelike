@@ -161,7 +161,7 @@ namespace RogueBasin
             }
         }
         
-        public LogEntry GenerateDoorLogEntry(string doorId, int levelForDoor)
+        public LogEntry GenerateDoorLogEntry(MapState mapState, string doorId, int levelForDoor)
         {
             var entry = new LogEntry();
 
@@ -176,7 +176,7 @@ namespace RogueBasin
                 logEntryLines = ApplyStandardSubstitutions(logEntryLines);
 
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<level>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
+                { "<level>", mapState.LevelReadableNames[levelForDoor] },
                 { "<idtype>", doorId }
             });
 
@@ -191,7 +191,7 @@ namespace RogueBasin
             return entry;
         }
 
-        public LogEntry GenerateGoodyRoomLogEntry(string doorId, int levelForDoor, List<Item> itemsInRoom)
+        public LogEntry GenerateGoodyRoomLogEntry(MapState mapState, string doorId, int levelForDoor, List<Item> itemsInRoom)
         {
             var entry = new LogEntry();
 
@@ -206,7 +206,7 @@ namespace RogueBasin
                 logEntryLines = ApplyStandardSubstitutions(logEntryLines);
 
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
+                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
                 { "<idtype>", doorId },
                 { "<item>", itemsInRoom.RandomElement().SingleItemDescription }
             });
@@ -221,12 +221,12 @@ namespace RogueBasin
 
             return entry;
         }
-        public LogEntry GenerateGeneralQuestLogEntry(string logname)
+        public LogEntry GenerateGeneralQuestLogEntry(MapState mapState, string logname)
         {
-            return GenerateGeneralQuestLogEntry(logname, 0, 0);
+            return GenerateGeneralQuestLogEntry(mapState, logname, 0, 0);
         }
 
-        public LogEntry GenerateGeneralQuestLogEntry(string logname, int levelForDoor, int levelForClue)
+        public LogEntry GenerateGeneralQuestLogEntry(MapState mapState, string logname, int levelForDoor, int levelForClue)
         {
             var entry = new LogEntry();
 
@@ -241,8 +241,8 @@ namespace RogueBasin
                 logEntryLines = ApplyStandardSubstitutions(logEntryLines);
 
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
-                { "<cluelevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForClue] }
+                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
+                { "<cluelevel>", mapState.LevelReadableNames[levelForClue] }
             });
 
             }
@@ -256,7 +256,7 @@ namespace RogueBasin
             return entry;
         }
 
-        public List<LogEntry> GenerateCoupledDoorLogEntry(string doorId, int levelForDoor, int levelForClue)
+        public List<LogEntry> GenerateCoupledDoorLogEntry(MapState mapState, string doorId, int levelForDoor, int levelForClue)
         {
             
             //Ensure we have 2 coupled entries
@@ -279,8 +279,8 @@ namespace RogueBasin
             try
             {
                 firstlogEntryLines = ApplySubstitutions(firstlogEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
-                { "<cluelevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForClue] },
+                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
+                { "<cluelevel>", mapState.LevelReadableNames[levelForClue] },
                 { "<lastname>", secondLogName },
                 { "<idtype>", doorId }
             });
@@ -298,8 +298,8 @@ namespace RogueBasin
             try
             {
                 secondlogEntryLines = ApplySubstitutions(secondlogEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForDoor] },
-                { "<cluelevel>", Game.Dungeon.DungeonInfo.LevelNaming[levelForClue] },
+                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
+                { "<cluelevel>", mapState.LevelReadableNames[levelForClue] },
                 { "<lastname>", firstLogName },
                 { "<idtype>", doorId }
             });
@@ -316,7 +316,7 @@ namespace RogueBasin
             return new List<LogEntry>{ firstReturnLog, secondReturnLog};
         }
 
-        public LogEntry GenerateElevatorLogEntry(int sourceLevel, int targetLevel)
+        public LogEntry GenerateElevatorLogEntry(MapState mapState, int sourceLevel, int targetLevel)
         {
             var entry = new LogEntry();
 
@@ -328,8 +328,8 @@ namespace RogueBasin
 
             try {
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<source>", Game.Dungeon.DungeonInfo.LevelNaming[sourceLevel] },
-                { "<target>", Game.Dungeon.DungeonInfo.LevelNaming[targetLevel] }
+                { "<source>", mapState.LevelReadableNames[sourceLevel] },
+                { "<target>", mapState.LevelReadableNames[targetLevel] }
             });
 
             } catch(Exception) {

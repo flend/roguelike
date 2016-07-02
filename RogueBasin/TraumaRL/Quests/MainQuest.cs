@@ -177,11 +177,11 @@ namespace TraumaRL.Quests
             var logCluesCritical = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForLogsNonCritical);
 
-            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_computer1", connectingLevel, computerCoreLevel), logCluesCritical[0]);
-            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_computer2", connectingLevel, computerCoreLevel), logCluesCritical[1]);
+            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_computer1", connectingLevel, computerCoreLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_computer2", connectingLevel, computerCoreLevel), logCluesCritical[1]);
 
-            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_computer3", connectingLevel, computerCoreLevel), logCluesNonCritical[0]);
-            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_computer4", connectingLevel, computerCoreLevel), logCluesNonCritical[1]);
+            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_computer3", connectingLevel, computerCoreLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_computer4", connectingLevel, computerCoreLevel), logCluesNonCritical[1]);
 
             Builder.PlaceLogClues(MapState, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
         }
@@ -241,11 +241,11 @@ namespace TraumaRL.Quests
             var logCluesCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
 
-            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_captain1", connectingLevel, captainsIdLevel), logCluesCritical[0]);
-            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_captain2", connectingLevel, captainsIdLevel), logCluesCritical[1]);
+            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_captain1", connectingLevel, captainsIdLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_captain2", connectingLevel, captainsIdLevel), logCluesCritical[1]);
 
-            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_captain3", connectingLevel, captainsIdLevel), logCluesNonCritical[0]);
-            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_captain4", connectingLevel, captainsIdLevel), logCluesNonCritical[1]);
+            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_captain3", connectingLevel, captainsIdLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_captain4", connectingLevel, captainsIdLevel), logCluesNonCritical[1]);
 
             Builder.PlaceLogClues(MapState, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
         }
@@ -349,11 +349,11 @@ namespace TraumaRL.Quests
             var logCluesCritical = manager.AddCluesToExistingDoor(arcologyDoorId, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingDoor(arcologyDoorId, roomsForLogsNonCritical);
 
-            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_arcology3", levelToArcology, biowareLevel), logCluesCritical[0]);
-            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_arcology4", levelToArcology, biowareLevel), logCluesCritical[1]);
+            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_arcology3", levelToArcology, biowareLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_arcology4", levelToArcology, biowareLevel), logCluesCritical[1]);
 
-            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_arcology1", levelToArcology, biowareLevel), logCluesNonCritical[0]);
-            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_arcology2", levelToArcology, biowareLevel), logCluesNonCritical[1]);
+            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_arcology1", levelToArcology, biowareLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_arcology2", levelToArcology, biowareLevel), logCluesNonCritical[1]);
 
             Builder.PlaceLogClues(MapState, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
 
@@ -438,11 +438,11 @@ namespace TraumaRL.Quests
             var logCluesCritical = manager.AddCluesToExistingObjective(antennaeObjName, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingObjective(antennaeObjName, roomsForLogsNonCritical);
 
-            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_antennae2", antennaeLevel, servoLevel), logCluesCritical[0]);
-            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_antennae3", antennaeLevel, servoLevel), logCluesCritical[1]);
+            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_antennae2", antennaeLevel, servoLevel), logCluesCritical[0]);
+            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_antennae3", antennaeLevel, servoLevel), logCluesCritical[1]);
 
-            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_antennae1", antennaeLevel, servoLevel), logCluesNonCritical[0]);
-            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry("qe_antennae4", antennaeLevel, servoLevel), logCluesNonCritical[1]);
+            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_antennae1", antennaeLevel, servoLevel), logCluesNonCritical[0]);
+            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_antennae4", antennaeLevel, servoLevel), logCluesNonCritical[1]);
 
             Builder.PlaceLogClues(MapState, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
 

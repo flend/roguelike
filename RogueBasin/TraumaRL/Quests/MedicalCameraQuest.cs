@@ -50,7 +50,7 @@ namespace TraumaRL.Quests
             var roomsForLogs = Builder.GetRandomRoomsForClues(MapState, 2, allowedRoomsForClues);
             var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
 
-            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateElevatorLogEntry(medicalLevel, lowerAtriumLevel), logClues[0]);
+            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateElevatorLogEntry(MapState, medicalLevel, lowerAtriumLevel), logClues[0]);
             var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateArbitaryLogEntry("qe_medicalsecurity"), logClues[1]);
             Builder.PlaceLogClues(MapState, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
         }
