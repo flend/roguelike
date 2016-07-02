@@ -5206,5 +5206,70 @@ namespace RogueBasin
 
             return status;
         }
+
+        /// <summary>
+        /// RoomPlacements currently contain absolute co-ordinates. I would prefer them to have relative coordinates, and those to get
+        /// mapped to absolute coordinates here
+        /// </summary>
+        /// <param name="mapInfo"></param>
+        public void AddMapObjectsToDungeon(MapInfo mapInfo)
+        {
+            var rooms = mapInfo.Populator.AllRoomsInfo();
+
+            foreach (RoomInfo roomInfo in rooms)
+            {
+                foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
+                {
+                    bool monsterResult = AddMonster(monsterPlacement.monster, monsterPlacement.location);
+
+                    if (!monsterResult)
+                    {
+                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+
+                foreach (ItemRoomPlacement itemPlacement in roomInfo.Items)
+                {
+                    bool monsterResult = AddItem(itemPlacement.item, itemPlacement.location);
+
+                    if (!monsterResult)
+                    {
+                        LogFile.Log.LogEntryDebug("Cannot add item to dungeon: " + itemPlacement.item.SingleItemDescription + " at: " + itemPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+
+                foreach (FeatureRoomPlacement featurePlacement in roomInfo.Features)
+                {
+                    if (featurePlacement.feature.IsBlocking)
+                    {
+                        bool featureResult = AddFeatureBlocking(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord, featurePlacement.feature.BlocksLight);
+
+                        if (!featureResult)
+                        {
+                            LogFile.Log.LogEntryDebug("Cannot add blocking feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
+                        }
+                    }
+                    else
+                    {
+                        bool featureResult = AddFeature(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord);
+
+                        if (!featureResult)
+                        {
+                            LogFile.Log.LogEntryDebug("Cannot add feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
+                        }
+                    }
+                }
+            }
+
+            foreach (var doorInfo in mapInfo.Populator.DoorInfo)
+            {
+                var door = doorInfo.Value;
+
+                foreach (var doorLock in door.Locks)
+                {
+                    AddLock(doorLock);
+                }
+            }
+        }
     }
 }

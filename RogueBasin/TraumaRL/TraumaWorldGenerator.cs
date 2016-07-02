@@ -132,16 +132,7 @@ namespace TraumaRL
 
             //Create the state object which will hold the map state in the generation phase
 
-            var startVertex = 0;
-            var startLevel = 0;
-            mapState = new MapState();
-            mapState.UpdateWithNewLevelMaps(levelLinks, levelInfo, startLevel);
-            mapState.InitialiseDoorAndClueManager(startVertex);
-                        
-            //Feels like there will be a more dynamic way of getting this state in future
-            mapState.ConnectionStore["escapePodConnection"] = levelBuilder.EscapePodsConnection;
-            mapState.AllReplaceableVaults = levelBuilder.AllReplaceableVaults;
-
+            SetupMapState(levelBuilder, levelInfo);
             MapInfo mapInfo = mapState.MapInfo;
             
             //Add maps to the dungeon (must be ordered)
@@ -154,16 +145,7 @@ namespace TraumaRL
             //Generate quests
             var mapQuestBuilder = new QuestMapBuilder();
             GenerateQuests(mapState, mapQuestBuilder);
-
-            //Place loot
-            CalculateLevelDifficulty(mapState);
-
-            if (!quickLevelGen)
-                PlaceLootInArmory(mapState, mapQuestBuilder);
-
-            if (!quickLevelGen)
-                AddGoodyQuestLogClues(mapState, mapQuestBuilder);
-
+           
             //Add non-interactable features
             var decorator = new DungeonDecorator(mapState, mapQuestBuilder);
             decorator.AddDecorationFeatures();
@@ -179,7 +161,7 @@ namespace TraumaRL
 
             //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
             //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
-            AddMapObjectsToDungeon(mapInfo);
+            Game.Dungeon.AddMapObjectsToDungeon(mapInfo);
             
             //Add monsters
             Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapState, mapState.GameLevels, mapState.LevelDifficulty);
@@ -193,67 +175,19 @@ namespace TraumaRL
             }
         }
 
-        /// <summary>
-        /// RoomPlacements currently contain absolute co-ordinates. I would prefer them to have relative coordinates, and those to get
-        /// mapped to absolute coordinates here
-        /// </summary>
-        /// <param name="mapInfo"></param>
-        private void AddMapObjectsToDungeon(MapInfo mapInfo)
+        private void SetupMapState(TraumaLevelBuilder levelBuilder, Dictionary<int, LevelInfo> levelInfo)
         {
-            var rooms = mapInfo.Populator.AllRoomsInfo();
+            var startVertex = 0;
+            var startLevel = 0;
+            mapState = new MapState();
+            mapState.UpdateWithNewLevelMaps(levelLinks, levelInfo, startLevel);
+            mapState.InitialiseDoorAndClueManager(startVertex);
 
-            foreach (RoomInfo roomInfo in rooms)
-            {
-                foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
-                {
-                    bool monsterResult = Game.Dungeon.AddMonster(monsterPlacement.monster, monsterPlacement.location);
+            //Feels like there will be a more dynamic way of getting this state in future
+            mapState.ConnectionStore["escapePodConnection"] = levelBuilder.EscapePodsConnection;
+            mapState.AllReplaceableVaults = levelBuilder.AllReplaceableVaults;
 
-                    if (!monsterResult) {
-                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (ItemRoomPlacement itemPlacement in roomInfo.Items)
-                {
-                    bool monsterResult = Game.Dungeon.AddItem(itemPlacement.item, itemPlacement.location);
-
-                    if (!monsterResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add item to dungeon: " + itemPlacement.item.SingleItemDescription + " at: " + itemPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (FeatureRoomPlacement featurePlacement in roomInfo.Features)
-                {
-                    if (featurePlacement.feature.IsBlocking)
-                    {
-                        bool featureResult = Game.Dungeon.AddFeatureBlocking(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord, featurePlacement.feature.BlocksLight);
-
-                        if (!featureResult)
-                        {
-                            LogFile.Log.LogEntryDebug("Cannot add blocking feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                    }
-                    else
-                    {
-                        bool featureResult = Game.Dungeon.AddFeature(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord);
-
-                        if (!featureResult)
-                        {
-                            LogFile.Log.LogEntryDebug("Cannot add feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                    }
-                }
-            }
-
-            foreach (var doorInfo in mapInfo.Populator.DoorInfo)
-            {
-                var door = doorInfo.Value;
-
-                foreach(var doorLock in door.Locks) {
-                    Game.Dungeon.AddLock(doorLock);
-                }
-            }
+            CalculateLevelDifficulty(mapState);
         }
 
         private void AssertMapIsSolveable(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)
@@ -358,7 +292,7 @@ namespace TraumaRL
             {
                 try
                 {
-                    var blockElevatorQuest = new BlockElevatorQuest(mapState, builder, logGen, level, roomConnectivityMap);
+                    var blockElevatorQuest = new Quests.BlockElevatorQuest(mapState, builder, logGen, level, roomConnectivityMap);
                     blockElevatorQuest.ClueOnElevatorLevel = Game.Random.Next(2) > 0;
                     blockElevatorQuest.SetupQuest();
                 }
@@ -373,7 +307,7 @@ namespace TraumaRL
         {
             try
             {
-                var blockElevatorQuest = new BlockElevatorQuest(mapState, builder, logGen, lowerAtriumLevel, roomConnectivityMap);
+                var blockElevatorQuest = new Quests.BlockElevatorQuest(mapState, builder, logGen, lowerAtriumLevel, roomConnectivityMap);
                 blockElevatorQuest.SetupQuest();
             }
             catch (Exception ex)
@@ -382,116 +316,22 @@ namespace TraumaRL
             }
         }
 
-        Dictionary<int, int> goodyRooms;
-        Dictionary<int, string> goodyRoomKeyNames;
 
         private void BuildGoodyQuests(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
-            //Ensure that we have a goody room on every level that will support it
-            var levelInfo = mapState.LevelInfo;
-            var replaceableVaultsForLevels = levelInfo.ToDictionary(kv => kv.Key, kv => kv.Value.ReplaceableVaultConnections.Except(kv.Value.ReplaceableVaultConnectionsUsed));
-            goodyRooms = new Dictionary<int,int>();
-            goodyRoomKeyNames = new Dictionary<int, string>();
-
-            var manager = mapState.DoorAndClueManager;
-
-            foreach (var kv in replaceableVaultsForLevels)
-            {
-                if (kv.Value.Count() == 0)
-                {
-                    LogFile.Log.LogEntryDebug("No vaults left for armory on level " + kv.Key, LogDebugLevel.High);
-                    continue;
-                }
-
-                var thisLevel = kv.Key;
-                var thisConnection = kv.Value.RandomElement();
-                var thisRoom = thisConnection.Target;
-
-                LogFile.Log.LogEntryDebug("Placing goody room at: level: " + thisLevel + " room: " + thisRoom, LogDebugLevel.Medium);
-
-                //Place door
-                var doorReadableId = mapState.LevelNames[thisLevel] + " armory";
-                var doorId = doorReadableId;
-                
-                var unusedColor = builder.GetUnusedColor();
-                var clueName = unusedColor.Item2 + " key card";
-
-                builder.PlaceLockedDoorOnMap(mapState, doorId, clueName, 1, unusedColor.Item1, thisConnection);
-
-                goodyRooms[thisLevel] = thisRoom;
-
-                //Clue
-                var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
-
-                //Assume a critical path from the lower level elevator
-                var lowerLevelFloor = levelInfo[thisLevel].ConnectionsToOtherLevels.Min(level => level.Key);
-                var elevatorFromLowerLevel = levelInfo[thisLevel].ConnectionsToOtherLevels[lowerLevelFloor].Target;
-                var criticalPath = mapState.MapInfo.Model.GetPathBetweenVerticesInReducedMap(elevatorFromLowerLevel, thisRoom);
-
-                var filteredRooms = builder.FilterClueRooms(mapState, allowedRoomsForClues, criticalPath, true, QuestMapBuilder.CluePath.NotOnCriticalPath, true);
-                var roomsToPlaceMonsters = new List<int>();
-
-                var roomsForMonsters = builder.GetRandomRoomsForClues(mapState, 1, filteredRooms);
-                var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
-
-                
-                goodyRoomKeyNames[thisLevel] = clueName;
-                var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, unusedColor.Item1, clueName));
-                builder.PlaceSimpleClueItems(mapState, cluesAndColors, true, false);
-
-                //Vault is used
-                levelInfo[thisLevel].ReplaceableVaultConnectionsUsed.Add(thisConnection);
-            }
-        
-        }
-
-        private void AddGoodyQuestLogClues(MapState mapState, QuestMapBuilder builder)
-        {
-            //Ensure that we have a goody room on every level that will support it
-            var manager = mapState.DoorAndClueManager;
-            var mapInfo = mapState.MapInfo;
-            var levelInfo = mapState.LevelInfo;
-
-            foreach (var kv in goodyRooms)
-            {
-                var thisLevel = kv.Key;
-                var thisRoom = kv.Value;
-                
-                var doorId = mapState.LevelNames[thisLevel] + " armory";
-
-                //Clue
-                var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
-
-                //Assume a critical path from the lower level elevator
-                var lowerLevelFloor = levelInfo[thisLevel].ConnectionsToOtherLevels.Min(level => level.Key);
-                var elevatorFromLowerLevel = levelInfo[thisLevel].ConnectionsToOtherLevels[lowerLevelFloor].Target;
-                var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(elevatorFromLowerLevel, thisRoom);
-
-                //Logs - try placing them on the critical path from the start of the game!
-
-                var criticalPathFromStart = mapInfo.Model.GetPathBetweenVerticesInReducedMap(0, thisRoom);
-                var preferredRoomsForLogsNonCritical = builder.FilterClueRooms(mapState, allowedRoomsForClues, criticalPath, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
-
-                var roomsForLogsNonCritical = builder.GetRandomRoomsForClues(mapState, 1, preferredRoomsForLogsNonCritical);
-
-                var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
-                var clueName = goodyRoomKeyNames[thisLevel];
-                var log1 = new Tuple<LogEntry, Clue>(logGen.GenerateGoodyRoomLogEntry(clueName, thisLevel, itemsInArmory[thisLevel]), logClues[0]);
-                builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1 }, true, true);
-            }
-
+            var armoryQuest = new Quests.ArmoryQuest(mapState, builder, logGen);
+            armoryQuest.SetupQuest();
         }
         
         private void BuildMedicalLevelQuests(MapState mapState, QuestMapBuilder builder)
         {
-            var cameraQuest = new MedicalCameraQuest(mapState, builder, logGen);
+            var cameraQuest = new Quests.MedicalCameraQuest(mapState, builder, logGen);
             cameraQuest.SetupQuest();
         }
 
         private void BuildMainQuest(MapState mapState, QuestMapBuilder questMapBuilder)
         {
-            //Escape pod end game
-            var escapePod = new MainQuest(mapState, questMapBuilder, logGen);
+            var escapePod = new Quests.MainQuest(mapState, questMapBuilder, logGen);
             escapePod.SetupQuest();
         }
 
@@ -531,9 +371,22 @@ namespace TraumaRL
                     sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);
             }
         }
-        
-        
 
+        private void CalculateLevelDifficulty(MapState mapState)
+        {
+            var levelsToHandleSeparately = new List<int> { medicalLevel, arcologyLevel, computerCoreLevel, bridgeLevel };
 
+            var levelDifficulty = mapState.LevelDifficulty;
+
+            foreach (var kv in mapState.LevelDepths)
+            {
+                levelDifficulty[kv.Key] = kv.Value;
+            }
+
+            levelDifficulty[reactorLevel] = 4;
+            levelDifficulty[arcologyLevel] = 4;
+            levelDifficulty[computerCoreLevel] = 5;
+            levelDifficulty[bridgeLevel] = 5;
+        }
     }
 }
