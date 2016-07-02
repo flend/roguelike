@@ -65,19 +65,16 @@ namespace TraumaRL
         private void GenerateStoryDungeon(bool retry)
         {
             //Setup a single test level
-            TraumaWorldGenerator templateGen = new TraumaWorldGenerator();
+            TraumaWorldGenerator worldGen = new TraumaWorldGenerator();
 
-            var mapInfo = templateGen.GenerateTraumaLevels(retry);
+            worldGen.GenerateTraumaLevels(retry);
 
-            Game.Dungeon.MapInfo = mapInfo;
+            Game.Dungeon.MapInfo = worldGen.MapState.MapInfo;
 
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
-            VisualiseConnectivityGraph(mapInfo.Model, templateGen.MapState.DoorAndClueManager);
-            var mapModel = new MapModel(templateGen.LevelLinks, 0);
-            var doorAndClueManager = new DoorAndClueManager(mapModel);
-
-            VisualiseLevelConnectivityGraph(mapModel, doorAndClueManager, TraumaWorldGenerator.LevelNaming);
+            VisualiseConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager);
+            VisualiseLevelConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager, TraumaWorldGenerator.LevelNaming);
         }
 
         private void VisualiseConnectivityGraph(MapModel graphModel, DoorAndClueManager doorAndClueManager)
@@ -131,9 +128,10 @@ namespace TraumaRL
         }
 
         private void RandomSetup() {
-                        int seedToUse = 153;
-            //Game.Random = new Random(seedToUse);
-            Game.Random = new Random();
+            int seedToUse = new Random().Next();
+            //int seedToUse = 153;
+            LogFile.Log.LogEntry("Random seed: " + seedToUse);
+            Game.Random = new Random(seedToUse);
         }
 
         GameDifficulty difficulty;

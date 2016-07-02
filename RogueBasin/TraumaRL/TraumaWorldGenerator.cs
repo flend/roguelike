@@ -32,9 +32,10 @@ namespace TraumaRL
 
         MapState mapState;
 
-        
-        static List<Tuple<System.Drawing.Color, string>> availableColors;
-        List<Tuple<System.Drawing.Color, string>> usedColors = new List<Tuple<System.Drawing.Color, string>>();
+        public ConnectivityMap LevelLinks { get { return levelLinks; } }
+
+        public static Dictionary<int, string> LevelNaming { get { return levelNaming; } }
+
 
         public const int medicalLevel = 0;
         public const int lowerAtriumLevel = 1;
@@ -90,13 +91,6 @@ namespace TraumaRL
         }
 
 
-
-        public ConnectivityMap LevelLinks { get { return levelLinks; } }
-
-        public static Dictionary<int, string> LevelNaming { get { return levelNaming; } }
-
-        MapModel levelMap;
-
         /// <summary>
         /// Build a level->level map showing how the levels are connected
         /// </summary>
@@ -137,7 +131,6 @@ namespace TraumaRL
             }
 
             //Calculate some data about the levels
-            levelMap = new MapModel(levelLinks, medicalLevel);
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
 
             return levelLinks;
@@ -147,12 +140,9 @@ namespace TraumaRL
 
         
         /** Build a map using templated rooms */
-        public MapInfo GenerateTraumaLevels(bool retry)
+        public void GenerateTraumaLevels(bool retry)
         {
             //We catch exceptions on generation and keep looping
-
-            //Reset shared state
-            usedColors = new List<Tuple<System.Drawing.Color, string>>();
 
             //Generate the overall level structure
             levelLinks = GenerateLevelLinks();
@@ -225,8 +215,6 @@ namespace TraumaRL
             {
                 throw new ApplicationException("It happened!");
             }
-
-            return mapInfo;
         }
 
         /// <summary>
