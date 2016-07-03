@@ -184,7 +184,7 @@ namespace RogueBasin {
         public Point Target { get; set; }
 
         public TargettingType TargetType { get; set; }
-        public RogueBase.TargettingAction TargetAction { get; set; }
+        public TargettingAction TargetAction { get; set; }
 
         public int TargetRange { get; set; }
         public double TargetPermissiveAngle { get; set; }
@@ -1447,7 +1447,7 @@ namespace RogueBasin {
             //Draw actual target point
             if (SetTargetInRange)
             {
-                var targetSprite = TargetAction == RogueBase.TargettingAction.Examine ? greenTargetTile : redTargetTile;
+                var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
             }
             else
