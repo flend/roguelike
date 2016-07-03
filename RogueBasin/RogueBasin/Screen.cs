@@ -2476,9 +2476,6 @@ namespace RogueBasin {
                         }
                     }
 
-                    if (creature == Screen.Instance.CreatureToView)
-                        targetSprite = greenTargetTile;
-
                     if (creature.InPursuit())
                     {
                         //backgroundColor = pursuitBackground;

@@ -47,6 +47,8 @@ namespace RogueBasin
 
         Targetting targetting;
 
+        TargettingAction mouseDefaultTargettingAction = TargettingAction.MoveOrWeapon;
+
         Creature lastSpellTarget = null;
 
 
@@ -152,6 +154,7 @@ namespace RogueBasin
             Events.KeyboardUp += new EventHandler<KeyboardEventArgs>(KeyboardEventHandler);
             Events.MusicFinished += new EventHandler<MusicFinishedEventArgs>(MusicFinishedEventHandler);
             Events.MouseButtonUp += new EventHandler<MouseButtonEventArgs>(MouseButtonHandler);
+            Events.MouseMotion += new EventHandler<MouseMotionEventArgs>(MouseMotionHandler);
         }
 
         private void MusicFinishedEventHandler(object sender, MusicFinishedEventArgs e)
@@ -228,7 +231,32 @@ namespace RogueBasin
                 return;
             }
 
-            bool timeAdvances = DoPlayerNextAction(actionState, null, args);
+            bool timeAdvances = DoPlayerNextAction(actionState, null, args, null);
+
+            if (timeAdvances)
+            {
+                ProfileEntry("After user (mouse)");
+
+                Game.Dungeon.PlayerHadBonusTurn = true;
+
+                waitingForTurnTick = true;
+            }
+        }
+
+        private void MouseMotionHandler(object sender, MouseMotionEventArgs args)
+        {
+            //Dungeon click must complete before we take more input
+            if (waitingForTurnTick && GameStarted)
+            {
+                return;
+            }
+
+            if (actionState != ActionState.Interactive)
+            {
+                return;
+            }
+
+            bool timeAdvances = DoPlayerNextAction(actionState, null, null, args);
 
             if (timeAdvances)
             {
@@ -254,7 +282,7 @@ namespace RogueBasin
                 return;
             }
 
-            bool timeAdvances = DoPlayerNextAction(actionState, args, null);
+            bool timeAdvances = DoPlayerNextAction(actionState, args, null, null);
             
             if (timeAdvances)
             {
@@ -327,7 +355,7 @@ namespace RogueBasin
             if (actionState == ActionState.Running)
             {
                 //If the player is running, take their turn immediately without waiting for input
-                DoPlayerNextAction(actionState, null, null);
+                DoPlayerNextAction(actionState, null, null, null);
                 Game.Dungeon.PlayerHadBonusTurn = true;
                 waitingForTurnTick = true;
             }
@@ -350,7 +378,7 @@ namespace RogueBasin
                 SoundPlayer.Instance().PlaySounds();
         }
 
-        private bool DoPlayerNextAction(ActionState action, KeyboardEventArgs args, MouseButtonEventArgs mouseArgs)
+        private bool DoPlayerNextAction(ActionState action, KeyboardEventArgs args, MouseButtonEventArgs mouseArgs, MouseMotionEventArgs mouseMotionArgs)
         {
             var player = Game.Dungeon.Player;
             try
@@ -374,9 +402,13 @@ namespace RogueBasin
                         {
                             inputResult = PlayerAction(action, args);
                         }
-                        else
+                        else if(mouseArgs != null)
                         {
                             inputResult = PlayerAction(action, mouseArgs);
+                        }
+                        else 
+                        {
+                            inputResult = PlayerAction(action, mouseMotionArgs);
                         }
 
                         timeAdvances = inputResult.Item1;
@@ -413,6 +445,29 @@ namespace RogueBasin
             return false;
         }
 
+        private Tuple<bool, bool> PlayerAction(ActionState action, MouseMotionEventArgs mouseArgs)
+        {
+            bool timeAdvances = false;
+            bool centreOnPC = false;
+
+            var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
+
+            switch (inputState)
+            {
+                case InputState.Targetting:
+                    timeAdvances = TargettingMouseMotionEvent(clickLocation);
+                    break;
+
+                //Normal movement on the map
+                case InputState.MapMovement:
+
+                    HandleMapMovementMouseMotion(clickLocation, mouseArgs);
+                    break;
+            }
+
+            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+        }
+
         private Tuple<bool, bool> PlayerAction(ActionState action, MouseButtonEventArgs mouseArgs)
         {
             var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
@@ -429,7 +484,12 @@ namespace RogueBasin
                 //Normal movement on the map
                 case InputState.MapMovement:
 
-                    HandleMapMovementClick(clickLocation, mouseArgs.Button);
+                    timeAdvances = HandleMapMovementClick(clickLocation, mouseArgs.Button);
+                    break;
+
+                case InputState.MovieDisplay:
+
+                    MovieDisplayMouseEvent(mouseArgs);
                     break;
             }
 
@@ -441,49 +501,113 @@ namespace RogueBasin
             bool timeAdvances = false;
 
             //If we clicked where we clicked before, it's confirmation
-
-            //If we clicked elsewhere, it's a retarget
+            //If we clicked elsewhere, it's a retarget, motion will take care of this
             if (clickLocation == targetting.CurrentTarget)
             {
-                timeAdvances = ExecuteTargettedAction(true);
-            }
-            else
-            {
-                GetTargetFromPlayerBasedOnSquareContents(clickLocation, mouseButton);
+                timeAdvances = ExecuteTargettedAction(false);
             }
 
             return timeAdvances;
         }
 
-        private void HandleMapMovementClick(Point clickLocation, MouseButton mouseButtons)
+        private bool TargettingMouseMotionEvent(Point clickLocation)
         {
-            GetTargetFromPlayerBasedOnSquareContents(clickLocation, mouseButtons);
+            bool timeAdvances = false;
+
+            targetting.RetargetSquare(clickLocation);
+            
+            return timeAdvances;
+        }
+
+        private bool HandleMapMovementClick(Point clickLocation, MouseButton mouseButtons)
+        {
+            if (mouseButtons == MouseButton.PrimaryButton)
+            {
+
+                bool shifted = false;
+
+                var keyboardState = new KeyboardState();
+                if (keyboardState.IsKeyPressed(Key.LeftShift) || keyboardState.IsKeyPressed(Key.RightShift))
+                {
+                    shifted = true;
+                }
+
+                return ExecuteTargettedAction(shifted);
+            }
+            else
+            {
+                if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
+                {
+                    mouseDefaultTargettingAction = TargettingAction.MoveOrThrow;
+                }
+                else
+                {
+                    mouseDefaultTargettingAction = TargettingAction.MoveOrWeapon;
+                }
+
+                return false;
+            }
         }
 
         private void GetTargetFromPlayerBasedOnSquareContents(Point clickLocation, MouseButton mouseButtons)
         {
+            bool shifted = false;
+            
+            var keyboardState = new KeyboardState();
+            if (keyboardState.IsKeyPressed(Key.LeftShift) || keyboardState.IsKeyPressed(Key.RightShift))
+            {
+                shifted = true;
+            }
+
             SquareContents squareContents = Game.Dungeon.MapSquareContents(Screen.Instance.LevelToDisplay, clickLocation);
 
             if (squareContents.monster != null)
             {
-                if (mouseButtons == MouseButton.PrimaryButton)
+                if (!shifted)
                 {
-                    targetting.TargetWeapon(clickLocation);
+                    TargetWeaponOrUtility(clickLocation, mouseButtons);
                 }
                 else
                 {
-                    targetting.TargetThrowUtility(clickLocation);
+                    targetting.TargetMove(clickLocation);
                 }
             }
             else
             {
-                targetting.TargetMove(clickLocation);
+                //No monster
+                if (!shifted)
+                {
+                    targetting.TargetMove(clickLocation);
+                }
+                else
+                {
+                    TargetWeaponOrUtility(clickLocation, mouseButtons);
+                }
             }
         }
 
-        private void HandleMapMovementClick(ActionState action, Point clickLocation, MouseEventArgs mouseArgs)
+        private void TargetWeaponOrUtility(Point clickLocation, MouseButton mouseButtons)
         {
-            throw new NotImplementedException();
+            if (mouseButtons == MouseButton.PrimaryButton)
+            {
+                targetting.TargetWeapon(clickLocation);
+            }
+            else
+            {
+                targetting.TargetThrowUtility(clickLocation);
+            }
+        }
+
+        private void HandleMapMovementMouseMotion(Point clickLocation, MouseMotionEventArgs mouseArgs)
+        {
+            if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
+            {
+                targetting.TargetMoveOrFireInstant(clickLocation);
+            }
+            else
+            {
+                targetting.TargetMoveOrThrowInstant(clickLocation);
+            }
         }
         
         bool PlayerPrepareForNextTurn()
@@ -1594,11 +1718,24 @@ namespace RogueBasin
         {
             if (args.Key == Key.Return)
             {
-                //Finish movie
-                Screen.Instance.DequeueFirstMovie();
-                //Out of movie mode if no more to display
-                if (!Screen.Instance.MoviesToPlay())
-                    inputState = InputState.MapMovement;
+                FinishMovie();
+            }
+        }
+
+        private void FinishMovie()
+        {
+            //Finish movie
+            Screen.Instance.DequeueFirstMovie();
+            //Out of movie mode if no more to display
+            if (!Screen.Instance.MoviesToPlay())
+                inputState = InputState.MapMovement;
+        }
+
+        private void MovieDisplayMouseEvent(MouseButtonEventArgs args)
+        {
+            if (args.Button == MouseButton.PrimaryButton)
+            {
+                FinishMovie();
             }
         }
 
@@ -1827,9 +1964,13 @@ namespace RogueBasin
                 return false;
             }
 
-            if (validFire || escape)
+            if (validFire)
             {
-                return ExecuteTargettedAction(validFire);
+                return ExecuteTargettedAction(false);
+            }
+            else
+            {
+                targetting.DisableTargettingMode();
             }
 
             return false;
@@ -1845,7 +1986,7 @@ namespace RogueBasin
             targetting.RetargetSquare(newPoint);
         }
 
-        private bool ExecuteTargettedAction(bool fire)
+        private bool ExecuteTargettedAction(bool alternativeActionMode)
         {
             bool timeAdvances = false;
             bool restoreExamine = true;
@@ -1856,50 +1997,87 @@ namespace RogueBasin
             var player = Game.Dungeon.Player;
 
             //Turn targetting mode off
-            inputState = InputState.MapMovement;
-
-            Screen.Instance.TargettingModeOff();
+            targetting.DisableTargettingMode();
 
             //Complete actions
-            if (fire)
+            switch (targetting.TargettingAction)
             {
-                switch (targetting.TargettingAction)
-                {
-                    case TargettingAction.Weapon:
+                case TargettingAction.Weapon:
 
-                        //Time advances only on success
-                        timeAdvances = FireTargettedWeapon(targetting.CurrentTarget);
-                        player.ResetTurnsMoving();
-                        player.ResetTurnsSinceAction();
-                        break;
+                    timeAdvances = FireTargettedWeapon();
+                    break;
 
-                    case TargettingAction.Utility:
+                case TargettingAction.Utility:
 
-                        //Time advances only on success
-                        timeAdvances = ThrowTargettedUtility(targetting.CurrentTarget);
-                        player.ResetTurnsMoving();
-                        player.ResetTurnsSinceAction();
-                        break;
+                    timeAdvances = ThrowTargettedUtility();
+                    break;
 
-                    case TargettingAction.Examine:
+                case TargettingAction.Examine:
 
-                        restoreExamine = false;
-                        break;
+                    restoreExamine = false;
+                    break;
 
-                    case TargettingAction.Move:
-                        IEnumerable<Point> path = Game.Dungeon.Pathing.GetPathToSquare(player.LocationLevel, player.LocationMap, targetting.CurrentTarget, Pathing.PathingPermission.IgnoreDoors, true);
-                        if (path == null || !path.Skip(1).Any())
+                case TargettingAction.MoveOrWeapon:
+                    {
+                        SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, targetting.CurrentTarget);
+                        if (squareContents.monster != null)
                         {
-                            //Click on yourself
-                            restoreExamine = true;
-                            break;
+                            if (!alternativeActionMode)
+                            {
+                                timeAdvances = FireTargettedWeapon();
+                            }
+                            else
+                            {
+                                timeAdvances = RunToDestination();
+                            }
                         }
-                        timeAdvances = StartRunning(path.Skip(1));
-                        break;
-                }
+                        else
+                        {
+                            if (!alternativeActionMode)
+                            {
+                                timeAdvances = RunToDestination();
+                            }
+                            else
+                            {
+                                timeAdvances = FireTargettedWeapon();
+                            }
+                        }
+                    }
+                    break;
+
+                case TargettingAction.MoveOrThrow:
+                    {
+                        SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, targetting.CurrentTarget);
+                        if (squareContents.monster != null)
+                        {
+                            if (!alternativeActionMode)
+                            {
+                                timeAdvances = ThrowTargettedUtility();
+                            }
+                            else
+                            {
+                                timeAdvances = RunToDestination();
+                            }
+                        }
+                        else
+                        {
+                            if (!alternativeActionMode)
+                            {
+                                timeAdvances = RunToDestination();
+                            }
+                            else
+                            {
+                                timeAdvances = RunToDestination();
+                            }
+                        }
+                    }
+                    break;
+
+                case TargettingAction.Move:
+                    timeAdvances = RunToDestination();
+                    break;
             }
-
-
+            
             if (restoreExamine)
             {
                 Screen.Instance.CreatureToView = examineCreature;
@@ -1907,6 +2085,36 @@ namespace RogueBasin
                 Screen.Instance.FeatureToView = examineFeature;
             }
 
+            return timeAdvances;
+        }
+
+        private bool RunToDestination()
+        {
+            var player = Game.Dungeon.Player;
+
+            IEnumerable<Point> path = Game.Dungeon.Pathing.GetPathToSquare(player.LocationLevel, player.LocationMap, targetting.CurrentTarget, Pathing.PathingPermission.IgnoreDoors, true);
+            if (path == null || !path.Skip(1).Any())
+            {
+                return false;
+            }
+            return StartRunning(path.Skip(1));
+        }
+
+        private bool ThrowTargettedUtility()
+        {
+            var player = Game.Dungeon.Player;
+            var timeAdvances = ThrowTargettedUtility(targetting.CurrentTarget);
+            player.ResetTurnsMoving();
+            player.ResetTurnsSinceAction();
+            return timeAdvances;
+        }
+
+        private bool FireTargettedWeapon()
+        {
+            var player = Game.Dungeon.Player;
+            var timeAdvances = FireTargettedWeapon(targetting.CurrentTarget);
+            player.ResetTurnsMoving();
+            player.ResetTurnsSinceAction();
             return timeAdvances;
         }
 
@@ -2436,9 +2644,7 @@ namespace RogueBasin
         {
             targetting.TargetExamine();
             return false;
-        }
-
-        
+        }        
 
         private bool ThrowTargettedUtility(Point target)
         {
@@ -2449,6 +2655,14 @@ namespace RogueBasin
             Item toThrowItem = player.GetEquippedUtilityAsItem();
 
             CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+            if (toThrow == null)
+            {
+                Game.MessageQueue.AddMessage("No throwable weapon!");
+                LogFile.Log.LogEntryDebug("No throwable weapon", LogDebugLevel.Medium);
+                return false;
+            }
+
             int range = toThrow.RangeThrow();
 
             //Check we are in range of target (not done above)
@@ -2516,6 +2730,12 @@ namespace RogueBasin
 
             IEquippableItem weapon = player.GetEquippedRangedWeapon();
             Item weaponI = player.GetEquippedRangedWeaponAsItem();
+
+            if (weapon == null)
+            {
+                Game.MessageQueue.AddMessage("No weapon to fire");
+                LogFile.Log.LogEntryDebug("No weapon to fire", LogDebugLevel.Medium);
+            }
 
             if (target.x == player.LocationMap.x && target.y == player.LocationMap.y)
             {

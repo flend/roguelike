@@ -10,7 +10,8 @@ namespace RogueBasin
     {
         private readonly RogueBase rogueBase;
 
-        public string TargettingConfirmChar { get; set; }
+        private string TargettingConfirmChar { get; set; }
+        private string TargettingMessage { get; set; }
 
         TargettingAction currentTargettingAction = TargettingAction.Weapon;
 
@@ -20,7 +21,6 @@ namespace RogueBasin
         int currentTargetRange = 0;
         double currentSpreadAngle;
         TargettingType currentType;
-
 
         public TargettingReticle(RogueBase rogueBase) {
             this.rogueBase = rogueBase;
@@ -37,8 +37,8 @@ namespace RogueBasin
             SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(newSquare);
 
             //Update screen
-            SetTargettingMessage(TargettingConfirmChar);
-            SetTargettingState(currentTargetLevel, currentTarget, currentType, currentTargettingAction, currentTargetRange, currentSpreadAngle, TargettingConfirmChar);
+            SetTargettingMessage(TargettingMessage, TargettingConfirmChar);
+            SetTargettingState(currentTargetLevel, currentTarget, currentType, currentTargettingAction, currentTargetRange, currentSpreadAngle, TargettingConfirmChar, TargettingMessage);
         }
 
         /// <summary>
@@ -46,7 +46,12 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        public void GetTargetFromPlayer(int level, Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, string confirmKey, CreatureFOV currentFOV)
+        public void GetTargetFromPlayer(int level, Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, string confirmKey, string message, CreatureFOV currentFOV)
+        {
+            SetupTargetting(level, start, type, targetAction, range, spreadAngle, confirmKey, message, currentFOV);
+        }
+
+        private void SetupTargetting(int level, Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, string confirmKey, string message, CreatureFOV currentFOV)
         {
             SetScreenTargettingMode(start, type, targetAction, range, spreadAngle);
 
@@ -54,32 +59,20 @@ namespace RogueBasin
 
             SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(start);
 
-            SetTargettingMessage(confirmKey);
+            SetTargettingMessage(message, confirmKey);
 
-            SetTargettingState(level, start, type, targetAction, range, spreadAngle, confirmKey);
+            SetTargettingState(level, start, type, targetAction, range, spreadAngle, confirmKey, message);
         }
 
-        public void GetTargetFromPlayerNoRange(int level, Point start, TargettingType type, TargettingAction targetAction, string confirmKey)
+        
+        private void SetTargettingMessage(string message, string confirmKey)
         {
-            SetScreenTargettingMode(start, type, targetAction, 0, 0);
-
-            Screen.Instance.SetTargetInRange = true;
-
-            SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(start);
-
-            SetTargettingMessage(confirmKey);
-
-            SetTargettingState(level, start, type, targetAction, -1, 0.0, confirmKey);
-        }
-
-        private void SetTargettingMessage(string confirmKey)
-        {
-            Game.MessageQueue.AddMessage("Find a target. " + confirmKey + " to confirm. ESC to exit.");
+            Game.MessageQueue.AddMessage(message + " find a target. " + confirmKey + " to confirm. ESC to exit.");
         }
 
         private void CheckTargetInRange(Point start, TargettingAction targetAction, int range, CreatureFOV currentFOV)
         {
-            if (targetAction == TargettingAction.Utility || targetAction == TargettingAction.Weapon || targetAction == TargettingAction.Examine)
+            if (targetAction == TargettingAction.Utility || targetAction == TargettingAction.Weapon || targetAction == TargettingAction.Examine || targetAction == TargettingAction.MoveOrWeapon || targetAction == TargettingAction.MoveOrThrow)
             {
                 if ((range == -1 && currentFOV.CheckTileFOV(start.x, start.y))
                     || Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, start, range, currentFOV))
@@ -107,10 +100,8 @@ namespace RogueBasin
             Screen.Instance.TargetPermissiveAngle = spreadAngle;
         }
 
-        private void SetTargettingState(int level, Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, string confirmKey)
+        private void SetTargettingState(int level, Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, string confirmKey, string message)
         {
-            rogueBase.SetInputState(RogueBase.InputState.Targetting);
-
             currentTargettingAction = targetAction;
             TargettingConfirmChar = confirmKey;
             currentTarget = start;
@@ -118,6 +109,7 @@ namespace RogueBasin
             currentTargetRange = range;
             currentSpreadAngle = spreadAngle;
             currentType = type;
+            TargettingMessage = message;
         }
 
         public TargettingAction TargettingAction { get { return currentTargettingAction; } }
@@ -125,5 +117,10 @@ namespace RogueBasin
         public Point CurrentTarget { get { return currentTarget; } }
 
         public int CurrentTargetLevel { get { return currentTargetLevel; } }
+
+        public void DisableScreenTargettingMode()
+        {
+            Screen.Instance.TargettingModeOff();
+        }
     }
 }

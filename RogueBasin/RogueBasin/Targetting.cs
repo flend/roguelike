@@ -79,10 +79,15 @@ namespace RogueBasin
 
             SetupExamineTarget(defaultTarget);
         }
-
-        public void TargetExamine(Point target)
+        
+        public void TargetMoveOrFireInstant(Point target)
         {
-            SetupExamineTarget(target);
+            SetupMoveOrFireTargetInstant(target);
+        }
+
+        public void TargetMoveOrThrowInstant(Point target)
+        {
+            SetupMoveOrThrowTargetInstant(target);
         }
 
         public void TargetMove(Point target)
@@ -92,17 +97,29 @@ namespace RogueBasin
 
         private void SetupWeaponTarget(Point target)
         {
+            SetupWeaponTypeTarget(target, TargettingAction.Weapon, "f", "Fire Weapon");
+            rogueBase.SetInputState(RogueBase.InputState.Targetting);
+        }
+
+        private void SetupWeaponTypeTarget(Point target, TargettingAction action, string confirmKey, string message)
+        {
             IEquippableItem weapon = player.GetEquippedRangedWeapon();
 
-            //Find weapon range
-            int range = weapon.RangeFire();
-            TargettingType targetType = weapon.TargetTypeFire();
-            double spreadAngle = weapon.ShotgunSpreadAngle();
+            int range = 0;
+            TargettingType targetType = TargettingType.Line;
+            double spreadAngle = 0.0;
+
+            if (weapon != null)
+            {
+                range = weapon.RangeFire();
+                targetType = weapon.TargetTypeFire();
+                spreadAngle = weapon.ShotgunSpreadAngle();
+            }
 
             //Calculate FOV
             CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
 
-            TargetAction(target, range, targetType, TargettingAction.Weapon, spreadAngle, "f", currentFOV);
+            TargetAction(target, range, targetType, action, spreadAngle, confirmKey, message, currentFOV);
         }
 
         private void SetupMoveTarget(Point target)
@@ -110,21 +127,33 @@ namespace RogueBasin
             //Calculate FOV
             CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
 
-            TargetAction(target, 0, TargettingType.Line, TargettingAction.Move, 0.0, "ENTER", currentFOV);
+            TargetAction(target, 0, TargettingType.Line, TargettingAction.Move, 0.0, "ENTER", "Move", currentFOV);
+            rogueBase.SetInputState(RogueBase.InputState.Targetting);
         }
 
         private void SetupThrowTarget(Point target)
         {
+            SetupThrowTypeTarget(target, RogueBasin.TargettingAction.Utility, "t", "Throw Item");
+            rogueBase.SetInputState(RogueBase.InputState.Targetting);
+        }
+
+        private void SetupThrowTypeTarget(Point target, TargettingAction action, string confirmKey, string message)
+        {
             IEquippableItem utility = player.GetEquippedUtility();
 
-            //Find weapon range
-            int range = utility.RangeThrow();
-            TargettingType targetType = utility.TargetTypeThrow();
+            int range = 0;
+            TargettingType targetType = TargettingType.Line;
+
+            if (utility != null)
+            {
+                range = utility.RangeThrow();
+                targetType = utility.TargetTypeThrow();
+            }
 
             //Calculate FOV
             CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
 
-            TargetAction(target, range, targetType, TargettingAction.Utility, 0.0, "t", currentFOV);
+            TargetAction(target, range, targetType, action, 0.0, confirmKey, message, currentFOV);
         }
 
         private void SetupExamineTarget(Point target)
@@ -132,7 +161,26 @@ namespace RogueBasin
             //Calculate FOV
             CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
 
-            TargetAction(target, -1, TargettingType.Line, TargettingAction.Examine, 0.0, "x", currentFOV);
+            TargetAction(target, -1, TargettingType.Line, TargettingAction.Examine, 0.0, "x", "Examine", currentFOV);
+            rogueBase.SetInputState(RogueBase.InputState.Targetting);
+        }
+
+        private void SetupExamineTargetInstant(Point target)
+        {
+            //Calculate FOV
+            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
+
+            TargetAction(target, -1, TargettingType.Line, TargettingAction.Examine, 0.0, "x", "Examine", currentFOV);
+        }
+
+        private void SetupMoveOrFireTargetInstant(Point target)
+        {
+            SetupWeaponTypeTarget(target, TargettingAction.MoveOrWeapon, "f", "Move or Fire");
+        }
+
+        private void SetupMoveOrThrowTargetInstant(Point target)
+        {
+            SetupThrowTypeTarget(target, RogueBasin.TargettingAction.MoveOrThrow, "t", "Move or throw");
         }
 
         private bool CheckFireableWeapon()
@@ -157,14 +205,9 @@ namespace RogueBasin
             return true;
         }
 
-        /// <summary>
-        /// Let the user target something
-        /// </summary>
-        /// <returns></returns>
-        private void TargetAction(Point target, int range, TargettingType targetType, TargettingAction targetAction, double spreadAngle, string confirmChar, CreatureFOV currentFOV)
+        private void TargetAction(Point target, int range, TargettingType targetType, TargettingAction targetAction, double spreadAngle, string confirmChar, string message, CreatureFOV currentFOV)
         {
-            //Get the desired target from the player
-            targetReticle.GetTargetFromPlayer(player.LocationLevel, target, targetType, targetAction, range, spreadAngle, confirmChar, currentFOV);
+            targetReticle.GetTargetFromPlayer(player.LocationLevel, target, targetType, targetAction, range, spreadAngle, confirmChar, message, currentFOV);
         }
 
         private Point GetDefaultTarget(int range)
@@ -206,5 +249,11 @@ namespace RogueBasin
         public TargettingAction TargettingAction { get { return targetReticle.TargettingAction; } }
 
         public Point CurrentTarget { get { return targetReticle.CurrentTarget; } }
+
+        public void DisableTargettingMode()
+        {
+            rogueBase.SetInputState(RogueBasin.RogueBase.InputState.MapMovement);
+            targetReticle.DisableScreenTargettingMode();
+        }
     }
 }
