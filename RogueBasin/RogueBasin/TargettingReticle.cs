@@ -72,16 +72,16 @@ namespace RogueBasin
             {
                 if (targetInfo.IsInRange(player, dungeon, new Location(player.LocationLevel, start)))
                 {
-                    Screen.Instance.SetTargetInRange = true;
+                    Screen.Instance.TargetInRange = true;
                 }
                 else
                 {
-                    Screen.Instance.SetTargetInRange = false;
+                    Screen.Instance.TargetInRange = false;
                 }
             }
             else
             {
-                Screen.Instance.SetTargetInRange = true;
+                Screen.Instance.TargetInRange = true;
             }
         }
 

@@ -6,16 +6,12 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class ExamineTargettingInfo : TargettingInfo
+    class ExamineTargettingInfo : BasicLineTargettingInfo
     {
         public override bool IsInRange(Player player, Dungeon dungeon, Location targetPoint)
         {
-            return true;
-        }
-
-        public override IEnumerable<Point> TargetPoints(Player player, Dungeon dungeon, Location targetPoint)
-        {
-            return new List<Point>() { targetPoint.MapCoord };
+            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
+            return currentFOV.CheckTileFOV(targetPoint.MapCoord.x, targetPoint.MapCoord.y);
         }
     }
 }

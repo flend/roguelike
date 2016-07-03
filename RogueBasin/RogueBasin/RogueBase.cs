@@ -539,31 +539,36 @@ namespace RogueBasin
                 if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
                 {
                     mouseDefaultTargettingAction = TargettingAction.MoveOrThrow;
+                    MouseFocusOnMap(clickLocation);
                 }
                 else
                 {
                     mouseDefaultTargettingAction = TargettingAction.MoveOrWeapon;
+                    MouseFocusOnMap(clickLocation);
                 }
 
                 return false;
             }
         }
 
-        private void TargetWeaponOrUtility(Point clickLocation, MouseButton mouseButtons)
+        public void UpdateMapTargetting()
         {
-            if (mouseButtons == MouseButton.PrimaryButton)
-            {
-                targetting.TargetWeapon(clickLocation);
-            }
-            else
-            {
-                targetting.TargetThrowUtility(clickLocation);
-            }
+            var mousePosition = SdlDotNet.Input.Mouse.MousePosition;
+            var mouseLocation = Screen.Instance.PixelToCoord(mousePosition);
+
+            MouseFocusOnMap(mouseLocation);
+
+            LogFile.Log.LogEntryDebug("mouse pos: " + new Point(mousePosition), LogDebugLevel.High);
         }
 
-        private void HandleMapMovementMouseMotion(Point clickLocation, MouseMotionEventArgs mouseArgs)
+        public void MouseFocusOnMap(Point mousePosition)
         {
             bool shifted = false;
+
+            if (targetting == null)
+            {
+                return;
+            }
 
             var keyboardState = new KeyboardState();
             if (keyboardState.IsKeyPressed(Key.LeftShift) || keyboardState.IsKeyPressed(Key.RightShift))
@@ -573,12 +578,17 @@ namespace RogueBasin
 
             if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
             {
-                targetting.TargetMoveOrFireInstant(clickLocation, shifted);
+                targetting.TargetMoveOrFireInstant(mousePosition, shifted);
             }
             else
             {
-                targetting.TargetMoveOrThrowInstant(clickLocation, shifted);
+                targetting.TargetMoveOrThrowInstant(mousePosition, shifted);
             }
+        }
+        
+        private void HandleMapMovementMouseMotion(Point moveLocation, MouseMotionEventArgs mouseArgs)
+        {
+            MouseFocusOnMap(moveLocation);
         }
         
         bool PlayerPrepareForNextTurn()

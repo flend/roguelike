@@ -17,5 +17,10 @@ namespace RogueBasin
         {
             return new List<Point>() { targetPoint.MapCoord };
         }
+
+        public override IEnumerable<Point> ToPoints(Player player, Dungeon dungeon, Location targetPoint)
+        {
+            return Enumerable.Empty<Point>();
+        }
     }
 }

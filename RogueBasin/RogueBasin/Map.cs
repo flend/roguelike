@@ -46,6 +46,12 @@ namespace RogueBasin
             this.y = oldP.y;
         }
 
+        public Point(System.Drawing.Point dp)
+        {
+            this.x = dp.X;
+            this.y = dp.Y;
+        }
+
         public static bool operator ==(Point i, Point j)
         {
             // If both are null, or both are same instance, return true.

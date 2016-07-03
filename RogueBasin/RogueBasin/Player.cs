@@ -1898,6 +1898,8 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
             Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped.");
 
+            Game.Base.UpdateMapTargetting();
+
             return true;
         }
 
@@ -2263,84 +2265,6 @@ namespace RogueBasin
             return usedSuccessfully;
         }
 
-
-
-        /// <summary>
-        /// Simpler version of equip item, doesn't care about slots
-        /// </summary>
-        /// <param name="equipItem"></param>
-        internal bool EquipItemNoSlots(IEquippableItem equipItem)
-        {
-            Item item = equipItem as Item;
-
-            if (item == null)
-            {
-                //Should never happen
-                LogFile.Log.LogEntry("Problem with item equip");
-                Game.MessageQueue.AddMessage("You can't equip this item (bug)");
-                return false;
-            }
-
-            //Play help movie
-            if (Game.Dungeon.Player.PlayItemMovies && ItemHelpMovieSeen == false)
-            {
-                //Game.Base.PlayMovie("helpitems", true);
-                ItemHelpMovieSeen = true;
-            }
-
-            //Set the item as found
-            item.IsFound = true;
-
-            //If we have room in our equipped slots, equip and add the item to the inventory
-            if (CurrentEquippedItems < MaximumEquippedItems)
-            {
-                //Add the item to our inventory
-                item.IsEquipped = true;
-                Inventory.AddItem(item);
-
-                CurrentEquippedItems++;
-
-                //Let the item do its equip action
-                //This can happen multiple times in PrincessRL since items can be dropped
-                //Probably just play a video
-                equipItem.Equip(this);
-
-                //Update the player's combat stats which may have been affected
-
-                CalculateCombatStats();
-
-                //Update the inventory listing since equipping an item changes its stackability
-                //No longer necessary since no equippable items get displayed in inventory
-                //Inventory.RefreshInventoryListing();
-
-                //Message the user
-                LogFile.Log.LogEntryDebug("Item equipped: " + item.SingleItemDescription, LogDebugLevel.Medium);
-                //Game.MessageQueue.AddMessage(item.SingleItemDescription + " found.");
-
-                return true;
-            }
-            else if (LocationLevel == 0)
-            {
-                //If not, and we're in town, don't pick it up
-                Game.MessageQueue.AddMessage("You can't carry any more items. Press 'd' to drop your current items.");
-                LogFile.Log.LogEntryDebug("Max number of items reached", LogDebugLevel.Medium);
-
-                return false;
-            }
-            else
-            {
-                //If not, and we're not in town, set it as inInventory so it won't be drawn. It'll get returned to town on when go back
-                item.InInventory = true;
-
-                //Play the video
-                equipItem.Equip(this);
-
-                Game.MessageQueue.AddMessage("You place the " + item.SingleItemDescription + " in your backpack.");
-                LogFile.Log.LogEntryDebug("Max number of items reached. Item returns to town.", LogDebugLevel.Medium);
-
-                return true;
-            }          
-        }
 
         /// <summary>
         /// Level up the player!

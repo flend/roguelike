@@ -55,6 +55,7 @@
     <Compile Include="Algorithms\IFieldOfView.cs" />
     <Compile Include="Algorithms\IPathFinder.cs" />
     <Compile Include="ArrayCache.cs" />
+    <Compile Include="BasicLineTargetInfo.cs" />
     <Compile Include="ExamineTargettingInfo.cs" />
     <Compile Include="GrenadeTargettingInfo.cs" />
     <Compile Include="LineTargettingInfo.cs" />

@@ -64,7 +64,7 @@ namespace RogueBasin {
         /// </summary>
         int MaxShowRoomNumbering = 2;
 
-        public bool SetTargetInRange = false;
+        public bool TargetInRange { get; set; }
 
         //Viewport in tile coordinates
         Point mapTopLeftBase;
@@ -1390,26 +1390,36 @@ namespace RogueBasin {
         {
             Player player = Game.Dungeon.Player;
 
-            //Draw the area of effect
-            var pathToTarget = Utility.GetPointsOnLine(Game.Dungeon.Player.LocationMap, Target).Skip(1);
-            var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
+            if (Target == null) {
+                return;
+            }
 
-            DrawTargettingOverSquaresAndCreatures(pathToTarget, "orangetarget");
-            DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, "redtarget");
-
-            //Highlight target if in range
             if (!isViewVisible(Target))
                 return;
 
-            //Draw actual target point
-            if (SetTargetInRange)
+            //Draw the area of effect
+            if (Game.Dungeon.IsSquareSeenByPlayer(Target) || SeeAllMap)
             {
-                var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
+                var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
+
+                DrawTargettingOverSquaresAndCreatures(pathToTarget, "orangetarget");
+                DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, "redtarget");
+
+                if (TargetInRange)
+                {
+                    var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
+                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                }
+                else
+                {
+                    var targetSprite = blackTargetTile;
+                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                }
             }
             else
             {
-                var targetSprite = blackTargetTile;
+                var targetSprite = redTargetTile;
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
             }
         }

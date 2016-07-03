@@ -153,9 +153,9 @@ namespace RogueBasin
 
         private void SetupMoveOrFireTargetInstant(Point target, bool showFireTarget)
         {
-            SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
+            SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
 
-            if (squareContents.monster != null || showFireTarget)
+            if (dungeon.IsSquareInPlayerFOV(target) && (squareContents.monster != null || showFireTarget))
             {
                 IEquippableItem weapon = player.GetEquippedRangedWeapon();
 
@@ -178,7 +178,7 @@ namespace RogueBasin
         {
             SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
 
-            if (squareContents.monster != null || showThrowTarget)
+            if (dungeon.IsSquareInPlayerFOV(target) && squareContents.monster != null || showThrowTarget)
             {
                 IEquippableItem utility = player.GetEquippedUtility();
 

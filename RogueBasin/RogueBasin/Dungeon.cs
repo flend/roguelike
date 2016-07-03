@@ -3441,6 +3441,33 @@ namespace RogueBasin
             }
         }
 
+        public bool IsSquareInPlayerFOV(Point target)
+        {
+            if (target.x > 0 && target.y >= 0 && target.x < Levels[player.LocationLevel].width && target.y < Levels[player.LocationLevel].height)
+            {
+                MapSquare targetSquare = Levels[player.LocationLevel].mapSquares[target.x, target.y];
+                if (targetSquare.InPlayerFOV)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool IsSquareSeenByPlayer(Point target)
+        {
+            if (target.x > 0 && target.y >= 0 && target.x < Levels[player.LocationLevel].width && target.y < Levels[player.LocationLevel].height)
+            {
+                MapSquare targetSquare = Levels[player.LocationLevel].mapSquares[target.x, target.y];
+                if (targetSquare.SeenByPlayer)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
         /// <summary>
         /// Recalculate the players FOV. Subsequent accesses to the TCODMap of the player's level will have his FOV
         /// Note that the maps may get hijacked by other creatures
