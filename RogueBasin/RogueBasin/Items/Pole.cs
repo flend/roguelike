@@ -310,5 +310,10 @@ namespace RogueBasin.Items
         {
             return "ui-pole";
         }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new MeleeTargettingInfo();
+        }
     }
 }

@@ -65,10 +65,15 @@ namespace RogueBasin.Items
             Point dest = Game.Dungeon.Player.ThrowItemGeneric(this, target, 0, true);
 
             //Draw attack
-            List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(target, Game.Dungeon.Player.LocationLevel, 4);
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Bullet);
+            var targettingInfo = TargettingInfo();
+            Screen.Instance.DrawAreaAttackAnimation(targettingInfo.TargetPoints(Game.Dungeon.Player, Game.Dungeon, new Location(Game.Dungeon.Player.LocationLevel, target)), Screen.AttackType.Bullet);
 
             return dest;
+        }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new GrenadeTargettingInfo(RangeThrow(), 4);
         }
 
         public void FireAudio()

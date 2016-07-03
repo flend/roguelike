@@ -47,6 +47,11 @@ namespace RogueBasin.Items
             SoundPlayer.Instance().EnqueueSound("gunshot");
         }
 
+        public TargettingInfo TargettingInfo()
+        {
+            return new LineTargettingInfo(RangeFire());
+        }
+
         public void ThrowAudio()
         {
             return;

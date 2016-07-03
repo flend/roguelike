@@ -310,5 +310,10 @@ namespace RogueBasin.Items
         {
             return "ui-axe";
         }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new MeleeTargettingInfo();
+        }
     }
 }

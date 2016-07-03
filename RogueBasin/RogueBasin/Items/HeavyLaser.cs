@@ -31,6 +31,11 @@ namespace RogueBasin.Items
             return Game.Dungeon.FireLaserLineWeapon(target, this, 150);
         }
 
+        public TargettingInfo TargettingInfo()
+        {
+            return new LineThroughTargettingInfo(RangeFire());
+        }
+
         public List<EquipmentSlot> EquipmentSlots
         {
             get

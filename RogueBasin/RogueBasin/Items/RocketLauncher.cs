@@ -26,7 +26,7 @@ namespace RogueBasin.Items
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, target);
 
-            Game.Dungeon.DoGrenadeExplosion(Game.Dungeon.Player.LocationLevel, target, 4.0, scaledDamage, Game.Dungeon.Player, Screen.combationAnimationFrameDuration);
+            Game.Dungeon.DoGrenadeExplosion(this, Game.Dungeon.Player.LocationLevel, target, scaledDamage, Game.Dungeon.Player, Screen.combationAnimationFrameDuration);
 
             var targetSquares = Game.Dungeon.CalculateTrajectory(Game.Dungeon.Player, target);
             Screen.Instance.DrawAreaAttackAnimationProgressive(targetSquares, "rocket");
@@ -35,6 +35,11 @@ namespace RogueBasin.Items
             Ammo--;
 
             return true;
+        }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new GrenadeTargettingInfo(RangeFire(), 4);
         }
 
         public List<EquipmentSlot> EquipmentSlots

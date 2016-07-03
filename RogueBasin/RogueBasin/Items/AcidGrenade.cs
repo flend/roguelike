@@ -107,13 +107,7 @@ namespace RogueBasin.Items
 
             //Work out grenade splash and damage
 
-              //Work out grenade splash and damage
-            List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, 3.0);
-
-            //Use FOV from point of explosion (this means grenades don't go round corners or through walls)
-            WrappedFOV grenadeFOV = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, destination, 0);
-
-            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(Game.Dungeon.Player.LocationLevel, sq));
+            var grenadeAffectsFiltered = TargettingInfo().TargetPoints(Game.Dungeon.Player, Game.Dungeon, new Location(Game.Dungeon.Player.LocationLevel, destination));
 
             //Draw attack
             Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Acid);
@@ -142,6 +136,11 @@ namespace RogueBasin.Items
 
             return destination;
 
+        }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new GrenadeTargettingInfo(RangeThrow(), 3);
         }
         
         /// <summary>

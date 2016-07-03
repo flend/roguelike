@@ -140,6 +140,8 @@ namespace RogueBasin
         /// <returns></returns>
         int RangeFire();
 
+        TargettingInfo TargettingInfo();
+
         /// <summary>
         /// Noise mag of this weapon on firing
         /// </summary>

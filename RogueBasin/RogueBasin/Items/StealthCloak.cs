@@ -301,5 +301,10 @@ namespace RogueBasin.Items
         {
             return 0;
         }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new MeleeTargettingInfo();
+        }
     }
 }

@@ -27,6 +27,11 @@ namespace RogueBasin.Items
             return true;
         }
 
+        public TargettingInfo TargettingInfo()
+        {
+            return new ShotgunTargettingInfo(RangeFire(), ShotgunSpreadAngle(), RangeFire());
+        }
+
         public List<EquipmentSlot> EquipmentSlots
         {
             get

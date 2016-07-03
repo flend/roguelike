@@ -48,11 +48,6 @@ namespace RogueBasin
         /// <returns></returns>
         public void GetTargetFromPlayer(int level, Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, string confirmKey, string message, CreatureFOV currentFOV)
         {
-            SetupTargetting(level, start, type, targetAction, range, spreadAngle, confirmKey, message, currentFOV);
-        }
-
-        private void SetupTargetting(int level, Point start, TargettingType type, TargettingAction targetAction, int range, double spreadAngle, string confirmKey, string message, CreatureFOV currentFOV)
-        {
             SetScreenTargettingMode(start, type, targetAction, range, spreadAngle);
 
             CheckTargetInRange(start, targetAction, range, currentFOV);
@@ -64,7 +59,6 @@ namespace RogueBasin
             SetTargettingState(level, start, type, targetAction, range, spreadAngle, confirmKey, message);
         }
 
-        
         private void SetTargettingMessage(string message, string confirmKey)
         {
             Game.MessageQueue.AddMessage(message + " find a target. " + confirmKey + " to confirm. ESC to exit.");

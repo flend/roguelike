@@ -76,6 +76,11 @@ namespace RogueBasin.Items
             
             return dest;
         }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new GrenadeTargettingInfo(RangeThrow(), 2);
+        }
         
         /// <summary>
         /// not used in this game

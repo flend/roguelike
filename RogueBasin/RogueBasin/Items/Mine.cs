@@ -227,6 +227,11 @@ namespace RogueBasin.Items
 
         }
 
+        public TargettingInfo TargettingInfo()
+        {
+            return new GrenadeTargettingInfo(0, 3);
+        }
+
         /// <summary>
         /// What type of targetting reticle is needed? [for throwing]
         /// </summary>

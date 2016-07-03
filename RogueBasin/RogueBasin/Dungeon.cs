@@ -2756,37 +2756,41 @@ namespace RogueBasin
             //Work out grenade splash and damage
             if (stunning)
             {
-                DoGrenadeExplosionStun(level, target, size, damage, Game.Dungeon.Player);
+                DoGrenadeExplosionStun(item, level, target, damage, Game.Dungeon.Player);
             }
             else
             {
-                DoGrenadeExplosion(level, target, size, damage, Game.Dungeon.Player);
+                DoGrenadeExplosion(item, level, target, damage, Game.Dungeon.Player);
             }
 
             return destination;
         }
 
-        /// <summary>
-        /// Do a grenade explosion. If this originated on a monster then the monster will be the origin of the attack
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="p"></param>
-        /// <param name="size"></param>
-        /// <param name="damage"></param>
-        /// <param name="originMonster"></param>
         public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Creature originMonster, int animationDelay = 0)
         {
-            //Work out grenade splash and damage
             List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
 
             //Use FOV from point of explosion (this means grenades don't go round corners or through walls)
-            WrappedFOV grenadeFOV = Game.Dungeon.CalculateAbstractFOV(level, locationMap, 0);
+            WrappedFOV grenadeFOV = CalculateAbstractFOV(player.LocationLevel, locationMap, 0);
 
-            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
+            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(player.LocationLevel, sq));
+
+            DoGrenadeExplosion(level, damage, originMonster, animationDelay, grenadeAffectsFiltered);
+        }
+
+        public void DoGrenadeExplosion(IEquippableItem item, int level, Point locationMap, int damage, Creature originMonster, int animationDelay = 0)
+        {
+            //Work out grenade splash and damage
+            var grenadeAffectsFiltered = item.TargettingInfo().TargetPoints(Player, this, new Location(level, locationMap));
+            DoGrenadeExplosion(level, damage, originMonster, animationDelay, grenadeAffectsFiltered);
+        }
+
+        private void DoGrenadeExplosion(int level, int damage, Creature originMonster, int animationDelay, IEnumerable<Point> grenadeAffectsFiltered)
+        {
 
             //Draw attack
             Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion, false, animationDelay);
-           
+
             foreach (Point sq in grenadeAffectsFiltered)
             {
                 SquareContents squareContents = Game.Dungeon.MapSquareContents(level, sq);
@@ -2815,7 +2819,7 @@ namespace RogueBasin
 
             //And the player
 
-            if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
+            if (grenadeAffectsFiltered.Where(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y).Any())
             {
                 if (originMonster != null)
                 {
@@ -2830,15 +2834,10 @@ namespace RogueBasin
             }
         }
 
-        public void DoGrenadeExplosionStun(int level, Point locationMap, double size, int stunDamage, Creature originMonster)
+        public void DoGrenadeExplosionStun(IEquippableItem item, int level, Point locationMap, int stunDamage, Creature originMonster)
         {
             //Work out grenade splash and damage
-            List<Point> grenadeAffects = GetPointsForGrenadeTemplate(locationMap, level, size);
-
-            //Use FOV from point of explosion (this means grenades don't go round corners or through walls)
-            WrappedFOV grenadeFOV = Game.Dungeon.CalculateAbstractFOV(level, locationMap, 0);
-
-            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(level, sq));
+            var grenadeAffectsFiltered = item.TargettingInfo().TargetPoints(Player, this, new Location(level, locationMap));
 
             //Draw attack
             Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Stun);
@@ -2865,7 +2864,7 @@ namespace RogueBasin
 
             //And the player
 
-            if (grenadeAffects.Find(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y) != null)
+            if (grenadeAffectsFiltered.Where(p => p.x == Game.Dungeon.Player.LocationMap.x && p.y == Game.Dungeon.Player.LocationMap.y).Any())
             {
                 if (originMonster != null)
                 {

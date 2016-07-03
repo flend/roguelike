@@ -55,6 +55,11 @@
     <Compile Include="Algorithms\IFieldOfView.cs" />
     <Compile Include="Algorithms\IPathFinder.cs" />
     <Compile Include="ArrayCache.cs" />
+    <Compile Include="GrenadeTargettingInfo.cs" />
+    <Compile Include="LineTargettingInfo.cs" />
+    <Compile Include="LineThroughTargettingInfo.cs" />
+    <Compile Include="MeleeTargettingInfo.cs" />
+    <Compile Include="ShotgunTargettingInfo.cs" />
     <Compile Include="TargettingAction.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Creatures\AlertBot.cs" />
@@ -342,6 +347,7 @@
     <Compile Include="ShuffleExtension.cs" />
     <Compile Include="SoundPlayer.cs" />
     <Compile Include="Targetting.cs" />
+    <Compile Include="TargettingInfo.cs" />
     <Compile Include="TargettingReticle.cs" />
     <Compile Include="TerrainSets\CrossPiece.cs" />
     <Compile Include="TerrainSets\Pond.cs" />

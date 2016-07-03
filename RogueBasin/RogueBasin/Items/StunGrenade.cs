@@ -389,5 +389,10 @@ namespace RogueBasin.Items
         {
             SoundPlayer.Instance().EnqueueSound("explosion");
         }
+
+        public TargettingInfo TargettingInfo()
+        {
+            return new MeleeTargettingInfo();
+        }
     }
 }

@@ -311,5 +311,10 @@ namespace RogueBasin.Items
             return "ui-knife";
         }
 
+        public TargettingInfo TargettingInfo()
+        {
+            return new MeleeTargettingInfo();
+        }
+
     }
 }

@@ -283,5 +283,9 @@ namespace RogueBasin.Items
         {
             return;
         }
+
+        public TargettingInfo TargettingInfo() {
+            return new MeleeTargettingInfo();
+        }
     }
 }

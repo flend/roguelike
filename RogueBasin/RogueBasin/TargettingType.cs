@@ -5,7 +5,7 @@ using System.Text;
 namespace RogueBasin
 {
     /// <summary>
-    /// Shape of targetting to use for weapons [implemented on old spell interface]
+    /// Shape of targetting to use for weapons
     /// </summary>
     public enum TargettingType
     {
