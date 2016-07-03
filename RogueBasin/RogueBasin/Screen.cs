@@ -183,11 +183,8 @@ namespace RogueBasin {
         /// </summary>
         public Point Target { get; set; }
 
-        public TargettingType TargetType { get; set; }
+        public TargettingInfo TargetInfo { get; set; }
         public TargettingAction TargetAction { get; set; }
-
-        public int TargetRange { get; set; }
-        public double TargetPermissiveAngle { get; set; }
 
         public System.Drawing.Color PCColor { get; set;}
 
@@ -1394,51 +1391,11 @@ namespace RogueBasin {
             Player player = Game.Dungeon.Player;
 
             //Draw the area of effect
+            var pathToTarget = Utility.GetPointsOnLine(Game.Dungeon.Player.LocationMap, Target).Skip(1);
+            var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
 
-            switch (TargetType)
-            {
-                case TargettingType.Line:
-
-                    //Draw a line up to the target
-                    DrawPathLine(TileLevel.TargettingUI, player.LocationMap, Target, targetForeground, targetBackground);
-                    //Should improve the getlinesquare function to give nicer output so we could use it here too
-
-                    List<Point> thisLineSquares = Game.Dungeon.GetPathLinePoints(Game.Dungeon.Player.LocationMap, Target);
-                    DrawTargettingOverSquaresAndCreatures(thisLineSquares);    
-                    break;
-
-                case TargettingType.LineThrough:
-
-                    //Cast a line which terminates on the edge of the map
-                    Point projectedLine = Game.Dungeon.GetEndOfLine(player.LocationMap, Target, player.LocationLevel);
-
-                    //Get the in-FOV points up to that end point
-                    WrappedFOV currentFOV2 = Game.Dungeon.CalculateAbstractFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, 80);
-                    List<Point> lineSquares = Game.Dungeon.GetPathLinePointsInFOV(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, projectedLine, currentFOV2);
-
-                    DrawTargettingOverSquaresAndCreatures(lineSquares);      
-
-                    break;
-                    
-                case TargettingType.Rocket:
-                    {
-                        //Todo
-
-                    }
-                    break;
-
-                case TargettingType.Shotgun:
-                    {
-                        int size = TargetRange;
-                        double spreadAngle = TargetPermissiveAngle;
-
-                        CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-                        List<Point> splashSquares = currentFOV.GetPointsForTriangularTargetInFOV(player.LocationMap, Target, Game.Dungeon.Levels[player.LocationLevel], size, spreadAngle);
-
-                        DrawTargettingOverSquaresAndCreatures(splashSquares);
-                    }
-                    break;
-            }
+            DrawTargettingOverSquaresAndCreatures(pathToTarget, "orangetarget");
+            DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, "redtarget");
 
             //Highlight target if in range
             if (!isViewVisible(Target))
@@ -1455,42 +1412,9 @@ namespace RogueBasin {
                 var targetSprite = blackTargetTile;
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
             }
-                       
-
-            /*
-            System.Drawing.Color backgroundColor = targetBackground;
-            System.Drawing.Color foregroundColor = targetForeground;
-
-            if (SetTargetInRange)
-            {
-                backgroundColor = System.Drawing.Color.Red;
-            }
-
-            char toDraw = '.';
-            int monsterIdInSquare = tileMapLayer(TileLevel.Creatures)[ViewRelative(Target)].TileID;
-            var monsterColorInSquare = tileMapLayer(TileLevel.Creatures)[ViewRelative(Target)].TileFlag as LibtcodColorFlags;
-            if (monsterIdInSquare == -1)
-            {
-                monsterIdInSquare = tileMapLayer(TileLevel.Features)[ViewRelative(Target)].TileID;
-                monsterColorInSquare = tileMapLayer(TileLevel.Terrain)[ViewRelative(Target)].TileFlag as LibtcodColorFlags;
-            }
-            if (monsterIdInSquare == -1)
-            {
-                monsterIdInSquare = tileMapLayer(TileLevel.Terrain)[ViewRelative(Target)].TileID;
-                monsterColorInSquare = tileMapLayer(TileLevel.Terrain)[ViewRelative(Target)].TileFlag as LibtcodColorFlags;
-            }
-            
-            if (monsterIdInSquare != -1)
-                toDraw = (char)monsterIdInSquare;
-
-            tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(toDraw);
-            if(monsterColorInSquare != null)
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)].TileFlag = new LibtcodColorFlags(foregroundColor, backgroundColor);
-             */
-            
         }
-        /*
-        private void DrawExplosionOverSquaresAndCreatures(List<Point> splashSquares)
+
+        private void DrawTargettingOverSquaresAndCreatures(IEnumerable<Point> splashSquares, string targetSprite)
         {
             //Draw each point as targetted
             foreach (Point p in splashSquares)
@@ -1498,31 +1422,7 @@ namespace RogueBasin {
                 if (!isViewVisible(p))
                     continue;
 
-                //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
-                char toDraw = explosionIcon;
-                int monsterIdInSquare = tileMapLayer(TileLevel.Creatures)[ViewRelative(p)].TileID;
-
-                if (monsterIdInSquare != -1)
-                    toDraw = (char)monsterIdInSquare;
-
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(toDraw);
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
-            }
-        }*/
-
-        private void DrawTargettingOverSquaresAndCreatures(List<Point> splashSquares)
-        {
-            //Draw each point as targetted
-            foreach (Point p in splashSquares)
-            {
-                if (!isViewVisible(p))
-                    continue;
-
-                //If there's a monster in the square, draw it in red in the animation layer. Otherwise, draw an explosion
-
-                var targetSprite = "orangetarget";
                 tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)] = new TileEngine.TileCell(targetSprite);
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(p)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
             }
         }
 
@@ -3043,7 +2943,7 @@ namespace RogueBasin {
             //Draw animation to animation layer
 
             //Calculate and draw the line overlay
-            List<Point> thisLineSquares = Game.Dungeon.GetPathLinePoints(originCreature.LocationMap, target.LocationMap);
+            IEnumerable<Point> thisLineSquares = Utility.GetPointsOnLine(originCreature.LocationMap, target.LocationMap);
             DrawAreaAttackAnimation(thisLineSquares, AttackType.Bullet, true);    
             //DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, System.Drawing.Color.Black);
 

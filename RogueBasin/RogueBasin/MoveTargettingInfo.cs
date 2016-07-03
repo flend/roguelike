@@ -6,16 +6,20 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class MeleeTargettingInfo : TargettingInfo
+    class MoveTargettingInfo : TargettingInfo
     {
-        public override bool IsInRange(Player player, Dungeon dungeon, Location targetPoint)
+        public MoveTargettingInfo()
         {
+        }
+
+        public override bool IsInRange(Player player, Dungeon dungeon, Location targetPoint) {
+
             return true;
         }
 
         public override IEnumerable<Point> TargetPoints(Player player, Dungeon dungeon, Location targetPoint)
         {
-            return new List<Point>() { targetPoint.MapCoord };
+            return player.GetPlayerRunningPath(targetPoint.MapCoord);
         }
     }
 }

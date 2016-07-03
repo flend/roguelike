@@ -8,7 +8,7 @@ namespace RogueBasin
 {
     public abstract class TargettingInfo
     {
-        public abstract bool IsInRange(Player player, CreatureFOV fov, Location targetPoint);
+        public abstract bool IsInRange(Player player, Dungeon dungeon, Location targetPoint);
         public abstract IEnumerable<Point> TargetPoints(Player player, Dungeon dungeon, Location targetPoint);
     }
 }

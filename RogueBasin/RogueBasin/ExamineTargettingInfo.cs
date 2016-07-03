@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class MeleeTargettingInfo : TargettingInfo
+    class ExamineTargettingInfo : TargettingInfo
     {
         public override bool IsInRange(Player player, Dungeon dungeon, Location targetPoint)
         {

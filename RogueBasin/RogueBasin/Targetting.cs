@@ -16,7 +16,7 @@ namespace RogueBasin
 
         public Targetting(RogueBase rogueBase) {
 
-            targetReticle = new TargettingReticle(rogueBase);
+            targetReticle = new TargettingReticle(rogueBase, Game.Dungeon, Game.Dungeon.Player);
 
             this.rogueBase = rogueBase;
             dungeon = Game.Dungeon;
@@ -105,29 +105,19 @@ namespace RogueBasin
         {
             IEquippableItem weapon = player.GetEquippedRangedWeapon();
 
-            int range = 0;
-            TargettingType targetType = TargettingType.Line;
-            double spreadAngle = 0.0;
+            TargettingInfo targetInfo = new NullTargettingInfo();
 
             if (weapon != null)
             {
-                range = weapon.RangeFire();
-                targetType = weapon.TargetTypeFire();
-                spreadAngle = weapon.ShotgunSpreadAngle();
+                targetInfo = weapon.TargettingInfo();
             }
 
-            //Calculate FOV
-            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
-
-            TargetAction(target, range, targetType, action, spreadAngle, confirmKey, message, currentFOV);
+            TargetAction(target, targetInfo, action, confirmKey, message);
         }
 
         private void SetupMoveTarget(Point target)
         {
-            //Calculate FOV
-            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
-
-            TargetAction(target, 0, TargettingType.Line, TargettingAction.Move, 0.0, "ENTER", "Move", currentFOV);
+            TargetAction(target, new MoveTargettingInfo(), TargettingAction.Move, "ENTER", "Move");
             rogueBase.SetInputState(RogueBase.InputState.Targetting);
         }
 
@@ -142,35 +132,24 @@ namespace RogueBasin
             IEquippableItem utility = player.GetEquippedUtility();
 
             int range = 0;
-            TargettingType targetType = TargettingType.Line;
+            TargettingInfo targetType = new NullTargettingInfo();
 
             if (utility != null)
             {
-                range = utility.RangeThrow();
-                targetType = utility.TargetTypeThrow();
+                targetType = utility.TargettingInfo();
             }
 
-            //Calculate FOV
-            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
-
-            TargetAction(target, range, targetType, action, 0.0, confirmKey, message, currentFOV);
+            TargetAction(target, targetType, action, confirmKey, message);
         }
 
         private void SetupExamineTarget(Point target)
         {
-            //Calculate FOV
-            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
-
-            TargetAction(target, -1, TargettingType.Line, TargettingAction.Examine, 0.0, "x", "Examine", currentFOV);
+            TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine");
             rogueBase.SetInputState(RogueBase.InputState.Targetting);
         }
 
-        private void SetupExamineTargetInstant(Point target)
-        {
-            //Calculate FOV
-            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
-
-            TargetAction(target, -1, TargettingType.Line, TargettingAction.Examine, 0.0, "x", "Examine", currentFOV);
+        private void SetupExamineTargetInstant(Point target) {
+            TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine");
         }
 
         private void SetupMoveOrFireTargetInstant(Point target)
@@ -205,9 +184,9 @@ namespace RogueBasin
             return true;
         }
 
-        private void TargetAction(Point target, int range, TargettingType targetType, TargettingAction targetAction, double spreadAngle, string confirmChar, string message, CreatureFOV currentFOV)
+        private void TargetAction(Point target, TargettingInfo targetInfo, TargettingAction targetAction, string confirmChar, string message)
         {
-            targetReticle.GetTargetFromPlayer(player.LocationLevel, target, targetType, targetAction, range, spreadAngle, confirmChar, message, currentFOV);
+            targetReticle.GetTargetFromPlayer(player.LocationLevel, target, targetInfo, targetAction, confirmChar, message);
         }
 
         private Point GetDefaultTarget(int range)

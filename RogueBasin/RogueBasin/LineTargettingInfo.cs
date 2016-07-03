@@ -14,7 +14,7 @@ namespace RogueBasin
             this.range = range;
         }
 
-        public override bool IsInRange(Player player, CreatureFOV fov, Location targetPoint) {
+        public override bool IsInRange(Player player, Dungeon dungeon, Location targetPoint) {
 
             if (player.LocationLevel != targetPoint.Level)
             {
@@ -22,13 +22,14 @@ namespace RogueBasin
             }
             else
             {
-                return Utility.TestRangeFOVForWeapon(player, targetPoint.MapCoord, (double)range, fov);
+                CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
+                return Utility.TestRangeFOVForWeapon(player, targetPoint.MapCoord, (double)range, currentFOV);
             }            
         }
 
         public override IEnumerable<Point> TargetPoints(Player player, Dungeon dungeon, Location targetPoint)
         {
-            var pointsFromPlayer = dungeon.GetPathLinePoints(player.LocationMap, targetPoint.MapCoord);
+            var pointsFromPlayer = Utility.GetPointsOnLine(player.LocationMap, targetPoint.MapCoord);
             return new List<Point>() { pointsFromPlayer.Last() };
         }
     }

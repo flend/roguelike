@@ -3295,20 +3295,7 @@ namespace RogueBasin
 
             return pointsToRet;
         }
-
-        public List<Point> GetPathLinePoints(Point start, Point end)
-        {
-            List<Point> pointsToRet = new List<Point>();
-
-            foreach (Point p in Utility.GetPointsOnLine(start, end))
-            {
-                    pointsToRet.Add(p);
-            }
-
-            return pointsToRet;
-        }
-
-
+        
         /// <summary>
         /// Calculates the FOV for a creature if it was in the location
         public CreatureFOV CalculateCreatureFOV(Creature creature, Point location)

@@ -2087,17 +2087,20 @@ namespace RogueBasin
 
             return timeAdvances;
         }
+        
 
         private bool RunToDestination()
         {
             var player = Game.Dungeon.Player;
 
-            IEnumerable<Point> path = Game.Dungeon.Pathing.GetPathToSquare(player.LocationLevel, player.LocationMap, targetting.CurrentTarget, Pathing.PathingPermission.IgnoreDoors, true);
-            if (path == null || !path.Skip(1).Any())
+            IEnumerable<Point> path = player.GetPlayerRunningPath(targetting.CurrentTarget);
+
+            if (!path.Any())
             {
                 return false;
             }
-            return StartRunning(path.Skip(1));
+            
+            return StartRunning(path);
         }
 
         private bool ThrowTargettedUtility()

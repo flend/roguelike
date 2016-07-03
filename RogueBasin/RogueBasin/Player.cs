@@ -2963,5 +2963,15 @@ namespace RogueBasin
             Inventory.AddItemNotFromDungeon(pistol);
             EquipAndReplaceItem(pistol);
         }
+
+        public IEnumerable<Point> GetPlayerRunningPath(Point destination)
+        {
+            IEnumerable<Point> path = Game.Dungeon.Pathing.GetPathToSquare(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap, destination, Pathing.PathingPermission.IgnoreDoors, true);
+            if (path == null || !path.Skip(1).Any())
+            {
+                return Enumerable.Empty<Point>();
+            }
+            return path.Skip(1);
+        }
     }
 }
