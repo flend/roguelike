@@ -61,21 +61,6 @@ namespace RogueBasin.Items
         {
             SoundPlayer.Instance().EnqueueSound("explosion");
         }
-
-        /// <summary>
-        /// Throws the item. Can use generic, it's just 
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="enemyTarget"></param>
-        /// <returns></returns>
-        public Point ThrowItem(Point target)
-        {
-            //Stun for 0 rounds
-            Game.MessageQueue.AddMessage("The fragmentation grenade explodes!");
-            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 2.0, 30);
-            
-            return dest;
-        }
         
         /// <summary>
         /// not used in this game
@@ -93,6 +78,11 @@ namespace RogueBasin.Items
         public override int GetWeight()
         {
             return 50;
+        }
+        
+        public Point ThrowItem(Point target)
+        {
+            return null;
         }
 
         public override string SingleItemDescription

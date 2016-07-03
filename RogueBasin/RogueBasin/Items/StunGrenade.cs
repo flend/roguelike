@@ -63,82 +63,14 @@ namespace RogueBasin.Items
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The stun grenade explodes!");
 
-            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 4, 6, true);
+            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 6, true);
             
             return dest;
         }
 
-        
-         /// <summary>
-        /// Stun grenade - goes through walls
-        /// Should sync with above method
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
-        public static Point ThrowItemGrenadeLikeStun(IEquippableItem item, Point target, double size, int damage) {
-
-            Item itemAsItem = item as Item;
-
-            LogFile.Log.LogEntryDebug("Throwing " + itemAsItem.SingleItemDescription, LogDebugLevel.Medium);
-
-            Player player = Game.Dungeon.Player;
-
-            //Find target
-
-            List<Point> targetSquares = Game.Dungeon.CalculateTrajectory(target);
-            Monster monster = Game.Dungeon.FirstMonsterInTrajectory(targetSquares);
-
-            //Find where it landed
-
-            //Destination will be the last square in trajectory
-            Point destination;
-            if (targetSquares.Count > 0)
-                destination = targetSquares[targetSquares.Count - 1];
-            else
-                //Threw it on themselves!
-                destination = player.LocationMap;
-           
-             
-            //Stopped by a monster
-            if (monster != null)
-            {
-                destination = monster.LocationMap;
-            }
-
-            //Make throwing sound AT target location
-            Game.Dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), Game.Dungeon.Player.LocationLevel, destination);
-
-            //Work out grenade splash and damage
-            
-            List<Point> grenadeAffects = Game.Dungeon.GetPointsForGrenadeTemplate(destination, Game.Dungeon.Player.LocationLevel, size);
-            
-            //Draw attack
-            Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Stun);
-
-            //Attack all monsters in the area
-
-            foreach (Point sq in grenadeAffects)
-            {
-                SquareContents squareContents = Game.Dungeon.MapSquareContents(player.LocationLevel, sq);
-
-                Monster m = squareContents.monster;
-
-                //Hit the monster if it's there
-                if (m != null)
-                {
-                    string combatResultsMsg = "PvM (" + m.Representation + ") Grenade: Stun: " + damage;
-                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                    //Apply damage
-                    m.ApplyStunDamageToMonster(Game.Dungeon.Player, damage);
-                }
-            }
-
-            //Doesn't affect the player
-
-            return(destination);
-
+        public TargettingInfo TargettingInfo()
+        {
+            return new GrenadeTargettingInfo(RangeThrow(), 4.0);
         }
 
 
@@ -390,9 +322,5 @@ namespace RogueBasin.Items
             SoundPlayer.Instance().EnqueueSound("explosion");
         }
 
-        public TargettingInfo TargettingInfo()
-        {
-            return new MeleeTargettingInfo();
-        }
     }
 }

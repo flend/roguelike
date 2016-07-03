@@ -549,43 +549,6 @@ namespace RogueBasin
             }
         }
 
-        private void GetTargetFromPlayerBasedOnSquareContents(Point clickLocation, MouseButton mouseButtons)
-        {
-            bool shifted = false;
-            
-            var keyboardState = new KeyboardState();
-            if (keyboardState.IsKeyPressed(Key.LeftShift) || keyboardState.IsKeyPressed(Key.RightShift))
-            {
-                shifted = true;
-            }
-
-            SquareContents squareContents = Game.Dungeon.MapSquareContents(Screen.Instance.LevelToDisplay, clickLocation);
-
-            if (squareContents.monster != null)
-            {
-                if (!shifted)
-                {
-                    TargetWeaponOrUtility(clickLocation, mouseButtons);
-                }
-                else
-                {
-                    targetting.TargetMove(clickLocation);
-                }
-            }
-            else
-            {
-                //No monster
-                if (!shifted)
-                {
-                    targetting.TargetMove(clickLocation);
-                }
-                else
-                {
-                    TargetWeaponOrUtility(clickLocation, mouseButtons);
-                }
-            }
-        }
-
         private void TargetWeaponOrUtility(Point clickLocation, MouseButton mouseButtons)
         {
             if (mouseButtons == MouseButton.PrimaryButton)
@@ -600,13 +563,21 @@ namespace RogueBasin
 
         private void HandleMapMovementMouseMotion(Point clickLocation, MouseMotionEventArgs mouseArgs)
         {
+            bool shifted = false;
+
+            var keyboardState = new KeyboardState();
+            if (keyboardState.IsKeyPressed(Key.LeftShift) || keyboardState.IsKeyPressed(Key.RightShift))
+            {
+                shifted = true;
+            }
+
             if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
             {
-                targetting.TargetMoveOrFireInstant(clickLocation);
+                targetting.TargetMoveOrFireInstant(clickLocation, shifted);
             }
             else
             {
-                targetting.TargetMoveOrThrowInstant(clickLocation);
+                targetting.TargetMoveOrThrowInstant(clickLocation, shifted);
             }
         }
         
@@ -2067,7 +2038,7 @@ namespace RogueBasin
                             }
                             else
                             {
-                                timeAdvances = RunToDestination();
+                                timeAdvances = ThrowTargettedUtility();
                             }
                         }
                     }

@@ -80,14 +80,14 @@ namespace RogueBasin
             SetupExamineTarget(defaultTarget);
         }
         
-        public void TargetMoveOrFireInstant(Point target)
+        public void TargetMoveOrFireInstant(Point target, bool showFireTarget)
         {
-            SetupMoveOrFireTargetInstant(target);
+            SetupMoveOrFireTargetInstant(target, showFireTarget);
         }
 
-        public void TargetMoveOrThrowInstant(Point target)
+        public void TargetMoveOrThrowInstant(Point target, bool showThrowTarget)
         {
-            SetupMoveOrThrowTargetInstant(target);
+            SetupMoveOrThrowTargetInstant(target, showThrowTarget);
         }
 
         public void TargetMove(Point target)
@@ -131,7 +131,6 @@ namespace RogueBasin
         {
             IEquippableItem utility = player.GetEquippedUtility();
 
-            int range = 0;
             TargettingInfo targetType = new NullTargettingInfo();
 
             if (utility != null)
@@ -152,14 +151,50 @@ namespace RogueBasin
             TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine");
         }
 
-        private void SetupMoveOrFireTargetInstant(Point target)
+        private void SetupMoveOrFireTargetInstant(Point target, bool showFireTarget)
         {
-            SetupWeaponTypeTarget(target, TargettingAction.MoveOrWeapon, "f", "Move or Fire");
+            SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
+
+            if (squareContents.monster != null || showFireTarget)
+            {
+                IEquippableItem weapon = player.GetEquippedRangedWeapon();
+
+                TargettingInfo targetInfo = new NullTargettingInfo();
+
+                if (weapon != null)
+                {
+                    targetInfo = weapon.TargettingInfo();
+                }
+
+                TargetAction(target, targetInfo, TargettingAction.MoveOrWeapon, "f", "Move or Fire");
+            }
+            else
+            {
+                TargetAction(target, new MoveTargettingInfo(), TargettingAction.MoveOrWeapon, "f", "Move or Fire");
+            }
         }
 
-        private void SetupMoveOrThrowTargetInstant(Point target)
+        private void SetupMoveOrThrowTargetInstant(Point target, bool showThrowTarget)
         {
-            SetupThrowTypeTarget(target, RogueBasin.TargettingAction.MoveOrThrow, "t", "Move or throw");
+            SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, target);
+
+            if (squareContents.monster != null || showThrowTarget)
+            {
+                IEquippableItem utility = player.GetEquippedUtility();
+
+                TargettingInfo targetInfo = new NullTargettingInfo();
+
+                if (utility != null)
+                {
+                    targetInfo = utility.TargettingInfo();
+                }
+
+                TargetAction(target, targetInfo, RogueBasin.TargettingAction.MoveOrThrow, "t", "Move or throw");
+            }
+            else
+            {
+                TargetAction(target, new MoveTargettingInfo(), RogueBasin.TargettingAction.MoveOrThrow, "t", "Move or throw");
+            }
         }
 
         private bool CheckFireableWeapon()

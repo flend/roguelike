@@ -2717,7 +2717,7 @@ namespace RogueBasin
         /// <param name="item"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, double size, int damage, bool stunning = false)
+        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, int damage, bool stunning = false)
         {
             Item itemAsItem = item as Item;
 
