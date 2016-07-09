@@ -502,5 +502,26 @@ namespace RogueBasin
             return roomToPlace;
         }
 
+
+        public static bool TimeAdvancesOnMove(MoveResults moveResults)
+        {
+            switch (moveResults)
+            {
+                case MoveResults.AttackedMonster:
+                    return true;
+                case MoveResults.InteractedWithFeature:
+                    return true;
+                case MoveResults.InteractedWithObstacle:
+                    return false;
+                case MoveResults.NormalMove:
+                    return true;
+                case MoveResults.StoppedByObstacle:
+                    return false;
+                case MoveResults.SwappedWithMonster:
+                    return true;
+            }
+
+            return true;
+        }
     }
 }

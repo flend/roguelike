@@ -15,6 +15,13 @@ using SdlDotNet.Audio;
 
 namespace RogueBasin
 {
+
+    public enum ActionState
+    {
+        Running,
+        Interactive
+    }
+
     public class RogueBase
     {
         //Are we running or have we exited?
@@ -27,13 +34,6 @@ namespace RogueBasin
             MovieDisplay, PreMapMovement, SpecialScreen
         }
 
-
-        public enum ActionState
-        {
-            Running,
-            Interactive
-        }
-
         /// <summary>
         /// State determining what functions keys have
         /// </summary>
@@ -42,10 +42,8 @@ namespace RogueBasin
 
         Action<bool> promptAction = null;
 
-        Point runningDirection;
-        IEnumerable<Point> runningPath;
-
         Targetting targetting;
+        Running running;
 
         TargettingAction mouseDefaultTargettingAction = TargettingAction.MoveOrWeapon;
 
@@ -63,10 +61,13 @@ namespace RogueBasin
         public void Initialise()
         {
             targetting = new Targetting(this);
+            running = new Running(this);
         }
 
         public bool PlaySounds { get; set; }
         public bool PlayMusic { get; set; }
+
+        public ActionState ActionState { get { return actionState; } set { actionState = value; } }
 
         /// <summary>
         /// Setup internal systems
@@ -392,7 +393,7 @@ namespace RogueBasin
                 switch (action)
                 {
                     case ActionState.Running:
-                        timeAdvances = RunNextStep();
+                        timeAdvances = running.RunNextStep();
                         centreOnPC = true;
                         break;
 
@@ -1488,13 +1489,13 @@ namespace RogueBasin
 
                     if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift) || args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl) || args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.RightAlt)))
                     {
-                        timeAdvances = TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
+                        timeAdvances = Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
                         centreOnPC = true;
                     }
 
                     if (wasDirection && (mod == KeyModifier.Numeric) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
                     {
-                        timeAdvances = StartRunning(direction.x, direction.y);
+                        timeAdvances = running.StartRunning(direction.x, direction.y);
                         centreOnPC = true;
                     }
 
@@ -1530,104 +1531,7 @@ namespace RogueBasin
             return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
 
-        private bool TimeAdvancesOnMove(MoveResults moveResults)
-        {
-            switch (moveResults)
-            {
-                case MoveResults.AttackedMonster:
-                    return true;
-                case MoveResults.InteractedWithFeature:
-                    return true;
-                case MoveResults.InteractedWithObstacle:
-                    return false;
-                case MoveResults.NormalMove:
-                    return true;
-                case MoveResults.StoppedByObstacle:
-                    return false;
-                case MoveResults.SwappedWithMonster:
-                    return true;
-            }
-
-            return true;
-        }
-
-        private bool StartRunning(int directionX, int directionY)
-        {
-            runningDirection = new Point(directionX, directionY);
-            actionState = ActionState.Running;
-
-            return RunNextStep();
-        }
-
-        private bool StartRunning(IEnumerable<Point> path)
-        {
-            runningDirection = null;
-            runningPath = path;
-            actionState = ActionState.Running;
-
-            return RunNextStep();
-        }
-
-        public void StopRunning()
-        {
-            actionState = ActionState.Interactive;
-        }
-
-        private bool RunNextStep()
-        {
-            Point relativeNextStep = new Point(0,0);
-
-            if (runningPath != null && runningPath.Any())
-            {
-                relativeNextStep = runningPath.ElementAt(0) - Game.Dungeon.Player.LocationMap;
-                runningPath = runningPath.Skip(1);
-
-                if (!runningPath.Any())
-                {
-                    //Reached end of path
-                    StopRunning();
-                }
-            }
-            else if (runningPath != null && runningPath.Any())
-            {
-                //Empty path
-                StopRunning();
-            }
-            else if (runningPath == null)
-            {
-                relativeNextStep = new Point(runningDirection.x, runningDirection.y);
-            }
-
-            if (relativeNextStep == new Point(0, 0))
-            {
-                LogFile.Log.LogEntryDebug("Can't run onto yourself", LogDebugLevel.High);
-                StopRunning();
-            }
-
-            MoveResults results = Game.Dungeon.PCMove(relativeNextStep.x, relativeNextStep.y);
-
-            switch (results) { 
-                case MoveResults.AttackedMonster:
-                    StopRunning();
-                    break;
-                case MoveResults.InteractedWithFeature:
-                    StopRunning();
-                    break;
-                case MoveResults.InteractedWithObstacle:
-                    StopRunning();
-                    break;
-                case MoveResults.NormalMove:
-                    break;
-                case MoveResults.StoppedByObstacle:
-                    StopRunning();
-                    break;
-                case MoveResults.SwappedWithMonster:
-                    break;
-            }
-
-            return TimeAdvancesOnMove(results);
-        }
-
+        
         public void ToggleSounds()
         {
             if (PlaySounds)
@@ -2009,17 +1913,18 @@ namespace RogueBasin
                             }
                             else
                             {
-                                timeAdvances = RunToDestination();
+                                timeAdvances = RunToTargettedDestination();
                             }
                         }
                         else
                         {
                             if (!alternativeActionMode)
                             {
-                                timeAdvances = RunToDestination();
+                                timeAdvances = RunToTargettedDestination();
                             }
                             else
                             {
+
                                 timeAdvances = FireTargettedWeapon();
                             }
                         }
@@ -2037,14 +1942,14 @@ namespace RogueBasin
                             }
                             else
                             {
-                                timeAdvances = RunToDestination();
+                                timeAdvances = RunToTargettedDestination();
                             }
                         }
                         else
                         {
                             if (!alternativeActionMode)
                             {
-                                timeAdvances = RunToDestination();
+                                timeAdvances = RunToTargettedDestination();
                             }
                             else
                             {
@@ -2055,7 +1960,7 @@ namespace RogueBasin
                     break;
 
                 case TargettingAction.Move:
-                    timeAdvances = RunToDestination();
+                    timeAdvances = RunToTargettedDestination();
                     break;
             }
             
@@ -2070,8 +1975,13 @@ namespace RogueBasin
         }
         
 
-        private bool RunToDestination()
+        private bool RunToTargettedDestination()
         {
+            if (!Game.Dungeon.IsSquareSeenByPlayer(targetting.CurrentTarget))
+            {
+                return false;
+            }
+
             var player = Game.Dungeon.Player;
 
             IEnumerable<Point> path = player.GetPlayerRunningPath(targetting.CurrentTarget);
@@ -2081,11 +1991,16 @@ namespace RogueBasin
                 return false;
             }
             
-            return StartRunning(path);
+            return running.StartRunning(path);
         }
 
         private bool ThrowTargettedUtility()
         {
+            if (!Game.Dungeon.IsSquareInPlayerFOV(targetting.CurrentTarget))
+            {
+                return false;
+            }
+
             var player = Game.Dungeon.Player;
             var timeAdvances = ThrowTargettedUtility(targetting.CurrentTarget);
             player.ResetTurnsMoving();
@@ -2095,6 +2010,11 @@ namespace RogueBasin
 
         private bool FireTargettedWeapon()
         {
+            if (!Game.Dungeon.IsSquareInPlayerFOV(targetting.CurrentTarget))
+            {
+                return false;
+            }
+
             var player = Game.Dungeon.Player;
             var timeAdvances = FireTargettedWeapon(targetting.CurrentTarget);
             player.ResetTurnsMoving();
@@ -2117,7 +2037,7 @@ namespace RogueBasin
 
         private bool DoNothing()
         {
-            return TimeAdvancesOnMove(Game.Dungeon.PCMove(0, 0));
+            return Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(0, 0));
         }
 
         private void LoadGame(string playerName)
@@ -2968,6 +2888,31 @@ namespace RogueBasin
         {
             Game.Dungeon.RunMainLoop = false;
             Events.QuitApplication();
+        }
+
+        public void NotifyMonsterEvent(MonsterEvent monsterEvent)
+        {
+            switch (monsterEvent.EventType)
+            {
+                case MonsterEvent.MonsterEventType.MonsterAttacksPlayer:
+
+                    running.StopRunning();
+                    
+                    if (!Screen.Instance.TargetSelected())
+                    {
+                        Screen.Instance.CreatureToView = monsterEvent.Monster;
+                    }
+
+                    break;
+
+                case MonsterEvent.MonsterEventType.MonsterSeenByPlayer:
+
+                    running.StopRunning();
+
+                    Game.MessageQueue.AddMessage("You see a " + monsterEvent.Monster.SingleDescription + ".");
+
+                    break;
+            }
         }
     }
 }

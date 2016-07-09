@@ -292,13 +292,13 @@ namespace RogueBasin.LibTCOD
                 return returnNodes.GetRange(0, 1);
             }
 
-            do
+            while(x != dest.x || y != dest.y)
             {
                 path.WalkPath(ref x, ref y, false);
                 returnNodes.Add(new Point(x, y));
-                if (x == dest.x && y == dest.y)
-                    return returnNodes;
-            } while (true);
+            }
+
+            return returnNodes;
         }
     }
 }

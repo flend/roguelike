@@ -61,8 +61,10 @@
     <Compile Include="LineTargettingInfo.cs" />
     <Compile Include="LineThroughTargettingInfo.cs" />
     <Compile Include="MeleeTargettingInfo.cs" />
+    <Compile Include="MonsterEvent.cs" />
     <Compile Include="MoveTargettingInfo.cs" />
     <Compile Include="NullTargettingInfo.cs" />
+    <Compile Include="Running.cs" />
     <Compile Include="ShotgunTargettingInfo.cs" />
     <Compile Include="TargettingAction.cs" />
     <Compile Include="Config.cs" />

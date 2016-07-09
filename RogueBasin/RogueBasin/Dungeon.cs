@@ -645,7 +645,8 @@ namespace RogueBasin
                     //Apply damage to player
                     if (damage > 0)
                     {
-                        player.ApplyCombatDamageToPlayer(gunner as Monster, damage, true); 
+                        player.ApplyCombatDamageToPlayer(gunner as Monster, damage, true);
+                        player.NotifyMonsterEvent(new MonsterEvent(MonsterEvent.MonsterEventType.MonsterAttacksPlayer, gunner as Monster));
                     }
                 }
             }
@@ -901,6 +902,22 @@ namespace RogueBasin
             return creatures.Where(c => currentFOV.CheckTileFOV(c.LocationMap));
         }
 
+        public bool IsMonsterHostile(Monster monster)
+        {
+            if (monster.Charmed || monster.Passive)
+                return false;
+
+            if (IgnoreHostileMonstersOfType(monster))
+                return false;
+
+            return true;
+        }
+
+        public IEnumerable<Monster> FindAllHostileCreaturesInFoV(CreatureFOV fov)
+        {
+            return monsters.Where(m => m.LocationLevel == player.LocationLevel && IsMonsterHostile(m) && fov.CheckTileFOV(m.LocationMap)).ToList();
+        }
+
         /// <summary>
         /// Find the hostile creature to the map object
         /// </summary>
@@ -918,11 +935,10 @@ namespace RogueBasin
 
             foreach (Monster creature in monsters)
             {
-                if (creature.Charmed || creature.Passive)
+                if (!IsMonsterHostile(creature))
+                {
                     continue;
-
-                if (IgnoreHostileCreaturesOfType(creature.GetType()))
-                    continue;
+                }
 
                 distance = Utility.GetDistanceBetween(origin, creature);
 
@@ -942,7 +958,7 @@ namespace RogueBasin
             return closestCreature;
         }
 
-        private bool IgnoreHostileCreaturesOfType(Type monsterType)
+        private bool IgnoreHostileMonstersOfType(Monster monsterType)
         {
             if (monsterType is Creatures.Grenade || monsterType is Creatures.Mine)
                 return true;
@@ -2341,6 +2357,8 @@ namespace RogueBasin
 
                 MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y, runTriggersAlways);
 
+                CheckForNewMonstersInFoV();
+
                 //Auto-pick up any items
                 if (contents.items.Count > 0)
                 {
@@ -2380,6 +2398,16 @@ namespace RogueBasin
             }
 
             return moveResults;
+        }
+
+        private void CheckForNewMonstersInFoV()
+        {
+            var newMonstersInFoV = player.NewMonstersinFoV();
+
+            foreach(var m in newMonstersInFoV)
+            {
+                player.NotifyMonsterEvent(new MonsterEvent(MonsterEvent.MonsterEventType.MonsterSeenByPlayer, m));
+            }
         }
 
         /// <summary>
@@ -2828,7 +2856,10 @@ namespace RogueBasin
                 }
                 //Apply damage (uses damage base)
                 if (originMonster != null && originMonster != Game.Dungeon.Player)
+                {
                     player.ApplyCombatDamageToPlayer((originMonster as Monster), damage, true);
+                    player.NotifyMonsterEvent(new MonsterEvent(MonsterEvent.MonsterEventType.MonsterAttacksPlayer, originMonster as Monster));
+                }
                 else
                     player.ApplyCombatDamageToPlayer(damage);
             }

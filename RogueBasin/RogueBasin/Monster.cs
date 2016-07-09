@@ -656,23 +656,30 @@ namespace RogueBasin
                 string combatResultsMsg = "MvP (" + this.Representation + ") Normal. Dam: " + damage;
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
-                if (!ranged)
-                {
-                    if (this is Creatures.Psycho)
-                    {
-                        SoundPlayer.Instance().EnqueueSound("chainsaw");
-                    }
-                    else
-                    {
-                        SoundPlayer.Instance().EnqueueSound("punch");
-                    }
-                }
-                SoundPlayer.Instance().EnqueueSound("gunshot");
+                AttackAudio(ranged);
 
-                return Game.Dungeon.Player.ApplyCombatDamageToPlayer(this, damage, ranged);
+                player.NotifyMonsterEvent(new MonsterEvent(MonsterEvent.MonsterEventType.MonsterAttacksPlayer, this));
+
+                return player.ApplyCombatDamageToPlayer(this, damage, ranged);
             }
 
             return CombatResults.NeitherDied;
+        }
+
+        private void AttackAudio(bool ranged)
+        {
+            if (!ranged)
+            {
+                if (this is Creatures.Psycho)
+                {
+                    SoundPlayer.Instance().EnqueueSound("chainsaw");
+                }
+                else
+                {
+                    SoundPlayer.Instance().EnqueueSound("punch");
+                }
+            }
+            SoundPlayer.Instance().EnqueueSound("gunshot");
         }
 
         public virtual CombatResults AttackMonster(Monster monster, bool ranged)

@@ -21,6 +21,8 @@ namespace RogueBasin
 
         public List<Monster> Kills { get; set;}
 
+        private IEnumerable<Monster> monstersInLastFoV = Enumerable.Empty<Monster>();
+
         public int KillCount = 0;
 
         public string Name { get; set; }
@@ -507,6 +509,15 @@ namespace RogueBasin
         public void EquipNextUtility()
         {
             EquipNextUtilityInventoryItem(0);
+        }
+
+        public IEnumerable<Monster> NewMonstersinFoV()
+        {
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(this);
+            var monstersInFoV = Game.Dungeon.FindAllHostileCreaturesInFoV(currentFOV);
+            var difference = monstersInFoV.Except(monstersInLastFoV);
+            monstersInLastFoV = monstersInFoV;
+            return difference;
         }
 
         /// <summary>
@@ -2545,8 +2556,6 @@ namespace RogueBasin
         /// <param name="damage"></param>
         public CombatResults ApplyCombatDamageToPlayer(Monster attacker, int damage, bool ranged)
         {
-            NotifyAttack(attacker);
-
             var modifiedDamaged = (int)Math.Floor(CalculateDamageModifierForAttacksOnPlayer(attacker, ranged) * damage);
             return ApplyDamageToPlayer(modifiedDamaged);
         }
@@ -2783,14 +2792,9 @@ namespace RogueBasin
         }
 
 
-        internal void NotifyAttack(Monster monster)
+        internal void NotifyMonsterEvent(MonsterEvent monsterEvent)
         {
-            if (!Screen.Instance.TargetSelected())
-            {
-                Screen.Instance.CreatureToView = monster;
-            }
-
-            Game.Base.StopRunning();
+            Game.Base.NotifyMonsterEvent(monsterEvent);
         }
 
         internal void RefillWeapons()
