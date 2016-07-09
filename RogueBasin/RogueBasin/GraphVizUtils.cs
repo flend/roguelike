@@ -10,11 +10,16 @@ namespace RogueBasin
     public static class GraphVizUtils
     {
 
+        public static void RunGraphVizPDF(string graphVizLocation, string filename)
+        {
+            RunGraphViz(graphVizLocation, "pdf", filename);
+        }
+
         /// <summary>
         /// Uses graphviz to make a png from a dot. No filename extension on parameter
         /// </summary>
         /// <param name="filename"></param>
-        public static void RunGraphVizPNG(string graphVizLocation, string filename)
+        public static void RunGraphViz(string graphVizLocation, string format, string filename)
         {
             // Use ProcessStartInfo class
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -22,7 +27,7 @@ namespace RogueBasin
             startInfo.UseShellExecute = false;
             startInfo.FileName = graphVizLocation;
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.Arguments = filename + ".dot -Tpng -o " + filename + ".png";
+            startInfo.Arguments = filename + ".dot -T" + format + " -o " + filename + "." + format;
 
             try
             {

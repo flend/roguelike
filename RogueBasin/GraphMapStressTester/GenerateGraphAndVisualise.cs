@@ -37,7 +37,7 @@ namespace GraphMapStressTester
             try
             {
                 var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
-                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-full");
+                GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-full");
                 GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
             }
             catch (Exception)

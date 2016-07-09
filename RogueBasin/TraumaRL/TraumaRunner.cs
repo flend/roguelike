@@ -92,9 +92,9 @@ namespace TraumaRL
             {
                 if (Game.Config.SaveGraphs || Game.Config.DisplayGraphs)
                 {
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-full");
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-door");
-                    GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-dep");
+                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-full");
+                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-door");
+                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-dep");
                 }
 
                 if (Game.Config.DisplayGraphs)
@@ -122,7 +122,7 @@ namespace TraumaRL
                     {
                         var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
 
-                        GraphVizUtils.RunGraphVizPNG(graphVizLocation, "levellinks-full");
+                        GraphVizUtils.RunGraphVizPDF(graphVizLocation, "levellinks-full");
                         GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
                     }
                     catch (Exception)

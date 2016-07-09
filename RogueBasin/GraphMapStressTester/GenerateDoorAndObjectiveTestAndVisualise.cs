@@ -46,7 +46,7 @@ namespace GraphMapStressTester
             try
             {
                 var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
-                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-full");
+                GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-full");
                 GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
             }
             catch (Exception)
@@ -63,9 +63,9 @@ namespace GraphMapStressTester
             try
             {
                 var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
-                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-door");
+                GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-door");
                 GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
-                GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-dep");
+                GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-dep");
                 GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
             }
             catch (Exception)
