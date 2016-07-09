@@ -1978,7 +1978,7 @@ namespace RogueBasin
 
         private bool RunToTargettedDestination()
         {
-            if (!Game.Dungeon.IsSquareSeenByPlayer(targetting.CurrentTarget))
+            if (!Game.Dungeon.IsSquareSeenByPlayer(targetting.CurrentTarget) && !Screen.Instance.SeeAllMap)
             {
                 return false;
             }
