@@ -8,11 +8,13 @@ namespace RogueBasin.Items
 {
     public class Log : Item, IUseableItem
     {
-        LogEntry logEntry;
+        private LogEntry logEntry;
+        private string lockId;
 
-        public Log(LogEntry entry)
+        public Log(LogEntry entry, string lockId)
         {
             this.logEntry = entry;
+            this.lockId = lockId;
         }
 
         public bool UsedUp
@@ -46,6 +48,14 @@ namespace RogueBasin.Items
         public override string GroupItemDescription
         {
             get { return "Logs"; }
+        }
+
+        public override string QuestId
+        {
+            get
+            {
+                return "log-clue-" + lockId;
+            }
         }
 
         public override System.Drawing.Color GetColour()

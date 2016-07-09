@@ -12,7 +12,6 @@ namespace RogueBasin.Creatures
     /// 
     public class ComputerNode : MonsterNullAI
     {
-        bool rotationClockwise = true;
 
         public ComputerNode()
         {
@@ -136,6 +135,14 @@ namespace RogueBasin.Creatures
         public override int HitModifier()
         {
             return 0;
+        }
+
+        public override string QuestId
+        {
+            get
+            {
+                return "computer-node";
+            }
         }
     }
 }

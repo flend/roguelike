@@ -60,5 +60,13 @@ namespace RogueBasin.Features
             }
         }
 
+        public override string QuestId
+        {
+            get
+            {
+                return "reactor-override";
+            }
+        }
+
     }
 }

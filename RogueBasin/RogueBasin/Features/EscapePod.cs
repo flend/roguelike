@@ -42,5 +42,13 @@ namespace RogueBasin.Features
                 return "Escape Pod Launch";
             }
         }
+
+        public override string QuestId
+        {
+            get
+            {
+                return "escape-pod-launch";
+            }
+        }
     }
 }

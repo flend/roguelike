@@ -186,6 +186,18 @@ namespace GraphMap
         /// </summary>
         public Objective LockedObjective { get; private set; }
 
+        public String GetLockedItemId()
+        {
+            if (LockedDoor != null)
+            {
+                return LockedDoor.Id;
+            }
+            else
+            {
+                return LockedObjective.Id;
+            }
+        }
+
         public List<int> PossibleClueRoomsInFullMap
         {
             get;

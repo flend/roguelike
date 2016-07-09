@@ -165,5 +165,13 @@ namespace RogueBasin.Creatures
         {
             return 0;
         }
+
+        public override string QuestId
+        {
+            get
+            {
+                return "captain";
+            }
+        }
     }
 }

@@ -240,14 +240,14 @@ namespace RogueBasin
         }
 
 
-        public void PlaceCreatureClues<T>(MapState mapState, List<Clue> monsterCluesToPlace, bool autoPickup, bool includeVaults) where T : Monster, new()
+        public void PlaceCreatureClues<T>(MapState mapState, List<Clue> monsterCluesToPlace, bool autoPickup, bool includeVaults, bool preferBoundaries) where T : Monster, new()
         {
             var mapInfo = mapState.MapInfo;
 
             foreach (var clue in monsterCluesToPlace)
             {
                 var candidateRooms = GetPossibleRoomsForClues(mapState, clue, true, includeVaults);
-                var pointsForClues = mapInfo.GetAllUnoccupiedRoomPoints(candidateRooms, true);
+                var pointsForClues = mapInfo.GetAllUnoccupiedRoomPoints(candidateRooms, preferBoundaries);
 
                 var newMonster = new T();
                 Item clueItem;
@@ -269,9 +269,28 @@ namespace RogueBasin
             }
         }
 
+        public void PlaceCreaturesInRoom(MapState mapState, int level, int roomId, List<Monster> monstersToPlace, bool preferBoundaries)
+        {
+            var mapInfo = mapState.MapInfo;
+            var pointsForClues = mapInfo.GetAllUnoccupiedRoomPoints(roomId, preferBoundaries);
+
+            var shuffledPoints = pointsForClues.Shuffle();
+
+            if (shuffledPoints.Count() < monstersToPlace.Count())
+            {
+                throw new ApplicationException("Nowhere to place clue monsters including: " + monstersToPlace.ElementAt(0).SingleDescription);
+            }
+
+            var monstersAndPoints = shuffledPoints.Zip(monstersToPlace, Tuple.Create);
+            foreach (var m in monstersAndPoints)
+            {
+                mapInfo.Populator.AddMonsterToRoom(m.Item2, m.Item1.roomId, m.Item1.ToLocation());
+            }
+        }
+
         public void PlaceLogClues(MapState mapState, List<Tuple<LogEntry, Clue>> logCluesToPlace, bool boundariesPreferred, bool cluesNotInCorridors)
         {
-            var clueItems = logCluesToPlace.Select(t => new Tuple<Clue, Item>(t.Item2, new RogueBasin.Items.Log(t.Item1)));
+            var clueItems = logCluesToPlace.Select(t => new Tuple<Clue, Item>(t.Item2, new RogueBasin.Items.Log(t.Item1, t.Item2.GetLockedItemId())));
             PlaceClueItems(mapState, clueItems, boundariesPreferred, cluesNotInCorridors, false);
         }
 
@@ -453,5 +472,6 @@ namespace RogueBasin
                 mapInfo.Populator.AddItemToRoom(pi.Item1, pi.Item2.roomId, pi.Item2.ToLocation());
             }
         }
+
     }
 }

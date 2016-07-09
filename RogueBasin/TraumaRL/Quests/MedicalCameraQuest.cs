@@ -41,7 +41,7 @@ namespace TraumaRL.Quests
             var roomsForMonsters = Builder.GetRandomRoomsForClues(MapState, objectsToPlace, allowedRoomsForClues);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
-            Builder.PlaceCreatureClues<RogueBasin.Creatures.Camera>(MapState, clues, true, false);
+            Builder.PlaceCreatureClues<RogueBasin.Creatures.Camera>(MapState, clues, true, false, true);
 
             //Place log entries explaining the puzzle
             //These will not be turned into in-engine clue items, so they can't be used to open the door

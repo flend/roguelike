@@ -56,5 +56,13 @@ namespace RogueBasin.Features
             }
         }
 
+        public override string QuestId
+        {
+            get
+            {
+                return "comms-antennae";
+            }
+        }
+
     }
 }

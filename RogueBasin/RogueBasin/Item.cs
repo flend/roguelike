@@ -45,6 +45,8 @@ namespace RogueBasin
     {
         System.Drawing.Color defaultItemColor = System.Drawing.Color.Red;
 
+        private string id;
+
         public Item()
         {
             inInventory = false;
@@ -113,6 +115,18 @@ namespace RogueBasin
         public abstract string GroupItemDescription
         {
             get;
+        }
+
+        /// <summary>
+        /// A hidden id, for display in developer maps etc.
+        /// </summary>
+        public virtual string QuestId
+        {
+            get
+            {
+
+                return "";
+            }
         }
 
         /// <summary>

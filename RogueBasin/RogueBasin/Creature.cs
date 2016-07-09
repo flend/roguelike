@@ -420,5 +420,10 @@ namespace RogueBasin
                 inventory = value;
             }
         }
+
+        public virtual string QuestId
+        {
+            get { return ""; }
+        }
     }
 }

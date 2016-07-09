@@ -402,6 +402,11 @@ namespace RogueBasin
             return allWalkablePoints.Shuffle();
         }
 
+        public IEnumerable<RoomPoint> GetAllUnoccupiedRoomPoints(int room, bool preferBoundaries)
+        {
+            return GetAllUnoccupiedRoomPoints(Enumerable.Repeat(room, 1), preferBoundaries);
+        }
+
         public IEnumerable<RoomPoint> GetAllUnoccupiedRoomPoints(IEnumerable<int> rooms, bool preferBoundaries)
         {
             if (!preferBoundaries)

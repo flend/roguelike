@@ -32,5 +32,13 @@ namespace RogueBasin
                 return "Feature";
             }
         }
+
+        public virtual string QuestId
+        {
+            get
+            {
+                return "";
+            }
+        }
     }
 }

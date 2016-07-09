@@ -146,7 +146,7 @@ namespace TraumaRL.Quests
             var roomsForMonsters = Builder.GetRandomRoomsForClues(MapState, coresToPlace, roomsOnComputerCoreLevel);
             var clues = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForMonsters);
 
-            Builder.PlaceCreatureClues<RogueBasin.Creatures.ComputerNode>(MapState, clues, true, false);
+            Builder.PlaceCreatureClues<RogueBasin.Creatures.ComputerNode>(MapState, clues, true, false, true);
 
             //Place log entries explaining the puzzle
             //These will not be turned into in-engine clue items, so they can't be used to open the door
@@ -217,7 +217,7 @@ namespace TraumaRL.Quests
             //Add monsters - nice to put ID on captain but not for now
             var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainsIdRoom);
             var monstersToPlace = new List<Monster> { new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.AssaultCyborgRanged(), new RogueBasin.Creatures.Captain() };
-            Game.Dungeon.MonsterPlacement.AddMonstersToRoom(mapInfo, captainsIdLevel, captainsIdRoom, monstersToPlace);
+            Builder.PlaceCreaturesInRoom(MapState, captainsIdLevel, captainsIdRoom, monstersToPlace, false);
 
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton]),
             new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),

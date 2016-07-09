@@ -110,5 +110,13 @@ namespace RogueBasin.Items
                 return "key";
             }
         }
+
+        public override string QuestId
+        {
+            get
+            {
+                return "id-" + id + " (" + parentId + ")";
+            }
+        }
     }
 }

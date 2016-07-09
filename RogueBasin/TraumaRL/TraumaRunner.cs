@@ -75,13 +75,13 @@ namespace TraumaRL
             
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
-            VisualiseConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager);
-            VisualiseLevelConnectivityGraph(worldGen.MapState.MapInfo.Model, worldGen.MapState.DoorAndClueManager, worldGen.MapState.LevelNames);
+            VisualiseConnectivityGraph(worldGen.MapState.MapInfo, worldGen.MapState.DoorAndClueManager);
+            VisualiseLevelConnectivityGraph(worldGen.MapState.MapInfo, worldGen.MapState.DoorAndClueManager, worldGen.MapState.LevelNames);
         }
 
-        private void VisualiseConnectivityGraph(MapModel graphModel, DoorAndClueManager doorAndClueManager)
+        private void VisualiseConnectivityGraph(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)
         {
-            var visualiser = new DoorClueGraphvizExport(graphModel, doorAndClueManager);
+            var visualiser = new MapGraphvizExport(mapInfo, doorAndClueManager);
             visualiser.OutputFullGraph("bsptree-full");
             visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
@@ -110,9 +110,9 @@ namespace TraumaRL
             }
         }
 
-        private void VisualiseLevelConnectivityGraph(MapModel graphModel, DoorAndClueManager manager, ImmutableDictionary<int, string> levelNaming)
+        private void VisualiseLevelConnectivityGraph(MapInfo mapInfo, DoorAndClueManager manager, ImmutableDictionary<int, string> levelNaming)
         {
-            var visualiser = new DoorClueGraphvizExport(graphModel, manager, levelNaming);
+            var visualiser = new MapGraphvizExport(mapInfo, manager, levelNaming);
             visualiser.OutputClueDoorGraph("levellinks-full");
             if (Game.Config.DebugMode)
             {

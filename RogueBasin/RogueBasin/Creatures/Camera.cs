@@ -52,6 +52,14 @@ namespace RogueBasin.Creatures
         /// </summary>
         public override string GroupDescription { get { return "Cameras"; } }
 
+        public override string QuestId
+        {
+            get
+            {
+                return "camera";
+            }
+        }
+
         protected override char GetRepresentation()
         {
             return (char)271;
