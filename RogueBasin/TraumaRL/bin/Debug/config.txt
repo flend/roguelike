@@ -1,6 +1,7 @@
 tilesize=16
 debug=true
 displayGraphs=false
+saveGraphs=true
 graphviz=C:\Program Files (x86)\Graphviz2.36\bin\dot.exe
 sound=true
 music=false

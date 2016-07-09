@@ -63,6 +63,9 @@ namespace RogueBasin
 
         private void SetTargettingMessage(string message, string confirmKey)
         {
+            if (message == null)
+                return;
+
             Game.MessageQueue.AddMessage(message + " find a target. " + confirmKey + " to confirm. ESC to exit.");
         }
 

@@ -58,7 +58,7 @@ namespace RogueBasin {
         /// </summary>
         public bool CombatAnimations { get; set; }
 
-        int ShowRoomNumbering { get; set; }
+        public int ShowRoomNumbering { get; set; }
         /// <summary>
         /// Total modes available for show room numbering
         /// </summary>
@@ -2528,25 +2528,16 @@ namespace RogueBasin {
                         {
                             //Draw the room id (in empty areas only for SRN==1)
 
-                            List<System.Drawing.Color> colors = new List<System.Drawing.Color>(new System.Drawing.Color[] { System.Drawing.Color.Yellow, System.Drawing.Color.Gold, System.Drawing.Color.RosyBrown, orangeDisactivatedColor, System.Drawing.Color.LightGray, System.Drawing.Color.Gray });
-
                             int roomId = map.roomIdMap[i, j];
 
-                            int numberToDraw = roomId % 10;
-                            int colorIndex = roomId / 10;
-
+                            int numberToDraw = roomId % 100;
+                            
                             if (numberToDraw == -1)
                             {
-                                screenChar = 'n';
-                                baseDrawColor = System.Drawing.Color.DarkGray;
+                                effectSprite = "room_numbering_00";
                             }
                             else {
-                                char r = Convert.ToChar(numberToDraw.ToString());
-                                screenChar = r;
-                                if (colorIndex >= colors.Count)
-                                    colorIndex = colorIndex % colors.Count;
-                                
-                                baseDrawColor = colors[colorIndex];
+                                effectSprite = "room_numbering_" + (numberToDraw / 10) + (numberToDraw % 10);
                             }
                         }
                     }

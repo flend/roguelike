@@ -166,11 +166,11 @@ namespace RogueBasin
                     targetInfo = weapon.TargettingInfo();
                 }
 
-                TargetAction(target, targetInfo, TargettingAction.MoveOrWeapon, "f", "Move or Fire");
+                TargetAction(target, targetInfo, TargettingAction.MoveOrWeapon, "f", null);
             }
             else
             {
-                TargetAction(target, new MoveTargettingInfo(), TargettingAction.MoveOrWeapon, "f", "Move or Fire");
+                TargetAction(target, new MoveTargettingInfo(), TargettingAction.MoveOrWeapon, "f", null);
             }
         }
 
@@ -189,11 +189,11 @@ namespace RogueBasin
                     targetInfo = utility.TargettingInfo();
                 }
 
-                TargetAction(target, targetInfo, RogueBasin.TargettingAction.MoveOrThrow, "t", "Move or throw");
+                TargetAction(target, targetInfo, RogueBasin.TargettingAction.MoveOrThrow, "t", null);
             }
             else
             {
-                TargetAction(target, new MoveTargettingInfo(), RogueBasin.TargettingAction.MoveOrThrow, "t", "Move or throw");
+                TargetAction(target, new MoveTargettingInfo(), RogueBasin.TargettingAction.MoveOrThrow, "t", null);
             }
         }
 

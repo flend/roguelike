@@ -53,6 +53,14 @@ namespace RogueBasin
             }
         }
 
+        public bool SaveGraphs
+        {
+            get
+            {
+                return Game.Config.Entries.ContainsKey("saveGraphs") && Game.Config.Entries["saveGraphs"] == "true";
+            }
+        }
+
         public bool Sound
         {
             get

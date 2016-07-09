@@ -212,16 +212,18 @@ namespace RogueBasin
 
                         try
                         {
-                            if (thisCell.TileSprite != null && thisCell.TileSprite.Length > 14 && thisCell.TileSprite.Substring(0, 14) == "monster_level_")
+                            if (thisCell.TileSprite != null && thisCell.TileSprite.Length > 14 && 
+                                (thisCell.TileSprite.Substring(0, 14) == "monster_level_" || thisCell.TileSprite.Substring(0, 14) == "room_numbering"))
                             {
-                                var thisLevel = thisCell.TileSprite.Substring(14);
+                                var thisLevel = thisCell.TileSprite.Substring(thisCell.TileSprite.LastIndexOf('_') + 1);
                                 var thisLevelNum = Convert.ToInt32(thisLevel);
                                 var thisTens = thisLevelNum / 10;
-                                var thisRem = thisTens % 10;
+                                var thisRem = thisLevelNum % 10;
 
                                 if (thisTens == 0)
                                 {
-                                    DrawTileSprite(thisCell, new Point(screenTileX, screenTileY), new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
+                                    var units = new TileEngine.TileCell("monster_level_" + thisRem.ToString());
+                                    DrawTileSprite(units, new Point(screenTileX, screenTileY), new Point(offsetX, offsetY), thisCell.Transparency, 0, false);
                                 }
                                 else
                                 {

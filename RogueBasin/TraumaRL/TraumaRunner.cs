@@ -86,24 +86,28 @@ namespace TraumaRL
             visualiser.OutputClueDoorGraph("bsptree-door");
             visualiser.OutputDoorDependencyGraph("bsptree-dep");
 
-            if (Game.Config.DisplayGraphs) {
-                try
-                {
-                    var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
+            var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
 
+            try
+            {
+                if (Game.Config.SaveGraphs || Game.Config.DisplayGraphs)
+                {
                     GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-full");
                     GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-door");
                     GraphVizUtils.RunGraphVizPNG(graphVizLocation, "bsptree-dep");
+                }
 
+                if (Game.Config.DisplayGraphs)
+                {
                     GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
                     GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
                     GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
                 }
-                catch (Exception)
-                {
-                    LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
-                }
-            }   
+            }
+            catch (Exception)
+            {
+                LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+            }
         }
 
         private void VisualiseLevelConnectivityGraph(MapModel graphModel, DoorAndClueManager manager, ImmutableDictionary<int, string> levelNaming)

@@ -30,13 +30,13 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Visualise the cucle-reduced graph, including door and clue locations
+        /// Visualise the full graph, including door and clue locations (though clues will be at the wrapped-up vertex)
         /// </summary>
         /// <param name="filename"></param>
         public void OutputClueDoorGraph(string filename)
         {
             //Visualise the reduced graph, including door and clue locations
-            var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(model.GraphNoCycles.mapNoCycles);
+            var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(model.BaseGraph);
 
             graphviz.FormatVertex += graphviz_FormatVertex;
             graphviz.FormatEdge += graphviz_FormatEdge;
@@ -49,7 +49,7 @@ namespace GraphMap
         }
 
         /// <summary>
-        /// Visualise the full graph, including door and clue locations (though clues will be at the wrapped-up vertex)
+        /// Visualise the full graph, rooms only
         /// </summary>
         /// <param name="filename"></param>
         public void OutputFullGraph(string filename)

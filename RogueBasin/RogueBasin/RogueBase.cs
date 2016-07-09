@@ -1030,6 +1030,7 @@ namespace RogueBasin
 
                                 case Key.N:
                                     //screen numbering
+                                    Game.MessageQueue.AddMessage("Cycling room numbering: " + Screen.Instance.ShowRoomNumbering);
                                     Screen.Instance.CycleRoomNumbering();
                                     break;
 
