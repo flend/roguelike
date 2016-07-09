@@ -61,7 +61,7 @@ namespace RogueBasin
         public void Initialise()
         {
             targetting = new Targetting(this);
-            running = new Running(this);
+            running = new Running(this, Game.Dungeon.Player);
         }
 
         public bool PlaySounds { get; set; }

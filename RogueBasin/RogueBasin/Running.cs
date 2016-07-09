@@ -9,11 +9,13 @@ namespace RogueBasin
     class Running
     {
         RogueBase rogueBase;
+        Player player;
         Point runningDirection;
         IEnumerable<Point> runningPath;
 
-        public Running(RogueBase rogueBase) {
+        public Running(RogueBase rogueBase, Player player) {
             this.rogueBase = rogueBase;
+            this.player = player;
         }
 
         public bool StartRunning(int directionX, int directionY)
@@ -29,6 +31,7 @@ namespace RogueBasin
             runningDirection = null;
             runningPath = path;
             rogueBase.ActionState = ActionState.Running;
+            player.Running = true;
 
             return RunNextStep();
         }
@@ -36,6 +39,7 @@ namespace RogueBasin
         public void StopRunning()
         {
             rogueBase.ActionState = ActionState.Interactive;
+            player.Running = false;
         }
 
         public bool RunNextStep()
@@ -89,6 +93,9 @@ namespace RogueBasin
                     StopRunning();
                     break;
                 case MoveResults.SwappedWithMonster:
+                    break;
+                case MoveResults.StoppedByMonster:
+                    StopRunning();
                     break;
             }
 

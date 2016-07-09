@@ -69,6 +69,7 @@ namespace RogueBasin
         InteractedWithObstacle,
         AttackedMonster,
         SwappedWithMonster,
+        StoppedByMonster,
         InteractedWithFeature,
         NormalMove
     }
@@ -2273,13 +2274,22 @@ namespace RogueBasin
                     }
                     else if (monster.Passive)
                     {
-                        //Attack the passive creature.
-                        DoMeleeAttackOnMonster(deltaMove, newPCLocation);
-                        okToMoveIntoSquare = false;
+                        if (!player.Running)
+                        {
+                            //Attack the passive creature.
+                            DoMeleeAttackOnMonster(deltaMove, newPCLocation);
+                            okToMoveIntoSquare = false;
 
-                        attackAction = true;
-                        stationaryAction = true;
-                        moveResults = MoveResults.AttackedMonster;
+                            attackAction = true;
+                            stationaryAction = true;
+                            moveResults = MoveResults.AttackedMonster;
+                        }
+                        else
+                        {
+                            stationaryAction = true;
+                            okToMoveIntoSquare = false;
+                            moveResults = MoveResults.StoppedByMonster;
+                        }
                     }
                     else
                     {

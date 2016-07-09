@@ -142,6 +142,11 @@ namespace RogueBasin
         public PlayerClass PlayerClass { get; private set; }
 
         /// <summary>
+        /// Is the player currently in the running state (changes interactions)
+        /// </summary>
+        public bool Running { get; set; }
+
+        /// <summary>
         /// Number of times we get knocked out
         /// </summary>
         public int NumDeaths { get; set; }
@@ -2901,5 +2906,6 @@ namespace RogueBasin
             }
             return path.Skip(1);
         }
+
     }
 }
