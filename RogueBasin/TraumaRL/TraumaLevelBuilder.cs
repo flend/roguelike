@@ -141,6 +141,53 @@ namespace TraumaRL
             }
             //Make other levels generically
 
+            IEnumerable<int> standardGameLevels = GetStandardGameLevelNos();
+
+            foreach (var level in standardGameLevels)
+            {
+                var thisLevelInfo = GenerateStandardLevel(level, level * 100, "standard" + level, "Standard " + level);
+                levelInfo[level] = thisLevelInfo;
+            }
+
+            //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
+            allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
+        }
+
+        public void CompleteLevels()
+        {
+            ReplaceUnconnectedDoorsWithWalls(medicalLevel);
+
+            if (!quickLevelGen)
+            {
+                ReplaceUnconnectedDoorsWithWalls(lowerAtriumLevel);
+
+                ReplaceUnconnectedDoorsWithWalls(scienceLevel);
+
+                ReplaceUnconnectedDoorsWithWalls(bridgeLevel);
+
+                ReplaceUnconnectedDoorsWithWalls(storageLevel);
+
+                ReplaceUnconnectedDoorsWithWalls(flightDeck);
+
+                ReplaceUnconnectedDoorsWithWalls(reactorLevel);
+
+                ReplaceUnconnectedDoorsWithWalls(computerCoreLevel);
+
+                ReplaceAllsDoorsWithFloor(arcologyLevel);
+
+                ReplaceAllsDoorsWithFloor(commercialLevel);
+            }
+
+            IEnumerable<int> standardGameLevels = GetStandardGameLevelNos();
+
+            foreach (var level in standardGameLevels)
+            {
+                ReplaceUnconnectedDoorsWithWalls(level);
+            }
+        }
+
+        private IEnumerable<int> GetStandardGameLevelNos()
+        {
             IEnumerable<int> standardGameLevels;
 
             if (quickLevelGen)
@@ -151,15 +198,7 @@ namespace TraumaRL
             {
                 standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel, lowerAtriumLevel });
             }
-
-            foreach (var level in standardGameLevels)
-            {
-                var thisLevelInfo = GenerateStandardLevel(level, level * 100, "standard" + level, "Standard " + level);
-                levelInfo[level] = thisLevelInfo;
-            }
-
-            //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
-            allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
+            return standardGameLevels;
         }
 
         private LevelInfo GenerateMedicalLevel(int levelNo)
@@ -201,10 +240,7 @@ namespace TraumaRL
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
-
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
-
+            
             //Wall type
             medicalInfo.TerrainMapping = irisTerrainMapping;
 
@@ -273,9 +309,6 @@ namespace TraumaRL
 
             //Add extra corridors
             //AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
-
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             //Wall type
             levelInfo.TerrainMapping = lineTerrainMapping;
@@ -346,9 +379,6 @@ namespace TraumaRL
             //Add extra corridors
             //AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
 
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
-
             //Wall type
             levelInfo.TerrainMapping = lineTerrainMapping;
 
@@ -393,9 +423,6 @@ namespace TraumaRL
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
-
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             return medicalInfo;
         }
@@ -443,9 +470,6 @@ namespace TraumaRL
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
 
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
-
             medicalInfo.TerrainMapping = cutTerrainMapping;
 
             return medicalInfo;
@@ -462,7 +486,17 @@ namespace TraumaRL
                 AddReplaceableVaults(templateGenerator, corridor1, new List<RoomTemplate> { armory1, armory2, armory3 }, maxPlaceHolders));
         }
 
-        Connection connectionFromReactorOriginRoom;
+        private void ReplaceAllsDoorsWithFloor(int levelNo)
+        {
+            levelInfo[levelNo].LevelGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            //Remove doors
+            levelInfo[levelNo].LevelGenerator.ReplaceConnectedDoorsWithTerrain(RoomTemplateTerrain.Floor);
+        }
+
+        private void ReplaceUnconnectedDoorsWithWalls(int levelNo)
+        {
+            levelInfo[levelNo].LevelGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+        }
 
         private LevelInfo GenerateReactorLevel(int levelNo, int startVertexIndex)
         {
@@ -485,7 +519,7 @@ namespace TraumaRL
 
             PlaceOriginRoom(templateGenerator, originRoom);
 
-            connectionFromReactorOriginRoom = AddRoomToRandomOpenDoor(templateGenerator, largeRoom, corridor1, 2);
+            AddRoomToRandomOpenDoor(templateGenerator, largeRoom, corridor1, 2);
 
             int numberOfRandomRooms = 20;
 
@@ -510,9 +544,6 @@ namespace TraumaRL
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
-
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             //Wall type
             medicalInfo.TerrainMapping = securityTerrainMapping;
@@ -542,7 +573,7 @@ namespace TraumaRL
 
             PlaceOriginRoom(templateGenerator, originRoom);
 
-            connectionFromReactorOriginRoom = AddRoomToRandomOpenDoor(templateGenerator, largeRoom, corridor1, 2);
+            AddRoomToRandomOpenDoor(templateGenerator, largeRoom, corridor1, 2);
 
             int numberOfRandomRooms = 20;
 
@@ -567,9 +598,6 @@ namespace TraumaRL
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
-
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
 
             //Wall type
             medicalInfo.TerrainMapping = panelTerrainMapping;
@@ -649,17 +677,10 @@ namespace TraumaRL
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 1, new List<RoomTemplate> { corridor1 });
 
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
-            //Remove doors
-            templateGenerator.ReplaceConnectedDoorsWithTerrain(RoomTemplateTerrain.Floor);
-
             //Wall type
             medicalInfo.TerrainMapping = bioTerrainMapping;
 
             return medicalInfo;
-
-
         }
 
         private LevelInfo GenerateCommercialLevel(int levelNo, int startVertexIndex)
@@ -719,11 +740,6 @@ namespace TraumaRL
 
             //Add extra corridors
             AddCorridorsBetweenOpenDoors(templateGenerator, 1, new List<RoomTemplate> { corridor1 });
-
-            //Tidy terrain
-            templateGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
-            //Remove doors
-            templateGenerator.ReplaceConnectedDoorsWithTerrain(RoomTemplateTerrain.Floor);
 
             //Wall type
             medicalInfo.TerrainMapping = dipTerrainMapping;

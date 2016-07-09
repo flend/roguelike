@@ -135,9 +135,6 @@ namespace TraumaRL
             SetupMapState(levelBuilder, levelInfo);
             MapInfo mapInfo = mapState.MapInfo;
             
-            //Add maps to the dungeon (must be ordered)
-            AddLevelMapsToDungeon(levelInfo);
-
             //Add elevator features to link the maps
             if (!quickLevelGen)
                 AddElevatorFeatures(mapInfo, levelInfo);
@@ -152,6 +149,12 @@ namespace TraumaRL
 
             //Add debug stuff in the first room
             AddDebugItems(mapInfo);
+
+            //Close off any unused doors etc.
+            levelBuilder.CompleteLevels();
+            
+            //Add maps to the dungeon (must be ordered)
+            AddLevelMapsToDungeon(levelInfo);
 
             //Set player's start location (must be done before adding items)
             SetPlayerStartLocation(mapInfo);
@@ -188,6 +191,14 @@ namespace TraumaRL
             mapState.AllReplaceableVaults = levelBuilder.AllReplaceableVaults;
 
             CalculateLevelDifficulty(mapState);
+        }
+
+        private void UpdateMapStateAfterAddition(TraumaLevelBuilder levelBuilder, Dictionary<int, LevelInfo> levelInfo)
+        {
+            var startLevel = 0;
+            mapState.UpdateWithNewLevelMaps(levelLinks, levelInfo, startLevel);
+
+            mapState.AllReplaceableVaults = levelBuilder.AllReplaceableVaults;
         }
 
         private void AssertMapIsSolveable(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)
@@ -264,6 +275,8 @@ namespace TraumaRL
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
+            BuildMapExpandQuest(mapState, questMapBuilder);
+
             if (!quickLevelGen)
             {
                 BuildMainQuest(mapState, questMapBuilder);
@@ -278,6 +291,15 @@ namespace TraumaRL
 
                 BuildGoodyQuests(mapState, questMapBuilder, roomConnectivityMap);
             }
+        }
+
+        private void BuildMapExpandQuest(MapState mapState, QuestMapBuilder questMapBuilder)
+        {
+            //Try to add a new room the medical level
+            //var mapExpandQuest = new Quests.MapExpandQuest(mapState, questMapBuilder, logGen);
+            //mapExpandQuest.SetupQuest();
+
+            //Requires a map update
         }
 
         private void BuildRandomElevatorQuests(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap)
