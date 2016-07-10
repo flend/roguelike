@@ -39,7 +39,7 @@ namespace TraumaRL.Quests
             var roomsOnLevel = MapState.MapInfo.GetRoomIndicesForLevel(levelToPlace);
 
             var filteredRooms = Builder.FilterRoomsByPath(MapState, roomsOnLevel, criticalPath, true, QuestMapBuilder.CluePath.OnCriticalPath, true);
-            var roomToPlaceLog = filteredRooms.RandomElement();
+            var roomToPlaceLog = filteredRooms.Skip(1).Take(filteredRooms.Count() / 2).RandomElement();
 
             var logEntry = LogGen.GenerateGeneralQuestLogEntry(MapState, "qe_stash1", levelToPlace, levelToPlace);
             var log = new Log(logEntry, "mapexpandquest-" + Game.Random.Next());
