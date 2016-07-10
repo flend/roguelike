@@ -15,10 +15,13 @@ namespace RogueBasin
         MapPopulator populator;
         Dictionary<int, LevelInfo> levelInfo;
         List<int> gameLevels;
+        ConnectivityMap levelLinks;
         ImmutableDictionary<string, int> levelIds;
         ImmutableDictionary<int, string> levelNames;
         ImmutableDictionary<int, string> levelReadableNames;
-        
+        int startLevel;
+        int startVertex;
+                
         Dictionary<int, int> levelDifficulty = new Dictionary<int,int>();
         IEnumerable<int> allReplaceableVaults;
         Dictionary<int, int> levelDepths;
@@ -34,9 +37,25 @@ namespace RogueBasin
             populator = new MapPopulator();
         }
 
-        public void UpdateWithNewLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
+        /// <summary>
+        /// Call if the contents of levelLinks or levelInfo has changed (e.g. to add a new room).
+        /// Rebuilds mapInfo and related state
+        /// </summary>
+        public void RefreshLevelMaps()
+        {
+            InitialiseWithLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
+            doorAndClueManager = new DoorAndClueManager(this.doorAndClueManager, MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
+        }
+
+        /// <summary>
+        /// Process the level maps and links to build mapInfo and related state
+        /// </summary>
+        public void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel, int startVertex)
         {
             this.levelInfo = levelInfo;
+            this.levelLinks = levelLinks;
+            this.startLevel = startLevel;
+            this.startVertex = startVertex;
             
             //Build the room graph containing all levels
 
@@ -99,11 +118,7 @@ namespace RogueBasin
             levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
             levelReadableNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelReadableName);
             levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
-        }
 
-        public void InitialiseDoorAndClueManager(int startVertex)
-        {
-            //This must be done after UpdateMapInfoWithNewLevelMaps() called [the first time]
             doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
         }
 
@@ -132,5 +147,8 @@ namespace RogueBasin
         public IEnumerable<int> AllReplaceableVaults { get { return allReplaceableVaults; } set { allReplaceableVaults = value; } }
 
         public Dictionary<int, int> LevelDepths { get { return levelDepths; } }
+
+        public int StartLevel { get { return startLevel; } }
+        public int StartVertex { get { return startVertex; } }
     }
 }

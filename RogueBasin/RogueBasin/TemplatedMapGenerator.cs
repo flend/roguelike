@@ -278,6 +278,11 @@ namespace RogueBasin
             return true;
         }
 
+        public Connection PlaceRoomTemplateAlignedWithExistingDoor(RoomTemplate roomTemplateToPlace, DoorInfo existingDoor, int newRoomDoorIndex)
+        {
+            return PlaceRoomTemplateAlignedWithExistingDoor(roomTemplateToPlace, null, existingDoor, newRoomDoorIndex, 0);
+        }
+
         /// <summary>
         /// Place a room template aligned with an existing door.
         /// Returns Connection(Source = existing room or corridor to new room, Target = new room))

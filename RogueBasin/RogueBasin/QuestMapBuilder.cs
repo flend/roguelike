@@ -185,10 +185,13 @@ namespace RogueBasin
             OnCriticalPath, NotOnCriticalPath, Any
         }
 
-        public IEnumerable<int> FilterClueRooms(MapState mapState, IEnumerable<int> allCandidateRooms, IEnumerable<Connection> criticalPath, bool enforceClueOnDestLevel, CluePath clueCriticalPath, bool clueNotInCorridors)
+        public IEnumerable<int> FilterRoomsByPath(MapState mapState, IEnumerable<int> allCandidateRooms, IEnumerable<Connection> criticalPath, bool enforceClueOnDestLevel, CluePath clueCriticalPath, bool clueNotInCorridors, bool excludeVaults = true)
         {
             var mapInfo = mapState.MapInfo;
-            var candidateRooms = allCandidateRooms.Except(mapState.AllReplaceableVaults);
+            var candidateRooms = allCandidateRooms;
+            if(excludeVaults) 
+                candidateRooms = candidateRooms.Except(mapState.AllReplaceableVaults);
+
             if (enforceClueOnDestLevel)
                 candidateRooms = candidateRooms.Intersect(mapInfo.GetRoomIndicesForLevel(mapInfo.GetLevelForRoomIndex(criticalPath.Last().Target)));
 
@@ -217,7 +220,7 @@ namespace RogueBasin
             return preferredRoomsIncludingType;
         }
 
-        public List<int> GetRandomRoomsForClues(MapState mapState, int cluesToPlace, IEnumerable<int> allowedRoomsForClues)
+        public List<int> PickExpandedRoomsFromReducedRoomsList(MapState mapState, int cluesToPlace, IEnumerable<int> allowedRoomsForClues)
         {
             if (allowedRoomsForClues.Count() == 0)
                 throw new ApplicationException("Not enough rooms to place clues");
@@ -452,6 +455,11 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("Placing " + clueItemToPlace.SingleItemDescription + " on level " + captainsIdLevel + " in vault " + captainIdRoom, LogDebugLevel.Medium);
 
             return captainIdRoom;
+        }
+
+        public void PlaceItems(MapState mapState, Item item, int room, bool boundariesPreferred)
+        {
+            PlaceItems(mapState, Enumerable.Repeat(item, 1), Enumerable.Repeat(room, 1), boundariesPreferred);
         }
 
         public void PlaceItems(MapState mapState, IEnumerable<Item> items, IEnumerable<int> rooms, bool boundariesPreferred)

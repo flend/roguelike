@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Quests\MapExpandQuest.cs" />
     <Compile Include="Quests\ArmoryQuest.cs" />
     <Compile Include="Quests\BlockElevatorQuest.cs" />
     <Compile Include="DungeonDecorator.cs" />

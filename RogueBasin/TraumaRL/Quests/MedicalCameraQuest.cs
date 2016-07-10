@@ -38,7 +38,7 @@ namespace TraumaRL.Quests
             var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
             allowedRoomsForClues = mapInfo.FilterOutCorridors(allowedRoomsForClues);
 
-            var roomsForMonsters = Builder.GetRandomRoomsForClues(MapState, objectsToPlace, allowedRoomsForClues);
+            var roomsForMonsters = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, objectsToPlace, allowedRoomsForClues);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
             Builder.PlaceCreatureClues<RogueBasin.Creatures.Camera>(MapState, clues, true, false, true);
@@ -47,7 +47,7 @@ namespace TraumaRL.Quests
             //These will not be turned into in-engine clue items, so they can't be used to open the door
             //They are added though, to ensure that they are readable before the door is opened
 
-            var roomsForLogs = Builder.GetRandomRoomsForClues(MapState, 2, allowedRoomsForClues);
+            var roomsForLogs = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, allowedRoomsForClues);
             var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
 
             var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateElevatorLogEntry(MapState, medicalLevel, lowerAtriumLevel), logClues[0]);

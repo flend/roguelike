@@ -135,7 +135,7 @@ namespace TraumaRL
 
         private void RandomSetup() {
             int seedToUse = new Random().Next();
-            //int seedToUse = 153;
+            //seedToUse = 153;
             LogFile.Log.LogEntry("Random seed: " + seedToUse);
             Game.Random = new Random(seedToUse);
         }

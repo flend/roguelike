@@ -104,9 +104,9 @@ namespace TraumaRL.Quests
             //Place clues
 
             var allRoomsForClue = manager.GetValidRoomsToPlaceClueForDoor(doorId);
-            var preferredRooms = builder.FilterClueRooms(mapState, allRoomsForClue, criticalPath, enforceClueOnDestLevel, clueNotOnCriticalPath, clueNotInCorridors);
+            var preferredRooms = builder.FilterRoomsByPath(mapState, allRoomsForClue, criticalPath, enforceClueOnDestLevel, clueNotOnCriticalPath, clueNotInCorridors);
 
-            var roomsForClues = builder.GetRandomRoomsForClues(mapState, cluesForDoor, preferredRooms);
+            var roomsForClues = builder.PickExpandedRoomsFromReducedRoomsList(mapState, cluesForDoor, preferredRooms);
             var clues = manager.AddCluesToExistingDoor(doorId, roomsForClues);
 
             var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, colorToUse, doorName));
@@ -119,14 +119,14 @@ namespace TraumaRL.Quests
             {
                 //Put major clue on the critical path
 
-                var preferredRoomsForLogs = builder.FilterClueRooms(mapState, allRoomsForClue, criticalPath, false, logOnCriticalPath, logNotInCorridors);
-                var roomsForLogs = builder.GetRandomRoomsForClues(mapState, 1, preferredRoomsForLogs);
+                var preferredRoomsForLogs = builder.FilterRoomsByPath(mapState, allRoomsForClue, criticalPath, false, logOnCriticalPath, logNotInCorridors);
+                var roomsForLogs = builder.PickExpandedRoomsFromReducedRoomsList(mapState, 1, preferredRoomsForLogs);
                 var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogs);
 
                 //Put minor clue somewhere else
-                var preferredRoomsForLogsNonCritical = builder.FilterClueRooms(mapState, allRoomsForClue, criticalPath, false, QuestMapBuilder.CluePath.Any, logNotInCorridors);
+                var preferredRoomsForLogsNonCritical = builder.FilterRoomsByPath(mapState, allRoomsForClue, criticalPath, false, QuestMapBuilder.CluePath.Any, logNotInCorridors);
 
-                var roomsForLogsNonCritical = builder.GetRandomRoomsForClues(mapState, 1, preferredRoomsForLogsNonCritical);
+                var roomsForLogsNonCritical = builder.PickExpandedRoomsFromReducedRoomsList(mapState, 1, preferredRoomsForLogsNonCritical);
                 var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
 
                 var coupledLogs = LogGen.GenerateCoupledDoorLogEntry(mapState, doorName, mapInfo.GetLevelForRoomIndex(criticalConnectionForDoor.Source),

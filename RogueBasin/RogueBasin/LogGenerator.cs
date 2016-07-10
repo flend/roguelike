@@ -221,20 +221,15 @@ namespace RogueBasin
 
             return entry;
         }
+
         public LogEntry GenerateGeneralQuestLogEntry(MapState mapState, string logname)
         {
             return GenerateGeneralQuestLogEntry(mapState, logname, 0, 0);
         }
 
-        public LogEntry GenerateGeneralQuestLogEntry(MapState mapState, string logname, int levelForDoor, int levelForClue)
+        private IEnumerable<string> SubstituteQuestLogLines(MapState mapState, IEnumerable<string> logLines, int levelForDoor, int levelForClue)
         {
-            var entry = new LogEntry();
-
-            entry.title = GenerateRandomTitle();
-
-            var randomLog = logDatabaseByFilename[logname];
-            var substitutedLog = randomLog;
-            List<string> logEntryLines = substitutedLog.lines;
+            var logEntryLines = logLines;
 
             try
             {
@@ -246,14 +241,32 @@ namespace RogueBasin
             });
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //Not to worry
+                LogFile.Log.LogEntryDebug("Failed to substitute log lines: " + ex.Message, LogDebugLevel.High);
             }
 
-            entry.lines = logEntryLines;
+            return logEntryLines;
+        }
 
-            return entry;
+        public LogEntry GenerateGeneralQuestLogEntry(MapState mapState, string logname, int levelForDoor, int levelForClue)
+        {
+            var entry = new LogEntry();
+
+            entry.title = GenerateRandomTitle();
+
+            try {
+
+                var baseLog = logDatabaseByFilename[logname];
+                IEnumerable<string> substitutedLines = SubstituteQuestLogLines(mapState, baseLog.lines, levelForDoor, levelForClue);
+                entry.lines = substitutedLines.ToList();
+
+                return entry;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Failed to create logentry " + logname + ": " + ex.Message);
+            }
         }
 
         public List<LogEntry> GenerateCoupledDoorLogEntry(MapState mapState, string doorId, int levelForDoor, int levelForClue)

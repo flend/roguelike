@@ -1003,6 +1003,7 @@
     <EmbeddedResource Include="bin\Debug\vaults\oval_vault_small1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\basic_large_arena.room" />
     <EmbeddedResource Include="bin\Debug\movies\fun_mode_failure0.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_stash1.amf" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

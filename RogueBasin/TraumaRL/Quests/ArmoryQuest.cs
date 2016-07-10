@@ -80,10 +80,10 @@ namespace TraumaRL.Quests
                 var elevatorFromLowerLevel = levelInfo[thisLevel].ConnectionsToOtherLevels[lowerLevelFloor].Target;
                 var criticalPath = MapState.MapInfo.Model.GetPathBetweenVerticesInReducedMap(elevatorFromLowerLevel, thisRoom);
 
-                var filteredRooms = Builder.FilterClueRooms(MapState, allowedRoomsForClues, criticalPath, true, QuestMapBuilder.CluePath.NotOnCriticalPath, true);
+                var filteredRooms = Builder.FilterRoomsByPath(MapState, allowedRoomsForClues, criticalPath, true, QuestMapBuilder.CluePath.NotOnCriticalPath, true);
                 var roomsToPlaceMonsters = new List<int>();
 
-                var roomsForMonsters = Builder.GetRandomRoomsForClues(MapState, 1, filteredRooms);
+                var roomsForMonsters = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 1, filteredRooms);
                 var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
 
@@ -122,9 +122,9 @@ namespace TraumaRL.Quests
                 //Logs - try placing them on the critical path from the start of the game!
 
                 var criticalPathFromStart = mapInfo.Model.GetPathBetweenVerticesInReducedMap(0, thisRoom);
-                var preferredRoomsForLogsNonCritical = Builder.FilterClueRooms(MapState, allowedRoomsForClues, criticalPath, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
+                var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForClues, criticalPath, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
 
-                var roomsForLogsNonCritical = Builder.GetRandomRoomsForClues(MapState, 1, preferredRoomsForLogsNonCritical);
+                var roomsForLogsNonCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 1, preferredRoomsForLogsNonCritical);
 
                 var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
                 var clueName = goodyRoomKeyNames[thisLevel];

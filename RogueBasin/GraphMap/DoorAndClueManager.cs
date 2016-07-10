@@ -72,6 +72,21 @@ namespace GraphMap
             this.startVertex = model.StartVertex;
         }
 
+        public DoorAndClueManager(DoorAndClueManager doorAndClueManager, MapCycleReducer reducedMap, int startVertex)
+        {
+            //Should refactor DoorAndClueManager into a wrapper and state holder to make this nicer
+            this.mapNoCycles = reducedMap;
+            this.startVertex = startVertex;
+
+            //Copy state
+            this.nextLockIndex = doorAndClueManager.nextLockIndex;
+            this.lockDependencyGraph = doorAndClueManager.lockDependencyGraph;
+            this.doorMap = doorAndClueManager.doorMap;
+            this.objectiveMap = doorAndClueManager.objectiveMap;
+            this.objectiveRoomMap = doorAndClueManager.objectiveRoomMap;
+            this.clueMap = doorAndClueManager.clueMap;
+        }
+
         public Dictionary<int, List<Clue>> ClueMap
         {
             get { return clueMap; }

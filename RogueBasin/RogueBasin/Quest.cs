@@ -24,6 +24,5 @@ namespace RogueBasin
         protected QuestMapBuilder Builder { get { return builder; } }
         protected MapState MapState { get { return mapState; } }
         protected LogGenerator LogGen { get { return logGen; } }
-
     }
 }
