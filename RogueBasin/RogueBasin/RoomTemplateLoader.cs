@@ -1290,53 +1290,64 @@ namespace RogueBasin
                 mapRows.Add(thisLine);
             }
 
-            //Calculate dimensions
-            int width = 0;
-            int height = 0;
-
-            foreach (string mapRow in mapRows)
-            {
-                if (mapRow.Length > width)
-                    width = mapRow.Length;
-
-                height++;
-            }
-
-            if (width == 0)
-            {
-                LogFile.Log.LogEntry("No data in room template file stream");
-                throw new ApplicationException("No data in room template file - width is 0");
-            }
-
             //Build a 2d representation of the room
 
-            RoomTemplateTerrain[,] roomMap = new RoomTemplateTerrain[width, height];
+            var roomMap = new List<List<RoomTemplateTerrain>>();
             List<RoomTemplate.PotentialDoor> potentialDoors = new List<RoomTemplate.PotentialDoor>();
+            int maxWidth = 0;
 
             for (int y = 0; y < mapRows.Count; y++)
             {
                 int x;
+                var rowTerrain = new List<RoomTemplateTerrain>();
+
                 for (x = 0; x < mapRows[y].Length; x++)
                 {
                     char inputTerrain = mapRows[y][x];
 
                     if (!terrainMapping.ContainsKey(inputTerrain))
                     {
-                        LogFile.Log.LogEntryDebug("No mapping for char : " + inputTerrain + " in file", LogDebugLevel.High);
-                        roomMap[x, y] = RoomTemplateTerrain.Transparent;
+                        var errorMsg = "No mapping for char : " + inputTerrain + " in file";
+                        LogFile.Log.LogEntryDebug(errorMsg, LogDebugLevel.High);
+                        continue;
                     }
 
-                    roomMap[x, y] = terrainMapping[inputTerrain];
+                    rowTerrain.Add(terrainMapping[inputTerrain]);
                 }
 
-                //Fill all rows to width length
-                for (; x < width; x++)
+                if (rowTerrain.Count > 0)
                 {
-                    roomMap[x, y] = RoomTemplateTerrain.Transparent;
+                    roomMap.Add(rowTerrain);
+                    maxWidth = Math.Max(rowTerrain.Count, maxWidth);
                 }
             }
 
-            return new RoomTemplate(roomMap);
+            if (maxWidth == 0)
+            {
+                LogFile.Log.LogEntry("No data in room template file stream");
+                throw new ApplicationException("No data in room template file - width is 0");
+            }
+
+            //Fill all rows to width length
+            for (int i = 0; i < roomMap.Count; i++) 
+            {
+                var fillLength = maxWidth - roomMap[i].Count;
+                for (int j = 0; j < fillLength; j++)
+                {
+                    roomMap[i].Add(RoomTemplateTerrain.Transparent);
+                }
+            }
+
+            RoomTemplateTerrain[,] roomTemplate = new RoomTemplateTerrain[maxWidth, roomMap.Count];
+            for (int i = 0; i < roomMap.Count; i++)
+            {
+                for (int j = 0; j < roomMap[i].Count; j++)
+                {
+                    roomTemplate[j, i] = roomMap[i][j];
+                }
+            }
+
+            return new RoomTemplate(roomTemplate);
         }
 
         /** Loads template from manifest resource file. Throws exception on failure */
