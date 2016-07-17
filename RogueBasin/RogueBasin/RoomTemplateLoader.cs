@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RogueBasin.Features;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -26,7 +27,7 @@ namespace RogueBasin
             Top = 0, Left = 1, Bottom = 2, Right = 3
         }
 
-        private Dictionary<Point, Feature> features;
+        private Dictionary<Point, Feature> features = new Dictionary<Point,Feature>();
 
         public bool IsCorridor { get; private set; }
 
@@ -93,6 +94,41 @@ namespace RogueBasin
             }
 
             features[pointInRoom] = feature;
+        }
+
+        public override bool Equals(System.Object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            RoomTemplate p = obj as RoomTemplate;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            var terrainTheSame = IsTerrainTheSame(p);
+
+            var featuresDifferent = features.Where(f => !p.features.Any(a => a.Key == f.Key && a.Value == f.Value)).Any();
+
+            return terrainTheSame && !featuresDifferent;
+        }
+
+        public bool Equals(RoomTemplate p)
+        {
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            var terrainTheSame = IsTerrainTheSame(p);
+
+            var featuresDifferent = features.Where(f => !p.features.Any(a => a.Key == f.Key && a.Value == f.Value)).Any();
+
+            return terrainTheSame && !featuresDifferent;
         }
         
         private bool IsTerrainTheSame(RoomTemplate p)
@@ -1268,24 +1304,101 @@ namespace RogueBasin
     /** Loads a room / vault from disk and returns as a usuable object */
     public class RoomTemplateLoader
     {
+        class FeatureGenerator
+        {
+            private string mapKey;
+
+            public FeatureGenerator(string mapKey)
+            {
+                this.mapKey = mapKey;
+
+                try
+                {
+                    Enum.Parse(typeof(DecorationFeatureDetails.DecorationFeatures), mapKey);
+                }
+                catch (Exception)
+                {
+                    var errorMsg = "Can't find decorative feature with name: " + mapKey;
+                    LogFile.Log.LogEntryDebug(errorMsg, LogDebugLevel.High);
+                    throw new ApplicationException(errorMsg);
+                }
+            }
+
+            public Feature CreateFeature()
+            {
+                var decorationType = 
+                    (DecorationFeatureDetails.DecorationFeatures) Enum.Parse(typeof(DecorationFeatureDetails.DecorationFeatures), mapKey);
+                var decoration = DecorationFeatureDetails.decorationFeatures[decorationType];
+
+                return new RogueBasin.Features.StandardDecorativeFeature(decoration.representation, decoration.colour, decoration.isBlocking);
+            }
+        }
+
 
         /** Loads template from a file stream. Throws exception on failure */
         public static RoomTemplate LoadTemplateFromFile(Stream fileStream, Dictionary<char, RoomTemplateTerrain> terrainMapping)
         {
-            StreamReader reader = new StreamReader(fileStream);
-            string thisLine;
+            var mapRows = LoadTrimmedLinesFromFile(fileStream);
 
-            List<string> mapRows = new List<string>();
+            var keyRow = mapRows.FindIndex(r => r == "KEY");
 
-            while ((thisLine = reader.ReadLine()) != null)
+            //Only terrain
+            if (keyRow == -1)
             {
-                mapRows.Add(thisLine);
+                return GenerateTerrainTemplate(terrainMapping, mapRows);
             }
+            else
+            {
+                var featureMapping = CreateFeatureMapping(mapRows.GetRange(keyRow, mapRows.Count - keyRow));
+                return GenerateTerrainTemplate(terrainMapping, featureMapping, mapRows.GetRange(0, keyRow));
+            }
+        }
+
+        private static Dictionary<char, FeatureGenerator> CreateFeatureMapping(List<string> keyRows)
+        {
+            var featureMapping = new Dictionary<char, FeatureGenerator>();
+
+            foreach (var row in keyRows.Skip(1))
+            {
+                try
+                {
+                    var trimmedRow = row.Trim();
+
+                    var colonIndex = trimmedRow.IndexOf(":");
+
+                    var leftOfColon = trimmedRow.Substring(0, colonIndex).Trim();
+                    var mapChar = leftOfColon[0];
+
+                    var rightOfColon = trimmedRow.Substring(colonIndex + 1).Trim();
+                    var featureGenerator = new FeatureGenerator(rightOfColon);
+
+                    featureMapping.Add(mapChar, featureGenerator);
+                }
+                catch (Exception ex)
+                {
+                    var errorMsg = "Failed to parse key row: " + row + " because " + ex.Message;
+                    LogFile.Log.LogEntryDebug(errorMsg, LogDebugLevel.High);
+                    throw new ApplicationException(errorMsg);
+                }
+            }
+
+            return featureMapping;
+        }
+        
+        private static RoomTemplate GenerateTerrainTemplate(Dictionary<char, RoomTemplateTerrain> terrainMapping, List<string> mapRows)
+        {
+            return GenerateTerrainTemplate(terrainMapping, new Dictionary<char, FeatureGenerator>(), mapRows);
+        }
+
+        private static RoomTemplate GenerateTerrainTemplate(Dictionary<char, RoomTemplateTerrain> terrainMapping, Dictionary<char, FeatureGenerator> featureMapping, List<string> mapRows)
+        {
 
             //Build a 2d representation of the room
 
             var roomMap = new List<List<RoomTemplateTerrain>>();
             List<RoomTemplate.PotentialDoor> potentialDoors = new List<RoomTemplate.PotentialDoor>();
+            Dictionary<Point, FeatureGenerator> featuresToPlace = new Dictionary<Point, FeatureGenerator>();
+
             int maxWidth = 0;
 
             for (int y = 0; y < mapRows.Count; y++)
@@ -1299,8 +1412,17 @@ namespace RogueBasin
 
                     if (!terrainMapping.ContainsKey(inputTerrain))
                     {
-                        var errorMsg = "No mapping for char : " + inputTerrain + " in file";
-                        LogFile.Log.LogEntryDebug(errorMsg, LogDebugLevel.High);
+                        if (featureMapping.ContainsKey(inputTerrain))
+                        {
+                            featuresToPlace.Add(new Point(x, y), featureMapping[inputTerrain]);
+                        }
+                        else
+                        {                            
+                            var errorMsg = "No mapping for char : " + inputTerrain + " in file";
+                            LogFile.Log.LogEntryDebug(errorMsg, LogDebugLevel.High);
+                            throw new ApplicationException(errorMsg);
+                        }
+
                         continue;
                     }
 
@@ -1320,8 +1442,19 @@ namespace RogueBasin
                 throw new ApplicationException("No data in room template file - width is 0");
             }
 
+            FillRoomsToMaxWidth(roomMap, maxWidth);
+
+            var roomTemplate = BuildRoomTemplate(roomMap, maxWidth);
+
+            AddFeaturesToRoomTemplate(featuresToPlace, roomTemplate);
+
+            return roomTemplate;
+        }
+
+        private static void FillRoomsToMaxWidth(List<List<RoomTemplateTerrain>> roomMap, int maxWidth)
+        {
             //Fill all rows to width length
-            for (int i = 0; i < roomMap.Count; i++) 
+            for (int i = 0; i < roomMap.Count; i++)
             {
                 var fillLength = maxWidth - roomMap[i].Count;
                 for (int j = 0; j < fillLength; j++)
@@ -1329,17 +1462,48 @@ namespace RogueBasin
                     roomMap[i].Add(RoomTemplateTerrain.Transparent);
                 }
             }
+        }
 
-            RoomTemplateTerrain[,] roomTemplate = new RoomTemplateTerrain[maxWidth, roomMap.Count];
+        private static RoomTemplate BuildRoomTemplate(List<List<RoomTemplateTerrain>> roomMap, int maxWidth)
+        {
+            RoomTemplateTerrain[,] roomTemplateTerrain = new RoomTemplateTerrain[maxWidth, roomMap.Count];
             for (int i = 0; i < roomMap.Count; i++)
             {
                 for (int j = 0; j < roomMap[i].Count; j++)
                 {
-                    roomTemplate[j, i] = roomMap[i][j];
+                    roomTemplateTerrain[j, i] = roomMap[i][j];
                 }
             }
 
-            return new RoomTemplate(roomTemplate);
+            var roomTemplate = new RoomTemplate(roomTemplateTerrain);
+            return roomTemplate;
+        }
+
+        private static void AddFeaturesToRoomTemplate(Dictionary<Point, FeatureGenerator> featuresToPlace, RoomTemplate roomTemplate)
+        {
+            foreach (var kv in featuresToPlace)
+            {
+                roomTemplate.AddFeature(kv.Key, kv.Value.CreateFeature());
+            }
+        }
+
+        private static List<string> LoadTrimmedLinesFromFile(Stream fileStream)
+        {
+            StreamReader reader = new StreamReader(fileStream);
+
+            var mapRows = new List<string>();
+            string thisLine;
+
+            while ((thisLine = reader.ReadLine()) != null)
+            {
+                var thisLineTrimmed = thisLine.TrimEnd();
+                if (thisLineTrimmed.Length > 0)
+                {
+                    mapRows.Add(thisLine.TrimEnd());
+                }
+            }
+
+            return mapRows;
         }
 
         /** Loads template from manifest resource file. Throws exception on failure */
