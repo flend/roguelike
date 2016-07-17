@@ -47,7 +47,7 @@ namespace RogueBasin
                 for (int j = 0; j < template.Height; j++)
                 {
                     thisMap.setCell(i, j,
-                        RoomTemplateTerrainWalkable.terrainWalkable[template.terrainMap[i, j]] ? FillingTerrain.Walkable : FillingTerrain.Unwalkable);
+                        RoomTemplateTerrainWalkable.terrainWalkable[template.TerrainMap[i, j]] ? FillingTerrain.Walkable : FillingTerrain.Unwalkable);
                 }
             }
         }

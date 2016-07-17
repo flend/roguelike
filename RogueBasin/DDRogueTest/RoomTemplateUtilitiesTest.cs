@@ -328,7 +328,7 @@ namespace DDRogueTest
                 }
             }
 
-            CollectionAssert.AreEqual(expectedTerrain, transparentTemplatePositioned.Room.terrainMap);
+            CollectionAssert.AreEqual(expectedTerrain, transparentTemplatePositioned.Room.TerrainMap);
         }
 
         [TestMethod]

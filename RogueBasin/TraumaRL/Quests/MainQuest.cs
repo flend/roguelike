@@ -406,7 +406,8 @@ namespace TraumaRL.Quests
             var antennaeLevel = mapInfo.GetLevelForRoomIndex(antennaeVault);
 
             var monstersToPlace = new List<Monster> { new RogueBasin.Creatures.RotatingTurret(), new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.PatrolBotRanged(), new RogueBasin.Creatures.PatrolBotRanged() };
-            Game.Dungeon.MonsterPlacement.AddMonstersToRoom(mapInfo, antennaeLevel, antennaeVault, monstersToPlace);
+            
+            Builder.PlaceCreaturesInRoom(MapState, antennaeLevel, antennaeVault, monstersToPlace, false);
 
             var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Antennae]) };
             Builder.AddStandardDecorativeFeaturesToRoom(MapState, antennaeVault, 10, decorations, false);

@@ -58,7 +58,7 @@ namespace RogueBasin
 
         public RoomTemplateTerrain TerrainAtPoint(Point p)
         {
-            return Room.terrainMap[p.x - X, p.y - Y];
+            return Room.TerrainMap[p.x - X, p.y - Y];
         }
     }
 
@@ -67,8 +67,6 @@ namespace RogueBasin
      *  Z-ordering is currently meaningless because no overlap is allowed**/
     public class TemplatedMapBuilder
     {
-
-
         /// <summary>
         /// 2d array for terrain
         /// </summary>
@@ -122,7 +120,7 @@ namespace RogueBasin
 
         public bool CanBePlacedWithoutOverlappingOtherTemplates(TemplatePositioned template)
         {
-            return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
+            return mapCache.CheckMergeArea(template.Location, template.Room.TerrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
         }
 
         /// <summary>
@@ -132,7 +130,7 @@ namespace RogueBasin
         /// <returns></returns>
         public bool CanBePlacedOverlappingOtherTemplates(TemplatePositioned template)
         {
-            return mapCache.CheckMergeArea(template.Location, template.Room.terrainMap, OverrideFloorTerrain);
+            return mapCache.CheckMergeArea(template.Location, template.Room.TerrainMap, OverrideFloorTerrain);
         }
         
         private RoomTemplateTerrain MergeTerrain(RoomTemplateTerrain originTerrain, RoomTemplateTerrain newTerrain)
@@ -191,7 +189,7 @@ namespace RogueBasin
 
             try
             {
-                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.TerrainMap, MergeTerrain, CheckNotCompletelyOverlapping);
       
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), MergeIds);
                 return true;
@@ -215,7 +213,7 @@ namespace RogueBasin
 
             try
             {
-                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, OverrideFloorTerrain);
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.TerrainMap, OverrideFloorTerrain);
 
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), OverrideIds);
 
@@ -238,7 +236,7 @@ namespace RogueBasin
         {
             try
             {
-                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.terrainMap, OverrideTerrain);
+                mapCache.MergeArea(templateToAdd.Location, templateToAdd.Room.TerrainMap, OverrideTerrain);
 
                 idCache.MergeArea(templateToAdd.Location, MakeIdArray(templateToAdd), OverrideIds);
             }
@@ -291,13 +289,13 @@ namespace RogueBasin
 
         private int[,] MakeIdArray(TemplatePositioned template)
         {
-            var ret = new int[template.Room.terrainMap.GetLength(0), template.Room.terrainMap.GetLength(1)];
+            var ret = new int[template.Room.TerrainMap.GetLength(0), template.Room.TerrainMap.GetLength(1)];
 
-            for (int i = 0; i < template.Room.terrainMap.GetLength(0); i++)
+            for (int i = 0; i < template.Room.TerrainMap.GetLength(0); i++)
             {
-                for (int j = 0; j < template.Room.terrainMap.GetLength(1); j++)
+                for (int j = 0; j < template.Room.TerrainMap.GetLength(1); j++)
                 {
-                    if (template.Room.terrainMap[i, j] != RoomTemplateTerrain.Transparent)
+                    if (template.Room.TerrainMap[i, j] != RoomTemplateTerrain.Transparent)
                         ret[i, j] = template.RoomIndex;
                     else
                         ret[i, j] = defaultId;

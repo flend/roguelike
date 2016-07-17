@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -25,12 +26,16 @@ namespace RogueBasin
             Top = 0, Left = 1, Bottom = 2, Right = 3
         }
 
+        private Dictionary<Point, Feature> features;
+
         public bool IsCorridor { get; private set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
         
-        public RoomTemplateTerrain[,] terrainMap;
+        public RoomTemplateTerrain[,] TerrainMap { get; private set; }
+
+        public ImmutableDictionary<Point, Feature> Features { get { return features.ToImmutableDictionary(); } }
 
         /// <summary>
         /// Get the potential doors. Indexed in by row then column
@@ -46,8 +51,8 @@ namespace RogueBasin
                 {
                     for (int j = 0; j < Width; j++)
                     {
-                        if (terrainMap[j, i] == RoomTemplateTerrain.OpenWithPossibleDoor ||
-                            terrainMap[j, i] == RoomTemplateTerrain.WallWithPossibleDoor)
+                        if (TerrainMap[j, i] == RoomTemplateTerrain.OpenWithPossibleDoor ||
+                            TerrainMap[j, i] == RoomTemplateTerrain.WallWithPossibleDoor)
                         {
                             doors.Add(new PotentialDoor(new Point(j, i)));
                         }
@@ -70,39 +75,26 @@ namespace RogueBasin
 
         private void SetMapRelatedMembers(RoomTemplateTerrain[,] terrain)
         {
-            this.terrainMap = (RoomTemplateTerrain[,])terrain.Clone();
-            Width = terrainMap.GetLength(0);
-            Height = terrainMap.GetLength(1);
-
+            this.TerrainMap = (RoomTemplateTerrain[,])terrain.Clone();
+            Width = TerrainMap.GetLength(0);
+            Height = TerrainMap.GetLength(1);
         }
 
-        public override bool Equals(System.Object obj)
+        public void AddFeature(Point pointInRoom, Feature feature)
         {
-            // If parameter is null return false.
-            if (obj == null)
+            if (pointInRoom.x < 0 || pointInRoom.y < 0 || pointInRoom.x >= Width || pointInRoom.y >= Height)
             {
-                return false;
+                throw new ApplicationException("Can't place feature at " + pointInRoom + " - not within room.");
             }
 
-            RoomTemplate p = obj as RoomTemplate;
-            if ((System.Object)p == null)
+            if (TerrainMap[pointInRoom.x, pointInRoom.y] != RoomTemplateTerrain.Floor)
             {
-                return false;
+                throw new ApplicationException("Can't place feature at " + pointInRoom + " - must be placed on floor.");
             }
 
-            return IsTerrainTheSame(p);
+            features[pointInRoom] = feature;
         }
-
-        public bool Equals(RoomTemplate p)
-        {
-            if ((object)p == null)
-            {
-                return false;
-            }
-
-            return IsTerrainTheSame(p);
-        }
-
+        
         private bool IsTerrainTheSame(RoomTemplate p)
         {
             if(p.Width != this.Width)
@@ -115,7 +107,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < Height; j++)
                 {
-                    if (this.terrainMap[i, j] != p.terrainMap[i, j])
+                    if (this.TerrainMap[i, j] != p.TerrainMap[i, j])
                         return false;
                 }
             }
@@ -131,7 +123,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < Height; j++)
                 {
-                    if (terrainMap[i, j] == RoomTemplateTerrain.Wall)
+                    if (TerrainMap[i, j] == RoomTemplateTerrain.Wall)
                         hashCount++;
                 }
             }
@@ -201,7 +193,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < room.Height; j++)
                 {
-                    if (room.terrainMap[i, j] == terrainToFind)
+                    if (room.TerrainMap[i, j] == terrainToFind)
                         candidatePoints.Add(new Point(i, j));
                 }
             }
@@ -219,7 +211,7 @@ namespace RogueBasin
                 {
                     var doJitter = Game.Random.Next(100) * jitterRatio > 1.0;
 
-                    if (room.terrainMap[i, j] != RoomTemplateTerrain.Floor)
+                    if (room.TerrainMap[i, j] != RoomTemplateTerrain.Floor)
                         continue;
 
                     Point p = new Point(i, j);
@@ -247,7 +239,7 @@ namespace RogueBasin
             {
                 for (int j = 0; j < room.Height; j++)
                 {
-                    if(room.terrainMap[i, j] == RoomTemplateTerrain.Floor &&
+                    if(room.TerrainMap[i, j] == RoomTemplateTerrain.Floor &&
                         HasWallButNoCardinalDoorNeighbours(room, new Point(i, j)))
                         candidatePoints.Add(new Point(i,j));
                 }
@@ -276,14 +268,14 @@ namespace RogueBasin
                 if (pt.x < 0 || pt.y < 0 || pt.x >= room.Width || pt.y >= room.Height)
                     continue;
 
-                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.Wall)
+                if (room.TerrainMap[pt.x, pt.y] == RoomTemplateTerrain.Wall)
                     foundWall = true;
 
                 //This isn't great because it works on the pre-filled in terrain
-                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.WallWithPossibleDoor)
+                if (room.TerrainMap[pt.x, pt.y] == RoomTemplateTerrain.WallWithPossibleDoor)
                     return false;
 
-                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.OpenWithPossibleDoor)
+                if (room.TerrainMap[pt.x, pt.y] == RoomTemplateTerrain.OpenWithPossibleDoor)
                     return false;
             }
 
@@ -309,14 +301,14 @@ namespace RogueBasin
                 if (pt.x < 0 || pt.y < 0 || pt.x >= room.Width || pt.y >= room.Height)
                     continue;
 
-                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.Wall)
+                if (room.TerrainMap[pt.x, pt.y] == RoomTemplateTerrain.Wall)
                     foundWall = true;
 
                 //This isn't great because it works on the pre-filled in terrain
-                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.WallWithPossibleDoor)
+                if (room.TerrainMap[pt.x, pt.y] == RoomTemplateTerrain.WallWithPossibleDoor)
                     return false;
 
-                if (room.terrainMap[pt.x, pt.y] == RoomTemplateTerrain.OpenWithPossibleDoor)
+                if (room.TerrainMap[pt.x, pt.y] == RoomTemplateTerrain.OpenWithPossibleDoor)
                     return false;
             }
 
@@ -342,7 +334,7 @@ namespace RogueBasin
                 {
                     for (int i = 0; i < corridorTemplate.Width; i++)
                     {
-                        newRoom[j, i] = corridorTemplate.terrainMap[i, 0];
+                        newRoom[j, i] = corridorTemplate.TerrainMap[i, 0];
                     }
                 }
             }
@@ -353,7 +345,7 @@ namespace RogueBasin
                 {
                     for (int i = 0; i < corridorTemplate.Width; i++)
                     {
-                        newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
+                        newRoom[i, j] = corridorTemplate.TerrainMap[i, 0];
                     }
                 }
             }
@@ -735,7 +727,7 @@ namespace RogueBasin
             {
                 for (int i = 0; i < corridorTemplate.Width; i++)
                 {
-                    newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
+                    newRoom[i, j] = corridorTemplate.TerrainMap[i, 0];
                 }
             }
 
@@ -744,7 +736,7 @@ namespace RogueBasin
             {
                 //Use the outside character (should be solid)
                 if (newRoom[i, lTransition + 1] == RoomTemplateTerrain.Transparent)
-                    newRoom[i, lTransition + 1] = corridorTemplate.terrainMap[0, 0];
+                    newRoom[i, lTransition + 1] = corridorTemplate.TerrainMap[0, 0];
             }
 
             //Down right
@@ -752,7 +744,7 @@ namespace RogueBasin
             {
                 for (int i = 0; i < corridorTemplate.Width; i++)
                 {
-                    newRoom[absXOffset + 1 - rightFromCentre + i, j] = corridorTemplate.terrainMap[i, 0];
+                    newRoom[absXOffset + 1 - rightFromCentre + i, j] = corridorTemplate.TerrainMap[i, 0];
                 }
             }
 
@@ -761,7 +753,7 @@ namespace RogueBasin
             {
                 //Use the outside character (should be solid)
                 if (newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] == RoomTemplateTerrain.Transparent)
-                    newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] = corridorTemplate.terrainMap[0, 0];
+                    newRoom[absXOffset + 1 - rightFromCentre + i, lTransition - 1] = corridorTemplate.TerrainMap[0, 0];
             }
 
             //Overlay rotated cross-corridor. Always prefer open to closed
@@ -770,8 +762,8 @@ namespace RogueBasin
                 for (int i = 0; i < corridorTemplate.Width; i++)
                 {
                     if (newRoom[j, lTransition - 1 + i] == RoomTemplateTerrain.Transparent ||
-                        corridorTemplate.terrainMap[i, 0] == RoomTemplateTerrain.Floor)
-                        newRoom[j, lTransition - 1 + i] = corridorTemplate.terrainMap[i, 0];
+                        corridorTemplate.TerrainMap[i, 0] == RoomTemplateTerrain.Floor)
+                        newRoom[j, lTransition - 1 + i] = corridorTemplate.TerrainMap[i, 0];
                 }
             }
             return new Tuple<RoomTemplateTerrain[,], Point, Point>(newRoom, new Point(leftFromCentre, 0), new Point(width - 1 - rightFromCentre, absYOffset));
@@ -804,7 +796,7 @@ namespace RogueBasin
             {
                 for (int i = 0; i < corridorTemplate.Width; i++)
                 {
-                    newRoom[i, j] = corridorTemplate.terrainMap[i, 0];
+                    newRoom[i, j] = corridorTemplate.TerrainMap[i, 0];
                 }
             }
 
@@ -812,7 +804,7 @@ namespace RogueBasin
             for (int i = 0; i < corridorTemplate.Width; i++)
             {
                 //Use the outside character (should be solid)
-                newRoom[i, yOffset + 1] = corridorTemplate.terrainMap[0, 0];
+                newRoom[i, yOffset + 1] = corridorTemplate.TerrainMap[0, 0];
             }
 
             //Overlay rotated cross-corridor. Always prefer open to closed
@@ -821,8 +813,8 @@ namespace RogueBasin
                 for (int i = 0; i < corridorTemplate.Width; i++)
                 {
                     if (newRoom[j, yOffset - 1 + i] == RoomTemplateTerrain.Transparent ||
-                        corridorTemplate.terrainMap[i, 0] == RoomTemplateTerrain.Floor)
-                        newRoom[j, yOffset - 1 + i] = corridorTemplate.terrainMap[i, 0];
+                        corridorTemplate.TerrainMap[i, 0] == RoomTemplateTerrain.Floor)
+                        newRoom[j, yOffset - 1 + i] = corridorTemplate.TerrainMap[i, 0];
                 }
             }
             return new Tuple<RoomTemplateTerrain[,], Point, Point>(newRoom, new Point(leftFromCentre, 0), new Point(absXOffset + leftFromCentre, absYOffset));
@@ -871,7 +863,7 @@ namespace RogueBasin
         public static RoomTemplate RotateRoomTemplate(RoomTemplate templateToRotate, int ninetyDegreeAntiClockwiseSteps)
         {
 
-            RoomTemplateTerrain[,] rotatedTerrain = templateToRotate.terrainMap;
+            RoomTemplateTerrain[,] rotatedTerrain = templateToRotate.TerrainMap;
 
             for (int i = 0; i < ninetyDegreeAntiClockwiseSteps; i++) { 
                     rotatedTerrain = RotateTerrainRight(rotatedTerrain);
@@ -1147,7 +1139,7 @@ namespace RogueBasin
                         for (int i = 0; i < templateToExport.Width; i++)
                         {
                             //Defaults
-                            char screenChar = RoomTerrainChars[templateToExport.terrainMap[i, j]];
+                            char screenChar = RoomTerrainChars[templateToExport.TerrainMap[i, j]];
                             mapLine.Append(screenChar);
                         }
                         writer.WriteLine(mapLine);
