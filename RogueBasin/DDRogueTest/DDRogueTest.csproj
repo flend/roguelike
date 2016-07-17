@@ -216,6 +216,9 @@
   <ItemGroup>
     <None Include="packages.config" />
     <EmbeddedResource Include="testdata\vaults\testsimplefeature.room" />
+    <EmbeddedResource Include="testdata\vaults\testsimplefeatures.room" />
+    <EmbeddedResource Include="testdata\vaults\testunknownfeatures.room" />
+    <EmbeddedResource Include="testdata\vaults\testunknownmapchar.room" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

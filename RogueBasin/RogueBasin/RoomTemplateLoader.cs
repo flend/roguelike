@@ -1415,6 +1415,7 @@ namespace RogueBasin
                         if (featureMapping.ContainsKey(inputTerrain))
                         {
                             featuresToPlace.Add(new Point(x, y), featureMapping[inputTerrain]);
+                            rowTerrain.Add(RoomTemplateTerrain.Floor);
                         }
                         else
                         {                            
@@ -1489,21 +1490,28 @@ namespace RogueBasin
 
         private static List<string> LoadTrimmedLinesFromFile(Stream fileStream)
         {
-            StreamReader reader = new StreamReader(fileStream);
-
-            var mapRows = new List<string>();
-            string thisLine;
-
-            while ((thisLine = reader.ReadLine()) != null)
+            try
             {
-                var thisLineTrimmed = thisLine.TrimEnd();
-                if (thisLineTrimmed.Length > 0)
-                {
-                    mapRows.Add(thisLine.TrimEnd());
-                }
-            }
+                StreamReader reader = new StreamReader(fileStream);
 
-            return mapRows;
+                var mapRows = new List<string>();
+                string thisLine;
+
+                while ((thisLine = reader.ReadLine()) != null)
+                {
+                    var thisLineTrimmed = thisLine.TrimEnd();
+                    if (thisLineTrimmed.Length > 0)
+                    {
+                        mapRows.Add(thisLine.TrimEnd());
+                    }
+                }
+
+                return mapRows;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Couldn't load room file: " + ex.Message);
+            }
         }
 
         /** Loads template from manifest resource file. Throws exception on failure */

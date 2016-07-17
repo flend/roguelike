@@ -43,12 +43,38 @@ namespace DDRogueTest
         }
 
         [TestMethod]
-        public void DecorationFeaturesInFileArePlaced()
+        public void SingleDecorationFeatureInFileIsPlaced()
         {
             var loadedTemplate = LoadRoomTemplate("testsimplefeature.room");
             var expectedFeatureType = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2];
 
             Assert.AreEqual(expectedFeatureType.representation, loadedTemplate.Features[new Point(3, 1)].Representation);
+        }
+
+        [TestMethod]
+        public void MultipleDecorationFeaturesInFileArePlaced()
+        {
+            var loadedTemplate = LoadRoomTemplate("testsimplefeatures.room");
+            var expectedFeatureType1 = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2];
+            var expectedFeatureType2 = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Screen4];
+
+            Assert.AreEqual(expectedFeatureType1.representation, loadedTemplate.Features[new Point(3, 1)].Representation);
+            Assert.AreEqual(expectedFeatureType2.representation, loadedTemplate.Features[new Point(4, 2)].Representation);
+            Assert.AreEqual(expectedFeatureType2.representation, loadedTemplate.Features[new Point(5, 2)].Representation);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void UnknownFeaturePlacementThrowsException()
+        {
+            var loadedTemplate = LoadRoomTemplate("testunknownfeatures.room");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void UnknownMapCharThrowsException()
+        {
+            var loadedTemplate = LoadRoomTemplate("testunknownmapchar.room");
         }
 
         [TestMethod]
