@@ -68,6 +68,12 @@ namespace RogueBasin
             SetMapRelatedMembers(terrain);
         }
 
+        public RoomTemplate(RoomTemplateTerrain[,] terrain, Dictionary<Point, Feature> features)
+        {
+            SetMapRelatedMembers(terrain);
+            this.features = features;
+        }
+
         public RoomTemplate(RoomTemplateTerrain[,] terrain, bool isCorridor)
         {
             SetMapRelatedMembers(terrain);
@@ -898,14 +904,27 @@ namespace RogueBasin
 
         public static RoomTemplate RotateRoomTemplate(RoomTemplate templateToRotate, int ninetyDegreeAntiClockwiseSteps)
         {
-
             RoomTemplateTerrain[,] rotatedTerrain = templateToRotate.TerrainMap;
 
             for (int i = 0; i < ninetyDegreeAntiClockwiseSteps; i++) { 
                     rotatedTerrain = RotateTerrainRight(rotatedTerrain);
             }
 
-            return new RoomTemplate(rotatedTerrain);
+            var rotatedFeatures = RotateFeaturesRight(templateToRotate, ninetyDegreeAntiClockwiseSteps);
+
+            return new RoomTemplate(rotatedTerrain, rotatedFeatures);
+        }
+
+        private static Dictionary<Point, Feature> RotateFeaturesRight(RoomTemplate templateToRotate, int ninetyDegreeAntiClockwiseSteps)
+        {
+            var rotatedFeatures = new Dictionary<Point, Feature>();
+
+            foreach (var feature in templateToRotate.Features) {
+                var rotatedPoint = RotateRoomPoint(templateToRotate, feature.Key, ninetyDegreeAntiClockwiseSteps);
+                rotatedFeatures.Add(rotatedPoint, feature.Value);
+            }
+
+            return rotatedFeatures;
         }
 
         public static RoomTemplate RotateRoomTemplate(RoomTemplate templateToRotate, TemplateRotation rotationAmount)

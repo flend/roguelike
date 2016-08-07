@@ -942,6 +942,31 @@ namespace DDRogueTest
         }
 
         [TestMethod]
+        public void RotateRoomTemplate90DegRotatesPlacedFeature()
+        {
+            RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
+            asymmetricRoomTemplate.AddFeature(new Point(3, 1), new TestFeature());
+
+            RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg90);
+
+            Assert.IsTrue(rotatedTemplate.Features.ContainsKey(new Point(5, 3)));
+        }
+
+        [TestMethod]
+        public void RotateRoomTemplate270DegRotatesPlacedFeatures()
+        {
+            RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
+            asymmetricRoomTemplate.AddFeature(new Point(3, 1), new TestFeature());
+            asymmetricRoomTemplate.AddFeature(new Point(2, 2), new TestFeature());
+
+            RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg270);
+
+            Assert.IsTrue(rotatedTemplate.Features.ContainsKey(new Point(1, 2)));
+            Assert.IsTrue(rotatedTemplate.Features.ContainsKey(new Point(2, 3)));
+
+        }
+
+        [TestMethod]
         public void RotateRoomTemplate180DegHasCorrectDoorPlacement()
         {
             RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
@@ -1043,6 +1068,11 @@ namespace DDRogueTest
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream(filePath);
             return RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+        }
+
+        class TestFeature : Feature
+        {
+            public TestFeature() { }
         }
     }
 }
