@@ -114,12 +114,44 @@ namespace RogueBasin
                 LogFile.Log.LogEntryDebug("Level " + kv.Key + " depth " + kv.Value, LogDebugLevel.Medium);
             }
 
+            CopyLevelMapRoomFeaturesIfNotAlreadyPresent(levelInfo);
+
             //Level name and id lookup
             levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
             levelReadableNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelReadableName);
             levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
 
             doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
+        }
+
+        /// <summary>
+        /// Copy any features from the templates into the mapPopulator.
+        /// Since this may be run many times, we avoid copying features that are already there.
+        /// </summary>
+        /// <param name="levelInfo"></param>
+        private void CopyLevelMapRoomFeaturesIfNotAlreadyPresent(Dictionary<int, LevelInfo> levelInfo)
+        {
+            foreach (var levelPair in levelInfo) {
+                var thisLevelId = levelPair.Key;
+                var thisLevel = levelPair.Value;
+                var thisLevelGen = thisLevel.LevelGenerator;
+
+                var thisLevelRoomTemplates = thisLevelGen.GetRoomTemplatesInWorldCoords();
+
+                foreach (var roomTemplate in thisLevelRoomTemplates)
+                {
+                    foreach (var featureLoc in roomTemplate.Room.Features)
+                    {
+                        var featureWorldPos = featureLoc.Key + new Point(roomTemplate.X, roomTemplate.Y);
+                        if (!populator.RoomInfo(roomTemplate.RoomIndex).IsFeatureAt(new Location(thisLevelId, featureWorldPos)))
+                        {
+                            populator.AddFeatureToRoom(mapInfo, roomTemplate.RoomIndex, featureWorldPos, featureLoc.Value);
+                            LogFile.Log.LogEntryDebug("Adding feature for room " + roomTemplate.RoomIndex + " at " + featureWorldPos, LogDebugLevel.High);
+                        }
+                    }
+                }
+                
+            }
         }
 
         public DoorAndClueManager DoorAndClueManager { get { return doorAndClueManager; } }

@@ -837,9 +837,11 @@ namespace TraumaRL
             RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping);
             RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
 
+            //                new Tuple<int, RoomTemplate>(100, lshapeRoom),
+             //   new Tuple<int, RoomTemplate>(100, lshapeAsymmetric),
+
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
-                new Tuple<int, RoomTemplate>(100, lshapeRoom),
-                new Tuple<int, RoomTemplate>(100, lshapeAsymmetric),
+
                 new Tuple<int, RoomTemplate>(100, tshape),
                 new Tuple<int, RoomTemplate>(100, xshape) };
 

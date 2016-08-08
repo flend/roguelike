@@ -213,6 +213,11 @@ namespace RogueBasin
             }
         }
 
+        public bool IsFeatureAt(Location loc)
+        {
+            return features.Where(f => f.location == loc).Any();
+        }
+
         public void AddMonster(MonsterRoomPlacement monster)
         {
             monsters.Add(monster);
