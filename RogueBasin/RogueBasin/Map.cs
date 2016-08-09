@@ -8,19 +8,59 @@ using System.Linq;
 namespace RogueBasin
 {
 
-    public sealed class Location : Tuple<int, Point>
+    public sealed class Location
     {
+        private readonly int level;
+        private readonly Point mapCoord;
+
         public Location(int level, Point mapCoord)
-            : base(level, mapCoord)
         {
+            this.level = level;
+            this.mapCoord = mapCoord;
         }
 
-        public int Level { get { return Item1; } }
-        public Point MapCoord { get { return Item2; } }
+        public int Level { get { return level; } }
+        public Point MapCoord { get { return mapCoord; } }
 
         public override string ToString()
         {
             return "level: " + Level + " " + MapCoord.ToString();
+        }
+
+        public static bool operator ==(Location i, Location j)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(i, j))
+            {
+                return true;
+            }
+
+            // If one is null, but not both, return false.
+            if (((object)i == null) || ((object)j == null))
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            if (i.Level == j.Level && i.MapCoord == j.MapCoord)
+                return true;
+            return false;
+        }
+
+        public static bool operator !=(Location i, Location j)
+        {
+            return !(i == j);
+        }
+
+        public override bool Equals(object obj)
+        {
+            //Value-wise comparison ensured by the cast
+            return this == (Location)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return Level + 17 * MapCoord.GetHashCode();
         }
     }
 
@@ -85,7 +125,7 @@ namespace RogueBasin
 
         public override int GetHashCode()
         {
-            return x ^ y;
+            return x + 17 * y + 17 * x * y;
         }
 
         public static Point operator-(Point i, Point j)

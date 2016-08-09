@@ -161,8 +161,8 @@ namespace TraumaRL
             //Set maps in engine (needs to be done before placing items and monsters)
             SetupMapsInEngine();
 
-            //Quests is being refactored to store information in MapInfo, rather than in the Dungeon
-            //Need to add here the code which transfers the completed MapInfo creatures, features, items and locks into the Dungeon
+            MessageBox.Show("post engine");
+
             Game.Dungeon.AddMapObjectsToDungeon(MapState.MapInfo);
             
             //Add monsters

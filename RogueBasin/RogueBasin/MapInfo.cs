@@ -243,6 +243,8 @@ namespace RogueBasin
                 return items;
             }
         }
+
+        public int Id { get { return id; } }
     }
 
     public class DoorContentsInfo

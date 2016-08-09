@@ -145,7 +145,7 @@ namespace RogueBasin
                         var featureWorldPos = featureLoc.Key + new Point(roomTemplate.X, roomTemplate.Y);
                         if (!populator.RoomInfo(roomTemplate.RoomIndex).IsFeatureAt(new Location(thisLevelId, featureWorldPos)))
                         {
-                            populator.AddFeatureToRoom(mapInfo, roomTemplate.RoomIndex, featureWorldPos, featureLoc.Value);
+                            populator.AddFeatureToRoom(mapInfo, roomTemplate.RoomIndex, featureWorldPos, new Features.StandardDecorativeFeature(featureLoc.Value.Representation, featureLoc.Value.RepresentationColor(), featureLoc.Value.IsBlocking));
                             LogFile.Log.LogEntryDebug("Adding feature for room " + roomTemplate.RoomIndex + " at " + featureWorldPos, LogDebugLevel.High);
                         }
                     }

@@ -27,6 +27,7 @@ namespace RogueBasin
             Top = 0, Left = 1, Bottom = 2, Right = 3
         }
 
+        //I think this should be FeatureGenerator - don't make new features at this level of abstraction
         private Dictionary<Point, Feature> features = new Dictionary<Point,Feature>();
 
         public bool IsCorridor { get; private set; }

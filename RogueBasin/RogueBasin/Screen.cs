@@ -2103,8 +2103,13 @@ namespace RogueBasin {
 
         private void DrawFeatures(int levelToDraw, List<Feature> featureList)
         {
+
+            var myFeature = featureList.Where(f => f.LocationMap == new Point(32, 29));
+
+
             foreach (Feature feature in featureList)
             {
+
                 //Don't draw features on other levels
                 if (feature.LocationLevel != levelToDraw)
                     continue;
@@ -2146,7 +2151,13 @@ namespace RogueBasin {
                 if (drawFeature)
                 {
                     if (!isViewVisible(feature.LocationMap))
+                    {
+                        LogFile.Log.LogEntryDebug("Not Drawing feature: " + feature.LocationMap, LogDebugLevel.High);
                         continue;
+                    }
+
+                    LogFile.Log.LogEntryDebug("Drawing feature: " + feature.LocationMap, LogDebugLevel.High);
+                    
 
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.GameSprite);
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileID = feature.Representation;
@@ -2519,12 +2530,11 @@ namespace RogueBasin {
                         else
                             baseDrawColor = literalColor;
                     }
-                    else if (ShowRoomNumbering > 0 && (map.mapSquares[i, j].Terrain == MapTerrain.Empty || map.mapSquares[i,j].Terrain == MapTerrain.Void))
+                    else if (ShowRoomNumbering > 0)
                     {
                         //Draw room ids as an overlay
 
-                        if ((ShowRoomNumbering == 1 && map.mapSquares[i, j].Terrain == MapTerrain.Empty)
-                            || ShowRoomNumbering == 2)
+                        if (map.mapSquares[i, j].Terrain == MapTerrain.Empty)
                         {
                             //Draw the room id (in empty areas only for SRN==1)
 
@@ -2537,6 +2547,19 @@ namespace RogueBasin {
                                 effectSprite = "room_numbering_00";
                             }
                             else {
+                                effectSprite = "room_numbering_" + (numberToDraw / 10) + (numberToDraw % 10);
+                            }
+                        }
+                        else {
+                            //Draw coords on borders
+                            if (i == 0 || i == map.width - 1)
+                            {
+                                int numberToDraw = j % 100;
+                                effectSprite = "room_numbering_" + (numberToDraw / 10) + (numberToDraw % 10);
+                            }
+                            if (j == 0 || j == map.height - 1)
+                            {
+                                int numberToDraw = i % 100;
                                 effectSprite = "room_numbering_" + (numberToDraw / 10) + (numberToDraw % 10);
                             }
                         }
