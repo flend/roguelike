@@ -6,23 +6,28 @@ using System.Text;
 
 namespace RogueBasin.LibTCOD
 {
+    class MapSize {
+        public readonly int width;
+        public readonly int height;
+
+        public MapSize(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+    }
+
     public class TCODPathFindingWrapper : Algorithms.IPathFinder
     {
+        Dictionary<int, TCODFov> levelTCODMaps = new Dictionary<int,TCODFov>();
+        Dictionary<int, TCODFov> levelTCODMapsIgnoringTerrain = new Dictionary<int,TCODFov>();
+        Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoors = new Dictionary<int,TCODFov>();
+        Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoorsAndTerrain = new Dictionary<int,TCODFov>();
+        Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoorsAndLocks = new Dictionary<int,TCODFov>();
 
-        Dictionary<int, TCODFov> levelTCODMaps;
-        Dictionary<int, TCODFov> levelTCODMapsIgnoringTerrain;
-        Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoors;
-        Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoorsAndTerrain;
-        Dictionary<int, TCODFov> levelTCODMapsIgnoringClosedDoorsAndLocks;
-
+        Dictionary<int, MapSize> levelTCODMapsSize = new Dictionary<int,MapSize>();
 
         public TCODPathFindingWrapper()
         {
-            levelTCODMaps = new Dictionary<int, TCODFov>();
-            levelTCODMapsIgnoringClosedDoors = new Dictionary<int, TCODFov>();
-            levelTCODMapsIgnoringClosedDoorsAndLocks = new Dictionary<int, TCODFov>();
-            levelTCODMapsIgnoringTerrain = new Dictionary<int, TCODFov>();
-            levelTCODMapsIgnoringClosedDoorsAndTerrain = new Dictionary<int, TCODFov>();
         }
 
         public bool arePointsConnected(int level, Point origin, Point dest, Pathing.PathingPermission permission)
@@ -43,6 +48,7 @@ namespace RogueBasin.LibTCOD
             }
 
             levelTCODMaps[level] = tcodLevel;
+            levelTCODMapsSize[level] = new MapSize(terrainMap.Width, terrainMap.Height);
 
             //Taking into account dangerous terrain (will be done in separate calls)
             TCODFov tcodLevelWithTerrain = new TCODFov(terrainMap.Width, terrainMap.Height);
@@ -249,6 +255,14 @@ namespace RogueBasin.LibTCOD
             List<Point> returnNodes = new List<Point>();
 
             TCODFov mapToUse;
+
+            if(origin.x < 0 || origin.y < 0 ||
+                origin.x >= levelTCODMapsSize[level].width || origin.y >= levelTCODMapsSize[level].height ||
+                dest.x < 0 || dest.y < 0 ||
+                dest.x >= levelTCODMapsSize[level].width || dest.y >= levelTCODMapsSize[level].height)
+            {
+                return returnNodes;
+            }
 
             switch (permission)
             {
