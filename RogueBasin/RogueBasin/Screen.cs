@@ -2103,13 +2103,8 @@ namespace RogueBasin {
 
         private void DrawFeatures(int levelToDraw, List<Feature> featureList)
         {
-
-            var myFeature = featureList.Where(f => f.LocationMap == new Point(32, 29));
-
-
             foreach (Feature feature in featureList)
             {
-
                 //Don't draw features on other levels
                 if (feature.LocationLevel != levelToDraw)
                     continue;
@@ -2152,12 +2147,8 @@ namespace RogueBasin {
                 {
                     if (!isViewVisible(feature.LocationMap))
                     {
-                        LogFile.Log.LogEntryDebug("Not Drawing feature: " + feature.LocationMap, LogDebugLevel.High);
                         continue;
                     }
-
-                    LogFile.Log.LogEntryDebug("Drawing feature: " + feature.LocationMap, LogDebugLevel.High);
-                    
 
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)] = new TileEngine.TileCell(feature.GameSprite);
                     tileMapLayer(TileLevel.Features)[ViewRelative(feature.LocationMap)].TileID = feature.Representation;

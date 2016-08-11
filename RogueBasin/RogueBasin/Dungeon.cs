@@ -1569,12 +1569,6 @@ namespace RogueBasin
         {
             feature.LocationLevel = loc.Level;
             feature.LocationMap = loc.MapCoord;
-
-            if (loc.MapCoord == new Point(32, 29))
-            {
-                var anewthing = new Point(32, 29);
-                anewthing = new Point(32, 29);
-            }
             
             List<Feature> featureListAtLocation;
             features.TryGetValue(loc, out featureListAtLocation);
@@ -1587,14 +1581,6 @@ namespace RogueBasin
             else
             {
                 featureListAtLocation.Add(feature);
-            }
-
-            if (features[new Location(0, new Point(32, 29))].Count > 0)
-            {
-                if(features[new Location(0, new Point(32, 29))][0].LocationMap != new Point(32,29)) {
-                    var anewthing = new Point(32, 29);
-                    anewthing = new Point(32, 29);
-                }
             }
         }
 
@@ -5338,18 +5324,6 @@ namespace RogueBasin
                     }
                     else
                     {
-                        if (featurePlacement.location.MapCoord == new Point(32, 29))
-                        {
-                            var anewthing = new Point(32, 29);
-                            anewthing = new Point(32, 29);
-                        }
-
-                        if (featurePlacement.location.MapCoord == new Point(47, 14))
-                        {
-                            var anewthing = new Point(42, 17);
-                            anewthing = new Point(42, 17);
-                        }
-
                         bool featureResult = AddFeature(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord);
 
                         if (!featureResult)

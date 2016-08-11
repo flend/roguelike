@@ -161,7 +161,8 @@ namespace TraumaRL
             //Set maps in engine (needs to be done before placing items and monsters)
             SetupMapsInEngine();
 
-            MessageBox.Show("post engine");
+            //Pause here to attach the debugger
+            //MessageBox.Show("post engine");
 
             Game.Dungeon.AddMapObjectsToDungeon(MapState.MapInfo);
             

@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace RogueBasin
 {
-
     public sealed class Location
     {
         private readonly int level;

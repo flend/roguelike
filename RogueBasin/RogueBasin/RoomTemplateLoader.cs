@@ -1,4 +1,4 @@
-﻿using RogueBasin.Features;
+﻿using RogueBasin;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -27,8 +27,7 @@ namespace RogueBasin
             Top = 0, Left = 1, Bottom = 2, Right = 3
         }
 
-        //I think this should be FeatureGenerator - don't make new features at this level of abstraction
-        private Dictionary<Point, Feature> features = new Dictionary<Point,Feature>();
+        private Dictionary<Point, FeatureGenerator> features = new Dictionary<Point, FeatureGenerator>();
 
         public bool IsCorridor { get; private set; }
 
@@ -37,7 +36,7 @@ namespace RogueBasin
         
         public RoomTemplateTerrain[,] TerrainMap { get; private set; }
 
-        public ImmutableDictionary<Point, Feature> Features { get { return features.ToImmutableDictionary(); } }
+        public ImmutableDictionary<Point, FeatureGenerator> Features { get { return features.ToImmutableDictionary(); } }
 
         /// <summary>
         /// Get the potential doors. Indexed in by row then column
@@ -69,7 +68,7 @@ namespace RogueBasin
             SetMapRelatedMembers(terrain);
         }
 
-        public RoomTemplate(RoomTemplateTerrain[,] terrain, Dictionary<Point, Feature> features)
+        public RoomTemplate(RoomTemplateTerrain[,] terrain, Dictionary<Point, FeatureGenerator> features)
         {
             SetMapRelatedMembers(terrain);
             this.features = features;
@@ -88,7 +87,7 @@ namespace RogueBasin
             Height = TerrainMap.GetLength(1);
         }
 
-        public void AddFeature(Point pointInRoom, Feature feature)
+        public void AddFeature(Point pointInRoom, FeatureGenerator feature)
         {
             if (pointInRoom.x < 0 || pointInRoom.y < 0 || pointInRoom.x >= Width || pointInRoom.y >= Height)
             {
@@ -916,9 +915,9 @@ namespace RogueBasin
             return new RoomTemplate(rotatedTerrain, rotatedFeatures);
         }
 
-        private static Dictionary<Point, Feature> RotateFeaturesRight(RoomTemplate templateToRotate, int ninetyDegreeAntiClockwiseSteps)
+        private static Dictionary<Point, FeatureGenerator> RotateFeaturesRight(RoomTemplate templateToRotate, int ninetyDegreeAntiClockwiseSteps)
         {
-            var rotatedFeatures = new Dictionary<Point, Feature>();
+            var rotatedFeatures = new Dictionary<Point, FeatureGenerator>();
 
             foreach (var feature in templateToRotate.Features) {
                 var rotatedPoint = RotateRoomPoint(templateToRotate, feature.Key, ninetyDegreeAntiClockwiseSteps);
@@ -1321,39 +1320,41 @@ namespace RogueBasin
         }
     }
 
-    /** Loads a room / vault from disk and returns as a usuable object */
-    public class RoomTemplateLoader
+    /** A factory for Features that represents a feature in a RoomTemplate to be replicated */
+    public class FeatureGenerator
     {
-        class FeatureGenerator
+        private string mapKey;
+
+        public FeatureGenerator(string mapKey)
         {
-            private string mapKey;
+            this.mapKey = mapKey;
 
-            public FeatureGenerator(string mapKey)
+            try
             {
-                this.mapKey = mapKey;
-
-                try
-                {
-                    Enum.Parse(typeof(DecorationFeatureDetails.DecorationFeatures), mapKey);
-                }
-                catch (Exception)
-                {
-                    var errorMsg = "Can't find decorative feature with name: " + mapKey;
-                    LogFile.Log.LogEntryDebug(errorMsg, LogDebugLevel.High);
-                    throw new ApplicationException(errorMsg);
-                }
+                Enum.Parse(typeof(DecorationFeatureDetails.DecorationFeatures), mapKey);
             }
-
-            public Feature CreateFeature()
+            catch (Exception)
             {
-                var decorationType = 
-                    (DecorationFeatureDetails.DecorationFeatures) Enum.Parse(typeof(DecorationFeatureDetails.DecorationFeatures), mapKey);
-                var decoration = DecorationFeatureDetails.decorationFeatures[decorationType];
-
-                return new RogueBasin.Features.StandardDecorativeFeature(decoration.representation, decoration.colour, decoration.isBlocking);
+                var errorMsg = "Can't find decorative feature with name: " + mapKey;
+                LogFile.Log.LogEntryDebug(errorMsg, LogDebugLevel.High);
+                throw new ApplicationException(errorMsg);
             }
         }
 
+        public Feature CreateFeature()
+        {
+            var decorationType =
+                (DecorationFeatureDetails.DecorationFeatures)Enum.Parse(typeof(DecorationFeatureDetails.DecorationFeatures), mapKey);
+            var decoration = DecorationFeatureDetails.decorationFeatures[decorationType];
+
+            return new RogueBasin.Features.StandardDecorativeFeature(decoration.representation, decoration.colour, decoration.isBlocking);
+        }
+    }
+
+
+    /** Loads a room / vault from disk and returns as a usuable object */
+    public class RoomTemplateLoader
+    {
 
         /** Loads template from a file stream. Throws exception on failure */
         public static RoomTemplate LoadTemplateFromFile(Stream fileStream, Dictionary<char, RoomTemplateTerrain> terrainMapping)
@@ -1504,7 +1505,7 @@ namespace RogueBasin
         {
             foreach (var kv in featuresToPlace)
             {
-                roomTemplate.AddFeature(kv.Key, kv.Value.CreateFeature());
+                roomTemplate.AddFeature(kv.Key, kv.Value);
             }
         }
 

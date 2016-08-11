@@ -945,7 +945,7 @@ namespace DDRogueTest
         public void RotateRoomTemplate90DegRotatesPlacedFeature()
         {
             RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
-            asymmetricRoomTemplate.AddFeature(new Point(3, 1), new TestFeature());
+            asymmetricRoomTemplate.AddFeature(new Point(3, 1), new FeatureGenerator("HumanCorpse2"));
 
             RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg90);
 
@@ -956,8 +956,8 @@ namespace DDRogueTest
         public void RotateRoomTemplate270DegRotatesPlacedFeatures()
         {
             RoomTemplate asymmetricRoomTemplate = LoadTemplateFromAssemblyFile("DDRogueTest.testdata.vaults.testrotation.room"); //6x7
-            asymmetricRoomTemplate.AddFeature(new Point(3, 1), new TestFeature());
-            asymmetricRoomTemplate.AddFeature(new Point(2, 2), new TestFeature());
+            asymmetricRoomTemplate.AddFeature(new Point(3, 1), new FeatureGenerator("HumanCorpse2"));
+            asymmetricRoomTemplate.AddFeature(new Point(2, 2), new FeatureGenerator("HumanCorpse2"));
 
             RoomTemplate rotatedTemplate = RoomTemplateUtilities.RotateRoomTemplate(asymmetricRoomTemplate, TemplateRotation.Deg270);
 
@@ -1068,11 +1068,6 @@ namespace DDRogueTest
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream(filePath);
             return RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
-        }
-
-        class TestFeature : Feature
-        {
-            public TestFeature() { }
         }
     }
 }

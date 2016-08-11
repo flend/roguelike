@@ -10,10 +10,6 @@ namespace DDRogueTest
     [TestClass]
     public class RoomTemplateLoaderTest
     {
-        class TestFeature : Feature {
-
-        }
-
         [TestMethod]
         public void WidthAndHeightShouldBeSetCorrectlyFromLoadedFile()
         {
@@ -48,7 +44,7 @@ namespace DDRogueTest
             var loadedTemplate = LoadRoomTemplate("testsimplefeature.room");
             var expectedFeatureType = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2];
 
-            Assert.AreEqual(expectedFeatureType.representation, loadedTemplate.Features[new Point(3, 1)].Representation);
+            Assert.AreEqual(expectedFeatureType.representation, loadedTemplate.Features[new Point(3, 1)].CreateFeature().Representation);
         }
 
         [TestMethod]
@@ -58,9 +54,9 @@ namespace DDRogueTest
             var expectedFeatureType1 = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.HumanCorpse2];
             var expectedFeatureType2 = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Screen4];
 
-            Assert.AreEqual(expectedFeatureType1.representation, loadedTemplate.Features[new Point(3, 1)].Representation);
-            Assert.AreEqual(expectedFeatureType2.representation, loadedTemplate.Features[new Point(4, 2)].Representation);
-            Assert.AreEqual(expectedFeatureType2.representation, loadedTemplate.Features[new Point(5, 2)].Representation);
+            Assert.AreEqual(expectedFeatureType1.representation, loadedTemplate.Features[new Point(3, 1)].CreateFeature().Representation);
+            Assert.AreEqual(expectedFeatureType2.representation, loadedTemplate.Features[new Point(4, 2)].CreateFeature().Representation);
+            Assert.AreEqual(expectedFeatureType2.representation, loadedTemplate.Features[new Point(5, 2)].CreateFeature().Representation);
         }
 
         [TestMethod]
@@ -82,7 +78,7 @@ namespace DDRogueTest
         public void FeatureCannotBePlacedOffBLMap()
         {
             RoomTemplate loadedTemplate = RoomTemplateLoader.LoadTemplateFromFile(GetFileStreamFromResources("DDRogueTest.testdata.vaults.testfeatureplacement.room"), StandardTemplateMapping.terrainMapping);
-            loadedTemplate.AddFeature(new Point(0, -1), new TestFeature());
+            loadedTemplate.AddFeature(new Point(0, -1), TestFeatureGenerator());
         }
 
         [TestMethod]
@@ -90,7 +86,7 @@ namespace DDRogueTest
         public void FeatureCannotBePlacedOffTRMap()
         {
             RoomTemplate loadedTemplate = RoomTemplateLoader.LoadTemplateFromFile(GetFileStreamFromResources("DDRogueTest.testdata.vaults.testfeatureplacement.room"), StandardTemplateMapping.terrainMapping);
-            loadedTemplate.AddFeature(new Point(9, 5), new TestFeature());
+            loadedTemplate.AddFeature(new Point(9, 5), TestFeatureGenerator());
         }
 
         [TestMethod]
@@ -98,14 +94,14 @@ namespace DDRogueTest
         public void FeatureCannotBePlacedOnWall()
         {
             RoomTemplate loadedTemplate = RoomTemplateLoader.LoadTemplateFromFile(GetFileStreamFromResources("DDRogueTest.testdata.vaults.testfeatureplacement.room"), StandardTemplateMapping.terrainMapping);
-            loadedTemplate.AddFeature(new Point(3, 1), new TestFeature());
+            loadedTemplate.AddFeature(new Point(3, 1), TestFeatureGenerator());
         }
 
         [TestMethod]
         public void PlacedFeaturesCanBeRetrieved()
         {
             RoomTemplate loadedTemplate = RoomTemplateLoader.LoadTemplateFromFile(GetFileStreamFromResources("DDRogueTest.testdata.vaults.testfeatureplacement.room"), StandardTemplateMapping.terrainMapping);
-            loadedTemplate.AddFeature(new Point(4, 1), new TestFeature());
+            loadedTemplate.AddFeature(new Point(4, 1), TestFeatureGenerator());
             Assert.IsNotNull(loadedTemplate.Features[new Point(4, 1)]);
         }
 
@@ -120,6 +116,9 @@ namespace DDRogueTest
             return _assembly.GetManifestResourceStream(filePath);
         }
 
-
+        private FeatureGenerator TestFeatureGenerator()
+        {
+            return new FeatureGenerator("HumanCorpse2");
+        }
     }
 }
