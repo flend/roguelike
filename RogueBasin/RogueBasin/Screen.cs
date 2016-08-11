@@ -191,8 +191,6 @@ namespace RogueBasin {
         public bool SeeAllMonsters { get; set; }
         public bool SeeAllMap { get; set; }
 
-        public int ViewportScrollSpeed { get; set; }
-
         public uint MessageQueueWidth { get; private set; }
 
         public bool ExtraUI { get; set; }
@@ -265,8 +263,6 @@ namespace RogueBasin {
             }
 
             UIScaling = 1;
-
-            ViewportScrollSpeed = 1;
 
             viewTL = new Point(0, 0);
             SetViewBRFromTL();
@@ -466,9 +462,9 @@ namespace RogueBasin {
         /// Scroll the viewport, by the delta
         /// </summary>
         /// <param name="delta"></param>
-        public void ScrollViewport(Point delta) {
-
-            viewTL += delta * ViewportScrollSpeed;
+        public void ScrollViewport(Point delta, int viewportScrollSpeed)
+        {
+            viewTL += delta * viewportScrollSpeed;
 
             RestrictViewpointToMap();
         }
@@ -3061,6 +3057,22 @@ namespace RogueBasin {
             var y = point.Y / ScaledSpriteSize + viewTL.y;
 
             return new Point(x, y);
+        }
+
+        public RogueBasin.Point RelativePixelToRelativeCoord(Point point)
+        {
+            var x = point.x / ScaledSpriteSize;
+            var y = point.y / ScaledSpriteSize;
+
+            return new Point(x, y);
+        }
+
+        public RogueBasin.Point RelativePixelToRemainder(Point point)
+        {
+            var x = point.x / ScaledSpriteSize;
+            var y = point.y / ScaledSpriteSize;
+
+            return new Point(point.x - x * ScaledSpriteSize, point.y - y * ScaledSpriteSize);
         }
     }
 

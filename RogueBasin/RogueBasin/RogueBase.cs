@@ -49,7 +49,18 @@ namespace RogueBasin
 
         Creature lastSpellTarget = null;
 
+        public Point dragTracker { get; set; }
 
+        public bool PlaySounds { get; set; }
+        public bool PlayMusic { get; set; }
+        private Boolean FunMode { get; set; }
+
+        public ActionState ActionState { get { return actionState; } set { actionState = value; } }
+        
+        bool waitingForTurnTick = true;
+
+        public bool GameStarted { get; set; }
+        
         public RogueBase()
         {
         }
@@ -63,11 +74,6 @@ namespace RogueBasin
             targetting = new Targetting(this);
             running = new Running(this, Game.Dungeon.Player);
         }
-
-        public bool PlaySounds { get; set; }
-        public bool PlayMusic { get; set; }
-
-        public ActionState ActionState { get { return actionState; } set { actionState = value; } }
 
         /// <summary>
         /// Setup internal systems
@@ -169,8 +175,6 @@ namespace RogueBasin
             Events.Run();
         }
 
-        bool firstRun = true;
-
         public void InitializeScreen()
         {
             Screen.Instance.NeedsUpdate = true;
@@ -184,10 +188,6 @@ namespace RogueBasin
 
             Events.QuitApplication();
         }
-
-        bool waitingForTurnTick = true;
-
-        public bool GameStarted { get; set; }
 
         private void ApplicationTickEventHandler(object sender, TickEventArgs args)
         {
@@ -448,10 +448,10 @@ namespace RogueBasin
 
         private Tuple<bool, bool> PlayerAction(ActionState action, MouseMotionEventArgs mouseArgs)
         {
+            var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
+
             bool timeAdvances = false;
             bool centreOnPC = false;
-
-            var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
 
             switch (inputState)
             {
@@ -462,7 +462,14 @@ namespace RogueBasin
                 //Normal movement on the map
                 case InputState.MapMovement:
 
-                    HandleMapMovementMouseMotion(clickLocation, mouseArgs);
+                    if (mouseArgs.ButtonPressed && mouseArgs.Button == MouseButton.PrimaryButton)
+                    {
+                        HandleMapMovementMouseDrag(mouseArgs);
+                    }
+                    else
+                    {
+                        HandleMapMovementMouseMotion(clickLocation, mouseArgs);
+                    }
                     break;
             }
 
@@ -589,7 +596,24 @@ namespace RogueBasin
         
         private void HandleMapMovementMouseMotion(Point moveLocation, MouseMotionEventArgs mouseArgs)
         {
+            ResetDragTracker();
+
             MouseFocusOnMap(moveLocation);
+        }
+
+        private void ResetDragTracker()
+        {
+            dragTracker = new Point(0, 0);
+        }
+
+        private void HandleMapMovementMouseDrag(MouseMotionEventArgs mouseArgs)
+        {
+            dragTracker += new Point(mouseArgs.RelativeX, mouseArgs.RelativeY);
+            LogFile.Log.LogEntryDebug("dragtracker: " + dragTracker, LogDebugLevel.High);
+
+            var relativeDrag = Screen.Instance.RelativePixelToRelativeCoord(dragTracker);
+            dragTracker = Screen.Instance.RelativePixelToRemainder(dragTracker);
+            Screen.Instance.ScrollViewport(relativeDrag, 3); 
         }
         
         bool PlayerPrepareForNextTurn()
@@ -1502,8 +1526,7 @@ namespace RogueBasin
 
                     if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
                     {
-                        Screen.Instance.ViewportScrollSpeed = 4;
-                        Screen.Instance.ScrollViewport(direction);
+                        Screen.Instance.ScrollViewport(direction, 4);
                         centreOnPC = false;
                     }
 
@@ -1624,8 +1647,6 @@ namespace RogueBasin
                 FinishMovie();
             }
         }
-
-        private Boolean FunMode { get; set; }
 
         public void CharacterSelectionKeyHandler(KeyboardEventArgs args)
         {
