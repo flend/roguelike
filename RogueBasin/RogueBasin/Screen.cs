@@ -51,8 +51,6 @@ namespace RogueBasin {
         //UI size
         public double UIScaling { get; set; }
 
-        public bool DebugMode { get; set; }
-
         /// <summary>
         /// Show flashes on attacks and thrown projectiles
         /// </summary>
@@ -188,8 +186,13 @@ namespace RogueBasin {
 
         public System.Drawing.Color PCColor { get; set;}
 
-        public bool SeeAllMonsters { get; set; }
-        public bool SeeAllMap { get; set; }
+        private bool seeAllMap = false;
+        private bool seeDebugMarkers = false;
+        private bool seeAllMonsters = false;
+
+        public bool SeeAllMonsters { get { return seeAllMonsters; } }
+        public bool SeeAllMap { get { return seeAllMap; } }
+        public bool SeeDebugMarkers { get { return seeDebugMarkers; } }
 
         public uint MessageQueueWidth { get; private set; }
 
@@ -269,7 +272,6 @@ namespace RogueBasin {
 
             LevelToDisplay = 0;
 
-            DebugMode = false;
             CombatAnimations = true;
 
             msgDisplayTopLeft = new Point(50, 50);
@@ -291,12 +293,32 @@ namespace RogueBasin {
 
             PCColor = System.Drawing.Color.White;
 
-            SeeAllMonsters = false;
-            SeeAllMap = false;
-
             NeedsUpdate = true;
 
             ExtraUI = true;
+        }
+
+        public void SetSeeAllMap() {
+            seeAllMap = true;
+            seeAllMonsters = true;
+        }
+
+        public void SetSeeDebugMarkers()
+        {
+            SetSeeAllMap();
+            seeDebugMarkers = true;
+        }
+
+        public void ClearDebugMarkers()
+        {
+            seeDebugMarkers = false;
+            ClearSeeAllMap();
+        }
+
+        public void ClearSeeAllMap()
+        {
+            seeAllMap = false;
+            seeAllMonsters = false;
         }
 
         //Setup the screen
@@ -754,7 +776,7 @@ namespace RogueBasin {
             Point PClocation = player.LocationMap;
             System.Drawing.Color PCDrawColor = PCColor;
 
-            if (DebugMode)
+            if (SeeDebugMarkers)
             {
                 MapSquare pcSquare = Game.Dungeon.Levels[player.LocationLevel].mapSquares[player.LocationMap.x, player.LocationMap.y];
 
@@ -2018,7 +2040,7 @@ namespace RogueBasin {
                 else
                 {
                     //Never in FOV
-                    if (DebugMode)
+                    if (SeeDebugMarkers)
                     {
                         itemColorToUse = itemColor;
                     }
@@ -2074,7 +2096,7 @@ namespace RogueBasin {
                 else
                 {
                     //Never in FOV
-                    if (DebugMode)
+                    if (SeeDebugMarkers)
                     {
                         featureColor = neverSeenFOVTerrainColor;
                     }
@@ -2128,7 +2150,7 @@ namespace RogueBasin {
                 else
                 {
                     //Never in FOV
-                    if (DebugMode)
+                    if (SeeDebugMarkers)
                     {
                         featureColor = neverSeenFOVTerrainColor;
                     }
@@ -2179,14 +2201,14 @@ namespace RogueBasin {
                 else if (creatureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    if (!DebugMode)
+                    if (!SeeDebugMarkers)
                         drawCreature = false;
                     //creatureColor = hiddenColor;
                 }
                 else
                 {
                     //Never in FOV
-                    if (!DebugMode)
+                    if (!SeeDebugMarkers)
                         drawCreature = false;
 
                 }
@@ -2271,14 +2293,14 @@ namespace RogueBasin {
                 else if (creatureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    if (!DebugMode)
+                    if (!SeeDebugMarkers)
                         drawCreature = false;
                     //creatureColor = hiddenColor;
                 }
                 else
                 {
                     //Never in FOV
-                    if (!DebugMode)
+                    if (!SeeDebugMarkers)
                         drawCreature = false;
 
                 }
@@ -2290,7 +2312,7 @@ namespace RogueBasin {
                 }
 
 
-                if (DebugMode)
+                if (SeeDebugMarkers)
                 {
                     if (creatureSquare.InMonsterFOV)
                     {
@@ -2575,7 +2597,7 @@ namespace RogueBasin {
                     else
                     {
                         //Never in FOV
-                        if (DebugMode)
+                        if (SeeDebugMarkers)
                         {
                             drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.7);
                             spriteTransparency = 0.7;
@@ -2588,7 +2610,7 @@ namespace RogueBasin {
                     }
 
                     //Monster FOV in debug mode
-                    if (DebugMode)
+                    if (SeeDebugMarkers)
                     {
                         //Draw player FOV explicitally
                         if (map.mapSquares[i, j].InPlayerFOV)
@@ -3025,7 +3047,7 @@ namespace RogueBasin {
 
         internal void ResetViewPanel()
         {
-            if (!DebugMode)
+            if (!SeeDebugMarkers)
             {
                 Screen.Instance.CreatureToView = null;
                 Screen.Instance.ItemToView = null;

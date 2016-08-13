@@ -686,7 +686,7 @@ namespace RogueBasin
 
             //Debug: show the FOV of all monsters. Should flag or comment this for release.
             //This is extremely slow, so restricting to debug mode
-            if (Screen.Instance.DebugMode)
+            if (Screen.Instance.SeeDebugMarkers)
             {
                 foreach (Monster monster in Game.Dungeon.Monsters)
                 {
@@ -1072,9 +1072,14 @@ namespace RogueBasin
                                     break;
 
                                 case Key.W:
-                                    //screen debug mode
-                                    Screen.Instance.DebugMode = !Screen.Instance.DebugMode;
-                                    if (Screen.Instance.DebugMode)
+                                    if (Screen.Instance.SeeDebugMarkers)
+                                    {
+                                        Screen.Instance.ClearDebugMarkers();
+                                    }
+                                    else {
+                                        Screen.Instance.SetSeeDebugMarkers();
+                                    }
+                                    if (Screen.Instance.SeeDebugMarkers)
                                         Game.MessageQueue.AddMessage("Screen debug mode on.");
                                     else
                                         Game.MessageQueue.AddMessage("Screen debug mode off.");
@@ -1082,9 +1087,15 @@ namespace RogueBasin
                                     break;
 
                                 case Key.B:
-                                    //screen see all mode
-                                    Screen.Instance.SeeAllMap = Screen.Instance.SeeAllMap ? false : true;
-                                    Screen.Instance.SeeAllMonsters = Screen.Instance.SeeAllMonsters ? false : true;
+
+                                    if (Screen.Instance.SeeAllMap)
+                                    {
+                                        Screen.Instance.ClearSeeAllMap();
+                                    }
+                                    else
+                                    {
+                                        Screen.Instance.SetSeeAllMap();
+                                    }
                                     Screen.Instance.NeedsUpdate = true;
                                     break;
 
