@@ -2560,13 +2560,18 @@ namespace RogueBasin {
                             }
                         }
                         else {
-                            //Draw coords on borders
-                            if (i == 0 || i == map.width - 1)
+                            int numberSpacing = 5;
+
+                            //Draw coords on borders and void
+                            if (i == 0 || i == map.width - 1 ||
+                                (map.mapSquares[i, j].Terrain == MapTerrain.Void && i % numberSpacing == 0))
                             {
                                 int numberToDraw = j % 100;
                                 effectSprite = "room_numbering_" + (numberToDraw / 10) + (numberToDraw % 10);
                             }
-                            if (j == 0 || j == map.height - 1)
+                            
+                            if (j == 0 || j == map.height - 1 ||
+                                (map.mapSquares[i, j].Terrain == MapTerrain.Void && j % numberSpacing == 0))
                             {
                                 int numberToDraw = i % 100;
                                 effectSprite = "room_numbering_" + (numberToDraw / 10) + (numberToDraw % 10);
