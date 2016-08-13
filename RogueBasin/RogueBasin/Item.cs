@@ -91,6 +91,11 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// An id if this item is used as a clue in a quest
+        /// </summary>
+        private string questId;
+
+        /// <summary>
         /// Has the object been found (i.e. picked up) by the player. For PrincessRL
         /// </summary>
         public bool IsFound { get; set; }
@@ -124,8 +129,11 @@ namespace RogueBasin
         {
             get
             {
-
-                return "";
+                return questId;
+            }
+            set
+            {
+                questId = value;
             }
         }
 

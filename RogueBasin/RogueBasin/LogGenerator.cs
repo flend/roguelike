@@ -365,7 +365,20 @@ namespace RogueBasin
 
             var logByName = logDatabaseByFilename[logname];
             
-            entry.lines = logByName.lines;
+            var randomLog = logDatabase[LogType.SimpleLockedDoor].RandomElement();
+            var substitutedLog = randomLog.Value.First();
+            List<string> logEntryLines = logByName.lines;
+
+            try
+            {
+                logEntryLines = ApplyStandardSubstitutions(logEntryLines);
+            }
+            catch (Exception)
+            {
+                //Not to worry
+            }
+
+            entry.lines = logEntryLines;
 
             return entry;
         }

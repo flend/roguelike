@@ -577,6 +577,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\logentries\qe_medicalsecurity.amf" />
     <EmbeddedResource Include="ImageDisplay.resx">
       <DependentUpon>ImageDisplay.cs</DependentUpon>
     </EmbeddedResource>
@@ -887,7 +888,6 @@
     <EmbeddedResource Include="bin\Debug\movies\t_medicalsecuritylocked0.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\el_broken.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\el_transit.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\qe_medicalsecurity.amf" />
     <EmbeddedResource Include="bin\Debug\vaults\longvault1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\longvault_corners1.room" />
     <EmbeddedResource Include="bin\Debug\vaults\central_pillars1.room" />
@@ -1005,6 +1005,9 @@
     <EmbeddedResource Include="bin\Debug\vaults\basic_large_arena.room" />
     <EmbeddedResource Include="bin\Debug\movies\fun_mode_failure0.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_stash1.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\qe_medicalturretsecurity.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecuritylocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecurityunlocked0.amf" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

@@ -335,7 +335,8 @@ namespace TraumaRL
         
         private void BuildMedicalLevelQuests(MapState mapState, QuestMapBuilder builder)
         {
-            var cameraQuest = new Quests.MedicalCameraQuest(mapState, builder, logGen);
+            //var cameraQuest = new Quests.MedicalCameraQuest(mapState, builder, logGen);
+            var cameraQuest = new Quests.MedicalTurretTrapQuest(mapState, builder, logGen);
             cameraQuest.SetupQuest();
         }
 
