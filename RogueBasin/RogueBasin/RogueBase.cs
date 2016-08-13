@@ -49,7 +49,8 @@ namespace RogueBasin
 
         Creature lastSpellTarget = null;
 
-        public Point dragTracker { get; set; }
+        private Point DragTracker { get; set; }
+        private bool lastMouseActionWasDrag = false;
 
         public bool PlaySounds { get; set; }
         public bool PlayMusic { get; set; }
@@ -464,10 +465,12 @@ namespace RogueBasin
 
                     if (mouseArgs.ButtonPressed && mouseArgs.Button == MouseButton.PrimaryButton)
                     {
+                        lastMouseActionWasDrag = true;
                         HandleMapMovementMouseDrag(mouseArgs);
                     }
                     else
                     {
+                        lastMouseActionWasDrag = false;
                         HandleMapMovementMouseMotion(clickLocation, mouseArgs);
                     }
                     break;
@@ -482,6 +485,12 @@ namespace RogueBasin
 
             bool timeAdvances = false;
             bool centreOnPC = false;
+
+            if (mouseArgs.ButtonPressed == true || lastMouseActionWasDrag)
+            {
+                lastMouseActionWasDrag = false;
+                return new Tuple<bool, bool>(false, false);
+            }
 
             switch (inputState)
             {
@@ -603,17 +612,22 @@ namespace RogueBasin
 
         private void ResetDragTracker()
         {
-            dragTracker = new Point(0, 0);
+            LogFile.Log.LogEntryDebug("Drag tracker reset", LogDebugLevel.High);
+            DragTracker = new Point(0, 0);
         }
 
         private void HandleMapMovementMouseDrag(MouseMotionEventArgs mouseArgs)
         {
-            dragTracker += new Point(mouseArgs.RelativeX, mouseArgs.RelativeY);
-            LogFile.Log.LogEntryDebug("dragtracker: " + dragTracker, LogDebugLevel.High);
+            var thisDrag = new Point(mouseArgs.RelativeX, mouseArgs.RelativeY);
+            var newDragTotal = DragTracker + thisDrag;
+            LogFile.Log.LogEntryDebug("dragTracker: " + DragTracker, LogDebugLevel.High);
+            LogFile.Log.LogEntryDebug("newDragTotal: " + newDragTotal, LogDebugLevel.High);
 
-            var relativeDrag = Screen.Instance.RelativePixelToRelativeCoord(dragTracker);
-            dragTracker = Screen.Instance.RelativePixelToRemainder(dragTracker);
-            Screen.Instance.ScrollViewport(relativeDrag, 3); 
+            var relativeDrag = Screen.Instance.RelativePixelToRelativeCoord(newDragTotal, true);
+            DragTracker = relativeDrag.remainder;
+            LogFile.Log.LogEntryDebug("dragTracker after: " + DragTracker + " remainder:  " + relativeDrag.remainder, LogDebugLevel.High);
+
+            Screen.Instance.ScrollViewport(relativeDrag.coord, 3); 
         }
         
         bool PlayerPrepareForNextTurn()

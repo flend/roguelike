@@ -3051,6 +3051,18 @@ namespace RogueBasin {
 
         public bool ShowMessageQueue { get; set; }
 
+        public class CoordFromPixel
+        {
+            public readonly Point coord;
+            public readonly Point remainder;
+
+            public CoordFromPixel(Point coord, Point remainder)
+            {
+                this.coord = coord;
+                this.remainder = remainder;
+            }
+        }
+
         public RogueBasin.Point PixelToCoord(System.Drawing.Point point)
         {
             var x = point.X / ScaledSpriteSize + viewTL.x;
@@ -3059,20 +3071,21 @@ namespace RogueBasin {
             return new Point(x, y);
         }
 
-        public RogueBasin.Point RelativePixelToRelativeCoord(Point point)
+        public CoordFromPixel RelativePixelToRelativeCoord(Point point, bool invert)
         {
-            var x = point.x / ScaledSpriteSize;
-            var y = point.y / ScaledSpriteSize;
+            var xCoord = point.x / ScaledSpriteSize;
+            var yCoord = point.y / ScaledSpriteSize;
 
-            return new Point(x, y);
-        }
+            var xRemainder = point.x - ScaledSpriteSize * xCoord;
+            var yRemainder = point.y - ScaledSpriteSize * yCoord;
 
-        public RogueBasin.Point RelativePixelToRemainder(Point point)
-        {
-            var x = point.x / ScaledSpriteSize;
-            var y = point.y / ScaledSpriteSize;
+            if (invert)
+            {
+                xCoord = -xCoord;
+                yCoord = -yCoord;
+            }
 
-            return new Point(point.x - x * ScaledSpriteSize, point.y - y * ScaledSpriteSize);
+            return new CoordFromPixel(new Point(xCoord, yCoord), new Point(xRemainder, yRemainder));
         }
     }
 
