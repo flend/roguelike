@@ -540,7 +540,6 @@ namespace RogueBasin
         {
             if (mouseButtons == MouseButton.PrimaryButton)
             {
-
                 bool shifted = false;
 
                 var keyboardState = new KeyboardState();

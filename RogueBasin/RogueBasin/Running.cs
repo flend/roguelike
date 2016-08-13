@@ -87,6 +87,12 @@ namespace RogueBasin
                 case MoveResults.InteractedWithObstacle:
                     StopRunning();
                     break;
+                case MoveResults.OpenedDoor:
+                    if (!Screen.Instance.SeeAllMap)
+                    {
+                        StopRunning();
+                    }
+                    break;
                 case MoveResults.NormalMove:
                     break;
                 case MoveResults.StoppedByObstacle:

@@ -513,6 +513,8 @@ namespace RogueBasin
                     return true;
                 case MoveResults.InteractedWithObstacle:
                     return false;
+                case MoveResults.OpenedDoor:
+                    return false;
                 case MoveResults.NormalMove:
                     return true;
                 case MoveResults.StoppedByObstacle:

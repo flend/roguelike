@@ -67,6 +67,7 @@ namespace RogueBasin
     {
         StoppedByObstacle,
         InteractedWithObstacle,
+        OpenedDoor,
         AttackedMonster,
         SwappedWithMonster,
         StoppedByMonster,
@@ -1607,16 +1608,12 @@ namespace RogueBasin
         /// </summary>
         public bool AddLock(Lock newLock)
         {
-            //Try to add a feature at the requested location
-            //This may fail due to something else being there or being non-walkable
             try
             {
                 int level = newLock.LocationLevel;
                 Point location = newLock.LocationMap;
 
                 SetTerrainAtPoint(level, location, MapTerrain.ClosedLock);
-
-                //Otherwise OK
 
                 if (!locks.ContainsKey(newLock.Location))
                     locks[newLock.Location] = new List<Lock>();
@@ -2227,7 +2224,7 @@ namespace RogueBasin
                         OpenDoor(player.LocationLevel, newPCLocation);
                         stationaryAction = true;
                         okToMoveIntoSquare = false;
-                        moveResults = MoveResults.InteractedWithObstacle;
+                        moveResults = MoveResults.OpenedDoor;
                     }
                     else if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedLock)
                     {
@@ -2250,8 +2247,11 @@ namespace RogueBasin
                         okToMoveIntoSquare = false;
                         moveResults = MoveResults.InteractedWithObstacle;
                     }
-                    okToMoveIntoSquare = false;
-                    moveResults = MoveResults.StoppedByObstacle;
+                    else
+                    {
+                        okToMoveIntoSquare = false;
+                        moveResults = MoveResults.StoppedByObstacle;
+                    }
                 }
 
                 //Check for monsters in the square
