@@ -233,7 +233,7 @@ namespace RogueBasin
                 return;
             }
 
-            bool timeAdvances = DoPlayerNextAction(actionState, null, args, null);
+            bool timeAdvances = DoPlayerNextAction(actionState, null, args, null, null);
 
             if (timeAdvances)
             {
@@ -258,7 +258,7 @@ namespace RogueBasin
                 return;
             }
 
-            bool timeAdvances = DoPlayerNextAction(actionState, null, null, args);
+            bool timeAdvances = DoPlayerNextAction(actionState, null, null, args, null);
 
             if (timeAdvances)
             {
@@ -284,7 +284,7 @@ namespace RogueBasin
                 return;
             }
 
-            bool timeAdvances = DoPlayerNextAction(actionState, args, null, null);
+            bool timeAdvances = DoPlayerNextAction(actionState, args, null, null, null);
             
             if (timeAdvances)
             {
@@ -357,7 +357,7 @@ namespace RogueBasin
             if (actionState == ActionState.Running)
             {
                 //If the player is running, take their turn immediately without waiting for input
-                DoPlayerNextAction(actionState, null, null, null);
+                DoPlayerNextAction(actionState, null, null, null, null);
                 Game.Dungeon.PlayerHadBonusTurn = true;
                 waitingForTurnTick = true;
             }
@@ -380,7 +380,7 @@ namespace RogueBasin
                 SoundPlayer.Instance().PlaySounds();
         }
 
-        private bool DoPlayerNextAction(ActionState action, KeyboardEventArgs args, MouseButtonEventArgs mouseArgs, MouseMotionEventArgs mouseMotionArgs)
+        private bool DoPlayerNextAction(ActionState action, KeyboardEventArgs args, MouseButtonEventArgs mouseArgs, MouseMotionEventArgs mouseMotionArgs, CustomInputArgs customArgs)
         {
             var player = Game.Dungeon.Player;
             try
@@ -408,9 +408,23 @@ namespace RogueBasin
                         {
                             inputResult = PlayerAction(action, mouseArgs);
                         }
-                        else 
+                        else if(mouseMotionArgs != null)
                         {
                             inputResult = PlayerAction(action, mouseMotionArgs);
+                        }
+                        else
+                        {
+                            if (customArgs.action == CustomInputArgsActions.MouseMoveToCurrentLocation)
+                            {
+                                //This action just updates the screen with the mouse's current position
+                                var currentMousePosition = SdlDotNet.Input.Mouse.MousePosition;
+                                var fakeMotionArgs = new MouseMotionEventArgs(false, MouseButton.None, (short)currentMousePosition.X, (short)currentMousePosition.Y, 0, 0);
+                                inputResult = PlayerAction(action, fakeMotionArgs);
+                            }
+                            else
+                            {
+                                inputResult = new Tuple<bool, bool>(false, false);
+                            }
                         }
 
                         timeAdvances = inputResult.Item1;
@@ -2959,6 +2973,11 @@ namespace RogueBasin
 
                     break;
             }
+        }
+
+        public void SimulateMouseEventInCurrentPosition()
+        {
+            DoPlayerNextAction(actionState, null, null, null, new CustomInputArgs(CustomInputArgsActions.MouseMoveToCurrentLocation));
         }
     }
 }

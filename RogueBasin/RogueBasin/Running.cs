@@ -39,6 +39,7 @@ namespace RogueBasin
         public void StopRunning()
         {
             rogueBase.ActionState = ActionState.Interactive;
+            rogueBase.SimulateMouseEventInCurrentPosition();
             player.Running = false;
         }
 
