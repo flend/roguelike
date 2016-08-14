@@ -314,7 +314,8 @@ namespace RogueBasin
 
             bool playerNotReady = true;
 
-            if (!waitingForTurnTick)
+            //If we are waiting on the user's input, do not advance the dungeon
+            if (!waitingForTurnTick && actionState == RogueBasin.ActionState.Interactive)
             {
                 return;
             }
@@ -324,31 +325,36 @@ namespace RogueBasin
             Game.Dungeon.ResetCreatureFOVOnMap();
             Game.Dungeon.ResetSoundOnMap();
 
-            while (playerNotReady)
+            //Run the dungeon to the player's next turn if required
+            //Sometimes running does no-time events (like opening doors) - we want the next run step to continue
+            if (waitingForTurnTick)
             {
-                try
+                while (playerNotReady)
                 {
-                    //If we want to give the PC an extra go for any reason before the creatures
-                    //(e.g. has just loaded, has just entered dungeon)
+                    try
+                    {
+                        //If we want to give the PC an extra go for any reason before the creatures
+                        //(e.g. has just loaded, has just entered dungeon)
 
-                    bool pcFreeTurn = false;
-                    if (!Game.Dungeon.PlayerHadBonusTurn && Game.Dungeon.PlayerBonusTurn)
-                        pcFreeTurn = true;
+                        bool pcFreeTurn = false;
+                        if (!Game.Dungeon.PlayerHadBonusTurn && Game.Dungeon.PlayerBonusTurn)
+                            pcFreeTurn = true;
 
-                    //Advance time in the dungeon
-                    if (!pcFreeTurn)
-                        DungeonActions();
+                        //Advance time in the dungeon
+                        if (!pcFreeTurn)
+                            DungeonActions();
 
-                    //Advance time for the PC
-                    playerNotReady = !PlayerPrepareForNextTurn();
+                        //Advance time for the PC
+                        playerNotReady = !PlayerPrepareForNextTurn();
 
-                    //Catch the player being killed
-                    //if (!Game.Dungeon.RunMainLoop)
-                    //   break;
-                }
-                catch (Exception ex)
-                {
-                    LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+                        //Catch the player being killed
+                        //if (!Game.Dungeon.RunMainLoop)
+                        //   break;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogFile.Log.LogEntry("Exception thrown" + ex.Message);
+                    }
                 }
             }
 

@@ -46,6 +46,7 @@ namespace RogueBasin
         public bool RunNextStep()
         {
             Point relativeNextStep = new Point(0, 0);
+            var originalRunningPath = runningPath.Select(t => t);
 
             if (runningPath != null && runningPath.Any())
             {
@@ -92,6 +93,12 @@ namespace RogueBasin
                     if (!Screen.Instance.SeeAllMap)
                     {
                         StopRunning();
+                    }
+                    else
+                    {
+                        //After a time-free action (opening the door), take the last step again (walking onto the door)
+                        //A nicer solution might be to indicate from PCMove if the last step should be retaken
+                        runningPath = originalRunningPath;
                     }
                     break;
                 case MoveResults.NormalMove:
