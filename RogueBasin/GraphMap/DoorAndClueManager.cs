@@ -130,7 +130,6 @@ namespace GraphMap
          * specifying also that we want to not place the clue behind any door in the list doorsToAvoid*/
         public IEnumerable<int> GetValidRoomsToPlaceClueForDoor(Connection edgeForDoor, List<string> doorsToAvoidIds)
         {
-
             //Traverse the locked tree and find all clues that will be behind the locked door
             var foundEdge = mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeForDoor.Source, edgeForDoor.Target);
             var newlyLockedClues = GetCluesBehindLockedEdge(foundEdge);

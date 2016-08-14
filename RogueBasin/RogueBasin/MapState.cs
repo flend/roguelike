@@ -48,9 +48,23 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Call initially to initialise the MapState ready for use.
+        /// Builds the full connected map representation
+        /// </summary>
+        /// <param name="levelLinks"></param>
+        /// <param name="levelInfo"></param>
+        /// <param name="startLevel"></param>
+        /// <param name="startVertex"></param>
+        public void BuildLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel, int startVertex)
+        {
+            InitialiseWithLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
+            doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
+        }
+
+        /// <summary>
         /// Process the level maps and links to build mapInfo and related state
         /// </summary>
-        public void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel, int startVertex)
+        private void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel, int startVertex)
         {
             this.levelInfo = levelInfo;
             this.levelLinks = levelLinks;
@@ -120,8 +134,6 @@ namespace RogueBasin
             levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
             levelReadableNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelReadableName);
             levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
-
-            doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
         }
 
         /// <summary>

@@ -143,7 +143,7 @@ namespace TraumaRL.Quests
 
             var roomsToPlaceMonsters = new List<int>();
 
-            var roomsForMonsters = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, coresToPlace, roomsOnComputerCoreLevel);
+            var roomsForMonsters = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, coresToPlace, roomsOnComputerCoreLevel);
             var clues = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForMonsters);
 
             Builder.PlaceCreatureClues<RogueBasin.Creatures.ComputerNode>(MapState, clues, true, false, true);
@@ -171,8 +171,8 @@ namespace TraumaRL.Quests
             var preferredRoomsForLogsCritical = Builder.FilterRoomsByPath(MapState, preferredRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
             var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(MapState, preferredRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.Any, true);
 
-            var roomsForLogsCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsCritical);
-            var roomsForLogsNonCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsNonCritical);
+            var roomsForLogsCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsNonCritical);
 
             var logCluesCritical = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingObjective(primeSelfDestructId, roomsForLogsNonCritical);
@@ -235,8 +235,8 @@ namespace TraumaRL.Quests
             var preferredRoomsForLogsCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
             var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.Any, true);
 
-            var roomsForLogsCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsCritical);
-            var roomsForLogsNonCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsNonCritical);
+            var roomsForLogsCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsNonCritical);
 
             var logCluesCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
@@ -343,8 +343,8 @@ namespace TraumaRL.Quests
             var preferredRoomsForLogsCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
             var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.Any, true);
 
-            var roomsForLogsCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsCritical);
-            var roomsForLogsNonCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsNonCritical);
+            var roomsForLogsCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsNonCritical);
 
             var logCluesCritical = manager.AddCluesToExistingDoor(arcologyDoorId, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingDoor(arcologyDoorId, roomsForLogsNonCritical);
@@ -433,8 +433,8 @@ namespace TraumaRL.Quests
             var preferredRoomsForLogsCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForLogs, criticalPath, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
             var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForLogs, criticalPath, false, QuestMapBuilder.CluePath.Any, true);
 
-            var roomsForLogsCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsCritical);
-            var roomsForLogsNonCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 2, preferredRoomsForLogsNonCritical);
+            var roomsForLogsCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsCritical);
+            var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 2, preferredRoomsForLogsNonCritical);
 
             var logCluesCritical = manager.AddCluesToExistingObjective(antennaeObjName, roomsForLogsCritical);
             var logCluesNonCritical = manager.AddCluesToExistingObjective(antennaeObjName, roomsForLogsNonCritical);

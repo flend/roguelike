@@ -183,7 +183,7 @@ namespace TraumaRL
             var startVertex = 0;
             var startLevel = 0;
             mapState = new MapState();
-            mapState.InitialiseWithLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
+            mapState.BuildLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
 
             //Feels like there will be a more dynamic way of getting this state in future
             mapState.ConnectionStore["escapePodConnection"] = levelBuilder.EscapePodsConnection;
@@ -266,7 +266,8 @@ namespace TraumaRL
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
 
-            BuildMapExpandQuest(mapState, questMapBuilder, medicalLevel);
+            //Example has been surpassed by the MedicalTurretTrapQuest
+            //BuildMapExpandQuest(mapState, questMapBuilder, medicalLevel);
 
             if (!quickLevelGen)
             {

@@ -1008,6 +1008,7 @@
     <EmbeddedResource Include="bin\Debug\logentries\qe_medicalturretsecurity.amf" />
     <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecuritylocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecurityunlocked0.amf" />
+    <EmbeddedResource Include="bin\Debug\vaults\turret_trap1.room" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

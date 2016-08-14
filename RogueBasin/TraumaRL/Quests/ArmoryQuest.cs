@@ -83,7 +83,7 @@ namespace TraumaRL.Quests
                 var filteredRooms = Builder.FilterRoomsByPath(MapState, allowedRoomsForClues, criticalPath, true, QuestMapBuilder.CluePath.NotOnCriticalPath, true);
                 var roomsToPlaceMonsters = new List<int>();
 
-                var roomsForMonsters = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 1, filteredRooms);
+                var roomsForMonsters = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 1, filteredRooms);
                 var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
 
@@ -124,7 +124,7 @@ namespace TraumaRL.Quests
                 var criticalPathFromStart = mapInfo.Model.GetPathBetweenVerticesInReducedMap(0, thisRoom);
                 var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForClues, criticalPath, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
 
-                var roomsForLogsNonCritical = Builder.PickExpandedRoomsFromReducedRoomsList(MapState, 1, preferredRoomsForLogsNonCritical);
+                var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 1, preferredRoomsForLogsNonCritical);
 
                 var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
                 var clueName = goodyRoomKeyNames[thisLevel];

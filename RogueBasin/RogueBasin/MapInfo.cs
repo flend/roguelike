@@ -341,6 +341,11 @@ namespace RogueBasin
             return roomNodes.SelectMany(r => Enumerable.Repeat(r, Model.GraphNoCycles.roomMappingNoCycleToFullMap[r].Count()));
         }
 
+        public IEnumerable<int> RoomsInFullMapFromRoomsInCollapsedCycles(IEnumerable<int> roomNodes)
+        {
+            return roomNodes.SelectMany(r => Model.GraphNoCycles.roomMappingNoCycleToFullMap[r]);
+        }
+
         public IEnumerable<Point> GetAllPointsInRoomOfTerrain(int roomIndex, RoomTemplateTerrain terrainToFind)
         {
             var roomRelativePoints = RoomTemplateUtilities.GetPointsInRoomWithTerrain(rooms[roomIndex].Room, terrainToFind);

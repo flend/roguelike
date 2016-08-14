@@ -220,7 +220,7 @@ namespace RogueBasin
             return preferredRoomsIncludingType;
         }
 
-        public List<int> PickExpandedRoomsFromReducedRoomsList(MapState mapState, int cluesToPlace, IEnumerable<int> allowedRoomsForClues)
+        public List<int> PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState mapState, int cluesToPlace, IEnumerable<int> allowedRoomsForClues)
         {
             if (allowedRoomsForClues.Count() == 0)
                 throw new ApplicationException("Not enough rooms to place clues");
