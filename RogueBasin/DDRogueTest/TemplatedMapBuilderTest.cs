@@ -16,7 +16,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -30,7 +30,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             RoomTemplate corridor1 = LoadTemplateFromFileRogueBasin("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room");
 
@@ -61,7 +61,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -80,7 +80,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -99,10 +99,10 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             Stream overlapFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testoverlap.room");
-            RoomTemplate room2 = RoomTemplateLoader.LoadTemplateFromFile(overlapFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room2 = new RoomTemplateLoader(overlapFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -121,10 +121,10 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.test4doors.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             Stream overlapFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testoverlap.room");
-            RoomTemplate room2 = RoomTemplateLoader.LoadTemplateFromFile(overlapFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room2 = new RoomTemplateLoader(overlapFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -148,10 +148,10 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testalignmentroom3.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             Stream overlapFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testoverlap.room");
-            RoomTemplate room2 = RoomTemplateLoader.LoadTemplateFromFile(overlapFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room2 = new RoomTemplateLoader(overlapFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -175,7 +175,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testalignmentroom3.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -193,7 +193,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -211,7 +211,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testtransparent1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -230,7 +230,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -252,7 +252,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -284,7 +284,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -303,7 +303,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -322,7 +322,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -340,7 +340,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -357,7 +357,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -374,7 +374,7 @@ namespace DDRogueTest
             //Load sample template 8x4
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream("DDRogueTest.testdata.vaults.testsolid1.room");
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             TemplatedMapBuilder mapGen = new TemplatedMapBuilder();
 
@@ -432,12 +432,12 @@ namespace DDRogueTest
         {
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream roomFileStream = _assembly.GetManifestResourceStream(filePath);
-            return RoomTemplateLoader.LoadTemplateFromFile(roomFileStream, StandardTemplateMapping.terrainMapping);
+            return new RoomTemplateLoader(roomFileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
         }
 
         private static RoomTemplate LoadTemplateFromFileRogueBasin(string filename)
         {
-            return RoomTemplateLoader.LoadTemplateFromFile(filename, StandardTemplateMapping.terrainMapping);
+            return new RoomTemplateLoader(filename, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
         }
     }
 }

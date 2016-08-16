@@ -207,12 +207,12 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate deadEnd = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber3x3_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate medicalBay = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.medical_bay1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate deadEnd = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber3x3_1door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate medicalBay = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.medical_bay1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -252,10 +252,10 @@ namespace TraumaRL
             var levelInfo = new LevelInfo(levelNo, "science", "Science");
 
             //Load standard room types
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             levelInfo.LevelBuilder = mapBuilder;
@@ -263,12 +263,12 @@ namespace TraumaRL
             levelInfo.LevelGenerator = templateGenerator;
 
             //Load sample templates
-            RoomTemplate branchRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.branchroom.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate branchRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.branchroom2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber1Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber2Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_2door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber1Doors2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber6x4_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber2Doors2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber6x4_2door.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate branchRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.branchroom.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate branchRoom2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.branchroom2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber1Doors = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber7x3_1door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber2Doors = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber7x3_2door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber1Doors2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber6x4_1door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber2Doors2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber6x4_2door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             //Build a network of branched corridors
 
@@ -321,10 +321,10 @@ namespace TraumaRL
             var levelInfo = new LevelInfo(levelNo, "bridge", "Bridge");
 
             //Load standard room types
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             levelInfo.LevelBuilder = mapBuilder;
@@ -332,12 +332,12 @@ namespace TraumaRL
             levelInfo.LevelGenerator = templateGenerator;
 
             //Load sample templates
-            RoomTemplate branchRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.branchroom.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate branchRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.branchroom2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber1Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber2Doors = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber7x3_2door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber1Doors2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber6x4_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate chamber2Doors2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.chamber6x4_2door.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate branchRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.branchroom.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate branchRoom2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.branchroom2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber1Doors = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber7x3_1door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber2Doors = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber7x3_2door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber1Doors2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber6x4_1door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate chamber2Doors2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.chamber6x4_2door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             //Build a network of branched corridors
 
@@ -391,11 +391,11 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate originRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -433,12 +433,12 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate originRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate escapePodVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.escape_pod1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate escapePodVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.escape_pod1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -477,10 +477,10 @@ namespace TraumaRL
 
         private void AddStandardPlaceholderVaults(LevelInfo medicalInfo, TemplatedMapGenerator templateGenerator, int maxPlaceHolders)
         {
-            RoomTemplate armory1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.armory1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate armory2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.armory2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate armory3 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.armory3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate armory1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.armory1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate armory2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.armory2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate armory3 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.armory3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, new List<RoomTemplate> { armory1, armory2, armory3 }, maxPlaceHolders));
@@ -504,13 +504,13 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.reactor1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate deadEnd = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate largeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate originRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.reactor1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate deadEnd = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way_1door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate largeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -557,14 +557,14 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.reactor1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate deadEnd = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way_1door.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate largeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate largeRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_2way3.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate originRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.reactor1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate deadEnd = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way_1door.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate largeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate largeRoom2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_2way3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -631,15 +631,15 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_special1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate arcologyBig = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_big1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate arcologySmall = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_small1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate arcologyTiny = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_tiny1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate arcologyOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate originRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_special1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate arcologyBig = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_vault_big1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate arcologySmall = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_vault_small1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate arcologyTiny = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_vault_tiny1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate arcologyOval = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_small_deadend1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_vault_small_deadend1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -689,20 +689,20 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate originRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.central_pillars1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate lshapeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate lshapeAsymmetric = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape_asymmetric3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate tshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.tshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate originRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.central_pillars1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate lshapeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate lshapeAsymmetric = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape_asymmetric3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate tshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.tshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate xshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate arcologyOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate arcologySmall = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_small1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate arcologyOval = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate arcologySmall = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.arcology_vault_small1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate armoryVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.armory1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate armoryVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.armory1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;
@@ -751,9 +751,9 @@ namespace TraumaRL
 
         private void GenerateLargeRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
-            RoomTemplate largeRoom1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largeconnectingvault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate largeRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.largeconnectingvault2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate largeRoom1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.largeconnectingvault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate largeRoom2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.largeconnectingvault2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>>();
 
@@ -770,10 +770,10 @@ namespace TraumaRL
 
         private void GenerateClosePackedSquareRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
-            RoomTemplate largeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate smallRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate tinyRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate largeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate smallRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate tinyRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>>();
 
@@ -791,11 +791,11 @@ namespace TraumaRL
 
         private void GenerateClosePackedSquareRooms2(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
-            RoomTemplate largeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate largeRoom2 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_2way3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate smallRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate tinyRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.square_4way.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate largeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate largeRoom2 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_2way3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate smallRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate tinyRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.square_4way.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>>();
 
@@ -814,11 +814,11 @@ namespace TraumaRL
 
         private void BuildTXShapedRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
-            RoomTemplate lshapeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate lshapeAsymmetric = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape_asymmetric2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate tshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.tshape1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate lshapeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate lshapeAsymmetric = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape_asymmetric2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate tshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.tshape1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate xshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.xshape1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
                 new Tuple<int, RoomTemplate>(100, lshapeRoom),
@@ -831,11 +831,11 @@ namespace TraumaRL
 
         private void BuildTXShapedRoomsBig(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
-            RoomTemplate lshapeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate lshapeAsymmetric = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape_asymmetric3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate tshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.tshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate lshapeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate lshapeAsymmetric = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape_asymmetric3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate tshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.tshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate xshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
                 new Tuple<int, RoomTemplate>(100, lshapeRoom),
@@ -852,11 +852,11 @@ namespace TraumaRL
 
             //Load standard room types
 
-            RoomTemplate room1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate room1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.vault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate placeHolderVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             medicalInfo.LevelBuilder = mapBuilder;

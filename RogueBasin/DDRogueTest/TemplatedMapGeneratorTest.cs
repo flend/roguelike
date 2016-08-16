@@ -865,12 +865,12 @@ namespace DDRogueTest
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream _fileStream = _assembly.GetManifestResourceStream(filename);
 
-            return RoomTemplateLoader.LoadTemplateFromFile(_fileStream, StandardTemplateMapping.terrainMapping);
+            return new RoomTemplateLoader(_fileStream, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
         }
 
         private static RoomTemplate LoadTemplateFromFileRogueBasin(string filename)
         {
-            return RoomTemplateLoader.LoadTemplateFromFile(filename, StandardTemplateMapping.terrainMapping);
+            return new RoomTemplateLoader(filename, StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
         }
     }
 }

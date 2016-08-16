@@ -55,7 +55,7 @@ namespace TraumaRL.Quests
 
         private Connection AddRoomToMap(int level)
         {
-            RoomTemplate roomTemplate = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.tshape1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate roomTemplate = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.tshape1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
             var doorIndex = 0; //top door
 
             var levelGenerator = MapState.LevelInfo[level].LevelGenerator;

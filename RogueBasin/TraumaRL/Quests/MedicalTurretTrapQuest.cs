@@ -54,9 +54,9 @@ namespace TraumaRL.Quests
             var colorForKeycard = Builder.GetUnusedColor();
             var nameForKeycard = colorForKeycard.Item2 + " key card";
             var keycardItem = new RogueBasin.Items.Clue(turrentRoomKeycardClue, colorForKeycard.Item1, nameForKeycard);
-            var keycardItemAndClue = new Tuple<Clue, Item>(turrentRoomKeycardClue, keycardItem);
+            var keycardLocation = MapState.MapInfo.Room(turretRoom).FeatureMarkerPoints("key").First();
 
-            Builder.PlaceClueItems(MapState, Enumerable.Repeat(keycardItemAndClue, 1), false, true, false);
+            mapInfo.Populator.AddItemToRoom(keycardItem, turretRoom, new Location(medicalLevel, keycardLocation));
             
             //Add grenade elsewhere on the level (in an existing room)
 
@@ -89,7 +89,7 @@ namespace TraumaRL.Quests
                 
         private Connection AddTurretRoomToMap(int level, IEnumerable<int> allowedRoomsFullMap)
         {
-            RoomTemplate roomTemplate = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.turret_trap1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate roomTemplate = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.turret_trap1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
             var doorIndex = 0; //align the top door of the template
 
             var levelGenerator = MapState.LevelInfo[level].LevelGenerator;

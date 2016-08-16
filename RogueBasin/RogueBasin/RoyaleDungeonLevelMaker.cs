@@ -175,13 +175,13 @@ namespace RogueBasin
 
             //Load standard room types
 
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate largeOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.oval_vault1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate verylargeOvalArena = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.basic_large_arena.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate xshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate largeOval = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.oval_vault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate verylargeOvalArena = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.basic_large_arena.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             //Entry/exit booth
-            RoomTemplate replacementVault = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
             levelInfo.LevelBuilder = mapBuilder;
@@ -293,8 +293,8 @@ namespace RogueBasin
         private void BuildCircularRooms(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
             // RoomTemplate mediumOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.arcology_vault_oval1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate smallOval = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.oval_vault_small1.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate smallOval = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.oval_vault_small1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
                 new Tuple<int, RoomTemplate>(200, smallOval) };
@@ -306,11 +306,11 @@ namespace RogueBasin
 
         private void BuildTXShapedRoomsBig(TemplatedMapGenerator templateGenerator, int numberOfRandomRooms)
         {
-            RoomTemplate lshapeRoom = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate lshapeAsymmetric = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.lshape_asymmetric3.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate tshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.tshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate xshape = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping);
-            RoomTemplate corridor1 = RoomTemplateLoader.LoadTemplateFromFile("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping);
+            RoomTemplate lshapeRoom = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate lshapeAsymmetric = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.lshape_asymmetric3.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate tshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.tshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate xshape = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.xshape2.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var allRoomsToPlace = new List<Tuple<int, RoomTemplate>> { 
                 new Tuple<int, RoomTemplate>(100, lshapeRoom),

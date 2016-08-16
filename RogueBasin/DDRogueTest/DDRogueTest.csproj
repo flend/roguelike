@@ -219,6 +219,7 @@
     <EmbeddedResource Include="testdata\vaults\testsimplefeatures.room" />
     <EmbeddedResource Include="testdata\vaults\testunknownfeatures.room" />
     <EmbeddedResource Include="testdata\vaults\testunknownmapchar.room" />
+    <EmbeddedResource Include="testdata\vaults\testsimplefeaturemarkers.room" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
