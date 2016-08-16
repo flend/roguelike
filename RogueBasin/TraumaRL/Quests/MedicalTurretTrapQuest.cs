@@ -30,7 +30,7 @@ namespace TraumaRL.Quests
             var doorId = "medical-turret-security";
 
             var numCluesRequiredToOpen = 1;
-            Builder.PlaceMovieDoorOnMap(MapState, doorId, doorId, numCluesRequiredToOpen, System.Drawing.Color.Red, "t_medicalturretunlocked", "t_medicalturretlocked", elevatorConnection);
+            Builder.PlaceMovieDoorOnMap(MapState, doorId, doorId, numCluesRequiredToOpen, System.Drawing.Color.Red, "t_medicalturretsecurityunlocked", "t_medicalturretsecuritylocked", elevatorConnection);
 
             //Add trap room with keycard
             var allowedRoomsForCluesReducedMap = MapState.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(doorId);

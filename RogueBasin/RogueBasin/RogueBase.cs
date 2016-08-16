@@ -51,6 +51,7 @@ namespace RogueBasin
 
         private Point DragTracker { get; set; }
         private bool lastMouseActionWasDrag = false;
+        private int mouseDragStartThreshold = 8;
 
         public bool PlaySounds { get; set; }
         public bool PlayMusic { get; set; }
@@ -474,6 +475,8 @@ namespace RogueBasin
             bool timeAdvances = false;
             bool centreOnPC = false;
 
+            LogFile.Log.LogEntryDebug("Action: mouseMotion: " + mouseArgs.ToString(), LogDebugLevel.Low);
+
             switch (inputState)
             {
                 case InputState.Targetting:
@@ -485,8 +488,12 @@ namespace RogueBasin
 
                     if (mouseArgs.ButtonPressed && mouseArgs.Button == MouseButton.PrimaryButton)
                     {
-                        lastMouseActionWasDrag = true;
-                        HandleMapMovementMouseDrag(mouseArgs);
+                        var dragNotPositionCorrection = HandleMapMovementMouseDrag(mouseArgs);
+                        if (!dragNotPositionCorrection)
+                        {
+                            lastMouseActionWasDrag = false;
+                            HandleMapMovementMouseMotion(clickLocation, mouseArgs);
+                        }
                     }
                     else
                     {
@@ -506,9 +513,12 @@ namespace RogueBasin
             bool timeAdvances = false;
             bool centreOnPC = false;
 
+            LogFile.Log.LogEntryDebug("Action: mouseButton: " + mouseArgs.ToString(), LogDebugLevel.Low);
+
             if (mouseArgs.ButtonPressed == true || lastMouseActionWasDrag)
             {
                 lastMouseActionWasDrag = false;
+                LogFile.Log.LogEntryDebug("Action: last action was drag so ignoring", LogDebugLevel.Low);
                 return new Tuple<bool, bool>(false, false);
             }
 
@@ -635,18 +645,28 @@ namespace RogueBasin
             DragTracker = new Point(0, 0);
         }
 
-        private void HandleMapMovementMouseDrag(MouseMotionEventArgs mouseArgs)
+        private bool HandleMapMovementMouseDrag(MouseMotionEventArgs mouseArgs)
         {
             var thisDrag = new Point(mouseArgs.RelativeX, mouseArgs.RelativeY);
             var newDragTotal = DragTracker + thisDrag;
             LogFile.Log.LogEntryDebug("dragTracker: " + DragTracker, LogDebugLevel.High);
             LogFile.Log.LogEntryDebug("newDragTotal: " + newDragTotal, LogDebugLevel.High);
 
+            if (!lastMouseActionWasDrag && mouseArgs.RelativeX + mouseArgs.RelativeY < mouseDragStartThreshold)
+            {
+                return false;
+            }
+            else
+            {
+                lastMouseActionWasDrag = true;
+            }
+            
             var relativeDrag = Screen.Instance.RelativePixelToRelativeCoord(newDragTotal, true);
             DragTracker = relativeDrag.remainder;
             LogFile.Log.LogEntryDebug("dragTracker after: " + DragTracker + " remainder:  " + relativeDrag.remainder, LogDebugLevel.High);
 
-            Screen.Instance.ScrollViewport(relativeDrag.coord, 3); 
+            Screen.Instance.ScrollViewport(relativeDrag.coord, 3);
+            return true;
         }
         
         bool PlayerPrepareForNextTurn()
@@ -857,6 +877,8 @@ namespace RogueBasin
         {
             bool timeAdvances = false;
             bool centreOnPC = false;
+
+            LogFile.Log.LogEntryDebug("Action: keyboard: " + args.ToString(), LogDebugLevel.Low);
 
             //Only on key up
             
