@@ -18,9 +18,10 @@ namespace TraumaRL.Quests
 
         public override void SetupQuest()
         {
-            var mapInfo = MapState.MapInfo;
             var medicalLevel = MapState.LevelIds["medical"];
             var lowerAtriumLevel = MapState.LevelIds["lowerAtrium"];
+
+            //LOCKED DOOR
 
             //Lock the door to the next level elevator with a key card which is stashed in a trap room full of turrets
             //Make sure a stun grenade is accessible before the door
@@ -32,24 +33,27 @@ namespace TraumaRL.Quests
             var numCluesRequiredToOpen = 1;
             Builder.PlaceMovieDoorOnMap(MapState, doorId, doorId, numCluesRequiredToOpen, System.Drawing.Color.Red, "t_medicalturretsecurityunlocked", "t_medicalturretsecuritylocked", elevatorConnection);
 
-            //Add trap room with keycard
+            //TRAP/KEY ROOM
+
+            //Find a room where the key is allowed to exist, from which we can grow off the turret room
+
             var allowedRoomsForCluesReducedMap = MapState.DoorAndClueManager.GetValidRoomsToPlaceClueForDoor(doorId);
             var allowedRoomsForCluesFullMap = MapState.MapInfo.RoomsInFullMapFromRoomsInCollapsedCycles(allowedRoomsForCluesReducedMap);
 
-            allowedRoomsForCluesFullMap = mapInfo.FilterOutCorridors(allowedRoomsForCluesFullMap);
+            allowedRoomsForCluesFullMap = MapState.MapInfo.FilterOutCorridors(allowedRoomsForCluesFullMap);
 
             var turretRoomConnection = AddTurretRoomToMap(medicalLevel, allowedRoomsForCluesFullMap);
             var turretRoom = turretRoomConnection.Target;
 
-            //Note that this manager is new after AddTurretRoomToMap
+            //Note mapState is rebuilt after adding new room
             var manager = MapState.DoorAndClueManager;
+            var mapInfo = MapState.MapInfo;
 
-            //Turret room is guaranteed not to be in a cycle (at this stage), so placing a clue must be possible
-            //Turret room should only have 1 viable door to prevent the clue ending up elsewhere (if it became part of a cycle later)
+            //Turret room is guaranteed not to be in a cycle (at this stage), so turretRoom is guaranteed to be in the reduced map
             
             var turrentRoomKeycardClue = manager.AddCluesToExistingDoor(doorId, Enumerable.Repeat(turretRoom, 1)).ElementAt(0);
           
-            //Keycard
+            //Add Keycard
 
             var colorForKeycard = Builder.GetUnusedColor();
             var nameForKeycard = colorForKeycard.Item2 + " key card";
@@ -58,7 +62,25 @@ namespace TraumaRL.Quests
 
             mapInfo.Populator.AddItemToRoom(keycardItem, turretRoom, new Location(medicalLevel, keycardLocation));
             
-            //Add grenade elsewhere on the level (in an existing room)
+            //Add turrets
+            var turretOrDecorationLocations = MapState.MapInfo.Room(turretRoom).FeatureMarkerPoints("turret");
+            foreach (var turretLoc in turretOrDecorationLocations)
+            {
+                if (Game.Random.Next(100) < 50)
+                {
+                    mapInfo.Populator.AddMonsterToRoom(new RogueBasin.Creatures.RotatingTurret(), turretRoom, new Location(medicalLevel, turretLoc));
+                }
+                else
+                {
+                    var sqPC = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.SquarePC];
+                    mapInfo.Populator.AddFeatureToRoom(mapInfo, turretRoom, turretLoc, sqPC.NewFeature());
+                }
+            }
+
+
+            //GRENADE ROOM
+
+            //Add grenade (helper item) elsewhere on the level (in an existing room)
 
             var grenadeClueRoom = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 1, allowedRoomsForCluesReducedMap).ElementAt(0);
             var grenadeClue = manager.AddCluesToExistingDoor(doorId, Enumerable.Repeat(grenadeClueRoom, 1)).ElementAt(0);
@@ -76,6 +98,8 @@ namespace TraumaRL.Quests
             //All rooms will be on the medical level, so we could make the list of rooms from the connections
             var roomsOnCriticalPath = Builder.FilterRoomsByPath(MapState, roomsOnLevel, criticalPath, true, QuestMapBuilder.CluePath.OnCriticalPath, true);
 
+            //Note that roomsOnCriticalPath doesn't seem to take into account loops, so you can miss the critical path (i.e. a loop room will be in the critical path
+            //and then the clue is placed in a random room within this)
             var roomToPlaceLog = roomsOnCriticalPath.Skip(1).Take(roomsOnCriticalPath.Count() / 2).RandomElement();
             var logClue = manager.AddCluesToExistingDoor(doorId, Enumerable.Repeat(roomToPlaceLog, 1)).ElementAt(0);
             var turretLog = new Tuple<LogEntry, Clue>(LogGen.GenerateArbitaryLogEntry("qe_medicalturretsecurity"), logClue);
@@ -84,6 +108,7 @@ namespace TraumaRL.Quests
             var roomForLevelLog = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 1, allowedRoomsForCluesReducedMap).ElementAt(0);
             var levelLogClue = manager.AddCluesToExistingDoor(doorId, Enumerable.Repeat(roomForLevelLog, 1)).ElementAt(0);
             var levelLog = new Tuple<LogEntry, Clue>(LogGen.GenerateElevatorLogEntry(MapState, medicalLevel, lowerAtriumLevel), levelLogClue);
+            
             Builder.PlaceLogClues(MapState, new List<Tuple<LogEntry, Clue>> { levelLog, turretLog }, true, true);
         }
                 

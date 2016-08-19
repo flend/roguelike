@@ -381,7 +381,7 @@ namespace RogueBasin
         Dictionary<Location, List<Feature>> features;
         Dictionary<Location, List<Lock>> locks;
         public List<HiddenNameInfo> HiddenNameInfo { get; set; } //for serialization
-        public List<DungeonSquareTrigger> Triggers { get; set; }
+        public Dictionary<Location, List<DungeonSquareTrigger>> Triggers { get; set; }
 
         List<SpecialMove> specialMoves;
 
@@ -488,7 +488,7 @@ namespace RogueBasin
             specialMoves = new List<SpecialMove>();
             spells = new List<Spell>();
             HiddenNameInfo = new List<HiddenNameInfo>();
-            Triggers = new List<DungeonSquareTrigger>();
+            Triggers = new Dictionary<Location, List<DungeonSquareTrigger>>();
 
             dungeonInfo = new DungeonInfo();
 
@@ -1063,35 +1063,7 @@ namespace RogueBasin
                 move.Known = false;
             }
         }
-
-        /// <summary>
-        /// Triggers which flip terrain into different type
-        /// Yeah, ok, I was tired when I wrote this. I think it has no redeeming features!
-        /// </summary>
-        /// <param name="triggerIDToFlip"></param>
-        public void FlipTerrain(string triggerIDToFlip)
-        {
-            foreach (DungeonSquareTrigger trigger in Triggers)
-            {
-                if (trigger.GetType() == typeof(Triggers.TerrainFlipTrigger))
-                {
-                    Triggers.TerrainFlipTrigger flipTrig = trigger as Triggers.TerrainFlipTrigger;
-
-                    if (trigger == null)
-                    {
-                        LogFile.Log.LogEntryDebug("Trigger is not terrain flip - problem", LogDebugLevel.High);
-                        continue;
-                    }
-
-                    if (triggerIDToFlip == flipTrig.triggerID)
-                    {
-                        flipTrig.FlipTerrain();
-                    }
-                }
-            }
-
-        }
-
+        
         /// <summary>
         /// Save the game to disk. Throws exceptions
         /// </summary>
@@ -1117,7 +1089,6 @@ namespace RogueBasin
                 saveGameInfo.hiddenNameInfo = this.HiddenNameInfo;
                 saveGameInfo.worldClock = this.worldClock;
                 saveGameInfo.dateCounter = this.dateCounter;
-                saveGameInfo.triggers = this.Triggers;
                 saveGameInfo.difficulty = this.Difficulty;
                 saveGameInfo.dungeonInfo = this.dungeonInfo;
                 saveGameInfo.nextUniqueID = this.nextUniqueID;
@@ -4219,18 +4190,12 @@ namespace RogueBasin
             List<DungeonSquareTrigger> triggersSnapshot = new List<DungeonSquareTrigger>();
 
             //Make a copy in case the trigger adds more triggers to the global collection
-
-            foreach (DungeonSquareTrigger trigger in Triggers)
-            {
-                triggersSnapshot.Add(trigger);
-            }
+            var triggersAtPoint = Triggers.Where(kv => kv.Key.Level == level && kv.Key.MapCoord == mapLocation).ToList();
 
             foreach (DungeonSquareTrigger trigger in triggersSnapshot)
             {
                 trigger.CheckTrigger(level, mapLocation);
             }
-
-
         }
 
         internal void AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
@@ -4239,7 +4204,20 @@ namespace RogueBasin
             trigger.Level = level;
             trigger.mapPosition = point;
 
-            Triggers.Add(trigger);
+            Location loc = new Location(level, point);
+
+            List<DungeonSquareTrigger> triggerListAtLocation;
+            Triggers.TryGetValue(loc, out triggerListAtLocation);
+
+            if (triggerListAtLocation == null)
+            {
+                Triggers[loc] = new List<DungeonSquareTrigger>();
+                Triggers[loc].Add(trigger);
+            }
+            else
+            {
+                triggerListAtLocation.Add(trigger);
+            }
         }
 
 
@@ -4615,11 +4593,7 @@ namespace RogueBasin
         /// <returns></returns>
         public bool CheckGlobalTrigger(Type triggerType)
         {
-            List<DungeonSquareTrigger> triggersOfType = Triggers.FindAll(t => t.GetType() == triggerType);
-            if (triggersOfType.Exists(t => t.IsTriggered()))
-                return true;
-            else
-                return false;
+            return Triggers.SelectMany(kv => kv.Value).Where(t => t.GetType() == triggerType && t.IsTriggered()).Any();
         }
 
         /// <summary>

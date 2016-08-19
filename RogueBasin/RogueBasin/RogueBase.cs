@@ -2159,7 +2159,6 @@ namespace RogueBasin
                 newDungeon.SpecialMoves = readData.specialMoves;
                 newDungeon.WorldClock = readData.worldClock;
                 newDungeon.HiddenNameInfo = readData.hiddenNameInfo;
-                newDungeon.Triggers = readData.triggers;
                 newDungeon.Difficulty = readData.difficulty;
                 newDungeon.DungeonInfo = readData.dungeonInfo;
                 newDungeon.dateCounter = readData.dateCounter;

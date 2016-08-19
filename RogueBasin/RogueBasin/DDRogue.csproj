@@ -361,6 +361,7 @@
     <Compile Include="TerrainSets\Pond.cs" />
     <Compile Include="TraumaLevelBuilder.cs" />
     <Compile Include="Triggers\ArenaEntry.cs" />
+    <Compile Include="Triggers\FeaturesToCreaturesTrigger.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
     <Compile Include="KeyValue.cs" />

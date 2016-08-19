@@ -33,6 +33,11 @@ namespace RogueBasin
                 this.colour = colour;
                 this.isBlocking = isBlocking;
             }
+
+            public Feature NewFeature()
+            {
+                return new RogueBasin.Features.StandardDecorativeFeature(this.representation, this.colour, this.isBlocking);
+            }
         }
 
         public static readonly Dictionary<DecorationFeatures, Decoration> decorationFeatures = new Dictionary<DecorationFeatures,Decoration>();
