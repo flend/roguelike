@@ -4187,12 +4187,10 @@ namespace RogueBasin
 
         public void RunDungeonTriggers(int level, Point mapLocation)
         {
-            List<DungeonSquareTrigger> triggersSnapshot = new List<DungeonSquareTrigger>();
-
             //Make a copy in case the trigger adds more triggers to the global collection
-            var triggersAtPoint = Triggers.Where(kv => kv.Key.Level == level && kv.Key.MapCoord == mapLocation).ToList();
+            var triggersAtPoint = Triggers[new Location(level, mapLocation)];
 
-            foreach (DungeonSquareTrigger trigger in triggersSnapshot)
+            foreach (DungeonSquareTrigger trigger in triggersAtPoint)
             {
                 trigger.CheckTrigger(level, mapLocation);
             }
