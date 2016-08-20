@@ -78,6 +78,11 @@ namespace RogueBasin
             RoomInfo(roomId).AddItem(new ItemRoomPlacement(item, absoluteLocation));
         }
 
+        public void AddTriggerToRoom(DungeonSquareTrigger trigger, int roomId, Location absoluteLocation)
+        {
+            RoomInfo(roomId).AddTrigger(new TriggerRoomPlacement(trigger, absoluteLocation));
+        }
+
         public int AddFeaturesToRoom(MapInfo mapInfo, int roomId, IEnumerable<Tuple<RogueBasin.Point, Feature>> featurePoints)
         {
             var thisRoom = mapInfo.Room(roomId);

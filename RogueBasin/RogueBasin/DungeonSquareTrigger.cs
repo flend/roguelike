@@ -7,30 +7,6 @@ namespace RogueBasin
     /// <summary>
     /// Function that triggers when the PC moves into a particular square
     /// </summary>
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.DungeonEntranceTrigger))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.SeeCorpses))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.SpotFriend))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TreasureRoom))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TerrainFlipTrigger))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.TownToWilderness))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.ApproachingTheDragon))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.BackToSchool))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.PrinceInABox))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.SchoolEntryTrigger))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.DockDoor))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.LeaveByDock))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.FirstLevelEntry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission3Entry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission2Entry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission1Entry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission4Entry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission5Entry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission6Entry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission11Entry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Triggers.Mission14Entry))]
-
-
-
     public abstract class DungeonSquareTrigger
     {
         public int Level { get; set; }
@@ -40,7 +16,7 @@ namespace RogueBasin
         /// Has the trigger been activated?
         /// Don't access this directly. Only public for serializing
         /// </summary>
-        public bool triggered;
+        private bool triggered;
         
         public DungeonSquareTrigger()
         {
@@ -65,15 +41,10 @@ namespace RogueBasin
             return true;
         }
 
-        /// <summary>
-        /// Get: Check if this trigger or ANY OTHER TRIGGER OF THE SAME TYPE has been triggered
-        /// Set: Set THIS TRIGGER triggered
-        /// </summary>
-        /// <returns></returns>
         protected bool Triggered {
             get
             {
-                return Game.Dungeon.CheckGlobalTrigger(this.GetType());
+                return triggered;
             }
             set
             {
@@ -81,10 +52,6 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Has THIS trigger been activated. Can be overridden.
-        /// </summary>
-        /// <returns></returns>
         public virtual bool IsTriggered()
         {
             return triggered;

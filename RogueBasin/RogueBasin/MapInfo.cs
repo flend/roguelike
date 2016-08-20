@@ -166,6 +166,18 @@ namespace RogueBasin
         }
     }
 
+    public class TriggerRoomPlacement
+    {
+        public readonly DungeonSquareTrigger trigger;
+        public readonly Location location;
+
+        public TriggerRoomPlacement(DungeonSquareTrigger t, Location loc)
+        {
+            trigger = t;
+            location = loc;
+        }
+    }
+
     public class FeatureRoomPlacement
     {
         public readonly Feature feature;
@@ -196,6 +208,7 @@ namespace RogueBasin
         private List<FeatureRoomPlacement> features = new List<FeatureRoomPlacement>();
         private List<MonsterRoomPlacement> monsters = new List<MonsterRoomPlacement>();
         private List<ItemRoomPlacement> items = new List<ItemRoomPlacement>();
+        private List<TriggerRoomPlacement> triggers = new List<TriggerRoomPlacement>();
         
         public RoomInfo(int roomId) {
             this.id = roomId;
@@ -236,11 +249,24 @@ namespace RogueBasin
             items.Add(item);
         }
 
+        public void AddTrigger(TriggerRoomPlacement trigger)
+        {
+            triggers.Add(trigger);
+        }
+
         public IEnumerable<ItemRoomPlacement> Items
         {
             get
             {
                 return items;
+            }
+        }
+
+        public IEnumerable<TriggerRoomPlacement> Triggers
+        {
+            get
+            {
+                return triggers;
             }
         }
 

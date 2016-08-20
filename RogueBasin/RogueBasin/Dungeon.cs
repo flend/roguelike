@@ -1468,6 +1468,33 @@ namespace RogueBasin
         }
 
         /// <summary>
+        /// Remove feature from the dungeon
+        /// </summary>
+        public void RemoveFeature(Feature feature)
+        {
+            if(!features.ContainsKey(feature.Location)) {
+                LogFile.Log.LogEntryDebug("RemoveFeature: feature " + feature.Description + " does not exist at: " + feature.Location, LogDebugLevel.High);
+                return;
+            }
+
+            var existingFeatureList = features[feature.Location];
+            if (!existingFeatureList.Any())
+            {
+                LogFile.Log.LogEntryDebug("RemoveFeature: feature " + feature.Description + " does not exist at: " + feature.Location, LogDebugLevel.High);
+                return;
+            }
+
+            existingFeatureList.Remove(feature);
+
+            if (feature.IsBlocking)
+            {
+                //We don't store what terrain was there before, but it's invariably floor now
+                SetTerrainAtPoint(feature.LocationLevel, feature.LocationMap, MapTerrain.Empty);
+            }
+        }
+
+
+        /// <summary>
         /// Add feature to the dungeon
         /// </summary>
         /// <param name="feature"></param>
@@ -4187,8 +4214,12 @@ namespace RogueBasin
 
         public void RunDungeonTriggers(int level, Point mapLocation)
         {
-            //Make a copy in case the trigger adds more triggers to the global collection
-            var triggersAtPoint = Triggers[new Location(level, mapLocation)];
+            var location = new Location(level, mapLocation);
+
+            if(!Triggers.ContainsKey(location))
+                return;
+
+            var triggersAtPoint = Triggers[location];
 
             foreach (DungeonSquareTrigger trigger in triggersAtPoint)
             {
@@ -4196,7 +4227,12 @@ namespace RogueBasin
             }
         }
 
-        internal void AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
+        internal bool AddTrigger(DungeonSquareTrigger trigger, Location location)
+        {
+            return AddTrigger(location.Level, location.MapCoord, trigger);
+        }
+
+        internal bool AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
         {
             //Set the trigger position
             trigger.Level = level;
@@ -4216,6 +4252,8 @@ namespace RogueBasin
             {
                 triggerListAtLocation.Add(trigger);
             }
+
+            return true;
         }
 
 
@@ -4583,17 +4621,7 @@ namespace RogueBasin
                 }
             }
         }
-
-        /// <summary>
-        /// Because we can't serialize statics, this function will check all the instances of a particular trigger type
-        /// and return true if any one of them has been triggered
-        /// </summary>
-        /// <returns></returns>
-        public bool CheckGlobalTrigger(Type triggerType)
-        {
-            return Triggers.SelectMany(kv => kv.Value).Where(t => t.GetType() == triggerType && t.IsTriggered()).Any();
-        }
-
+        
         /// <summary>
         /// Remove all temporary items
         /// </summary>
@@ -5259,6 +5287,16 @@ namespace RogueBasin
 
             foreach (RoomInfo roomInfo in rooms)
             {
+                foreach (TriggerRoomPlacement triggerPlacement in roomInfo.Triggers)
+                {
+                    bool monsterResult = AddTrigger(triggerPlacement.trigger, triggerPlacement.location);
+
+                    if (!monsterResult)
+                    {
+                        LogFile.Log.LogEntryDebug("Cannot add trigger to dungeon at: " + triggerPlacement.location, LogDebugLevel.Medium);
+                    }
+                }
+
                 foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
                 {
                     bool monsterResult = AddMonster(monsterPlacement.monster, monsterPlacement.location);

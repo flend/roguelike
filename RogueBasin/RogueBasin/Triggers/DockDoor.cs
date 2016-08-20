@@ -5,15 +5,12 @@ using libtcodWrapper;
 
 namespace RogueBasin.Triggers
 {
-    public class FeaturesToCreaturesTrigger : DungeonSquareTrigger
+    public class DockDoor : DungeonSquareTrigger
     {
-        private Dictionary<Point, Feature> featuresToRemove;
-        private Dictionary<Point, Creature> creaturesToPlace;
 
-        public FeaturesToCreaturesTrigger(Dictionary<Point, Feature> featuresToRemove, Dictionary<Point, Creature> creaturesToPlace)
+        public DockDoor()
         {
-            this.featuresToRemove = featuresToRemove;
-            this.creaturesToPlace = creaturesToPlace;
+
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)

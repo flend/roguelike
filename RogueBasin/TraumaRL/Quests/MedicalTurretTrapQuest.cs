@@ -1,5 +1,6 @@
 ﻿using GraphMap;
 using RogueBasin;
+using RogueBasin.Triggers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,9 @@ namespace TraumaRL.Quests
             var turretRoomConnection = AddTurretRoomToMap(medicalLevel, allowedRoomsForCluesFullMap);
             var turretRoom = turretRoomConnection.Target;
 
+            //Using medicalLevel would be fine, but this lookup is slightly more general, if we refactor out this code in future
+            var turretLevel = MapState.MapInfo.GetLevelForRoomIndex(turretRoom);
+
             //Note mapState is rebuilt after adding new room
             var manager = MapState.DoorAndClueManager;
             var mapInfo = MapState.MapInfo;
@@ -60,23 +64,28 @@ namespace TraumaRL.Quests
             var keycardItem = new RogueBasin.Items.Clue(turrentRoomKeycardClue, colorForKeycard.Item1, nameForKeycard);
             var keycardLocation = MapState.MapInfo.Room(turretRoom).FeatureMarkerPoints("key").First();
 
-            mapInfo.Populator.AddItemToRoom(keycardItem, turretRoom, new Location(medicalLevel, keycardLocation));
+            mapInfo.Populator.AddItemToRoom(keycardItem, turretRoom, new Location(turretLevel, keycardLocation));
             
-            //Add turrets
+            //Add features (including concealed turrets)
             var turretOrDecorationLocations = MapState.MapInfo.Room(turretRoom).FeatureMarkerPoints("turret");
+            var concealedTurretFeatures = new List<Feature>();
+            var turrets = new Dictionary<Location, Monster>();
             foreach (var turretLoc in turretOrDecorationLocations)
             {
+                var sqPC = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.SquarePC].NewFeature();
+                mapInfo.Populator.AddFeatureToRoom(mapInfo, turretRoom, turretLoc, sqPC);
+
                 if (Game.Random.Next(100) < 50)
                 {
-                    mapInfo.Populator.AddMonsterToRoom(new RogueBasin.Creatures.RotatingTurret(), turretRoom, new Location(medicalLevel, turretLoc));
-                }
-                else
-                {
-                    var sqPC = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.SquarePC];
-                    mapInfo.Populator.AddFeatureToRoom(mapInfo, turretRoom, turretLoc, sqPC.NewFeature());
+                    concealedTurretFeatures.Add(sqPC);
+                    var turret = new RogueBasin.Creatures.RotatingTurret();
+                    turrets.Add(new Location(turretLevel, turretLoc), turret);
                 }
             }
 
+            //Add trigger
+            var keycardTrigger = new FeaturesToCreaturesTrigger(concealedTurretFeatures, turrets);
+            mapInfo.Populator.AddTriggerToRoom(keycardTrigger, turretRoom, new Location(turretLevel, keycardLocation));
 
             //GRENADE ROOM
 

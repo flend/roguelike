@@ -5,31 +5,32 @@ using libtcodWrapper;
 
 namespace RogueBasin.Triggers
 {
-    /// <summary>
-    /// Magic library
-    /// </summary>
-    public class DockDoor : DungeonSquareTrigger
+    public class FeaturesToCreaturesTrigger : DungeonSquareTrigger
     {
+        private List<Feature> featuresToRemove;
+        private Dictionary<Location, Monster> creaturesToPlace;
 
-        public DockDoor()
+        public FeaturesToCreaturesTrigger(List<Feature> featuresToRemove, Dictionary<Location, Monster> creaturesToPlace)
         {
-
+            this.featuresToRemove = featuresToRemove;
+            this.creaturesToPlace = creaturesToPlace;
         }
 
         public override bool CheckTrigger(int level, Point mapLocation)
         {
-            //Check we are in the right place - should be in the base I think
-            if (CheckLocation(level, mapLocation) == false)
+            //Remove features
+            //Do first, because we probably plan to place monsters on top of features
+            foreach (var feature in featuresToRemove)
             {
-                return false;
+                Game.Dungeon.RemoveFeature(feature);
             }
 
-            //(Don't check on triggered, since it's global for these events
-
-            //Ensure that this level's entered flat is set
-
-            Game.Dungeon.DungeonInfo.Dungeons[Game.Dungeon.Player.LocationLevel].PlayerLeftDock = true;
-
+            foreach(var kv in creaturesToPlace) {
+                var loc = kv.Key;
+                var monster = kv.Value;
+                Game.Dungeon.AddMonsterDynamic(monster, loc.Level, loc.MapCoord);
+            }
+            
             return true;
         }
     }
