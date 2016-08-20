@@ -2349,15 +2349,7 @@ namespace RogueBasin {
 
                     //Overlay depends on status
 
-                    if (creature.Charmed)
-                    {
-
-                    }
-                    else if (creature.Passive)
-                    {
-
-                    }
-                    else if (creature.StunnedTurns > 0)
+                    if (creature.StunnedTurns > 0)
                     {
                         overlapSprite = "stun";
                     }
@@ -2400,7 +2392,7 @@ namespace RogueBasin {
                             }
                         }
 
-                        //Also agressive
+                        //Also aggressive
                         if (creature.InPursuit())
                         {
                         }

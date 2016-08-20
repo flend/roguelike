@@ -652,7 +652,7 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("dragTracker: " + DragTracker, LogDebugLevel.High);
             LogFile.Log.LogEntryDebug("newDragTotal: " + newDragTotal, LogDebugLevel.High);
 
-            if (!lastMouseActionWasDrag && mouseArgs.RelativeX + mouseArgs.RelativeY < mouseDragStartThreshold)
+            if (!lastMouseActionWasDrag && Math.Abs(mouseArgs.RelativeX + mouseArgs.RelativeY) < mouseDragStartThreshold)
             {
                 return false;
             }

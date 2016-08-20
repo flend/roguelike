@@ -97,6 +97,12 @@ namespace RogueBasin.Creatures
             return CreatureFOV.CreatureFOVType.Triangular;
         }
 
+        //Otherwise turrets won't start rotating until the player stumbles into their triangular FOV
+        protected override bool WakesOnBeingSeen()
+        {
+            return true;
+        }
+
         public override PatrolType GetPatrolType()
         {
             return PatrolType.Rotate;

@@ -28,6 +28,10 @@ namespace RogueBasin.Triggers
             foreach(var kv in creaturesToPlace) {
                 var loc = kv.Key;
                 var monster = kv.Value;
+
+                //Point at the trigger
+                monster.SetHeadingToTarget(this.mapPosition);
+
                 Game.Dungeon.AddMonsterDynamic(monster, loc.Level, loc.MapCoord);
             }
             

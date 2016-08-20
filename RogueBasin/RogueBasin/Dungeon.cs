@@ -1294,7 +1294,6 @@ namespace RogueBasin
         /// <param name="creature"></param>
         private void AddMonsterToList(Monster monster)
         {
-
             monster.UniqueID = nextUniqueID;
             nextUniqueID++;
 
@@ -3248,8 +3247,6 @@ namespace RogueBasin
         /// <param name="creature"></param>
         public CreatureFOV CalculateCreatureFOV(Creature creature)
         {
-            Map currentMap = levels[creature.LocationLevel];
-
             //Update FOV
             fov.CalculateFOV(creature.LocationLevel, creature.LocationMap, creature.SightRadius);
 

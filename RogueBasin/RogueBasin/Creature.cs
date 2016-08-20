@@ -214,7 +214,13 @@ namespace RogueBasin
             int randX = Game.Random.Next(-1, 2);
             int randY = Game.Random.Next(-1, 2);
 
-            Heading = DirectionUtil.DirectionFromMove(randX, randY);
+            Heading = DirectionUtil.DiagonalCardinalAngleFromRelativePosition(randX, randY);
+        }
+
+        public void SetHeadingToTarget(Point target)
+        {
+            var relativeDirection = target - this.LocationMap;
+            Heading = DirectionUtil.DiagonalCardinalAngleFromRelativePosition(relativeDirection.x, relativeDirection.y);
         }
 
         //Creatures start with a random amount in their turn clock. This stops them all moving simultaneously (looks strange if the player is fast)

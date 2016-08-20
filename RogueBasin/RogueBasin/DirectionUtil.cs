@@ -28,6 +28,8 @@ namespace RogueBasin
             int deltaX = deltaDir.x;
             int deltaY = deltaDir.y;
 
+            return Math.Atan2(deltaY, deltaX);
+
             /*
             //Ensure that single square moves are dealt with correctly
 
@@ -39,12 +41,12 @@ namespace RogueBasin
 
             //Otherwise do by angle
 
-            double angle = Math.Atan(deltaY / (double) deltaX);
+            //double angle = Math.Atan(deltaY / (double) deltaX);
 
-			if (deltaX < 0)
-				angle += Math.PI;
+			//if (deltaX < 0)
+			//	angle += Math.PI;
 
-            return angle;
+           // return angle;
             /*
 			// NE: -3p/8 -> -pi/8
 			// E: -pi/8 -> pi/8
@@ -82,51 +84,15 @@ namespace RogueBasin
             return thisDirection;*/
 		}
 
-        /// <summary>
-        /// Direction from a movement direction. Currently only handles 1 square moves (max offset 1 -1)
-        /// </summary>
-        /// <param name="deltaX"></param>
-        /// <param name="deltaY"></param>
-        /// <returns></returns>
-        public static double DirectionFromMove(int deltaX, int deltaY)
-        {
-            if(Math.Abs(deltaX) > 1 || Math.Abs(deltaY) > 1) {
+        public static double DiagonalCardinalAngleFromRelativePosition(int deltaX, int deltaY) {
 
-                string error = "DirectionFromMove: Deltas too big. Throwing exception - can implement this feature";
-                LogFile.Log.LogEntry(error);
-                throw new ApplicationException(error);
-            }
+            var fullAngle = Math.Atan2(deltaY, deltaX);
 
-            // NE: -3p/8 -> -pi/8
-            // E: -pi/8 -> pi/8
-            // SE: pi/8 -> 3pi/8
-            // S: 3pi/8 -> 5pi/8
-            // SW: 5pi/8 -> 7pi/8
-            // W: 7pi/8 -> 9pi/8
-            // NW: 9pi/8 -> 11pi/8
-            // N: 11pi/8 -> 13pi/2 & -p/2 -> -3p/8
+            var cardinalRounding = Math.Round(
+             (fullAngle / (Math.PI / 4)),
+             MidpointRounding.AwayFromZero) * (Math.PI / 4);
 
-            if(deltaX == 0 && deltaY == -1)
-                return -1 * Math.PI / 2;
-            if(deltaX == 1 && deltaY == -1)
-                return -1 * Math.PI / 4;
-            if(deltaX == 1 && deltaY == 0)
-                return 0;
-            if(deltaX == 1 && deltaY == 1)
-                return Math.PI / 4;
-            if(deltaX == 0 && deltaY == 1)
-                return Math.PI / 2;
-            if(deltaX == -1 && deltaY == 1)
-                return 3 * Math.PI / 4;
-            if(deltaX == -1 && deltaY == 0)
-                return Math.PI;
-            if(deltaX == -1 && deltaY == -1)
-                return 5 * Math.PI / 4;
-
-            string error2 = "DirectionFromMove: Can't find heading (BUG) returning North";
-            LogFile.Log.LogEntry(error2);
-            return -1 * Math.PI / 2;
-
+            return cardinalRounding;
         }
 
         /// <summary>
