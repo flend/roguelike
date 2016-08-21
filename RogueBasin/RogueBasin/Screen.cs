@@ -1606,7 +1606,7 @@ namespace RogueBasin {
 
                 DrawUISpriteByCentre(weapon, new Point(playerUI_TL.x + rangedWeaponUICenter.x, playerUI_TL.y + rangedWeaponUICenter.y));
 
-                var rangedDamage = player.ScaleRangedDamage(weaponE, weaponE.DamageBase());
+                var rangedDamage = weaponE.DamageBase();
                 
                 //Draw bullets
                 double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();

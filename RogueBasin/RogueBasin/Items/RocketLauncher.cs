@@ -21,7 +21,7 @@ namespace RogueBasin.Items
         {
             //Should be guaranteed in range by caller
 
-            var scaledDamage = Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase());
+            var scaledDamage = DamageBase();
             //Sounds everywhere
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, target);

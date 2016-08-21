@@ -2862,14 +2862,11 @@ namespace RogueBasin
             }
         }
 
-        internal int ScaleRangedDamage(IEquippableItem item, int damageBase)
-        {
-            return Game.Dungeon.LevelScalingCalculation(damageBase, Level);
-        }
 
         internal int ScaleMeleeDamage(Item item, int damageBase)
         {
-            var scaledDamage = Game.Dungeon.LevelScalingCalculation(damageBase, Level);
+            var scaledDamage = damageBase;
+
             //Get a boost for dodge
             if(IsDodgeActive())
                 return scaledDamage * 2;

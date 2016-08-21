@@ -165,7 +165,7 @@ namespace RogueBasin.Items
         public bool FireItem(Point target)
         {
             //Pistol has unlimited ammo
-            return Game.Dungeon.FirePistolLineWeapon(target, this, Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase()));
+            return Game.Dungeon.FirePistolLineWeapon(target, this, DamageBase());
         }
 
         /// <summary>

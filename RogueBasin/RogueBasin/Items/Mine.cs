@@ -209,7 +209,7 @@ namespace RogueBasin.Items
             //{
                 LogFile.Log.LogEntryDebug("Laying mine", LogDebugLevel.Medium);
 
-                var grenadeCreature = new Creatures.Mine(player.ScaleRangedDamage(this, 30));
+                var grenadeCreature = new Creatures.Mine(30);
                 //var grenadeSquare = adjacentSquares.RandomElement();
 
                 var success = Game.Dungeon.AddMonsterDynamic(grenadeCreature, player.LocationLevel, player.LocationMap, true);
