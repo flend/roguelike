@@ -15,7 +15,25 @@ namespace TraumaRL.Quests
 
         public MainQuest(MapState mapState, QuestMapBuilder builder, LogGenerator logGen) : base(mapState, builder, logGen)
         {
+            //Order of the main quest (in future, this will be generic)
 
+            //Escape pod (flight deck) [requires active self-destruct]
+            //Activate self-destruct (bridge) [requires enable self-destruct]
+            //Enable self-destruct (reactor) [requires computer cores destroyed]
+            //Destroy computer cores (computer-core) [no pre-requisite]
+            //Bridge lock (any level place captain's cabin) [no pre-requisite]
+            //Computer core lock (arcology) [no pre-requisite]
+            //Arcology lock (any level - place bioware) [no pre-requisite]
+            //Arcology lock (any level) [antennae disabled]
+            //Antennae (science / storage) [no pre-requisite]
+
+            //To chain quests
+            //Figure out the list of quests, from last to first
+            //From first to last, pass on the result-clues to the next quest
+            //(e.g. door key, 20 monsters killed clues) + possibly some meta-data to inform the logs
+            //Then create quests from last to first, referring to the inherited clues
+
+            //[or never write quests with pre-requisites! lock doors to levels with a complete quest as a single quest object]
         }
 
         public override void SetupQuest()

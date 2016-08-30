@@ -63,8 +63,52 @@ namespace TraumaRL
 
         }
 
-        static TraumaWorldGenerator() { 
+        private class LevelAndDifficulty
+        {
+            public readonly int level;
+            public readonly int difficulty;
+
+            public LevelAndDifficulty(int level, int difficulty)
+            {
+                this.level = level;
+                this.difficulty = difficulty;
+            }
+
+            public static bool operator ==(LevelAndDifficulty i, LevelAndDifficulty j)
+            {
+                // If both are null, or both are same instance, return true.
+                if (System.Object.ReferenceEquals(i, j))
+                {
+                    return true;
+                }
+
+                // If one is null, but not both, return false.
+                if (((object)i == null) || ((object)j == null))
+                {
+                    return false;
+                }
+
+                // Return true if the fields match:
+                if (i.level == j.level && i.difficulty == j.difficulty)
+                    return true;
+                return false;
+            }
+
+            public static bool operator !=(LevelAndDifficulty i, LevelAndDifficulty j)
+            {
+                return !(i == j);
+            }
             
+            public override bool Equals(object obj)
+            {
+                //Value-wise comparison ensured by the cast
+                return this == (LevelAndDifficulty)obj;
+            }
+
+            public override int GetHashCode()
+            {
+                return level + 17 * difficulty;
+            }
         }
 
         /// <summary>
@@ -74,36 +118,86 @@ namespace TraumaRL
         {
             var levelLinks = new ConnectivityMap();
 
+            //Order of the main quest (in future, this will be generic)
+
+            //Escape pod (flight deck) [requires active self-destruct]
+            //Activate self-destruct (bridge) [requires enable self-destruct]
+            //Enable self-destruct (reactor) [requires computer cores destroyed]
+            //Destroy computer cores (computer-core) [no pre-requisite]
+            //Bridge lock (any level place captain's cabin) [no pre-requisite]
+            //Computer core lock (arcology) [no pre-requisite]
+            //Arcology lock (any level - place bioware) [no pre-requisite]
+            //Arcology lock (any level) [antennae disabled]
+            //Antennae (science / storage) [no pre-requisite]
+            
+            //Lower Atrium (may be out-of-sequence)
+            //Medical
+
+            //Level order (last to first)
+
+            //flight deck
+            //bridge
+            //reactor
+            //computer-core
+            //arcology
+            //science
+            //storage
+
+            //lower atrium
+            //medical
+
+            //non-difficulty sequenced:
+
+            //commercial
+
             //Player starts in medical which links to the lower atrium
             levelLinks.AddRoomConnection(new Connection(medicalLevel, lowerAtriumLevel));
 
             if (!quickLevelGen)
             {
-                var standardLowerLevels = new List<int> { scienceLevel, storageLevel, flightDeck, arcologyLevel, commercialLevel };
+                //Create levels in order of difficulty
+                var levelsAndDifficulties = new List<LevelAndDifficulty> {
+                    new LevelAndDifficulty(flightDeck, 1),
+                    new LevelAndDifficulty(bridgeLevel, 2),
+                    new LevelAndDifficulty(reactorLevel, 3),
+                    new LevelAndDifficulty(computerCoreLevel, 4),
+                    new LevelAndDifficulty(arcologyLevel, 5),
+                    new LevelAndDifficulty(scienceLevel, 6),
+                    new LevelAndDifficulty(storageLevel, 7),
+                    new LevelAndDifficulty(commercialLevel, 6),
+                    new LevelAndDifficulty(lowerAtriumLevel, 8)
+                };
 
-                //3 of these branch from the lower atrium
-                var directLinksFromLowerAtrium = standardLowerLevels.RandomElements(3);
+                //Pick terminuses (all levels except most difficult and lower atrium)
+                //Note that the toList() is essential here, otherwise the list keeps getting lazily reshuffled which breaks the algorithm
+                var terminusShuffle = levelsAndDifficulties.Skip(1).Take(7).Shuffle().ToList();
 
-                foreach (var level in directLinksFromLowerAtrium)
-                    levelLinks.AddRoomConnection(lowerAtriumLevel, level);
+                var numberOfTerminii = Game.Random.Next(2) + 2;
+                var terminusNodes = terminusShuffle.Take(numberOfTerminii);
 
-                //The remainder branch from other levels (except the arcology)
-                var leafLevels = directLinksFromLowerAtrium.Select(x => x);
-                leafLevels = leafLevels.Except(new List<int> { arcologyLevel });
+                //Add most difficult level as terminus
+                terminusNodes = terminusNodes.Union(Enumerable.Repeat(levelsAndDifficulties.ElementAt(0), 1));
 
-                var allLowerLevelsToPlace = standardLowerLevels.Except(directLinksFromLowerAtrium).Union(new List<int> { reactorLevel });
-                foreach (var level in allLowerLevelsToPlace)
+                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(Enumerable.Repeat(new LevelAndDifficulty(lowerAtriumLevel, 8), 1));
+
+                foreach (var level in remainingNodes)
                 {
-                    levelLinks.AddRoomConnection(leafLevels.RandomElement(), level);
+                    //Pick a parent from current terminusNodes, which is less difficult
+                    var parentLevel = terminusNodes.Where(parent => parent.difficulty < level.difficulty).Shuffle().First();
+                    levelLinks.AddRoomConnection(new Connection(level.level, parentLevel.level));
+
+                    //Remove parent from terminii and add this level
+                    var terminusNodesExceptParent = terminusNodes.Except(Enumerable.Repeat(parentLevel, 1));
+                    terminusNodes = terminusNodesExceptParent.Union(Enumerable.Repeat(level, 1));
                 }
 
-                //Bridge and computer core are also leaves
-                var allLaterLevels = standardLowerLevels.Except(directLinksFromLowerAtrium);
-                var finalLevelsToPlace = new List<int> { computerCoreLevel, bridgeLevel };
-                foreach (var level in finalLevelsToPlace)
+                //Connect all terminii to lower atrium
+                foreach (var level in terminusNodes)
                 {
-                    levelLinks.AddRoomConnection(allLaterLevels.RandomElement(), level);
+                    levelLinks.AddRoomConnection(new Connection(lowerAtriumLevel, level.level));
                 }
+
+                //TODO: try to balance the tree a bit, otherwise pathological situations (one long branch) are quite likely
             }
 
             return levelLinks;
