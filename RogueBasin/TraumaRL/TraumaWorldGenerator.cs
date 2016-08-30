@@ -106,9 +106,6 @@ namespace TraumaRL
                 }
             }
 
-            //Calculate some data about the levels
-            var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
-
             return levelLinks;
         }
 

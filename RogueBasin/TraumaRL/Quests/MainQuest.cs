@@ -89,7 +89,7 @@ namespace TraumaRL.Quests
 
             manager.PlaceObjective(new ObjectiveRequirements(selfDestructRoom, "self-destruct", 1, new List<string> { "escape" }));
             var selfDestructObjective = manager.GetObjectiveById("self-destruct");
-            //PlaceObjective(mapInfo, selfDestructObjective, null, true, true);
+
             var bridgeLocation = Builder.PlaceObjective(MapState, selfDestructObjective, new RogueBasin.Features.SelfDestructObjective(selfDestructObjective, MapState.DoorAndClueManager.GetClueObjectsLiberatedByAnObjective(selfDestructObjective)), true, true, true);
 
             Builder.UseVault(MapState, selfDestructConnection);
