@@ -176,7 +176,7 @@ namespace TraumaRL
                 var terminusNodes = terminusShuffle.Take(numberOfTerminii);
 
                 //Add most difficult level as terminus
-                terminusNodes = terminusNodes.Union(Enumerable.Repeat(levelsAndDifficulties.ElementAt(0), 1));
+                terminusNodes = terminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
 
                 var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(Enumerable.Repeat(new LevelAndDifficulty(lowerAtriumLevel, 8), 1));
 
@@ -187,8 +187,8 @@ namespace TraumaRL
                     levelLinks.AddRoomConnection(new Connection(level.level, parentLevel.level));
 
                     //Remove parent from terminii and add this level
-                    var terminusNodesExceptParent = terminusNodes.Except(Enumerable.Repeat(parentLevel, 1));
-                    terminusNodes = terminusNodesExceptParent.Union(Enumerable.Repeat(level, 1));
+                    var terminusNodesExceptParent = terminusNodes.Except(EnumerableEx.Return(parentLevel));
+                    terminusNodes = terminusNodesExceptParent.Union(EnumerableEx.Return(level));
                 }
 
                 //Connect all terminii to lower atrium

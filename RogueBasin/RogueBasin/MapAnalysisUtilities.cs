@@ -52,7 +52,7 @@ namespace TraumaRL
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
-            return Shuffle(source, Game.Random);
+            return Shuffle(source, Game.Random).ToList();
         }
     }
 }
