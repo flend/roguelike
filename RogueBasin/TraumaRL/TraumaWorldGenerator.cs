@@ -178,17 +178,26 @@ namespace TraumaRL
                 //Add most difficult level as terminus
                 terminusNodes = terminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
 
-                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(Enumerable.Repeat(new LevelAndDifficulty(lowerAtriumLevel, 8), 1));
+                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevel, 8)));
 
                 foreach (var level in remainingNodes)
                 {
-                    //Pick a parent from current terminusNodes, which is less difficult
-                    var parentLevel = terminusNodes.Where(parent => parent.difficulty < level.difficulty).Shuffle().First();
-                    levelLinks.AddRoomConnection(new Connection(level.level, parentLevel.level));
+                    var numberOfParents = Math.Min(Game.Random.Next(3), terminusNodes.Count());
 
-                    //Remove parent from terminii and add this level
-                    var terminusNodesExceptParent = terminusNodes.Except(EnumerableEx.Return(parentLevel));
-                    terminusNodes = terminusNodesExceptParent.Union(EnumerableEx.Return(level));
+                    var parentNodes = terminusNodes.Where(parent => parent.difficulty < level.difficulty).Shuffle();
+
+                    for (int p = 0; p < numberOfParents; p++)
+                    {
+                        var parentLevel = parentNodes.ElementAt(p);
+                        //Pick a parent from current terminusNodes, which is less difficult
+                        levelLinks.AddRoomConnection(new Connection(level.level, parentLevel.level));
+                        //Remove parent from terminii
+                        terminusNodes = terminusNodes.Except(EnumerableEx.Return(parentLevel));
+                    }
+                                        
+                    //Add this level
+
+                    terminusNodes = terminusNodes.Union(EnumerableEx.Return(level));
                 }
 
                 //Connect all terminii to lower atrium
