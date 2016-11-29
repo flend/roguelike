@@ -111,6 +111,25 @@ namespace TraumaRL
             }
         }
 
+        private IEnumerable<LevelAndDifficulty> GetLevelDifficulties()
+        {
+            //This should come from which quests are chosen
+            var levelsAndDifficulties = new List<LevelAndDifficulty> {
+                    new LevelAndDifficulty(flightDeck, 8),
+                    new LevelAndDifficulty(bridgeLevel, 7),
+                    new LevelAndDifficulty(reactorLevel, 6),
+                    new LevelAndDifficulty(computerCoreLevel, 5),
+                    new LevelAndDifficulty(arcologyLevel, 4),
+                    new LevelAndDifficulty(scienceLevel, 3),
+                    new LevelAndDifficulty(storageLevel, 2),
+                    new LevelAndDifficulty(commercialLevel, 3),
+                    new LevelAndDifficulty(lowerAtriumLevel, 1),
+                    new LevelAndDifficulty(medicalLevel, 0)
+                };
+
+            return levelsAndDifficulties;
+        }
+
         /// <summary>
         /// Build a level->level map showing how the levels are connected
         /// </summary>
@@ -148,29 +167,26 @@ namespace TraumaRL
 
             //non-difficulty sequenced:
 
-            //commercial
+            //commercial (close to atrium)
 
             //Player starts in medical which links to the lower atrium
             levelLinks.AddRoomConnection(new Connection(medicalLevel, lowerAtriumLevel));
 
+            mapState.LevelDifficulty[medicalLevel] = 0;
+            mapState.LevelDifficulty[lowerAtriumLevel] = 1;
+
             if (!quickLevelGen)
             {
                 //Create levels in order of difficulty
-                var levelsAndDifficulties = new List<LevelAndDifficulty> {
-                    new LevelAndDifficulty(flightDeck, 1),
-                    new LevelAndDifficulty(bridgeLevel, 2),
-                    new LevelAndDifficulty(reactorLevel, 3),
-                    new LevelAndDifficulty(computerCoreLevel, 4),
-                    new LevelAndDifficulty(arcologyLevel, 5),
-                    new LevelAndDifficulty(scienceLevel, 6),
-                    new LevelAndDifficulty(storageLevel, 7),
-                    new LevelAndDifficulty(commercialLevel, 6),
-                    new LevelAndDifficulty(lowerAtriumLevel, 8)
-                };
+                var levelsAndDifficultiesFull = GetLevelDifficulties();
+                var levelsAndDifficultiesAscending = levelsAndDifficultiesFull.Except(EnumerableEx.Return(new LevelAndDifficulty(medicalLevel, 0)));
 
+                var maxDifficulty = levelsAndDifficultiesAscending.Max(l => l.difficulty);
+                var levelsAndDifficulties = levelsAndDifficultiesAscending.Select(l => new LevelAndDifficulty(l.level, maxDifficulty - l.difficulty));
+                
                 //Pick terminuses (all levels except most difficult and lower atrium)
-                //Note that the toList() is essential here, otherwise the list keeps getting lazily reshuffled which breaks the algorithm
-                var terminusShuffle = levelsAndDifficulties.Skip(1).Take(7).Shuffle().ToList();
+                //Note that shuffle now has an implicit toList() which stops multiple evaluations giving different results
+                var terminusShuffle = levelsAndDifficulties.Skip(1).Take(7).Shuffle();
 
                 var numberOfTerminii = Game.Random.Next(2) + 2;
                 var terminusNodes = terminusShuffle.Take(numberOfTerminii);
@@ -220,6 +236,9 @@ namespace TraumaRL
         {
             //We catch exceptions on generation and keep looping
 
+            //Create the state object which will hold the map state in the generation phase
+            mapState = new MapState();
+
             //Generate the overall level structure
             levelLinks = GenerateLevelLinks();
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
@@ -229,8 +248,6 @@ namespace TraumaRL
             levelBuilder.GenerateLevels();
             
             Dictionary<int, LevelInfo> levelInfo = levelBuilder.LevelInfo;
-
-            //Create the state object which will hold the map state in the generation phase
 
             SetupMapState(levelBuilder, levelInfo);
             
@@ -282,7 +299,6 @@ namespace TraumaRL
         {
             var startVertex = 0;
             var startLevel = 0;
-            mapState = new MapState();
             mapState.BuildLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
 
             //Feels like there will be a more dynamic way of getting this state in future
@@ -486,19 +502,12 @@ namespace TraumaRL
 
         private void CalculateLevelDifficulty(MapState mapState)
         {
-            var levelsToHandleSeparately = new List<int> { medicalLevel, arcologyLevel, computerCoreLevel, bridgeLevel };
-
-            var levelDifficulty = mapState.LevelDifficulty;
-
-            foreach (var kv in mapState.LevelDepths)
+            var levelsAndDifficulties = GetLevelDifficulties();
+            
+            foreach (var levelAndDifficulty in levelsAndDifficulties)
             {
-                levelDifficulty[kv.Key] = kv.Value;
+                mapState.LevelDifficulty[levelAndDifficulty.level] = levelAndDifficulty.difficulty;
             }
-
-            levelDifficulty[reactorLevel] = 4;
-            levelDifficulty[arcologyLevel] = 4;
-            levelDifficulty[computerCoreLevel] = 5;
-            levelDifficulty[bridgeLevel] = 5;
         }
     }
 }
