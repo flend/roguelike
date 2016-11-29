@@ -194,7 +194,8 @@ namespace TraumaRL
                 //Add most difficult level as terminus
                 terminusNodes = terminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
 
-                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevel, 8)));
+                //Fragile way of removing lowerAtrium
+                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevel, maxDifficulty - 1)));
 
                 foreach (var level in remainingNodes)
                 {
