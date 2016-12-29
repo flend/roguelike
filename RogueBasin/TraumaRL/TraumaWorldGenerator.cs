@@ -199,9 +199,8 @@ namespace TraumaRL
 
                 foreach (var level in remainingNodes)
                 {
-                    var numberOfParents = Math.Min(Game.Random.Next(3), terminusNodes.Count());
-
                     var parentNodes = terminusNodes.Where(parent => parent.difficulty < level.difficulty).Shuffle();
+                    var numberOfParents = Math.Min(Game.Random.Next(3), parentNodes.Count());
 
                     for (int p = 0; p < numberOfParents; p++)
                     {
@@ -280,7 +279,7 @@ namespace TraumaRL
             SetupMapsInEngine();
 
             //Pause here to attach the debugger
-            //MessageBox.Show("post engine");
+            MessageBox.Show("post engine");
 
             Game.Dungeon.AddMapObjectsToDungeon(MapState.MapInfo);
             
@@ -394,11 +393,11 @@ namespace TraumaRL
 
             if (!quickLevelGen)
             {
-                BuildAtriumLevelQuests(mapState, questMapBuilder, roomConnectivityMap);
+                //BuildAtriumLevelQuests(mapState, questMapBuilder, roomConnectivityMap);
 
-                BuildRandomElevatorQuests(mapState, questMapBuilder, roomConnectivityMap);
+                //BuildRandomElevatorQuests(mapState, questMapBuilder, roomConnectivityMap);
 
-                BuildGoodyQuests(mapState, questMapBuilder, roomConnectivityMap);
+                //BuildGoodyQuests(mapState, questMapBuilder, roomConnectivityMap);
             }
         }
 

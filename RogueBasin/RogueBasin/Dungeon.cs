@@ -479,7 +479,7 @@ namespace RogueBasin
             features = new Dictionary<Location, List<Feature>>();
             locks = new Dictionary<Location, List<Lock>>();
 
-            pathFinding = new Pathing(this, new LibTCOD.TCODPathFindingWrapper());
+            pathFinding = new Pathing(this, new LibRogueSharp.RogueSharpPathFindingWrapper());
             fov = new LibTCOD.TCODFovWrapper();
 
             ///DungeonEffects are indexed by the time that they occur

@@ -37,7 +37,7 @@ namespace RogueBasin
 
         private void BuildPathableMap() {
 
-            pathFinding = new LibTCOD.TCODPathFindingWrapper();
+            pathFinding = new LibRogueSharp.RogueSharpPathFindingWrapper();
 
             pathingMap = new PathingMap(template.Width, template.Height);
 

@@ -67,6 +67,7 @@
     <Compile Include="MonsterEvent.cs" />
     <Compile Include="MoveTargettingInfo.cs" />
     <Compile Include="NullTargettingInfo.cs" />
+    <Compile Include="LibRogueSharp\RogueSharpPathFindingWrapper.cs" />
     <Compile Include="Running.cs" />
     <Compile Include="ShotgunTargettingInfo.cs" />
     <Compile Include="TargettingAction.cs" />
@@ -550,6 +551,9 @@
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
+    <Reference Include="RogueSharp">
+      <HintPath>..\packages\RogueSharp.3.0.0\lib\portable-net40+sl50+win+wpa81+wp80\RogueSharp.dll</HintPath>
     </Reference>
     <Reference Include="SdlDotNet">
       <HintPath>..\TraumaRL\bin\Debug\SdlDotNet.dll</HintPath>
