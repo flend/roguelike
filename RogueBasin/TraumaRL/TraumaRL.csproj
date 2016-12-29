@@ -66,6 +66,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LevelBuilderUtils.cs" />
+    <Compile Include="Levels\ArcologyLevelBuilder.cs" />
+    <Compile Include="Levels\BridgeLevelBuilder.cs" />
+    <Compile Include="Levels\CommercialLevelBuilder.cs" />
+    <Compile Include="Levels\ComputerCoreLevelBuilder.cs" />
+    <Compile Include="Levels\FlightDeckLevelBuilder.cs" />
+    <Compile Include="Levels\MedicalLevelBuilder.cs" />
+    <Compile Include="Levels\ReactorLevelBuilder.cs" />
+    <Compile Include="Levels\ScienceLevelBuilder.cs" />
+    <Compile Include="Levels\StandardLevelBuilder.cs" />
+    <Compile Include="Levels\StorageLevelBuilder.cs" />
+    <Compile Include="Quests\EscapePodQuest.cs" />
     <Compile Include="Quests\MapExpandQuest.cs" />
     <Compile Include="Quests\ArmoryQuest.cs" />
     <Compile Include="Quests\BlockElevatorQuest.cs" />

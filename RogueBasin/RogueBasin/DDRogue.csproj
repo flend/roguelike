@@ -57,7 +57,9 @@
     <Compile Include="ArrayCache.cs" />
     <Compile Include="BasicLineTargetInfo.cs" />
     <Compile Include="CustomInputArgs.cs" />
+    <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraphvizExport.cs" />
+    <Compile Include="LevelId.cs" />
     <Compile Include="MapGraphvizExport.cs" />
     <Compile Include="ExamineTargettingInfo.cs" />
     <Compile Include="GrenadeTargettingInfo.cs" />
@@ -67,6 +69,7 @@
     <Compile Include="MonsterEvent.cs" />
     <Compile Include="MoveTargettingInfo.cs" />
     <Compile Include="NullTargettingInfo.cs" />
+    <Compile Include="RequiredLevelInfo.cs" />
     <Compile Include="Running.cs" />
     <Compile Include="ShotgunTargettingInfo.cs" />
     <Compile Include="TargettingAction.cs" />

@@ -459,8 +459,11 @@ namespace TraumaRL
 
         private void BuildMainQuest(MapState mapState, QuestMapBuilder questMapBuilder)
         {
-            var escapePod = new Quests.MainQuest(mapState, questMapBuilder, logGen);
+            var escapePod = new Quests.EscapePodQuest(mapState, questMapBuilder, logGen);
             escapePod.SetupQuest();
+    
+            var mainQuest = new Quests.MainQuest(mapState, questMapBuilder, logGen);
+            mainQuest.SetupQuest();
         }
 
         private void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
