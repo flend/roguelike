@@ -199,9 +199,8 @@ namespace TraumaRL
 
                 foreach (var level in remainingNodes)
                 {
-                    var numberOfParents = Math.Min(Game.Random.Next(3), terminusNodes.Count());
-
                     var parentNodes = terminusNodes.Where(parent => parent.difficulty < level.difficulty).Shuffle();
+                    var numberOfParents = Math.Min(Game.Random.Next(3), parentNodes.Count());
 
                     for (int p = 0; p < numberOfParents; p++)
                     {
