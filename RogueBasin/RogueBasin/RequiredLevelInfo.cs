@@ -8,7 +8,11 @@ namespace RogueBasin
 {
     public class RequiredLevelInfo
     {
-        public LevelId LevelId { get; set; }
-        public IEnumerable<LevelId> HarderLevels { get; set; }
+        public RequiredLevelInfo(LevelType type)
+        {
+            this.LevelType = type;
+        }
+
+        public LevelType LevelType { get; set; }
     }
 }

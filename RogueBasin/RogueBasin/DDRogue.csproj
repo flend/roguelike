@@ -59,7 +59,8 @@
     <Compile Include="CustomInputArgs.cs" />
     <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraphvizExport.cs" />
-    <Compile Include="LevelId.cs" />
+    <Compile Include="LevelRegister.cs" />
+    <Compile Include="LevelType.cs" />
     <Compile Include="MapGraphvizExport.cs" />
     <Compile Include="ExamineTargettingInfo.cs" />
     <Compile Include="GrenadeTargettingInfo.cs" />

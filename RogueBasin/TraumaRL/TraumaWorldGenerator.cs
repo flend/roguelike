@@ -239,7 +239,16 @@ namespace TraumaRL
             //Create the state object which will hold the map state in the generation phase
             mapState = new MapState();
 
+            //Pick main quests
+
+            //Generate levels needed in the game from quests
+            //Add any filler levels
+            
+            //List of (level id [arbitrary], "level type")
+            //Graph of difficulties
+
             //Generate the overall level structure
+            //(honour graph of difficulties)
             levelLinks = GenerateLevelLinks();
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
 
@@ -403,8 +412,8 @@ namespace TraumaRL
 
         private void BuildMapExpandQuest(MapState mapState, QuestMapBuilder questMapBuilder, int level)
         {
-            var mapExpandQuest = new Quests.MapExpandQuest(mapState, questMapBuilder, logGen, level);
-            mapExpandQuest.SetupQuest();
+            var mapExpandQuest = new Quests.MapExpandQuest(questMapBuilder, logGen, level);
+            mapExpandQuest.SetupQuest(mapState);
         }
 
         private void BuildRandomElevatorQuests(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap)
@@ -419,9 +428,9 @@ namespace TraumaRL
             {
                 try
                 {
-                    var blockElevatorQuest = new Quests.BlockElevatorQuest(mapState, builder, logGen, level, roomConnectivityMap);
+                    var blockElevatorQuest = new Quests.BlockElevatorQuest(builder, logGen, level, roomConnectivityMap);
                     blockElevatorQuest.ClueOnElevatorLevel = Game.Random.Next(2) > 0;
-                    blockElevatorQuest.SetupQuest();
+                    blockElevatorQuest.SetupQuest(mapState);
                 }
                 catch (Exception ex)
                 {
@@ -434,8 +443,8 @@ namespace TraumaRL
         {
             try
             {
-                var blockElevatorQuest = new Quests.BlockElevatorQuest(mapState, builder, logGen, lowerAtriumLevel, roomConnectivityMap);
-                blockElevatorQuest.SetupQuest();
+                var blockElevatorQuest = new Quests.BlockElevatorQuest(builder, logGen, lowerAtriumLevel, roomConnectivityMap);
+                blockElevatorQuest.SetupQuest(mapState);
             }
             catch (Exception ex)
             {
@@ -446,24 +455,24 @@ namespace TraumaRL
 
         private void BuildGoodyQuests(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap)
         {
-            var armoryQuest = new Quests.ArmoryQuest(mapState, builder, logGen);
-            armoryQuest.SetupQuest();
+            var armoryQuest = new Quests.ArmoryQuest(builder, logGen);
+            armoryQuest.SetupQuest(mapState);
         }
         
         private void BuildMedicalLevelQuests(MapState mapState, QuestMapBuilder builder)
         {
             //var cameraQuest = new Quests.MedicalCameraQuest(mapState, builder, logGen);
-            var cameraQuest = new Quests.MedicalTurretTrapQuest(mapState, builder, logGen);
-            cameraQuest.SetupQuest();
+            var cameraQuest = new Quests.MedicalTurretTrapQuest(builder, logGen);
+            cameraQuest.SetupQuest(mapState);
         }
 
         private void BuildMainQuest(MapState mapState, QuestMapBuilder questMapBuilder)
         {
-            var escapePod = new Quests.EscapePodQuest(mapState, questMapBuilder, logGen);
-            escapePod.SetupQuest();
+            var escapePod = new Quests.EscapePodQuest(questMapBuilder, logGen);
+            escapePod.SetupQuest(mapState);
     
-            var mainQuest = new Quests.MainQuest(mapState, questMapBuilder, logGen);
-            mainQuest.SetupQuest();
+            var mainQuest = new Quests.MainQuest(questMapBuilder, logGen);
+            mainQuest.SetupQuest(mapState);
         }
 
         private void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)

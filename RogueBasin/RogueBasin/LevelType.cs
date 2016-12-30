@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RogueBasin
 {
-    public enum LevelId
+    public enum LevelType
     {
         MedicalLevel = 0,
         LowerAtriumLevel = 1,

@@ -15,8 +15,8 @@ namespace TraumaRL.Quests
         public bool ClueOnElevatorLevel { get; set; }
         public int MaxDoorsToMake { get; set; }
 
-        public BlockElevatorQuest(MapState mapState, QuestMapBuilder builder, LogGenerator logGen, int questLevel, Dictionary<int, List<Connection>> roomConnectivityMap)
-            : base(mapState, builder, logGen)
+        public BlockElevatorQuest(QuestMapBuilder builder, LogGenerator logGen, int questLevel, Dictionary<int, List<Connection>> roomConnectivityMap)
+            : base(builder, logGen)
         {
             this.questLevel = questLevel;
             this.roomConnectivityMap = roomConnectivityMap;
@@ -25,11 +25,11 @@ namespace TraumaRL.Quests
             MaxDoorsToMake = 1;
         }
 
-        public override void SetupQuest()
+        public override void SetupQuest(MapState mapState)
         {
             try
             {
-                BlockElevatorPaths(MapState, Builder, roomConnectivityMap, questLevel, MaxDoorsToMake, ClueOnElevatorLevel);
+                BlockElevatorPaths(mapState, Builder, roomConnectivityMap, questLevel, MaxDoorsToMake, ClueOnElevatorLevel);
             }
             catch (Exception ex)
             {
