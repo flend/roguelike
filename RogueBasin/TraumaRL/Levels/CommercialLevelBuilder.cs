@@ -17,6 +17,8 @@ namespace TraumaRL.Levels
         private readonly string levelName;
         private readonly string levelReadableName;
 
+        private LevelInfo levelInfo;
+
         public CommercialLevelBuilder(LevelBuilderUtils utils, ConnectivityMap levelLinks, int startVertexIndex, Dictionary<MapTerrain, List<MapTerrain>> terrainMapping,
             string levelName, string levelReadableName)
         {
@@ -30,7 +32,7 @@ namespace TraumaRL.Levels
 
         public override LevelInfo GenerateLevel(int levelNo)
         {
-            var medicalInfo = new LevelInfo(levelNo, levelName, levelReadableName);
+            levelInfo = new LevelInfo(levelNo, levelName, levelReadableName);
 
             //Load standard room types
 
@@ -50,9 +52,9 @@ namespace TraumaRL.Levels
             RoomTemplate placeHolderVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.placeholdervault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
-            medicalInfo.LevelBuilder = mapBuilder;
+            levelInfo.LevelBuilder = mapBuilder;
             var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
-            medicalInfo.LevelGenerator = templateGenerator;
+            levelInfo.LevelGenerator = templateGenerator;
 
             utils.PlaceOriginRoom(templateGenerator, originRoom);
 
@@ -69,16 +71,16 @@ namespace TraumaRL.Levels
 
             //Add connections to other levels
 
-            var connections = utils.AddConnectionsToOtherLevels(levelLinks, levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
+            var connections = utils.AddConnectionsToOtherLevels(levelLinks, levelNo, levelInfo, corridor1, replacementVault, templateGenerator);
             foreach (var connection in connections)
             {
-                medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
+                levelInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
             }
 
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            utils.AddStandardPlaceholderVaults(medicalInfo, templateGenerator, maxPlaceHolders);
+            utils.AddStandardPlaceholderVaults(levelInfo, templateGenerator, maxPlaceHolders);
 
             //If we have any more doors, add a couple of dead ends
             utils.PlaceRandomConnectedRooms(templateGenerator, 3, armoryVault, corridor1, 0, 0);
@@ -87,9 +89,15 @@ namespace TraumaRL.Levels
             utils.AddCorridorsBetweenOpenDoors(templateGenerator, 1, new List<RoomTemplate> { corridor1 });
 
             //Wall type
-            medicalInfo.TerrainMapping = terrainMapping;
+            levelInfo.TerrainMapping = terrainMapping;
 
-            return medicalInfo;
+            return levelInfo;
+        }
+
+        public override LevelInfo CompleteLevel()
+        {
+            utils.ReplaceUnconnectedDoorsWithWalls(levelInfo);
+            return levelInfo;
         }
     }
 }

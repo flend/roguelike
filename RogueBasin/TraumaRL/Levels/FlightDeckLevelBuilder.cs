@@ -16,6 +16,9 @@ namespace TraumaRL.Levels
         private readonly int startVertexIndex;
         private readonly string levelName;
         private readonly string levelReadableName;
+
+        private LevelInfo levelInfo;
+
         private Connection escapePodsConnection;
 
         public FlightDeckLevelBuilder(LevelBuilderUtils utils, ConnectivityMap levelLinks, int startVertexIndex, Dictionary<MapTerrain, List<MapTerrain>> terrainMapping,
@@ -31,7 +34,7 @@ namespace TraumaRL.Levels
 
         public override LevelInfo GenerateLevel(int levelNo)
         {
-            var medicalInfo = new LevelInfo(levelNo, levelName, levelReadableName);
+            levelInfo = new LevelInfo(levelNo, levelName, levelReadableName);
 
             //Load standard room types
 
@@ -43,9 +46,9 @@ namespace TraumaRL.Levels
             RoomTemplate replacementVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.replacevault1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
 
             var mapBuilder = new TemplatedMapBuilder(100, 100);
-            medicalInfo.LevelBuilder = mapBuilder;
+            levelInfo.LevelBuilder = mapBuilder;
             var templateGenerator = new TemplatedMapGenerator(mapBuilder, startVertexIndex);
-            medicalInfo.LevelGenerator = templateGenerator;
+            levelInfo.LevelGenerator = templateGenerator;
 
             utils.PlaceOriginRoom(templateGenerator, originRoom);
 
@@ -55,10 +58,10 @@ namespace TraumaRL.Levels
 
             //Add connections to other levels
 
-            var connections = utils.AddConnectionsToOtherLevels(levelLinks, levelNo, medicalInfo, corridor1, replacementVault, templateGenerator);
+            var connections = utils.AddConnectionsToOtherLevels(levelLinks, levelNo, levelInfo, corridor1, replacementVault, templateGenerator);
             foreach (var connection in connections)
             {
-                medicalInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
+                levelInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
             }
 
             //Add the escape pods
@@ -67,19 +70,25 @@ namespace TraumaRL.Levels
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
-            utils.AddStandardPlaceholderVaults(medicalInfo, templateGenerator, maxPlaceHolders);
+            utils.AddStandardPlaceholderVaults(levelInfo, templateGenerator, maxPlaceHolders);
 
             //Add extra corridors
             utils.AddCorridorsBetweenOpenDoors(templateGenerator, 5, new List<RoomTemplate> { corridor1 });
 
-            medicalInfo.TerrainMapping = terrainMapping;
+            levelInfo.TerrainMapping = terrainMapping;
 
-            return medicalInfo;
+            return levelInfo;
         }
 
         public Connection GetEscapePodsConnection()
         {
             return escapePodsConnection;
+        }
+
+        public override LevelInfo CompleteLevel()
+        {
+            utils.ReplaceUnconnectedDoorsWithWalls(levelInfo);
+            return levelInfo;
         }
     }
 }

@@ -17,6 +17,8 @@ namespace TraumaRL.Levels
         private readonly string levelName;
         private readonly string levelReadableName;
 
+        private LevelInfo levelInfo;
+
         public BridgeLevelBuilder(LevelBuilderUtils utils, ConnectivityMap levelLinks, int startVertexIndex, Dictionary<MapTerrain, List<MapTerrain>> terrainMapping,
             string levelName, string levelReadableName)
         {
@@ -30,7 +32,7 @@ namespace TraumaRL.Levels
 
         public override LevelInfo GenerateLevel(int levelNo)
         {
-            var levelInfo = new LevelInfo(levelNo, levelName, levelReadableName);
+            levelInfo = new LevelInfo(levelNo, levelName, levelReadableName);
 
             //Load standard room types
             RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
@@ -94,6 +96,12 @@ namespace TraumaRL.Levels
             //Wall type
             levelInfo.TerrainMapping = terrainMapping;
 
+            return levelInfo;
+        }
+
+        public override LevelInfo CompleteLevel()
+        {
+            utils.ReplaceUnconnectedDoorsWithWalls(levelInfo);
             return levelInfo;
         }
     }

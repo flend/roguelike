@@ -307,5 +307,17 @@ namespace TraumaRL
             medicalInfo.ReplaceableVaultConnections.AddRange(
                 AddReplaceableVaults(templateGenerator, corridor1, new List<RoomTemplate> { armory1, armory2, armory3 }, maxPlaceHolders));
         }
+
+        public void ReplaceAllsDoorsWithFloor(LevelInfo levelInfo)
+        {
+            levelInfo.LevelGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+            //Remove doors
+            levelInfo.LevelGenerator.ReplaceConnectedDoorsWithTerrain(RoomTemplateTerrain.Floor);
+        }
+
+        public void ReplaceUnconnectedDoorsWithWalls(LevelInfo levelInfo)
+        {
+            levelInfo.LevelGenerator.ReplaceUnconnectedDoorsWithTerrain(RoomTemplateTerrain.Wall);
+        }
     }
 }
