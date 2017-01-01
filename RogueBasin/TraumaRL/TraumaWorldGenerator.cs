@@ -63,7 +63,7 @@ namespace TraumaRL
 
         }
 
-        private class LevelAndDifficulty
+        public class LevelAndDifficulty
         {
             public readonly int level;
             public readonly int difficulty;
@@ -172,8 +172,7 @@ namespace TraumaRL
             //Player starts in medical which links to the lower atrium
             levelLinks.AddRoomConnection(new Connection(medicalLevel, lowerAtriumLevel));
 
-            mapState.LevelDifficulty[medicalLevel] = 0;
-            mapState.LevelDifficulty[lowerAtriumLevel] = 1;
+            //This feels kinda misplaced
 
             if (!quickLevelGen)
             {
@@ -293,7 +292,7 @@ namespace TraumaRL
             Game.Dungeon.AddMapObjectsToDungeon(MapState.MapInfo);
             
             //Add monsters
-            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapState, mapState.GameLevels, mapState.LevelDifficulty);
+            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapState, mapState.LevelGraph.GameLevels, mapState.LevelGraph.LevelDifficulty);
 
             //Check we are solvable
             AssertMapIsSolveable(MapState.MapInfo, mapState.DoorAndClueManager);
@@ -313,8 +312,6 @@ namespace TraumaRL
             //Feels like there will be a more dynamic way of getting this state in future
             mapState.ConnectionStore["escapePodConnection"] = levelBuilder.EscapePodsConnection;
             mapState.AllReplaceableVaults = levelBuilder.AllReplaceableVaults;
-
-            CalculateLevelDifficulty(mapState);
         }
 
         private void AssertMapIsSolveable(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)
@@ -376,7 +373,7 @@ namespace TraumaRL
             //Comment for faster UI check
             Game.Dungeon.RefreshAllLevelPathingAndFOV();
 
-            foreach (var level in mapState.GameLevels)
+            foreach (var level in mapState.LevelGraph.GameLevels)
             {
                 Game.Dungeon.Levels[level].LightLevel = 0;
             }
@@ -386,7 +383,7 @@ namespace TraumaRL
         private void GenerateQuests(MapState mapState, QuestMapBuilder questMapBuilder)
         {
             var mapInfo = mapState.MapInfo;
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
 
             var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
             var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
@@ -420,7 +417,7 @@ namespace TraumaRL
         {
             var noLevelsToBlock = 1 + Game.Random.Next(1);
 
-            var candidateLevels = mapState.GameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => mapState.LevelInfo[l].ConnectionsToOtherLevels.Count() > 1);
+            var candidateLevels = mapState.LevelGraph.GameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => mapState.LevelGraph.LevelInfo[l].ConnectionsToOtherLevels.Count() > 1);
             LogFile.Log.LogEntryDebug("Candidates for elevator quests: " + candidateLevels, LogDebugLevel.Medium);
             var chosenLevels = candidateLevels.RandomElements(noLevelsToBlock);
 
@@ -471,7 +468,7 @@ namespace TraumaRL
             var escapePod = new Quests.EscapePodQuest(questMapBuilder, logGen);
             escapePod.SetupQuest(mapState);
     
-            var mainQuest = new Quests.MainQuest(questMapBuilder, logGen);
+            var mainQuest = new Quests.CaptainIdQuest(questMapBuilder, logGen);
             mainQuest.SetupQuest(mapState);
         }
 
@@ -509,16 +506,6 @@ namespace TraumaRL
                 
                 LogFile.Log.LogEntryDebug("Adding elevator connection " + sourceLevel + ":" + targetLevel + " via points" +
                     sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);
-            }
-        }
-
-        private void CalculateLevelDifficulty(MapState mapState)
-        {
-            var levelsAndDifficulties = GetLevelDifficulties();
-            
-            foreach (var levelAndDifficulty in levelsAndDifficulties)
-            {
-                mapState.LevelDifficulty[levelAndDifficulty.level] = levelAndDifficulty.difficulty;
             }
         }
     }

@@ -247,7 +247,7 @@ namespace TraumaRL
         {
             var mapInfo = mapState.MapInfo;
 
-            foreach (var kv in mapState.LevelInfo)
+            foreach (var kv in mapState.LevelGraph.LevelInfo)
             {
                 var thisLevel = kv.Key;
 

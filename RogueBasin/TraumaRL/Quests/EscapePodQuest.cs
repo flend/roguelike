@@ -67,11 +67,11 @@ namespace TraumaRL.Quests
 
         private void SelfDestruct(MapState mapState)
         {
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var mapInfo = mapState.MapInfo;
             var manager = mapState.DoorAndClueManager;
 
-            int selfDestructLevel = mapState.LevelIds["bridge"];
+            int selfDestructLevel = mapState.LevelGraph.LevelIds["bridge"];
             var replaceableVaultsInBridge = levelInfo[selfDestructLevel].ReplaceableVaultConnections.Except(levelInfo[selfDestructLevel].ReplaceableVaultConnectionsUsed);
             var bridgeRoomsInDistanceOrderFromStart = mapInfo.RoomsInDescendingDistanceFromSource(levelInfo[selfDestructLevel].ConnectionsToOtherLevels.First().Value.Target, replaceableVaultsInBridge.Select(c => c.Target));
             var selfDestructRoom = bridgeRoomsInDistanceOrderFromStart.ElementAt(0);
@@ -96,7 +96,7 @@ namespace TraumaRL.Quests
 
             //Self destruct objective in reactor
             //Requires destruction of computer core
-            var unusedVaultsInReactorLevel = Builder.GetAllAvailableVaults(mapState).Where(c => mapInfo.GetLevelForRoomIndex(c.Target) == mapState.LevelIds["reactor"]);
+            var unusedVaultsInReactorLevel = Builder.GetAllAvailableVaults(mapState).Where(c => mapInfo.GetLevelForRoomIndex(c.Target) == mapState.LevelGraph.LevelIds["reactor"]);
             var reactorSelfDestructVaultConnection = unusedVaultsInReactorLevel.First();
             var reactorSelfDestructVault = reactorSelfDestructVaultConnection.Target;
             Builder.UseVault(mapState, reactorSelfDestructVaultConnection);
@@ -118,11 +118,11 @@ namespace TraumaRL.Quests
 
         private void ComputerCore(MapState mapState)
         {
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var mapInfo = mapState.MapInfo;
             var manager = mapState.DoorAndClueManager;
 
-            var computerCoreLevel = mapState.LevelIds["computerCore"];
+            var computerCoreLevel = mapState.LevelGraph.LevelIds["computerCore"];
             var primeSelfDestructId = "prime-self-destruct";
             var coresToPlace = 20;
 
@@ -148,8 +148,8 @@ namespace TraumaRL.Quests
 
             var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForObjective(primeSelfDestructId);
 
-            var arcologyLevel = mapState.LevelIds["arcology"];
-            var commercialLevel = mapState.LevelIds["commercial"];
+            var arcologyLevel = mapState.LevelGraph.LevelIds["arcology"];
+            var commercialLevel = mapState.LevelGraph.LevelIds["commercial"];
             var preferredLevelsForLogs = new List<int> { arcologyLevel, commercialLevel };
             var preferredRooms = preferredLevelsForLogs.SelectMany(l => mapInfo.GetRoomIndicesForLevel(l));
 
@@ -173,6 +173,11 @@ namespace TraumaRL.Quests
             var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(mapState, "qe_computer4", connectingLevel, computerCoreLevel), logCluesNonCritical[1]);
 
             Builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
+        }
+
+        public override void RegisterLevels(LevelRegister register)
+        {
+            throw new NotImplementedException();
         }
     }
 }

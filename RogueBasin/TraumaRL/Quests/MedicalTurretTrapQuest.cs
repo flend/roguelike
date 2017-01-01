@@ -19,8 +19,8 @@ namespace TraumaRL.Quests
 
         public override void SetupQuest(MapState mapState)
         {
-            var medicalLevel = mapState.LevelIds["medical"];
-            var lowerAtriumLevel = mapState.LevelIds["lowerAtrium"];
+            var medicalLevel = mapState.LevelGraph.LevelIds["medical"];
+            var lowerAtriumLevel = mapState.LevelGraph.LevelIds["lowerAtrium"];
 
             //LOCKED DOOR
 
@@ -28,7 +28,7 @@ namespace TraumaRL.Quests
             //Make sure a stun grenade is accessible before the door
         
             //Lock the door off the level
-            var elevatorConnection = mapState.LevelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
+            var elevatorConnection = mapState.LevelGraph.LevelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
             var doorId = "medical-turret-security";
 
             var numCluesRequiredToOpen = 1;
@@ -126,7 +126,7 @@ namespace TraumaRL.Quests
             RoomTemplate roomTemplate = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.turret_trap1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
             var doorIndex = 0; //align the top door of the template
 
-            var levelGenerator = mapState.LevelInfo[level].LevelGenerator;
+            var levelGenerator = mapState.LevelGraph.LevelInfo[level].LevelGenerator;
             var sourceDoorsInAllowedRooms = levelGenerator.PotentialDoors.Where(d => allowedRoomsFullMap.Contains(d.OwnerRoomIndex)).Shuffle();
 
             Connection placedRoomConnection = null;
@@ -149,6 +149,13 @@ namespace TraumaRL.Quests
             mapState.RefreshLevelMaps();
 
             return placedRoomConnection;
+        }
+
+        public override void RegisterLevels(LevelRegister register)
+        {
+            var medicalLevel = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.MedicalLevel));
+            var lowerAtriumLevel = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.LowerAtriumLevel));
+            register.RegisterAscendingDifficultyRelationship(medicalLevel, lowerAtriumLevel);
         }
     }
 }

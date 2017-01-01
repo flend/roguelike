@@ -60,6 +60,7 @@
     <Compile Include="DifficultyOrdering.cs" />
     <Compile Include="DirectedGraphWrapper.cs" />
     <Compile Include="LevelBuilder.cs" />
+    <Compile Include="LevelGraph.cs" />
     <Compile Include="LevelGraphvizExport.cs" />
     <Compile Include="LevelRegister.cs" />
     <Compile Include="LevelType.cs" />

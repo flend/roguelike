@@ -71,12 +71,12 @@ namespace TraumaRL
             worldGen.GenerateTraumaLevels(retry);
 
             Game.Dungeon.MapState = worldGen.MapState;
-            Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelReadableNames.ToDictionary(kv => kv.Key, kv => kv.Value);
+            Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelGraph.LevelReadableNames.ToDictionary(kv => kv.Key, kv => kv.Value);
             
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
 
             VisualiseConnectivityGraph(worldGen.MapState.MapInfo, worldGen.MapState.DoorAndClueManager);
-            VisualiseLevelConnectivityGraph(worldGen.LevelLinks, worldGen.MapState.LevelNames);
+            VisualiseLevelConnectivityGraph(worldGen.LevelLinks, worldGen.MapState.LevelGraph.LevelNames);
         }
 
         private void VisualiseConnectivityGraph(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)

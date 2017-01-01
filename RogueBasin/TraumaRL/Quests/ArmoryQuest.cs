@@ -41,7 +41,7 @@ namespace TraumaRL.Quests
         {
 
             //Ensure that we have a goody room on every level that will support it
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var replaceableVaultsForLevels = levelInfo.ToDictionary(kv => kv.Key, kv => kv.Value.ReplaceableVaultConnections.Except(kv.Value.ReplaceableVaultConnectionsUsed));
             goodyRooms = new Dictionary<int, int>();
             goodyRoomKeyNames = new Dictionary<int, string>();
@@ -63,7 +63,7 @@ namespace TraumaRL.Quests
                 LogFile.Log.LogEntryDebug("Placing goody room at: level: " + thisLevel + " room: " + thisRoom, LogDebugLevel.Medium);
 
                 //Place door
-                var doorReadableId = mapState.LevelNames[thisLevel] + " armory";
+                var doorReadableId = mapState.LevelGraph.LevelNames[thisLevel] + " armory";
                 var doorId = doorReadableId;
 
                 var unusedColor = Builder.GetUnusedColor();
@@ -103,14 +103,14 @@ namespace TraumaRL.Quests
             //Ensure that we have a goody room on every level that will support it
             var manager = mapState.DoorAndClueManager;
             var mapInfo = mapState.MapInfo;
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
 
             foreach (var kv in goodyRooms)
             {
                 var thisLevel = kv.Key;
                 var thisRoom = kv.Value;
 
-                var doorId = mapState.LevelNames[thisLevel] + " armory";
+                var doorId = mapState.LevelGraph.LevelNames[thisLevel] + " armory";
 
                 //Clue
                 var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
@@ -137,7 +137,7 @@ namespace TraumaRL.Quests
 
         private void PlaceLootInArmory(MapState mapState)
         {
-            var levelDifficulty = mapState.LevelDifficulty;
+            var levelDifficulty = mapState.LevelGraph.LevelDifficulty;
 
             //Add standard loot
             AddStandardLootToArmory(mapState, Builder);
@@ -146,7 +146,7 @@ namespace TraumaRL.Quests
 
             itemsInArmory = new Dictionary<int, List<Item>>();
 
-            foreach (var l in mapState.GameLevels)
+            foreach (var l in mapState.LevelGraph.GameLevels)
             {
                 itemsInArmory[l] = new List<Item>();
             }
@@ -251,7 +251,7 @@ namespace TraumaRL.Quests
                     var lootToPlace = possibleLoot.RandomElement();
 
                     Builder.PlaceItems(mapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
-                    LogFile.Log.LogEntryDebug("Placing item: " + lootToPlace.SingleItemDescription + " on level " + mapState.LevelNames[level], LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug("Placing item: " + lootToPlace.SingleItemDescription + " on level " + mapState.LevelGraph.LevelNames[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
                     itemsInArmory[level].Add(lootToPlace);
@@ -273,7 +273,7 @@ namespace TraumaRL.Quests
                     var lootToPlace = possibleLoot.RandomElement();
 
                     Builder.PlaceItems(mapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
-                    LogFile.Log.LogEntryDebug("Placing item (catchup): " + lootToPlace.SingleItemDescription + " on level " + mapState.LevelNames[level], LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug("Placing item (catchup): " + lootToPlace.SingleItemDescription + " on level " + mapState.LevelGraph.LevelNames[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
                     itemsInArmory[level].Add(lootToPlace);
@@ -296,7 +296,7 @@ namespace TraumaRL.Quests
                     itemsPlaced.Add(i);
                     itemsInArmory[randomRoom.Key].Add(i);
                     lootPlaced++;
-                    LogFile.Log.LogEntryDebug("Placing item (final): " + i.SingleItemDescription + " on level " + mapState.LevelNames[randomRoom.Key], LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug("Placing item (final): " + i.SingleItemDescription + " on level " + mapState.LevelGraph.LevelNames[randomRoom.Key], LogDebugLevel.Medium);
                 }
             }
 
@@ -307,7 +307,7 @@ namespace TraumaRL.Quests
 
         private void AddStandardLootToArmory(MapState mapState, QuestMapBuilder builder)
         {
-            var levelDifficulty = mapState.LevelDifficulty;
+            var levelDifficulty = mapState.LevelGraph.LevelDifficulty;
 
             foreach (var kv in goodyRooms.OrderBy(k => k.Key))
             {
@@ -367,6 +367,11 @@ namespace TraumaRL.Quests
             player.GiveItemNotFromDungeon(level1WareToGive);
 
             return itemsGiven;
+        }
+
+        public override void RegisterLevels(LevelRegister register)
+        {
+            //This quest does not require any specific levels, but will work with levels already present
         }
         
     }

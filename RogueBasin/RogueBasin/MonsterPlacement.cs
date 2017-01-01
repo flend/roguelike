@@ -80,7 +80,7 @@ namespace RogueBasin
                 else if (Game.Dungeon.Difficulty == GameDifficulty.Hard)
                     monstersForLevel = (int)Math.Ceiling(monstersForLevel * 1.2);
 
-                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelNames[level], LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelGraph.LevelNames[level], LogDebugLevel.Medium);
 
                 monsterSetsUsed.Add(setToUse);
 
@@ -240,7 +240,7 @@ namespace RogueBasin
 
                 var setToUse = setsToPick.RandomElement();
 
-                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelNames[level], LogDebugLevel.Medium);
+                LogFile.Log.LogEntryDebug("Use set of difficulty " + setToUse.difficulty + " for level " + mapState.LevelGraph.LevelNames[level], LogDebugLevel.Medium);
 
                 monsterSetsUsed.Add(setToUse);
 

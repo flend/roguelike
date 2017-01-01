@@ -159,15 +159,15 @@ namespace RogueBasin
 
         public void UseVault(MapState mapState, Connection vaultConnection)
         {
-            var levelInfo = mapState.LevelInfo;
-            var levelForVault = mapState.GameLevels.Where(l => levelInfo[l].ReplaceableVaultConnections.Contains(vaultConnection)).First();
+            var levelInfo = mapState.LevelGraph.LevelInfo;
+            var levelForVault = mapState.LevelGraph.GameLevels.Where(l => levelInfo[l].ReplaceableVaultConnections.Contains(vaultConnection)).First();
 
             levelInfo[levelForVault].ReplaceableVaultConnectionsUsed.Add(vaultConnection);
         }
 
         private IEnumerable<Connection> GetAllUsedVaults(MapState mapState)
         {
-            return mapState.GameLevels.SelectMany(l => mapState.LevelInfo[l].ReplaceableVaultConnectionsUsed);
+            return mapState.LevelGraph.GameLevels.SelectMany(l => mapState.LevelGraph.LevelInfo[l].ReplaceableVaultConnectionsUsed);
         }
 
         public IEnumerable<Connection> GetAllAvailableVaults(MapState mapState)
@@ -177,7 +177,7 @@ namespace RogueBasin
 
         public IEnumerable<Connection> GetAllVaults(MapState mapState)
         {
-            return mapState.GameLevels.SelectMany(l => mapState.LevelInfo[l].ReplaceableVaultConnections);
+            return mapState.LevelGraph.GameLevels.SelectMany(l => mapState.LevelGraph.LevelInfo[l].ReplaceableVaultConnections);
         }
 
         public enum CluePath
@@ -428,7 +428,7 @@ namespace RogueBasin
         public int PlaceMovieClueForObjectiveInVault(MapState mapState, string objectiveId, char representation, string pickupMovie, string description, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapState.DoorAndClueManager;
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var mapInfo = mapState.MapInfo;
 
             var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForObjective(objectiveId);

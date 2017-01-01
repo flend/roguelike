@@ -4,15 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TraumaRL.Quests
 {
-    class MainQuest : Quest
+    class ArcologyQuest : Quest
     {
-
+        
         string arcologyAntDoorId;
 
-        public MainQuest(QuestMapBuilder builder, LogGenerator logGen) : base(builder, logGen)
+        public ArcologyQuest(QuestMapBuilder builder, LogGenerator logGen)
+            : base(builder, logGen)
         {
             //Order of the main quest (in future, this will be generic)
 
@@ -23,6 +25,7 @@ namespace TraumaRL.Quests
             //Destroy computer cores (computer-core) [no pre-requisite]
             
             //Bridge lock (any level place captain's cabin) [no pre-requisite]
+
             //Computer core lock (arcology) [no pre-requisite]
             //Arcology lock (any level - place bioware) [no pre-requisite]
             //Arcology lock (any level) [antennae disabled]
@@ -39,15 +42,11 @@ namespace TraumaRL.Quests
 
         public override void SetupQuest(MapState mapState)
         {
-            //Bridge lock
-            //Requires captain's id
-            BridgeLock(mapState);
-
             //Computer core lock
             //Requires computer tech's id
             ComputerCoreId(mapState);
 
-            //Archology lock
+            //Arcology lock
             //Requires bioprotect wetware
             ArcologyLock(mapState);
 
@@ -57,77 +56,13 @@ namespace TraumaRL.Quests
 
         }
 
-
-        private void BridgeLock(MapState mapState)
-        {
-            var bridgeLevel = mapState.LevelIds["bridge"];
-            var lowerAtriumLevel = mapState.LevelIds["lowerAtrium"];
-            var medicalLevel = mapState.LevelIds["medical"];
-            var storageLevel = mapState.LevelIds["storage"];
-            var scienceLevel = mapState.LevelIds["science"];
-
-            var levelInfo = mapState.LevelInfo;
-            var mapInfo = mapState.MapInfo;
-
-            //bridge is a dead end
-            var sourceElevatorConnection = levelInfo[bridgeLevel].ConnectionsToOtherLevels.First();
-            var connectingLevel = sourceElevatorConnection.Key;
-            var elevatorToBridge = levelInfo[connectingLevel].ConnectionsToOtherLevels[bridgeLevel];
-
-            var doorName = "captain's id bridge";
-            var doorId = doorName;
-            var colorForCaptainId = Builder.GetUnusedColor();
-            var doorColor = colorForCaptainId.Item1;
-
-            Builder.PlaceMovieDoorOnMap(mapState, doorId, doorName, 1, doorColor, "bridgelocked", "bridgeunlocked", elevatorToBridge);
-
-            //Captain's id
-            var captainIdIdealLevel = mapState.LevelDepths.Where(kv => kv.Value >= 1).Select(kv => kv.Key).Except(new List<int> { lowerAtriumLevel, medicalLevel, storageLevel, scienceLevel });
-            var captainsIdRoom = Builder.PlaceClueForDoorInVault(mapState, levelInfo, doorId, doorColor, doorName, captainIdIdealLevel);
-
-            //Add monsters - nice to put ID on captain but not for now
-            var captainsIdLevel = mapInfo.GetLevelForRoomIndex(captainsIdRoom);
-            var monstersToPlace = new List<Monster> { new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.HeavyTurret(), new RogueBasin.Creatures.AssaultCyborgRanged(), new RogueBasin.Creatures.Captain() };
-            Builder.PlaceCreaturesInRoom(mapState, captainsIdLevel, captainsIdRoom, monstersToPlace, false);
-
-            var decorations = new List<Tuple<int, DecorationFeatureDetails.Decoration>> { new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Skeleton]),
-            new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant2]),
-                new Tuple<int, DecorationFeatureDetails.Decoration>(1, DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.Plant3])};
-            Builder.AddStandardDecorativeFeaturesToRoom(mapState, captainsIdRoom, 10, decorations, false);
-
-            //Logs
-
-            var manager = mapState.DoorAndClueManager;
-
-            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForDoor(doorId);
-
-            var criticalPathLog = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, elevatorToBridge.Source);
-
-            var preferredRoomsForLogsCritical = Builder.FilterRoomsByPath(mapState, allowedRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
-            var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(mapState, allowedRoomsForLogs, criticalPathLog, false, QuestMapBuilder.CluePath.Any, true);
-
-            var roomsForLogsCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(mapState, 2, preferredRoomsForLogsCritical);
-            var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(mapState, 2, preferredRoomsForLogsNonCritical);
-
-            var logCluesCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsCritical);
-            var logCluesNonCritical = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
-
-            var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(mapState, "qe_captain1", connectingLevel, captainsIdLevel), logCluesCritical[0]);
-            var log3 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(mapState, "qe_captain2", connectingLevel, captainsIdLevel), logCluesCritical[1]);
-
-            var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(mapState, "qe_captain3", connectingLevel, captainsIdLevel), logCluesNonCritical[0]);
-            var log4 = new Tuple<LogEntry, Clue>(LogGen.GenerateGeneralQuestLogEntry(mapState, "qe_captain4", connectingLevel, captainsIdLevel), logCluesNonCritical[1]);
-
-            Builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
-        }
-
         private void ComputerCoreId(MapState mapState)
         {
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var mapInfo = mapState.MapInfo;
 
             var colorForComputerTechsId = Builder.GetUnusedColor();
-            var computerCoreLevel = mapState.LevelIds["computerCore"];
+            var computerCoreLevel = mapState.LevelGraph.LevelIds["computerCore"];
 
             //computer core is a dead end
             var computerCoreSourceElevatorConnection = levelInfo[computerCoreLevel].ConnectionsToOtherLevels.First();
@@ -141,7 +76,7 @@ namespace TraumaRL.Quests
             Builder.PlaceMovieDoorOnMap(mapState, computerDoorId, computerDoorName, 1, computerDoorColor, "computercoreunlocked", "computercorelocked", elevatorToComputerCore);
 
             //Tech's id (this should always work)
-            var arcologyLevel = mapState.LevelIds["arcology"];
+            var arcologyLevel = mapState.LevelGraph.LevelIds["arcology"];
             var techIdIdealLevel = new List<int> { arcologyLevel };
             var techIdRoom = Builder.PlaceClueForDoorInVault(mapState, levelInfo, computerDoorId, computerDoorColor, computerDoorName, techIdIdealLevel);
             var techIdLevel = mapInfo.GetLevelForRoomIndex(techIdRoom);
@@ -158,21 +93,19 @@ namespace TraumaRL.Quests
 
         private void ArcologyLock(MapState mapState)
         {
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var mapInfo = mapState.MapInfo;
 
-            var arcologyLevel = mapState.LevelIds["arcology"];
-            var computerCoreLevel = mapState.LevelIds["computerCore"];
-            var bridgeLevel = mapState.LevelIds["bridge"];
+            var arcologyLevel = mapState.LevelGraph.LevelIds["arcology"];
+            var computerCoreLevel = mapState.LevelGraph.LevelIds["computerCore"];
+            var bridgeLevel = mapState.LevelGraph.LevelIds["bridge"];
             var colorForArcologyLock = Builder.GetUnusedColor();
 
-            // arcology is not a dead end, but only the cc and bridge can follow it
-            var arcologyLockSourceElevatorConnections = levelInfo[arcologyLevel].ConnectionsToOtherLevels.Where(c => c.Key != computerCoreLevel && c.Key != bridgeLevel);
-            if (arcologyLockSourceElevatorConnections.Count() != 1)
-                throw new ApplicationException("arcology connectivity is wrong");
+            //Find door blocking arcology from start6
+            var routeToArcology = mapState.LevelGraph.GetPathBetweenLevels(mapState.StartLevel, arcologyLevel);
 
-            var arcologyLockSourceElevatorConnection = arcologyLockSourceElevatorConnections.First();
-            var levelToArcology = arcologyLockSourceElevatorConnection.Key;
+            var arcologyLockSourceElevatorConnection = routeToArcology.Last();
+            var levelToArcology = arcologyLockSourceElevatorConnection.Source;
             var elevatorToArcology = levelInfo[levelToArcology].ConnectionsToOtherLevels[arcologyLevel];
 
             var arcologyDoorName = "bioware - arcology door lock";
@@ -190,11 +123,10 @@ namespace TraumaRL.Quests
             Builder.PlaceLockedDoorOnMap(mapState, arcologyDoor, door);
 
             //Bioware
-            var flightDeck = mapState.LevelIds["flightDeck"];
-            var storageLevel = mapState.LevelIds["storage"];
-            var scienceLevel = mapState.LevelIds["science"];
+            var storageLevel = mapState.LevelGraph.LevelIds["storage"];
+            var scienceLevel = mapState.LevelGraph.LevelIds["science"];
 
-            var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel, flightDeck };
+            var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel };
             //PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
             var biowareRoom = Builder.PlaceClueItemForDoorInVault(mapState, levelInfo, arcologyDoorId, new RogueBasin.Items.BioWare(), arcologyDoorName, biowareIdIdealLevel);
             var biowareLevel = mapInfo.GetLevelForRoomIndex(biowareRoom);
@@ -231,9 +163,9 @@ namespace TraumaRL.Quests
             //Wrap the arcology door in another door that depends on the antennae
             //Get critical path to archology door
 
-            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, arcologyLockSourceElevatorConnection.Value.Source);
+            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, arcologyLockSourceElevatorConnection.Source);
 
-            //Don't use 2 sincee that's between levels
+            //Don't use 2 since that's between levels
             var lastCorridorToArcology = criticalPath.ElementAt(criticalPath.Count() - 4);
 
             var colorForArcologyAntLock = Builder.GetUnusedColor();
@@ -251,8 +183,8 @@ namespace TraumaRL.Quests
 
         private void AntennaeQuest(MapState mapState)
         {
-            var scienceLevel = mapState.LevelIds["science"];
-            var storageLevel = mapState.LevelIds["storage"];
+            var scienceLevel = mapState.LevelGraph.LevelIds["science"];
+            var storageLevel = mapState.LevelGraph.LevelIds["storage"];
 
             var mapInfo = mapState.MapInfo;
             var manager = mapState.DoorAndClueManager;
@@ -318,6 +250,10 @@ namespace TraumaRL.Quests
 
             Builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1, log2, log3, log4 }, true, true);
 
+        }
+        public override void RegisterLevels(LevelRegister register)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -16,6 +16,7 @@ namespace RogueBasin
         private int nextLevel = 0;
 
         private Dictionary<int, RequiredLevelInfo> levelInfo = new Dictionary<int, RequiredLevelInfo>();
+        private Dictionary<RequiredLevelInfo, int> levelInfoReverse = new Dictionary<RequiredLevelInfo, int>();
         private DirectedGraphWrapper graphWrapper = new DirectedGraphWrapper();
         
         public LevelRegister()
@@ -23,10 +24,16 @@ namespace RogueBasin
 
         }
 
-        public int RegisterNewLevel(RequiredLevelInfo newLevelInfo)
+        public int GetIdForLevelType(RequiredLevelInfo newLevelInfo)
         {
+            if (levelInfoReverse.ContainsKey(newLevelInfo))
+            {
+                return levelInfoReverse[newLevelInfo];
+            }
+                        
             var newIdLevel = nextLevel;
             levelInfo[nextLevel] = newLevelInfo;
+            levelInfoReverse[newLevelInfo] = nextLevel;
 
             nextLevel++;
 

@@ -77,12 +77,13 @@
     <Compile Include="Levels\ScienceLevelBuilder.cs" />
     <Compile Include="Levels\StandardLevelBuilder.cs" />
     <Compile Include="Levels\StorageLevelBuilder.cs" />
+    <Compile Include="Quests\ArcologyQuest.cs" />
     <Compile Include="Quests\EscapePodQuest.cs" />
     <Compile Include="Quests\MapExpandQuest.cs" />
     <Compile Include="Quests\ArmoryQuest.cs" />
     <Compile Include="Quests\BlockElevatorQuest.cs" />
     <Compile Include="DungeonDecorator.cs" />
-    <Compile Include="Quests\MainQuest.cs" />
+    <Compile Include="Quests\CaptainIdQuest.cs" />
     <Compile Include="Quests\MedicalCameraQuest.cs" />
     <Compile Include="Quests\MedicalTurretTrapQuest.cs" />
     <Compile Include="TraumaLevelBuilder.cs" />

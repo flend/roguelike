@@ -11,20 +11,15 @@ namespace RogueBasin
     public class MapState
     {
         MapInfo mapInfo;
+        //Get from mapInfo?
+        int startVertex;
+        
         DoorAndClueManager doorAndClueManager;
         MapPopulator populator;
-        Dictionary<int, LevelInfo> levelInfo;
-        List<int> gameLevels;
-        ConnectivityMap levelLinks;
-        ImmutableDictionary<string, int> levelIds;
-        ImmutableDictionary<int, string> levelNames;
-        ImmutableDictionary<int, string> levelReadableNames;
-        int startLevel;
-        int startVertex;
-                
-        Dictionary<int, int> levelDifficulty = new Dictionary<int,int>();
+
+        LevelGraph levelGraph;
+        
         IEnumerable<int> allReplaceableVaults;
-        Dictionary<int, int> levelDepths;
 
         /// <summary>
         /// A way of communicating between the level generation and quest generation.
@@ -43,7 +38,7 @@ namespace RogueBasin
         /// </summary>
         public void RefreshLevelMaps()
         {
-            InitialiseWithLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
+            InitialiseWithLevelMaps(levelGraph.LevelLinks, levelGraph.LevelInfo, levelGraph.StartLevel, startVertex);
             doorAndClueManager = new DoorAndClueManager(this.doorAndClueManager, MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
         }
 
@@ -66,9 +61,8 @@ namespace RogueBasin
         /// </summary>
         private void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel, int startVertex)
         {
-            this.levelInfo = levelInfo;
-            this.levelLinks = levelLinks;
-            this.startLevel = startLevel;
+            this.levelGraph = new LevelGraph(levelInfo, levelLinks, startLevel);
+            
             this.startVertex = startVertex;
             
             //Build the room graph containing all levels
@@ -86,6 +80,7 @@ namespace RogueBasin
 
             var levelsAdded = new HashSet<int> { startLevel };
 
+            //This is a slight abuse of MapModel which has more functionality than needed
             MapModel levelModel = new MapModel(levelLinks, startLevel);
             var vertexDFSOrder = levelModel.GraphNoCycles.mapMST.verticesInDFSOrder;
 
@@ -119,21 +114,8 @@ namespace RogueBasin
             }
             mapInfo = new MapInfo(mapInfoBuilder, populator);
 
-            gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
-
-            var levelMap = new MapModel(levelLinks, startLevel);
-            levelDepths = levelMap.GetDistanceOfVerticesFromParticularVertexInFullMap(startLevel, gameLevels);
-            foreach (var kv in levelDepths)
-            {
-                LogFile.Log.LogEntryDebug("Level " + kv.Key + " depth " + kv.Value, LogDebugLevel.Medium);
-            }
-
             CopyLevelMapRoomFeaturesIfNotAlreadyPresent(levelInfo);
 
-            //Level name and id lookup
-            levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
-            levelReadableNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelReadableName);
-            levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
         }
 
         /// <summary>
@@ -175,23 +157,13 @@ namespace RogueBasin
             }
         }
 
-        public Dictionary<int, LevelInfo> LevelInfo { get { return levelInfo;  } }
-
-        public Dictionary<int, int> LevelDifficulty { get { return levelDifficulty; } }
-
         public Dictionary<string, Connection> ConnectionStore { get { return connectionStore; } }
-
-        public List<int> GameLevels { get { return gameLevels;  } }
-
-        public ImmutableDictionary<string, int> LevelIds { get { return levelIds; } }
-        public ImmutableDictionary<int, string> LevelNames { get { return levelNames; } }
-        public ImmutableDictionary<int, string> LevelReadableNames { get { return levelNames; } }
         
         public IEnumerable<int> AllReplaceableVaults { get { return allReplaceableVaults; } set { allReplaceableVaults = value; } }
 
-        public Dictionary<int, int> LevelDepths { get { return levelDepths; } }
+        public LevelGraph LevelGraph { get { return levelGraph; } }
 
-        public int StartLevel { get { return startLevel; } }
+        public int StartLevel { get { return levelGraph.StartLevel; } }
         public int StartVertex { get { return startVertex; } }
     }
 }

@@ -17,7 +17,7 @@ namespace RogueBasin
             this.logGen = logGen;
         }
 
-        public virtual void RegisterLevels(LevelRegister register) {}
+        public abstract void RegisterLevels(LevelRegister register);
         public abstract void SetupQuest(MapState mapState);
 
         protected QuestMapBuilder Builder { get { return builder; } }

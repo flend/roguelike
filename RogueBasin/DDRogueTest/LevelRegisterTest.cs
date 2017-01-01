@@ -13,12 +13,12 @@ namespace DDRogueTest
         public void SixLevelDifficultyGraphReturnedInCorrectOrder()
         {
             var register = new LevelRegister();
-            register.RegisterNewLevel(new RequiredLevelInfo(LevelType.ArcologyLevel));
-            register.RegisterNewLevel(new RequiredLevelInfo(LevelType.BridgeLevel));
-            register.RegisterNewLevel(new RequiredLevelInfo(LevelType.CommercialLevel));
-            register.RegisterNewLevel(new RequiredLevelInfo(LevelType.ComputerCoreLevel));
-            register.RegisterNewLevel(new RequiredLevelInfo(LevelType.FlightDeck));
-            register.RegisterNewLevel(new RequiredLevelInfo(LevelType.LowerAtriumLevel));
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel));
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel));
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.CommercialLevel));
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ComputerCoreLevel));
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.FlightDeck));
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.LowerAtriumLevel));
 
             register.RegisterAscendingDifficultyRelationship(0, 1);
             register.RegisterAscendingDifficultyRelationship(1, 2);
@@ -32,6 +32,17 @@ namespace DDRogueTest
             var orderedLevels = difficultyOrdering.GetLevelsInAscendingDifficultyOrder();
 
             CollectionAssert.AreEqual(new List<int> { 0, 1, 2, 3, 4, 5 }, orderedLevels.ToList());
+        }
+
+        [TestMethod]
+        public void TestLevelIdCanBeRetrievedByRequiredLevelInfo()
+        {
+            var register = new LevelRegister();
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel));
+            register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel));
+
+            Assert.AreEqual(0, register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel)));
+            Assert.AreEqual(1, register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel)));
         }
     }
 }

@@ -19,11 +19,11 @@ namespace TraumaRL.Quests
         public override void SetupQuest(MapState mapState)
         {
             var mapInfo = mapState.MapInfo;
-            var medicalLevel = mapState.LevelIds["medical"];
-            var lowerAtriumLevel = mapState.LevelIds["lowerAtrium"];
+            var medicalLevel = mapState.LevelGraph.LevelIds["medical"];
+            var lowerAtriumLevel = mapState.LevelGraph.LevelIds["lowerAtrium"];
 
             //Lock the door to the elevator and require a certain number of monsters to be killed
-            var elevatorConnection = mapState.LevelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
+            var elevatorConnection = mapState.LevelGraph.LevelInfo[medicalLevel].ConnectionsToOtherLevels.First().Value;
 
             var doorId = "medical-security";
             int objectsToPlace = 15;
@@ -53,6 +53,13 @@ namespace TraumaRL.Quests
             var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateElevatorLogEntry(mapState, medicalLevel, lowerAtriumLevel), logClues[0]);
             var log2 = new Tuple<LogEntry, Clue>(LogGen.GenerateArbitaryLogEntry("qe_medicalsecurity"), logClues[1]);
             Builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1, log2 }, true, true);
+        }
+
+        public override void RegisterLevels(LevelRegister register)
+        {
+            var medicalLevel = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.MedicalLevel));
+            var lowerAtriumLevel = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.LowerAtriumLevel));
+            register.RegisterAscendingDifficultyRelationship(medicalLevel, lowerAtriumLevel);
         }
     }
 }

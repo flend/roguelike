@@ -58,7 +58,7 @@ namespace TraumaRL.Quests
             RoomTemplate roomTemplate = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.tshape1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
             var doorIndex = 0; //top door
 
-            var levelGenerator = mapState.LevelInfo[level].LevelGenerator;
+            var levelGenerator = mapState.LevelGraph.LevelInfo[level].LevelGenerator;
 
             var sourceDoors = levelGenerator.PotentialDoors.Shuffle();
 
@@ -80,6 +80,11 @@ namespace TraumaRL.Quests
             }
 
             return placedRoomConnection;
+        }
+
+        public override void RegisterLevels(LevelRegister register)
+        {
+            //This quest does not require a specific level
         }
     }
 }
