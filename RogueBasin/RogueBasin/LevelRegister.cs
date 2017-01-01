@@ -55,5 +55,13 @@ namespace RogueBasin
                 return levelInfo;
             }
         }
+
+        public DirectedGraphWrapper DifficultyGraph
+        {
+            get
+            {
+                return graphWrapper;
+            }
+        }
     }
 }

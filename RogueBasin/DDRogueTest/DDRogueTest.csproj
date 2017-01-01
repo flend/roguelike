@@ -66,6 +66,7 @@
     <Compile Include="ArrayCacheTest.cs" />
     <Compile Include="DifficultyOrderingTest.cs" />
     <Compile Include="DirectionUtilTest.cs" />
+    <Compile Include="LevelRegisterTest.cs" />
     <Compile Include="MapInfoTest.cs" />
     <Compile Include="RoomFillingTest.cs" />
     <Compile Include="RoomTemplateUtilitiesTest.cs" />
