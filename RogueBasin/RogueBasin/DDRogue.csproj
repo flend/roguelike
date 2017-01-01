@@ -57,6 +57,8 @@
     <Compile Include="ArrayCache.cs" />
     <Compile Include="BasicLineTargetInfo.cs" />
     <Compile Include="CustomInputArgs.cs" />
+    <Compile Include="DifficultyOrdering.cs" />
+    <Compile Include="DirectedGraphWrapper.cs" />
     <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraphvizExport.cs" />
     <Compile Include="LevelRegister.cs" />

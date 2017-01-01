@@ -16,7 +16,7 @@ namespace RogueBasin
         private int nextLevel = 0;
 
         private Dictionary<int, RequiredLevelInfo> levelInfo = new Dictionary<int, RequiredLevelInfo>();
-        private AdjacencyGraph<int, TaggedEdge<int, string>> difficultyGraph = new AdjacencyGraph<int,TaggedEdge<int, string>>();
+        private DirectedGraphWrapper graphWrapper = new DirectedGraphWrapper();
         
         public LevelRegister()
         {
@@ -33,7 +33,7 @@ namespace RogueBasin
             return newIdLevel;
         }
 
-        public void RegisterDifficultyRelationship(int easierLevel, int harderLevel)
+        public void RegisterAscendingDifficultyRelationship(int easierLevel, int harderLevel)
         {
             if(!levelInfo.Keys.Contains(easierLevel)) {
                 var errorMsg = "Error: easier level: " + easierLevel + " not in registered levels";
@@ -46,22 +46,9 @@ namespace RogueBasin
                 LogFile.Log.LogEntry(errorMsg);
                 throw new ApplicationException(errorMsg);
             }
-
-            TaggedEdge<int, string> possibleEdge = null;
-
-            difficultyGraph.TryGetEdge(easierLevel, harderLevel, out possibleEdge);
-
-            if (possibleEdge == null)
-                difficultyGraph.AddVerticesAndEdge(new TaggedEdge<int, string>(easierLevel, harderLevel, ""));
+            graphWrapper.AddSourceDestEdge(easierLevel, harderLevel);
         }
 
-        public AdjacencyGraph<int, TaggedEdge<int, string>> DifficultyGraph
-        {
-            get
-            {
-                return difficultyGraph;
-            }
-        }
 
         public Dictionary<int, RequiredLevelInfo> LevelInfo {
             get {
