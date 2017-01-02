@@ -5273,20 +5273,19 @@ namespace RogueBasin
             return status;
         }
 
-        /// <summary>
-        /// RoomPlacements currently contain absolute co-ordinates. I would prefer them to have relative coordinates, and those to get
-        /// mapped to absolute coordinates here
-        /// </summary>
-        /// <param name="mapInfo"></param>
         public void AddMapObjectsToDungeon(MapInfo mapInfo)
         {
             var rooms = mapInfo.Populator.AllRoomsInfo();
 
             foreach (RoomInfo roomInfo in rooms)
             {
+                var roomPositioned = mapInfo.Room(roomInfo.Id);
+                var roomLocation = roomPositioned.Location;
+                var roomLevel = mapInfo.GetLevelForRoomIndex(roomInfo.Id);
+
                 foreach (TriggerRoomPlacement triggerPlacement in roomInfo.Triggers)
                 {
-                    bool monsterResult = AddTrigger(triggerPlacement.trigger, triggerPlacement.location);
+                    bool monsterResult = AddTrigger(triggerPlacement.trigger, new Location(roomLevel, roomLocation + triggerPlacement.location));
 
                     if (!monsterResult)
                     {
@@ -5296,7 +5295,7 @@ namespace RogueBasin
 
                 foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
                 {
-                    bool monsterResult = AddMonster(monsterPlacement.monster, monsterPlacement.location);
+                    bool monsterResult = AddMonster(monsterPlacement.monster, new Location(roomLevel, roomLocation + monsterPlacement.location));
 
                     if (!monsterResult)
                     {
@@ -5306,7 +5305,7 @@ namespace RogueBasin
 
                 foreach (ItemRoomPlacement itemPlacement in roomInfo.Items)
                 {
-                    bool monsterResult = AddItem(itemPlacement.item, itemPlacement.location);
+                    bool monsterResult = AddItem(itemPlacement.item, new Location(roomLevel, roomLocation + itemPlacement.location));
 
                     if (!monsterResult)
                     {
@@ -5318,7 +5317,7 @@ namespace RogueBasin
                 {
                     if (featurePlacement.feature.IsBlocking)
                     {
-                        bool featureResult = AddFeatureBlocking(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord, featurePlacement.feature.BlocksLight);
+                        bool featureResult = AddFeatureBlocking(featurePlacement.feature, roomLevel, roomLocation + featurePlacement.location, featurePlacement.feature.BlocksLight);
 
                         if (!featureResult)
                         {
@@ -5331,7 +5330,7 @@ namespace RogueBasin
                     }
                     else
                     {
-                        bool featureResult = AddFeature(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord);
+                        bool featureResult = AddFeature(featurePlacement.feature, roomLevel, roomLocation + featurePlacement.location);
 
                         if (!featureResult)
                         {

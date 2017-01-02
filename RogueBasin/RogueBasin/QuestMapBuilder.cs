@@ -7,6 +7,9 @@ using System.Text;
 
 namespace RogueBasin
 {
+    /// <summary>
+    /// TODO: Use relative to room co-ordinates for all placing and utility functions
+    /// </summary>
     public class QuestMapBuilder
     {
         private static List<Tuple<System.Drawing.Color, string>> availableColors = new List<Tuple<System.Drawing.Color, string>> {
@@ -43,7 +46,7 @@ namespace RogueBasin
 
             var roomPoint = roomPoints.First();
 
-            bool success = mapInfo.Populator.AddFeatureToRoom(mapInfo, roomPoint.roomId, roomPoint.mapLocation, objectiveFeature);
+            bool success = mapInfo.Populator.AddFeatureToRoom(mapInfo, roomPoint.roomId, roomPoint.ToRelativePoint(mapInfo), objectiveFeature);
 
             if (!success)
             {
@@ -85,7 +88,7 @@ namespace RogueBasin
                 return;
 
             var featuresObjectsDetails = points.Select(p => new Tuple<RogueBasin.Point, DecorationFeatureDetails.Decoration>
-                (p + mapInfo.Room(roomId).Location, Utility.ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
+                (p, Utility.ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
             var featureObjectsToPlace = featuresObjectsDetails.Select(dt => new Tuple<RogueBasin.Point, Feature>
                 (dt.Item1, new RogueBasin.Features.StandardDecorativeFeature(dt.Item2.representation, dt.Item2.colour, dt.Item2.isBlocking)));
 
@@ -268,7 +271,7 @@ namespace RogueBasin
 
                 var pointToPlaceClue = pointsForClues.Shuffle().First();
 
-                mapInfo.Populator.AddMonsterToRoom(newMonster, pointToPlaceClue.roomId, pointToPlaceClue.ToLocation());
+                mapInfo.Populator.AddMonsterToRoom(newMonster, pointToPlaceClue.roomId, pointToPlaceClue.ToRelativePoint(mapState.MapInfo));
             }
         }
 
@@ -287,7 +290,7 @@ namespace RogueBasin
             var monstersAndPoints = shuffledPoints.Zip(monstersToPlace, Tuple.Create);
             foreach (var m in monstersAndPoints)
             {
-                mapInfo.Populator.AddMonsterToRoom(m.Item2, m.Item1.roomId, m.Item1.ToLocation());
+                mapInfo.Populator.AddMonsterToRoom(m.Item2, m.Item1.roomId, m.Item1.ToRelativePoint(mapState.MapInfo));
             }
         }
 
@@ -317,7 +320,7 @@ namespace RogueBasin
                 }
 
                 var pointToPlaceClue = pointsForClues.Shuffle().First();
-                mapInfo.Populator.AddItemToRoom(itemToPlace, pointToPlaceClue.roomId, pointToPlaceClue.ToLocation());
+                mapInfo.Populator.AddItemToRoom(itemToPlace, pointToPlaceClue.roomId, pointToPlaceClue.ToRelativePoint(mapState.MapInfo));
                 pointsPlaced.Add(pointToPlaceClue);
             }
 
@@ -477,7 +480,7 @@ namespace RogueBasin
 
             foreach (var pi in pointsAndItems)
             {
-                mapInfo.Populator.AddItemToRoom(pi.Item1, pi.Item2.roomId, pi.Item2.ToLocation());
+                mapInfo.Populator.AddItemToRoom(pi.Item1, pi.Item2.roomId, pi.Item2.ToRelativePoint(mapState.MapInfo));
             }
         }
 

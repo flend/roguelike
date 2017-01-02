@@ -14,9 +14,9 @@ namespace RogueBasin
         {
         }
 
-        public bool AddFeatureToRoom(MapInfo mapInfo, int roomId, RogueBasin.Point roomPoint, Feature feature)
+        public bool AddFeatureToRoom(MapInfo mapInfo, int roomId, RogueBasin.Point relativeLocation, Feature feature)
         {
-            var featuresPlaced = AddFeaturesToRoom(mapInfo, roomId, new List<Tuple<RogueBasin.Point, Feature>>() { new Tuple<RogueBasin.Point, Feature>(roomPoint, feature) });
+            var featuresPlaced = AddFeaturesToRoom(mapInfo, roomId, new List<Tuple<RogueBasin.Point, Feature>>() { new Tuple<RogueBasin.Point, Feature>(relativeLocation, feature) });
 
             if (featuresPlaced > 0)
             {
@@ -68,22 +68,22 @@ namespace RogueBasin
             }
         }
 
-        public void AddMonsterToRoom(Monster monster, int roomId, Location absoluteLocation)
+        public void AddMonsterToRoom(Monster monster, int roomId, Point relativeLocation)
         {
-            RoomInfo(roomId).AddMonster(new MonsterRoomPlacement(monster, absoluteLocation));
+            RoomInfo(roomId).AddMonster(new MonsterRoomPlacement(monster, relativeLocation));
         }
 
-        public void AddItemToRoom(Item item, int roomId, Location absoluteLocation)
+        public void AddItemToRoom(Item item, int roomId, Point relativeLocation)
         {
-            RoomInfo(roomId).AddItem(new ItemRoomPlacement(item, absoluteLocation));
+            RoomInfo(roomId).AddItem(new ItemRoomPlacement(item, relativeLocation));
         }
 
-        public void AddTriggerToRoom(DungeonSquareTrigger trigger, int roomId, Location absoluteLocation)
+        public void AddTriggerToRoom(DungeonSquareTrigger trigger, int roomId, Point relativeLocation)
         {
-            RoomInfo(roomId).AddTrigger(new TriggerRoomPlacement(trigger, absoluteLocation));
+            RoomInfo(roomId).AddTrigger(new TriggerRoomPlacement(trigger, relativeLocation));
         }
 
-        public int AddFeaturesToRoom(MapInfo mapInfo, int roomId, IEnumerable<Tuple<RogueBasin.Point, Feature>> featurePoints)
+        public int AddFeaturesToRoom(MapInfo mapInfo, int roomId, IEnumerable<Tuple<RogueBasin.Point, Feature>> featureRelativePoints)
         {
             var thisRoom = mapInfo.Room(roomId);
             var roomFiller = new RoomFilling(thisRoom.Room);
@@ -93,17 +93,17 @@ namespace RogueBasin
 
             int featuresPlaced = 0;
 
-            foreach (var featurePoint in featurePoints)
+            foreach (var featurePoint in featureRelativePoints)
             {
                 var p = featurePoint.Item1;
                 var featureToPlace = featurePoint.Item2;
 
-                var pointInRoom = p - thisRoom.Location;
+                var pointInRoom = p;
 
                 if (!featureToPlace.IsBlocking ||
                     featureToPlace.IsBlocking && roomFiller.SetSquareUnWalkableIfMaintainsConnectivity(pointInRoom))
                 {
-                    RoomInfo(roomId).AddFeature(new FeatureRoomPlacement(featureToPlace, new Location(mapInfo.GetLevelForRoomIndex(roomId), p)));
+                    RoomInfo(roomId).AddFeature(new FeatureRoomPlacement(featureToPlace, pointInRoom));
                     featuresPlaced++;
                 }
             }
@@ -121,7 +121,7 @@ namespace RogueBasin
             //Items squares must be connected
             foreach (var item in roomInfo.Items)
             {
-                roomFiller.SetSquareAsUnfillableMustBeConnected(item.location.MapCoord - room.Location);
+                roomFiller.SetSquareAsUnfillableMustBeConnected(item.location);
             }
 
             //Non-blocking features must be connected
@@ -129,18 +129,18 @@ namespace RogueBasin
             {
                 if (feature.feature.IsBlocking)
                 {
-                    roomFiller.SetSquareUnwalkable(feature.location.MapCoord - room.Location);
+                    roomFiller.SetSquareUnwalkable(feature.location);
                 }
                 else
                 {
-                    roomFiller.SetSquareAsUnfillableMustBeConnected(feature.location.MapCoord - room.Location);
+                    roomFiller.SetSquareAsUnfillableMustBeConnected(feature.location);
                 }
             }
 
             //Monsters must be connected
             foreach (var monster in roomInfo.Monsters)
             {
-                roomFiller.SetSquareAsUnfillableMustBeConnected(monster.location.MapCoord - room.Location);
+                roomFiller.SetSquareAsUnfillableMustBeConnected(monster.location);
             }
         }
     }

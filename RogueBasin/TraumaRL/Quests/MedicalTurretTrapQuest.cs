@@ -62,12 +62,12 @@ namespace TraumaRL.Quests
             var colorForKeycard = Builder.GetUnusedColor();
             var nameForKeycard = colorForKeycard.Item2 + " key card";
             var keycardItem = new RogueBasin.Items.Clue(turrentRoomKeycardClue, colorForKeycard.Item1, nameForKeycard);
-            var keycardLocation = mapState.MapInfo.Room(turretRoom).FeatureMarkerPoints("key").First();
+            var keycardLocation = mapState.MapInfo.Room(turretRoom).Room.FeatureMarkerPoints("key").First();
 
-            mapInfo.Populator.AddItemToRoom(keycardItem, turretRoom, new Location(turretLevel, keycardLocation));
+            mapInfo.Populator.AddItemToRoom(keycardItem, turretRoom, keycardLocation);
             
             //Add features (including concealed turrets)
-            var turretOrDecorationLocations = mapState.MapInfo.Room(turretRoom).FeatureMarkerPoints("turret");
+            var turretOrDecorationLocations = mapState.MapInfo.Room(turretRoom).Room.FeatureMarkerPoints("turret");
             var concealedTurretFeatures = new List<Feature>();
             var turrets = new Dictionary<Location, Monster>();
             foreach (var turretLoc in turretOrDecorationLocations)
@@ -85,7 +85,7 @@ namespace TraumaRL.Quests
 
             //Add trigger
             var keycardTrigger = new FeaturesToCreaturesTrigger(concealedTurretFeatures, turrets);
-            mapInfo.Populator.AddTriggerToRoom(keycardTrigger, turretRoom, new Location(turretLevel, keycardLocation));
+            mapInfo.Populator.AddTriggerToRoom(keycardTrigger, turretRoom, keycardLocation);
 
             //GRENADE ROOM
 

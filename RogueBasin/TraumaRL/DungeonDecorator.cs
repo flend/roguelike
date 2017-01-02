@@ -297,7 +297,7 @@ namespace TraumaRL
                 return;
 
             var featuresObjectsDetails = points.Select(p => new Tuple<RogueBasin.Point, DecorationFeatureDetails.Decoration>
-                (p + mapInfo.Room(roomId).Location, Utility.ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
+                (p, Utility.ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
             var featureObjectsToPlace = featuresObjectsDetails.Select(dt => new Tuple<RogueBasin.Point, Feature>
                 (dt.Item1, new RogueBasin.Features.StandardDecorativeFeature(dt.Item2.representation, dt.Item2.colour, dt.Item2.isBlocking)));
 

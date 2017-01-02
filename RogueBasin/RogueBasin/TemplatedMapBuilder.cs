@@ -60,11 +60,6 @@ namespace RogueBasin
         {
             return Room.TerrainMap[p.x - X, p.y - Y];
         }
-
-        public IEnumerable<Point> FeatureMarkerPoints(string featureMarkerName)
-        {
-            return Room.FeatureMarkerPoints(featureMarkerName).Select(p => p + Location);
-        }
     }
 
     

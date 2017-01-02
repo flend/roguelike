@@ -331,8 +331,9 @@ namespace TraumaRL
                 var sourceToTargetElevatorPoint = kv.Value.Item2;
 
                 var elevatorFeature = new RogueBasin.Features.Elevator(targetLevel, targetToSourceElevator.Item2);
+                var elevatorRoomRelativePoint = sourceToTargetElevatorPoint - mapInfo.Room(sourceToTargetElevatorRoomId).Location;
 
-                mapInfo.Populator.AddFeatureToRoom(mapInfo, sourceToTargetElevatorRoomId, sourceToTargetElevatorPoint, elevatorFeature);
+                mapInfo.Populator.AddFeatureToRoom(mapInfo, sourceToTargetElevatorRoomId, elevatorRoomRelativePoint, elevatorFeature);
                 
                 LogFile.Log.LogEntryDebug("Adding elevator connection " + sourceLevel + ":" + targetLevel + " via points" +
                     sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);

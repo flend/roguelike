@@ -136,10 +136,9 @@ namespace RogueBasin
                 {
                     foreach (var featureLoc in roomTemplate.Room.Features)
                     {
-                        var featureWorldPos = featureLoc.Key + new Point(roomTemplate.X, roomTemplate.Y);
-                        if (!populator.RoomInfo(roomTemplate.RoomIndex).IsFeatureAt(new Location(thisLevelId, featureWorldPos)))
+                        if (!populator.RoomInfo(roomTemplate.RoomIndex).IsFeatureAt(featureLoc.Key))
                         {
-                            populator.AddFeatureToRoom(mapInfo, roomTemplate.RoomIndex, featureWorldPos, featureLoc.Value.CreateFeature());
+                            populator.AddFeatureToRoom(mapInfo, roomTemplate.RoomIndex, featureLoc.Key, featureLoc.Value.CreateFeature());
                         }
                     }
                 }
