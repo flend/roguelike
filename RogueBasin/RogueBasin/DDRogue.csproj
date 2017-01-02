@@ -59,10 +59,12 @@
     <Compile Include="CustomInputArgs.cs" />
     <Compile Include="DifficultyOrdering.cs" />
     <Compile Include="DirectedGraphWrapper.cs" />
+    <Compile Include="LevelAndDifficulty.cs" />
     <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraph.cs" />
     <Compile Include="LevelGraphvizExport.cs" />
     <Compile Include="LevelRegister.cs" />
+    <Compile Include="LevelTreeBuilder.cs" />
     <Compile Include="LevelType.cs" />
     <Compile Include="MapGraphvizExport.cs" />
     <Compile Include="ExamineTargettingInfo.cs" />

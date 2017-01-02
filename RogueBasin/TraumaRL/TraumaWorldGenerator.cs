@@ -31,17 +31,7 @@ namespace TraumaRL
         MapState mapState;
 
         public ConnectivityMap LevelLinks { get { return levelLinks; } }
-
-        public const int medicalLevel = 0;
-        public const int lowerAtriumLevel = 1;
-        public const int scienceLevel = 2;
-        public const int storageLevel = 3;
-        public const int flightDeck = 4;
-        public const int reactorLevel = 5;
-        public const int arcologyLevel = 6;
-        public const int commercialLevel = 7;
-        public const int computerCoreLevel = 8;
-        public const int bridgeLevel = 9;
+        public MapState MapState { get { return mapState; } }
 
         public TraumaWorldGenerator()
         {
@@ -60,175 +50,7 @@ namespace TraumaRL
             brickTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
 
                 { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.BrickWall1, MapTerrain.BrickWall1, MapTerrain.BrickWall1, MapTerrain.BrickWall2, MapTerrain.BrickWall3, MapTerrain.BrickWall4, MapTerrain.BrickWall5 } }};
-
-        }
-
-        public class LevelAndDifficulty
-        {
-            public readonly int level;
-            public readonly int difficulty;
-
-            public LevelAndDifficulty(int level, int difficulty)
-            {
-                this.level = level;
-                this.difficulty = difficulty;
-            }
-
-            public static bool operator ==(LevelAndDifficulty i, LevelAndDifficulty j)
-            {
-                // If both are null, or both are same instance, return true.
-                if (System.Object.ReferenceEquals(i, j))
-                {
-                    return true;
-                }
-
-                // If one is null, but not both, return false.
-                if (((object)i == null) || ((object)j == null))
-                {
-                    return false;
-                }
-
-                // Return true if the fields match:
-                if (i.level == j.level && i.difficulty == j.difficulty)
-                    return true;
-                return false;
-            }
-
-            public static bool operator !=(LevelAndDifficulty i, LevelAndDifficulty j)
-            {
-                return !(i == j);
-            }
-            
-            public override bool Equals(object obj)
-            {
-                //Value-wise comparison ensured by the cast
-                return this == (LevelAndDifficulty)obj;
-            }
-
-            public override int GetHashCode()
-            {
-                return level + 17 * difficulty;
-            }
-        }
-
-        private IEnumerable<LevelAndDifficulty> GetLevelDifficulties()
-        {
-            //This should come from which quests are chosen
-            var levelsAndDifficulties = new List<LevelAndDifficulty> {
-                    new LevelAndDifficulty(flightDeck, 8),
-                    new LevelAndDifficulty(bridgeLevel, 7),
-                    new LevelAndDifficulty(reactorLevel, 6),
-                    new LevelAndDifficulty(computerCoreLevel, 5),
-                    new LevelAndDifficulty(arcologyLevel, 4),
-                    new LevelAndDifficulty(scienceLevel, 3),
-                    new LevelAndDifficulty(storageLevel, 2),
-                    new LevelAndDifficulty(commercialLevel, 3),
-                    new LevelAndDifficulty(lowerAtriumLevel, 1),
-                    new LevelAndDifficulty(medicalLevel, 0)
-                };
-
-            return levelsAndDifficulties;
-        }
-
-        /// <summary>
-        /// Build a level->level map showing how the levels are connected
-        /// </summary>
-        private ConnectivityMap GenerateLevelLinks()
-        {
-            var levelLinks = new ConnectivityMap();
-
-            //Order of the main quest (in future, this will be generic)
-
-            //Escape pod (flight deck) [requires active self-destruct]
-            //Activate self-destruct (bridge) [requires enable self-destruct]
-            //Enable self-destruct (reactor) [requires computer cores destroyed]
-            //Destroy computer cores (computer-core) [no pre-requisite]
-            //Bridge lock (any level place captain's cabin) [no pre-requisite]
-            //Computer core lock (arcology) [no pre-requisite]
-            //Arcology lock (any level - place bioware) [no pre-requisite]
-            //Arcology lock (any level) [antennae disabled]
-            //Antennae (science / storage) [no pre-requisite]
-            
-            //Lower Atrium (may be out-of-sequence)
-            //Medical
-
-            //Level order (last to first)
-
-            //flight deck
-            //bridge
-            //reactor
-            //computer-core
-            //arcology
-            //science
-            //storage
-
-            //lower atrium
-            //medical
-
-            //non-difficulty sequenced:
-
-            //commercial (close to atrium)
-
-            //Player starts in medical which links to the lower atrium
-            levelLinks.AddRoomConnection(new Connection(medicalLevel, lowerAtriumLevel));
-
-            //This feels kinda misplaced
-
-            if (!quickLevelGen)
-            {
-                //Create levels in order of difficulty
-                var levelsAndDifficultiesFull = GetLevelDifficulties();
-                var levelsAndDifficultiesAscending = levelsAndDifficultiesFull.Except(EnumerableEx.Return(new LevelAndDifficulty(medicalLevel, 0)));
-
-                var maxDifficulty = levelsAndDifficultiesAscending.Max(l => l.difficulty);
-                var levelsAndDifficulties = levelsAndDifficultiesAscending.Select(l => new LevelAndDifficulty(l.level, maxDifficulty - l.difficulty));
-                
-                //Pick terminuses (all levels except most difficult and lower atrium)
-                //Note that shuffle now has an implicit toList() which stops multiple evaluations giving different results
-                var terminusShuffle = levelsAndDifficulties.Skip(1).Take(7).Shuffle();
-
-                var numberOfTerminii = Game.Random.Next(2) + 2;
-                var terminusNodes = terminusShuffle.Take(numberOfTerminii);
-
-                //Add most difficult level as terminus
-                terminusNodes = terminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
-
-                //Fragile way of removing lowerAtrium
-                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevel, maxDifficulty - 1)));
-
-                foreach (var level in remainingNodes)
-                {
-                    var parentNodes = terminusNodes.Where(parent => parent.difficulty < level.difficulty).Shuffle();
-                    var numberOfParents = Math.Min(Game.Random.Next(3), parentNodes.Count());
-
-                    for (int p = 0; p < numberOfParents; p++)
-                    {
-                        var parentLevel = parentNodes.ElementAt(p);
-                        //Pick a parent from current terminusNodes, which is less difficult
-                        levelLinks.AddRoomConnection(new Connection(level.level, parentLevel.level));
-                        //Remove parent from terminii
-                        terminusNodes = terminusNodes.Except(EnumerableEx.Return(parentLevel));
-                    }
-                                        
-                    //Add this level
-
-                    terminusNodes = terminusNodes.Union(EnumerableEx.Return(level));
-                }
-
-                //Connect all terminii to lower atrium
-                foreach (var level in terminusNodes)
-                {
-                    levelLinks.AddRoomConnection(new Connection(lowerAtriumLevel, level.level));
-                }
-
-                //TODO: try to balance the tree a bit, otherwise pathological situations (one long branch) are quite likely
-            }
-
-            return levelLinks;
-        }
-
-        public MapState MapState { get { return mapState; } }
-
+        }        
         
         /** Build a map using templated rooms */
         public void GenerateTraumaLevels(bool retry)
@@ -248,7 +70,8 @@ namespace TraumaRL
 
             //Generate the overall level structure
             //(honour graph of difficulties)
-            levelLinks = GenerateLevelLinks();
+            var levelTreeBuilder = new LevelTreeBuilder(quickLevelGen);
+            levelLinks = levelTreeBuilder.GenerateLevelLinks();
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
 
             //Build each level individually
@@ -417,6 +240,9 @@ namespace TraumaRL
         {
             var noLevelsToBlock = 1 + Game.Random.Next(1);
 
+            var lowerAtriumLevel = mapState.LevelGraph.LevelIds["lowerAtrium"];
+            var medicalLevel = mapState.LevelGraph.LevelIds["medical"];
+
             var candidateLevels = mapState.LevelGraph.GameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => mapState.LevelGraph.LevelInfo[l].ConnectionsToOtherLevels.Count() > 1);
             LogFile.Log.LogEntryDebug("Candidates for elevator quests: " + candidateLevels, LogDebugLevel.Medium);
             var chosenLevels = candidateLevels.RandomElements(noLevelsToBlock);
@@ -440,6 +266,7 @@ namespace TraumaRL
         {
             try
             {
+                var lowerAtriumLevel = mapState.LevelGraph.LevelIds["lowerAtrium"];
                 var blockElevatorQuest = new Quests.BlockElevatorQuest(builder, logGen, lowerAtriumLevel, roomConnectivityMap);
                 blockElevatorQuest.SetupQuest(mapState);
             }
@@ -470,6 +297,9 @@ namespace TraumaRL
     
             var mainQuest = new Quests.CaptainIdQuest(questMapBuilder, logGen);
             mainQuest.SetupQuest(mapState);
+
+            var arcologyQuest = new Quests.ArcologyQuest(questMapBuilder, logGen);
+            arcologyQuest.SetupQuest(mapState);
         }
 
         private void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
