@@ -105,10 +105,10 @@ namespace RogueBasin
                 var terminusShuffle = levelsAndDifficulties.Skip(1).Take(7).Shuffle();
 
                 var numberOfTerminii = Game.Random.Next(2) + 2;
-                var terminusNodes = terminusShuffle.Take(numberOfTerminii);
+                var subTerminusNodes = terminusShuffle.Take(numberOfTerminii);
 
                 //Add most difficult level as terminus
-                terminusNodes = terminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
+                var terminusNodes = subTerminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
 
                 //Fragile way of removing lowerAtrium
                 var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevel, maxDifficulty - 1)));
