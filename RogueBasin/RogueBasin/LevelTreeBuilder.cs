@@ -31,14 +31,14 @@ namespace RogueBasin
         {
             //This should come from which quests are chosen
             var levelsAndDifficulties = new List<LevelAndDifficulty> {
-                    new LevelAndDifficulty(flightDeck, 8),
-                    new LevelAndDifficulty(bridgeLevel, 7),
-                    new LevelAndDifficulty(reactorLevel, 6),
-                    new LevelAndDifficulty(computerCoreLevel, 5),
-                    new LevelAndDifficulty(arcologyLevel, 4),
-                    new LevelAndDifficulty(scienceLevel, 3),
-                    new LevelAndDifficulty(storageLevel, 2),
-                    new LevelAndDifficulty(commercialLevel, 3),
+                    new LevelAndDifficulty(flightDeck, 9),
+                    new LevelAndDifficulty(bridgeLevel, 8),
+                    new LevelAndDifficulty(reactorLevel, 7),
+                    new LevelAndDifficulty(computerCoreLevel, 6),
+                    new LevelAndDifficulty(arcologyLevel, 5),
+                    new LevelAndDifficulty(scienceLevel, 4),
+                    new LevelAndDifficulty(storageLevel, 3),
+                    new LevelAndDifficulty(commercialLevel, 2),
                     new LevelAndDifficulty(lowerAtriumLevel, 1),
                     new LevelAndDifficulty(medicalLevel, 0)
                 };
@@ -93,6 +93,7 @@ namespace RogueBasin
             if (!quickLevelGen)
             {
                 //Create levels in order of difficulty
+                //NOTE THIS ALGORITHM REQUIRES THAT GetLevelDifficulties gives back unique difficulties in lower-is-easier form! TODO: fix
                 var levelsAndDifficultiesFull = GetLevelDifficulties();
                 var levelsAndDifficultiesAscending = levelsAndDifficultiesFull.Except(EnumerableEx.Return(new LevelAndDifficulty(medicalLevel, 0)));
 

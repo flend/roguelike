@@ -57,9 +57,6 @@ namespace TraumaRL
         {
             //We catch exceptions on generation and keep looping
 
-            //Create the state object which will hold the map state in the generation phase
-            mapState = new MapState();
-
             //Pick main quests
 
             //Generate levels needed in the game from quests
@@ -68,8 +65,7 @@ namespace TraumaRL
             //List of (level id [arbitrary], "level type")
             //Graph of difficulties
 
-            //Generate the overall level structure
-            //(honour graph of difficulties)
+            //Generate the overall level tree structure
             var levelTreeBuilder = new LevelTreeBuilder(quickLevelGen);
             levelLinks = levelTreeBuilder.GenerateLevelLinks();
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
@@ -78,21 +74,24 @@ namespace TraumaRL
             TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(gameLevels, levelLinks, quickLevelGen);
             levelBuilder.GenerateLevels();
             
+            //Initialise mapState that supports map mutations
+            mapState = new MapState();
             Dictionary<int, LevelInfo> levelInfo = levelBuilder.LevelInfo;
-
             SetupMapState(levelBuilder, levelInfo);
-            
-            //Add elevator features to link the maps
-            if (!quickLevelGen)
-                AddElevatorFeatures(MapState.MapInfo, levelInfo);
 
-            //Generate quests
+            //Generate quests (includes map mutations)
             var mapQuestBuilder = new QuestMapBuilder();
             GenerateQuests(mapState, mapQuestBuilder);
            
             //Add non-interactable features
             var decorator = new DungeonDecorator(mapState, mapQuestBuilder);
             decorator.AddDecorationFeatures();
+
+            //Add elevator features to link the maps
+            //Note that since the absolute-coords of level maps can now change due to the addition of new rooms (mutations)
+            //It's only safe to add elevator features after all map changes have taken place
+            if (!quickLevelGen)
+                AddElevatorFeatures(MapState.MapInfo, levelInfo);
 
             //Add debug stuff in the first room
             AddDebugItems(MapState.MapInfo);
