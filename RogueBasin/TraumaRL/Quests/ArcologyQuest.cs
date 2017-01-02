@@ -104,8 +104,9 @@ namespace TraumaRL.Quests
             //Find door blocking arcology from start6
             var routeToArcology = mapState.LevelGraph.GetPathBetweenLevels(mapState.StartLevel, arcologyLevel);
 
-            var arcologyLockSourceElevatorConnection = routeToArcology.Last();
-            var levelToArcology = arcologyLockSourceElevatorConnection.Source;
+            var levelBeforeArcology = routeToArcology.Last().Source;
+
+            var levelToArcology = routeToArcology.Last().Source;
             var elevatorToArcology = levelInfo[levelToArcology].ConnectionsToOtherLevels[arcologyLevel];
 
             var arcologyDoorName = "bioware - arcology door lock";
@@ -163,7 +164,7 @@ namespace TraumaRL.Quests
             //Wrap the arcology door in another door that depends on the antennae
             //Get critical path to archology door
 
-            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, arcologyLockSourceElevatorConnection.Source);
+            var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, elevatorToArcology.Source);
 
             //Don't use 2 since that's between levels
             var lastCorridorToArcology = criticalPath.ElementAt(criticalPath.Count() - 4);
