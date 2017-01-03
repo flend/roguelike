@@ -66,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GraphVisualizer.cs" />
     <Compile Include="LevelBuilderUtils.cs" />
     <Compile Include="Levels\ArcologyLevelBuilder.cs" />
     <Compile Include="Levels\BridgeLevelBuilder.cs" />

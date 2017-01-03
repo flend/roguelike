@@ -62,7 +62,7 @@ namespace TraumaRL
                 Game.Base.PlayMovie("helpkeys", true);
             }
         }
-   
+
         private void GenerateStoryDungeon(bool retry)
         {
             //Setup a single test level
@@ -72,66 +72,8 @@ namespace TraumaRL
 
             Game.Dungeon.MapState = worldGen.MapState;
             Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelGraph.LevelReadableNames.ToDictionary(kv => kv.Key, kv => kv.Value);
-            
+
             LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
-
-            VisualiseConnectivityGraph(worldGen.MapState.MapInfo, worldGen.MapState.DoorAndClueManager);
-            VisualiseLevelConnectivityGraph(worldGen.LevelLinks, worldGen.MapState.LevelGraph.LevelNames);
-        }
-
-        private void VisualiseConnectivityGraph(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)
-        {
-            var visualiser = new MapGraphvizExport(mapInfo, doorAndClueManager);
-            visualiser.OutputFullGraph("bsptree-full");
-            visualiser.OutputClueDoorGraph("bsptree-door");
-            visualiser.OutputDoorDependencyGraph("bsptree-dep");
-
-            var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
-
-            try
-            {
-                if (Game.Config.SaveGraphs || Game.Config.DisplayGraphs)
-                {
-                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-full");
-                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-door");
-                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, "bsptree-dep");
-                }
-
-                if (Game.Config.DisplayGraphs)
-                {
-                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-full");
-                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-door");
-                    GraphVizUtils.DisplayPNGInChildWindow("bsptree-dep");
-                }
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
-            }
-        }
-
-        private void VisualiseLevelConnectivityGraph(ConnectivityMap map, ImmutableDictionary<int, string> levelNaming)
-        {
-            var visualiser = new LevelGraphvizExport(map, levelNaming);
-            visualiser.OutputLevelGraph("levellinks-full");
-            if (Game.Config.SaveGraphs || Game.Config.DisplayGraphs)
-            {
-                try
-                {
-                    var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
-
-                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, "levellinks-full");
-
-                    if (Game.Config.DisplayGraphs)
-                    {
-                        GraphVizUtils.DisplayPNGInChildWindow("levellinks-full");
-                    }
-                }
-                catch (Exception)
-                {
-                    LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
-                }
-            }
         }
 
         private void RandomSetup() {

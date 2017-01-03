@@ -166,8 +166,7 @@ namespace TraumaRL.Quests
 
             var criticalPath = mapInfo.Model.GetPathBetweenVerticesInReducedMap(mapInfo.StartRoom, elevatorToArcology.Source);
 
-            //Don't use 2 since that's between levels
-            var lastCorridorToArcology = criticalPath.ElementAt(criticalPath.Count() - 4);
+            var lastCorridorToArcology = criticalPath.ElementAt(criticalPath.Count() - 1);
 
             var colorForArcologyAntLock = Builder.GetUnusedColor();
 

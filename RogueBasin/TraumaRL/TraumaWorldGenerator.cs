@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.Immutable;
 
 namespace TraumaRL
 {
@@ -69,7 +70,7 @@ namespace TraumaRL
             var levelTreeBuilder = new LevelTreeBuilder(quickLevelGen);
             levelLinks = levelTreeBuilder.GenerateLevelLinks();
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
-
+            
             //Build each level individually
             TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(gameLevels, levelLinks, quickLevelGen);
             levelBuilder.GenerateLevels();
@@ -79,10 +80,16 @@ namespace TraumaRL
             Dictionary<int, LevelInfo> levelInfo = levelBuilder.LevelInfo;
             SetupMapState(levelBuilder, levelInfo);
 
+            GraphVisualizer.VisualiseLevelConnectivityGraph(levelLinks, MapState.LevelGraph.LevelNames);
+            GraphVisualizer.VisualiseFullMapGraph(MapState.MapInfo, MapState.DoorAndClueManager, "prequest");
+
             //Generate quests (includes map mutations)
             var mapQuestBuilder = new QuestMapBuilder();
             GenerateQuests(mapState, mapQuestBuilder);
-           
+
+            GraphVisualizer.VisualiseFullMapGraph(MapState.MapInfo, MapState.DoorAndClueManager, "postquest");
+            GraphVisualizer.VisualiseClueDoorGraph(MapState.MapInfo, MapState.DoorAndClueManager, "postquest");
+        
             //Add non-interactable features
             var decorator = new DungeonDecorator(mapState, mapQuestBuilder);
             decorator.AddDecorationFeatures();
@@ -338,5 +345,6 @@ namespace TraumaRL
                     sourceToTargetElevator + "->" + targetToSourceElevator, LogDebugLevel.Medium);
             }
         }
+
     }
 }
