@@ -101,15 +101,19 @@ namespace TraumaRL.Quests
             Builder.PlaceClueItems(mapState, Enumerable.Repeat(grenade, 1), false, true, false);
 
             //Place log entry warning about the turret room
-            var criticalPath = mapState.MapInfo.Model.GetPathBetweenVerticesInFullMap(mapState.MapInfo.StartRoom, turretRoom);
-            var roomsOnLevel = mapState.MapInfo.GetRoomIndicesForLevel(medicalLevel);
+            var criticalPath = mapState.MapInfo.Model.GetPathBetweenVerticesInReducedMap(mapState.MapInfo.StartRoom, turretRoom);
+            var allowedRoomsForLogs = manager.GetValidRoomsToPlaceClueForDoor(doorId);
 
-            //All rooms will be on the medical level, so we could make the list of rooms from the connections
-            var roomsOnCriticalPath = Builder.FilterRoomsByPath(mapState, roomsOnLevel, criticalPath, true, QuestMapBuilder.CluePath.OnCriticalPath, true);
+            //Any room on the critical 
+            var roomsOnCriticalPath = Builder.FilterRoomsByPath(mapState, allowedRoomsForLogs, criticalPath, true, QuestMapBuilder.CluePath.OnCriticalPath, true);
+
+            GraphVisualizer.VisualiseClueDoorGraph(mapInfo, mapState.DoorAndClueManager, "cmedical");
+            GraphVisualizer.VisualiseFullMapGraph(mapInfo, mapState.DoorAndClueManager, "cmedical");
 
             //Note that roomsOnCriticalPath doesn't seem to take into account loops, so you can miss the critical path (i.e. a loop room will be in the critical path
             //and then the clue is placed in a random room within this)
-            var roomToPlaceLog = roomsOnCriticalPath.Skip(1).Take(roomsOnCriticalPath.Count() / 2).RandomElement();
+            var roomToPlaceLog = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(mapState, 1, roomsOnCriticalPath)[0];
+
             var logClue = manager.AddCluesToExistingDoor(doorId, Enumerable.Repeat(roomToPlaceLog, 1)).ElementAt(0);
             var turretLog = new Tuple<LogEntry, Clue>(LogGen.GenerateArbitaryLogEntry("qe_medicalturretsecurity"), logClue);
             
