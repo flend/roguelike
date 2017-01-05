@@ -213,6 +213,18 @@ namespace RogueBasin
         }
     }
 
+    public class LockRoomPlacement
+    {
+        public readonly Lock thisLock;
+        public readonly Point location;
+
+        public LockRoomPlacement(Lock l, Point loc)
+        {
+            thisLock = l;
+            location = loc;
+        }
+    }
+
     /// <summary>
     /// Stores the location of items within a room
     /// This is used to track the contents of rooms at map generation stage
@@ -225,7 +237,8 @@ namespace RogueBasin
         private List<MonsterRoomPlacement> monsters = new List<MonsterRoomPlacement>();
         private List<ItemRoomPlacement> items = new List<ItemRoomPlacement>();
         private List<TriggerRoomPlacement> triggers = new List<TriggerRoomPlacement>();
-        
+        private List<LockRoomPlacement> locks = new List<LockRoomPlacement>();
+
         public RoomInfo(int roomId) {
             this.id = roomId;
         }
@@ -265,17 +278,17 @@ namespace RogueBasin
             items.Add(item);
         }
 
-        public void AddTrigger(TriggerRoomPlacement trigger)
-        {
-            triggers.Add(trigger);
-        }
-
         public IEnumerable<ItemRoomPlacement> Items
         {
             get
             {
                 return items;
             }
+        }
+
+        public void AddTrigger(TriggerRoomPlacement trigger)
+        {
+            triggers.Add(trigger);
         }
 
         public IEnumerable<TriggerRoomPlacement> Triggers
@@ -286,31 +299,20 @@ namespace RogueBasin
             }
         }
 
-        public int Id { get { return id; } }
-    }
-
-    public class DoorContentsInfo
-    {
-        private string id;
-        private List<Lock> locks = new List<Lock>();
-
-        public DoorContentsInfo(string doorId)
+        public void AddLock(LockRoomPlacement thisLock)
         {
-            this.id = doorId;
+            locks.Add(thisLock);
         }
 
-        public void AddLock(Lock newLock)
-        {
-            locks.Add(newLock);
-        }
-
-        public IEnumerable<Lock> Locks
+        public IEnumerable<LockRoomPlacement> Locks
         {
             get
             {
                 return locks;
             }
         }
+
+        public int Id { get { return id; } }
     }
 
     /// <summary>

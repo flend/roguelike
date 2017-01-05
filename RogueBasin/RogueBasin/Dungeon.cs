@@ -5342,15 +5342,18 @@ namespace RogueBasin
                         }
                     }
                 }
-            }
 
-            foreach (var doorInfo in mapInfo.Populator.DoorInfo)
-            {
-                var door = doorInfo.Value;
-
-                foreach (var doorLock in door.Locks)
+                foreach (LockRoomPlacement lockPlacement in roomInfo.Locks)
                 {
-                    AddLock(doorLock);
+                    var thisLock = lockPlacement.thisLock;
+                    thisLock.LocationLevel = roomLevel;
+                    thisLock.LocationMap = roomLocation + lockPlacement.location;
+                    bool lockResult = AddLock(lockPlacement.thisLock);
+
+                    if (!lockResult)
+                    {
+                        LogFile.Log.LogEntryDebug("Cannot add lock to dungeon at: " + lockPlacement.location, LogDebugLevel.Medium);
+                    }
                 }
             }
         }

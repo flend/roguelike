@@ -120,12 +120,12 @@ namespace RogueBasin
         public void PlaceLockedDoorOnMap(MapState mapState, Lock lockedDoor, Door door)
         {
             var doorInfo = mapState.MapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-            lockedDoor.LocationLevel = doorInfo.LevelNo;
-            lockedDoor.LocationMap = doorInfo.MapLocation;
 
-            mapState.MapInfo.Populator.GetDoorInfo(door.Id).AddLock(lockedDoor);
+            var roomId = door.DoorConnectionFullMap.Source;
+            var roomRelativeLocation = doorInfo.MapLocation - mapState.MapInfo.Room(roomId).Location;
+
+            mapState.MapInfo.Populator.RoomInfo(roomId).AddLock(new LockRoomPlacement(lockedDoor, roomRelativeLocation));
         }
-
 
         public Tuple<System.Drawing.Color, string> GetUnusedColor()
         {

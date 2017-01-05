@@ -8,7 +8,6 @@ namespace RogueBasin
     public class MapPopulator
     {
         Dictionary<int, RoomInfo> roomInfo = new Dictionary<int,RoomInfo>();
-        Dictionary<string, DoorContentsInfo> doorInfo = new Dictionary<string,DoorContentsInfo>();
 
         public MapPopulator()
         {
@@ -45,27 +44,6 @@ namespace RogueBasin
         public IEnumerable<RoomInfo> AllRoomsInfo()
         {
             return roomInfo.Select(r => r.Value);
-        }
-
-        public DoorContentsInfo GetDoorInfo(string doorIndex)
-        {
-            DoorContentsInfo thisDoorInfo;
-            doorInfo.TryGetValue(doorIndex, out thisDoorInfo);
-
-            if (thisDoorInfo == null)
-            {
-                doorInfo[doorIndex] = new DoorContentsInfo(doorIndex);
-            }
-
-            return doorInfo[doorIndex];
-        }
-
-        public Dictionary<string, DoorContentsInfo> DoorInfo
-        {
-            get
-            {
-                return doorInfo;
-            }
         }
 
         public void AddMonsterToRoom(Monster monster, int roomId, Point relativeLocation)
