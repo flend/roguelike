@@ -64,10 +64,13 @@ namespace TraumaRL
             var questManager = new TraumaQuestManager(mapQuestBuilder, logGen, quickLevelGen);
             questManager.RegisterQuests(levelRegister);
                         
-            //List of (level id [arbitrary], "level type")
-            //Graph of difficulties
+            //Levels are now registered inside levelRegister and level ids are generated
+            //These level ids are used inside the quests
 
-            //Generate the overall level tree structure
+            //BUT THE LEVEL IDS ARE ALL OVERRIDDEN IN THE LEVEL TREE BUILDER
+            //This needs to be fixed
+
+            //Generate the overall level tree structure and difficulties
             var levelTreeBuilder = new LevelTreeBuilder(quickLevelGen);
             levelLinks = levelTreeBuilder.GenerateLevelLinks();
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
