@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectivityMap.cs" />
+    <Compile Include="DirectedGraphWrapper.cs" />
     <Compile Include="DoorAndClueManager.cs" />
     <Compile Include="DoorClueGraphvizExport.cs" />
     <Compile Include="FileDotEngine.cs" />

@@ -1,4 +1,5 @@
-﻿using QuickGraph;
+﻿using GraphMap;
+using QuickGraph;
 using QuickGraph.Graphviz;
 using System;
 using System.Collections.Generic;
@@ -6,22 +7,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GraphMap
+namespace RogueBasin
 {
-    /** Export a graph in standard edge / vertex format */
-    public static class GraphvizExport
+    static public class GraphVizExporter
     {
-        public static void OutputUndirectedGraph(IEdgeListGraph<int, TaggedEdge<int, string>> graph, string filename)
+        public static void OutputDirectedGraph(DirectedGraphWrapper graph, string filename)
         {
-            var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(graph);
+            var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(graph.Graph);
 
             graphviz.FormatVertex += graphviz_FormatVertex;
             graphviz.FormatEdge += graphviz_FormatEdge;
 
-            graphviz.Generate(new FileDotEngineUndirected(), filename);
-
-  
-            // "C:\Program Files (x86)\Graphviz 2.28\bin\dot.exe" -Tbmp -ograph.bmp graph.dot
+            graphviz.Generate(new FileDotEngine(), filename);
         }
 
         private static void graphviz_FormatEdge(object sender, FormatEdgeEventArgs<int, TaggedEdge<int, string>> e)

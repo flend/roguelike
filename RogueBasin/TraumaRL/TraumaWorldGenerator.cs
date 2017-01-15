@@ -64,6 +64,11 @@ namespace TraumaRL
             var questManager = new TraumaQuestManager(mapQuestBuilder, logGen, quickLevelGen);
             questManager.RegisterQuests(levelRegister);
                         
+            //tmp
+            GraphVisualizer.VisualiseDirectedGraph(levelRegister.DifficultyGraph, "diff-graph");
+            var difficultyOrderer = new DifficultyOrdering(levelRegister.DifficultyGraph);
+            var levelDifficultyOrder = difficultyOrderer.GetLevelsInAscendingDifficultyOrder();
+
             //Levels are now registered inside levelRegister and level ids are generated
             //These level ids are used inside the quests
 
@@ -71,7 +76,7 @@ namespace TraumaRL
             //This needs to be fixed
 
             //Generate the overall level tree structure and difficulties
-            var levelTreeBuilder = new LevelTreeBuilder(quickLevelGen);
+            var levelTreeBuilder = new LevelTreeBuilder(levelRegister, quickLevelGen);
             levelLinks = levelTreeBuilder.GenerateLevelLinks();
             var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
             

@@ -10,15 +10,16 @@ namespace RogueBasin
 {
     public class DifficultyOrdering
     {
-        private AdjacencyGraph<int, TaggedEdge<int, string>> difficultyGraph;
+        private DirectedGraphWrapper directedGraphWrapper;
         
-        public DifficultyOrdering(AdjacencyGraph<int, TaggedEdge<int, string>> difficultyGraph) {
-            this.difficultyGraph = difficultyGraph;
+        public DifficultyOrdering(DirectedGraphWrapper directedGraphWrapper)
+        {
+            this.directedGraphWrapper = directedGraphWrapper;
         }
         
         public IEnumerable<int> GetLevelsInAscendingDifficultyOrder()
         {
-            var topologicalSort = new TopologicalSortAlgorithm<int, TaggedEdge<int, string>>(difficultyGraph);
+            var topologicalSort = new TopologicalSortAlgorithm<int, TaggedEdge<int, string>>(directedGraphWrapper.Graph);
             topologicalSort.Compute();
 
             return topologicalSort.SortedVertices;

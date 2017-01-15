@@ -28,7 +28,7 @@ namespace DDRogueTest
             register.RegisterAscendingDifficultyRelationship(3, 5);
             register.RegisterAscendingDifficultyRelationship(4, 5);
 
-            var difficultyOrdering = new DifficultyOrdering(register.DifficultyGraph.Graph);
+            var difficultyOrdering = new DifficultyOrdering(register.DifficultyGraph);
             var orderedLevels = difficultyOrdering.GetLevelsInAscendingDifficultyOrder();
 
             CollectionAssert.AreEqual(new List<int> { 0, 1, 2, 3, 4, 5 }, orderedLevels.ToList());

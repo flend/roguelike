@@ -20,6 +20,8 @@ namespace TraumaRL
         private Quests.EscapePodQuest escapePodQuest;
         private Quests.CaptainIdQuest captainsIdQuest;
         private Quests.ArcologyQuest arcologyQuest;
+        private Quest medicalQuest;
+        private Quests.LowerAtriumQuest lowerAtriumQuest;
 
         public TraumaQuestManager(QuestMapBuilder builder, LogGenerator logGen, bool quickLevelGen)
         {
@@ -30,6 +32,8 @@ namespace TraumaRL
             escapePodQuest = new Quests.EscapePodQuest(builder, logGen);
             captainsIdQuest = new Quests.CaptainIdQuest(builder, logGen);
             arcologyQuest = new Quests.ArcologyQuest(builder, logGen);
+            medicalQuest = new Quests.MedicalTurretTrapQuest(builder, logGen);
+            lowerAtriumQuest = new Quests.LowerAtriumQuest(builder, logGen);
         }
 
         public void RegisterQuests(LevelRegister register)
@@ -37,6 +41,8 @@ namespace TraumaRL
             escapePodQuest.RegisterLevels(register);
             captainsIdQuest.RegisterLevels(register);
             arcologyQuest.RegisterLevels(register);
+            medicalQuest.RegisterLevels(register);
+            lowerAtriumQuest.RegisterLevels(register);
         }
 
         public void GenerateQuests(MapState mapState)
@@ -113,7 +119,6 @@ namespace TraumaRL
         private void BuildMedicalLevelQuests(MapState mapState, QuestMapBuilder builder)
         {
             //var cameraQuest = new Quests.MedicalCameraQuest(mapState, builder, logGen);
-            var medicalQuest = new Quests.MedicalTurretTrapQuest(builder, logGen);
             medicalQuest.SetupQuest(mapState);
         }
 

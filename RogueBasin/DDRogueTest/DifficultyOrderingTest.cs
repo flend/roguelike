@@ -18,7 +18,7 @@ namespace DDRogueTest
             var dag = new DirectedGraphWrapper();
             dag.AddSourceDestEdge(1, 2);
 
-            var difficultyOrdering = new DifficultyOrdering(dag.Graph);
+            var difficultyOrdering = new DifficultyOrdering(dag);
             var orderedLevels = difficultyOrdering.GetLevelsInAscendingDifficultyOrder();
 
             CollectionAssert.AreEqual(new List<int>{1, 2}, orderedLevels.ToList());
@@ -36,7 +36,7 @@ namespace DDRogueTest
             dag.AddSourceDestEdge(3, 5);
             dag.AddSourceDestEdge(4, 5);
 
-            var difficultyOrdering = new DifficultyOrdering(dag.Graph);
+            var difficultyOrdering = new DifficultyOrdering(dag);
             var orderedLevels = difficultyOrdering.GetLevelsInAscendingDifficultyOrder();
 
             CollectionAssert.AreEqual(new List<int> { 0, 1, 2, 3, 4, 5 }, orderedLevels.ToList());
@@ -53,7 +53,7 @@ namespace DDRogueTest
             dag.AddSourceDestEdge(3, 5);
             dag.AddSourceDestEdge(4, 5);
 
-            var difficultyOrdering = new DifficultyOrdering(dag.Graph);
+            var difficultyOrdering = new DifficultyOrdering(dag);
             var orderedLevels = difficultyOrdering.GetLevelsInAscendingDifficultyOrder();
 
             CollectionAssert.AreEqual(new List<int> { 0, 1, 4, 2, 3, 5 }, orderedLevels.ToList());

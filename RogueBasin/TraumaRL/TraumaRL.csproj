@@ -80,6 +80,7 @@
     <Compile Include="Levels\StorageLevelBuilder.cs" />
     <Compile Include="Quests\ArcologyQuest.cs" />
     <Compile Include="Quests\EscapePodQuest.cs" />
+    <Compile Include="Quests\LowerAtriumQuest.cs" />
     <Compile Include="Quests\MapExpandQuest.cs" />
     <Compile Include="Quests\ArmoryQuest.cs" />
     <Compile Include="Quests\BlockElevatorQuest.cs" />

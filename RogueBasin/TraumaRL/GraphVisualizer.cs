@@ -63,6 +63,29 @@ namespace TraumaRL
             }
         }
 
+        static public void VisualiseDirectedGraph(DirectedGraphWrapper graphWrapper, string filename)
+        {
+            GraphVizExporter.OutputDirectedGraph(graphWrapper, filename);
+            if (Game.Config.SaveGraphs || Game.Config.DisplayGraphs)
+            {
+                try
+                {
+                    var graphVizLocation = Game.Config.Entries[Config.GraphVizLocation];
+
+                    GraphVizUtils.RunGraphVizPDF(graphVizLocation, filename);
+
+                    if (Game.Config.DisplayGraphs)
+                    {
+                        GraphVizUtils.DisplayPNGInChildWindow(filename);
+                    }
+                }
+                catch (Exception)
+                {
+                    LogFile.Log.LogEntryDebug("Can't find graphViz in config file", LogDebugLevel.High);
+                }
+            }
+        }
+
         static public void VisualiseFullMapGraph(MapInfo mapInfo, DoorAndClueManager doorAndClueManager, string prefix)
         {
             var visualiser = new MapGraphvizExport(mapInfo, doorAndClueManager);

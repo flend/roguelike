@@ -20,10 +20,13 @@ namespace RogueBasin
         public const int computerCoreLevel = 8;
         public const int bridgeLevel = 9;
 
+        private LevelRegister levelRegister;
+
         private bool quickLevelGen = false;
 
-        public LevelTreeBuilder(bool quickLevelGen)
+        public LevelTreeBuilder(LevelRegister levelRegister, bool quickLevelGen)
         {
+            this.levelRegister = levelRegister;
             this.quickLevelGen = quickLevelGen;
         }
 
