@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
+    /// <summary>
+    /// Level request from a quest.
+    /// At the moment we assume there is only 1 type of each level in the game
+    /// </summary>
     public class RequiredLevelInfo
     {
         public RequiredLevelInfo(LevelType type)

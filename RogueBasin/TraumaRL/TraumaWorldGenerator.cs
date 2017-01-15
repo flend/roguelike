@@ -27,8 +27,6 @@ namespace TraumaRL
         //For development, skip making most of the levels
         bool quickLevelGen = false;
 
-        LogGenerator logGen = new LogGenerator();
-
         MapState mapState;
 
         public ConnectivityMap LevelLinks { get { return levelLinks; } }
@@ -59,10 +57,13 @@ namespace TraumaRL
             //We catch exceptions on generation and keep looping
 
             //Pick main quests
+            var mapQuestBuilder = new QuestMapBuilder();
+            var logGen = new LogGenerator();
+            var levelRegister = new LevelRegister();
 
-            //Generate levels needed in the game from quests
-            //Add any filler levels
-            
+            var questManager = new TraumaQuestManager(mapQuestBuilder, logGen, quickLevelGen);
+            questManager.RegisterQuests(levelRegister);
+                        
             //List of (level id [arbitrary], "level type")
             //Graph of difficulties
 
@@ -77,15 +78,14 @@ namespace TraumaRL
             
             //Initialise mapState that supports map mutations
             mapState = new MapState();
-            Dictionary<int, LevelInfo> levelInfo = levelBuilder.LevelInfo;
+            var levelInfo = levelBuilder.LevelInfo;
             SetupMapState(levelBuilder, levelInfo);
 
             GraphVisualizer.VisualiseLevelConnectivityGraph(levelLinks, MapState.LevelGraph.LevelNames);
             GraphVisualizer.VisualiseFullMapGraph(MapState.MapInfo, MapState.DoorAndClueManager, "prequest");
 
             //Generate quests (includes map mutations)
-            var mapQuestBuilder = new QuestMapBuilder();
-            GenerateQuests(mapState, mapQuestBuilder);
+            questManager.GenerateQuests(mapState);
 
             GraphVisualizer.VisualiseFullMapGraph(MapState.MapInfo, MapState.DoorAndClueManager, "postquest");
             GraphVisualizer.VisualiseClueDoorGraph(MapState.MapInfo, MapState.DoorAndClueManager, "postquest");
@@ -206,106 +206,6 @@ namespace TraumaRL
             {
                 Game.Dungeon.Levels[level].LightLevel = 0;
             }
-        }
-
-
-        private void GenerateQuests(MapState mapState, QuestMapBuilder questMapBuilder)
-        {
-            var mapInfo = mapState.MapInfo;
-            var levelInfo = mapState.LevelGraph.LevelInfo;
-
-            var mapHeuristics = new MapHeuristics(mapInfo.Model.GraphNoCycles, mapInfo.StartRoom);
-            var roomConnectivityMap = mapHeuristics.GetTerminalBranchConnections();
-
-            //Example has been surpassed by the MedicalTurretTrapQuest
-            //BuildMapExpandQuest(mapState, questMapBuilder, medicalLevel);
-
-            if (!quickLevelGen)
-            {
-                BuildMainQuest(mapState, questMapBuilder);
-            }
-            BuildMedicalLevelQuests(mapState, questMapBuilder);
-
-            if (!quickLevelGen)
-            {
-                BuildAtriumLevelQuests(mapState, questMapBuilder, roomConnectivityMap);
-
-                BuildRandomElevatorQuests(mapState, questMapBuilder, roomConnectivityMap);
-
-                BuildGoodyQuests(mapState, questMapBuilder, roomConnectivityMap);
-            }
-        }
-
-        private void BuildMapExpandQuest(MapState mapState, QuestMapBuilder questMapBuilder, int level)
-        {
-            var mapExpandQuest = new Quests.MapExpandQuest(questMapBuilder, logGen, level);
-            mapExpandQuest.SetupQuest(mapState);
-        }
-
-        private void BuildRandomElevatorQuests(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap)
-        {
-            var noLevelsToBlock = 1 + Game.Random.Next(1);
-
-            var lowerAtriumLevel = mapState.LevelGraph.LevelIds["lowerAtrium"];
-            var medicalLevel = mapState.LevelGraph.LevelIds["medical"];
-
-            var candidateLevels = mapState.LevelGraph.GameLevels.Except(new List<int> { lowerAtriumLevel, medicalLevel }).Where(l => mapState.LevelGraph.LevelInfo[l].ConnectionsToOtherLevels.Count() > 1);
-            LogFile.Log.LogEntryDebug("Candidates for elevator quests: " + candidateLevels, LogDebugLevel.Medium);
-            var chosenLevels = candidateLevels.RandomElements(noLevelsToBlock);
-
-            foreach (var level in chosenLevels)
-            {
-                try
-                {
-                    var blockElevatorQuest = new Quests.BlockElevatorQuest(builder, logGen, level, roomConnectivityMap);
-                    blockElevatorQuest.ClueOnElevatorLevel = Game.Random.Next(2) > 0;
-                    blockElevatorQuest.SetupQuest(mapState);
-                }
-                catch (Exception ex)
-                {
-                    LogFile.Log.LogEntryDebug("Random Elevator Exception (level " + level + "): " + ex, LogDebugLevel.High);
-                }
-            }
-        }
-
-        private void BuildAtriumLevelQuests(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap)
-        {
-            try
-            {
-                var lowerAtriumLevel = mapState.LevelGraph.LevelIds["lowerAtrium"];
-                var blockElevatorQuest = new Quests.BlockElevatorQuest(builder, logGen, lowerAtriumLevel, roomConnectivityMap);
-                blockElevatorQuest.SetupQuest(mapState);
-            }
-            catch (Exception ex)
-            {
-                LogFile.Log.LogEntryDebug("Atrium Elevator Exception: " + ex, LogDebugLevel.High);
-            }
-        }
-
-
-        private void BuildGoodyQuests(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap)
-        {
-            var armoryQuest = new Quests.ArmoryQuest(builder, logGen);
-            armoryQuest.SetupQuest(mapState);
-        }
-        
-        private void BuildMedicalLevelQuests(MapState mapState, QuestMapBuilder builder)
-        {
-            //var cameraQuest = new Quests.MedicalCameraQuest(mapState, builder, logGen);
-            var cameraQuest = new Quests.MedicalTurretTrapQuest(builder, logGen);
-            cameraQuest.SetupQuest(mapState);
-        }
-
-        private void BuildMainQuest(MapState mapState, QuestMapBuilder questMapBuilder)
-        {
-            var escapePod = new Quests.EscapePodQuest(questMapBuilder, logGen);
-            escapePod.SetupQuest(mapState);
-    
-            var mainQuest = new Quests.CaptainIdQuest(questMapBuilder, logGen);
-            mainQuest.SetupQuest(mapState);
-
-            var arcologyQuest = new Quests.ArcologyQuest(questMapBuilder, logGen);
-            arcologyQuest.SetupQuest(mapState);
         }
 
         private void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)

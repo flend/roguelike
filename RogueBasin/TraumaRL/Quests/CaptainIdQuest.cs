@@ -9,6 +9,7 @@ namespace TraumaRL.Quests
 {
     class CaptainIdQuest : Quest
     {
+        LevelIdData bridgeLevelData = null;
 
         public CaptainIdQuest(QuestMapBuilder builder, LogGenerator logGen) : base(builder, logGen)
         {
@@ -39,13 +40,16 @@ namespace TraumaRL.Quests
         {
             //Bridge lock
             //Requires captain's id
+
             BridgeLock(mapState);
         }
 
-
         private void BridgeLock(MapState mapState)
         {
-            var bridgeLevel = mapState.LevelGraph.LevelIds["bridge"];
+            var bridgeLevel = bridgeLevelData.id;
+
+            //This should be replaced by a query solely based on difficulty / start levels
+            //rather than hard-coding levels we know to be easier
             var lowerAtriumLevel = mapState.LevelGraph.LevelIds["lowerAtrium"];
             var medicalLevel = mapState.LevelGraph.LevelIds["medical"];
             var storageLevel = mapState.LevelGraph.LevelIds["storage"];
@@ -108,7 +112,8 @@ namespace TraumaRL.Quests
 
         public override void RegisterLevels(LevelRegister register)
         {
-            throw new NotImplementedException();
+            //Almost certainly another quest has already registered the bridge, this quest just locks it
+            bridgeLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel));
         }
     }
 }

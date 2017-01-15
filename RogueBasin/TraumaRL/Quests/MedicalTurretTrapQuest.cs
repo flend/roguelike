@@ -159,7 +159,7 @@ namespace TraumaRL.Quests
         {
             var medicalLevel = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.MedicalLevel));
             var lowerAtriumLevel = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.LowerAtriumLevel));
-            register.RegisterAscendingDifficultyRelationship(medicalLevel, lowerAtriumLevel);
+            register.RegisterAscendingDifficultyRelationship(medicalLevel.id, lowerAtriumLevel.id);
         }
     }
 }

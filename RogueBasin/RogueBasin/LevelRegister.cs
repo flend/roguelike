@@ -7,6 +7,20 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
+    public class LevelIdData
+    {
+        public readonly string name;
+        public readonly LevelType type;
+        public readonly int id;
+
+        public LevelIdData(string name, LevelType type, int id)
+        {
+            this.name = name;
+            this.type = type;
+            this.id = id;
+        }
+    }
+
     /// <summary>
     /// Assigns continguous ids to new levels
     /// Stores difficulty relationship between levels
@@ -18,17 +32,19 @@ namespace RogueBasin
         private Dictionary<int, RequiredLevelInfo> levelInfo = new Dictionary<int, RequiredLevelInfo>();
         private Dictionary<RequiredLevelInfo, int> levelInfoReverse = new Dictionary<RequiredLevelInfo, int>();
         private DirectedGraphWrapper graphWrapper = new DirectedGraphWrapper();
-        
+
+
         public LevelRegister()
         {
 
         }
 
-        public int GetIdForLevelType(RequiredLevelInfo newLevelInfo)
+        public LevelIdData GetIdForLevelType(RequiredLevelInfo newLevelInfo)
         {
             if (levelInfoReverse.ContainsKey(newLevelInfo))
             {
-                return levelInfoReverse[newLevelInfo];
+                var id = levelInfoReverse[newLevelInfo];
+                return new LevelIdData(LevelNaming.LevelNames[newLevelInfo.LevelType], newLevelInfo.LevelType, id);
             }
                         
             var newIdLevel = nextLevel;
@@ -37,7 +53,7 @@ namespace RogueBasin
 
             nextLevel++;
 
-            return newIdLevel;
+            return new LevelIdData(LevelNaming.LevelNames[newLevelInfo.LevelType], newLevelInfo.LevelType, newIdLevel);
         }
 
         public void RegisterAscendingDifficultyRelationship(int easierLevel, int harderLevel)

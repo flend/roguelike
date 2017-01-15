@@ -10,8 +10,13 @@ namespace TraumaRL.Quests
 {
     class ArcologyQuest : Quest
     {
-        
         string arcologyAntDoorId;
+
+        LevelIdData computerCoreLevelData = null;
+        LevelIdData arcologyLevelData = null;
+        LevelIdData bridgeLevelData = null;
+        LevelIdData scienceLevelData = null;
+        LevelIdData storageLevelData = null;
 
         public ArcologyQuest(QuestMapBuilder builder, LogGenerator logGen)
             : base(builder, logGen)
@@ -62,7 +67,7 @@ namespace TraumaRL.Quests
             var mapInfo = mapState.MapInfo;
 
             var colorForComputerTechsId = Builder.GetUnusedColor();
-            var computerCoreLevel = mapState.LevelGraph.LevelIds["computerCore"];
+            var computerCoreLevel = computerCoreLevelData.id;
 
             //computer core is a dead end
             var computerCoreSourceElevatorConnection = levelInfo[computerCoreLevel].ConnectionsToOtherLevels.First();
@@ -76,7 +81,7 @@ namespace TraumaRL.Quests
             Builder.PlaceMovieDoorOnMap(mapState, computerDoorId, computerDoorName, 1, computerDoorColor, "computercoreunlocked", "computercorelocked", elevatorToComputerCore);
 
             //Tech's id (this should always work)
-            var arcologyLevel = mapState.LevelGraph.LevelIds["arcology"];
+            var arcologyLevel = arcologyLevelData.id;
             var techIdIdealLevel = new List<int> { arcologyLevel };
             var techIdRoom = Builder.PlaceClueForDoorInVault(mapState, levelInfo, computerDoorId, computerDoorColor, computerDoorName, techIdIdealLevel);
             var techIdLevel = mapInfo.GetLevelForRoomIndex(techIdRoom);
@@ -96,9 +101,9 @@ namespace TraumaRL.Quests
             var levelInfo = mapState.LevelGraph.LevelInfo;
             var mapInfo = mapState.MapInfo;
 
-            var arcologyLevel = mapState.LevelGraph.LevelIds["arcology"];
-            var computerCoreLevel = mapState.LevelGraph.LevelIds["computerCore"];
-            var bridgeLevel = mapState.LevelGraph.LevelIds["bridge"];
+            var arcologyLevel = arcologyLevelData.id;
+            var computerCoreLevel = computerCoreLevelData.id;
+            var bridgeLevel = bridgeLevelData.id;
             var colorForArcologyLock = Builder.GetUnusedColor();
 
             //Find door blocking arcology from start6
@@ -124,8 +129,8 @@ namespace TraumaRL.Quests
             Builder.PlaceLockedDoorOnMap(mapState, arcologyDoor, door);
 
             //Bioware
-            var storageLevel = mapState.LevelGraph.LevelIds["storage"];
-            var scienceLevel = mapState.LevelGraph.LevelIds["science"];
+            var storageLevel = storageLevelData.id;
+            var scienceLevel = scienceLevelData.id;
 
             var biowareIdIdealLevel = new List<int> { storageLevel, scienceLevel };
             //PlaceClueForDoorInVault(mapInfo, levelInfo, arcologyDoorId, arcologyDoorColor, arcologyDoorName, biowareIdIdealLevel);
@@ -183,8 +188,8 @@ namespace TraumaRL.Quests
 
         private void AntennaeQuest(MapState mapState)
         {
-            var scienceLevel = mapState.LevelGraph.LevelIds["science"];
-            var storageLevel = mapState.LevelGraph.LevelIds["storage"];
+            var scienceLevel = scienceLevelData.id;
+            var storageLevel = storageLevelData.id;
 
             var mapInfo = mapState.MapInfo;
             var manager = mapState.DoorAndClueManager;
@@ -253,7 +258,17 @@ namespace TraumaRL.Quests
         }
         public override void RegisterLevels(LevelRegister register)
         {
-            throw new NotImplementedException();
+            computerCoreLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ComputerCoreLevel));
+            arcologyLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel));
+            bridgeLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel));
+            storageLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.StorageLevel));
+            scienceLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ScienceLevel));
+            
+            register.RegisterAscendingDifficultyRelationship(computerCoreLevelData.id, bridgeLevelData.id);
+            register.RegisterAscendingDifficultyRelationship(arcologyLevelData.id, computerCoreLevelData.id);
+
+            register.RegisterAscendingDifficultyRelationship(storageLevelData.id, arcologyLevelData.id);
+            register.RegisterAscendingDifficultyRelationship(scienceLevelData.id, arcologyLevelData.id);
         }
     }
 }

@@ -63,6 +63,7 @@
     <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraph.cs" />
     <Compile Include="LevelGraphvizExport.cs" />
+    <Compile Include="LevelNaming.cs" />
     <Compile Include="LevelRegister.cs" />
     <Compile Include="LevelTreeBuilder.cs" />
     <Compile Include="LevelType.cs" />

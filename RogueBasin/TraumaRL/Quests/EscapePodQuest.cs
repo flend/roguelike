@@ -15,6 +15,16 @@ namespace TraumaRL.Quests
     {
         private const int computerCoresToDestroy = 15;
 
+        //Quest-critical levels
+        LevelIdData computerCoreLevelData = null;
+        LevelIdData bridgeLevelData = null;
+        LevelIdData flightDeckLevelData = null;
+        LevelIdData reactorLevelData = null;
+
+        //Mostly used as filler
+        LevelIdData commercialLevelData = null;
+        LevelIdData arcologyLevelData = null;
+
         public EscapePodQuest(QuestMapBuilder builder, LogGenerator logGen)
             : base(builder, logGen)
         {
@@ -177,7 +187,22 @@ namespace TraumaRL.Quests
 
         public override void RegisterLevels(LevelRegister register)
         {
-            throw new NotImplementedException();
+            computerCoreLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ComputerCoreLevel));
+            arcologyLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel));
+            bridgeLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel));
+            flightDeckLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.FlightDeck));
+            reactorLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ReactorLevel));
+
+            commercialLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.CommercialLevel));
+            arcologyLevelData = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel));
+
+            register.RegisterAscendingDifficultyRelationship(bridgeLevelData.id, flightDeckLevelData.id);
+            
+            register.RegisterAscendingDifficultyRelationship(reactorLevelData.id, bridgeLevelData.id);
+            register.RegisterAscendingDifficultyRelationship(computerCoreLevelData.id, reactorLevelData.id);
+
+            register.RegisterAscendingDifficultyRelationship(commercialLevelData.id, computerCoreLevelData.id);
+            register.RegisterAscendingDifficultyRelationship(arcologyLevelData.id, computerCoreLevelData.id);
         }
     }
 }
