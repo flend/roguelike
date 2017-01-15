@@ -23,6 +23,8 @@ namespace TraumaRL
         private Quest medicalQuest;
         private Quests.LowerAtriumQuest lowerAtriumQuest;
 
+        private LevelIdData startLevel;
+
         public TraumaQuestManager(QuestMapBuilder builder, LogGenerator logGen, bool quickLevelGen)
         {
             this.builder = builder;
@@ -43,6 +45,8 @@ namespace TraumaRL
             arcologyQuest.RegisterLevels(register);
             medicalQuest.RegisterLevels(register);
             lowerAtriumQuest.RegisterLevels(register);
+
+            startLevel = register.GetIdForLevelType(new RequiredLevelInfo(LevelType.MedicalLevel));
         }
 
         public void GenerateQuests(MapState mapState)
@@ -129,6 +133,14 @@ namespace TraumaRL
             captainsIdQuest.SetupQuest(mapState);
 
             arcologyQuest.SetupQuest(mapState);
+        }
+
+        public LevelIdData StartLevel
+        {
+            get
+            {
+                return startLevel;
+            }
         }
     }
 }

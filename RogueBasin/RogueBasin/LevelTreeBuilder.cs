@@ -1,5 +1,6 @@
 ﻿using GraphMap;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,43 +10,23 @@ namespace RogueBasin
 {
     public class LevelTreeBuilder
     {
-        public const int medicalLevel = 0;
-        public const int lowerAtriumLevel = 1;
-        public const int scienceLevel = 2;
-        public const int storageLevel = 3;
-        public const int flightDeck = 4;
-        public const int reactorLevel = 5;
-        public const int arcologyLevel = 6;
-        public const int commercialLevel = 7;
-        public const int computerCoreLevel = 8;
-        public const int bridgeLevel = 9;
-
         private LevelRegister levelRegister;
 
         private bool quickLevelGen = false;
+        private int startLevel;
 
-        public LevelTreeBuilder(LevelRegister levelRegister, bool quickLevelGen)
+        public LevelTreeBuilder(int startLevel, LevelRegister levelRegister, bool quickLevelGen)
         {
+            this.startLevel = startLevel;
             this.levelRegister = levelRegister;
             this.quickLevelGen = quickLevelGen;
         }
 
-        private IEnumerable<LevelAndDifficulty> GetLevelDifficulties()
+        private IEnumerable<LevelAndDifficulty> GetLevelDifficulties(IEnumerable<int> levelDifficultyOrder)
         {
             //This should come from which quests are chosen
-            var levelsAndDifficulties = new List<LevelAndDifficulty> {
-                    new LevelAndDifficulty(flightDeck, 9),
-                    new LevelAndDifficulty(bridgeLevel, 8),
-                    new LevelAndDifficulty(reactorLevel, 7),
-                    new LevelAndDifficulty(computerCoreLevel, 6),
-                    new LevelAndDifficulty(arcologyLevel, 5),
-                    new LevelAndDifficulty(scienceLevel, 4),
-                    new LevelAndDifficulty(storageLevel, 3),
-                    new LevelAndDifficulty(commercialLevel, 2),
-                    new LevelAndDifficulty(lowerAtriumLevel, 1),
-                    new LevelAndDifficulty(medicalLevel, 0)
-                };
-
+            var levelsAndDifficulties = levelDifficultyOrder.Select((item, index) => new LevelAndDifficulty(item, index));
+            
             return levelsAndDifficulties;
         }
 
@@ -88,17 +69,24 @@ namespace RogueBasin
 
             //commercial (close to atrium)
 
-            //Player starts in medical which links to the lower atrium
-            levelLinks.AddRoomConnection(new Connection(medicalLevel, lowerAtriumLevel));
+            var difficultyOrderer = new DifficultyOrdering(levelRegister.DifficultyGraph);
+            var levelDifficultyOrder = difficultyOrderer.GetLevelsInAscendingDifficultyOrder();          
+
+            //Add easiest two levels as start connection
+            var medicalLevelId = levelDifficultyOrder.ElementAt(0);
+            var lowerAtriumLevelId = levelDifficultyOrder.ElementAt(1);
+
+            levelLinks.AddRoomConnection(new Connection(medicalLevelId, lowerAtriumLevelId));
 
             //This feels kinda misplaced
 
             if (!quickLevelGen)
             {
                 //Create levels in order of difficulty
+
                 //NOTE THIS ALGORITHM REQUIRES THAT GetLevelDifficulties gives back unique difficulties in lower-is-easier form! TODO: fix
-                var levelsAndDifficultiesFull = GetLevelDifficulties();
-                var levelsAndDifficultiesAscending = levelsAndDifficultiesFull.Except(EnumerableEx.Return(new LevelAndDifficulty(medicalLevel, 0)));
+                var levelsAndDifficultiesFull = GetLevelDifficulties(levelDifficultyOrder);
+                var levelsAndDifficultiesAscending = levelsAndDifficultiesFull.Except(EnumerableEx.Return(new LevelAndDifficulty(medicalLevelId, 0)));
 
                 var maxDifficulty = levelsAndDifficultiesAscending.Max(l => l.difficulty);
                 var levelsAndDifficulties = levelsAndDifficultiesAscending.Select(l => new LevelAndDifficulty(l.level, maxDifficulty - l.difficulty));
@@ -114,7 +102,7 @@ namespace RogueBasin
                 var terminusNodes = subTerminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
 
                 //Fragile way of removing lowerAtrium
-                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevel, maxDifficulty - 1)));
+                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevelId, maxDifficulty - 1)));
 
                 foreach (var level in remainingNodes)
                 {
@@ -138,7 +126,7 @@ namespace RogueBasin
                 //Connect all terminii to lower atrium
                 foreach (var level in terminusNodes)
                 {
-                    levelLinks.AddRoomConnection(new Connection(lowerAtriumLevel, level.level));
+                    levelLinks.AddRoomConnection(new Connection(lowerAtriumLevelId, level.level));
                 }
 
                 //TODO: try to balance the tree a bit, otherwise pathological situations (one long branch) are quite likely

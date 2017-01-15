@@ -26,7 +26,7 @@ namespace RogueBasin
         private ImmutableDictionary<int, string> levelNames;
         private ImmutableDictionary<int, string> levelReadableNames;
 
-        private Dictionary<int, int> levelDifficulty = new Dictionary<int, int>();
+        private ImmutableDictionary<int, int> levelDifficulty;
         private Dictionary<int, int> levelDepths;
 
         public LevelGraph(Dictionary<int, LevelInfo> levelInfo, ConnectivityMap levelLinks, int startLevel)
@@ -53,33 +53,10 @@ namespace RogueBasin
             levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
             levelReadableNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelReadableName);
             levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
-
-            CalculateLevelDifficulty();
+            //TODO: fix
+            levelDifficulty = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => 0);
         }
-
-        private void CalculateLevelDifficulty()
-        {
-            var levelsAndDifficulties = GetLevelDifficulties();
-
-            foreach (var levelAndDifficulty in levelsAndDifficulties)
-            {
-                levelDifficulty[levelAndDifficulty.level] = levelAndDifficulty.difficulty;
-            }
-        }
-
-        //This is all replicated from TWG.cs for now
-
-        public const int medicalLevel = 0;
-        public const int lowerAtriumLevel = 1;
-        public const int scienceLevel = 2;
-        public const int storageLevel = 3;
-        public const int flightDeck = 4;
-        public const int reactorLevel = 5;
-        public const int arcologyLevel = 6;
-        public const int commercialLevel = 7;
-        public const int computerCoreLevel = 8;
-        public const int bridgeLevel = 9;
-
+                
         public class LevelAndDifficulty
         {
             public readonly int level;
@@ -127,25 +104,7 @@ namespace RogueBasin
                 return level + 17 * difficulty;
             }
         }
-
-        private IEnumerable<LevelAndDifficulty> GetLevelDifficulties()
-        {
-            var levelsAndDifficulties = new List<LevelAndDifficulty> {
-                    new LevelAndDifficulty(flightDeck, 8),
-                    new LevelAndDifficulty(bridgeLevel, 7),
-                    new LevelAndDifficulty(reactorLevel, 6),
-                    new LevelAndDifficulty(computerCoreLevel, 5),
-                    new LevelAndDifficulty(arcologyLevel, 4),
-                    new LevelAndDifficulty(scienceLevel, 3),
-                    new LevelAndDifficulty(storageLevel, 2),
-                    new LevelAndDifficulty(commercialLevel, 3),
-                    new LevelAndDifficulty(lowerAtriumLevel, 1),
-                    new LevelAndDifficulty(medicalLevel, 0)
-                };
-
-            return levelsAndDifficulties;
-        }
-
+        
         public IEnumerable<Connection> GetPathBetweenLevels(int startLevel, int endLevel)
         {
             var tryGetPath = levelLinks.RoomConnectionGraph.ShortestPathsDijkstra(x => 1, startLevel);
@@ -170,7 +129,7 @@ namespace RogueBasin
         }
 
 
-        public Dictionary<int, int> LevelDifficulty { get { return levelDifficulty; } }
+        public ImmutableDictionary<int, int> LevelDifficulty { get { return levelDifficulty; } }
 
         public List<int> GameLevels { get { return gameLevels; } }
 

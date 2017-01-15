@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -39,7 +40,7 @@ namespace RogueBasin
 
         List<MonsterSet> monsterSets;
 
-        public void CreateMonstersForLevels(MapState mapState, IEnumerable<int> levelsToProcess, Dictionary<int, int> levelDifficulty)
+        public void CreateMonstersForLevels(MapState mapState, IEnumerable<int> levelsToProcess, ImmutableDictionary<int, int> levelDifficulty)
         {
             var mapInfo = mapState.MapInfo;
 
