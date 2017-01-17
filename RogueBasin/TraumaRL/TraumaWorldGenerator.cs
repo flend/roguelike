@@ -75,10 +75,12 @@ namespace TraumaRL
             //Generate the overall level tree structure and difficulties
             var levelTreeBuilder = new LevelTreeBuilder(questManager.StartLevel.id, levelRegister, quickLevelGen);
             levelLinks = levelTreeBuilder.GenerateLevelLinks();
-            var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
+            
+            //TODO: seems like a hard way of getting this info!
+            //var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
             
             //Build each level individually
-            TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(gameLevels, levelLinks, quickLevelGen);
+            TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(levelRegister, levelLinks, quickLevelGen);
             levelBuilder.GenerateLevels();
             
             //Initialise mapState that supports map mutations

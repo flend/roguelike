@@ -84,34 +84,35 @@ namespace RogueBasin
             {
                 //Create levels in order of difficulty
 
-                //NOTE THIS ALGORITHM REQUIRES THAT GetLevelDifficulties gives back unique difficulties in lower-is-easier form! TODO: fix
+                //Ordered in increasing difficulty
                 var levelsAndDifficultiesFull = GetLevelDifficulties(levelDifficultyOrder);
-                var levelsAndDifficultiesAscending = levelsAndDifficultiesFull.Except(EnumerableEx.Return(new LevelAndDifficulty(medicalLevelId, 0)));
+                var levelsAndDifficultiesWithoutMedicalAndLowerAtrium = levelsAndDifficultiesFull.Skip(2);
+                var levelsAndDifficultiesWithoutMedicalAndLowerAtriumAndMostDifficultLevel = levelsAndDifficultiesWithoutMedicalAndLowerAtrium.SkipLast(1);
 
-                var maxDifficulty = levelsAndDifficultiesAscending.Max(l => l.difficulty);
-                var levelsAndDifficulties = levelsAndDifficultiesAscending.Select(l => new LevelAndDifficulty(l.level, maxDifficulty - l.difficulty));
+                var mostDifficultLevelAndDifficulty = levelsAndDifficultiesFull.TakeLast(1);
 
                 //Pick terminuses (all levels except most difficult and lower atrium)
                 //Note that shuffle now has an implicit toList() which stops multiple evaluations giving different results
-                var terminusShuffle = levelsAndDifficulties.Skip(1).Take(7).Shuffle();
+                var terminusShuffle = levelsAndDifficultiesWithoutMedicalAndLowerAtriumAndMostDifficultLevel.Shuffle();
 
                 var numberOfTerminii = Game.Random.Next(2) + 2;
                 var subTerminusNodes = terminusShuffle.Take(numberOfTerminii);
 
                 //Add most difficult level as terminus
-                var terminusNodes = subTerminusNodes.Union(EnumerableEx.Return(levelsAndDifficulties.ElementAt(0)));
+                var terminusNodes = subTerminusNodes.Union(mostDifficultLevelAndDifficulty);
 
                 //Fragile way of removing lowerAtrium
-                var remainingNodes = levelsAndDifficulties.Except(terminusNodes).Except(EnumerableEx.Return(new LevelAndDifficulty(lowerAtriumLevelId, maxDifficulty - 1)));
+                var remainingNodes = levelsAndDifficultiesWithoutMedicalAndLowerAtrium.Except(terminusNodes);
 
                 foreach (var level in remainingNodes)
                 {
-                    var parentNodes = terminusNodes.Where(parent => parent.difficulty < level.difficulty).Shuffle();
-                    var numberOfParents = Math.Min(Game.Random.Next(3), parentNodes.Count());
+                    var parentNodes = terminusNodes.Where(parent => parent.difficulty > level.difficulty);
+                    var parentNodesShuffled = parentNodes.Shuffle();
+                    var numberOfParents = Math.Min(1 + Game.Random.Next(3), parentNodes.Count());
 
                     for (int p = 0; p < numberOfParents; p++)
                     {
-                        var parentLevel = parentNodes.ElementAt(p);
+                        var parentLevel = parentNodesShuffled.ElementAt(p);
                         //Pick a parent from current terminusNodes, which is less difficult
                         levelLinks.AddRoomConnection(new Connection(level.level, parentLevel.level));
                         //Remove parent from terminii
@@ -119,7 +120,6 @@ namespace RogueBasin
                     }
 
                     //Add this level
-
                     terminusNodes = terminusNodes.Union(EnumerableEx.Return(level));
                 }
 

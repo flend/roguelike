@@ -11,6 +11,7 @@ namespace TraumaRL
 
     public class TraumaLevelBuilder
     {
+        //TODO: remove
         public const int medicalLevel = 0;
         public const int lowerAtriumLevel = 1;
         public const int scienceLevel = 2;
@@ -24,9 +25,9 @@ namespace TraumaRL
 
         private Dictionary<int, LevelBuilder> levelBuilders = new Dictionary<int, LevelBuilder>();
 
-        private IEnumerable<int> gameLevels;
+        private readonly LevelRegister levelRegister;
         private bool quickLevelGen;
-        private ConnectivityMap levelLinks;
+        private readonly ConnectivityMap levelLinks;
 
         List<int> allReplaceableVaults;
         Dictionary<int, LevelInfo> levelInfo;
@@ -44,9 +45,9 @@ namespace TraumaRL
         Dictionary<MapTerrain, List<MapTerrain>> dipTerrainMapping;
         Dictionary<MapTerrain, List<MapTerrain>> cutTerrainMapping;
 
-        public TraumaLevelBuilder(IEnumerable<int> gameLevels, ConnectivityMap levelLinks, bool quickLevelGen)
+        public TraumaLevelBuilder(LevelRegister levelRegister, ConnectivityMap levelLinks, bool quickLevelGen)
         {
-            this.gameLevels = gameLevels;
+            this.levelRegister = levelRegister;
             this.quickLevelGen = quickLevelGen;
             this.levelLinks = levelLinks;
 
@@ -108,6 +109,12 @@ namespace TraumaRL
 
         public void GenerateLevels()
         {
+            var allRegisteredLevelData = levelRegister.GetAllRegisteredLevelIdData();
+
+            //TODO: Now loop over each registered level and actually build the level using a level builder
+            //set levelInfo[id]
+            
+            
             levelInfo = new Dictionary<int, LevelInfo>();
 
             var levelBuilderUtils = new LevelBuilderUtils();
@@ -182,6 +189,8 @@ namespace TraumaRL
         private IEnumerable<int> GetStandardGameLevelNos()
         {
             IEnumerable<int> standardGameLevels;
+
+            var gameLevels = levelRegister.GetAllRegisteredLevelIdData().Select(i => i.id);
 
             if (quickLevelGen)
             {

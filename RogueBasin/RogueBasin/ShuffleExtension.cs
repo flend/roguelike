@@ -51,7 +51,9 @@ namespace RogueBasin
                 // ... except we don't really need to swap it fully, as we can
                 // return it immediately, and afterwards it's irrelevant.
                 int swapIndex = rng.Next(i + 1);
+                var save = elements[swapIndex];
                 elements[swapIndex] = elements[i];
+                elements[i] = save;
             }
 
             return elements.ToList();

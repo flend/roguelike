@@ -56,6 +56,15 @@ namespace RogueBasin
             return new LevelIdData(LevelNaming.LevelNames[newLevelInfo.LevelType], newLevelInfo.LevelType, newIdLevel);
         }
 
+        /// <summary>
+        /// Returns ids, names and types for all registered levels
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<LevelIdData> GetAllRegisteredLevelIdData()
+        {
+            return levelInfo.Select(l => new LevelIdData(LevelNaming.LevelNames[l.Value.LevelType], l.Value.LevelType, l.Key));
+        }
+
         public void RegisterAscendingDifficultyRelationship(int easierLevel, int harderLevel)
         {
             if(!levelInfo.Keys.Contains(easierLevel)) {
