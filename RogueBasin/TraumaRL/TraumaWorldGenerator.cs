@@ -119,7 +119,7 @@ namespace TraumaRL
             SetupMapsInEngine();
 
             //Pause here to attach the debugger
-            MessageBox.Show("post engine");
+            //MessageBox.Show("post engine");
 
             Game.Dungeon.AddMapObjectsToDungeon(MapState.MapInfo);
             
@@ -164,7 +164,7 @@ namespace TraumaRL
 
             if (!quickLevelGen && !RoutabilityUtilities.CheckFeatureRouteability())
             {
-                //throw new ApplicationException("Feature is not connected to elevator, aborting.");
+                throw new ApplicationException("Feature is not connected to elevator, aborting.");
             }
         }
 
