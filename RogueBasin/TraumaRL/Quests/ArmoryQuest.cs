@@ -18,8 +18,6 @@ namespace TraumaRL.Quests
 
     class ArmoryQuest : Quest
     {
-        int medicalLevel = 0;
-
         Dictionary<int, int> goodyRooms;
         Dictionary<int, string> goodyRoomKeyNames;
         Dictionary<int, List<Item>> itemsInArmory = new Dictionary<int, List<Item>>();
@@ -210,18 +208,18 @@ namespace TraumaRL.Quests
 
             //Guarantee on medical, at least 1 ware and a pistol or vibroblade
             var randomWare = level1Ware.Except(itemsPlaced).RandomElement();
-            Builder.PlaceItems(mapState, new List<Item> { randomWare }, new List<int> { goodyRooms[medicalLevel] }, false);
+            Builder.PlaceItems(mapState, new List<Item> { randomWare }, new List<int> { goodyRooms[mapState.StartLevel] }, false);
             itemsPlaced.Add(randomWare);
             itemsInArmory[0].Add(randomWare);
 
-            Builder.PlaceItems(mapState, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[medicalLevel] }, false);
+            Builder.PlaceItems(mapState, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[mapState.StartLevel] }, false);
             itemsPlaced.Add(lootLevels[0][0]);
             itemsInArmory[0].Add(lootLevels[0][0]);
-            Builder.PlaceItems(mapState, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[medicalLevel] }, false);
+            Builder.PlaceItems(mapState, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[mapState.StartLevel] }, false);
             itemsPlaced.Add(lootLevels[0][1]);
             itemsInArmory[0].Add(lootLevels[0][0]);
 
-            var levelsToHandleSeparately = new List<int> { medicalLevel };
+            var levelsToHandleSeparately = new List<int> { mapState.StartLevel };
 
             var totalLoot = lootLevels.SelectMany(kv => kv.Value).Except(itemsPlaced).Count();
             var totalRooms = goodyRooms.Select(kv => kv.Key).Except(levelsToHandleSeparately).Count();

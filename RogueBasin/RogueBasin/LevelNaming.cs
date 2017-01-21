@@ -14,6 +14,7 @@ namespace RogueBasin
     public static class LevelNaming
     {
         static public ImmutableDictionary<LevelType, string> LevelNames { get; private set; }
+        static public ImmutableDictionary<LevelType, string> LevelReadableNames { get; private set; }
 
         static LevelNaming()
         {
@@ -31,6 +32,22 @@ namespace RogueBasin
             };
 
             LevelNames = levelNamingDict.ToImmutableDictionary(i => i.Key, i => i.Value);
+
+            var levelReadableNamingDict = new Dictionary<LevelType, string>() {
+                { LevelType.ArcologyLevel, "Arcology" },
+                { LevelType.BridgeLevel, "Bridge" },
+                { LevelType.CommercialLevel, "Commercial" },
+                { LevelType.ComputerCoreLevel, "Computer Core" },
+                { LevelType.FlightDeck, "Flight Deck" },
+                { LevelType.LowerAtriumLevel, "Lower Atrium" },
+                { LevelType.MedicalLevel, "Medical" },
+                { LevelType.ReactorLevel, "Reactor" },
+                { LevelType.ScienceLevel, "Science" },
+                { LevelType.StorageLevel, "Storage" }
+            };
+
+            LevelReadableNames = levelReadableNamingDict.ToImmutableDictionary(i => i.Key, i => i.Value);
+
         }
     }
 }

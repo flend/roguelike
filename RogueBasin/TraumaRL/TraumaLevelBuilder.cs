@@ -11,23 +11,13 @@ namespace TraumaRL
 
     public class TraumaLevelBuilder
     {
-        //TODO: remove
-        public const int medicalLevel = 0;
-        public const int lowerAtriumLevel = 1;
-        public const int scienceLevel = 2;
-        public const int storageLevel = 3;
-        public const int flightDeck = 4;
-        public const int reactorLevel = 5;
-        public const int arcologyLevel = 6;
-        public const int commercialLevel = 7;
-        public const int computerCoreLevel = 8;
-        public const int bridgeLevel = 9;
-
         private Dictionary<int, LevelBuilder> levelBuilders = new Dictionary<int, LevelBuilder>();
 
         private readonly LevelRegister levelRegister;
         private bool quickLevelGen;
         private readonly ConnectivityMap levelLinks;
+        private readonly int startLevel;
+        private int startVertex;
 
         List<int> allReplaceableVaults;
         Dictionary<int, LevelInfo> levelInfo;
@@ -45,11 +35,12 @@ namespace TraumaRL
         Dictionary<MapTerrain, List<MapTerrain>> dipTerrainMapping;
         Dictionary<MapTerrain, List<MapTerrain>> cutTerrainMapping;
 
-        public TraumaLevelBuilder(LevelRegister levelRegister, ConnectivityMap levelLinks, bool quickLevelGen)
+        public TraumaLevelBuilder(LevelRegister levelRegister, ConnectivityMap levelLinks, int startLevel, bool quickLevelGen)
         {
             this.levelRegister = levelRegister;
             this.quickLevelGen = quickLevelGen;
             this.levelLinks = levelLinks;
+            this.startLevel = startLevel;
 
             BuildTerrainMapping();
         }
@@ -78,6 +69,13 @@ namespace TraumaRL
             }
         }
 
+        public int StartVertex
+        {
+            get
+            {
+                return startVertex;
+            }
+        }
 
         private void BuildTerrainMapping()
         {
@@ -111,70 +109,71 @@ namespace TraumaRL
         {
             var allRegisteredLevelData = levelRegister.GetAllRegisteredLevelIdData();
 
-            //TODO: Now loop over each registered level and actually build the level using a level builder
-            //set levelInfo[id]
-            
-            
             levelInfo = new Dictionary<int, LevelInfo>();
-
             var levelBuilderUtils = new LevelBuilderUtils();
 
-            levelBuilders[medicalLevel] = new Levels.MedicalLevelBuilder(levelBuilderUtils, levelLinks, 0, irisTerrainMapping, "medical", "Medical");
-            var medicalInfo = levelBuilders[(int)LevelType.MedicalLevel].GenerateLevel(medicalLevel);
-            levelInfo[medicalLevel] = medicalInfo;
-
-            if (!quickLevelGen)
+            foreach (var levelData in allRegisteredLevelData)
             {
-                levelBuilders[(int)LevelType.LowerAtriumLevel] = new Levels.StandardLevelBuilder(levelBuilderUtils, levelLinks, lowerAtriumLevel * 100, irisTerrainMapping, "lowerAtrium", "Lower Atrium");
-                var lowerAtriumInfo = levelBuilders[(int)LevelType.LowerAtriumLevel].GenerateLevel(lowerAtriumLevel);
-                levelInfo[lowerAtriumLevel] = lowerAtriumInfo;
+                var levelId = levelData.id;
+                var levelName = levelData.name;
+                var levelReadableName = levelData.readableName;
+                var levelType = levelData.type;
 
-                levelBuilders[(int)LevelType.ScienceLevel] = new Levels.ScienceLevelBuilder(levelBuilderUtils, levelLinks, scienceLevel * 100, lineTerrainMapping, "science", "Science");
-                var scienceInfo = levelBuilders[(int)LevelType.ScienceLevel].GenerateLevel(scienceLevel);
-                levelInfo[scienceLevel] = scienceInfo;
+                switch (levelType)
+                {
+                    case LevelType.ArcologyLevel:
+                        levelBuilders[levelId] = new Levels.ArcologyLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, bioTerrainMapping, levelName, levelReadableName);
+                        break;
 
-                levelBuilders[(int)LevelType.BridgeLevel] = new Levels.BridgeLevelBuilder(levelBuilderUtils, levelLinks, bridgeLevel * 100, lineTerrainMapping, "bridge", "Bridge");
-                var bridgeInfo = levelBuilders[(int)LevelType.BridgeLevel].GenerateLevel(bridgeLevel);
-                levelInfo[bridgeLevel] = bridgeInfo;
+                    case LevelType.BridgeLevel:
+                        levelBuilders[levelId] = new Levels.BridgeLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, lineTerrainMapping, levelName, levelReadableName);
+                        break;
 
-                levelBuilders[(int)LevelType.StorageLevel] = new Levels.StorageLevelBuilder(levelBuilderUtils, levelLinks, storageLevel * 100, irisTerrainMapping, "storage", "Storage");
-                var storageInfo = levelBuilders[(int)LevelType.StorageLevel].GenerateLevel(storageLevel);
-                levelInfo[storageLevel] = storageInfo;
+                    case LevelType.CommercialLevel:
+                        levelBuilders[levelId] = new Levels.CommercialLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, dipTerrainMapping, levelName, levelReadableName);
+                        break;
 
-                var flightDeckLevelBuilder = new Levels.FlightDeckLevelBuilder(levelBuilderUtils, levelLinks, flightDeck * 100, cutTerrainMapping, "flightDeck", "Flight Deck");
-                levelBuilders[(int)LevelType.FlightDeck] = flightDeckLevelBuilder;
-                var flightInfo = flightDeckLevelBuilder.GenerateLevel(flightDeck);
-                levelInfo[flightDeck] = flightInfo;
-                escapePodsConnection = flightDeckLevelBuilder.GetEscapePodsConnection();
+                    case LevelType.ComputerCoreLevel:
+                        levelBuilders[levelId] = new Levels.ComputerCoreLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, panelTerrainMapping, levelName, levelReadableName);
+                        break;
 
-                levelBuilders[(int)LevelType.ReactorLevel] = new Levels.ReactorLevelBuilder(levelBuilderUtils, levelLinks, reactorLevel * 100, securityTerrainMapping, "reactor", "Reactor");
-                var reactorInfo = levelBuilders[(int)LevelType.ReactorLevel].GenerateLevel(reactorLevel);
-                levelInfo[reactorLevel] = reactorInfo;
+                    case LevelType.FlightDeck:
+                        levelBuilders[levelId] = new Levels.FlightDeckLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, cutTerrainMapping, levelName, levelReadableName);
+                        break;
 
-                levelBuilders[(int)LevelType.ComputerCoreLevel] = new Levels.ComputerCoreLevelBuilder(levelBuilderUtils, levelLinks, computerCoreLevel * 100, panelTerrainMapping, "computerCore", "Computer Core");
-                var computerInfo = levelBuilders[(int)LevelType.ComputerCoreLevel].GenerateLevel(computerCoreLevel);
-                levelInfo[computerCoreLevel] = computerInfo;
+                    case LevelType.LowerAtriumLevel:
+                        levelBuilders[levelId] = new Levels.StandardLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, irisTerrainMapping, LevelType.LowerAtriumLevel, levelName, levelReadableName);
+                        break;
 
-                levelBuilders[(int)LevelType.ArcologyLevel] = new Levels.ArcologyLevelBuilder(levelBuilderUtils, levelLinks, arcologyLevel * 100, bioTerrainMapping, "arcology", "Arcology");
-                var arcologyInfo = levelBuilders[(int)LevelType.ArcologyLevel].GenerateLevel(arcologyLevel);
-                levelInfo[arcologyLevel] = arcologyInfo;
+                    case LevelType.MedicalLevel:
+                        levelBuilders[levelId] = new Levels.MedicalLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, irisTerrainMapping, levelName, levelReadableName);
+                        break;
 
-                levelBuilders[(int)LevelType.CommercialLevel] = new Levels.CommercialLevelBuilder(levelBuilderUtils, levelLinks, commercialLevel * 100, dipTerrainMapping, "commercial", "Commercial");
-                var commercialInfo = levelBuilders[(int)LevelType.CommercialLevel].GenerateLevel(commercialLevel);
-                levelInfo[commercialLevel] = commercialInfo;
+                    case LevelType.ReactorLevel:
+                        levelBuilders[levelId] = new Levels.ReactorLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, securityTerrainMapping, levelName, levelReadableName);
+                        break;
+
+                    case LevelType.ScienceLevel:
+                        levelBuilders[levelId] = new Levels.ScienceLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, lineTerrainMapping, levelName, levelReadableName);
+                        break;
+
+                    case LevelType.StorageLevel:
+                        levelBuilders[levelId] = new Levels.StorageLevelBuilder(levelBuilderUtils, levelLinks, levelId * 100, irisTerrainMapping, levelName, levelReadableName);
+                        break;
+
+                }
+
+                levelInfo[levelId] = levelBuilders[levelId].GenerateLevel(levelId);
+
+                //This should be moved into the quest now we have dynamic map generation
+                if (levelType == LevelType.FlightDeck)
+                {
+                    escapePodsConnection = ((Levels.FlightDeckLevelBuilder)levelBuilders[levelId]).GetEscapePodsConnection();
+                }
             }
 
-            //Make other levels generically
-
-            IEnumerable<int> standardGameLevels = GetStandardGameLevelNos();
-
-            foreach (var level in standardGameLevels)
-            {
-                var standardLevelBuilder = new Levels.StandardLevelBuilder(levelBuilderUtils, levelLinks, level * 100, irisTerrainMapping, "standard" + level, "Standard " + level);
-                var thisLevelInfo = standardLevelBuilder.GenerateLevel(level);
-                levelInfo[level] = thisLevelInfo;
-            }
-
+            startVertex = levelInfo[startLevel].StartVertex;
+            
             //Maintain a list of the replaceable vaults. We don't want to put stuff in these as they may disappear
             allReplaceableVaults = levelInfo.SelectMany(kv => kv.Value.ReplaceableVaultConnections.Select(v => v.Target)).ToList();
         }
@@ -185,24 +184,5 @@ namespace TraumaRL
                 levelBuilder.Value.CompleteLevel();
             }
         }
-
-        private IEnumerable<int> GetStandardGameLevelNos()
-        {
-            IEnumerable<int> standardGameLevels;
-
-            var gameLevels = levelRegister.GetAllRegisteredLevelIdData().Select(i => i.id);
-
-            if (quickLevelGen)
-            {
-                standardGameLevels = gameLevels.Except(new List<int> { medicalLevel });
-            }
-            else
-            {
-                standardGameLevels = gameLevels.Except(new List<int> { medicalLevel, storageLevel, reactorLevel, flightDeck, arcologyLevel, scienceLevel, computerCoreLevel, bridgeLevel, commercialLevel, lowerAtriumLevel });
-            }
-            return standardGameLevels;
-        }
-
-
     }
 }

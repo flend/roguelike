@@ -87,6 +87,8 @@ namespace TraumaRL.Quests
             var selfDestructRoom = bridgeRoomsInDistanceOrderFromStart.ElementAt(0);
             var selfDestructConnection = replaceableVaultsInBridge.Where(c => c.Target == selfDestructRoom).First();
 
+            GraphVisualizer.VisualiseFullMapGraph(mapState.MapInfo, mapState.DoorAndClueManager, "pre-escape");
+
             manager.PlaceObjective(new ObjectiveRequirements(selfDestructRoom, "self-destruct", 1, new List<string> { "escape" }));
             var selfDestructObjective = manager.GetObjectiveById("self-destruct");
 

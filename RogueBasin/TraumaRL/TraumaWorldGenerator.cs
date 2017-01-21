@@ -63,32 +63,28 @@ namespace TraumaRL
 
             var questManager = new TraumaQuestManager(mapQuestBuilder, logGen, quickLevelGen);
             questManager.RegisterQuests(levelRegister);
+            var startLevel = questManager.StartLevel.id;
 
             GraphVisualizer.VisualiseDirectedGraph(levelRegister.DifficultyGraph, "diff-graph");
 
             //Levels are now registered inside levelRegister and level ids are generated
             //These level ids are used inside the quests
 
-            //BUT THE LEVEL IDS ARE ALL OVERRIDDEN IN THE LEVEL TREE BUILDER
-            //This needs to be fixed
-
             //Generate the overall level tree structure and difficulties
-            var levelTreeBuilder = new LevelTreeBuilder(questManager.StartLevel.id, levelRegister, quickLevelGen);
+            var levelTreeBuilder = new LevelTreeBuilder(startLevel, levelRegister, quickLevelGen);
             levelLinks = levelTreeBuilder.GenerateLevelLinks();
             
-            //TODO: seems like a hard way of getting this info!
-            //var gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
-            
             //Build each level individually
-            TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(levelRegister, levelLinks, quickLevelGen);
+            TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(levelRegister, levelLinks, startLevel, quickLevelGen);
             levelBuilder.GenerateLevels();
             
             //Initialise mapState that supports map mutations
             mapState = new MapState();
             var levelInfo = levelBuilder.LevelInfo;
-            SetupMapState(levelBuilder, levelInfo);
+            SetupMapState(levelBuilder, levelInfo, startLevel);
 
             GraphVisualizer.VisualiseLevelConnectivityGraph(levelLinks, MapState.LevelGraph.LevelNames);
+            GraphVisualizer.VisualiseClueDoorGraph(MapState.MapInfo, MapState.DoorAndClueManager, "prequest");
             GraphVisualizer.VisualiseFullMapGraph(MapState.MapInfo, MapState.DoorAndClueManager, "prequest");
 
             //Generate quests (includes map mutations)
@@ -116,14 +112,14 @@ namespace TraumaRL
             //Add maps to the dungeon (must be ordered)
             AddLevelMapsToDungeon(levelInfo);
 
-            //Set player's start location (must be done before adding items)
-            SetPlayerStartLocation(MapState.MapInfo);
+            //Set player's start location
+            SetPlayerStartLocation(MapState);
 
             //Set maps in engine (needs to be done before placing items and monsters)
             SetupMapsInEngine();
 
             //Pause here to attach the debugger
-            //MessageBox.Show("post engine");
+            MessageBox.Show("post engine");
 
             Game.Dungeon.AddMapObjectsToDungeon(MapState.MapInfo);
             
@@ -139,11 +135,9 @@ namespace TraumaRL
             }
         }
 
-        private void SetupMapState(TraumaLevelBuilder levelBuilder, Dictionary<int, LevelInfo> levelInfo)
+        private void SetupMapState(TraumaLevelBuilder levelBuilder, Dictionary<int, LevelInfo> levelInfo, int startLevel)
         {
-            var startVertex = 0;
-            var startLevel = 0;
-            mapState.BuildLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
+            mapState.BuildLevelMaps(levelLinks, levelInfo, startLevel);
 
             //Feels like there will be a more dynamic way of getting this state in future
             mapState.ConnectionStore["escapePodConnection"] = levelBuilder.EscapePodsConnection;
@@ -174,10 +168,14 @@ namespace TraumaRL
             }
         }
 
-        private static void SetPlayerStartLocation(MapInfo mapInfo)
+        private static void SetPlayerStartLocation(MapState mapState)
         {
-            var firstRoom = mapInfo.Room(0);
-            Game.Dungeon.Levels[0].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+            var mapInfo = mapState.MapInfo;
+            var firstRoom = mapInfo.Room(mapState.StartVertex);
+            Game.Dungeon.Levels[mapState.StartLevel].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            Game.Dungeon.Player.LocationLevel = mapState.StartLevel;
+            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
         }
 
 

@@ -10,12 +10,14 @@ namespace RogueBasin
     public class LevelIdData
     {
         public readonly string name;
+        public readonly string readableName;
         public readonly LevelType type;
         public readonly int id;
 
-        public LevelIdData(string name, LevelType type, int id)
+        public LevelIdData(string name, string readableName, LevelType type, int id)
         {
             this.name = name;
+            this.readableName = readableName;
             this.type = type;
             this.id = id;
         }
@@ -44,7 +46,7 @@ namespace RogueBasin
             if (levelInfoReverse.ContainsKey(newLevelInfo))
             {
                 var id = levelInfoReverse[newLevelInfo];
-                return new LevelIdData(LevelNaming.LevelNames[newLevelInfo.LevelType], newLevelInfo.LevelType, id);
+                return new LevelIdData(LevelNaming.LevelNames[newLevelInfo.LevelType], LevelNaming.LevelReadableNames[newLevelInfo.LevelType], newLevelInfo.LevelType, id);
             }
                         
             var newIdLevel = nextLevel;
@@ -53,7 +55,7 @@ namespace RogueBasin
 
             nextLevel++;
 
-            return new LevelIdData(LevelNaming.LevelNames[newLevelInfo.LevelType], newLevelInfo.LevelType, newIdLevel);
+            return new LevelIdData(LevelNaming.LevelNames[newLevelInfo.LevelType], LevelNaming.LevelReadableNames[newLevelInfo.LevelType], newLevelInfo.LevelType, newIdLevel);
         }
 
         /// <summary>
@@ -62,7 +64,7 @@ namespace RogueBasin
         /// <returns></returns>
         public IEnumerable<LevelIdData> GetAllRegisteredLevelIdData()
         {
-            return levelInfo.Select(l => new LevelIdData(LevelNaming.LevelNames[l.Value.LevelType], l.Value.LevelType, l.Key));
+            return levelInfo.Select(l => new LevelIdData(LevelNaming.LevelNames[l.Value.LevelType], LevelNaming.LevelReadableNames[l.Value.LevelType], l.Value.LevelType, l.Key));
         }
 
         public void RegisterAscendingDifficultyRelationship(int easierLevel, int harderLevel)

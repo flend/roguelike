@@ -32,7 +32,7 @@ namespace TraumaRL.Levels
 
         public override LevelInfo GenerateLevel(int levelNo)
         {
-            levelInfo = new LevelInfo(levelNo, levelName, levelReadableName);
+            levelInfo = new LevelInfo(levelNo, LevelType.ScienceLevel, startVertexIndex, levelName, levelReadableName);
 
             //Load standard room types
             RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();

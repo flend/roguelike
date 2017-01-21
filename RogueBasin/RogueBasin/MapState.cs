@@ -11,8 +11,6 @@ namespace RogueBasin
     public class MapState
     {
         MapInfo mapInfo;
-        //Get from mapInfo?
-        int startVertex;
         
         DoorAndClueManager doorAndClueManager;
         MapPopulator populator;
@@ -38,8 +36,8 @@ namespace RogueBasin
         /// </summary>
         public void RefreshLevelMaps()
         {
-            InitialiseWithLevelMaps(levelGraph.LevelLinks, levelGraph.LevelInfo, levelGraph.StartLevel, startVertex);
-            doorAndClueManager = new DoorAndClueManager(this.doorAndClueManager, MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
+            InitialiseWithLevelMaps(levelGraph.LevelLinks, levelGraph.LevelInfo, StartLevel);
+            doorAndClueManager = new DoorAndClueManager(this.doorAndClueManager, MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[StartVertex]);
         }
 
         /// <summary>
@@ -50,30 +48,28 @@ namespace RogueBasin
         /// <param name="levelInfo"></param>
         /// <param name="startLevel"></param>
         /// <param name="startVertex"></param>
-        public void BuildLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel, int startVertex)
+        public void BuildLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
         {
-            InitialiseWithLevelMaps(levelLinks, levelInfo, startLevel, startVertex);
-            doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[startVertex]);
+            InitialiseWithLevelMaps(levelLinks, levelInfo, startLevel);
+            doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[StartVertex]);
         }
 
         /// <summary>
         /// Process the level maps and links to build mapInfo and related state
         /// </summary>
-        private void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel, int startVertex)
+        private void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
         {
             this.levelGraph = new LevelGraph(levelInfo, levelLinks, startLevel);
-            
-            this.startVertex = startVertex;
-            
+                       
             //Build the room graph containing all levels
 
             //Build and add the start level
 
             var mapInfoBuilder = new MapInfoBuilder();
-            var startRoom = 0;
             var startLevelInfo = levelInfo[startLevel];
+            var startVertex = levelInfo[startLevel].StartVertex;
             mapInfoBuilder.AddConstructedLevel(startLevel, startLevelInfo.LevelGenerator.ConnectivityMap, startLevelInfo.LevelGenerator.GetRoomTemplatesInWorldCoords(),
-                startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startRoom);
+                startLevelInfo.LevelGenerator.GetDoorsInMapCoords(), startVertex);
 
             //Build and add each connected level
             //Needs to be done in DFS fashion so we don't add the same level twice
@@ -163,6 +159,6 @@ namespace RogueBasin
         public LevelGraph LevelGraph { get { return levelGraph; } }
 
         public int StartLevel { get { return levelGraph.StartLevel; } }
-        public int StartVertex { get { return startVertex; } }
+        public int StartVertex { get { return mapInfo.StartRoom; } }
     }
 }

@@ -11,18 +11,7 @@ namespace TraumaRL
         private QuestMapBuilder builder;
         private MapState mapState;
 
-        public const int medicalLevel = 0;
-        public const int lowerAtriumLevel = 1;
-        public const int scienceLevel = 2;
-        public const int storageLevel = 3;
-        public const int flightDeck = 4;
-        public const int reactorLevel = 5;
-        public const int arcologyLevel = 6;
-        public const int commercialLevel = 7;
-        public const int computerCoreLevel = 8;
-        public const int bridgeLevel = 9;
-
-        Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>> featuresByLevel;
+        Dictionary<LevelType, List<DecorationFeatureDetails.DecorationFeatures>> featuresByLevel;
 
         public DungeonDecorator(MapState state, QuestMapBuilder builder)
         {
@@ -35,9 +24,9 @@ namespace TraumaRL
         private void SetupFeatures()
         {
 
-            featuresByLevel = new Dictionary<int, List<DecorationFeatureDetails.DecorationFeatures>>();
+            featuresByLevel = new Dictionary<LevelType, List<DecorationFeatureDetails.DecorationFeatures>>();
 
-            featuresByLevel[medicalLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.MedicalLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
             {
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -60,7 +49,7 @@ namespace TraumaRL
                 DecorationFeatureDetails.DecorationFeatures.Bin
             };
 
-            featuresByLevel[lowerAtriumLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.LowerAtriumLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
             {
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -84,7 +73,7 @@ namespace TraumaRL
                 DecorationFeatureDetails.DecorationFeatures.Bin
             };
 
-            featuresByLevel[scienceLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.ScienceLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
             {
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -110,7 +99,7 @@ namespace TraumaRL
                 DecorationFeatureDetails.DecorationFeatures.Screen9
             };
 
-            featuresByLevel[storageLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.StorageLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
             {
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                 DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -132,7 +121,7 @@ namespace TraumaRL
                 DecorationFeatureDetails.DecorationFeatures.Screen4
             };
 
-            featuresByLevel[flightDeck] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.FlightDeck] = new List<DecorationFeatureDetails.DecorationFeatures>
                     {
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -158,7 +147,7 @@ namespace TraumaRL
                         DecorationFeatureDetails.DecorationFeatures.Screen8
                     };
 
-            featuresByLevel[reactorLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.ReactorLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
                     {
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -184,7 +173,7 @@ namespace TraumaRL
                         DecorationFeatureDetails.DecorationFeatures.Screen8
                     };
 
-            featuresByLevel[arcologyLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.ArcologyLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
                     {
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -205,7 +194,7 @@ namespace TraumaRL
               
                     };
 
-            featuresByLevel[commercialLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
+            featuresByLevel[LevelType.CommercialLevel] = new List<DecorationFeatureDetails.DecorationFeatures>
                     {
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse,
                         DecorationFeatureDetails.DecorationFeatures.HumanCorpse2,
@@ -237,9 +226,9 @@ namespace TraumaRL
               
                     };
 
-            featuresByLevel[computerCoreLevel] = featuresByLevel[reactorLevel];
+            featuresByLevel[LevelType.ComputerCoreLevel] = featuresByLevel[LevelType.ReactorLevel];
 
-            featuresByLevel[bridgeLevel] = featuresByLevel[flightDeck];
+            featuresByLevel[LevelType.BridgeLevel] = featuresByLevel[LevelType.FlightDeck];
 
         }
 
@@ -250,6 +239,7 @@ namespace TraumaRL
             foreach (var kv in mapState.LevelGraph.LevelInfo)
             {
                 var thisLevel = kv.Key;
+                var thisLevelInfo = kv.Value;
 
                 var roomsInThisLevel = mapInfo.GetRoomIndicesForLevel(thisLevel);
                 roomsInThisLevel = mapInfo.FilterOutCorridors(roomsInThisLevel);
@@ -261,7 +251,7 @@ namespace TraumaRL
                 double featureAv = 10;
                 double featureStd = 100;
 
-                if (!featuresByLevel.ContainsKey(thisLevel))
+                if (!featuresByLevel.ContainsKey(thisLevelInfo.LevelType))
                     continue;
 
                 foreach (var room in roomsInThisLevel)
@@ -270,7 +260,7 @@ namespace TraumaRL
                     //  continue;
 
                     //Bias rooms towards one or two types
-                    var featuresAndWeights = featuresByLevel[thisLevel].Select(f => new Tuple<int, DecorationFeatureDetails.Decoration>((int)Math.Abs(Gaussian.BoxMuller(featureAv, featureStd)), DecorationFeatureDetails.decorationFeatures[f]));
+                    var featuresAndWeights = featuresByLevel[thisLevelInfo.LevelType].Select(f => new Tuple<int, DecorationFeatureDetails.Decoration>((int)Math.Abs(Gaussian.BoxMuller(featureAv, featureStd)), DecorationFeatureDetails.decorationFeatures[f]));
 
                     var thisRoom = mapInfo.Room(room);
                     var thisRoomArea = thisRoom.Room.Width * thisRoom.Room.Height;

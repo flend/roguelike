@@ -177,7 +177,7 @@ namespace GraphMap
         private IEnumerable<int> GetValidRoomsToPlaceClue(List<string> doorsToAvoidIds, Connection edgeToLock, IEnumerable<int> lockedClues)
         {
             //Check the edge is in the reduced map (will throw an exception if can't find)
-            List<TaggedEdge<int, string>> foundEdge = new List<TaggedEdge<int, string>>(); ;
+            List<TaggedEdge<int, string>> foundEdge = new List<TaggedEdge<int, string>>();
             if (edgeToLock != null)
                 foundEdge.Add(mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeToLock.Source, edgeToLock.Target));
 

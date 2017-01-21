@@ -16,11 +16,12 @@ namespace TraumaRL.Levels
         private readonly int startVertexIndex;
         private readonly string levelName;
         private readonly string levelReadableName;
+        private readonly LevelType levelType;
 
         private LevelInfo levelInfo;
 
         public StandardLevelBuilder(LevelBuilderUtils utils, ConnectivityMap levelLinks, int startVertexIndex, Dictionary<MapTerrain, List<MapTerrain>> terrainMapping,
-            string levelName, string levelReadableName)
+            LevelType levelType, string levelName, string levelReadableName)
         {
             this.utils = utils;
             this.terrainMapping = terrainMapping;
@@ -28,11 +29,12 @@ namespace TraumaRL.Levels
             this.startVertexIndex = startVertexIndex;
             this.levelName = levelName;
             this.levelReadableName = levelReadableName;
+            this.levelType = levelType;
         }
 
         public override LevelInfo GenerateLevel(int levelNo)
         {
-            levelInfo = new LevelInfo(levelNo, levelName, levelReadableName);
+            levelInfo = new LevelInfo(levelNo, levelType, startVertexIndex, levelName, levelReadableName);
 
             //Load standard room types
 

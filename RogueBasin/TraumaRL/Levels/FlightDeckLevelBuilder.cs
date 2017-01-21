@@ -34,7 +34,7 @@ namespace TraumaRL.Levels
 
         public override LevelInfo GenerateLevel(int levelNo)
         {
-            levelInfo = new LevelInfo(levelNo, levelName, levelReadableName);
+            levelInfo = new LevelInfo(levelNo, LevelType.FlightDeck, startVertexIndex, levelName, levelReadableName);
 
             //Load standard room types
 
