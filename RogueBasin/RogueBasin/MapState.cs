@@ -19,12 +19,6 @@ namespace RogueBasin
         
         IEnumerable<int> allReplaceableVaults;
 
-        /// <summary>
-        /// A way of communicating between the level generation and quest generation.
-        /// Not sure we will keep this in a more dynamic setup
-        /// </summary>
-        Dictionary<string, Connection> connectionStore = new Dictionary<string,Connection>();
-
         public MapState()
         {
             populator = new MapPopulator();
@@ -151,9 +145,7 @@ namespace RogueBasin
                 return mapInfo;
             }
         }
-
-        public Dictionary<string, Connection> ConnectionStore { get { return connectionStore; } }
-        
+       
         public IEnumerable<int> AllReplaceableVaults { get { return allReplaceableVaults; } set { allReplaceableVaults = value; } }
 
         public LevelGraph LevelGraph { get { return levelGraph; } }

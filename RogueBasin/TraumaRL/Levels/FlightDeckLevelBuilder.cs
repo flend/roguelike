@@ -19,8 +19,6 @@ namespace TraumaRL.Levels
 
         private LevelInfo levelInfo;
 
-        private Connection escapePodsConnection;
-
         public FlightDeckLevelBuilder(LevelBuilderUtils utils, ConnectivityMap levelLinks, int startVertexIndex, Dictionary<MapTerrain, List<MapTerrain>> terrainMapping,
             string levelName, string levelReadableName)
         {
@@ -64,9 +62,6 @@ namespace TraumaRL.Levels
                 levelInfo.ConnectionsToOtherLevels[connection.Item1] = connection.Item2;
             }
 
-            //Add the escape pods
-            escapePodsConnection = utils.AddRoomToRandomOpenDoor(templateGenerator, escapePodVault, corridor1, 2);
-
             //Add a small number of place holder holder rooms for vaults
             int maxPlaceHolders = 3;
 
@@ -78,11 +73,6 @@ namespace TraumaRL.Levels
             levelInfo.TerrainMapping = terrainMapping;
 
             return levelInfo;
-        }
-
-        public Connection GetEscapePodsConnection()
-        {
-            return escapePodsConnection;
         }
 
         public override LevelInfo CompleteLevel()

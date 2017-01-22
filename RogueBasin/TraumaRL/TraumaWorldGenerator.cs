@@ -140,7 +140,6 @@ namespace TraumaRL
             mapState.BuildLevelMaps(levelLinks, levelInfo, startLevel);
 
             //Feels like there will be a more dynamic way of getting this state in future
-            mapState.ConnectionStore["escapePodConnection"] = levelBuilder.EscapePodsConnection;
             mapState.AllReplaceableVaults = levelBuilder.AllReplaceableVaults;
         }
 

@@ -22,9 +22,6 @@ namespace TraumaRL
         List<int> allReplaceableVaults;
         Dictionary<int, LevelInfo> levelInfo;
 
-        //Quest important rooms / vaults
-        Connection escapePodsConnection;
-
         //Wall mappings
         Dictionary<MapTerrain, List<MapTerrain>> brickTerrainMapping;
         Dictionary<MapTerrain, List<MapTerrain>> panelTerrainMapping;
@@ -60,15 +57,7 @@ namespace TraumaRL
                 return levelInfo;
             }
         }
-
-        public Connection EscapePodsConnection
-        {
-            get
-            {
-                return escapePodsConnection;
-            }
-        }
-
+        
         public int StartVertex
         {
             get
@@ -164,12 +153,6 @@ namespace TraumaRL
                 }
 
                 levelInfo[levelId] = levelBuilders[levelId].GenerateLevel(levelId);
-
-                //This should be moved into the quest now we have dynamic map generation
-                if (levelType == LevelType.FlightDeck)
-                {
-                    escapePodsConnection = ((Levels.FlightDeckLevelBuilder)levelBuilders[levelId]).GetEscapePodsConnection();
-                }
             }
 
             startVertex = levelInfo[startLevel].StartVertex;

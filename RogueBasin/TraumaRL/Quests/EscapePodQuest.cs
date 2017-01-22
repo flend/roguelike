@@ -49,7 +49,33 @@ namespace TraumaRL.Quests
 
         public void EscapePod(MapState mapState)
         {
-            var escapePodConnection = mapState.ConnectionStore["escapePodConnection"];
+            //Add escape pod room
+            RoomTemplate escapePodVault = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.escape_pod1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+            RoomTemplate corridor1 = new RoomTemplateLoader("RogueBasin.bin.Debug.vaults.corridortemplate3x1.room", StandardTemplateMapping.terrainMapping).LoadTemplateFromFile();
+
+            var levelGenerator = mapState.LevelGraph.LevelInfo[flightDeckLevelData.id].LevelGenerator;
+            var sourceDoors = levelGenerator.PotentialDoors.Shuffle();
+
+            Connection escapePodConnection = null;
+
+            foreach (var door in sourceDoors)
+            {
+                try
+                {
+                    escapePodConnection = levelGenerator.PlaceRoomTemplateAlignedWithExistingDoor(escapePodVault, corridor1, door, 0, 2);
+                    break;
+                }
+                catch (ApplicationException) { }
+            }
+
+            if (escapePodConnection == null)
+            {
+                throw new ApplicationException("Unable to place escape pod.");
+            }
+
+            mapState.RefreshLevelMaps();
+
+            //Add features to escape pod room
             var escapePodRoom = escapePodConnection.Target;
             Builder.PlaceFeatureInRoom(mapState, new RogueBasin.Features.EscapePod(), new List<int>() { escapePodRoom }, true);
 
