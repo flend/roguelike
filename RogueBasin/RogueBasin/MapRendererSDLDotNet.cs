@@ -587,12 +587,15 @@ namespace RogueBasin
         {
             videoSurface = Video.SetVideoMode(width, height, 32, false, false, false, true);
             videoSurface.AlphaBlending = true;
+            Video.WindowCaption = "TraumaRL2";
 
             Assembly _assembly = Assembly.GetExecutingAssembly();
             Stream fileStream = _assembly.GetManifestResourceStream("RogueBasin.bin.Debug.graphics.tiles.trauma_tiles.png");
             MemoryStream memoryStream = new MemoryStream();
             fileStream.CopyTo(memoryStream);
             spriteSheet = new Surface(memoryStream).Convert(videoSurface, true, true);
+
+            Video.WindowIcon(_assembly, "trauma.ico");
         }
 
 

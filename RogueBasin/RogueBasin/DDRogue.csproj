@@ -1188,4 +1188,7 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\ui\ui_left_extended.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ico\trauma.ico" />
+  </ItemGroup>
 </Project>
