@@ -30,7 +30,7 @@ namespace RogueBasin
         /// </summary>
         public void RefreshLevelMaps()
         {
-            InitialiseWithLevelMaps(levelGraph.LevelLinks, levelGraph.LevelInfo, StartLevel);
+            InitialiseWithLevelMaps(levelGraph.LevelLinks, levelGraph.LevelInfo, levelGraph.LevelDifficulty, StartLevel);
             doorAndClueManager = new DoorAndClueManager(this.doorAndClueManager, MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[StartVertex]);
         }
 
@@ -42,18 +42,18 @@ namespace RogueBasin
         /// <param name="levelInfo"></param>
         /// <param name="startLevel"></param>
         /// <param name="startVertex"></param>
-        public void BuildLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
+        public void BuildLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, ImmutableDictionary<int, int> levelDifficulties, int startLevel)
         {
-            InitialiseWithLevelMaps(levelLinks, levelInfo, startLevel);
+            InitialiseWithLevelMaps(levelLinks, levelInfo, levelDifficulties, startLevel);
             doorAndClueManager = new DoorAndClueManager(MapInfo.Model.GraphNoCycles, MapInfo.Model.GraphNoCycles.roomMappingFullToNoCycleMap[StartVertex]);
         }
 
         /// <summary>
         /// Process the level maps and links to build mapInfo and related state
         /// </summary>
-        private void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, int startLevel)
+        private void InitialiseWithLevelMaps(ConnectivityMap levelLinks, Dictionary<int, LevelInfo> levelInfo, ImmutableDictionary<int, int> levelDifficulties, int startLevel)
         {
-            this.levelGraph = new LevelGraph(levelInfo, levelLinks, startLevel);
+            this.levelGraph = new LevelGraph(levelInfo, levelLinks, levelDifficulties, startLevel);
                        
             //Build the room graph containing all levels
 

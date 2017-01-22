@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,8 @@ namespace RogueBasin
 
         private bool quickLevelGen = false;
         private int startLevel;
+        private ImmutableDictionary<int, int> levelDifficulties;
+        private ConnectivityMap levelLinks;
 
         public LevelTreeBuilder(int startLevel, LevelRegister levelRegister, bool quickLevelGen)
         {
@@ -30,12 +33,37 @@ namespace RogueBasin
             return levelsAndDifficulties;
         }
 
+        public ImmutableDictionary<int, int> LevelDifficulties
+        {
+            get
+            {
+                if (levelDifficulties == null)
+                {
+                    GenerateLevelLinks();
+                }
+
+                return levelDifficulties;
+            }
+        }
+
+        public ConnectivityMap LevelLinks
+        {
+            get
+            {
+                if (levelLinks == null)
+                {
+                    GenerateLevelLinks();
+                }
+                return levelLinks;
+            }
+        }
+
         /// <summary>
         /// Build a level->level map showing how the levels are connected
         /// </summary>
         public ConnectivityMap GenerateLevelLinks()
         {
-            var levelLinks = new ConnectivityMap();
+            levelLinks = new ConnectivityMap();
 
             //Order of the main quest (in future, this will be generic)
 
@@ -48,27 +76,7 @@ namespace RogueBasin
             //Arcology lock (any level - place bioware) [no pre-requisite]
             //Arcology lock (any level) [antennae disabled]
             //Antennae (science / storage) [no pre-requisite]
-
-            //Lower Atrium (may be out-of-sequence)
-            //Medical
-
-            //Level order (last to first)
-
-            //flight deck
-            //bridge
-            //reactor
-            //computer-core
-            //arcology
-            //science
-            //storage
-
-            //lower atrium
-            //medical
-
-            //non-difficulty sequenced:
-
-            //commercial (close to atrium)
-
+            
             var difficultyOrderer = new DifficultyOrdering(levelRegister.DifficultyGraph);
             var levelDifficultyOrder = difficultyOrderer.GetLevelsInAscendingDifficultyOrder();          
 
@@ -131,6 +139,8 @@ namespace RogueBasin
 
                 //TODO: try to balance the tree a bit, otherwise pathological situations (one long branch) are quite likely
             }
+
+            levelDifficulties = levelDifficultyOrder.Select((l, i) => new { l, i }).ToImmutableDictionary(x => x.l, x => x.i);
 
             return levelLinks;
         }

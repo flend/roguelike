@@ -20,31 +20,32 @@ namespace RogueBasin
         private readonly int startLevel;
         private readonly Dictionary<int, LevelInfo> levelInfo;
 
-        private List<int> gameLevels;
+        private ImmutableList<int> gameLevels;
 
         private ImmutableDictionary<string, int> levelIds;
         private ImmutableDictionary<int, string> levelNames;
         private ImmutableDictionary<int, string> levelReadableNames;
 
         private ImmutableDictionary<int, int> levelDifficulty;
-        private Dictionary<int, int> levelDepths;
+        private ImmutableDictionary<int, int> levelDepths;
 
-        public LevelGraph(Dictionary<int, LevelInfo> levelInfo, ConnectivityMap levelLinks, int startLevel)
+        public LevelGraph(Dictionary<int, LevelInfo> levelInfo, ConnectivityMap levelLinks, ImmutableDictionary<int, int> levelDifficulties, int startLevel)
         {
             this.levelLinks = levelLinks;
             this.startLevel = startLevel;
             this.levelInfo = levelInfo;
+            this.levelDifficulty = levelDifficulties;
 
             CalculateDerivedMetrics();
         }
 
         private void CalculateDerivedMetrics()
         {
-            gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToList();
+            gameLevels = levelLinks.GetAllConnections().SelectMany(c => new List<int> { c.Source, c.Target }).Distinct().OrderBy(c => c).ToImmutableList();
 
             var levelMap = new MapModel(levelLinks, startLevel);
-            levelDepths = levelMap.GetDistanceOfVerticesFromParticularVertexInFullMap(startLevel, gameLevels);
-            foreach (var kv in levelDepths)
+            var newLevelDepths = levelMap.GetDistanceOfVerticesFromParticularVertexInFullMap(startLevel, gameLevels);
+            foreach (var kv in newLevelDepths)
             {
                 LogFile.Log.LogEntryDebug("Level " + kv.Key + " depth " + kv.Value, LogDebugLevel.Medium);
             }
@@ -53,8 +54,7 @@ namespace RogueBasin
             levelNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelName);
             levelReadableNames = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => i.Value.LevelReadableName);
             levelIds = levelInfo.ToImmutableDictionary(i => i.Value.LevelName, i => i.Value.LevelNo);
-            //TODO: fix
-            levelDifficulty = levelInfo.ToImmutableDictionary(i => i.Value.LevelNo, i => 0);
+            levelDepths = newLevelDepths.ToImmutableDictionary(i => i.Key, i => i.Value);
         }
                 
         public class LevelAndDifficulty
@@ -131,13 +131,13 @@ namespace RogueBasin
 
         public ImmutableDictionary<int, int> LevelDifficulty { get { return levelDifficulty; } }
 
-        public List<int> GameLevels { get { return gameLevels; } }
+        public ImmutableList<int> GameLevels { get { return gameLevels; } }
 
         public ImmutableDictionary<string, int> LevelIds { get { return levelIds; } }
         public ImmutableDictionary<int, string> LevelNames { get { return levelNames; } }
         public ImmutableDictionary<int, string> LevelReadableNames { get { return levelNames; } }
 
-        public Dictionary<int, int> LevelDepths { get { return levelDepths; } }
+        public ImmutableDictionary<int, int> LevelDepths { get { return levelDepths; } }
 
 
         public int StartLevel { get { return startLevel; } }

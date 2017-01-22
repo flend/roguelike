@@ -22,14 +22,11 @@ namespace TraumaRL
 
         Dictionary<MapTerrain, List<MapTerrain>> brickTerrainMapping;
 
-        ConnectivityMap levelLinks;
-
         //For development, skip making most of the levels
         bool quickLevelGen = false;
 
         MapState mapState;
 
-        public ConnectivityMap LevelLinks { get { return levelLinks; } }
         public MapState MapState { get { return mapState; } }
 
         public TraumaWorldGenerator()
@@ -72,7 +69,8 @@ namespace TraumaRL
 
             //Generate the overall level tree structure and difficulties
             var levelTreeBuilder = new LevelTreeBuilder(startLevel, levelRegister, quickLevelGen);
-            levelLinks = levelTreeBuilder.GenerateLevelLinks();
+            var levelLinks = levelTreeBuilder.LevelLinks;
+            var levelDifficulities = levelTreeBuilder.LevelDifficulties;
             
             //Build each level individually
             TraumaLevelBuilder levelBuilder = new TraumaLevelBuilder(levelRegister, levelLinks, startLevel, quickLevelGen);
@@ -80,8 +78,8 @@ namespace TraumaRL
             
             //Initialise mapState that supports map mutations
             mapState = new MapState();
+            SetupMapState(levelBuilder, levelTreeBuilder, startLevel);
             var levelInfo = levelBuilder.LevelInfo;
-            SetupMapState(levelBuilder, levelInfo, startLevel);
 
             GraphVisualizer.VisualiseLevelConnectivityGraph(levelLinks, MapState.LevelGraph.LevelNames);
             GraphVisualizer.VisualiseClueDoorGraph(MapState.MapInfo, MapState.DoorAndClueManager, "prequest");
@@ -135,9 +133,9 @@ namespace TraumaRL
             }
         }
 
-        private void SetupMapState(TraumaLevelBuilder levelBuilder, Dictionary<int, LevelInfo> levelInfo, int startLevel)
+        private void SetupMapState(TraumaLevelBuilder levelBuilder, LevelTreeBuilder levelTreeBuilder, int startLevel)
         {
-            mapState.BuildLevelMaps(levelLinks, levelInfo, startLevel);
+            mapState.BuildLevelMaps(levelTreeBuilder.LevelLinks, levelBuilder.LevelInfo, levelTreeBuilder.LevelDifficulties, startLevel);
 
             //Feels like there will be a more dynamic way of getting this state in future
             mapState.AllReplaceableVaults = levelBuilder.AllReplaceableVaults;

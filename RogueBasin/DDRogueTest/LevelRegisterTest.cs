@@ -41,8 +41,8 @@ namespace DDRogueTest
             register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel));
             register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel));
 
-            Assert.AreEqual(0, register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel)));
-            Assert.AreEqual(1, register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel)));
+            Assert.AreEqual(0, register.GetIdForLevelType(new RequiredLevelInfo(LevelType.ArcologyLevel)).id);
+            Assert.AreEqual(1, register.GetIdForLevelType(new RequiredLevelInfo(LevelType.BridgeLevel)).id);
         }
     }
 }

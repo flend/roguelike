@@ -3940,8 +3940,6 @@ namespace RogueBasin
             if (FunMode && !verb.Contains("quit"))
             {
                 //Restart the level with 0 fame
-                RestartLevelOnFailure();
-                NumberOfFunModeDeaths++;
                 PlayerDeathOccured = false;
                 return;
             }
@@ -4051,19 +4049,7 @@ namespace RogueBasin
 
         }
 
-
-        public int NumberOfFunModeDeaths { get; private set; }
-
-        private void RestartLevelOnFailure()
-        {
-            TeleportToArena(player.LocationLevel);
-            player.CombatXP = 0;
-            Game.Dungeon.Player.HealCompletely();
-            Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
-            Screen.Instance.NeedsUpdate = true;
-            Game.Base.SetupFunModeDeath();
-        }
-
+        
         public struct KillRecord
         {
             public int killCount;
@@ -5175,81 +5161,7 @@ namespace RogueBasin
         public MapState MapState { get; set; }
 
         public MonsterPlacement MonsterPlacement { get; private set; }
-
-        private RoyaleDungeonLevelMaker royaleDungeonMaker; 
-
-        public void SetupRoyaleEntryLevels()
-        {
-            royaleDungeonMaker = new RoyaleDungeonLevelMaker();
-
-            royaleDungeonMaker.CreateNextDungeonChoices(1);
-            royaleDungeonMaker.SetPlayerStartLocation();
-        }
-
-        public void GenerateNextRoyaleLevels()
-        {
-            var minLevel = (int)Math.Max(player.Level, ArenaLevelNumber() + 2);
-            royaleDungeonMaker.CreateNextDungeonChoices(minLevel);
-        }
-
-        /// <summary>
-        /// The player moves to view a new arena
-        /// </summary>
-        /// <param name="p"></param>
-        internal bool TeleportToAdjacentArena(bool arenaHigher)
-        {
-            int newLevel = player.LocationLevel + (arenaHigher ? 1 : -1);
-
-            if (newLevel < royaleDungeonMaker.NextDungeonLevelChoice)
-                return false;
-
-            if (newLevel >= royaleDungeonMaker.NextDungeonLevelChoice + royaleDungeonMaker.NumberDungeonLevelChoices)
-                return false;
-
-            LogFile.Log.LogEntryDebug("Moving to arena level " + newLevel, LogDebugLevel.Medium);
-
-            TeleportToArena(newLevel);
-            return true;
-        }
-
-        private void TeleportToArena(int newLevel)
-        {
-            var entryPoint = royaleDungeonMaker.GetEntryLocationOnLevel(newLevel);
-            MovePCAbsolute(newLevel, entryPoint);
-        }
-
-        /// <summary>
-        /// First is 0
-        /// </summary>
-        /// <returns></returns>
-        internal int ArenaLevelNumber()
-        {
-            return player.LocationLevel / 3;
-        }
-
-        public static int TotalArenas = 6;
-
-        internal void ExitLevel()
-        {
-            if (ArenaLevelNumber() == TotalArenas - 1)
-            {
-                //Game over folks
-                Game.Base.DoEndOfGame(true, true, false);
-            }
-            else
-            {
-
-                //Generate a new set of levels
-                Game.Dungeon.GenerateNextRoyaleLevels();
-
-                //Teleport to the first new level
-                TeleportToArena(royaleDungeonMaker.NextDungeonLevelChoice);
-
-                //Offer the user the choice of arenas
-                Game.Base.DoArenaSelection();
-            }
-        }
-
+        
         internal bool DangerousFeatureAtLocation(int LocationLevel, Point newLocation)
         {
             var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(LocationLevel, newLocation)).Where(f => f is DangerousActiveFeature);

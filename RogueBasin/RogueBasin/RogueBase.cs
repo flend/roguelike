@@ -641,7 +641,7 @@ namespace RogueBasin
 
         private void ResetDragTracker()
         {
-            LogFile.Log.LogEntryDebug("Drag tracker reset", LogDebugLevel.High);
+            LogFile.Log.LogEntryDebug("Drag tracker reset", LogDebugLevel.Low);
             DragTracker = new Point(0, 0);
         }
 
@@ -649,8 +649,8 @@ namespace RogueBasin
         {
             var thisDrag = new Point(mouseArgs.RelativeX, mouseArgs.RelativeY);
             var newDragTotal = DragTracker + thisDrag;
-            LogFile.Log.LogEntryDebug("dragTracker: " + DragTracker, LogDebugLevel.High);
-            LogFile.Log.LogEntryDebug("newDragTotal: " + newDragTotal, LogDebugLevel.High);
+            LogFile.Log.LogEntryDebug("dragTracker: " + DragTracker, LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("newDragTotal: " + newDragTotal, LogDebugLevel.Low);
 
             if (!lastMouseActionWasDrag && Math.Abs(mouseArgs.RelativeX + mouseArgs.RelativeY) < mouseDragStartThreshold)
             {
@@ -1671,24 +1671,7 @@ namespace RogueBasin
             MusicPlayer.Instance().Stop();
             PlayMusic = false;
         }
-
-        public void DoArenaSelection()
-        {
-            this.SetSpecialScreenAndHandler(Screen.Instance.ArenaSelectionScreen, ArenaSelectionKeyHandler);
-            SetupArenaSelection();
-        }
-
-        public void DoFunModeDeath()
-        {
-            this.SetSpecialScreenAndHandler(Screen.Instance.FunModeDeathScreen, FunModeDeathKeyHandler);
-        }
-
-        private void SetupArenaSelection()
-        {
-            Screen.Instance.ArenaItems = Game.Dungeon.Items.Where(i => i.LocationLevel == Game.Dungeon.Player.LocationLevel);
-            Screen.Instance.ArenaMonsters = Game.Dungeon.Monsters.Where(m => m.LocationLevel == Game.Dungeon.Player.LocationLevel);
-        }
-
+        
         private void MovieDisplayKeyboardEvent(KeyboardEventArgs args)
         {
             if (args.Key == Key.Return)
@@ -1711,74 +1694,6 @@ namespace RogueBasin
             if (args.Button == MouseButton.PrimaryButton)
             {
                 FinishMovie();
-            }
-        }
-
-        public void CharacterSelectionKeyHandler(KeyboardEventArgs args)
-        {
-
-            if (args.Key == Key.One)
-            {
-                PostCharacterSelection(PlayerClass.Athlete, FunMode);
-            }
-            if (args.Key == Key.Two)
-            {
-                PostCharacterSelection(PlayerClass.Gunner, FunMode);
-            }
-            if (args.Key == Key.Three)
-            {
-                PostCharacterSelection(PlayerClass.Sneaker, FunMode);
-            }
-            if (args.Key == Key.R)
-            {
-                FunMode = false;
-                //Is reset next method, but used to toggle display
-                Game.Dungeon.FunMode = false;
-            }
-            if (args.Key == Key.F)
-            {
-                FunMode = true;
-                Game.Dungeon.FunMode = true;
-            }
-        }
-
-        public void PostCharacterSelection(PlayerClass playerClass, bool funMode)
-        {
-            ClearSpecialScreenAndHandler();
-
-            SetupGame();
-            Game.Dungeon.Player.SetPlayerClass(playerClass);
-            Game.Dungeon.FunMode = funMode;
-
-            //Setup initial levels
-            SetupRoyaleEntryLevels();
-
-            Game.Dungeon.Player.LocationLevel = 0;
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
-
-            PrepareGameEntry();
-
-            //Follow on to initial arena selection
-            DoArenaSelection();
-        }
-
-        public void ArenaSelectionKeyHandler(KeyboardEventArgs args)
-        {
-            if (args.Key == Key.LeftArrow)
-            {
-                Game.Dungeon.TeleportToAdjacentArena(false);
-                SetupArenaSelection();
-            }
-            if (args.Key == Key.RightArrow)
-            {
-                Game.Dungeon.TeleportToAdjacentArena(true);
-                SetupArenaSelection();
-            }
-            if (args.Key == Key.F)
-            {
-                ClearSpecialScreenAndHandler();
-
-                StartGame();
             }
         }
 
@@ -1817,20 +1732,6 @@ namespace RogueBasin
         private void RestartGameAfterDeath()
         {
             SetupGame();
-            DoMenuScreen();
-        }
-
-        //Do menu screen, onto character selection
-        public void DoMenuScreen()
-        {
-            var menuScreen = new MenuScreen(DoCharacterSelection);
-            SetSpecialScreenAndHandler(menuScreen.DrawMenuScreen, menuScreen.MenuScreenKeyboardHandler);
-        }
-
-        public void DoCharacterSelection()
-        {
-            SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
-            LogFile.Log.LogEntryDebug("Requesting character gen screen", LogDebugLevel.High);
         }
 
         private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
@@ -2888,74 +2789,7 @@ namespace RogueBasin
             Screen.Instance.EnqueueMovie(movie);
             Screen.Instance.NeedsUpdate = true;
         }
-
-        public void SetupRoyaleEntryLevels()
-        {
-            Game.Dungeon.SetupRoyaleEntryLevels();
-        }
-
-        private void PreArenaEntryState() {
-            inputState = InputState.PreMapMovement;
-            //Screen.Instance.SeeAllMap = true;
-            //Screen.Instance.SeeAllMonsters = true;
-        }
-
-        private void PostArenaEntryState()
-        {
-            inputState = InputState.MapMovement;
-            //Screen.Instance.SeeAllMap = false;
-            //Screen.Instance.SeeAllMonsters = false;
-        }
-
-        /// <summary>
-        /// Player starts a new level and can choose an arena
-        /// </summary>
-        /// <param name="level"></param>
-        internal void PlayerStartsLevel(int level)
-        {
-            //Input state where the user can switch levels
-            PreArenaEntryState();
-
-            LogFile.Log.LogEntryDebug("Player starts level " + level, LogDebugLevel.Medium);
-        }
-
-        /// <summary>
-        /// Player actually enters the arena
-        /// </summary>
-        /// <param name="level"></param>
-        internal void PlayerEntersLevel(int level)
-        {
-            //Normal input state
-            PostArenaEntryState();
-
-            //If we are nerd, activate stealth
-            if(Game.Dungeon.Player.PlayerClass == PlayerClass.Sneaker) {
-                Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
-            }
-
-            LogFile.Log.LogEntryDebug("Player enters level " + level, LogDebugLevel.Medium);
-        }
-
-        /// <summary>
-        /// Player exists the arena successfully
-        /// </summary>
-        /// <param name="level"></param>
-        internal void PlayerExitsLevel(int level)
-        {
-            //Switching level state
-            PreArenaEntryState();
-
-            LogFile.Log.LogEntryDebug("Player exists level " + level, LogDebugLevel.Medium);
-
-            Game.Dungeon.ExitLevel();
-        }
-
-        public void PrepareGameEntry()
-        {
-            PlayerStartsLevel(0);
-
-        }
-
+        
         internal void DoEndOfGame(bool lived, bool won, bool quit)
         {
             Screen.Instance.EndOfGameWon = won;
@@ -2964,11 +2798,6 @@ namespace RogueBasin
             GameStarted = false;
 
             this.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, EndOfGameSelectionKeyHandler);
-        }
-
-        internal void SetupFunModeDeath()
-        {
-            this.SetSpecialScreenAndHandler(Screen.Instance.FunModeDeathScreen, FunModeDeathKeyHandler);
         }
 
         internal void QuitImmediately()

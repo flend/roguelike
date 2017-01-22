@@ -308,8 +308,6 @@
     <Compile Include="Items\BioWare.cs" />
     <Compile Include="Items\ShotgunTypeWeapon.cs" />
     <Compile Include="Items\Axe.cs" />
-    <Compile Include="Locks\EntryLock.cs" />
-    <Compile Include="Locks\ExitLock.cs" />
     <Compile Include="Locks\SimpleOptionalLockedDoorWithMovie.cs" />
     <Compile Include="IMapRenderer.cs" />
     <Compile Include="MapRendererSDLDotNet.cs" />
@@ -361,8 +359,6 @@
     <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="RecurringAnimation.cs" />
     <Compile Include="RoutabilityUtilities.cs" />
-    <Compile Include="RoyaleDungeonLevelMaker.cs" />
-    <Compile Include="RoyaleMonsterPlacement.cs" />
     <Compile Include="MusicPlayer.cs" />
     <Compile Include="ShuffleExtension.cs" />
     <Compile Include="SoundPlayer.cs" />

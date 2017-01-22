@@ -57,12 +57,13 @@ namespace RogueBasin
                 //0.05 is a bit high
                 double areaScaling = 0.03;
                 var monstersForLevel = (int)Math.Floor(floorAreaForLevel * areaScaling);
+                var monsterScaledDifficulty = levelDifficulty[level] / 2;
 
-                var monsterSetsForLevel = monsterSets.Where(s => s.difficulty == levelDifficulty[level]);
+                var monsterSetsForLevel = monsterSets.Where(s => s.difficulty == monsterScaledDifficulty);
 
                 if (!monsterSetsForLevel.Any())
                 {
-                    monsterSetsForLevel = monsterSets.Where(s => s.difficulty <= levelDifficulty[level]);
+                    monsterSetsForLevel = monsterSets.Where(s => s.difficulty <= monsterScaledDifficulty);
                 }
 
                 var newSets = monsterSetsForLevel.Except(monsterSetsUsed);
