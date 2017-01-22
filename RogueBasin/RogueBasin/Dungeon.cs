@@ -3502,7 +3502,6 @@ namespace RogueBasin
             return false;
         }
 
-        //Would be better on Location rather than Point
         public bool IsSquareSeenByPlayer(Location target)
         {
             var targetCoord = target.MapCoord;
