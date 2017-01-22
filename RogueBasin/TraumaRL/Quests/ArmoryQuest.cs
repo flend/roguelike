@@ -127,8 +127,11 @@ namespace TraumaRL.Quests
 
                 var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
                 var clueName = goodyRoomKeyNames[thisLevel];
-                var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGoodyRoomLogEntry(mapState, clueName, thisLevel, itemsInArmory[thisLevel]), logClues[0]);
-                Builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1 }, true, true);
+                if (itemsInArmory[thisLevel].Count > 0)
+                {
+                    var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGoodyRoomLogEntry(mapState, clueName, thisLevel, itemsInArmory[thisLevel]), logClues[0]);
+                    Builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1 }, true, true);
+                }
             }
 
         }
