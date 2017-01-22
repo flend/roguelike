@@ -1191,4 +1191,11 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\ico\trauma.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\blackoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\blueoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\greenoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\orangeoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\redoutlinetarget.png" />
+  </ItemGroup>
 </Project>

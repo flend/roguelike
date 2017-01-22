@@ -548,7 +548,7 @@ namespace RogueBasin
         {
             //If we clicked where we clicked before, it's confirmation
             //If we clicked elsewhere, it's a retarget, motion will take care of this
-            if (clickLocation == targetting.CurrentTarget)
+            if (clickLocation == targetting.CurrentTarget.MapCoord)
             {
                 return ExecuteTargettedAction(false);
             }
@@ -558,7 +558,7 @@ namespace RogueBasin
 
         private ActionResult TargettingMouseMotionEvent(Point clickLocation)
         {
-            targetting.RetargetSquare(clickLocation);
+            targetting.RetargetSquare(new Location(Screen.Instance.LevelToDisplay, clickLocation));
 
             return new ActionResult(false, false);
         }
@@ -619,13 +619,15 @@ namespace RogueBasin
                 shifted = true;
             }
 
+            var gameLocation = new Location(Screen.Instance.LevelToDisplay, mousePosition);
+
             if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
             {
-                targetting.TargetMoveOrFireInstant(mousePosition, shifted);
+                targetting.TargetMoveOrFireInstant(gameLocation, shifted);
             }
             else
             {
-                targetting.TargetMoveOrThrowInstant(mousePosition, shifted);
+                targetting.TargetMoveOrThrowInstant(gameLocation, shifted);
             }
         }
         
@@ -1836,7 +1838,7 @@ namespace RogueBasin
 
             if (wasDirection)
             {
-                Point newPoint = new Point(targetting.CurrentTarget.x + direction.x, targetting.CurrentTarget.y + direction.y);
+                Point newPoint = new Point(targetting.CurrentTarget.MapCoord.x + direction.x, targetting.CurrentTarget.MapCoord.y + direction.y);
                 RetargetSquare(newPoint);
                 
                 return new ActionResult(false, false);
@@ -1854,14 +1856,14 @@ namespace RogueBasin
             return new ActionResult(false, false);
         }
 
-        private void RetargetSquare(Point newPoint)
+        private void RetargetSquare(Point pointFromKeyboard)
         {
-            int level = Game.Dungeon.Player.LocationLevel;
+            int level = Screen.Instance.LevelToDisplay;
 
-            if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
+            if (pointFromKeyboard.x < 0 || pointFromKeyboard.x >= Game.Dungeon.Levels[level].width || pointFromKeyboard.y < 0 || pointFromKeyboard.y >= Game.Dungeon.Levels[level].height)
                 return;
 
-            targetting.RetargetSquare(newPoint);
+            targetting.RetargetSquare(new Location(level, pointFromKeyboard));
         }
 
         private ActionResult ExecuteTargettedAction(bool alternativeActionMode)
@@ -1897,7 +1899,7 @@ namespace RogueBasin
 
                 case TargettingAction.MoveOrWeapon:
                     {
-                        SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, targetting.CurrentTarget);
+                        SquareContents squareContents = Game.Dungeon.MapSquareContents(targetting.CurrentTarget);
                         if (squareContents.monster != null)
                         {
                             if (!alternativeActionMode)
@@ -1926,7 +1928,7 @@ namespace RogueBasin
 
                 case TargettingAction.MoveOrThrow:
                     {
-                        SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, targetting.CurrentTarget);
+                        SquareContents squareContents = Game.Dungeon.MapSquareContents(targetting.CurrentTarget);
                         if (squareContents.monster != null)
                         {
                             if (!alternativeActionMode)
@@ -1977,7 +1979,7 @@ namespace RogueBasin
 
             var player = Game.Dungeon.Player;
 
-            IEnumerable<Point> path = player.GetPlayerRunningPath(targetting.CurrentTarget);
+            IEnumerable<Point> path = player.GetPlayerRunningPath(targetting.CurrentTarget.MapCoord);
 
             if (!path.Any())
             {
@@ -1995,7 +1997,7 @@ namespace RogueBasin
             }
 
             var player = Game.Dungeon.Player;
-            var throwSuccessfully = ThrowTargettedUtility(targetting.CurrentTarget);
+            var throwSuccessfully = ThrowTargettedUtility(targetting.CurrentTarget.MapCoord);
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
             return new ActionResult(throwSuccessfully, throwSuccessfully);
@@ -2009,7 +2011,7 @@ namespace RogueBasin
             }
 
             var player = Game.Dungeon.Player;
-            var fireSuccessfully = FireTargettedWeapon(targetting.CurrentTarget);
+            var fireSuccessfully = FireTargettedWeapon(targetting.CurrentTarget.MapCoord);
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
             return new ActionResult(fireSuccessfully, fireSuccessfully);
@@ -2720,9 +2722,9 @@ namespace RogueBasin
             inputState = newState;
         }
         
-        public SquareContents SetViewPanelToTargetAtSquare(Point start)
+        public SquareContents SetViewPanelToTargetAtSquare(Location start)
         {
-            SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, start);
+            SquareContents sqC = Game.Dungeon.MapSquareContents(start);
             Screen.Instance.CreatureToView = sqC.monster; //may reset to null
             if (sqC.items.Count > 0)
                 Screen.Instance.ItemToView = sqC.items[0];

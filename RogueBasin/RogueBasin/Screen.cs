@@ -179,7 +179,7 @@ namespace RogueBasin {
         /// <summary>
         /// Targetting cursor
         /// </summary>
-        public Point Target { get; set; }
+        public Location Target { get; set; }
 
         public TargettingInfo TargetInfo { get; set; }
         public TargettingAction TargetAction { get; set; }
@@ -230,7 +230,14 @@ namespace RogueBasin {
         static readonly string blueTargetTile = "bluetarget";
         static readonly string greenTargetTile = "greentarget";
         static readonly string redTargetTile = "redtarget";
+        static readonly string orangeTargetTile = "orangetarget";
         static readonly string blackTargetTile = "blacktarget";
+
+        static readonly string blueOutlineTargetTile = "blueoutlinetarget";
+        static readonly string greenOutlineTargetTile = "greenoutlinetarget";
+        static readonly string redOutlineTargetTile = "redoutlinetarget";
+        static readonly string orangeOutlineTargetTile = "orangeoutlinetarget";
+        static readonly string blackOutlineTargetTile = "blackoutlinetarget";
 
         public int LevelToDisplay
         {
@@ -1181,33 +1188,35 @@ namespace RogueBasin {
                 return;
             }
 
-            if (!isViewVisible(Target))
+            if (!isViewVisible(Target.MapCoord))
                 return;
 
             //Draw the area of effect
             if (Game.Dungeon.IsSquareSeenByPlayer(Target) || SeeAllMap)
             {
-                var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
-                var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
+                var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
+                var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
 
-                DrawTargettingOverSquaresAndCreatures(pathToTarget, "orangetarget");
-                DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, "redtarget");
+//                var targetSquareContents =  
+
+                DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
+                DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, redTargetTile);
 
                 if (TargetInRange)
                 {
                     var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
-                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
                 }
                 else
                 {
                     var targetSprite = blackTargetTile;
-                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
                 }
             }
             else
             {
                 var targetSprite = redTargetTile;
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
             }
         }
 
@@ -2165,7 +2174,7 @@ namespace RogueBasin {
                         //In range firing
                         if (weapon.HasFireAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                         {
-                            targetSprite = blueTargetTile;
+                            targetSprite = blueOutlineTargetTile;
                         }
                         else
                         {

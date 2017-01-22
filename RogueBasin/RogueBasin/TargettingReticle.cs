@@ -17,8 +17,7 @@ namespace RogueBasin
 
         TargettingAction currentTargettingAction = TargettingAction.Weapon;
 
-        int currentTargetLevel = 0;
-        Point currentTarget = new Point(0, 0);
+        Location currentTarget = null;
 
         TargettingInfo currentInfo;
 
@@ -28,19 +27,18 @@ namespace RogueBasin
             this.dungeon = dungeon;
         }
 
-        public void RetargetSquare(int level, Point newSquare, CreatureFOV currentFOV)
+        public void RetargetSquare(Location newTarget, CreatureFOV currentFOV)
         {
-            currentTarget = newSquare;
-            currentTargetLevel = level;
+            currentTarget = newTarget;
 
             SetScreenTargettingMode(currentTarget, currentInfo, currentTargettingAction);
 
-            CheckTargetInRange(newSquare, currentTargettingAction, currentInfo);
-            SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(newSquare);
+            CheckTargetInRange(newTarget, currentTargettingAction, currentInfo);
+            SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(newTarget);
 
             //Update screen
             SetTargettingMessage(TargettingMessage, TargettingConfirmChar);
-            SetTargettingState(currentTargetLevel, currentTarget, currentInfo, currentTargettingAction, TargettingConfirmChar, TargettingMessage);
+            SetTargettingState(currentTarget, currentInfo, currentTargettingAction, TargettingConfirmChar, TargettingMessage);
         }
 
         /// <summary>
@@ -48,17 +46,17 @@ namespace RogueBasin
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        public void GetTargetFromPlayer(int level, Point start, TargettingInfo targetInfo, TargettingAction targetAction, string confirmKey, string message)
+        public void GetTargetFromPlayer(Location newTarget, TargettingInfo targetInfo, TargettingAction targetAction, string confirmKey, string message)
         {
-            SetScreenTargettingMode(start, targetInfo, targetAction);
+            SetScreenTargettingMode(newTarget, targetInfo, targetAction);
 
-            CheckTargetInRange(start, targetAction, targetInfo);
+            CheckTargetInRange(newTarget, targetAction, targetInfo);
 
-            SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(start);
+            SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(newTarget);
 
             SetTargettingMessage(message, confirmKey);
 
-            SetTargettingState(level, start, targetInfo, targetAction, confirmKey, message);
+            SetTargettingState(newTarget, targetInfo, targetAction, confirmKey, message);
         }
 
         private void SetTargettingMessage(string message, string confirmKey)
@@ -69,11 +67,11 @@ namespace RogueBasin
             Game.MessageQueue.AddMessage(message + " find a target. " + confirmKey + " to confirm. ESC to exit.");
         }
 
-        private void CheckTargetInRange(Point start, TargettingAction targetAction, TargettingInfo targetInfo)
+        private void CheckTargetInRange(Location start, TargettingAction targetAction, TargettingInfo targetInfo)
         {
             if (targetAction == TargettingAction.Utility || targetAction == TargettingAction.Weapon || targetAction == TargettingAction.Examine || targetAction == TargettingAction.MoveOrWeapon || targetAction == TargettingAction.MoveOrThrow)
             {
-                if (targetInfo.IsInRange(player, dungeon, new Location(player.LocationLevel, start)))
+                if (targetInfo.IsInRange(player, dungeon, start))
                 {
                     Screen.Instance.TargetInRange = true;
                 }
@@ -88,7 +86,7 @@ namespace RogueBasin
             }
         }
 
-        private void SetScreenTargettingMode(Point start, TargettingInfo info, TargettingAction targetAction)
+        private void SetScreenTargettingMode(Location start, TargettingInfo info, TargettingAction targetAction)
         {
             Screen.Instance.TargettingModeOn();
             Screen.Instance.Target = start;
@@ -96,21 +94,18 @@ namespace RogueBasin
             Screen.Instance.TargetAction = targetAction;
         }
 
-        private void SetTargettingState(int level, Point start, TargettingInfo info, TargettingAction targetAction, string confirmKey, string message)
+        private void SetTargettingState(Location target, TargettingInfo info, TargettingAction targetAction, string confirmKey, string message)
         {
             currentTargettingAction = targetAction;
             TargettingConfirmChar = confirmKey;
-            currentTarget = start;
-            currentTargetLevel = level;
+            currentTarget = target;
             currentInfo = info;
             TargettingMessage = message;
         }
 
         public TargettingAction TargettingAction { get { return currentTargettingAction; } }
 
-        public Point CurrentTarget { get { return currentTarget; } }
-
-        public int CurrentTargetLevel { get { return currentTargetLevel; } }
+        public Location CurrentTarget { get { return currentTarget; } }
 
         public void DisableScreenTargettingMode()
         {

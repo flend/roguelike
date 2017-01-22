@@ -1668,6 +1668,11 @@ namespace RogueBasin
 
         }
 
+        public SquareContents MapSquareContents(Location location)
+        {
+            return MapSquareContents(location.Level, location.MapCoord);
+        }
+
         /// <summary>
         /// Does the square contain a player or creature?
         /// </summary>
@@ -3477,11 +3482,18 @@ namespace RogueBasin
             }
         }
 
-        public bool IsSquareInPlayerFOV(Point target)
+        public bool IsSquareInPlayerFOV(Location target)
         {
-            if (target.x > 0 && target.y >= 0 && target.x < Levels[player.LocationLevel].width && target.y < Levels[player.LocationLevel].height)
+            if (target.Level != player.LocationLevel)
             {
-                MapSquare targetSquare = Levels[player.LocationLevel].mapSquares[target.x, target.y];
+                return false;
+            }
+
+            var targetCoord = target.MapCoord;
+
+            if (targetCoord.x >= 0 && targetCoord.y >= 0 && targetCoord.x < Levels[target.Level].width && targetCoord.y < Levels[target.Level].height)
+            {
+                MapSquare targetSquare = Levels[target.Level].mapSquares[targetCoord.x, targetCoord.y];
                 if (targetSquare.InPlayerFOV)
                 {
                     return true;
@@ -3490,11 +3502,14 @@ namespace RogueBasin
             return false;
         }
 
-        public bool IsSquareSeenByPlayer(Point target)
+        //Would be better on Location rather than Point
+        public bool IsSquareSeenByPlayer(Location target)
         {
-            if (target.x > 0 && target.y >= 0 && target.x < Levels[player.LocationLevel].width && target.y < Levels[player.LocationLevel].height)
+            var targetCoord = target.MapCoord;
+
+            if (targetCoord.x >= 0 && targetCoord.y >= 0 && targetCoord.x < Levels[target.Level].width && targetCoord.y < Levels[target.Level].height)
             {
-                MapSquare targetSquare = Levels[player.LocationLevel].mapSquares[target.x, target.y];
+                MapSquare targetSquare = Levels[target.Level].mapSquares[targetCoord.x, targetCoord.y];
                 if (targetSquare.SeenByPlayer)
                 {
                     return true;
