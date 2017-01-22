@@ -15,38 +15,11 @@ namespace TraumaRL
 {
     public partial class TraumaWorldGenerator
     {
-        /// <summary>
-        /// Mapping from template terrain to real terrain on the map
-        /// </summary>
-        Dictionary<RoomTemplateTerrain, MapTerrain> terrainMapping;
-
-        Dictionary<MapTerrain, List<MapTerrain>> brickTerrainMapping;
 
         //For development, skip making most of the levels
         bool quickLevelGen = false;
 
         MapState mapState;
-
-        public MapState MapState { get { return mapState; } }
-
-        public TraumaWorldGenerator()
-        {
-            BuildTerrainMapping();
-            
-        }
-
-        private void BuildTerrainMapping()
-        {
-            terrainMapping = new Dictionary<RoomTemplateTerrain, MapTerrain>();
-            terrainMapping[RoomTemplateTerrain.Wall] = MapTerrain.Wall;
-            terrainMapping[RoomTemplateTerrain.Floor] = MapTerrain.Empty;
-            terrainMapping[RoomTemplateTerrain.Transparent] = MapTerrain.Void;
-            terrainMapping[RoomTemplateTerrain.WallWithPossibleDoor] = MapTerrain.ClosedDoor;
-
-            brickTerrainMapping = new Dictionary<MapTerrain, List<MapTerrain>> {
-
-                { MapTerrain.Wall, new List<MapTerrain> { MapTerrain.BrickWall1, MapTerrain.BrickWall1, MapTerrain.BrickWall1, MapTerrain.BrickWall2, MapTerrain.BrickWall3, MapTerrain.BrickWall4, MapTerrain.BrickWall5 } }};
-        }        
         
         /** Build a map using templated rooms */
         public void GenerateTraumaLevels(bool retry)
@@ -81,15 +54,15 @@ namespace TraumaRL
             SetupMapState(levelBuilder, levelTreeBuilder, startLevel);
             var levelInfo = levelBuilder.LevelInfo;
 
-            GraphVisualizer.VisualiseLevelConnectivityGraph(levelLinks, MapState.LevelGraph.LevelNames);
-            GraphVisualizer.VisualiseClueDoorGraph(MapState.MapInfo, MapState.DoorAndClueManager, "prequest");
-            GraphVisualizer.VisualiseFullMapGraph(MapState.MapInfo, MapState.DoorAndClueManager, "prequest");
+            GraphVisualizer.VisualiseLevelConnectivityGraph(levelLinks, mapState.LevelGraph.LevelNames);
+            GraphVisualizer.VisualiseClueDoorGraph(mapState.MapInfo, mapState.DoorAndClueManager, "prequest");
+            GraphVisualizer.VisualiseFullMapGraph(mapState.MapInfo, mapState.DoorAndClueManager, "prequest");
 
             //Generate quests (includes map mutations)
             questManager.GenerateQuests(mapState);
 
-            GraphVisualizer.VisualiseFullMapGraph(MapState.MapInfo, MapState.DoorAndClueManager, "postquest");
-            GraphVisualizer.VisualiseClueDoorGraph(MapState.MapInfo, MapState.DoorAndClueManager, "postquest");
+            GraphVisualizer.VisualiseFullMapGraph(mapState.MapInfo, mapState.DoorAndClueManager, "postquest");
+            GraphVisualizer.VisualiseClueDoorGraph(mapState.MapInfo, mapState.DoorAndClueManager, "postquest");
         
             //Add non-interactable features
             var decorator = new DungeonDecorator(mapState, mapQuestBuilder);
@@ -99,33 +72,37 @@ namespace TraumaRL
             //Note that since the absolute-coords of level maps can now change due to the addition of new rooms (mutations)
             //It's only safe to add elevator features after all map changes have taken place
             if (!quickLevelGen)
-                AddElevatorFeatures(MapState.MapInfo, levelInfo);
+                AddElevatorFeatures(mapState.MapInfo, levelInfo);
 
             //Add debug stuff in the first room
-            AddDebugItems(MapState.MapInfo);
+            AddDebugItems(mapState.MapInfo);
 
             //Close off any unused doors etc.
             levelBuilder.CompleteLevels();
             
             //Add maps to the dungeon (must be ordered)
-            AddLevelMapsToDungeon(levelInfo);
+            var dungeonMapSetup = new DungeonMapSetup();
+            dungeonMapSetup.AddLevelMapsToDungeon(levelInfo);
 
             //Set player's start location
-            SetPlayerStartLocation(MapState);
+            dungeonMapSetup.SetPlayerStartLocation(mapState);
 
             //Set maps in engine (needs to be done before placing items and monsters)
-            SetupMapsInEngine();
+            dungeonMapSetup.SetupMapsInEngine(mapState);
 
             //Pause here to attach the debugger
             //MessageBox.Show("post engine");
 
-            Game.Dungeon.AddMapObjectsToDungeon(MapState.MapInfo);
+            //Add items/monsters/features from room model into dungeon
+            dungeonMapSetup.AddMapObjectsToDungeon(mapState.MapInfo);
             
-            //Add monsters
+            //Add monsters (should go via room interface, currently added directly)
             Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapState, mapState.LevelGraph.GameLevels, mapState.LevelGraph.LevelDifficulty);
 
+            dungeonMapSetup.AddMapStatePropertiesToDungeon(mapState);
+
             //Check we are solvable
-            AssertMapIsSolveable(MapState.MapInfo, mapState.DoorAndClueManager);
+            AssertMapIsSolveable(mapState.MapInfo, mapState.DoorAndClueManager);
 
             if (retry)
             {
@@ -164,52 +141,11 @@ namespace TraumaRL
                 throw new ApplicationException("Feature is not connected to elevator, aborting.");
             }
         }
-
-        private static void SetPlayerStartLocation(MapState mapState)
-        {
-            var mapInfo = mapState.MapInfo;
-            var firstRoom = mapInfo.Room(mapState.StartVertex);
-            Game.Dungeon.Levels[mapState.StartLevel].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
-
-            Game.Dungeon.Player.LocationLevel = mapState.StartLevel;
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
-        }
-
-
-        private void AddLevelMapsToDungeon(Dictionary<int, LevelInfo> levelInfo)
-        {
-            foreach (var kv in levelInfo.OrderBy(kv => kv.Key))
-            {
-                var thisLevelInfo = kv.Value;
-
-                Map masterMap = thisLevelInfo.LevelBuilder.MergeTemplatesIntoMap(terrainMapping);
-
-                Dictionary<MapTerrain, List<MapTerrain>> terrainSubstitution = brickTerrainMapping;
-                if (thisLevelInfo.TerrainMapping != null)
-                    terrainSubstitution = thisLevelInfo.TerrainMapping;
-
-                Map randomizedMapL1 = MapTerrainRandomizer.RandomizeTerrainInMap(masterMap, terrainSubstitution);
-                Game.Dungeon.AddMap(randomizedMapL1);
-            }
-        }
-
-
+        
         private void AddDebugItems(MapInfo mapInfo)
         {
             
         }
-
-        private void SetupMapsInEngine()
-        {
-            //Comment for faster UI check
-            Game.Dungeon.RefreshAllLevelPathingAndFOV();
-
-            foreach (var level in mapState.LevelGraph.GameLevels)
-            {
-                Game.Dungeon.Levels[level].LightLevel = 0;
-            }
-        }
-
         private void AddElevatorFeatures(MapInfo mapInfo, Dictionary<int, LevelInfo> levelInfo)
         {
             var elevatorLocations = new Dictionary<Tuple<int, int>, Tuple<int, RogueBasin.Point>>();

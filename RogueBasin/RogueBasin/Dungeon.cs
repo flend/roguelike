@@ -4210,12 +4210,12 @@ namespace RogueBasin
             }
         }
 
-        internal bool AddTrigger(DungeonSquareTrigger trigger, Location location)
+        public bool AddTrigger(DungeonSquareTrigger trigger, Location location)
         {
             return AddTrigger(location.Level, location.MapCoord, trigger);
         }
 
-        internal bool AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
+        public bool AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
         {
             //Set the trigger position
             trigger.Level = level;
@@ -5185,89 +5185,5 @@ namespace RogueBasin
             return status;
         }
 
-        public void AddMapObjectsToDungeon(MapInfo mapInfo)
-        {
-            var rooms = mapInfo.Populator.AllRoomsInfo();
-
-            foreach (RoomInfo roomInfo in rooms)
-            {
-                var roomPositioned = mapInfo.Room(roomInfo.Id);
-                var roomLocation = roomPositioned.Location;
-                var roomLevel = mapInfo.GetLevelForRoomIndex(roomInfo.Id);
-
-                foreach (TriggerRoomPlacement triggerPlacement in roomInfo.Triggers)
-                {
-                    bool monsterResult = AddTrigger(triggerPlacement.trigger, new Location(roomLevel, roomLocation + triggerPlacement.location));
-
-                    if (!monsterResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add trigger to dungeon at: " + triggerPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
-                {
-                    bool monsterResult = AddMonster(monsterPlacement.monster, new Location(roomLevel, roomLocation + monsterPlacement.location));
-
-                    if (!monsterResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (ItemRoomPlacement itemPlacement in roomInfo.Items)
-                {
-                    bool monsterResult = AddItem(itemPlacement.item, new Location(roomLevel, roomLocation + itemPlacement.location));
-
-                    if (!monsterResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add item to dungeon: " + itemPlacement.item.SingleItemDescription + " at: " + itemPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (FeatureRoomPlacement featurePlacement in roomInfo.Features)
-                {
-                    if (featurePlacement.feature.IsBlocking)
-                    {
-                        bool featureResult = AddFeatureBlocking(featurePlacement.feature, roomLevel, roomLocation + featurePlacement.location, featurePlacement.feature.BlocksLight);
-
-                        if (!featureResult)
-                        {
-                            LogFile.Log.LogEntryDebug("Cannot add blocking feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                        else
-                        {
-                            LogFile.Log.LogEntryDebug("Adding blocking feature to dungeon, room : " + roomInfo.Id + " feature: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                    }
-                    else
-                    {
-                        bool featureResult = AddFeature(featurePlacement.feature, roomLevel, roomLocation + featurePlacement.location);
-
-                        if (!featureResult)
-                        {
-                            LogFile.Log.LogEntryDebug("Cannot add feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                        else
-                        {
-                            LogFile.Log.LogEntryDebug("Adding non-blocking feature to dungeon, room : " + roomInfo.Id + " feature: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                    }
-                }
-
-                foreach (LockRoomPlacement lockPlacement in roomInfo.Locks)
-                {
-                    var thisLock = lockPlacement.thisLock;
-                    thisLock.LocationLevel = roomLevel;
-                    thisLock.LocationMap = roomLocation + lockPlacement.location;
-                    bool lockResult = AddLock(lockPlacement.thisLock);
-
-                    if (!lockResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add lock to dungeon at: " + lockPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-            }
-        }
     }
 }

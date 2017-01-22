@@ -107,9 +107,6 @@ namespace TraumaRL.Quests
             //Any room on the critical 
             var roomsOnCriticalPath = Builder.FilterRoomsByPath(mapState, allowedRoomsForLogs, criticalPath, true, QuestMapBuilder.CluePath.OnCriticalPath, true);
 
-            GraphVisualizer.VisualiseClueDoorGraph(mapInfo, mapState.DoorAndClueManager, "cmedical");
-            GraphVisualizer.VisualiseFullMapGraph(mapInfo, mapState.DoorAndClueManager, "cmedical");
-
             //Note that roomsOnCriticalPath doesn't seem to take into account loops, so you can miss the critical path (i.e. a loop room will be in the critical path
             //and then the clue is placed in a random room within this)
             var roomToPlaceLog = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(mapState, 1, roomsOnCriticalPath)[0];

@@ -14,7 +14,7 @@ namespace TraumaRL
     {
         RogueBase rb;
 
-        public void TemplatedMapTest()
+        public void SetupWorldAndRunGame()
         {
             RandomSetup();
 
@@ -65,15 +65,9 @@ namespace TraumaRL
 
         private void GenerateStoryDungeon(bool retry)
         {
-            //Setup a single test level
             TraumaWorldGenerator worldGen = new TraumaWorldGenerator();
 
             worldGen.GenerateTraumaLevels(retry);
-
-            Game.Dungeon.MapState = worldGen.MapState;
-            Game.Dungeon.DungeonInfo.LevelNaming = worldGen.MapState.LevelGraph.LevelReadableNames.ToDictionary(kv => kv.Key, kv => kv.Value);
-
-            LogFile.Log.LogEntryDebug("Player start: " + Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation, LogDebugLevel.High);
         }
 
         private void RandomSetup() {
