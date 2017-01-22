@@ -1346,6 +1346,8 @@ namespace RogueBasin {
             Point utilityUICenter = UIScale(new Point(300, 92));
             Point wetwareUICenter = UIScale(new Point(390, 92));
 
+            var lineHeight = 15;
+
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left_extended");
             playerUI_TL = new Point(0, ScreenHeight - uiLeftDim.Height);
@@ -1487,31 +1489,44 @@ namespace RogueBasin {
 
             if (ExtraUI)
             {
-                var playerHPTextOffset = UIScale(new Point(10, 0));
+                var col1XOffset = 10;
+                var col2XOffset = 170;
+
+                var playerHPTextOffset = UIScale(new Point(col1XOffset, 0));
                 var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
                 DrawUIText(hpStr, playerTextUI_UsefulTL + playerHPTextOffset);
 
-                //Draw Fame
-                var playerFameTextOffset = UIScale(new Point(10, 60));
-                var fameStr = "Fame: " + player.CombatXP;
-                DrawText(fameStr, playerTextUI_UsefulTL + playerFameTextOffset);
-                var playerExpFameTextOffset = UIScale(new Point(10, 75));
-                //var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
-                //DrawText(fameExpStr, playerUI_TL.Add(playerExpFameTextOffset));
+                var playerShieldTextOffset = UIScale(new Point(col2XOffset, 0));
+                var shieldStr = "SD: " + player.Shield + "/" + player.MaxShield;
+                DrawUIText(shieldStr, playerTextUI_UsefulTL + playerShieldTextOffset);
 
-                var playerMoveOffset = UIScale(new Point(170, 0));
+                var playerEnergyTextOffset = UIScale(new Point(col1XOffset, lineHeight));
+                var energyStr = "EN: " + player.Energy + "/" + player.MaxEnergy;
+                DrawUIText(energyStr, playerTextUI_UsefulTL + playerEnergyTextOffset);
+
+                var playerLevelTextOffset = UIScale(new Point(col1XOffset, 2 * lineHeight));
+                var levelStr = "PLvl: " + player.LocationLevel + " (" + Game.Dungeon.DungeonInfo.LevelNaming[player.LocationLevel] + ")";
+                DrawText(levelStr, playerTextUI_UsefulTL + playerLevelTextOffset);
+
+                var visibleLevelTextOffset = UIScale(new Point(col1XOffset, 3* lineHeight));
+                var visibleLevelStr = "VLvl: " + LevelToDisplay + " (" + Game.Dungeon.DungeonInfo.LevelNaming[LevelToDisplay] + ")";
+                DrawText(visibleLevelStr, playerTextUI_UsefulTL + visibleLevelTextOffset);
+
+                var xChunkOffset = 50;
+
+                var playerMoveOffset = UIScale(new Point(col1XOffset, lineHeight * 4));
                 var moveStr = "Move: " + player.TurnsMoving;
                 DrawText(moveStr, playerTextUI_UsefulTL + playerMoveOffset);
 
-                var playerStationaryOffset = UIScale(new Point(170, 15));
+                var playerStationaryOffset = UIScale(new Point(col2XOffset, lineHeight * 4));
                 var actionStr = "No A: " + player.TurnsSinceAction;
                 DrawText(actionStr, playerTextUI_UsefulTL + playerStationaryOffset);
 
-                var playerRestOffset = UIScale(new Point(170, 30));
+                var playerRestOffset = UIScale(new Point(col1XOffset, lineHeight * 5));
                 var restStr = "Rest: " + player.TurnsInactive;
                 DrawText(restStr, playerTextUI_UsefulTL + playerRestOffset);
 
-                var dodgeBonusOffset = UIScale(new Point(170, 45));
+                var dodgeBonusOffset = UIScale(new Point(col2XOffset, lineHeight * 5));
                 var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
                 DrawText(dodgeStr, playerTextUI_UsefulTL + dodgeBonusOffset);
             }

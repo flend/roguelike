@@ -1057,6 +1057,12 @@ namespace RogueBasin
                                 centreOnPC = true;
                                 break;
 
+                            case Key.C:
+                                //Centre on player
+                                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+                                timeAdvances = false;
+                                break;
+
                             case Key.X:
                                 //Examine
                                 timeAdvances = Examine();
