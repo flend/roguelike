@@ -18,7 +18,7 @@ namespace RogueBasin
             this.player = player;
         }
 
-        public bool StartRunning(int directionX, int directionY)
+        public ActionResult StartRunning(int directionX, int directionY)
         {
             runningDirection = new Point(directionX, directionY);
             rogueBase.ActionState = ActionState.Running;
@@ -26,7 +26,7 @@ namespace RogueBasin
             return RunNextStep();
         }
 
-        public bool StartRunning(IEnumerable<Point> path)
+        public ActionResult StartRunning(IEnumerable<Point> path)
         {
             runningDirection = null;
             runningPath = path;
@@ -43,7 +43,7 @@ namespace RogueBasin
             player.Running = false;
         }
 
-        public bool RunNextStep()
+        public ActionResult RunNextStep()
         {
             Point relativeNextStep = new Point(0, 0);
             var originalRunningPath = runningPath.Select(t => t);
@@ -63,7 +63,7 @@ namespace RogueBasin
             {
                 //Empty path
                 StopRunning();
-                return false;
+                return new ActionResult(false, true);
             }
             else if (runningPath == null)
             {
