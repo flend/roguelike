@@ -4363,10 +4363,10 @@ namespace RogueBasin
                 return;
             }
 
-            //Social Goddess
+            //Socialite
             if (player.CharmStat > 75 && noDungeonsCleared > 1)
             {
-                careerName = "Social Goddess";
+                careerName = "Socialite";
                 careerMovie = "endsocialite";
 
                 if (Game.Dungeon.DungeonInfo.DragonDead)
