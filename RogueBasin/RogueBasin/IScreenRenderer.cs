@@ -18,18 +18,18 @@ namespace RogueBasin
 
         void Clear();
 
-        void DrawTextWidth(string msg, int x, int y, int size, int width, Color foregroundColor, Color backgroundColor);
-        void DrawText(string msg, int x, int y, int size, LineAlignment alignment, Color foregroundColor, Color backgroundColor);
+        void DrawTextWidth(string msg, Point p, int size, int width, Color foregroundColor, Color backgroundColor);
+        void DrawText(string msg, Point p, int size, LineAlignment alignment, Color foregroundColor, Color backgroundColor);
 
-        void DrawTextWidth(string msg, int x, int y, int size, int width, Color color);
-        void DrawText(string msg, int x, int y, int size, LineAlignment alignment, Color color);
+        void DrawTextWidth(string msg, Point p, int size, int width, Color color);
+        void DrawText(string msg, Point p, int size, LineAlignment alignment, Color color);
         
-        Size TextSize(string msg, int size);
+        Size TextDimensions(string msg, int size);
 
-        void DrawScaledSprite(string filePath, int x, int y, double scaling = 1.0, double alpha = 1.0, bool isAnimated = false, int frameNo = 0);
+        void DrawSprite(string filePath, Point p, double scaling = 1.0, double alpha = 1.0, bool isAnimated = false, int frameNo = 0);
         Size GetSpriteDimensions(string id);
 
-        void DrawTraumaSprite(int id, int x, int y, LibtcodColorFlags flags, double scaling, double alpha);
+        void DrawTraumaSprite(int id, Point p, LibtcodColorFlags flags, double scaling, double alpha);
         Size GetTraumaSpriteDimensions(int id);
 
         void DrawLine(Point p1, Point p2, Color color);

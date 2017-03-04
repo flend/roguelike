@@ -166,14 +166,14 @@ namespace RogueBasin
             return spriteSurface;
         }
 
-        public void DrawScaledSprite(string id, int x, int y, double scaling = 1.0, double alpha = 1.0, bool isAnimated = false, int frameNo = 0)
+        public void DrawSprite(string id, Point p, double scaling = 1.0, double alpha = 1.0, bool isAnimated = false, int frameNo = 0)
         {
-            DrawScaledSprite(id, x, y, scaling, alpha, frameNo, isAnimated);
+            DrawScaledSprite(id, p, scaling, alpha, frameNo, isAnimated);
         }
 
-        public void DrawTraumaSprite(int id, int x, int y, LibtcodColorFlags flags, double scaling = 1.0, double alpha = 1.0)
+        public void DrawTraumaSprite(int id, Point p, LibtcodColorFlags flags, double scaling = 1.0, double alpha = 1.0)
         {
-            DrawScaledSprite(id, new Point(x, y), flags, scaling, alpha);     
+            DrawScaledSprite(id, p, flags, scaling, alpha);     
         }
 
         public Size GetSpriteDimensions(string id)
@@ -201,7 +201,7 @@ namespace RogueBasin
         /// <param name="id"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void DrawScaledSprite(string filePath, int x, int y, double spriteScaling, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
+        private void DrawScaledSprite(string filePath, Point p, double spriteScaling, double alpha = 1.0, int frameNo = 0, bool isAnimated = false)
         {
             SpriteCacheEntry entry = new SpriteCacheEntry(filePath);
             entry.AlphaOverride = alpha;
@@ -213,12 +213,12 @@ namespace RogueBasin
 
                 if (!isAnimated)
                 {
-                    videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y));
+                    videoSurface.Blit(spriteSurface, p.ToPoint());
                 }
                 else
                 {
                     //Probably unsafe with scaling
-                    videoSurface.Blit(spriteSurface, new System.Drawing.Point(x, y), new Rectangle(frameNo * tileSpriteSheetWidth, 0,
+                    videoSurface.Blit(spriteSurface, p.ToPoint(), new Rectangle(frameNo * tileSpriteSheetWidth, 0,
                         tileSpriteSheetWidth, tileSpriteSheetHeight));
                 }
 
@@ -393,63 +393,59 @@ namespace RogueBasin
             return font;
         }
 
-        public void DrawText(string msg, int x, int y, int size, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor)
+        public void DrawText(string msg, Point p, int size, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             Surface fontSurface = font.Render(msg, foregroundColor, backgroundColor, true);
 
-            var pointToDraw = new System.Drawing.Point(x, y);
+            var pointToDraw = p.ToPoint();
 
             if (lineAlignment == LineAlignment.Center)
             {
                 var dimensions = font.SizeText(msg);
-                pointToDraw = new System.Drawing.Point(x - dimensions.Width / 2, y - dimensions.Height / 2);
+                pointToDraw = new System.Drawing.Point(p.x - dimensions.Width / 2, p.y - dimensions.Height / 2);
             }
 
             videoSurface.Blit(fontSurface, pointToDraw);
         }
 
-        public void DrawText(string msg, int x, int y, int size, LineAlignment lineAlignment, Color foregroundColor)
+        public void DrawText(string msg, Point p, int size, LineAlignment lineAlignment, Color foregroundColor)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             Surface fontSurface = font.Render(msg, foregroundColor, Color.Black, true);
             fontSurface.Transparent = true;
             fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
 
-            var pointToDraw = new System.Drawing.Point(x, y);
+            var pointToDraw = p.ToPoint();
 
             if (lineAlignment == LineAlignment.Center)
             {
                 var dimensions = font.SizeText(msg);
-                pointToDraw = new System.Drawing.Point(x - dimensions.Width / 2, y - dimensions.Height / 2);
+                pointToDraw = new System.Drawing.Point(p.x - dimensions.Width / 2, p.y - dimensions.Height / 2);
             }
 
             videoSurface.Blit(fontSurface, pointToDraw);
         }
 
-        public void DrawTextWidth(string msg, int x, int y, int size, int width, Color color)
+        public void DrawTextWidth(string msg, Point p, int size, int width, Color color)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             Surface fontSurface = font.Render(msg, color, Color.Black, true, width, 100);
             fontSurface.Transparent = true;
             fontSurface.TransparentColor = Color.FromArgb(0, 0, 0);
 
-            var pointToDraw = new System.Drawing.Point(x, y);
-
-            videoSurface.Blit(fontSurface, pointToDraw);
+            videoSurface.Blit(fontSurface, p.ToPoint());
         }
 
-        public void DrawTextWidth(string msg, int x, int y, int size, int width, Color foregroundColor, Color backgroundColor)
+        public void DrawTextWidth(string msg, Point p, int size, int width, Color foregroundColor, Color backgroundColor)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             Surface fontSurface = font.Render(msg, foregroundColor, backgroundColor, true, width, 100);
 
-            var pointToDraw = new System.Drawing.Point(x, y);
-
-            videoSurface.Blit(fontSurface, pointToDraw);
+            videoSurface.Blit(fontSurface, p.ToPoint());
         }
 
-        public Size TextSize(string msg, int size)
+        public Size TextDimensions(string msg, int size)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             return font.SizeText(msg);

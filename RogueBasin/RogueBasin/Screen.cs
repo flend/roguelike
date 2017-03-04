@@ -592,7 +592,7 @@ namespace RogueBasin {
             {
                 foreach (String scanLine in frame.ScanLines)
                 {
-                    Size textSize = renderer.TextSize(scanLine, largeTextSize);
+                    Size textSize = renderer.TextDimensions(scanLine, largeTextSize);
                     textHeight = textSize.Height;
                     textHeightWithSpacing = textHeight + largeTextSizeLineOffset;
 
@@ -929,10 +929,7 @@ namespace RogueBasin {
             if(MoviesToPlay())
                 PlayFirstMovieInQueue();
 
-            if (SpecialScreen != null)
-            {
-                SpecialScreen();
-            }
+            SpecialScreen?.Invoke();
 
             //Prompt for user
             if (Prompt != null)
@@ -1756,52 +1753,52 @@ namespace RogueBasin {
 
         public void DrawText(string msg, Point p)
         {
-            renderer.DrawText(msg, p.x, p.y, largeTextSize, LineAlignment.Left, statsColor);
+            renderer.DrawText(msg, p, largeTextSize, LineAlignment.Left, statsColor);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
+            renderer.DrawText(msg, p, largeTextSize, lineAlignment, color);
         }
 
         public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            renderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, color);
+            renderer.DrawText(msg, p, smallTextSize, lineAlignment, color);
         }
 
         public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
+            renderer.DrawText(msg, p, largeTextSize, lineAlignment, color);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color color)
         {
-            renderer.DrawText(msg, p.x, p.y, size, lineAlignment, color);
+            renderer.DrawText(msg, p, size, lineAlignment, color);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
         public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            renderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p, smallTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
         public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            renderer.DrawText(msg, p.x, p.y, size, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p, size, lineAlignment, foregroundColor, backgroundColor);
         }
 
         void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
         {
-            renderer.DrawTextWidth(msg, p.x, p.y, largeTextSize, width, color);
+            renderer.DrawTextWidth(msg, p, largeTextSize, width, color);
         }
 
         private void DrawUIText(string msg, Point p)
@@ -1811,12 +1808,12 @@ namespace RogueBasin {
 
         private void DrawUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            renderer.DrawText(msg, p.x, p.y, (int)Math.Round(largeTextSize * UIScaling), lineAlignment, color);
+            renderer.DrawText(msg, p, (int)Math.Round(largeTextSize * UIScaling), lineAlignment, color);
         }
 
         private void DrawSmallUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            renderer.DrawText(msg, p.x, p.y, (int)Math.Round(smallTextSize * UIScaling), lineAlignment, color);
+            renderer.DrawText(msg, p, (int)Math.Round(smallTextSize * UIScaling), lineAlignment, color);
         }
 
         private void DrawFocusWindow()
@@ -1958,17 +1955,17 @@ namespace RogueBasin {
 
         private void DrawUISprite(string name, Point p, double alpha = 1.0)
         {
-            renderer.DrawScaledSprite(UISpritePath(name), p.x, p.y, UIScaling, alpha);
+            renderer.DrawSprite(UISpritePath(name), p, UIScaling, alpha);
         }
 
         private void DrawTraumaUISprite(int id, Point p, LibtcodColorFlags flags, double alpha = 1.0)
         {
-            renderer.DrawTraumaSprite(id, p.x, p.y, flags, UIScaling, alpha);
+            renderer.DrawTraumaSprite(id, p, flags, UIScaling, alpha);
         }
 
         private void DrawSprite(string name, Point p, double alpha = 1.0)
         {
-            renderer.DrawScaledSprite(UISpritePath(name), p.x, p.y, 1.0, alpha);
+            renderer.DrawSprite(UISpritePath(name), p, 1.0, alpha);
         }
 
         private char GetCharIconForNumber(int no)

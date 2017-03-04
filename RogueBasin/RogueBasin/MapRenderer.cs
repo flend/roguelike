@@ -191,11 +191,11 @@ namespace RogueBasin
         {
             if (cell.TileSprite == null)
             {
-                renderer.DrawTraumaSprite(cell.TileID, screenCoords.x, screenCoords.y, cell.TileFlag as LibtcodColorFlags, spriteVideoWidthScaling, alpha);
+                renderer.DrawTraumaSprite(cell.TileID, screenCoords, cell.TileFlag as LibtcodColorFlags, spriteVideoWidthScaling, alpha);
             }
             else
             {
-                renderer.DrawScaledSprite(TileSpritePath(cell.TileSprite), screenCoords.x, screenCoords.y, spriteVideoWidthScaling, alpha, isAnimated, frameNo);
+                renderer.DrawSprite(TileSpritePath(cell.TileSprite), screenCoords, spriteVideoWidthScaling, alpha, isAnimated, frameNo);
             }
         }
 
