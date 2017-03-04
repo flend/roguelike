@@ -1936,7 +1936,7 @@ namespace RogueBasin {
 
         private Size UISpriteSize(string name)
         {
-            var unscaledSize = renderer.GetSpriteDimensions(name);
+            var unscaledSize = renderer.GetSpriteDimensions(UISpritePath(name));
             return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
         }
 

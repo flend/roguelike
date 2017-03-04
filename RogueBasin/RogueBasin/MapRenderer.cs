@@ -207,7 +207,7 @@ namespace RogueBasin
             }
             else
             {
-                return renderer.GetSpriteDimensions(cell.TileSprite);
+                return renderer.GetSpriteDimensions(TileSpritePath(cell.TileSprite));
             }
         }
     }
