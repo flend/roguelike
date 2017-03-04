@@ -8,12 +8,8 @@ namespace RogueBasin
 {
     public enum LineAlignment { Left, Center, Right }
 
-    interface IMapRenderer
+    interface IScreenRenderer
     {
-        void RenderMap(TileEngine.TileMap mapToRender, Point mapOffset, Rectangle screenViewport);
-
-        void SetSpriteVideoSize(int width, int height);
-
         void Sleep(ulong milliseconds);
 
         void Setup(int width, int height);
@@ -30,10 +26,10 @@ namespace RogueBasin
         
         Size TextSize(string msg, int size);
 
-        void DrawUISprite(string id, int x, int y, double scaling, double alpha);
-        Size GetUISpriteDimensions(string id);
+        void DrawScaledSprite(string filePath, int x, int y, double scaling = 1.0, double alpha = 1.0, bool isAnimated = false, int frameNo = 0);
+        Size GetSpriteDimensions(string id);
 
-        void DrawTraumaUISprite(int id, int x, int y, LibtcodColorFlags flags, double scaling, double alpha);
+        void DrawTraumaSprite(int id, int x, int y, LibtcodColorFlags flags, double scaling, double alpha);
         Size GetTraumaSpriteDimensions(int id);
 
         void DrawLine(Point p1, Point p2, Color color);

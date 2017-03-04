@@ -39,6 +39,36 @@
             Represents a 32-bit color to the TCOD API.
             </summary>
         </member>
+        <member name="P:libtcodWrapper.Color.Red">
+            <summary>
+            Red
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Color.Green">
+            <summary>
+            Green
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Color.Blue">
+            <summary>
+            Blue
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Color.Hue">
+            <summary>
+            Hue (0.0 - 360.0)
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Color.Saturation">
+            <summary>
+            Saturation (0.0 - 1.0)
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Color.Value">
+            <summary>
+            Value (0.0 - 1.0)
+            </summary>
+        </member>
         <member name="M:libtcodWrapper.Color.FromRGB(System.Byte,System.Byte,System.Byte)">
             <summary>
             Form a Color from RGB components.
@@ -173,36 +203,6 @@
             <param name="c2">Second Color</param>
             <param name="coef">Interpolate Coefficient</param>
             <returns>New Color</returns>
-        </member>
-        <member name="P:libtcodWrapper.Color.Red">
-            <summary>
-            Red
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Color.Green">
-            <summary>
-            Green
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Color.Blue">
-            <summary>
-            Blue
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Color.Hue">
-            <summary>
-            Hue (0.0 - 360.0)
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Color.Saturation">
-            <summary>
-            Saturation (0.0 - 1.0)
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Color.Value">
-            <summary>
-            Value (0.0 - 1.0)
-            </summary>
         </member>
         <member name="T:libtcodWrapper.ColorPresets">
             <summary>
@@ -1122,6 +1122,16 @@
             </summary>
             <returns>Height</returns>
         </member>
+        <member name="P:libtcodWrapper.Console.ForegroundColor">
+            <summary>
+            Gets/sets the default foreground color of the console.
+            </summary>
+        </member>
+        <member name="P:libtcodWrapper.Console.BackgroundColor">
+            <summary>
+            Gets/sets the default background color of the console.
+            </summary>
+        </member>
         <member name="M:libtcodWrapper.Console.Clear">
             <summary>
             Clear the console by setting each cell to default background, foreground color, and ascii value to ' '
@@ -1351,16 +1361,6 @@
             <param name="alpha">If true, credits are transparently added on top of the existing screen. For this to work, this function must be placed between your screen rendering code and the console flush.</param>
             <returns>true when the credits screen is finished, indicating that you no longer need to call it.</returns>
         </member>
-        <member name="P:libtcodWrapper.Console.ForegroundColor">
-            <summary>
-            Gets/sets the default foreground color of the console.
-            </summary>
-        </member>
-        <member name="P:libtcodWrapper.Console.BackgroundColor">
-            <summary>
-            Gets/sets the default background color of the console.
-            </summary>
-        </member>
         <member name="T:libtcodWrapper.RootConsole">
             <summary>
             "Root" console, one which blits onto window or fullscreen
@@ -1441,18 +1441,6 @@
             <param name="h">Height in characters</param>
             <returns>New console</returns>
         </member>
-        <member name="M:libtcodWrapper.RootConsole.GetInstance">
-            <summary>
-            Modified singleton pattern. Creates the root console based on
-            the behavior values in RootConsole.Width, RootConsole.Height,
-            RootConsole.WindowTitle, RootConsole.Fullscreen, and
-            RootConsole.Font, or gets the already-created console if one
-            exists.
-            </summary>
-            <returns>
-               The root console object.
-            </returns>
-        </member>
         <member name="P:libtcodWrapper.RootConsole.Width">
             <summary>
             Width, in tiles, of the root console window. Attempting to reset
@@ -1481,6 +1469,18 @@
             <summary>
             Font data for a font other than the default "terminal.bmp".
             </summary>
+        </member>
+        <member name="M:libtcodWrapper.RootConsole.GetInstance">
+            <summary>
+            Modified singleton pattern. Creates the root console based on
+            the behavior values in RootConsole.Width, RootConsole.Height,
+            RootConsole.WindowTitle, RootConsole.Fullscreen, and
+            RootConsole.Font, or gets the already-created console if one
+            exists.
+            </summary>
+            <returns>
+               The root console object.
+            </returns>
         </member>
         <member name="T:libtcodWrapper.TCODException">
             <summary>
@@ -2073,16 +2073,6 @@
             Generates various types of "noise" using libtcod perlin.
             </summary>
         </member>
-        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultHurst">
-            <summary>
-            Default hurst value for noise generator
-            </summary>
-        </member>
-        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultLacunarity">
-            <summary>
-            Default Lacunarity value for noise generator
-            </summary>
-        </member>
         <member name="M:libtcodWrapper.TCODNoise.#ctor(System.Int32)">
             <summary>
             Create noise object.
@@ -2185,6 +2175,16 @@
         <member name="M:libtcodWrapper.TCODNoise.Dispose">
             <summary>
             Destory unmanaged noice generator.
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultHurst">
+            <summary>
+            Default hurst value for noise generator
+            </summary>
+        </member>
+        <member name="F:libtcodWrapper.TCODNoise.NoiseDefaultLacunarity">
+            <summary>
+            Default Lacunarity value for noise generator
             </summary>
         </member>
         <member name="T:libtcodWrapper.TCODPathCallback">
@@ -2335,6 +2335,18 @@
             Represents System Level Functions
             </summary>
         </member>
+        <member name="P:libtcodWrapper.TCODSystem.ElapsedMilliseconds">
+            <summary>
+            Obtain number of milliseconds since the program started
+            </summary>
+            <returns>Milliseconds since the program started</returns>
+        </member>
+        <member name="P:libtcodWrapper.TCODSystem.ElapsedSeconds">
+            <summary>
+            Obtain number of seconds since the program started
+            </summary>
+            <returns>Seconds since the program started</returns>
+        </member>
         <member name="M:libtcodWrapper.TCODSystem.Sleep(System.UInt32)">
             <summary>
             Stop program execution for specified amount of time
@@ -2353,18 +2365,6 @@
             </summary>
             <param name="width">Fullscreen Width</param>
             <param name="height">Fullscreen Height</param>
-        </member>
-        <member name="P:libtcodWrapper.TCODSystem.ElapsedMilliseconds">
-            <summary>
-            Obtain number of milliseconds since the program started
-            </summary>
-            <returns>Milliseconds since the program started</returns>
-        </member>
-        <member name="P:libtcodWrapper.TCODSystem.ElapsedSeconds">
-            <summary>
-            Obtain number of seconds since the program started
-            </summary>
-            <returns>Seconds since the program started</returns>
         </member>
         <member name="P:libtcodWrapper.TCODSystem.CurrentResolution">
             <summary>
@@ -2386,25 +2386,6 @@
             <summary>
             Constains information about current mouse status
             </summary>
-        </member>
-        <member name="M:libtcodWrapper.Mouse.ShowCursor(System.Boolean)">
-            <summary>
-            Changes visiblity of mouse while in our window(s)
-            </summary>
-            <param name="visible">Is mouse visible?</param>
-        </member>
-        <member name="M:libtcodWrapper.Mouse.MoveMouse(System.Int32,System.Int32)">
-            <summary>
-            Move user's mouse to that location
-            </summary>
-            <param name="x">Pixel x location</param>
-            <param name="y">Pixel y location</param>
-        </member>
-        <member name="M:libtcodWrapper.Mouse.GetStatus">
-            <summary>
-            Get current mouse status
-            </summary>
-            <returns>Mouse struct with location, movement, and buttom presses</returns>
         </member>
         <member name="P:libtcodWrapper.Mouse.PixelX">
             <summary>
@@ -2456,11 +2437,30 @@
             Mouse velocity in y direction in character sized blocks
             </summary>
         </member>
+        <member name="M:libtcodWrapper.Mouse.ShowCursor(System.Boolean)">
+            <summary>
+            Changes visiblity of mouse while in our window(s)
+            </summary>
+            <param name="visible">Is mouse visible?</param>
+        </member>
         <member name="P:libtcodWrapper.Mouse.IsVisible">
             <summary>
             Return if cursor is visible
             </summary>
             <returns>Is Visible?</returns>
+        </member>
+        <member name="M:libtcodWrapper.Mouse.MoveMouse(System.Int32,System.Int32)">
+            <summary>
+            Move user's mouse to that location
+            </summary>
+            <param name="x">Pixel x location</param>
+            <param name="y">Pixel y location</param>
+        </member>
+        <member name="M:libtcodWrapper.Mouse.GetStatus">
+            <summary>
+            Get current mouse status
+            </summary>
+            <returns>Mouse struct with location, movement, and buttom presses</returns>
         </member>
     </members>
 </doc>

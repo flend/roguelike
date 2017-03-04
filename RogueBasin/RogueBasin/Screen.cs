@@ -36,7 +36,9 @@ namespace RogueBasin {
 
         static Screen instance = null;
 
-        IMapRenderer mapRenderer;
+        IScreenRenderer renderer;
+        MapRenderer mapRenderer;
+
         public bool NeedsUpdate { get; set; }
 
         //A prompt for the user to respond to
@@ -205,7 +207,7 @@ namespace RogueBasin {
                 if (instance == null)
                 {
                     //instance = new Screen(new MapRendererLibTCod());
-                    instance = new Screen(new MapRendererSDLDotNet());
+                    instance = new Screen(new ScreenRendererSDLDotNet());
                 }
                 return instance;
             }
@@ -237,12 +239,13 @@ namespace RogueBasin {
             get; set;
         }
 
-        Screen(IMapRenderer renderer)
+        Screen(IScreenRenderer renderer)
         {
-            mapRenderer = renderer;
+            this.renderer = renderer;
+            mapRenderer = new MapRenderer(renderer);
 
-            ScreenWidth = 1285;
-            ScreenHeight = 965;
+            ScreenWidth = 1000;
+            ScreenHeight = 600;
 
             int nativeSpriteDim = 64;
             
@@ -324,7 +327,7 @@ namespace RogueBasin {
         //Setup the screen
         public void InitialSetup()
         {
-            mapRenderer.Setup(ScreenWidth, ScreenHeight);
+            renderer.Setup(ScreenWidth, ScreenHeight);
         }
 
         public void ShowMessageLine(string msg, System.Drawing.Color color)
@@ -477,7 +480,7 @@ namespace RogueBasin {
         /// </summary>
         public void FlushConsole()
         {
-            mapRenderer.Flush();
+            renderer.Flush();
         }
 
         /// <summary>
@@ -589,7 +592,7 @@ namespace RogueBasin {
             {
                 foreach (String scanLine in frame.ScanLines)
                 {
-                    Size textSize = mapRenderer.TextSize(scanLine, largeTextSize);
+                    Size textSize = renderer.TextSize(scanLine, largeTextSize);
                     textHeight = textSize.Height;
                     textHeightWithSpacing = textHeight + largeTextSizeLineOffset;
 
@@ -635,14 +638,14 @@ namespace RogueBasin {
         {
             if (clear)
             {
-                mapRenderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
+                renderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
             }
 
             for (int j = 0; j < lineWidth; j++) {
-                mapRenderer.DrawLine(new Point(x, y + j), new Point(x + width, y + j), color);
-                mapRenderer.DrawLine(new Point(x + width - j, y), new Point(x + width - j, y + height), color);
-                mapRenderer.DrawLine(new Point(x + j, y), new Point(x + j, y + height), color);
-                mapRenderer.DrawLine(new Point(x, y + height - j), new Point(x + width, y + height - j), color);
+                renderer.DrawLine(new Point(x, y + j), new Point(x + width, y + j), color);
+                renderer.DrawLine(new Point(x + width - j, y), new Point(x + width - j, y + height), color);
+                renderer.DrawLine(new Point(x + j, y), new Point(x + j, y + height), color);
+                renderer.DrawLine(new Point(x, y + height - j), new Point(x + width, y + height - j), color);
             }
         }
 
@@ -1466,7 +1469,7 @@ namespace RogueBasin {
 
         void ClearScreen()
         {
-            mapRenderer.Clear(); 
+            renderer.Clear(); 
         }
 
         /// <summary>
@@ -1474,7 +1477,7 @@ namespace RogueBasin {
         /// </summary>
         void ClearRect(int x, int y, int width, int height)
         {
-            mapRenderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
+            renderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
         }
 
         private void DrawUISpriteByCentre(string id, Point point)
@@ -1753,52 +1756,52 @@ namespace RogueBasin {
 
         public void DrawText(string msg, Point p)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, LineAlignment.Left, statsColor);
+            renderer.DrawText(msg, p.x, p.y, largeTextSize, LineAlignment.Left, statsColor);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
+            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
         }
 
         public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, color);
+            renderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, color);
         }
 
         public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
+            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, color);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, size, lineAlignment, color);
+            renderer.DrawText(msg, p.x, p.y, size, lineAlignment, color);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
         public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p.x, p.y, smallTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
         public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p.x, p.y, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
         public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, size, lineAlignment, foregroundColor, backgroundColor);
+            renderer.DrawText(msg, p.x, p.y, size, lineAlignment, foregroundColor, backgroundColor);
         }
 
         void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
         {
-            mapRenderer.DrawTextWidth(msg, p.x, p.y, largeTextSize, width, color);
+            renderer.DrawTextWidth(msg, p.x, p.y, largeTextSize, width, color);
         }
 
         private void DrawUIText(string msg, Point p)
@@ -1808,12 +1811,12 @@ namespace RogueBasin {
 
         private void DrawUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, (int)Math.Round(largeTextSize * UIScaling), lineAlignment, color);
+            renderer.DrawText(msg, p.x, p.y, (int)Math.Round(largeTextSize * UIScaling), lineAlignment, color);
         }
 
         private void DrawSmallUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
         {
-            mapRenderer.DrawText(msg, p.x, p.y, (int)Math.Round(smallTextSize * UIScaling), lineAlignment, color);
+            renderer.DrawText(msg, p.x, p.y, (int)Math.Round(smallTextSize * UIScaling), lineAlignment, color);
         }
 
         private void DrawFocusWindow()
@@ -1933,34 +1936,39 @@ namespace RogueBasin {
 
         private Size UISpriteSize(string name)
         {
-            var unscaledSize = mapRenderer.GetUISpriteDimensions(name);
+            var unscaledSize = renderer.GetSpriteDimensions(name);
             return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
         }
 
         private Size TraumaUISpriteSize(int id)
         {
-            var unscaledSize = mapRenderer.GetTraumaSpriteDimensions(id);
+            var unscaledSize = renderer.GetTraumaSpriteDimensions(id);
             return new Size((int)Math.Round(unscaledSize.Width * UIScaling), (int)Math.Round(unscaledSize.Height * UIScaling));
         }
 
         private Size SpriteSize(string name)
         {
-            return mapRenderer.GetUISpriteDimensions(name);
+            return renderer.GetSpriteDimensions(name);
+        }
+
+        private string UISpritePath(string id)
+        {
+            return "ui." + id + ".png";
         }
 
         private void DrawUISprite(string name, Point p, double alpha = 1.0)
         {
-            mapRenderer.DrawUISprite(name, p.x, p.y, UIScaling, alpha);
+            renderer.DrawScaledSprite(UISpritePath(name), p.x, p.y, UIScaling, alpha);
         }
 
         private void DrawTraumaUISprite(int id, Point p, LibtcodColorFlags flags, double alpha = 1.0)
         {
-            mapRenderer.DrawTraumaUISprite(id, p.x, p.y, flags, UIScaling, alpha);
+            renderer.DrawTraumaSprite(id, p.x, p.y, flags, UIScaling, alpha);
         }
 
         private void DrawSprite(string name, Point p, double alpha = 1.0)
         {
-            mapRenderer.DrawUISprite(name, p.x, p.y, 1.0, alpha);
+            renderer.DrawScaledSprite(UISpritePath(name), p.x, p.y, 1.0, alpha);
         }
 
         private char GetCharIconForNumber(int no)
