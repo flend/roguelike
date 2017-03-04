@@ -18,34 +18,33 @@ namespace TraumaRL.Quests
 
     class ArmoryQuest : Quest
     {
-        int medicalLevel = 0;
-
         Dictionary<int, int> goodyRooms;
         Dictionary<int, string> goodyRoomKeyNames;
         Dictionary<int, List<Item>> itemsInArmory = new Dictionary<int, List<Item>>();
 
-        public ArmoryQuest(MapState mapState, QuestMapBuilder builder, LogGenerator logGen)
-            : base(mapState, builder, logGen)
+        public ArmoryQuest(QuestMapBuilder builder, LogGenerator logGen)
+            : base(builder, logGen)
         {
 
         }
 
-        public override void SetupQuest()
+        public override void SetupQuest(MapState mapState)
         {
-            SetupGoodyRooms();
-            PlaceLootInArmory();
-            AddGoodyQuestLogClues();
+            SetupGoodyRooms(mapState);
+            PlaceLootInArmory(mapState);
+            AddGoodyQuestLogClues(mapState);
         }
 
-        private void SetupGoodyRooms() {
+        private void SetupGoodyRooms(MapState mapState)
+        {
 
             //Ensure that we have a goody room on every level that will support it
-            var levelInfo = MapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var replaceableVaultsForLevels = levelInfo.ToDictionary(kv => kv.Key, kv => kv.Value.ReplaceableVaultConnections.Except(kv.Value.ReplaceableVaultConnectionsUsed));
             goodyRooms = new Dictionary<int, int>();
             goodyRoomKeyNames = new Dictionary<int, string>();
 
-            var manager = MapState.DoorAndClueManager;
+            var manager = mapState.DoorAndClueManager;
 
             foreach (var kv in replaceableVaultsForLevels)
             {
@@ -62,13 +61,13 @@ namespace TraumaRL.Quests
                 LogFile.Log.LogEntryDebug("Placing goody room at: level: " + thisLevel + " room: " + thisRoom, LogDebugLevel.Medium);
 
                 //Place door
-                var doorReadableId = MapState.LevelNames[thisLevel] + " armory";
+                var doorReadableId = mapState.LevelGraph.LevelNames[thisLevel] + " armory";
                 var doorId = doorReadableId;
 
                 var unusedColor = Builder.GetUnusedColor();
                 var clueName = unusedColor.Item2 + " key card";
 
-                Builder.PlaceLockedDoorOnMap(MapState, doorId, clueName, 1, unusedColor.Item1, thisConnection);
+                Builder.PlaceLockedDoorOnMap(mapState, doorId, clueName, 1, unusedColor.Item1, thisConnection);
 
                 goodyRooms[thisLevel] = thisRoom;
 
@@ -78,18 +77,18 @@ namespace TraumaRL.Quests
                 //Assume a critical path from the lower level elevator
                 var lowerLevelFloor = levelInfo[thisLevel].ConnectionsToOtherLevels.Min(level => level.Key);
                 var elevatorFromLowerLevel = levelInfo[thisLevel].ConnectionsToOtherLevels[lowerLevelFloor].Target;
-                var criticalPath = MapState.MapInfo.Model.GetPathBetweenVerticesInReducedMap(elevatorFromLowerLevel, thisRoom);
+                var criticalPath = mapState.MapInfo.Model.GetPathBetweenVerticesInReducedMap(elevatorFromLowerLevel, thisRoom);
 
-                var filteredRooms = Builder.FilterRoomsByPath(MapState, allowedRoomsForClues, criticalPath, true, QuestMapBuilder.CluePath.NotOnCriticalPath, true);
+                var filteredRooms = Builder.FilterRoomsByPath(mapState, allowedRoomsForClues, criticalPath, true, QuestMapBuilder.CluePath.NotOnCriticalPath, true);
                 var roomsToPlaceMonsters = new List<int>();
 
-                var roomsForMonsters = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 1, filteredRooms);
+                var roomsForMonsters = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(mapState, 1, filteredRooms);
                 var clues = manager.AddCluesToExistingDoor(doorId, roomsForMonsters);
 
 
                 goodyRoomKeyNames[thisLevel] = clueName;
                 var cluesAndColors = clues.Select(c => new Tuple<Clue, System.Drawing.Color, string>(c, unusedColor.Item1, clueName));
-                Builder.PlaceSimpleClueItems(MapState, cluesAndColors, true, false);
+                Builder.PlaceSimpleClueItems(mapState, cluesAndColors, true, false);
 
                 //Vault is used
                 levelInfo[thisLevel].ReplaceableVaultConnectionsUsed.Add(thisConnection);
@@ -97,19 +96,19 @@ namespace TraumaRL.Quests
 
         }
 
-        private void AddGoodyQuestLogClues()
+        private void AddGoodyQuestLogClues(MapState mapState)
         {
             //Ensure that we have a goody room on every level that will support it
-            var manager = MapState.DoorAndClueManager;
-            var mapInfo = MapState.MapInfo;
-            var levelInfo = MapState.LevelInfo;
+            var manager = mapState.DoorAndClueManager;
+            var mapInfo = mapState.MapInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
 
             foreach (var kv in goodyRooms)
             {
                 var thisLevel = kv.Key;
                 var thisRoom = kv.Value;
 
-                var doorId = MapState.LevelNames[thisLevel] + " armory";
+                var doorId = mapState.LevelGraph.LevelNames[thisLevel] + " armory";
 
                 //Clue
                 var allowedRoomsForClues = manager.GetValidRoomsToPlaceClueForDoor(doorId);
@@ -122,30 +121,33 @@ namespace TraumaRL.Quests
                 //Logs - try placing them on the critical path from the start of the game!
 
                 var criticalPathFromStart = mapInfo.Model.GetPathBetweenVerticesInReducedMap(0, thisRoom);
-                var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(MapState, allowedRoomsForClues, criticalPath, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
+                var preferredRoomsForLogsNonCritical = Builder.FilterRoomsByPath(mapState, allowedRoomsForClues, criticalPath, false, QuestMapBuilder.CluePath.OnCriticalPath, true);
 
-                var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(MapState, 1, preferredRoomsForLogsNonCritical);
+                var roomsForLogsNonCritical = Builder.PickClueRoomsFromReducedRoomsListUsingFullMapWeighting(mapState, 1, preferredRoomsForLogsNonCritical);
 
                 var logClues = manager.AddCluesToExistingDoor(doorId, roomsForLogsNonCritical);
                 var clueName = goodyRoomKeyNames[thisLevel];
-                var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGoodyRoomLogEntry(MapState, clueName, thisLevel, itemsInArmory[thisLevel]), logClues[0]);
-                Builder.PlaceLogClues(MapState, new List<Tuple<LogEntry, Clue>> { log1 }, true, true);
+                if (itemsInArmory[thisLevel].Count > 0)
+                {
+                    var log1 = new Tuple<LogEntry, Clue>(LogGen.GenerateGoodyRoomLogEntry(mapState, clueName, thisLevel, itemsInArmory[thisLevel]), logClues[0]);
+                    Builder.PlaceLogClues(mapState, new List<Tuple<LogEntry, Clue>> { log1 }, true, true);
+                }
             }
 
         }
 
-        private void PlaceLootInArmory()
+        private void PlaceLootInArmory(MapState mapState)
         {
-            var levelDifficulty = MapState.LevelDifficulty;
+            var levelDifficulty = mapState.LevelGraph.LevelDifficulty;
 
             //Add standard loot
-            AddStandardLootToArmory(MapState, Builder);
+            AddStandardLootToArmory(mapState, Builder);
 
             //Weapons and wetware
 
             itemsInArmory = new Dictionary<int, List<Item>>();
 
-            foreach (var l in MapState.GameLevels)
+            foreach (var l in mapState.LevelGraph.GameLevels)
             {
                 itemsInArmory[l] = new List<Item>();
             }
@@ -209,18 +211,18 @@ namespace TraumaRL.Quests
 
             //Guarantee on medical, at least 1 ware and a pistol or vibroblade
             var randomWare = level1Ware.Except(itemsPlaced).RandomElement();
-            Builder.PlaceItems(MapState, new List<Item> { randomWare }, new List<int> { goodyRooms[medicalLevel] }, false);
+            Builder.PlaceItems(mapState, new List<Item> { randomWare }, new List<int> { goodyRooms[mapState.StartLevel] }, false);
             itemsPlaced.Add(randomWare);
             itemsInArmory[0].Add(randomWare);
 
-            Builder.PlaceItems(MapState, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[medicalLevel] }, false);
+            Builder.PlaceItems(mapState, new List<Item> { lootLevels[0][0] }, new List<int> { goodyRooms[mapState.StartLevel] }, false);
             itemsPlaced.Add(lootLevels[0][0]);
             itemsInArmory[0].Add(lootLevels[0][0]);
-            Builder.PlaceItems(MapState, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[medicalLevel] }, false);
+            Builder.PlaceItems(mapState, new List<Item> { lootLevels[0][1] }, new List<int> { goodyRooms[mapState.StartLevel] }, false);
             itemsPlaced.Add(lootLevels[0][1]);
             itemsInArmory[0].Add(lootLevels[0][0]);
 
-            var levelsToHandleSeparately = new List<int> { medicalLevel };
+            var levelsToHandleSeparately = new List<int> { mapState.StartLevel };
 
             var totalLoot = lootLevels.SelectMany(kv => kv.Value).Except(itemsPlaced).Count();
             var totalRooms = goodyRooms.Select(kv => kv.Key).Except(levelsToHandleSeparately).Count();
@@ -249,8 +251,8 @@ namespace TraumaRL.Quests
 
                     var lootToPlace = possibleLoot.RandomElement();
 
-                    Builder.PlaceItems(MapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
-                    LogFile.Log.LogEntryDebug("Placing item: " + lootToPlace.SingleItemDescription + " on level " + MapState.LevelNames[level], LogDebugLevel.Medium);
+                    Builder.PlaceItems(mapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
+                    LogFile.Log.LogEntryDebug("Placing item: " + lootToPlace.SingleItemDescription + " on level " + mapState.LevelGraph.LevelNames[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
                     itemsInArmory[level].Add(lootToPlace);
@@ -271,8 +273,8 @@ namespace TraumaRL.Quests
 
                     var lootToPlace = possibleLoot.RandomElement();
 
-                    Builder.PlaceItems(MapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
-                    LogFile.Log.LogEntryDebug("Placing item (catchup): " + lootToPlace.SingleItemDescription + " on level " + MapState.LevelNames[level], LogDebugLevel.Medium);
+                    Builder.PlaceItems(mapState, new List<Item> { lootToPlace }, new List<int> { room }, false);
+                    LogFile.Log.LogEntryDebug("Placing item (catchup): " + lootToPlace.SingleItemDescription + " on level " + mapState.LevelGraph.LevelNames[level], LogDebugLevel.Medium);
 
                     itemsPlaced.Add(lootToPlace);
                     itemsInArmory[level].Add(lootToPlace);
@@ -291,11 +293,11 @@ namespace TraumaRL.Quests
                 foreach (var i in possibleLoot)
                 {
                     var randomRoom = goodyRooms.RandomElement();
-                    Builder.PlaceItems(MapState, new List<Item> { i }, new List<int> { randomRoom.Value }, false);
+                    Builder.PlaceItems(mapState, new List<Item> { i }, new List<int> { randomRoom.Value }, false);
                     itemsPlaced.Add(i);
                     itemsInArmory[randomRoom.Key].Add(i);
                     lootPlaced++;
-                    LogFile.Log.LogEntryDebug("Placing item (final): " + i.SingleItemDescription + " on level " + MapState.LevelNames[randomRoom.Key], LogDebugLevel.Medium);
+                    LogFile.Log.LogEntryDebug("Placing item (final): " + i.SingleItemDescription + " on level " + mapState.LevelGraph.LevelNames[randomRoom.Key], LogDebugLevel.Medium);
                 }
             }
 
@@ -306,7 +308,7 @@ namespace TraumaRL.Quests
 
         private void AddStandardLootToArmory(MapState mapState, QuestMapBuilder builder)
         {
-            var levelDifficulty = mapState.LevelDifficulty;
+            var levelDifficulty = mapState.LevelGraph.LevelDifficulty;
 
             foreach (var kv in goodyRooms.OrderBy(k => k.Key))
             {
@@ -366,6 +368,11 @@ namespace TraumaRL.Quests
             player.GiveItemNotFromDungeon(level1WareToGive);
 
             return itemsGiven;
+        }
+
+        public override void RegisterLevels(LevelRegister register)
+        {
+            //This quest does not require any specific levels, but will work with levels already present
         }
         
     }

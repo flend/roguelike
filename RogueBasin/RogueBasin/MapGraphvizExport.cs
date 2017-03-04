@@ -15,22 +15,12 @@ namespace GraphMap
         private MapModel model;
         private MapInfo mapInfo;
         private DoorAndClueManager doorAndClueManager;
-        private ImmutableDictionary<int, string> vertexMapping;
 
         public MapGraphvizExport(MapInfo mapInfo, DoorAndClueManager doorAndClueManager)
         {
             this.model = mapInfo.Model;
             this.mapInfo = mapInfo;
             this.doorAndClueManager = doorAndClueManager;
-            vertexMapping = new Dictionary<int, String>().ToImmutableDictionary();
-        }
-
-        public MapGraphvizExport(MapInfo mapInfo, DoorAndClueManager doorAndClueManager, ImmutableDictionary<int, string> vertexMapping)
-        {
-            this.model = mapInfo.Model;
-            this.mapInfo = mapInfo;
-            this.doorAndClueManager = doorAndClueManager;
-            this.vertexMapping = vertexMapping;
         }
 
         /// <summary>
@@ -43,6 +33,7 @@ namespace GraphMap
             var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(model.GraphNoCycles.mapNoCycles);
 
             graphviz.FormatVertex += graphviz_FormatVertex;
+            //_FormatVertex gives all clues, but DoorAndClueManager can't distinguish log clues from item clues
             graphviz.FormatEdge += graphviz_FormatEdge;
 
             graphviz.Generate(new FileDotEngineUndirected(), filename);
@@ -98,33 +89,7 @@ namespace GraphMap
 
             vertexFormattor.Label = door;
         }
-
-        private void graphviz_FormatDoorEdge(object sender, FormatEdgeEventArgs<int, TaggedEdge<int, string>> e)
-        {
-            //Take tag from TaggedEdge and add as label on edge in serialized view
-
-            TaggedEdge<int, string> edge = e.Edge;
-            var edgeFormattor = e.EdgeFormatter;
-
-            //If there is a door on this edge, override with this tag
-
-            var doorHere = doorAndClueManager.GetDoorsForEdge(edge);
-
-            string edgeTag = edge.Tag;
-
-            if (doorHere.Count() > 0)
-            {
-                edgeTag = "";
-                foreach(var door in doorHere)
-                    edgeTag += door.Id + "+";
-            }
-                
-
-            edgeFormattor.Label = new QuickGraph.Graphviz.Dot.GraphvizEdgeLabel();
-            edgeFormattor.Label.Value = edgeTag;
-
-        }
-
+        
         private void graphviz_FormatEdge(object sender, FormatEdgeEventArgs<int, TaggedEdge<int, string>> e)
         {
             //Take tag from TaggedEdge and add as label on edge in serialized view
@@ -162,9 +127,6 @@ namespace GraphMap
 
             string vertexLabel = vertexNo.ToString();
 
-            if (vertexMapping.ContainsKey(vertexNo))
-                vertexLabel = vertexMapping[vertexNo];
-
             //If there is a clue here, append clue
             var clues = doorAndClueManager.GetObjectiveAndClueIdsAtVertex(vertexNo);
 
@@ -187,8 +149,6 @@ namespace GraphMap
 
             string vertexLabel = vertexNo.ToString();
 
-            if (vertexMapping.ContainsKey(vertexNo))
-                vertexLabel = vertexMapping[vertexNo];
 
             foreach (var itemPlacement in mapInfo.Populator.RoomInfo(vertexNo).Items)
             {

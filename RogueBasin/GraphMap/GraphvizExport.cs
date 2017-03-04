@@ -13,7 +13,6 @@ namespace GraphMap
     {
         public static void OutputUndirectedGraph(IEdgeListGraph<int, TaggedEdge<int, string>> graph, string filename)
         {
-
             var graphviz = new GraphvizAlgorithm<int, TaggedEdge<int, string>>(graph);
 
             graphviz.FormatVertex += graphviz_FormatVertex;

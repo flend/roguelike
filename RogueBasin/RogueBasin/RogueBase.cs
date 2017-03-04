@@ -16,6 +16,18 @@ using SdlDotNet.Audio;
 namespace RogueBasin
 {
 
+    public struct ActionResult
+    {
+        public readonly bool timeAdvances;
+        public readonly bool centreOnPC;
+
+        public ActionResult(bool timeAdvances, bool centreOnPC)
+        {
+            this.timeAdvances = timeAdvances;
+            this.centreOnPC = centreOnPC;
+        }
+    }
+
     public enum ActionState
     {
         Running,
@@ -393,16 +405,12 @@ namespace RogueBasin
             try
             {
                 //Deal with PCs turn as appropriate
-                Tuple<bool, bool> inputResult;
-
-                bool timeAdvances = false;
-                bool centreOnPC = false;
+                ActionResult inputResult = new ActionResult(false, false);
 
                 switch (action)
                 {
                     case ActionState.Running:
-                        timeAdvances = running.RunNextStep();
-                        centreOnPC = true;
+                        inputResult = running.RunNextStep();
                         break;
 
                     case ActionState.Interactive:
@@ -430,16 +438,13 @@ namespace RogueBasin
                             }
                             else
                             {
-                                inputResult = new Tuple<bool, bool>(false, false);
+                                inputResult = new ActionResult(false, false);
                             }
                         }
-
-                        timeAdvances = inputResult.Item1;
-                        centreOnPC = inputResult.Item2;
                         break;
                 }
 
-                if (centreOnPC)
+                if (inputResult.centreOnPC)
                 {
                     Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
                 }
@@ -457,7 +462,7 @@ namespace RogueBasin
                 if (PlaySounds)
                     SoundPlayer.Instance().PlaySounds();
 
-                return timeAdvances;
+                return inputResult.timeAdvances;
             }
 
             catch (Exception ex)
@@ -468,19 +473,16 @@ namespace RogueBasin
             return false;
         }
 
-        private Tuple<bool, bool> PlayerAction(ActionState action, MouseMotionEventArgs mouseArgs)
+        private ActionResult PlayerAction(ActionState action, MouseMotionEventArgs mouseArgs)
         {
             var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
-
-            bool timeAdvances = false;
-            bool centreOnPC = false;
 
             LogFile.Log.LogEntryDebug("Action: mouseMotion: " + mouseArgs.ToString(), LogDebugLevel.Low);
 
             switch (inputState)
             {
                 case InputState.Targetting:
-                    timeAdvances = TargettingMouseMotionEvent(clickLocation);
+                    return TargettingMouseMotionEvent(clickLocation);
                     break;
 
                 //Normal movement on the map
@@ -503,10 +505,10 @@ namespace RogueBasin
                     break;
             }
 
-            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+            return new ActionResult(false, false);
         }
 
-        private Tuple<bool, bool> PlayerAction(ActionState action, MouseButtonEventArgs mouseArgs)
+        private ActionResult PlayerAction(ActionState action, MouseButtonEventArgs mouseArgs)
         {
             var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
 
@@ -519,20 +521,19 @@ namespace RogueBasin
             {
                 lastMouseActionWasDrag = false;
                 LogFile.Log.LogEntryDebug("Action: last action was drag so ignoring", LogDebugLevel.Low);
-                return new Tuple<bool, bool>(false, false);
+                return new ActionResult(false, false);
             }
 
             switch (inputState)
             {
                 case InputState.Targetting:
-                    timeAdvances = TargettingMouseEvent(clickLocation, mouseArgs.Button);
+                    return TargettingMouseEvent(clickLocation, mouseArgs.Button);
                     break;
                     
                 //Normal movement on the map
                 case InputState.MapMovement:
 
-                    timeAdvances = HandleMapMovementClick(clickLocation, mouseArgs.Button);
-                    break;
+                    return HandleMapMovementClick(clickLocation, mouseArgs.Button);
 
                 case InputState.MovieDisplay:
 
@@ -540,33 +541,29 @@ namespace RogueBasin
                     break;
             }
 
-            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+            return new ActionResult(timeAdvances, centreOnPC);
         }
 
-        private bool TargettingMouseEvent(Point clickLocation, MouseButton mouseButton)
+        private ActionResult TargettingMouseEvent(Point clickLocation, MouseButton mouseButton)
         {
-            bool timeAdvances = false;
-
             //If we clicked where we clicked before, it's confirmation
             //If we clicked elsewhere, it's a retarget, motion will take care of this
-            if (clickLocation == targetting.CurrentTarget)
+            if (clickLocation == targetting.CurrentTarget.MapCoord)
             {
-                timeAdvances = ExecuteTargettedAction(false);
+                return ExecuteTargettedAction(false);
             }
 
-            return timeAdvances;
+            return new ActionResult(false, false);
         }
 
-        private bool TargettingMouseMotionEvent(Point clickLocation)
+        private ActionResult TargettingMouseMotionEvent(Point clickLocation)
         {
-            bool timeAdvances = false;
+            targetting.RetargetSquare(new Location(Screen.Instance.LevelToDisplay, clickLocation));
 
-            targetting.RetargetSquare(clickLocation);
-            
-            return timeAdvances;
+            return new ActionResult(false, false);
         }
 
-        private bool HandleMapMovementClick(Point clickLocation, MouseButton mouseButtons)
+        private ActionResult HandleMapMovementClick(Point clickLocation, MouseButton mouseButtons)
         {
             if (mouseButtons == MouseButton.PrimaryButton)
             {
@@ -593,7 +590,7 @@ namespace RogueBasin
                     MouseFocusOnMap(clickLocation);
                 }
 
-                return false;
+                return new ActionResult(false, false);
             }
         }
 
@@ -622,13 +619,15 @@ namespace RogueBasin
                 shifted = true;
             }
 
+            var gameLocation = new Location(Screen.Instance.LevelToDisplay, mousePosition);
+
             if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
             {
-                targetting.TargetMoveOrFireInstant(mousePosition, shifted);
+                targetting.TargetMoveOrFireInstant(gameLocation, shifted);
             }
             else
             {
-                targetting.TargetMoveOrThrowInstant(mousePosition, shifted);
+                targetting.TargetMoveOrThrowInstant(gameLocation, shifted);
             }
         }
         
@@ -641,7 +640,7 @@ namespace RogueBasin
 
         private void ResetDragTracker()
         {
-            LogFile.Log.LogEntryDebug("Drag tracker reset", LogDebugLevel.High);
+            LogFile.Log.LogEntryDebug("Drag tracker reset", LogDebugLevel.Low);
             DragTracker = new Point(0, 0);
         }
 
@@ -649,8 +648,8 @@ namespace RogueBasin
         {
             var thisDrag = new Point(mouseArgs.RelativeX, mouseArgs.RelativeY);
             var newDragTotal = DragTracker + thisDrag;
-            LogFile.Log.LogEntryDebug("dragTracker: " + DragTracker, LogDebugLevel.High);
-            LogFile.Log.LogEntryDebug("newDragTotal: " + newDragTotal, LogDebugLevel.High);
+            LogFile.Log.LogEntryDebug("dragTracker: " + DragTracker, LogDebugLevel.Low);
+            LogFile.Log.LogEntryDebug("newDragTotal: " + newDragTotal, LogDebugLevel.Low);
 
             if (!lastMouseActionWasDrag && Math.Abs(mouseArgs.RelativeX + mouseArgs.RelativeY) < mouseDragStartThreshold)
             {
@@ -873,10 +872,8 @@ namespace RogueBasin
         }
 
         //Return code is if the command was successful and time increments (i.e. the player has done a time-using command like moving)
-        private Tuple<bool, bool> PlayerAction(ActionState action, KeyboardEventArgs args)
+        private ActionResult PlayerAction(ActionState action, KeyboardEventArgs args)
         {
-            bool timeAdvances = false;
-            bool centreOnPC = false;
 
             LogFile.Log.LogEntryDebug("Action: keyboard: " + args.ToString(), LogDebugLevel.Low);
 
@@ -884,20 +881,18 @@ namespace RogueBasin
             
             try
             {
-                var result = ActionOnKeypress(args);
-                timeAdvances = result.Item1;
-                centreOnPC = result.Item2;
+                return ActionOnKeypress(args);
             }
             catch (Exception ex)
             {
                 //This should catch most exceptions that happen as a result of user commands
                 MessageBox.Show("Exception occurred: " + ex.Message + " but continuing on anyway");
                 LogFile.Log.LogEntryDebug("Exception occurred: " + ex.Message + "\n" + ex.StackTrace, LogDebugLevel.High);
+                return new ActionResult(false, false);
             }
-            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
         }
 
-        private Tuple<bool, bool> ActionOnKeypress(KeyboardEventArgs args)
+        private ActionResult ActionOnKeypress(KeyboardEventArgs args)
         {
             bool timeAdvances = false;
             bool centreOnPC = false;
@@ -905,14 +900,16 @@ namespace RogueBasin
             //Only on key up
             if (args.Down)
             {
-                return new Tuple<bool, bool>(false, false);
+                return new ActionResult(false, false);
             }
 
             //Each interactive state has different keys
             switch (inputState)
             {
                 case InputState.Targetting:
-                    timeAdvances = TargettingKeyboardEvent(args);
+                    var actionResult = TargettingKeyboardEvent(args);
+                    timeAdvances = actionResult.timeAdvances;
+                    centreOnPC = actionResult.centreOnPC;
                     break;
 
                 case InputState.YesNoPrompt:
@@ -1057,6 +1054,12 @@ namespace RogueBasin
                                 centreOnPC = true;
                                 break;
 
+                            case Key.C:
+                                //Centre on player
+                                Screen.Instance.CenterViewOnPoint(Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
+                                timeAdvances = false;
+                                break;
+
                             case Key.X:
                                 //Examine
                                 timeAdvances = Examine();
@@ -1069,9 +1072,10 @@ namespace RogueBasin
 
                             case Key.Period:
                                 // Do nothing
-                                timeAdvances = DoNothing();
+                                var nothingResult = DoNothing();
                                 // Don't recentre - useful for viewing
-                                centreOnPC = false;
+                                timeAdvances = nothingResult.timeAdvances;
+                                centreOnPC = nothingResult.centreOnPC;
                                 break;
                         }
                     }
@@ -1580,14 +1584,16 @@ namespace RogueBasin
 
                     if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift) || args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl) || args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.RightAlt)))
                     {
-                        timeAdvances = Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
-                        centreOnPC = true;
+                        var actionResultKey = Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
+                        timeAdvances = actionResultKey.timeAdvances;
+                        centreOnPC = actionResultKey.centreOnPC;
                     }
 
                     if (wasDirection && (mod == KeyModifier.Numeric) && (args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift)))
                     {
-                        timeAdvances = running.StartRunning(direction.x, direction.y);
-                        centreOnPC = true;
+                        var actionResultShifted = running.StartRunning(direction.x, direction.y);
+                        timeAdvances = actionResultShifted.timeAdvances;
+                        centreOnPC = actionResultShifted.centreOnPC;
                     }
 
                     if (wasDirection && mod == KeyModifier.Arrow && !(args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl)))
@@ -1618,7 +1624,7 @@ namespace RogueBasin
                     break;
             }
 
-            return new Tuple<bool, bool>(timeAdvances, centreOnPC);
+            return new ActionResult(timeAdvances, centreOnPC);
         }
 
         
@@ -1671,24 +1677,7 @@ namespace RogueBasin
             MusicPlayer.Instance().Stop();
             PlayMusic = false;
         }
-
-        public void DoArenaSelection()
-        {
-            this.SetSpecialScreenAndHandler(Screen.Instance.ArenaSelectionScreen, ArenaSelectionKeyHandler);
-            SetupArenaSelection();
-        }
-
-        public void DoFunModeDeath()
-        {
-            this.SetSpecialScreenAndHandler(Screen.Instance.FunModeDeathScreen, FunModeDeathKeyHandler);
-        }
-
-        private void SetupArenaSelection()
-        {
-            Screen.Instance.ArenaItems = Game.Dungeon.Items.Where(i => i.LocationLevel == Game.Dungeon.Player.LocationLevel);
-            Screen.Instance.ArenaMonsters = Game.Dungeon.Monsters.Where(m => m.LocationLevel == Game.Dungeon.Player.LocationLevel);
-        }
-
+        
         private void MovieDisplayKeyboardEvent(KeyboardEventArgs args)
         {
             if (args.Key == Key.Return)
@@ -1711,74 +1700,6 @@ namespace RogueBasin
             if (args.Button == MouseButton.PrimaryButton)
             {
                 FinishMovie();
-            }
-        }
-
-        public void CharacterSelectionKeyHandler(KeyboardEventArgs args)
-        {
-
-            if (args.Key == Key.One)
-            {
-                PostCharacterSelection(PlayerClass.Athlete, FunMode);
-            }
-            if (args.Key == Key.Two)
-            {
-                PostCharacterSelection(PlayerClass.Gunner, FunMode);
-            }
-            if (args.Key == Key.Three)
-            {
-                PostCharacterSelection(PlayerClass.Sneaker, FunMode);
-            }
-            if (args.Key == Key.R)
-            {
-                FunMode = false;
-                //Is reset next method, but used to toggle display
-                Game.Dungeon.FunMode = false;
-            }
-            if (args.Key == Key.F)
-            {
-                FunMode = true;
-                Game.Dungeon.FunMode = true;
-            }
-        }
-
-        public void PostCharacterSelection(PlayerClass playerClass, bool funMode)
-        {
-            ClearSpecialScreenAndHandler();
-
-            SetupGame();
-            Game.Dungeon.Player.SetPlayerClass(playerClass);
-            Game.Dungeon.FunMode = funMode;
-
-            //Setup initial levels
-            SetupRoyaleEntryLevels();
-
-            Game.Dungeon.Player.LocationLevel = 0;
-            Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;
-
-            PrepareGameEntry();
-
-            //Follow on to initial arena selection
-            DoArenaSelection();
-        }
-
-        public void ArenaSelectionKeyHandler(KeyboardEventArgs args)
-        {
-            if (args.Key == Key.LeftArrow)
-            {
-                Game.Dungeon.TeleportToAdjacentArena(false);
-                SetupArenaSelection();
-            }
-            if (args.Key == Key.RightArrow)
-            {
-                Game.Dungeon.TeleportToAdjacentArena(true);
-                SetupArenaSelection();
-            }
-            if (args.Key == Key.F)
-            {
-                ClearSpecialScreenAndHandler();
-
-                StartGame();
             }
         }
 
@@ -1817,20 +1738,6 @@ namespace RogueBasin
         private void RestartGameAfterDeath()
         {
             SetupGame();
-            DoMenuScreen();
-        }
-
-        //Do menu screen, onto character selection
-        public void DoMenuScreen()
-        {
-            var menuScreen = new MenuScreen(DoCharacterSelection);
-            SetSpecialScreenAndHandler(menuScreen.DrawMenuScreen, menuScreen.MenuScreenKeyboardHandler);
-        }
-
-        public void DoCharacterSelection()
-        {
-            SetSpecialScreenAndHandler(Screen.Instance.CharacterSelectionScreen, CharacterSelectionKeyHandler);
-            LogFile.Log.LogEntryDebug("Requesting character gen screen", LogDebugLevel.High);
         }
 
         private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
@@ -1905,7 +1812,7 @@ namespace RogueBasin
             }
         }
 
-        private bool TargettingKeyboardEvent(KeyboardEventArgs args)
+        private ActionResult TargettingKeyboardEvent(KeyboardEventArgs args)
         {
             Point direction = new Point(9, 9);
             KeyModifier mod = KeyModifier.Arrow;
@@ -1931,10 +1838,10 @@ namespace RogueBasin
 
             if (wasDirection)
             {
-                Point newPoint = new Point(targetting.CurrentTarget.x + direction.x, targetting.CurrentTarget.y + direction.y);
+                Point newPoint = new Point(targetting.CurrentTarget.MapCoord.x + direction.x, targetting.CurrentTarget.MapCoord.y + direction.y);
                 RetargetSquare(newPoint);
                 
-                return false;
+                return new ActionResult(false, false);
             }
 
             if (validFire)
@@ -1946,22 +1853,22 @@ namespace RogueBasin
                 targetting.DisableTargettingMode();
             }
 
-            return false;
+            return new ActionResult(false, false);
         }
 
-        private void RetargetSquare(Point newPoint)
+        private void RetargetSquare(Point pointFromKeyboard)
         {
-            int level = Game.Dungeon.Player.LocationLevel;
+            int level = Screen.Instance.LevelToDisplay;
 
-            if (newPoint.x < 0 || newPoint.x >= Game.Dungeon.Levels[level].width || newPoint.y < 0 || newPoint.y >= Game.Dungeon.Levels[level].height)
+            if (pointFromKeyboard.x < 0 || pointFromKeyboard.x >= Game.Dungeon.Levels[level].width || pointFromKeyboard.y < 0 || pointFromKeyboard.y >= Game.Dungeon.Levels[level].height)
                 return;
 
-            targetting.RetargetSquare(newPoint);
+            targetting.RetargetSquare(new Location(level, pointFromKeyboard));
         }
 
-        private bool ExecuteTargettedAction(bool alternativeActionMode)
+        private ActionResult ExecuteTargettedAction(bool alternativeActionMode)
         {
-            bool timeAdvances = false;
+            ActionResult result = new ActionResult(false, false);
             bool restoreExamine = true;
             Monster examineCreature = Screen.Instance.CreatureToView;
             Item examineItem = Screen.Instance.ItemToView;
@@ -1977,12 +1884,12 @@ namespace RogueBasin
             {
                 case TargettingAction.Weapon:
 
-                    timeAdvances = FireTargettedWeapon();
+                    result = FireTargettedWeapon();
                     break;
 
                 case TargettingAction.Utility:
 
-                    timeAdvances = ThrowTargettedUtility();
+                    result = ThrowTargettedUtility();
                     break;
 
                 case TargettingAction.Examine:
@@ -1992,28 +1899,28 @@ namespace RogueBasin
 
                 case TargettingAction.MoveOrWeapon:
                     {
-                        SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, targetting.CurrentTarget);
+                        SquareContents squareContents = Game.Dungeon.MapSquareContents(targetting.CurrentTarget);
                         if (squareContents.monster != null)
                         {
                             if (!alternativeActionMode)
                             {
-                                timeAdvances = FireTargettedWeapon();
+                                result = FireTargettedWeapon();
                             }
                             else
                             {
-                                timeAdvances = RunToTargettedDestination();
+                                result = RunToTargettedDestination();
                             }
                         }
                         else
                         {
                             if (!alternativeActionMode)
                             {
-                                timeAdvances = RunToTargettedDestination();
+                                result = RunToTargettedDestination();
                             }
                             else
                             {
 
-                                timeAdvances = FireTargettedWeapon();
+                                result = FireTargettedWeapon();
                             }
                         }
                     }
@@ -2021,34 +1928,34 @@ namespace RogueBasin
 
                 case TargettingAction.MoveOrThrow:
                     {
-                        SquareContents squareContents = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, targetting.CurrentTarget);
+                        SquareContents squareContents = Game.Dungeon.MapSquareContents(targetting.CurrentTarget);
                         if (squareContents.monster != null)
                         {
                             if (!alternativeActionMode)
                             {
-                                timeAdvances = ThrowTargettedUtility();
+                                result = ThrowTargettedUtility();
                             }
                             else
                             {
-                                timeAdvances = RunToTargettedDestination();
+                                result = RunToTargettedDestination();
                             }
                         }
                         else
                         {
                             if (!alternativeActionMode)
                             {
-                                timeAdvances = RunToTargettedDestination();
+                                result = RunToTargettedDestination();
                             }
                             else
                             {
-                                timeAdvances = ThrowTargettedUtility();
+                                result = ThrowTargettedUtility();
                             }
                         }
                     }
                     break;
 
                 case TargettingAction.Move:
-                    timeAdvances = RunToTargettedDestination();
+                    result = RunToTargettedDestination();
                     break;
             }
             
@@ -2059,55 +1966,55 @@ namespace RogueBasin
                 Screen.Instance.FeatureToView = examineFeature;
             }
 
-            return timeAdvances;
+            return result;
         }
         
 
-        private bool RunToTargettedDestination()
+        private ActionResult RunToTargettedDestination()
         {
             if (!Game.Dungeon.IsSquareSeenByPlayer(targetting.CurrentTarget) && !Screen.Instance.SeeAllMap)
             {
-                return false;
+                return new ActionResult(false, false);
             }
 
             var player = Game.Dungeon.Player;
 
-            IEnumerable<Point> path = player.GetPlayerRunningPath(targetting.CurrentTarget);
+            IEnumerable<Point> path = player.GetPlayerRunningPath(targetting.CurrentTarget.MapCoord);
 
             if (!path.Any())
             {
-                return false;
+                return new ActionResult(false, false);
             }
             
             return running.StartRunning(path);
         }
 
-        private bool ThrowTargettedUtility()
+        private ActionResult ThrowTargettedUtility()
         {
             if (!Game.Dungeon.IsSquareInPlayerFOV(targetting.CurrentTarget))
             {
-                return false;
+                return new ActionResult(false, false);
             }
 
             var player = Game.Dungeon.Player;
-            var timeAdvances = ThrowTargettedUtility(targetting.CurrentTarget);
+            var throwSuccessfully = ThrowTargettedUtility(targetting.CurrentTarget.MapCoord);
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
-            return timeAdvances;
+            return new ActionResult(throwSuccessfully, throwSuccessfully);
         }
 
-        private bool FireTargettedWeapon()
+        private ActionResult FireTargettedWeapon()
         {
             if (!Game.Dungeon.IsSquareInPlayerFOV(targetting.CurrentTarget))
             {
-                return false;
+                return new ActionResult(false, false);
             }
 
             var player = Game.Dungeon.Player;
-            var timeAdvances = FireTargettedWeapon(targetting.CurrentTarget);
+            var fireSuccessfully = FireTargettedWeapon(targetting.CurrentTarget.MapCoord);
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
-            return timeAdvances;
+            return new ActionResult(fireSuccessfully, fireSuccessfully);
         }
 
         private void ScreenLevelDown()
@@ -2123,7 +2030,7 @@ namespace RogueBasin
 
         }
 
-        private bool DoNothing()
+        private ActionResult DoNothing()
         {
             return Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(0, 0));
         }
@@ -2815,9 +2722,9 @@ namespace RogueBasin
             inputState = newState;
         }
         
-        public SquareContents SetViewPanelToTargetAtSquare(Point start)
+        public SquareContents SetViewPanelToTargetAtSquare(Location start)
         {
-            SquareContents sqC = Game.Dungeon.MapSquareContents(Game.Dungeon.Player.LocationLevel, start);
+            SquareContents sqC = Game.Dungeon.MapSquareContents(start);
             Screen.Instance.CreatureToView = sqC.monster; //may reset to null
             if (sqC.items.Count > 0)
                 Screen.Instance.ItemToView = sqC.items[0];
@@ -2888,74 +2795,7 @@ namespace RogueBasin
             Screen.Instance.EnqueueMovie(movie);
             Screen.Instance.NeedsUpdate = true;
         }
-
-        public void SetupRoyaleEntryLevels()
-        {
-            Game.Dungeon.SetupRoyaleEntryLevels();
-        }
-
-        private void PreArenaEntryState() {
-            inputState = InputState.PreMapMovement;
-            //Screen.Instance.SeeAllMap = true;
-            //Screen.Instance.SeeAllMonsters = true;
-        }
-
-        private void PostArenaEntryState()
-        {
-            inputState = InputState.MapMovement;
-            //Screen.Instance.SeeAllMap = false;
-            //Screen.Instance.SeeAllMonsters = false;
-        }
-
-        /// <summary>
-        /// Player starts a new level and can choose an arena
-        /// </summary>
-        /// <param name="level"></param>
-        internal void PlayerStartsLevel(int level)
-        {
-            //Input state where the user can switch levels
-            PreArenaEntryState();
-
-            LogFile.Log.LogEntryDebug("Player starts level " + level, LogDebugLevel.Medium);
-        }
-
-        /// <summary>
-        /// Player actually enters the arena
-        /// </summary>
-        /// <param name="level"></param>
-        internal void PlayerEntersLevel(int level)
-        {
-            //Normal input state
-            PostArenaEntryState();
-
-            //If we are nerd, activate stealth
-            if(Game.Dungeon.Player.PlayerClass == PlayerClass.Sneaker) {
-                Game.Dungeon.Player.ToggleEquipWetware(typeof(Items.StealthWare));
-            }
-
-            LogFile.Log.LogEntryDebug("Player enters level " + level, LogDebugLevel.Medium);
-        }
-
-        /// <summary>
-        /// Player exists the arena successfully
-        /// </summary>
-        /// <param name="level"></param>
-        internal void PlayerExitsLevel(int level)
-        {
-            //Switching level state
-            PreArenaEntryState();
-
-            LogFile.Log.LogEntryDebug("Player exists level " + level, LogDebugLevel.Medium);
-
-            Game.Dungeon.ExitLevel();
-        }
-
-        public void PrepareGameEntry()
-        {
-            PlayerStartsLevel(0);
-
-        }
-
+        
         internal void DoEndOfGame(bool lived, bool won, bool quit)
         {
             Screen.Instance.EndOfGameWon = won;
@@ -2964,11 +2804,6 @@ namespace RogueBasin
             GameStarted = false;
 
             this.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, EndOfGameSelectionKeyHandler);
-        }
-
-        internal void SetupFunModeDeath()
-        {
-            this.SetSpecialScreenAndHandler(Screen.Instance.FunModeDeathScreen, FunModeDeathKeyHandler);
         }
 
         internal void QuitImmediately()

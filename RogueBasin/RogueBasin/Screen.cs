@@ -181,7 +181,7 @@ namespace RogueBasin {
         /// <summary>
         /// Targetting cursor
         /// </summary>
-        public Point Target { get; set; }
+        public Location Target { get; set; }
 
         public TargettingInfo TargetInfo { get; set; }
         public TargettingAction TargetAction { get; set; }
@@ -232,7 +232,14 @@ namespace RogueBasin {
         static readonly string blueTargetTile = "bluetarget";
         static readonly string greenTargetTile = "greentarget";
         static readonly string redTargetTile = "redtarget";
+        static readonly string orangeTargetTile = "orangetarget";
         static readonly string blackTargetTile = "blacktarget";
+
+        static readonly string blueOutlineTargetTile = "blueoutlinetarget";
+        static readonly string greenOutlineTargetTile = "greenoutlinetarget";
+        static readonly string redOutlineTargetTile = "redoutlinetarget";
+        static readonly string orangeOutlineTargetTile = "orangeoutlinetarget";
+        static readonly string blackOutlineTargetTile = "blackoutlinetarget";
 
         public int LevelToDisplay
         {
@@ -949,219 +956,7 @@ namespace RogueBasin {
         }
 
         private System.Drawing.Color textColor = System.Drawing.Color.Khaki;
-
-        public void CharacterSelectionScreen()
-        {
-            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
-            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
-
-            var titleColor = System.Drawing.Color.Khaki;
-
-            var centreXOffset = ScreenWidth / 4;
-            var centreYOffset = ScreenHeight / 4;
-
-            var topY = centreYOffset / 2;
-            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
-
-            var centreX = ScreenWidth / 2;
-
-            var lanceCentre = new Point(centreXOffset, graphicsY);
-            var crackCentre = new Point(centreXOffset * 2, graphicsY);
-            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
-
-            var titleLineOffset = ScreenHeight / 32;
-
-            DrawLargeText("Congratulations!", new Point(centreX, topY), LineAlignment.Center, statsColor);
-            DrawLargeText("You VOLUNTEERed for the RoyaLe!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("VERY LITTLE (6 arenas)", new Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("now stands between you and victory!", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
-
-            DrawLargeText("State your name and history:", new Point(centreX, topY + titleLineOffset * 5), LineAlignment.Center, textColor);
-            
-            var characterOffset = ScreenHeight / 19;
-
-            DrawText("[1] Lance", lanceCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
-            DrawSpriteByCentre("lance", lanceCentre);
-
-            DrawText("[2] Crack", crackCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
-            DrawSpriteByCentre("crack", crackCentre);
-
-            DrawText("[3] N3rd", nerdCentre - new Point(0, characterOffset), LineAlignment.Center, statsColor);
-            DrawSpriteByCentre("nerd", nerdCentre);
-
-            var textY = ScreenHeight / 11;
-            var textWidth = (int)Math.Floor(ScreenWidth / 5.0);
-            var textXOffset = (int)Math.Floor(-ScreenWidth / 10.0);
-
-            var lanceText = "A disgraced athlete who was dismissed for his violent conduct in track and field. Ideal for the Arena.";
-            DrawTextWidth(lanceText, lanceCentre + new Point(textXOffset, textY), textWidth, statsColor);
-
-            var crackText = "In 2072 a commando was sent to prison by a military court for a crime he absolutely did commit. Now fighting for the pleasure of TV viewers everywhere!";
-            DrawTextWidth(crackText, crackCentre + new Point(textXOffset, textY), textWidth, statsColor);
-
-            var nerdText = "Having finally won GrandMaster league in popular video game 'Running Hunger Royale' the nerd was completely unprepared for his 'prize'!";
-            DrawTextWidth(nerdText, nerdCentre + new Point(textXOffset, textY), textWidth, statsColor);
-
-            var specialY = (int)Math.Floor(ScreenHeight / 3.2);
-
-            var lanceSpecial = "Special: Keep moving for a melee and defence bonus!";
-            DrawTextWidth(lanceSpecial, lanceCentre + new Point(textXOffset, specialY), textWidth, textColor);
-
-            var crackSpecial = "Special: Halt in place for a ranged and defence bonus!";
-            DrawTextWidth(crackSpecial, crackCentre + new Point(textXOffset, specialY), textWidth, textColor);
-
-            var nerdSpecial = "Special: Sneak around and cause mayhem!";
-            DrawTextWidth(nerdSpecial, nerdCentre + new Point(textXOffset, specialY), textWidth, textColor);
-
-            var styleY = (int)Math.Floor(ScreenHeight / 2.1);
-
-            if (Game.Dungeon.FunMode)
-            {
-                var funText1 = "FUN MODE!: Life's a laugh and death's a joke, it's true.";
-                var funText2 = "[R]: For roguelike mode!";
-
-                DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
-                DrawText(funText2, new Point(centreX, graphicsY + styleY + titleLineOffset), LineAlignment.Center, textColor);
-            }
-            else
-            {
-                var funText1 = "ROGUELIKE MODE!: I learnt to Crawl before I could walk.";
-                var funText2 = "[F]: For FUN mode!";
-
-                DrawText(funText1, new Point(centreX, graphicsY + styleY), LineAlignment.Center, statsColor);
-                DrawText(funText2, new Point(centreX, graphicsY + styleY + titleLineOffset), LineAlignment.Center, textColor);
-            }
-        }
-
-        public void FunModeDeathScreen()
-        {
-            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
-            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
-
-            var titleColor = System.Drawing.Color.Khaki;
-
-            var centreXOffset = ScreenWidth / 4;
-            var centreYOffset = ScreenHeight / 4;
-
-            var topY = centreYOffset / 2;
-            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
-
-            var centreX = ScreenWidth / 2;
-
-            var lanceCentre = new Point(centreXOffset, graphicsY);
-            var crackCentre = new Point(centreXOffset * 2, graphicsY);
-            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
-
-            var titleLineOffset = 30;
-
-            DrawLargeText("Congratulations!", new Point(centreX, topY), LineAlignment.Center, statsColor);
-            DrawLargeText("You DIED in the service of PRIME TIME TV!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("But...", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("But...", new Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, textColor);
-
-            DrawLargeText("You think the TV execs let you off that easy?", new Point(centreX, topY + titleLineOffset * 6), LineAlignment.Center, textColor);
-
-            string deathStr = "After just " + Game.Dungeon.NumberOfFunModeDeaths + " stupid deaths?";
-            if (Game.Dungeon.NumberOfFunModeDeaths == 1)
-            {
-                deathStr = "After just one stupid death?";
-            }
-            DrawLargeText(deathStr, new Point(centreX, topY + titleLineOffset * 7), LineAlignment.Center, textColor);
-
-            DrawLargeText("Press [F] to restart the area", new Point(centreX, topY + titleLineOffset * 9), LineAlignment.Center, statsColor);
-
-            DrawLargeText("Oh yeah, you lose any fame you had...", new Point(centreX, topY + titleLineOffset * 10), LineAlignment.Center, textColor);
-        }
-
-        public int ArenaSelected { get; set; }
-        public IEnumerable<Monster> ArenaMonsters { get; set; }
-        public IEnumerable<Item> ArenaItems { get; set; }
         
-        public void ArenaSelectionScreen()
-        {
-            var titleColor = System.Drawing.Color.Khaki;
-
-            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
-            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
-
-            var centreXOffset = ScreenWidth / 4;
-            var centreYOffset = ScreenHeight / 4;
-
-            var topY = centreYOffset / 2;
-            var graphicsY = centreYOffset * 2 - centreYOffset / 2;
-
-            var centreX = ScreenWidth / 2;
-
-            var lanceCentre = new Point(centreXOffset, graphicsY);
-            var crackCentre = new Point(centreXOffset * 2, graphicsY);
-            var nerdCentre = new Point(centreXOffset * 3, graphicsY);
-
-            var titleLineOffset = 30;
-
-            DrawLargeText("Entering arena: " + (Game.Dungeon.ArenaLevelNumber() + 1), new Point(centreX, topY), LineAlignment.Center, statsColor);
-            DrawLargeText("Pick your poison!", new Point(centreX, topY + titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("[Left] and [Right] to choose difficulty", new Point(centreX, topY + 2 * titleLineOffset), LineAlignment.Center, textColor);
-            DrawLargeText("[F] to begin", new Point(centreX, topY + 3 * titleLineOffset), LineAlignment.Center, textColor);
-
-            string difficultyText = null;
-            if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 3)
-            {
-                difficultyText = "Easy (?)";
-            }
-            else if (Game.Dungeon.Levels.Count() - Game.Dungeon.Player.LocationLevel == 2)
-            {
-                difficultyText = "Hard (!)";
-            }
-            else
-            {
-                difficultyText = "You must be joking (!!!)";
-            }
-
-            DrawLargeText("Difficulty: " + difficultyText, new Point(centreX, topY + 4 * titleLineOffset), LineAlignment.Center, statsColor);
-
-            var monsterStr = "Arena denizens:";
-            DrawLargeText(monsterStr, new Point(centreX, topY + 6 * titleLineOffset), LineAlignment.Center, titleColor);
-
-            var monsterTL = new Point(ScreenWidth / 8, topY + 7 * titleLineOffset + 30);
-            var maxWidth = 3 * ScreenWidth / 4;
-            var maxIcons = maxWidth / 64;
-
-            for (int i = 0; i < ArenaMonsters.Count(); i++)
-            {
-                var monster = ArenaMonsters.ElementAt(i);
-                var columnNo = i % maxIcons;
-                var rowNo = (int)Math.Floor(i / (double)maxIcons);
-                var thisPoint = new Point(columnNo * 64, rowNo * 96);
-                Point offset = new Point(0, 0);
-                if (monster.GameSprite == "boss")
-                {
-                    offset = new Point(-32, 32);
-                    DrawSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
-
-                }
-                else
-                {
-                    DrawSpriteByCentre(monster.GameSprite, monsterTL + thisPoint + offset);
-                    DrawSpriteByCentre("monster_level_" + monster.Level, monsterTL + thisPoint + new Point(0, 32) + offset);
-                }
-            }
-
-            var itemTL = new Point(ScreenWidth / 8, centreYOffset + 500);
-
-            var equipStr = "Equipment:";
-            DrawLargeText(equipStr, new Point(centreX, itemTL.y - (int)Math.Ceiling(titleLineOffset * 1.5)), LineAlignment.Center, titleColor);
-
-            for (int i = 0; i < ArenaItems.Count(); i++)
-            {
-                var item = ArenaItems.ElementAt(i);
-                var columnNo = i % maxIcons;
-                var rowNo = (int)Math.Floor(i / (double)maxIcons);
-                var thisPoint = new Point(columnNo * 64, rowNo * 96);
-                DrawSpriteByCentre(item.GameSprite, itemTL + thisPoint);
-            }
-
-        }
-
         int textLineNumber;
 
         internal void EndOfGameScreen()
@@ -1208,7 +1003,7 @@ namespace RogueBasin {
 
             DrawNextLine(fameText, centrePoint, titleColor);
 
-            var viewingFigures = (int)Math.Round(100 * totalFame / (double)(300 * Dungeon.TotalArenas * 1.2 * 2));
+            var viewingFigures = 0;
 
             string fameStr = "Slime Mold";
 
@@ -1259,25 +1054,6 @@ namespace RogueBasin {
 
             //Deaths
 
-            if(Game.Dungeon.FunMode) {
-                if (Game.Dungeon.NumberOfFunModeDeaths > 0)
-                {
-                    var deathStr = "You died: " + Game.Dungeon.NumberOfFunModeDeaths + " times (it's just for fun, right?)";
-                    DrawNextLine(deathStr, centrePoint, statsColor);
-                }
-
-                if (EndOfGameWon)
-                {
-                    var deathStr = "Well, you won. Congrats and all that. Wanna play properly now?";
-                    DrawNextLine(deathStr, centrePoint, statsColor);
-
-                    if (Game.Dungeon.NumberOfFunModeDeaths == 0)
-                    {
-                        var deathStr2 = "And you didn't die? Bet you wish you'd pressed [R] now!";
-                        DrawNextLine(deathStr2, centrePoint, statsColor);
-                    }
-                }
-            }
 
             //Total kills
             var killRecord = Game.Dungeon.GetKillRecord();
@@ -1412,33 +1188,35 @@ namespace RogueBasin {
                 return;
             }
 
-            if (!isViewVisible(Target))
+            if (!isViewVisible(Target.MapCoord))
                 return;
 
             //Draw the area of effect
             if (Game.Dungeon.IsSquareSeenByPlayer(Target) || SeeAllMap)
             {
-                var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
-                var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(player.LocationLevel, Target));
+                var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
+                var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
 
-                DrawTargettingOverSquaresAndCreatures(pathToTarget, "orangetarget");
-                DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, "redtarget");
+//                var targetSquareContents =  
+
+                DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
+                DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, redTargetTile);
 
                 if (TargetInRange)
                 {
                     var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
-                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
                 }
                 else
                 {
                     var targetSprite = blackTargetTile;
-                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
                 }
             }
             else
             {
                 var targetSprite = redTargetTile;
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target)] = new TileEngine.TileCell(targetSprite);
+                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
             }
         }
 
@@ -1576,6 +1354,8 @@ namespace RogueBasin {
             Point meleeWeaponUICenter = UIScale(new Point(38, 92));
             Point utilityUICenter = UIScale(new Point(300, 92));
             Point wetwareUICenter = UIScale(new Point(390, 92));
+
+            var lineHeight = 15;
 
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left_extended");
@@ -1718,31 +1498,44 @@ namespace RogueBasin {
 
             if (ExtraUI)
             {
-                var playerHPTextOffset = UIScale(new Point(10, 0));
+                var col1XOffset = 10;
+                var col2XOffset = 170;
+
+                var playerHPTextOffset = UIScale(new Point(col1XOffset, 0));
                 var hpStr = "HP: " + player.Hitpoints + "/" + player.MaxHitpoints;
                 DrawUIText(hpStr, playerTextUI_UsefulTL + playerHPTextOffset);
 
-                //Draw Fame
-                var playerFameTextOffset = UIScale(new Point(10, 60));
-                var fameStr = "Fame: " + player.CombatXP;
-                DrawText(fameStr, playerTextUI_UsefulTL + playerFameTextOffset);
-                var playerExpFameTextOffset = UIScale(new Point(10, 75));
-                //var fameExpStr = " [H]eal: " + player.GetHealXPCost() + " [L]evel: " + player.GetLevelXPCost();
-                //DrawText(fameExpStr, playerUI_TL.Add(playerExpFameTextOffset));
+                var playerShieldTextOffset = UIScale(new Point(col2XOffset, 0));
+                var shieldStr = "SD: " + player.Shield + "/" + player.MaxShield;
+                DrawUIText(shieldStr, playerTextUI_UsefulTL + playerShieldTextOffset);
 
-                var playerMoveOffset = UIScale(new Point(170, 0));
+                var playerEnergyTextOffset = UIScale(new Point(col1XOffset, lineHeight));
+                var energyStr = "EN: " + player.Energy + "/" + player.MaxEnergy;
+                DrawUIText(energyStr, playerTextUI_UsefulTL + playerEnergyTextOffset);
+
+                var playerLevelTextOffset = UIScale(new Point(col1XOffset, 2 * lineHeight));
+                var levelStr = "PLvl: " + player.LocationLevel + " (" + Game.Dungeon.DungeonInfo.LevelNaming[player.LocationLevel] + ")";
+                DrawText(levelStr, playerTextUI_UsefulTL + playerLevelTextOffset);
+
+                var visibleLevelTextOffset = UIScale(new Point(col1XOffset, 3* lineHeight));
+                var visibleLevelStr = "VLvl: " + LevelToDisplay + " (" + Game.Dungeon.DungeonInfo.LevelNaming[LevelToDisplay] + ")";
+                DrawText(visibleLevelStr, playerTextUI_UsefulTL + visibleLevelTextOffset);
+
+                var xChunkOffset = 50;
+
+                var playerMoveOffset = UIScale(new Point(col1XOffset, lineHeight * 4));
                 var moveStr = "Move: " + player.TurnsMoving;
                 DrawText(moveStr, playerTextUI_UsefulTL + playerMoveOffset);
 
-                var playerStationaryOffset = UIScale(new Point(170, 15));
+                var playerStationaryOffset = UIScale(new Point(col2XOffset, lineHeight * 4));
                 var actionStr = "No A: " + player.TurnsSinceAction;
                 DrawText(actionStr, playerTextUI_UsefulTL + playerStationaryOffset);
 
-                var playerRestOffset = UIScale(new Point(170, 30));
+                var playerRestOffset = UIScale(new Point(col1XOffset, lineHeight * 5));
                 var restStr = "Rest: " + player.TurnsInactive;
                 DrawText(restStr, playerTextUI_UsefulTL + playerRestOffset);
 
-                var dodgeBonusOffset = UIScale(new Point(170, 45));
+                var dodgeBonusOffset = UIScale(new Point(col2XOffset, lineHeight * 5));
                 var dodgeStr = "Dodge: " + player.CalculateDamageModifierForAttacksOnPlayer(null, true);
                 DrawText(dodgeStr, playerTextUI_UsefulTL + dodgeBonusOffset);
             }
@@ -2386,7 +2179,7 @@ namespace RogueBasin {
                         //In range firing
                         if (weapon.HasFireAction() && Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, creature, weapon.RangeFire(), currentFOV))
                         {
-                            targetSprite = blueTargetTile;
+                            targetSprite = blueOutlineTargetTile;
                         }
                         else
                         {

@@ -43,6 +43,17 @@ namespace RogueBasin
         {
             return new Location(level, mapLocation);
         }
+
+        /// <summary>
+        /// Really, all uses of this class should use relative coordinates now, and this method should not need to be used
+        /// </summary>
+        /// <param name="mapState"></param>
+        /// <returns></returns>
+        public Point ToRelativePoint(MapInfo mapInfo)
+        {
+            var roomOrigin = mapInfo.Room(roomId).Location;
+            return mapLocation - roomOrigin;
+        }
     }
 
 
@@ -157,9 +168,9 @@ namespace RogueBasin
     public class MonsterRoomPlacement
     {
         public readonly Monster monster;
-        public readonly Location location;
+        public readonly Point location;
 
-        public MonsterRoomPlacement(Monster m, Location loc)
+        public MonsterRoomPlacement(Monster m, Point loc)
         {
             monster = m;
             location = loc;
@@ -169,9 +180,9 @@ namespace RogueBasin
     public class TriggerRoomPlacement
     {
         public readonly DungeonSquareTrigger trigger;
-        public readonly Location location;
+        public readonly Point location;
 
-        public TriggerRoomPlacement(DungeonSquareTrigger t, Location loc)
+        public TriggerRoomPlacement(DungeonSquareTrigger t, Point loc)
         {
             trigger = t;
             location = loc;
@@ -181,9 +192,9 @@ namespace RogueBasin
     public class FeatureRoomPlacement
     {
         public readonly Feature feature;
-        public readonly Location location;
+        public readonly Point location;
 
-        public FeatureRoomPlacement(Feature f, Location loc)
+        public FeatureRoomPlacement(Feature f, Point loc)
         {
             feature = f;
             location = loc;
@@ -193,15 +204,32 @@ namespace RogueBasin
     public class ItemRoomPlacement
     {
         public readonly Item item;
-        public readonly Location location;
+        public readonly Point location;
 
-        public ItemRoomPlacement(Item i, Location loc)
+        public ItemRoomPlacement(Item i, Point loc)
         {
             item = i;
             location = loc;
         }
     }
 
+    public class LockRoomPlacement
+    {
+        public readonly Lock thisLock;
+        public readonly Point location;
+
+        public LockRoomPlacement(Lock l, Point loc)
+        {
+            thisLock = l;
+            location = loc;
+        }
+    }
+
+    /// <summary>
+    /// Stores the location of items within a room
+    /// This is used to track the contents of rooms at map generation stage
+    /// The absolute co-ordinate system of the level may change as the level grows, so all co-ordinates must be relative to the room origin
+    /// </summary>
     public class RoomInfo {
 
         private int id;
@@ -209,7 +237,8 @@ namespace RogueBasin
         private List<MonsterRoomPlacement> monsters = new List<MonsterRoomPlacement>();
         private List<ItemRoomPlacement> items = new List<ItemRoomPlacement>();
         private List<TriggerRoomPlacement> triggers = new List<TriggerRoomPlacement>();
-        
+        private List<LockRoomPlacement> locks = new List<LockRoomPlacement>();
+
         public RoomInfo(int roomId) {
             this.id = roomId;
         }
@@ -226,7 +255,7 @@ namespace RogueBasin
             }
         }
 
-        public bool IsFeatureAt(Location loc)
+        public bool IsFeatureAt(Point loc)
         {
             return features.Where(f => f.location == loc).Any();
         }
@@ -249,17 +278,17 @@ namespace RogueBasin
             items.Add(item);
         }
 
-        public void AddTrigger(TriggerRoomPlacement trigger)
-        {
-            triggers.Add(trigger);
-        }
-
         public IEnumerable<ItemRoomPlacement> Items
         {
             get
             {
                 return items;
             }
+        }
+
+        public void AddTrigger(TriggerRoomPlacement trigger)
+        {
+            triggers.Add(trigger);
         }
 
         public IEnumerable<TriggerRoomPlacement> Triggers
@@ -270,31 +299,20 @@ namespace RogueBasin
             }
         }
 
-        public int Id { get { return id; } }
-    }
-
-    public class DoorContentsInfo
-    {
-        private string id;
-        private List<Lock> locks = new List<Lock>();
-
-        public DoorContentsInfo(string doorId)
+        public void AddLock(LockRoomPlacement thisLock)
         {
-            this.id = doorId;
+            locks.Add(thisLock);
         }
 
-        public void AddLock(Lock newLock)
-        {
-            locks.Add(newLock);
-        }
-
-        public IEnumerable<Lock> Locks
+        public IEnumerable<LockRoomPlacement> Locks
         {
             get
             {
                 return locks;
             }
         }
+
+        public int Id { get { return id; } }
     }
 
     /// <summary>
@@ -393,8 +411,8 @@ namespace RogueBasin
         {
             var roomInfo = Populator.RoomInfo(roomIndex);
 
-            var occupiedFeaturePoints = roomInfo.Features.Where(f => f.feature.IsBlocking).Select(f => f.location.MapCoord);
-            var occupiedMonsterPoints = roomInfo.Monsters.Select(m => m.location.MapCoord);
+            var occupiedFeaturePoints = roomInfo.Features.Where(f => f.feature.IsBlocking).Select(f => f.location);
+            var occupiedMonsterPoints = roomInfo.Monsters.Select(m => m.location);
 
             return occupiedFeaturePoints.Concat(occupiedMonsterPoints);
         }

@@ -177,7 +177,7 @@ namespace GraphMap
         private IEnumerable<int> GetValidRoomsToPlaceClue(List<string> doorsToAvoidIds, Connection edgeToLock, IEnumerable<int> lockedClues)
         {
             //Check the edge is in the reduced map (will throw an exception if can't find)
-            List<TaggedEdge<int, string>> foundEdge = new List<TaggedEdge<int, string>>(); ;
+            List<TaggedEdge<int, string>> foundEdge = new List<TaggedEdge<int, string>>();
             if (edgeToLock != null)
                 foundEdge.Add(mapNoCycles.GetEdgeBetweenRoomsNoCycles(edgeToLock.Source, edgeToLock.Target));
 
@@ -438,10 +438,24 @@ namespace GraphMap
         public IEnumerable<Clue> PlaceDoorAndClues(DoorRequirements doorReq, IEnumerable<int> clueVertices)
         {
             //Check all clues are in the valid placement area
-            if (clueVertices.Except(GetValidRoomsToPlaceClueForDoor(doorReq.Location)).Any())
-                throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClueForDoor(doorReq.Location).Except(clueVertices).ToString(), doorReq.Location.Source, doorReq.Location.Target));
+            var invalidClueVertices = clueVertices.Except(GetValidRoomsToPlaceClueForDoor(doorReq.Location));
+            if (invalidClueVertices.Any())
+                throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", IntsToString(invalidClueVertices), doorReq.Location.Source, doorReq.Location.Target));
 
             return PlaceDoorAndCluesNoChecks(doorReq, clueVertices);
+        }
+
+        private string IntsToString(IEnumerable<int> input)
+        {
+            StringBuilder strB = new StringBuilder();
+            foreach(var inputNo in input) {
+                strB.Append(inputNo);
+                strB.Append(", ");
+            }
+
+            var str = strB.ToString();
+
+            return str.Substring(0, str.Length - 2);
         }
 
         /// <summary>
@@ -762,8 +776,9 @@ namespace GraphMap
                 throw new ApplicationException("Can't find door id " + doorId);
 
             var validRoomsToPlaceClues = GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap);
-            if (newClueVertices.Except(validRoomsToPlaceClues).Any())
-                throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", GetValidRoomsToPlaceClueForDoor(door.DoorConnectionReducedMap).Except(newClueVertices).ToString(), door.DoorConnectionReducedMap.Source, door.DoorConnectionReducedMap.Target));
+            var invalidClueVertices = newClueVertices.Except(validRoomsToPlaceClues);
+            if (invalidClueVertices.Any())
+                throw new ApplicationException(String.Format("Can't put clues: {0}, behind door at {1}:{2}", IntsToString(invalidClueVertices), door.DoorConnectionReducedMap.Source, door.DoorConnectionReducedMap.Target));
 
             return PlaceCluesAndUpdateDependencyGraph(newClueVertices, door, null);
         }
@@ -775,8 +790,9 @@ namespace GraphMap
                 throw new ApplicationException("Can't find obj id " + objectiveId);
 
             var validRoomsForObjectiveClues = GetValidRoomsToPlaceClueForObjective(objective.OpenLockIndex);
-            if (newClueVertices.Except(validRoomsForObjectiveClues).Any())
-                throw new ApplicationException(String.Format("Can't put clues: {0}, for objective at {1}", validRoomsForObjectiveClues.Except(newClueVertices).ToString(), objective.Vertex));
+            var invalidClueVertices = newClueVertices.Except(validRoomsForObjectiveClues);
+            if (invalidClueVertices.Any())
+                throw new ApplicationException(String.Format("Can't put clues: {0}, for objective at {1}", IntsToString(invalidClueVertices), objective.Vertex));
 
             return PlaceCluesAndUpdateDependencyGraph(newClueVertices, null, objective);
         }

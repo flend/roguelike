@@ -15,8 +15,8 @@ namespace TraumaRL.Quests
         public bool ClueOnElevatorLevel { get; set; }
         public int MaxDoorsToMake { get; set; }
 
-        public BlockElevatorQuest(MapState mapState, QuestMapBuilder builder, LogGenerator logGen, int questLevel, Dictionary<int, List<Connection>> roomConnectivityMap)
-            : base(mapState, builder, logGen)
+        public BlockElevatorQuest(QuestMapBuilder builder, LogGenerator logGen, int questLevel, Dictionary<int, List<Connection>> roomConnectivityMap)
+            : base(builder, logGen)
         {
             this.questLevel = questLevel;
             this.roomConnectivityMap = roomConnectivityMap;
@@ -25,11 +25,11 @@ namespace TraumaRL.Quests
             MaxDoorsToMake = 1;
         }
 
-        public override void SetupQuest()
+        public override void SetupQuest(MapState mapState)
         {
             try
             {
-                BlockElevatorPaths(MapState, Builder, roomConnectivityMap, questLevel, MaxDoorsToMake, ClueOnElevatorLevel);
+                BlockElevatorPaths(mapState, Builder, roomConnectivityMap, questLevel, MaxDoorsToMake, ClueOnElevatorLevel);
             }
             catch (Exception ex)
             {
@@ -40,7 +40,7 @@ namespace TraumaRL.Quests
         private bool BlockElevatorPaths(MapState mapState, QuestMapBuilder builder, Dictionary<int, List<Connection>> roomConnectivityMap,
         int levelForBlocks, int maxDoorsToMake, bool clueOnElevatorLevel)
         {
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var connectionsFromThisLevel = levelInfo[levelForBlocks].ConnectionsToOtherLevels;
 
             var pairs = Utility.GetPermutations<int>(connectionsFromThisLevel.Keys, 2);
@@ -67,7 +67,7 @@ namespace TraumaRL.Quests
                 var colorToUse = builder.GetUnusedColor();
 
                 var doorName = colorToUse.Item2 + " key card";
-                var doorId = mapState.LevelNames[levelForBlocks] + "-" + doorName + Game.Random.Next();
+                var doorId = mapState.LevelGraph.LevelNames[levelForBlocks] + "-" + doorName + Game.Random.Next();
                 var doorColor = colorToUse.Item1;
 
                 LogFile.Log.LogEntryDebug("Blocking elevators " + pairToTry.ElementAt(0) + " to " + pairToTry.ElementAt(1) + " with " + doorId, LogDebugLevel.High);
@@ -137,5 +137,9 @@ namespace TraumaRL.Quests
             }
         }
 
+        public override void RegisterLevels(LevelRegister register)
+        {
+            //This quest does not require any specific levels, but will work with levels already present
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace TraumaRL
         {
             var traumaRunner = new TraumaRunner();
 
-            traumaRunner.TemplatedMapTest();
+            traumaRunner.SetupWorldAndRunGame();
         }
     }
 }

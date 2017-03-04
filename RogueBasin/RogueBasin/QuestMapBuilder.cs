@@ -7,6 +7,9 @@ using System.Text;
 
 namespace RogueBasin
 {
+    /// <summary>
+    /// TODO: Use relative to room co-ordinates for all placing and utility functions
+    /// </summary>
     public class QuestMapBuilder
     {
         private static List<Tuple<System.Drawing.Color, string>> availableColors = new List<Tuple<System.Drawing.Color, string>> {
@@ -43,7 +46,7 @@ namespace RogueBasin
 
             var roomPoint = roomPoints.First();
 
-            bool success = mapInfo.Populator.AddFeatureToRoom(mapInfo, roomPoint.roomId, roomPoint.mapLocation, objectiveFeature);
+            bool success = mapInfo.Populator.AddFeatureToRoom(mapInfo, roomPoint.roomId, roomPoint.ToRelativePoint(mapInfo), objectiveFeature);
 
             if (!success)
             {
@@ -85,7 +88,7 @@ namespace RogueBasin
                 return;
 
             var featuresObjectsDetails = points.Select(p => new Tuple<RogueBasin.Point, DecorationFeatureDetails.Decoration>
-                (p + mapInfo.Room(roomId).Location, Utility.ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
+                (p, Utility.ChooseItemFromWeights<DecorationFeatureDetails.Decoration>(decorationDetails)));
             var featureObjectsToPlace = featuresObjectsDetails.Select(dt => new Tuple<RogueBasin.Point, Feature>
                 (dt.Item1, new RogueBasin.Features.StandardDecorativeFeature(dt.Item2.representation, dt.Item2.colour, dt.Item2.isBlocking)));
 
@@ -117,12 +120,12 @@ namespace RogueBasin
         public void PlaceLockedDoorOnMap(MapState mapState, Lock lockedDoor, Door door)
         {
             var doorInfo = mapState.MapInfo.GetDoorForConnection(door.DoorConnectionFullMap);
-            lockedDoor.LocationLevel = doorInfo.LevelNo;
-            lockedDoor.LocationMap = doorInfo.MapLocation;
 
-            mapState.MapInfo.Populator.GetDoorInfo(door.Id).AddLock(lockedDoor);
+            var roomId = door.DoorConnectionFullMap.Source;
+            var roomRelativeLocation = doorInfo.MapLocation - mapState.MapInfo.Room(roomId).Location;
+
+            mapState.MapInfo.Populator.RoomInfo(roomId).AddLock(new LockRoomPlacement(lockedDoor, roomRelativeLocation));
         }
-
 
         public Tuple<System.Drawing.Color, string> GetUnusedColor()
         {
@@ -159,15 +162,15 @@ namespace RogueBasin
 
         public void UseVault(MapState mapState, Connection vaultConnection)
         {
-            var levelInfo = mapState.LevelInfo;
-            var levelForVault = mapState.GameLevels.Where(l => levelInfo[l].ReplaceableVaultConnections.Contains(vaultConnection)).First();
+            var levelInfo = mapState.LevelGraph.LevelInfo;
+            var levelForVault = mapState.LevelGraph.GameLevels.Where(l => levelInfo[l].ReplaceableVaultConnections.Contains(vaultConnection)).First();
 
             levelInfo[levelForVault].ReplaceableVaultConnectionsUsed.Add(vaultConnection);
         }
 
         private IEnumerable<Connection> GetAllUsedVaults(MapState mapState)
         {
-            return mapState.GameLevels.SelectMany(l => mapState.LevelInfo[l].ReplaceableVaultConnectionsUsed);
+            return mapState.LevelGraph.GameLevels.SelectMany(l => mapState.LevelGraph.LevelInfo[l].ReplaceableVaultConnectionsUsed);
         }
 
         public IEnumerable<Connection> GetAllAvailableVaults(MapState mapState)
@@ -177,7 +180,7 @@ namespace RogueBasin
 
         public IEnumerable<Connection> GetAllVaults(MapState mapState)
         {
-            return mapState.GameLevels.SelectMany(l => mapState.LevelInfo[l].ReplaceableVaultConnections);
+            return mapState.LevelGraph.GameLevels.SelectMany(l => mapState.LevelGraph.LevelInfo[l].ReplaceableVaultConnections);
         }
 
         public enum CluePath
@@ -268,7 +271,7 @@ namespace RogueBasin
 
                 var pointToPlaceClue = pointsForClues.Shuffle().First();
 
-                mapInfo.Populator.AddMonsterToRoom(newMonster, pointToPlaceClue.roomId, pointToPlaceClue.ToLocation());
+                mapInfo.Populator.AddMonsterToRoom(newMonster, pointToPlaceClue.roomId, pointToPlaceClue.ToRelativePoint(mapState.MapInfo));
             }
         }
 
@@ -287,7 +290,7 @@ namespace RogueBasin
             var monstersAndPoints = shuffledPoints.Zip(monstersToPlace, Tuple.Create);
             foreach (var m in monstersAndPoints)
             {
-                mapInfo.Populator.AddMonsterToRoom(m.Item2, m.Item1.roomId, m.Item1.ToLocation());
+                mapInfo.Populator.AddMonsterToRoom(m.Item2, m.Item1.roomId, m.Item1.ToRelativePoint(mapState.MapInfo));
             }
         }
 
@@ -317,7 +320,7 @@ namespace RogueBasin
                 }
 
                 var pointToPlaceClue = pointsForClues.Shuffle().First();
-                mapInfo.Populator.AddItemToRoom(itemToPlace, pointToPlaceClue.roomId, pointToPlaceClue.ToLocation());
+                mapInfo.Populator.AddItemToRoom(itemToPlace, pointToPlaceClue.roomId, pointToPlaceClue.ToRelativePoint(mapState.MapInfo));
                 pointsPlaced.Add(pointToPlaceClue);
             }
 
@@ -428,7 +431,7 @@ namespace RogueBasin
         public int PlaceMovieClueForObjectiveInVault(MapState mapState, string objectiveId, char representation, string pickupMovie, string description, IEnumerable<int> idealLevelsForClue)
         {
             var manager = mapState.DoorAndClueManager;
-            var levelInfo = mapState.LevelInfo;
+            var levelInfo = mapState.LevelGraph.LevelInfo;
             var mapInfo = mapState.MapInfo;
 
             var possibleRoomsForCaptainsId = manager.GetValidRoomsToPlaceClueForObjective(objectiveId);
@@ -477,7 +480,7 @@ namespace RogueBasin
 
             foreach (var pi in pointsAndItems)
             {
-                mapInfo.Populator.AddItemToRoom(pi.Item1, pi.Item2.roomId, pi.Item2.ToLocation());
+                mapInfo.Populator.AddItemToRoom(pi.Item1, pi.Item2.roomId, pi.Item2.ToRelativePoint(mapState.MapInfo));
             }
         }
 

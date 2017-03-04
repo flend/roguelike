@@ -68,9 +68,9 @@ namespace DDRogueTest
             var mapInfo = StandardTwoRoomOneLevelMapInfo();
             var room0Info = mapInfo.Populator.RoomInfo(0);
 
-            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 2)));
-            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 3)));
-            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Location(0, new Point(4, 4)));
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(1, 2));
+            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Point(2, 3));
+            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Point(4, 4));
             room0Info.AddFeature(blockingFeatureToPlace);
             room0Info.AddFeature(nonBlockingFeatureToPlace);
             room0Info.AddMonster(monsterToPlace);
@@ -96,7 +96,7 @@ namespace DDRogueTest
             var mapInfo = StandardTwoRoomOneLevelMapInfo();
             var room0Info = mapInfo.Populator.RoomInfo(0);
 
-            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 1)));
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(1, 1));
             room0Info.AddFeature(blockingFeatureToPlace);
 
             var roomLevelLocation = mapInfo.Room(0).Location;
@@ -117,21 +117,21 @@ namespace DDRogueTest
             var mapInfo = SmallTwoRoomOneLevelMapInfo();
             var room0Info = mapInfo.Populator.RoomInfo(0);
 
-            FeatureRoomPlacement blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 1)));
+            FeatureRoomPlacement blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(1, 1));
             room0Info.AddFeature(blockingFeatureToPlace);
-            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(2, 1)));
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(2, 1));
             room0Info.AddFeature(blockingFeatureToPlace);
-            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(3, 1)));
-            room0Info.AddFeature(blockingFeatureToPlace);
-
-            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(3, 2)));
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(3, 1));
             room0Info.AddFeature(blockingFeatureToPlace);
 
-            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 3)));
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(3, 2));
             room0Info.AddFeature(blockingFeatureToPlace);
-            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(2, 3)));
+
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(1, 3));
             room0Info.AddFeature(blockingFeatureToPlace);
-            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(3, 3)));
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(2, 3));
+            room0Info.AddFeature(blockingFeatureToPlace);
+            blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(3, 3));
             room0Info.AddFeature(blockingFeatureToPlace);
 
             var roomLevelLocation = mapInfo.Room(0).Location;
@@ -148,9 +148,9 @@ namespace DDRogueTest
             var mapInfo = StandardTwoRoomOneLevelMapInfo();
             var room0Info = mapInfo.Populator.RoomInfo(0);
 
-            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 1)));
-            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 2)));
-            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Location(0, new Point(3, 3)));
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(1, 1));
+            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Point(2, 2));
+            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Point(3, 3));
             room0Info.AddFeature(blockingFeatureToPlace);
             room0Info.AddFeature(nonBlockingFeatureToPlace);
             room0Info.AddMonster(monsterToPlace);
@@ -172,9 +172,9 @@ namespace DDRogueTest
             var mapInfo = StandardTwoRoomOneLevelMapInfo();
             var room0Info = mapInfo.Populator.RoomInfo(0);
 
-            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Location(0, new Point(1, 2)));
-            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Location(0, new Point(2, 1)));
-            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Location(0, new Point(3, 4)));
+            var blockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.BlockingFeature(), new Point(1, 2));
+            var nonBlockingFeatureToPlace = new FeatureRoomPlacement(new TestEntities.NonBlockingFeature(), new Point(2, 1));
+            var monsterToPlace = new MonsterRoomPlacement(new TestEntities.TestMonster(), new Point(3, 4));
             room0Info.AddFeature(blockingFeatureToPlace);
             room0Info.AddFeature(nonBlockingFeatureToPlace);
             room0Info.AddMonster(monsterToPlace);

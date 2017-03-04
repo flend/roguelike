@@ -57,7 +57,17 @@
     <Compile Include="ArrayCache.cs" />
     <Compile Include="BasicLineTargetInfo.cs" />
     <Compile Include="CustomInputArgs.cs" />
+    <Compile Include="DifficultyOrdering.cs" />
+    <Compile Include="DirectedGraphWrapper.cs" />
+    <Compile Include="GraphVizExporter.cs" />
+    <Compile Include="LevelAndDifficulty.cs" />
+    <Compile Include="LevelBuilder.cs" />
+    <Compile Include="LevelGraph.cs" />
     <Compile Include="LevelGraphvizExport.cs" />
+    <Compile Include="LevelNaming.cs" />
+    <Compile Include="LevelRegister.cs" />
+    <Compile Include="LevelTreeBuilder.cs" />
+    <Compile Include="LevelType.cs" />
     <Compile Include="MapGraphvizExport.cs" />
     <Compile Include="ExamineTargettingInfo.cs" />
     <Compile Include="GrenadeTargettingInfo.cs" />
@@ -68,6 +78,7 @@
     <Compile Include="MonsterEvent.cs" />
     <Compile Include="MoveTargettingInfo.cs" />
     <Compile Include="NullTargettingInfo.cs" />
+    <Compile Include="RequiredLevelInfo.cs" />
     <Compile Include="Running.cs" />
     <Compile Include="ShotgunTargettingInfo.cs" />
     <Compile Include="TargettingAction.cs" />
@@ -298,8 +309,6 @@
     <Compile Include="Items\BioWare.cs" />
     <Compile Include="Items\ShotgunTypeWeapon.cs" />
     <Compile Include="Items\Axe.cs" />
-    <Compile Include="Locks\EntryLock.cs" />
-    <Compile Include="Locks\ExitLock.cs" />
     <Compile Include="Locks\SimpleOptionalLockedDoorWithMovie.cs" />
     <Compile Include="IScreenRenderer.cs" />
     <Compile Include="ScreenRendererSDLDotNet.cs" />
@@ -351,8 +360,6 @@
     <Compile Include="PlayerEffects\AimEnhance.cs" />
     <Compile Include="RecurringAnimation.cs" />
     <Compile Include="RoutabilityUtilities.cs" />
-    <Compile Include="RoyaleDungeonLevelMaker.cs" />
-    <Compile Include="RoyaleMonsterPlacement.cs" />
     <Compile Include="MusicPlayer.cs" />
     <Compile Include="ShuffleExtension.cs" />
     <Compile Include="SoundPlayer.cs" />
@@ -1181,5 +1188,15 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\ui\ui_left_extended.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ico\trauma.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\blackoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\blueoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\greenoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\orangeoutlinetarget.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\redoutlinetarget.png" />
   </ItemGroup>
 </Project>

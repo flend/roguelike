@@ -1668,6 +1668,11 @@ namespace RogueBasin
 
         }
 
+        public SquareContents MapSquareContents(Location location)
+        {
+            return MapSquareContents(location.Level, location.MapCoord);
+        }
+
         /// <summary>
         /// Does the square contain a player or creature?
         /// </summary>
@@ -3477,11 +3482,18 @@ namespace RogueBasin
             }
         }
 
-        public bool IsSquareInPlayerFOV(Point target)
+        public bool IsSquareInPlayerFOV(Location target)
         {
-            if (target.x > 0 && target.y >= 0 && target.x < Levels[player.LocationLevel].width && target.y < Levels[player.LocationLevel].height)
+            if (target.Level != player.LocationLevel)
             {
-                MapSquare targetSquare = Levels[player.LocationLevel].mapSquares[target.x, target.y];
+                return false;
+            }
+
+            var targetCoord = target.MapCoord;
+
+            if (targetCoord.x >= 0 && targetCoord.y >= 0 && targetCoord.x < Levels[target.Level].width && targetCoord.y < Levels[target.Level].height)
+            {
+                MapSquare targetSquare = Levels[target.Level].mapSquares[targetCoord.x, targetCoord.y];
                 if (targetSquare.InPlayerFOV)
                 {
                     return true;
@@ -3490,11 +3502,13 @@ namespace RogueBasin
             return false;
         }
 
-        public bool IsSquareSeenByPlayer(Point target)
+        public bool IsSquareSeenByPlayer(Location target)
         {
-            if (target.x > 0 && target.y >= 0 && target.x < Levels[player.LocationLevel].width && target.y < Levels[player.LocationLevel].height)
+            var targetCoord = target.MapCoord;
+
+            if (targetCoord.x >= 0 && targetCoord.y >= 0 && targetCoord.x < Levels[target.Level].width && targetCoord.y < Levels[target.Level].height)
             {
-                MapSquare targetSquare = Levels[player.LocationLevel].mapSquares[target.x, target.y];
+                MapSquare targetSquare = Levels[target.Level].mapSquares[targetCoord.x, targetCoord.y];
                 if (targetSquare.SeenByPlayer)
                 {
                     return true;
@@ -3940,8 +3954,6 @@ namespace RogueBasin
             if (FunMode && !verb.Contains("quit"))
             {
                 //Restart the level with 0 fame
-                RestartLevelOnFailure();
-                NumberOfFunModeDeaths++;
                 PlayerDeathOccured = false;
                 return;
             }
@@ -4051,19 +4063,7 @@ namespace RogueBasin
 
         }
 
-
-        public int NumberOfFunModeDeaths { get; private set; }
-
-        private void RestartLevelOnFailure()
-        {
-            TeleportToArena(player.LocationLevel);
-            player.CombatXP = 0;
-            Game.Dungeon.Player.HealCompletely();
-            Screen.Instance.CenterViewOnPoint(player.LocationLevel, player.LocationMap);
-            Screen.Instance.NeedsUpdate = true;
-            Game.Base.SetupFunModeDeath();
-        }
-
+        
         public struct KillRecord
         {
             public int killCount;
@@ -4224,12 +4224,12 @@ namespace RogueBasin
             }
         }
 
-        internal bool AddTrigger(DungeonSquareTrigger trigger, Location location)
+        public bool AddTrigger(DungeonSquareTrigger trigger, Location location)
         {
             return AddTrigger(location.Level, location.MapCoord, trigger);
         }
 
-        internal bool AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
+        public bool AddTrigger(int level, Point point, DungeonSquareTrigger trigger)
         {
             //Set the trigger position
             trigger.Level = level;
@@ -5175,81 +5175,7 @@ namespace RogueBasin
         public MapState MapState { get; set; }
 
         public MonsterPlacement MonsterPlacement { get; private set; }
-
-        private RoyaleDungeonLevelMaker royaleDungeonMaker; 
-
-        public void SetupRoyaleEntryLevels()
-        {
-            royaleDungeonMaker = new RoyaleDungeonLevelMaker();
-
-            royaleDungeonMaker.CreateNextDungeonChoices(1);
-            royaleDungeonMaker.SetPlayerStartLocation();
-        }
-
-        public void GenerateNextRoyaleLevels()
-        {
-            var minLevel = (int)Math.Max(player.Level, ArenaLevelNumber() + 2);
-            royaleDungeonMaker.CreateNextDungeonChoices(minLevel);
-        }
-
-        /// <summary>
-        /// The player moves to view a new arena
-        /// </summary>
-        /// <param name="p"></param>
-        internal bool TeleportToAdjacentArena(bool arenaHigher)
-        {
-            int newLevel = player.LocationLevel + (arenaHigher ? 1 : -1);
-
-            if (newLevel < royaleDungeonMaker.NextDungeonLevelChoice)
-                return false;
-
-            if (newLevel >= royaleDungeonMaker.NextDungeonLevelChoice + royaleDungeonMaker.NumberDungeonLevelChoices)
-                return false;
-
-            LogFile.Log.LogEntryDebug("Moving to arena level " + newLevel, LogDebugLevel.Medium);
-
-            TeleportToArena(newLevel);
-            return true;
-        }
-
-        private void TeleportToArena(int newLevel)
-        {
-            var entryPoint = royaleDungeonMaker.GetEntryLocationOnLevel(newLevel);
-            MovePCAbsolute(newLevel, entryPoint);
-        }
-
-        /// <summary>
-        /// First is 0
-        /// </summary>
-        /// <returns></returns>
-        internal int ArenaLevelNumber()
-        {
-            return player.LocationLevel / 3;
-        }
-
-        public static int TotalArenas = 6;
-
-        internal void ExitLevel()
-        {
-            if (ArenaLevelNumber() == TotalArenas - 1)
-            {
-                //Game over folks
-                Game.Base.DoEndOfGame(true, true, false);
-            }
-            else
-            {
-
-                //Generate a new set of levels
-                Game.Dungeon.GenerateNextRoyaleLevels();
-
-                //Teleport to the first new level
-                TeleportToArena(royaleDungeonMaker.NextDungeonLevelChoice);
-
-                //Offer the user the choice of arenas
-                Game.Base.DoArenaSelection();
-            }
-        }
-
+        
         internal bool DangerousFeatureAtLocation(int LocationLevel, Point newLocation)
         {
             var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(LocationLevel, newLocation)).Where(f => f is DangerousActiveFeature);
@@ -5273,87 +5199,5 @@ namespace RogueBasin
             return status;
         }
 
-        /// <summary>
-        /// RoomPlacements currently contain absolute co-ordinates. I would prefer them to have relative coordinates, and those to get
-        /// mapped to absolute coordinates here
-        /// </summary>
-        /// <param name="mapInfo"></param>
-        public void AddMapObjectsToDungeon(MapInfo mapInfo)
-        {
-            var rooms = mapInfo.Populator.AllRoomsInfo();
-
-            foreach (RoomInfo roomInfo in rooms)
-            {
-                foreach (TriggerRoomPlacement triggerPlacement in roomInfo.Triggers)
-                {
-                    bool monsterResult = AddTrigger(triggerPlacement.trigger, triggerPlacement.location);
-
-                    if (!monsterResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add trigger to dungeon at: " + triggerPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
-                {
-                    bool monsterResult = AddMonster(monsterPlacement.monster, monsterPlacement.location);
-
-                    if (!monsterResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (ItemRoomPlacement itemPlacement in roomInfo.Items)
-                {
-                    bool monsterResult = AddItem(itemPlacement.item, itemPlacement.location);
-
-                    if (!monsterResult)
-                    {
-                        LogFile.Log.LogEntryDebug("Cannot add item to dungeon: " + itemPlacement.item.SingleItemDescription + " at: " + itemPlacement.location, LogDebugLevel.Medium);
-                    }
-                }
-
-                foreach (FeatureRoomPlacement featurePlacement in roomInfo.Features)
-                {
-                    if (featurePlacement.feature.IsBlocking)
-                    {
-                        bool featureResult = AddFeatureBlocking(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord, featurePlacement.feature.BlocksLight);
-
-                        if (!featureResult)
-                        {
-                            LogFile.Log.LogEntryDebug("Cannot add blocking feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                        else
-                        {
-                            LogFile.Log.LogEntryDebug("Adding blocking feature to dungeon, room : " + roomInfo.Id + " feature: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                    }
-                    else
-                    {
-                        bool featureResult = AddFeature(featurePlacement.feature, featurePlacement.location.Level, featurePlacement.location.MapCoord);
-
-                        if (!featureResult)
-                        {
-                            LogFile.Log.LogEntryDebug("Cannot add feature to dungeon: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                        else
-                        {
-                            LogFile.Log.LogEntryDebug("Adding non-blocking feature to dungeon, room : " + roomInfo.Id + " feature: " + featurePlacement.feature.Description + " at: " + featurePlacement.location, LogDebugLevel.Medium);
-                        }
-                    }
-                }
-            }
-
-            foreach (var doorInfo in mapInfo.Populator.DoorInfo)
-            {
-                var door = doorInfo.Value;
-
-                foreach (var doorLock in door.Locks)
-                {
-                    AddLock(doorLock);
-                }
-            }
-        }
     }
 }

@@ -66,14 +66,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DungeonMapSetup.cs" />
+    <Compile Include="GraphVisualizer.cs" />
+    <Compile Include="LevelBuilderUtils.cs" />
+    <Compile Include="Levels\ArcologyLevelBuilder.cs" />
+    <Compile Include="Levels\BridgeLevelBuilder.cs" />
+    <Compile Include="Levels\CommercialLevelBuilder.cs" />
+    <Compile Include="Levels\ComputerCoreLevelBuilder.cs" />
+    <Compile Include="Levels\FlightDeckLevelBuilder.cs" />
+    <Compile Include="Levels\MedicalLevelBuilder.cs" />
+    <Compile Include="Levels\ReactorLevelBuilder.cs" />
+    <Compile Include="Levels\ScienceLevelBuilder.cs" />
+    <Compile Include="Levels\StandardLevelBuilder.cs" />
+    <Compile Include="Levels\StorageLevelBuilder.cs" />
+    <Compile Include="Quests\ArcologyQuest.cs" />
+    <Compile Include="Quests\EscapePodQuest.cs" />
+    <Compile Include="Quests\LowerAtriumQuest.cs" />
     <Compile Include="Quests\MapExpandQuest.cs" />
     <Compile Include="Quests\ArmoryQuest.cs" />
     <Compile Include="Quests\BlockElevatorQuest.cs" />
     <Compile Include="DungeonDecorator.cs" />
-    <Compile Include="Quests\MainQuest.cs" />
+    <Compile Include="Quests\CaptainIdQuest.cs" />
     <Compile Include="Quests\MedicalCameraQuest.cs" />
     <Compile Include="Quests\MedicalTurretTrapQuest.cs" />
     <Compile Include="TraumaLevelBuilder.cs" />
+    <Compile Include="TraumaQuestManager.cs" />
     <Compile Include="TraumaWorldGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

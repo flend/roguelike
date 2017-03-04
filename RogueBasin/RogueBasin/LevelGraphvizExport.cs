@@ -41,7 +41,7 @@ namespace GraphMap
             string vertexLabel = vertexNo.ToString();
 
             if (vertexMapping.ContainsKey(vertexNo))
-                vertexLabel = vertexMapping[vertexNo];
+                vertexLabel = vertexNo + "-" + vertexMapping[vertexNo];
             
             vertexFormattor.Label = vertexLabel;
         }

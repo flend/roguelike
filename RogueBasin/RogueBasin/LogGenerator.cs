@@ -176,7 +176,7 @@ namespace RogueBasin
                 logEntryLines = ApplyStandardSubstitutions(logEntryLines);
 
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<level>", mapState.LevelReadableNames[levelForDoor] },
+                { "<level>", mapState.LevelGraph.LevelReadableNames[levelForDoor] },
                 { "<idtype>", doorId }
             });
 
@@ -206,7 +206,7 @@ namespace RogueBasin
                 logEntryLines = ApplyStandardSubstitutions(logEntryLines);
 
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
+                { "<doorlevel>", mapState.LevelGraph.LevelReadableNames[levelForDoor] },
                 { "<idtype>", doorId },
                 { "<item>", itemsInRoom.RandomElement().SingleItemDescription }
             });
@@ -236,8 +236,8 @@ namespace RogueBasin
                 logEntryLines = ApplyStandardSubstitutions(logEntryLines);
 
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
-                { "<cluelevel>", mapState.LevelReadableNames[levelForClue] }
+                { "<doorlevel>", mapState.LevelGraph.LevelReadableNames[levelForDoor] },
+                { "<cluelevel>", mapState.LevelGraph.LevelReadableNames[levelForClue] }
             });
 
             }
@@ -292,8 +292,8 @@ namespace RogueBasin
             try
             {
                 firstlogEntryLines = ApplySubstitutions(firstlogEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
-                { "<cluelevel>", mapState.LevelReadableNames[levelForClue] },
+                { "<doorlevel>", mapState.LevelGraph.LevelReadableNames[levelForDoor] },
+                { "<cluelevel>", mapState.LevelGraph.LevelReadableNames[levelForClue] },
                 { "<lastname>", secondLogName },
                 { "<idtype>", doorId }
             });
@@ -311,8 +311,8 @@ namespace RogueBasin
             try
             {
                 secondlogEntryLines = ApplySubstitutions(secondlogEntryLines, new Dictionary<string, string> {
-                { "<doorlevel>", mapState.LevelReadableNames[levelForDoor] },
-                { "<cluelevel>", mapState.LevelReadableNames[levelForClue] },
+                { "<doorlevel>", mapState.LevelGraph.LevelReadableNames[levelForDoor] },
+                { "<cluelevel>", mapState.LevelGraph.LevelReadableNames[levelForClue] },
                 { "<lastname>", firstLogName },
                 { "<idtype>", doorId }
             });
@@ -341,8 +341,8 @@ namespace RogueBasin
 
             try {
                 logEntryLines = ApplySubstitutions(logEntryLines, new Dictionary<string, string> {
-                { "<source>", mapState.LevelReadableNames[sourceLevel] },
-                { "<target>", mapState.LevelReadableNames[targetLevel] }
+                { "<source>", mapState.LevelGraph.LevelReadableNames[sourceLevel] },
+                { "<target>", mapState.LevelGraph.LevelReadableNames[targetLevel] }
             });
 
             } catch(Exception) {
