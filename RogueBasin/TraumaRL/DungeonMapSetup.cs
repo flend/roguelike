@@ -87,11 +87,12 @@ namespace TraumaRL
 
                 foreach (MonsterRoomPlacement monsterPlacement in roomInfo.Monsters)
                 {
-                    bool monsterResult = Game.Dungeon.AddMonster(monsterPlacement.monster, new Location(roomLevel, roomLocation + monsterPlacement.location));
+                    var absoluteLocation = roomLocation + monsterPlacement.location;
+                    bool monsterResult = Game.Dungeon.AddMonster(monsterPlacement.monster, new Location(roomLevel, absoluteLocation));
 
                     if (!monsterResult)
                     {
-                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: " + monsterPlacement.location, LogDebugLevel.Medium);
+                        LogFile.Log.LogEntryDebug("Cannot add monster to dungeon: " + monsterPlacement.monster.SingleDescription + " at: level: " + roomLevel + " point: " + absoluteLocation + " roomIndex: " + roomInfo.Id, LogDebugLevel.Medium);
                     }
                 }
 

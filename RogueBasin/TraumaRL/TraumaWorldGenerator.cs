@@ -68,9 +68,13 @@ namespace TraumaRL
             var decorator = new DungeonDecorator(mapState, mapQuestBuilder);
             decorator.AddDecorationFeatures();
 
+            //Add monsters (note - right now does not take into account where decorations are placed - fix)
+            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapState, Game.Dungeon.Difficulty, mapState.LevelGraph.GameLevels, mapState.LevelGraph.LevelDifficulty);
+
             //Add elevator features to link the maps
             //Note that since the absolute-coords of level maps can now change due to the addition of new rooms (mutations)
             //It's only safe to add elevator features after all map changes have taken place
+            //(absolute coords are necessary since the features need to know where to teleport the user to)
             if (!quickLevelGen)
                 AddElevatorFeatures(mapState.MapInfo, levelInfo);
 
@@ -91,14 +95,11 @@ namespace TraumaRL
             dungeonMapSetup.SetupMapsInEngine(mapState);
 
             //Pause here to attach the debugger
-            //MessageBox.Show("post engine");
+            MessageBox.Show("post engine");
 
             //Add items/monsters/features from room model into dungeon
             dungeonMapSetup.AddMapObjectsToDungeon(mapState.MapInfo);
             
-            //Add monsters (should go via room interface, currently added directly)
-            Game.Dungeon.MonsterPlacement.CreateMonstersForLevels(mapState, mapState.LevelGraph.GameLevels, mapState.LevelGraph.LevelDifficulty);
-
             dungeonMapSetup.AddMapStatePropertiesToDungeon(mapState);
 
             //Check we are solvable

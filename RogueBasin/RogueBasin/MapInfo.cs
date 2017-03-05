@@ -360,20 +360,7 @@ namespace RogueBasin
                 roomListForLevel[level] = roomsInThisLevel;
             }
         }
-
-        /// <summary>
-        /// Returns point in map coords of this level in the required room of terrain
-        /// </summary>
-        /// <param name="roomIndex"></param>
-        /// <param name="terrainToFind"></param>
-        /// <returns></returns>
-        public Point GetRandomPointInRoomOfTerrain(int roomIndex, RoomTemplateTerrain terrainToFind)
-        {
-            var roomRelativePoint = RoomTemplateUtilities.GetRandomPointWithTerrain(rooms[roomIndex].Room, terrainToFind);
-
-            return new Point(rooms[roomIndex].Location + roomRelativePoint);
-        }
-
+        
         /// <summary>
         /// To have an event distribution of items in rooms, we need to place items based on the number of actual rooms that
         /// make up a room in the no-cycles map.
@@ -415,6 +402,11 @@ namespace RogueBasin
             var occupiedMonsterPoints = roomInfo.Monsters.Select(m => m.location);
 
             return occupiedFeaturePoints.Concat(occupiedMonsterPoints);
+        }
+
+        public Location RelativeRoomPointToLocation(int roomId, Point p)
+        {
+            return new Location(GetLevelForRoomIndex(roomId), rooms[roomId].Location + p);
         }
 
         public IEnumerable<Point> GetBoundaryFloorPointsInRoom(int roomIndex)
