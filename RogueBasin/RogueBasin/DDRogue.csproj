@@ -59,7 +59,10 @@
     <Compile Include="CustomInputArgs.cs" />
     <Compile Include="DifficultyOrdering.cs" />
     <Compile Include="DirectedGraphWrapper.cs" />
+    <Compile Include="GameTick.cs" />
     <Compile Include="GraphVizExporter.cs" />
+    <Compile Include="InputEvents.cs" />
+    <Compile Include="InputHandler.cs" />
     <Compile Include="LevelAndDifficulty.cs" />
     <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraph.cs" />
@@ -78,6 +81,7 @@
     <Compile Include="MonsterEvent.cs" />
     <Compile Include="MoveTargettingInfo.cs" />
     <Compile Include="NullTargettingInfo.cs" />
+    <Compile Include="PlayerActions.cs" />
     <Compile Include="RequiredLevelInfo.cs" />
     <Compile Include="Running.cs" />
     <Compile Include="ShotgunTargettingInfo.cs" />

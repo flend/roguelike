@@ -308,6 +308,59 @@ namespace RogueBasin {
             ExtraUI = true;
         }
 
+        //Maybe pull this into a view panel class
+        public void ResetViewPanelIfRequired(CreatureFOV playerFOV)
+        {
+            var targetCreature = Screen.Instance.CreatureToView;
+            var targetItem = Screen.Instance.ItemToView;
+            var targetFeature = Screen.Instance.FeatureToView;
+
+            if (targetCreature == null && targetItem == null && targetFeature == null)
+                return;
+
+            if (targetCreature != null)
+            {
+                if (targetCreature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                {
+                    Screen.Instance.ResetViewPanel();
+                    return;
+                }
+                if (!playerFOV.CheckTileFOV(targetCreature.LocationMap))
+                {
+                    Screen.Instance.ResetViewPanel();
+                    return;
+                }
+            }
+
+            if (targetItem != null)
+            {
+                if (targetItem.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                {
+                    Screen.Instance.ResetViewPanel();
+                    return;
+                }
+                if (!playerFOV.CheckTileFOV(targetItem.LocationMap))
+                {
+                    Screen.Instance.ResetViewPanel();
+                    return;
+                }
+            }
+
+            if (targetFeature != null)
+            {
+                if (targetFeature.LocationLevel != Game.Dungeon.Player.LocationLevel)
+                {
+                    Screen.Instance.ResetViewPanel();
+                    return;
+                }
+                if (!playerFOV.CheckTileFOV(targetFeature.LocationMap))
+                {
+                    Screen.Instance.ResetViewPanel();
+                    return;
+                }
+            }
+        }
+
         public void SetSeeAllMap() {
             seeAllMap = true;
             seeAllMonsters = true;
